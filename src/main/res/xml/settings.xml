@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Providers">
+
+        <MultiSelectListPreference
+            android:key="multisel_providers_enable"
+            android:title="Enabled providers"
+            android:summary="Enable or disable installed music providers" />
+
+        <ListPreference
+            android:key="list_providers_config"
+            android:title="Configure provider"
+            android:summary="Select a provider to configure it" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Automix">
+
+        <CheckBoxPreference
+            android:key="cb_auto_send_like"
+            android:title="Automatically save what I like"
+            android:summary="Helps making better suggestions by storing the kind of songs you like"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Other">
+
+        <PreferenceScreen
+            android:title="Licenses"
+            android:summary="Open Source and Third-Party Licenses">
+
+            <intent android:action="android.intent.action.VIEW"
+                android:data="http://www.android.com" />
+
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
