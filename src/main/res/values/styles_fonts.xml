@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Roboto Light -->
+    <style name="RobotoLightLarge" parent="@android:style/TextAppearance.Large">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textColor">@color/text_regular</item>
+    </style>
+    <style name="RobotoLightItalicLarge" parent="@style/RobotoLightLarge">
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="RobotoLightSmall" parent="@android:style/TextAppearance.Small">
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+    <style name="RobotoLightCapsSmall" parent="@style/RobotoLightSmall">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/text_detail</item>
+    </style>
+    <style name="RobotoLightCapsSmallBright" parent="@style/RobotoLightCapsSmall">
+        <item name="android:textColor">@color/text_detail_emphasize</item>
+    </style>
+
+    <!-- Roboto Condensed -->
+    <style name="RobotoCondensedLarge" parent="@android:style/TextAppearance.Large">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+    <style name="RobotoCondensedBoldLarge" parent="@style/RobotoCondensedLarge">
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="RobotoCondensedItalicLarge" parent="@style/RobotoCondensedLarge">
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="RobotoCondensedSmall" parent="@android:style/TextAppearance.Small">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+    <style name="RobotoCondensedItalicSmall" parent="@style/RobotoCondensedSmall">
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <!-- Roboto Regular -->
+    <style name="RobotoRegularLarge" parent="@android:style/TextAppearance.Large">
+    </style>
+    <style name="RobotoRegularBoldLarge" parent="@style/RobotoRegularLarge">
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

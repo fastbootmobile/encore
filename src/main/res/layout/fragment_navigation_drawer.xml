@@ -2,9 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#cccc"
+    android:background="#ffe1e1e1"
     android:choiceMode="singleChoice"
-    android:divider="@android:color/transparent"
-    android:dividerHeight="0dp"
+    android:divider="@color/navdrawer_separator"
+    android:dividerHeight="1dp"
     android:layout_marginTop="73dp"
     tools:context="org.omnirom.music.app.NavigationDrawerFragment" />

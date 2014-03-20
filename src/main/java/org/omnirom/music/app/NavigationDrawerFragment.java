@@ -6,11 +6,15 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,7 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -53,12 +59,18 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private View mFragmentContainerView;
+    private TextView mPreviousItem;
+
+    private Typeface mUnselectedTypeface;
+    private Typeface mSelectedTypeface;
 
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
 
     public NavigationDrawerFragment() {
+        mUnselectedTypeface = Typeface.create("sans-serif-light", 0);
+        mSelectedTypeface = Typeface.create("sans-serif", Typeface.BOLD);
     }
 
     @Override
@@ -99,15 +111,22 @@ public class NavigationDrawerFragment extends Fragment {
         });
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_activated_1,
+                R.layout.nav_drawer_list_item_activated,
                 android.R.id.text1,
                 new String[]{
-                        getString(R.string.title_section1),
-                        getString(R.string.title_section2),
-                        getString(R.string.title_section3),
+                        getString(R.string.title_section_listen_now),
+                        getString(R.string.title_section_my_songs),
+                        getString(R.string.title_section_playlists),
+                        getString(R.string.title_section_automix),
                 }
         ));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+        mDrawerListView.post(new Runnable() {
+            @Override
+            public void run() {
+                selectItem(mCurrentSelectedPosition);
+            }
+        });
         return mDrawerListView;
     }
 
@@ -121,9 +140,23 @@ public class NavigationDrawerFragment extends Fragment {
      * @param fragmentId   The android:id of this fragment in its activity's layout.
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      */
-    public void setUp(int fragmentId, DrawerLayout drawerLayout) {
+    public void setUp(int fragmentId, DrawerLayout drawerLayout, Resources.Theme theme) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
+
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mDrawerLayout.getLayoutParams();
+        // Calculate ActionBar height
+        int actionBarHeight = 0;
+        TypedValue tv = new TypedValue();
+        if (theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight += TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        }
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            actionBarHeight += getResources().getDimensionPixelSize(resourceId);
+        }
+        lp.topMargin = actionBarHeight;
+
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -193,6 +226,17 @@ public class NavigationDrawerFragment extends Fragment {
         mCurrentSelectedPosition = position;
         if (mDrawerListView != null) {
             mDrawerListView.setItemChecked(position, true);
+
+            if (mPreviousItem != null) {
+                mPreviousItem.setTypeface(mUnselectedTypeface);
+            }
+
+            View view = mDrawerListView.getChildAt(mCurrentSelectedPosition);
+            if (view != null) {
+                TextView tv = (TextView) view;
+                tv.setTypeface(mSelectedTypeface);
+                mPreviousItem = tv;
+            }
         }
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);

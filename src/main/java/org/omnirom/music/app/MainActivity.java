@@ -17,6 +17,11 @@ import android.widget.TextView;
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
+    private static final int SECTION_LISTEN_NOW = 1;
+    private static final int SECTION_MY_SONGS   = 2;
+    private static final int SECTION_PLAYLISTS  = 3;
+    private static final int SECTION_AUTOMIX    = 4;
+
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -39,7 +44,7 @@ public class MainActivity extends Activity
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+                (DrawerLayout) findViewById(R.id.drawer_layout), getTheme());
     }
 
     @Override
@@ -53,14 +58,17 @@ public class MainActivity extends Activity
 
     public void onSectionAttached(int number) {
         switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
+            case SECTION_LISTEN_NOW:
+                mTitle = getString(R.string.title_section_listen_now);
                 break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
+            case SECTION_MY_SONGS:
+                mTitle = getString(R.string.title_section_my_songs);
                 break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
+            case SECTION_PLAYLISTS:
+                mTitle = getString(R.string.title_section_playlists);
+                break;
+            case SECTION_AUTOMIX:
+                mTitle = getString(R.string.title_section_automix);
                 break;
         }
     }
@@ -127,8 +135,8 @@ public class MainActivity extends Activity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
+            /*TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+            textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));*/
             return rootView;
         }
 
