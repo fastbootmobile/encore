@@ -23,7 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -101,8 +103,27 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mDrawerListView = (ListView) inflater.inflate(
+        LinearLayout rootView = (LinearLayout) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
+
+        Button settingsBtn = (Button) rootView.findViewById(R.id.btn_nav_settings);
+        settingsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallbacks.onSettingsButtonPressed();
+
+                if (mPreviousItem != null) {
+                    mPreviousItem.setTypeface(mUnselectedTypeface);
+                    mPreviousItem = null;
+                }
+
+                if (mDrawerLayout != null) {
+                    mDrawerLayout.closeDrawer(mFragmentContainerView);
+                }
+            }
+        });
+
+        mDrawerListView = (ListView) rootView.findViewById(R.id.nav_drawer_list);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -127,7 +148,8 @@ public class NavigationDrawerFragment extends Fragment {
                 selectItem(mCurrentSelectedPosition);
             }
         });
-        return mDrawerListView;
+
+        return rootView;
     }
 
     public boolean isDrawerOpen() {
@@ -292,8 +314,11 @@ public class NavigationDrawerFragment extends Fragment {
             return true;
         }
 
-        if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+        if (item.getItemId() == R.id.action_cast) {
+            Toast.makeText(getActivity(), "Cast action.", Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (item.getItemId() == R.id.action_search) {
+            Toast.makeText(getActivity(), "Search action.", Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -323,5 +348,10 @@ public class NavigationDrawerFragment extends Fragment {
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected(int position);
+
+        /**
+         * Called when the Settings special entry is selected
+         */
+        void onSettingsButtonPressed();
     }
 }

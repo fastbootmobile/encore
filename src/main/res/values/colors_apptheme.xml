@@ -5,4 +5,5 @@
     <color name="white">#ffffff</color>
     <color name="separator">#dddddd</color>
     <color name="navdrawer_separator">#eaeaea</color>
+    <color name="default_fragment_background">#eaeaea</color>
 </resources>

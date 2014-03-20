@@ -1,8 +1,10 @@
 package org.omnirom.music.providers;
 
-import org.omnirom.music.providers.IProviderUpdateCallback;
+import android.content.Context;
+import android.content.pm.PackageManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,7 +13,6 @@ public class ProviderAggregator {
     private List<IProviderUpdateCallback> mUpdateCallbacks;
 
     private final static ProviderAggregator INSTANCE = new ProviderAggregator();
-
     public final static ProviderAggregator getDefault() {
         return INSTANCE;
     }
