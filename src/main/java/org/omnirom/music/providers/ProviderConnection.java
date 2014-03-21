@@ -35,6 +35,10 @@ public class ProviderConnection implements ServiceConnection {
         bindService();
     }
 
+    public IMusicProvider getBinder() {
+        return mBinder;
+    }
+
     public String getPackage() {
         return mPackage;
     }

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ProviderAggregator {
 
-    private List<IProviderUpdateCallback> mUpdateCallbacks;
+    private List<ILocalCallback> mUpdateCallbacks;
 
     private final static ProviderAggregator INSTANCE = new ProviderAggregator();
     public final static ProviderAggregator getDefault() {
@@ -18,18 +18,18 @@ public class ProviderAggregator {
     }
 
     private ProviderAggregator() {
-        mUpdateCallbacks = new ArrayList<IProviderUpdateCallback>();
+        mUpdateCallbacks = new ArrayList<ILocalCallback>();
     }
 
-    public void addUpdateCallback(IProviderUpdateCallback cb) {
+    public void addUpdateCallback(ILocalCallback cb) {
         mUpdateCallbacks.add(cb);
     }
 
-    public void removeUpdateCallback(IProviderUpdateCallback cb) {
+    public void removeUpdateCallback(ILocalCallback cb) {
         mUpdateCallbacks.remove(cb);
     }
 
-    public Iterator<IProviderUpdateCallback> getUpdateCallbacks() {
+    public Iterator<ILocalCallback> getUpdateCallbacks() {
         return mUpdateCallbacks.iterator();
     }
 

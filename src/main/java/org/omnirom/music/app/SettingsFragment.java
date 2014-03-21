@@ -5,16 +5,19 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.RemoteException;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.HashMap;
@@ -26,11 +29,14 @@ import java.util.List;
  */
 public class SettingsFragment extends PreferenceFragment {
 
+    private static final String TAG = "SettingsFragment";
+
     private static final String KEY_MULTISEL_PROVIDERS_ENABLE = "multisel_providers_enable";
     private static final String KEY_LIST_PROVIDERS_CONFIG = "list_providers_config";
 
     private PluginsLookup mPluginsLookup;
     private List<ProviderConnection> mProviders;
+    private ProviderConnection mProviderInConfig;
 
     /**
      * Use this factory method to create a new instance of
@@ -91,10 +97,12 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 int providerNum = Integer.parseInt((String) newValue);
-                ProviderConnection provider = mProviders.get(providerNum);
+                mProviderInConfig = mProviders.get(providerNum);
+
 
                 Intent i = new Intent();
-                i.setClassName(provider.getPackage(), provider.getConfigurationActivity());
+                i.setClassName(mProviderInConfig.getPackage(),
+                        mProviderInConfig.getConfigurationActivity());
                 startActivity(i);
 
                 return true;
@@ -108,5 +116,24 @@ public class SettingsFragment extends PreferenceFragment {
         view.setBackgroundColor(getResources().getColor(R.color.default_fragment_background));
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+        if (mProviderInConfig != null) {
+            IMusicProvider bind = mProviderInConfig.getBinder();
+            try {
+                if (bind.isSetup() && !bind.isAuthenticated()) {
+                    Log.d(TAG, "Provider is setup! Trying to log in!");
+                    if (!bind.login()) {
+                        Log.e(TAG, "Error while requesting login!");
+                    }
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception occurred on the set provider", e);
+            }
+        }
     }
 }
