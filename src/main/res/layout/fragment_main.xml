@@ -23,7 +23,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_marginBottom="8dp"
-            android:text="Here are some suggestions for you"
+            android:text="@string/here_are_suggestions"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/text_detail" />
 
@@ -100,7 +100,7 @@
                 android:id="@+id/button"
                 android:layout_width="match_parent"
                 android:layout_height="34dp"
-                android:text="Play now"
+                android:text="@string/play_now"
                 android:textAlignment="center"
                 android:includeFontPadding="false"
                 style="@style/OmniMusic.LargeCard.Action"
@@ -130,8 +130,6 @@
                 style="@style/OmniMusic.Card"
                 android:layout_width="match_parent"
                 android:layout_height="42dp"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/test_large_card"
                 android:layout_gravity="top"
                 android:layout_weight="1"
                 android:clickable="true"
@@ -159,7 +157,6 @@
                 style="@style/OmniMusic.Card"
                 android:layout_width="match_parent"
                 android:layout_height="42dp"
-                android:layout_below="@+id/small_card_1"
                 android:layout_weight="1"
                 android:clickable="true"
                 android:orientation="horizontal">
@@ -189,7 +186,7 @@
             android:layout_alignParentStart="true"
             android:layout_below="@+id/linearLayout"
             android:layout_marginTop="16dp"
-            android:text="You recently listened to..."
+            android:text="@string/recently_listened_to"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/text_detail" />
 
@@ -252,8 +249,6 @@
                 style="@style/OmniMusic.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/test_large_card"
                 android:layout_gravity="top"
                 android:layout_marginLeft="4dp"
                 android:layout_weight="1"

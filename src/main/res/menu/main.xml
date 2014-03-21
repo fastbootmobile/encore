@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_cast"
         android:showAsAction="always"
-        android:title="@string/search"
+        android:title="@string/cast"
         android:icon="@drawable/ic_media_route_off_holo_dark" />
 
     <item

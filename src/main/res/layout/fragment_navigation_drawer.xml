@@ -18,7 +18,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Settings"
+        android:text="@string/settings"
         android:id="@+id/btn_nav_settings"
         android:layout_gravity="center_vertical"
         style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
