@@ -1,4 +1,4 @@
-package org.omnirom.music.app;
+package org.omnirom.music.app.framework;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +8,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.util.Log;
 
+import org.omnirom.music.app.BuildConfig;
 import org.omnirom.music.provider.Constants;
 import org.omnirom.music.providers.ProviderConnection;
 

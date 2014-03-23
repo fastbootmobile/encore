@@ -13,7 +13,7 @@
         android:choiceMode="singleChoice"
         android:divider="@color/navdrawer_separator"
         android:dividerHeight="1dp"
-        tools:context="org.omnirom.music.app.NavigationDrawerFragment" />
+        tools:context="org.omnirom.music.app.fragments.NavigationDrawerFragment" />
 
     <Button
         android:layout_width="match_parent"

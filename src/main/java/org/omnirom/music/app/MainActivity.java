@@ -4,7 +4,6 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
@@ -12,7 +11,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+
+import org.omnirom.music.app.fragments.NavigationDrawerFragment;
+import org.omnirom.music.app.fragments.PlaylistFragment;
+import org.omnirom.music.app.fragments.SettingsFragment;
+import org.omnirom.music.app.framework.PluginsLookup;
 
 
 public class MainActivity extends Activity
@@ -57,9 +60,18 @@ public class MainActivity extends Activity
         // update the main content by replacing fragments
         try {
             FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                    .commit();
+            Fragment newFrag;
+            switch (position+1) {
+                case SECTION_PLAYLISTS:
+                    newFrag = PlaylistFragment.newInstance();
+                    break;
+
+                default:
+                    newFrag = PlaceholderFragment.newInstance(position + 1);
+                    break;
+            }
+
+            fragmentManager.beginTransaction().replace(R.id.container, newFrag).commit();
         } catch (IllegalStateException e) {
             // The app is pausing
         }

@@ -1,4 +1,4 @@
-package org.omnirom.music.app;
+package org.omnirom.music.app.fragments;
 
 
 import android.app.ActionBar;
@@ -29,6 +29,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.omnirom.music.app.R;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
