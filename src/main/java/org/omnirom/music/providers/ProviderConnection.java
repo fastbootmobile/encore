@@ -19,7 +19,6 @@ public class ProviderConnection implements ServiceConnection {
     private String mServiceName;
     private String mConfigurationActivity;
     private Context mContext;
-    private boolean mIsErroneous;
     private IMusicProvider mBinder;
     private boolean mIsBound;
 
@@ -31,7 +30,6 @@ public class ProviderConnection implements ServiceConnection {
         mServiceName = serviceName;
         mConfigurationActivity = configActivity;
 
-        mIsErroneous = false;
         mIsBound = false;
 
         // Try to bind to the service
@@ -58,16 +56,9 @@ public class ProviderConnection implements ServiceConnection {
         return mConfigurationActivity;
     }
 
-    /**
-     * @return true if binding to the service caused an error, false if the service works.
-     */
-    public boolean isErroneous() {
-        return mIsErroneous;
-    }
-
     public void unbindService() {
         if (mIsBound) {
-            if (DEBUG) Log.d(TAG, "UNBinding service...");
+            if (DEBUG) Log.d(TAG, "Unbinding service...");
             mContext.unbindService(this);
             mIsBound = false;
         }

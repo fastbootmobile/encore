@@ -65,7 +65,6 @@ public class PluginsLookup {
      * you can bind and unbind the instances as you wish.
      */
     public List<ProviderConnection> getAvailableProviders() {
-        Log.e(TAG, "Returning " + mConnections.size() + " connectoins");
         return mConnections;
     }
 

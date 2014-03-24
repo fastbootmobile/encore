@@ -2,7 +2,6 @@ package org.omnirom.music.app.adapters;
 
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +23,12 @@ public class PlaylistAdapter implements ListAdapter {
 
     private List<Playlist> mPlaylists;
     private List<DataSetObserver> mObservers;
+
+    private static class ViewHolder {
+        public ImageView ivCover;
+        public TextView tvTitle;
+        public TextView tvSubTitle;
+    }
 
     public PlaylistAdapter() {
         mPlaylists = new ArrayList<Playlist>();
@@ -65,6 +70,7 @@ public class PlaylistAdapter implements ListAdapter {
     public boolean contains(Playlist p) {
         return mPlaylists.contains(p);
     }
+
 
     @Override
     public boolean areAllItemsEnabled() {
@@ -113,24 +119,31 @@ public class PlaylistAdapter implements ListAdapter {
 
         View root = convertView;
         if (convertView == null) {
+            // Recycle the existing view
             LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             root = inflater.inflate(R.layout.medium_card, null);
+            assert root != null;
+
+            ViewHolder holder = new ViewHolder();
+            holder.ivCover = (ImageView) root.findViewById(R.id.ivCover);
+            holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
+            holder.tvSubTitle = (TextView) root.findViewById(R.id.tvSubTitle);
+
+            root.setTag(holder);
         }
-        assert root != null;
 
-        // ImageView ivCover = (ImageView) root.findViewById(R.id.ivCover);
-        // ivCover.setImageResource(R.drawable.album_placeholder);
-
-        TextView tvPlaylistName = (TextView) root.findViewById(R.id.tvTitle);
-        TextView tvStats = (TextView) root.findViewById(R.id.tvSubTitle);
-
+        // Fill in the fields
         Playlist playlist = getItem(position);
+        ViewHolder tag = (ViewHolder) root.getTag();
+
+        tag.ivCover.setImageResource(R.drawable.album_placeholder);
+
         if (playlist.isLoaded()) {
-            tvPlaylistName.setText(playlist.getName());
-            tvStats.setText("" + playlist.getSongsCount() + " songs");
+            tag.tvTitle.setText(playlist.getName());
+            tag.tvSubTitle.setText("" + playlist.getSongsCount() + " songs");
         } else {
-            tvPlaylistName.setText("Loading");
-            tvStats.setText("Loading");
+            tag.tvTitle.setText("Loading");
+            tag.tvSubTitle.setText("Loading");
         }
 
         return root;

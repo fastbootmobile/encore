@@ -39,6 +39,7 @@ public class PlaylistFragment extends Fragment implements ILocalCallback {
     private PlaylistAdapter mAdapter;
     private Handler mHandler;
     private final ArrayList<Playlist> mPlaylistsUpdated = new ArrayList<Playlist>();
+
     private Runnable mUpdateListRunnable = new Runnable() {
         @Override
         public void run() {
@@ -53,7 +54,6 @@ public class PlaylistFragment extends Fragment implements ILocalCallback {
 
                 mPlaylistsUpdated.clear();
             }
-
         }
     };
 
@@ -89,8 +89,8 @@ public class PlaylistFragment extends Fragment implements ILocalCallback {
         playlistLayout.setAdapter(mAdapter);
         playlistLayout.setExpanded(true);
 
+        // Set the initial playlists
         List<Playlist> playlists = ProviderAggregator.getDefault().getAllPlaylists();
-        Log.e("Playlists", "Playlists Addall: " + playlists.size());
         mAdapter.addAll(playlists);
 
         return root;
