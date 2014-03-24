@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
@@ -20,6 +21,7 @@ public class ProviderConnection implements ServiceConnection {
     private Context mContext;
     private boolean mIsErroneous;
     private IMusicProvider mBinder;
+    private boolean mIsBound;
 
     public ProviderConnection(Context ctx, String providerName, String pkg, String serviceName,
                               String configActivity) {
@@ -30,6 +32,7 @@ public class ProviderConnection implements ServiceConnection {
         mConfigurationActivity = configActivity;
 
         mIsErroneous = false;
+        mIsBound = false;
 
         // Try to bind to the service
         bindService();
@@ -63,20 +66,20 @@ public class ProviderConnection implements ServiceConnection {
     }
 
     public void unbindService() {
-        if (mBinder == null) {
-            Log.w(TAG, "unbindService(): Service is either not bound or already unbound");
-            return;
+        if (mIsBound) {
+            if (DEBUG) Log.d(TAG, "UNBinding service...");
+            mContext.unbindService(this);
+            mIsBound = false;
         }
-
-        mContext.unbindService(this);
     }
 
     public void bindService() {
-        if (mBinder != null) {
+        if (mIsBound) {
             Log.w(TAG, "bindService(): Service seems already bound");
             return;
         }
 
+        if (DEBUG) Log.d(TAG, "Binding service...");
         Intent i = new Intent();
         i.setClassName(mPackage, mServiceName);
         mContext.bindService(i, this, Context.BIND_AUTO_CREATE);
@@ -86,12 +89,27 @@ public class ProviderConnection implements ServiceConnection {
     public void onServiceConnected(ComponentName name, IBinder service) {
         mBinder = IMusicProvider.Stub.asInterface(service);
         ProviderAggregator.getDefault().registerProvider(mBinder);
+        mIsBound = true;
         if (DEBUG) Log.d(TAG, "Connected to provider " + name);
+
+        // Automatically try to login the provider once bound
+        try {
+            if (mBinder.isSetup() && !mBinder.isAuthenticated()) {
+                Log.d(TAG, "Provider is setup! Trying to log in!");
+                if (!mBinder.login()) {
+                    Log.e(TAG, "Error while requesting login!");
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Remote exception occurred on the set provider", e);
+        }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
+        ProviderAggregator.getDefault().unregisterProvider(mBinder);
         mBinder = null;
+        mIsBound = false;
         if (DEBUG) Log.d(TAG, "Disconnected from provider " + name);
     }
 }

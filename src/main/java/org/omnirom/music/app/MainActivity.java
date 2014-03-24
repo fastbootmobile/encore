@@ -36,10 +36,17 @@ public class MainActivity extends Activity
      */
     private CharSequence mTitle;
 
+    public MainActivity() {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Setup the plugins system
+        PluginsLookup.getDefault().initialize(this);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -49,10 +56,12 @@ public class MainActivity extends Activity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout), getTheme());
+    }
 
-
-        // TEST PLUGINS
-        PluginsLookup plugins = new PluginsLookup(this);
+    @Override
+    protected void onStop() {
+        super.onStop();
+        PluginsLookup.getDefault().tearDown();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.omnirom.music.providers;
 
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -61,11 +62,39 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to register as a callback");
             }
+
+            for (ILocalCallback cb : mUpdateCallbacks) {
+                cb.onProviderConnected(provider);
+            }
         }
+    }
+
+    public void unregisterProvider(IMusicProvider provider) {
+        mProviders.remove(provider);
     }
 
     public void search(final String query, final ISearchCallback callback) {
         throw new UnsupportedOperationException("Not implemented");
+    }
+
+    public List<Playlist> getAllPlaylists() {
+        // We return the playlists from the cache, and query for now playlists. They will be updated
+        // in the callback if needed.
+        List<Playlist> playlists = mCache.getAllPlaylists();
+
+        for (IMusicProvider conn : mProviders) {
+            try {
+                if (conn.isSetup() && conn.isAuthenticated()) {
+                    conn.getPlaylists();
+                } else {
+                    Log.i(TAG, "Skipping a provider because it is not setup or authenticated");
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to get playlists from a provider", e);
+            }
+        }
+
+        return playlists;
     }
 
     @Override
@@ -102,8 +131,21 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     @Override
     public void onPlaylistAddedOrUpdated(IMusicProvider provider, Playlist p) throws RemoteException {
-        Log.d(TAG, "onPlaylistAddedOrUpdated: " + p);
-        mCache.putPlaylist(p);
+        Playlist cached = mCache.getPlaylist(p.getRef());
+
+        boolean notify = false;
+        if (cached == null) {
+            mCache.putPlaylist(p);
+            notify = true;
+        } else {
+            notify = !cached.isIdentical(p);
+        }
+
+        if (notify) {
+            for (ILocalCallback cb : mUpdateCallbacks) {
+                cb.onPlaylistUpdate(p);
+            }
+        }
     }
 
     @Override

@@ -53,7 +53,7 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mPluginsLookup = new PluginsLookup(activity);
+        mPluginsLookup = PluginsLookup.getDefault();
     }
 
     @Override
@@ -120,18 +120,9 @@ public class SettingsFragment extends PreferenceFragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
+
         if (mProviderInConfig != null) {
-            IMusicProvider bind = mProviderInConfig.getBinder();
-            try {
-                if (bind.isSetup() && !bind.isAuthenticated()) {
-                    Log.d(TAG, "Provider is setup! Trying to log in!");
-                    if (!bind.login()) {
-                        Log.e(TAG, "Error while requesting login!");
-                    }
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "Remote exception occurred on the set provider", e);
-            }
+            mProviderInConfig.bindService();
         }
     }
 }

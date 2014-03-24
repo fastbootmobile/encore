@@ -2,11 +2,14 @@ package org.omnirom.music.app.adapters;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
+import android.widget.TextView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.model.Playlist;
@@ -25,6 +28,42 @@ public class PlaylistAdapter implements ListAdapter {
     public PlaylistAdapter() {
         mPlaylists = new ArrayList<Playlist>();
         mObservers = new ArrayList<DataSetObserver>();
+    }
+
+    public void notifyDataSetChanged() {
+        Log.e("ADAPTER", "NOTIFY");
+        for (DataSetObserver obs : mObservers) {
+            obs.onChanged();
+        }
+    }
+
+    public void addItem(Playlist p) {
+        mPlaylists.add(p);
+        notifyDataSetChanged();
+    }
+
+    public void addAll(List<Playlist> ps) {
+        mPlaylists.addAll(ps);
+        notifyDataSetChanged();
+    }
+
+    public void addAllUnique(List<Playlist> ps) {
+        boolean hasChanged = false;
+
+        for (Playlist p : ps) {
+            if (!mPlaylists.contains(p)) {
+                mPlaylists.add(p);
+                hasChanged = true;
+            }
+        }
+
+        if (hasChanged) {
+            notifyDataSetChanged();
+        }
+    }
+
+    public boolean contains(Playlist p) {
+        return mPlaylists.contains(p);
     }
 
     @Override
@@ -72,14 +111,29 @@ public class PlaylistAdapter implements ListAdapter {
         Context ctx = parent.getContext();
         assert ctx != null;
 
-        LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View root = inflater.inflate(R.layout.medium_card, null);
+        View root = convertView;
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            root = inflater.inflate(R.layout.medium_card, null);
+        }
         assert root != null;
 
-        ImageView ivCover = (ImageView) root.findViewById(R.id.ivCover);
-        ivCover.setImageResource(R.drawable.album_placeholder);
+        // ImageView ivCover = (ImageView) root.findViewById(R.id.ivCover);
+        // ivCover.setImageResource(R.drawable.album_placeholder);
 
-        return null;
+        TextView tvPlaylistName = (TextView) root.findViewById(R.id.tvTitle);
+        TextView tvStats = (TextView) root.findViewById(R.id.tvSubTitle);
+
+        Playlist playlist = getItem(position);
+        if (playlist.isLoaded()) {
+            tvPlaylistName.setText(playlist.getName());
+            tvStats.setText("" + playlist.getSongsCount() + " songs");
+        } else {
+            tvPlaylistName.setText("Loading");
+            tvStats.setText("Loading");
+        }
+
+        return root;
     }
 
     @Override

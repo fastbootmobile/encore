@@ -28,13 +28,18 @@ package org.omnirom.music.app.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.database.DataSetObserver;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 
 import org.omnirom.music.app.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FlowLayout extends ViewGroup {
     public static final int HORIZONTAL = 0;
@@ -43,6 +48,7 @@ public class FlowLayout extends ViewGroup {
     private int verticalSpacing = 0;
     private int orientation = 0;
     private boolean debugDraw = false;
+    private ListAdapter mAdapter;
 
     public FlowLayout(Context context) {
         super(context);
@@ -60,6 +66,62 @@ public class FlowLayout extends ViewGroup {
         super(context, attributeSet, defStyle);
 
         this.readStyleParameters(context, attributeSet);
+    }
+
+    public void setAdapter(ListAdapter adapter) {
+        mAdapter = adapter;
+        adapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                populateFromAdapter();
+            }
+
+            @Override
+            public void onInvalidated() {
+                super.onInvalidated();
+                populateFromAdapter();
+            }
+        });
+
+        populateFromAdapter();
+    }
+
+    public ListAdapter getAdapter() {
+        return mAdapter;
+    }
+
+    private void populateFromAdapter() {
+        if (mAdapter == null) {
+            throw new IllegalStateException("Cannot populate FlowLayout: adapter is null");
+        }
+
+        final int size = mAdapter.getCount();
+        final List<View> newViews = new ArrayList<View>();
+        final List<View> currViews = new ArrayList<View>();
+
+        // Populate the current views arrays to recycle them
+        final int currChildCnt = getChildCount();
+        for (int i = 0; i < currChildCnt; i++) {
+            currViews.add(getChildAt(i));
+        }
+
+        // Get the new views
+        for (int i = 0; i < size; i++) {
+            View recycle = null;
+            if (currViews.size() > 0) {
+                recycle = currViews.get(0);
+                currViews.remove(0);
+            }
+
+            newViews.add(mAdapter.getView(i, recycle, this));
+        }
+
+        // Actually put the new views
+        removeAllViews();
+        for (int i = 0; i < size; i++) {
+            addView(newViews.get(i));
+        }
     }
 
     @Override

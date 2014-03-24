@@ -5,7 +5,9 @@ import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,6 +32,10 @@ public class ProviderCache {
 
     public Playlist getPlaylist(final String ref) {
         return mPlaylists.get(ref);
+    }
+
+    public List<Playlist> getAllPlaylists() {
+        return new ArrayList<Playlist>(mPlaylists.values());
     }
 
     public void putSong(final Song song) {

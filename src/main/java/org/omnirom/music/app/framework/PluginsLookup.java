@@ -29,8 +29,19 @@ public class PluginsLookup {
 
     private Context mContext;
     private List<HashMap<String, String>> mProviders;
+    private List<ProviderConnection> mConnections;
 
-    public PluginsLookup(Context context) {
+    private static final PluginsLookup INSTANCE = new PluginsLookup();
+
+    public static final PluginsLookup getDefault() {
+        return INSTANCE;
+    }
+
+    private PluginsLookup() {
+        mConnections = new ArrayList<ProviderConnection>();
+    }
+
+    public void initialize(Context context) {
         mContext = context;
         updatePlugins();
     }
@@ -40,6 +51,12 @@ public class PluginsLookup {
         // mDSPs = fetchDSPs();
     }
 
+    public void tearDown() {
+        for (ProviderConnection connection : mConnections) {
+            connection.unbindService();
+        }
+    }
+
     /**
      * Returns the list of available music content providers. See DATA_** for the list of keys
      * available
@@ -47,21 +64,8 @@ public class PluginsLookup {
      * you can bind and unbind the instances as you wish.
      */
     public List<ProviderConnection> getAvailableProviders() {
-        List<ProviderConnection> providers = new ArrayList<ProviderConnection>();
-
-        for (HashMap<String, String> providerData : mProviders) {
-            String providerName = providerData.get(DATA_NAME);
-
-            if (providerName != null) {
-                ProviderConnection conn = new ProviderConnection(mContext, providerName,
-                        providerData.get(DATA_PACKAGE), providerData.get(DATA_SERVICE),
-                        providerData.get(DATA_CONFIGCLASS));
-
-                providers.add(conn);
-            }
-        }
-
-        return providers;
+        Log.e(TAG, "Returning " + mConnections.size() + " connectoins");
+        return mConnections;
     }
 
     /**
@@ -97,8 +101,27 @@ public class PluginsLookup {
                     item.put(DATA_CONFIGCLASS, sinfo.metaData.getString(Constants.METADATA_CONFIG_CLASS));
                 }
 
+                String providerName = item.get(DATA_NAME);
                 if (DEBUG) Log.d(TAG, "Found provider plugin: " + sinfo.packageName + ", "
-                        + sinfo.name + ", name:" + item.get(DATA_NAME));
+                        + sinfo.name + ", name:" + providerName);
+
+                if (providerName != null) {
+                    boolean found = false;
+                    for (ProviderConnection conn : mConnections) {
+                        if (conn.getPackage().equals(sinfo.packageName)
+                                && conn.getServiceName().equals(sinfo.name)) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        ProviderConnection conn = new ProviderConnection(mContext, providerName,
+                                item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
+                                item.get(DATA_CONFIGCLASS));
+                        mConnections.add(conn);
+                    }
+                }
 
                 services.add(item);
             }
