@@ -55,6 +55,7 @@ public class PluginsLookup {
         for (ProviderConnection connection : mConnections) {
             connection.unbindService();
         }
+        mConnections.clear();
     }
 
     /**

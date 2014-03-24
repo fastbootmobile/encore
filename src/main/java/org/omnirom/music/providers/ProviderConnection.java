@@ -88,7 +88,7 @@ public class ProviderConnection implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         mBinder = IMusicProvider.Stub.asInterface(service);
-        ProviderAggregator.getDefault().registerProvider(mBinder);
+        ProviderAggregator.getDefault().registerProvider(this);
         mIsBound = true;
         if (DEBUG) Log.d(TAG, "Connected to provider " + name);
 
@@ -107,7 +107,7 @@ public class ProviderConnection implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        ProviderAggregator.getDefault().unregisterProvider(mBinder);
+        ProviderAggregator.getDefault().unregisterProvider(this);
         mBinder = null;
         mIsBound = false;
         if (DEBUG) Log.d(TAG, "Disconnected from provider " + name);

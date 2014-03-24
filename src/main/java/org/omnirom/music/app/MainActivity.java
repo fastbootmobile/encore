@@ -59,8 +59,8 @@ public class MainActivity extends Activity
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         PluginsLookup.getDefault().tearDown();
     }
 

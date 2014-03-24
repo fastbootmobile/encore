@@ -20,7 +20,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private static final String TAG = "ProviderAggregator";
 
     private List<ILocalCallback> mUpdateCallbacks;
-    private List<IMusicProvider> mProviders;
+    final private List<ProviderConnection> mProviders;
     private ProviderCache mCache;
     private Handler mHandler;
 
@@ -33,7 +33,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     private ProviderAggregator() {
         mUpdateCallbacks = new ArrayList<ILocalCallback>();
-        mProviders = new ArrayList<IMusicProvider>();
+        mProviders = new ArrayList<ProviderConnection>();
         mCache = new ProviderCache();
         mHandler = new Handler();
     }
@@ -54,23 +54,36 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         return mUpdateCallbacks.iterator();
     }
 
-    public void registerProvider(IMusicProvider provider) {
-        if (!mProviders.contains(provider)) {
-            mProviders.add(provider);
-            try {
-                provider.registerCallback(this);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to register as a callback");
-            }
+    public void registerProvider(ProviderConnection provider) {
+        synchronized (mProviders) {
+            if (!mProviders.contains(provider)) {
+                mProviders.add(provider);
+                try {
+                    provider.getBinder().registerCallback(this);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to register as a callback");
+                }
 
-            for (ILocalCallback cb : mUpdateCallbacks) {
-                cb.onProviderConnected(provider);
+                for (ILocalCallback cb : mUpdateCallbacks) {
+                    cb.onProviderConnected(provider.getBinder());
+                }
             }
         }
     }
 
-    public void unregisterProvider(IMusicProvider provider) {
-        mProviders.remove(provider);
+    public void unregisterProvider(final ProviderConnection provider) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mProviders) {
+                    mProviders.remove(provider);
+                    try {
+                        provider.getBinder().unregisterCallback(ProviderAggregator.this);
+                    } catch (RemoteException e) { }
+                    provider.unbindService();
+                }
+            }
+        });
     }
 
     public void search(final String query, final ISearchCallback callback) {
@@ -82,15 +95,16 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         // in the callback if needed.
         List<Playlist> playlists = mCache.getAllPlaylists();
 
-        for (IMusicProvider conn : mProviders) {
+        for (ProviderConnection conn : mProviders) {
             try {
-                if (conn.isSetup() && conn.isAuthenticated()) {
-                    conn.getPlaylists();
+                if (conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
+                    conn.getBinder().getPlaylists();
                 } else {
                     Log.i(TAG, "Skipping a provider because it is not setup or authenticated");
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to get playlists from a provider", e);
+                unregisterProvider(conn);
             }
         }
 
@@ -116,6 +130,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         }
                     } catch (RemoteException e) {
                         Log.e(TAG, "Error while calling getPlaylist", e);
+                        ProviderConnection conn = mProviders.get(mProviders.indexOf(provider));
+                        unregisterProvider(conn);
                     }
                 }
             });
