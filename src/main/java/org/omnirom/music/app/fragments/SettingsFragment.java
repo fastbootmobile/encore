@@ -76,19 +76,17 @@ public class SettingsFragment extends PreferenceFragment {
 
         mProviders = mPluginsLookup.getAvailableProviders();
 
-        if (mProviders.size() > 0) {
-            CharSequence[] providerNames = new CharSequence[mProviders.size()];
-            CharSequence[] providerValues = new CharSequence[mProviders.size()];
-            int i = 0;
-            for (ProviderConnection provider : mProviders) {
-                providerNames[i] = provider.getProviderName();
-                providerValues[i] = Integer.toString(i);
-            }
-            mslProvidersEnable.setEntries(providerNames);
-            mslProvidersEnable.setEntryValues(providerValues);
-            listProvidersConfig.setEntries(providerNames);
-            listProvidersConfig.setEntryValues(providerValues);
+        CharSequence[] providerNames = new CharSequence[mProviders.size()];
+        CharSequence[] providerValues = new CharSequence[mProviders.size()];
+        int i = 0;
+        for (ProviderConnection provider : mProviders) {
+            providerNames[i] = provider.getProviderName();
+            providerValues[i] = Integer.toString(i);
         }
+        mslProvidersEnable.setEntries(providerNames);
+        mslProvidersEnable.setEntryValues(providerValues);
+        listProvidersConfig.setEntries(providerNames);
+        listProvidersConfig.setEntryValues(providerValues);
 
 
         listProvidersConfig.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {

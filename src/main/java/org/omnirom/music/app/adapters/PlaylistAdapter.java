@@ -36,7 +36,6 @@ public class PlaylistAdapter implements ListAdapter {
     }
 
     public void notifyDataSetChanged() {
-        Log.e("ADAPTER", "NOTIFY");
         for (DataSetObserver obs : mObservers) {
             obs.onChanged();
         }

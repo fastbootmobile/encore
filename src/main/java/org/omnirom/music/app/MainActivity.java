@@ -45,8 +45,6 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Setup the plugins system
-        PluginsLookup.getDefault().initialize(this);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -59,9 +57,19 @@ public class MainActivity extends Activity
     }
 
     @Override
+    protected void onResume() {
+        // Setup the plugins system
+        PluginsLookup.getDefault().initialize(this);
+
+        super.onResume();
+    }
+
+    @Override
     protected void onPause() {
-        super.onPause();
+        // Release services connections
         PluginsLookup.getDefault().tearDown();
+
+        super.onPause();
     }
 
     @Override

@@ -59,6 +59,7 @@ public class ProviderConnection implements ServiceConnection {
     public void unbindService() {
         if (mIsBound) {
             if (DEBUG) Log.d(TAG, "Unbinding service...");
+            ProviderAggregator.getDefault().unregisterProvider(this);
             mContext.unbindService(this);
             mIsBound = false;
         }
@@ -98,7 +99,6 @@ public class ProviderConnection implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        ProviderAggregator.getDefault().unregisterProvider(this);
         mBinder = null;
         mIsBound = false;
         if (DEBUG) Log.d(TAG, "Disconnected from provider " + name);
