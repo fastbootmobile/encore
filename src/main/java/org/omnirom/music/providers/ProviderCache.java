@@ -16,12 +16,14 @@ import java.util.Map;
 public class ProviderCache {
     private Map<String, Playlist> mPlaylists;
     private Map<String, Song> mSongs;
+    private Map<String, IMusicProvider> mSongsProvider;
     private Map<String, Album> mAlbums;
     private Map<String, Artist> mArtists;
 
     public ProviderCache() {
         mPlaylists = new HashMap<String, Playlist>();
         mSongs = new HashMap<String, Song>();
+        mSongsProvider = new HashMap<String, IMusicProvider>();
         mAlbums = new HashMap<String, Album>();
         mArtists = new HashMap<String, Artist>();
     }
@@ -38,12 +40,17 @@ public class ProviderCache {
         return new ArrayList<Playlist>(mPlaylists.values());
     }
 
-    public void putSong(final Song song) {
+    public void putSong(final IMusicProvider provider, final Song song) {
         mSongs.put(song.getRef(), song);
+        mSongsProvider.put(song.getRef(), provider);
     }
 
     public Song getSong(final String ref) {
         return mSongs.get(ref);
+    }
+
+    public IMusicProvider getSongProvider(final String ref) {
+        return mSongsProvider.get(ref);
     }
 
     public void putAlbum(final Album album) {

@@ -1,9 +1,13 @@
 package org.omnirom.music.providers;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.omnirom.music.app.framework.CircularArrayList;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -214,7 +218,22 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             notify = !cached.isIdentical(p);
         }
 
+        // If something has actually changed
         if (notify) {
+            // First, we try to check if we need information for some of the songs
+            Iterator<String> it = p.songs();
+            while (it.hasNext()) {
+                String ref = it.next();
+               /* Song cachedSong = mCache.getSong(ref);
+                if (cachedSong == null) {*/
+                    mCache.putSong(provider, provider.getSong(ref));
+                /*} else {
+                    // We update the remote provider object
+                    mCache.putSong(provider, cachedSong);
+                }*/
+            }
+
+            // Then we notify the callbacks
             for (ILocalCallback cb : mUpdateCallbacks) {
                 cb.onPlaylistUpdate(p);
             }
@@ -226,7 +245,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     @Override
     public void onSongUpdate(IMusicProvider provider, Song s) throws RemoteException {
-
+        if (s.isLoaded()) {
+            Log.i(TAG, "Song update: Title: " + s.getTitle());
+            mCache.putSong(provider, s);
+        } else {
+            Log.i(TAG, "Song update: Not loaded");
+        }
     }
 
     /**
@@ -245,5 +269,64 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     }
 
+    @Override
+    public void onSongPlaying(IMusicProvider provider, Song s) throws RemoteException {
 
+    }
+
+    @Override
+    public void onSongPaused(IMusicProvider provider) throws RemoteException {
+
+    }
+
+    @Override
+    public void onSongStopped(IMusicProvider provider) throws RemoteException {
+
+    }
+
+    private AudioTrack mTrack;
+    private final short[] mBuffer = new short[252144];
+    private int mBufferOffset = 0;
+
+    @Override
+    public void onMusicData(int[] frames, final int frameCount, int channels, int sampleRate)
+            throws RemoteException {
+        if (mTrack == null) {
+            Log.e(TAG, "Created track: " + channels + " channels, " + sampleRate + " Hz");
+            mTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,
+                    AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
+                    AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT)*8,
+                    AudioTrack.MODE_STREAM);
+            mTrack.play();
+
+            new Thread() {
+                public void run() {
+                    while (true) {
+                        if (isInterrupted()) break;
+
+                        synchronized (mBuffer) {
+                            // Playback audio, if any
+                            if (mBufferOffset > 0) {
+                                int ret = mTrack.write(mBuffer, 0, mBufferOffset);
+                                if (ret == AudioTrack.ERROR_INVALID_OPERATION) {
+                                    Log.e(TAG, "INVALID OPERATION");
+                                } else if (ret == AudioTrack.ERROR_BAD_VALUE) {
+                                    Log.e(TAG, "BAD VALUE");
+                                } else {
+                                    mBufferOffset = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+            }.start();
+        }
+
+        synchronized (mBuffer) {
+            for (int i = 0; i < frameCount; i++) {
+                mBuffer[mBufferOffset] = (short) frames[i];
+                mBufferOffset++;
+            }
+        }
+    }
 }

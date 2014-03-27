@@ -3,6 +3,7 @@ package org.omnirom.music.app.adapters;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,8 @@ import java.util.List;
  *
  */
 public class PlaylistAdapter implements ListAdapter {
+
+    private static final int DEFERRED_DELAY = 50;
 
     private List<Playlist> mPlaylists;
     private List<DataSetObserver> mObservers;
@@ -35,7 +39,7 @@ public class PlaylistAdapter implements ListAdapter {
                 mPendingPlaylists.remove(0);
 
                 if (mPendingPlaylists.size() > 0) {
-                    mHandler.postDelayed(mDeferredUpdate, 50);
+                    mHandler.postDelayed(mDeferredUpdate, DEFERRED_DELAY);
                 }
             }
         }
@@ -67,7 +71,7 @@ public class PlaylistAdapter implements ListAdapter {
 
     public void addAll(List<Playlist> ps) {
         mPendingPlaylists.addAll(ps);
-        mHandler.postDelayed(mDeferredUpdate, 50);
+        mHandler.postDelayed(mDeferredUpdate, DEFERRED_DELAY);
     }
 
     public void addAllUnique(List<Playlist> ps) {
@@ -77,7 +81,7 @@ public class PlaylistAdapter implements ListAdapter {
             }
         }
 
-        mHandler.postDelayed(mDeferredUpdate, 50);
+        mHandler.postDelayed(mDeferredUpdate, DEFERRED_DELAY);
     }
 
     public boolean contains(Playlist p) {
@@ -146,8 +150,8 @@ public class PlaylistAdapter implements ListAdapter {
         }
 
         // Fill in the fields
-        Playlist playlist = getItem(position);
-        ViewHolder tag = (ViewHolder) root.getTag();
+        final Playlist playlist = getItem(position);
+        final ViewHolder tag = (ViewHolder) root.getTag();
 
         tag.ivCover.setImageResource(R.drawable.album_placeholder);
 
@@ -158,6 +162,22 @@ public class PlaylistAdapter implements ListAdapter {
             tag.tvTitle.setText("Loading");
             tag.tvSubTitle.setText("Loading");
         }
+
+        //////////
+        // TEST //
+        root.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Play the first song of the playlist
+                String songRef = playlist.songs().next();
+                try {
+                    ProviderAggregator.getDefault().getCache().getSongProvider(songRef).playSong(songRef);
+                } catch (RemoteException e) {
+                    Log.e("TEST", "Unable to play song", e);
+                }
+            }
+        });
+
 
         return root;
     }
