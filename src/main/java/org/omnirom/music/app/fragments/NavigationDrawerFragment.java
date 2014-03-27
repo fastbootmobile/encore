@@ -276,7 +276,7 @@ public class NavigationDrawerFragment extends Fragment {
                 public void run() {
                     mCallbacks.onNavigationDrawerItemSelected(position);
                 }
-            }, 200);
+            }, 0);
 
         }
     }

@@ -2,6 +2,7 @@ package org.omnirom.music.app.adapters;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,22 @@ public class PlaylistAdapter implements ListAdapter {
 
     private List<Playlist> mPlaylists;
     private List<DataSetObserver> mObservers;
+    private List<Playlist> mPendingPlaylists;
+    private Handler mHandler;
+
+    private Runnable mDeferredUpdate = new Runnable() {
+        @Override
+        public void run() {
+            if (mPendingPlaylists.size() > 0) {
+                addItem(mPendingPlaylists.get(0));
+                mPendingPlaylists.remove(0);
+
+                if (mPendingPlaylists.size() > 0) {
+                    mHandler.postDelayed(mDeferredUpdate, 50);
+                }
+            }
+        }
+    };
 
     private static class ViewHolder {
         public ImageView ivCover;
@@ -32,7 +49,9 @@ public class PlaylistAdapter implements ListAdapter {
 
     public PlaylistAdapter() {
         mPlaylists = new ArrayList<Playlist>();
+        mPendingPlaylists = new ArrayList<Playlist>();
         mObservers = new ArrayList<DataSetObserver>();
+        mHandler = new Handler();
     }
 
     public void notifyDataSetChanged() {
@@ -47,23 +66,18 @@ public class PlaylistAdapter implements ListAdapter {
     }
 
     public void addAll(List<Playlist> ps) {
-        mPlaylists.addAll(ps);
-        notifyDataSetChanged();
+        mPendingPlaylists.addAll(ps);
+        mHandler.postDelayed(mDeferredUpdate, 50);
     }
 
     public void addAllUnique(List<Playlist> ps) {
-        boolean hasChanged = false;
-
         for (Playlist p : ps) {
             if (!mPlaylists.contains(p)) {
-                mPlaylists.add(p);
-                hasChanged = true;
+                mPendingPlaylists.add(p);
             }
         }
 
-        if (hasChanged) {
-            notifyDataSetChanged();
-        }
+        mHandler.postDelayed(mDeferredUpdate, 50);
     }
 
     public boolean contains(Playlist p) {

@@ -1,5 +1,6 @@
 package org.omnirom.music.app.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Handler;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.ListView;
 
+import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.ui.ExpandableHeightGridView;
@@ -94,6 +96,12 @@ public class PlaylistFragment extends Fragment implements ILocalCallback {
         mAdapter.addAll(playlists);
 
         return root;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ((MainActivity) activity).onSectionAttached(MainActivity.SECTION_PLAYLISTS);
     }
 
     @Override
