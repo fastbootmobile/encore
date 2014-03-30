@@ -17,6 +17,7 @@ import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.app.framework.PluginsLookup;
+import org.omnirom.music.providers.ProviderAggregator;
 
 
 public class MainActivity extends Activity
@@ -60,7 +61,7 @@ public class MainActivity extends Activity
     @Override
     protected void onResume() {
         // Setup the plugins system
-        PluginsLookup.getDefault().initialize(this);
+        PluginsLookup.getDefault().initialize(getApplicationContext());
 
         super.onResume();
     }
@@ -69,6 +70,7 @@ public class MainActivity extends Activity
     protected void onPause() {
         // Release services connections
         PluginsLookup.getDefault().tearDown();
+        ProviderAggregator.getDefault().getCache().purgeSongCache();
 
         super.onPause();
     }

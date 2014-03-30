@@ -8,6 +8,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.framework.CircularArrayList;
+import org.omnirom.music.app.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -170,6 +171,39 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     public List<Playlist> getAllPlaylists() {
         // We return the playlists from the cache, and query for new playlists. They will be updated
         // in the callback if needed.
+        for (final ProviderConnection provider : mProviders) {
+            try {
+                final List<Playlist> playlist = provider.getBinder().getPlaylists();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Playlist p : playlist) {
+                            mCache.putPlaylist(p);
+
+                            // Make sure we have references to all the songs in the playlist
+                            Iterator<String> songs = p.songs();
+                            while (songs.hasNext()) {
+                                String songRef = songs.next();
+                                Song song = null;
+                                try {
+                                    song = provider.getBinder().getSong(songRef);
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
+                                if (song != null) {
+                                    mCache.putSong(provider.getBinder(), song);
+                                }
+                            }
+                        }
+                    }
+                });
+
+            } catch (RemoteException e) {
+                Log.w(TAG, "RemoteException when fetching playlists", e);
+            }
+
+        }
+
         List<Playlist> playlists = mCache.getAllPlaylists();
 
         postOnce(mUpdatePlaylistsRunnable);

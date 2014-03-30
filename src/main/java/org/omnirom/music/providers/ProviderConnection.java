@@ -71,14 +71,15 @@ public class ProviderConnection implements ServiceConnection {
 
     public void bindService() {
         if (mIsBound) {
-            Log.w(TAG, "bindService(): Service seems already bound");
+            // Log.w(TAG, "bindService(): Service seems already bound");
             return;
         }
 
         if (DEBUG) Log.d(TAG, "Binding service...");
         Intent i = new Intent();
         i.setClassName(mPackage, mServiceName);
-        mContext.bindService(i, this, Context.BIND_IMPORTANT | Context.BIND_AUTO_CREATE);
+        mContext.startService(i);
+        mContext.bindService(i, this, Context.BIND_IMPORTANT);
     }
 
     @Override
@@ -101,10 +102,15 @@ public class ProviderConnection implements ServiceConnection {
             }
 
             // Automatically try to login the provider once bound
-            if (mBinder.isSetup() && !mBinder.isAuthenticated()) {
-                Log.d(TAG, "Provider is setup! Trying to log in!");
-                if (!mBinder.login()) {
-                    Log.e(TAG, "Error while requesting login!");
+            if (mBinder.isSetup()) {
+                if (!mBinder.isAuthenticated()) {
+                    Log.d(TAG, "Provider is setup! Trying to log in!");
+                    if (!mBinder.login()) {
+                        Log.e(TAG, "Error while requesting login!");
+                    }
+                } else {
+                    // Update playlists
+                    ProviderAggregator.getDefault().getAllPlaylists();
                 }
             }
         } catch (RemoteException e) {

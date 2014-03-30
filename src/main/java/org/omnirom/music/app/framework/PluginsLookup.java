@@ -10,6 +10,7 @@ import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
 import org.omnirom.music.provider.Constants;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.ArrayList;
@@ -55,7 +56,6 @@ public class PluginsLookup {
         for (ProviderConnection connection : mConnections) {
             connection.unbindService();
         }
-        mConnections.clear();
     }
 
     /**
@@ -74,7 +74,7 @@ public class PluginsLookup {
      */
     private List<HashMap<String, String>> fetchProviders() {
         Intent baseIntent = new Intent(Constants.ACTION_PICK_PROVIDER);
-        baseIntent.setFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
+        // baseIntent.setFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
 
         return fetchServicesForIntent(baseIntent);
     }
@@ -112,6 +112,7 @@ public class PluginsLookup {
                         if (conn.getPackage().equals(sinfo.packageName)
                                 && conn.getServiceName().equals(sinfo.name)) {
                             found = true;
+                            conn.bindService();
                             break;
                         }
                     }

@@ -7,6 +7,7 @@ import org.omnirom.music.model.Song;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,11 @@ public class ProviderCache {
         mSongsProvider = new HashMap<String, IMusicProvider>();
         mAlbums = new HashMap<String, Album>();
         mArtists = new HashMap<String, Artist>();
+    }
+
+    public void purgeSongCache() {
+        mSongs.clear();
+        mSongsProvider.clear();
     }
 
     public void putPlaylist(final Playlist pl) {
