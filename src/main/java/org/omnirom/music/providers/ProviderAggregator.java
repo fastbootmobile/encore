@@ -40,7 +40,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             for (ProviderConnection conn : providers) {
                 try {
                     if (conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
-                        conn.getBinder().getPlaylists();
+                        List<Playlist> playlist = conn.getBinder().getPlaylists();
+                        ensurePlaylistsSongsCached(conn.getBinder(), playlist);
                     } else {
                         Log.i(TAG, "Skipping a provider because it is not setup or authenticated");
                     }
@@ -99,6 +100,42 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     public void removeUpdateCallback(ILocalCallback cb) {
         mUpdateCallbacks.remove(cb);
+    }
+
+    private void ensurePlaylistsSongsCached(final IMusicProvider provider,
+                                            final List<Playlist> playlist) {
+        if (provider == null || playlist == null) {
+            // playlist may be null if there are no playlists
+            return;
+        }
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (Playlist p : playlist) {
+                    if (p == null) {
+                        continue;
+                    }
+
+                    mCache.putPlaylist(p);
+
+                    // Make sure we have references to all the songs in the playlist
+                    Iterator<String> songs = p.songs();
+                    while (songs.hasNext()) {
+                        String songRef = songs.next();
+                        Song song = null;
+                        try {
+                            song = provider.getSong(songRef);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        if (song != null) {
+                            mCache.putSong(provider, song);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -169,45 +206,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @return A list of playlists
      */
     public List<Playlist> getAllPlaylists() {
-        // We return the playlists from the cache, and query for new playlists. They will be updated
-        // in the callback if needed.
-        for (final ProviderConnection provider : mProviders) {
-            try {
-                final List<Playlist> playlist = provider.getBinder().getPlaylists();
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (Playlist p : playlist) {
-                            mCache.putPlaylist(p);
-
-                            // Make sure we have references to all the songs in the playlist
-                            Iterator<String> songs = p.songs();
-                            while (songs.hasNext()) {
-                                String songRef = songs.next();
-                                Song song = null;
-                                try {
-                                    song = provider.getBinder().getSong(songRef);
-                                } catch (RemoteException e) {
-                                    e.printStackTrace();
-                                }
-                                if (song != null) {
-                                    mCache.putSong(provider.getBinder(), song);
-                                }
-                            }
-                        }
-                    }
-                });
-
-            } catch (RemoteException e) {
-                Log.w(TAG, "RemoteException when fetching playlists", e);
-            }
-
-        }
-
+        mUpdatePlaylistsRunnable.run();
         List<Playlist> playlists = mCache.getAllPlaylists();
-
-        postOnce(mUpdatePlaylistsRunnable);
-
         return playlists;
     }
 
@@ -260,16 +260,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             Iterator<String> it = p.songs();
             while (it.hasNext()) {
                 String ref = it.next();
-               /* Song cachedSong = mCache.getSong(ref);
-                if (cachedSong == null) {*/
                 Song providerSong = provider.getSong(ref);
                 if (providerSong != null) {
                     mCache.putSong(provider, providerSong);
                 }
-                /*} else {
-                    // We update the remote provider object
-                    mCache.putSong(provider, cachedSong);
-                }*/
             }
 
             // Then we notify the callbacks
