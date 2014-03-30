@@ -140,7 +140,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 synchronized (mProviders) {
                     mProviders.remove(provider);
                     try {
-                        provider.getBinder().unregisterCallback(ProviderAggregator.this);
+                        if (provider.getBinder() != null) {
+                            provider.getBinder().unregisterCallback(ProviderAggregator.this);
+                        }
                     } catch (RemoteException e) { }
                     provider.unbindService();
                 }
@@ -226,7 +228,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 String ref = it.next();
                /* Song cachedSong = mCache.getSong(ref);
                 if (cachedSong == null) {*/
-                    mCache.putSong(provider, provider.getSong(ref));
+                Song providerSong = provider.getSong(ref);
+                if (providerSong != null) {
+                    mCache.putSong(provider, providerSong);
+                }
                 /*} else {
                     // We update the remote provider object
                     mCache.putSong(provider, cachedSong);
@@ -284,49 +289,4 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     }
 
-    private AudioTrack mTrack;
-    private final short[] mBuffer = new short[252144];
-    private int mBufferOffset = 0;
-
-    @Override
-    public void onMusicData(int[] frames, final int frameCount, int channels, int sampleRate)
-            throws RemoteException {
-        if (mTrack == null) {
-            Log.e(TAG, "Created track: " + channels + " channels, " + sampleRate + " Hz");
-            mTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,
-                    AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
-                    AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT)*8,
-                    AudioTrack.MODE_STREAM);
-            mTrack.play();
-
-            new Thread() {
-                public void run() {
-                    while (true) {
-                        if (isInterrupted()) break;
-
-                        synchronized (mBuffer) {
-                            // Playback audio, if any
-                            if (mBufferOffset > 0) {
-                                int ret = mTrack.write(mBuffer, 0, mBufferOffset);
-                                if (ret == AudioTrack.ERROR_INVALID_OPERATION) {
-                                    Log.e(TAG, "INVALID OPERATION");
-                                } else if (ret == AudioTrack.ERROR_BAD_VALUE) {
-                                    Log.e(TAG, "BAD VALUE");
-                                } else {
-                                    mBufferOffset = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }.start();
-        }
-
-        synchronized (mBuffer) {
-            for (int i = 0; i < frameCount; i++) {
-                mBuffer[mBufferOffset] = (short) frames[i];
-                mBufferOffset++;
-            }
-        }
-    }
 }

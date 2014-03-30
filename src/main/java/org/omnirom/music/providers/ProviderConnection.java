@@ -9,6 +9,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
+import org.omnirom.music.app.framework.AudioSocketHost;
+
+import java.io.IOException;
 
 public class ProviderConnection implements ServiceConnection {
     private static final boolean DEBUG = BuildConfig.DEBUG;
@@ -21,6 +24,7 @@ public class ProviderConnection implements ServiceConnection {
     private Context mContext;
     private IMusicProvider mBinder;
     private boolean mIsBound;
+    private AudioSocketHost mAudioSocket;
 
     public ProviderConnection(Context ctx, String providerName, String pkg, String serviceName,
                               String configActivity) {
@@ -74,7 +78,7 @@ public class ProviderConnection implements ServiceConnection {
         if (DEBUG) Log.d(TAG, "Binding service...");
         Intent i = new Intent();
         i.setClassName(mPackage, mServiceName);
-        mContext.bindService(i, this, Context.BIND_AUTO_CREATE);
+        mContext.bindService(i, this, Context.BIND_IMPORTANT | Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -84,8 +88,19 @@ public class ProviderConnection implements ServiceConnection {
         mIsBound = true;
         if (DEBUG) Log.d(TAG, "Connected to provider " + name);
 
-        // Automatically try to login the provider once bound
+
         try {
+            // Assign the provider an audio socket
+            try {
+                final String socketName = "org.omnirom.music.AUDIO_SOCKET_" + mProviderName + "_" + mBinder.hashCode();
+                mAudioSocket = new AudioSocketHost(socketName);
+                mAudioSocket.startListening();
+                mBinder.setAudioSocketName(socketName);
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to setup the audio socket for the provider " + mProviderName);
+            }
+
+            // Automatically try to login the provider once bound
             if (mBinder.isSetup() && !mBinder.isAuthenticated()) {
                 Log.d(TAG, "Provider is setup! Trying to log in!");
                 if (!mBinder.login()) {
@@ -99,8 +114,17 @@ public class ProviderConnection implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
+        // Release the binder
         mBinder = null;
         mIsBound = false;
+
+        // Release the audio host socket
+        if (mAudioSocket != null) {
+            mAudioSocket.release();
+            mAudioSocket = null;
+        }
+
+
         if (DEBUG) Log.d(TAG, "Disconnected from provider " + name);
     }
 }
