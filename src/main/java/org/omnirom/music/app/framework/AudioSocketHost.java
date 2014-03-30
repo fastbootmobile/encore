@@ -52,7 +52,9 @@ public class AudioSocketHost {
                     // arrive in order.
                     while (true) {
                         //Log.e(TAG, "Waiting data...");
-                        byte opcode = (byte) inputStream.read();
+                        int opcode = inputStream.read();
+
+                        if (opcode == -1) break;
 
                         switch (opcode) {
                             case AudioSocket.OPCODE_FORMAT:
@@ -61,9 +63,6 @@ public class AudioSocketHost {
 
                             case AudioSocket.OPCODE_DATA:
                                 handlePacketData(inputStream);
-                                break;
-
-                            case -1:
                                 break;
 
                             default:
@@ -207,15 +206,10 @@ public class AudioSocketHost {
      * @throws IOException
      */
     private void handlePacketData(InputStream in) throws IOException {
-        mIntBuffer.rewind();
-        for (int i = 0; i < 4; i++) {
-            mIntBuffer.put((byte) in.read());
-        }
+        in.read(mIntBuffer.array(), 0, 4);
         final int numFrames = mIntBuffer.getInt(0);
 
-
         synchronized (mAudioPushRunnable) {
-            long timeMs = SystemClock.currentThreadTimeMillis();
             int totalRead = 0;
             int totalToRead = numFrames * 2;
             int sizeToRead = totalToRead;
