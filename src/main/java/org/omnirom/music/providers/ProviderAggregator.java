@@ -1,14 +1,10 @@
 package org.omnirom.music.providers;
 
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
-import org.omnirom.music.app.framework.CircularArrayList;
-import org.omnirom.music.app.framework.PluginsLookup;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -41,12 +37,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 try {
                     if (conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
                         List<Playlist> playlist = conn.getBinder().getPlaylists();
-                        ensurePlaylistsSongsCached(conn.getBinder(), playlist);
+                        ensurePlaylistsSongsCached(conn, playlist);
                     } else {
-                        Log.i(TAG, "Skipping a provider because it is not setup or authenticated");
+                        Log.i(TAG, "Skipping a providers because it is not setup or authenticated");
                     }
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to get playlists from a provider", e);
+                    Log.e(TAG, "Unable to get playlists from a providers", e);
                     unregisterProvider(conn);
                 }
             }
@@ -102,7 +98,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         mUpdateCallbacks.remove(cb);
     }
 
-    private void ensurePlaylistsSongsCached(final IMusicProvider provider,
+    private void ensurePlaylistsSongsCached(final ProviderConnection provider,
                                             final List<Playlist> playlist) {
         if (provider == null || playlist == null) {
             // playlist may be null if there are no playlists
@@ -117,7 +113,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         continue;
                     }
 
-                    mCache.putPlaylist(p);
+                    mCache.putPlaylist(provider.getIdentifier(), p);
 
                     // Make sure we have references to all the songs in the playlist
                     Iterator<String> songs = p.songs();
@@ -125,12 +121,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         String songRef = songs.next();
                         Song song = null;
                         try {
-                            song = provider.getSong(songRef);
+                            song = provider.getBinder().getSong(songRef);
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
                         if (song != null) {
-                            mCache.putSong(provider, song);
+                            mCache.putSong(provider.getIdentifier(), song);
                         }
                     }
                 }
@@ -139,8 +135,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
-     * Registers a new provider service that has been bound, and add the aggregator as a callback
-     * @param provider The provider that connected
+     * Registers a new providers service that has been bound, and add the aggregator as a callback
+     * @param provider The providers that connected
      */
     public void registerProvider(ProviderConnection provider) {
         boolean added = false;
@@ -166,10 +162,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
-     * Removes the connection to a provider. This may be called either if the connection to a
+     * Removes the connection to a providers. This may be called either if the connection to a
      * service has been lost (e.g. in case of a DeadObjectException if the service crashed), or
      * simply if the app closes and a service is not needed anymore.
-     * @param provider The provider to remove
+     * @param provider The providers to remove
      */
     public void unregisterProvider(final ProviderConnection provider) {
         mHandler.post(new Runnable() {
@@ -212,12 +208,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
-     * Called by the provider when a feedback is available about a login request
+     * Called by the providers when a feedback is available about a login request
      *
      * @param success Whether or not the login succeeded
      */
     @Override
-    public void onLoggedIn(final IMusicProvider provider, boolean success) throws RemoteException {
+    public void onLoggedIn(final ProviderIdentifier provider, boolean success) throws RemoteException {
         // Request playlists if we logged in
         Log.d(TAG, "onLoggedIn(" + success + ")");
         if (success) {
@@ -228,27 +224,27 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
-     * Called by the provider when the user login has expired, or has been kicked.
+     * Called by the providers when the user login has expired, or has been kicked.
      */
     @Override
-    public void onLoggedOut(IMusicProvider provider) throws RemoteException {
+    public void onLoggedOut(ProviderIdentifier provider) throws RemoteException {
 
     }
 
     /**
-     * Called by the provider when a Playlist has been added or updated. The app's provider
+     * Called by the providers when a Playlist has been added or updated. The app's providers
      * syndicator will automatically update the local cache of playlists based on the playlist
      * name.
      */
     @Override
-    public void onPlaylistAddedOrUpdated(IMusicProvider provider, Playlist p) throws RemoteException {
+    public void onPlaylistAddedOrUpdated(ProviderIdentifier provider, Playlist p) throws RemoteException {
         // We compare the provided copy with the one we have in cache. We only notify the callbacks
         // if it indeed changed.
         Playlist cached = mCache.getPlaylist(p.getRef());
 
         boolean notify;
         if (cached == null) {
-            mCache.putPlaylist(p);
+            mCache.putPlaylist(provider, p);
             notify = true;
         } else {
             notify = !cached.isIdentical(p);
@@ -256,11 +252,13 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
         // If something has actually changed
         if (notify) {
+            final IMusicProvider binder = PluginsLookup.getDefault().getProvider(provider).getBinder();
+
             // First, we try to check if we need information for some of the songs
             Iterator<String> it = p.songs();
             while (it.hasNext()) {
                 String ref = it.next();
-                Song providerSong = provider.getSong(ref);
+                Song providerSong = binder.getSong(ref);
                 if (providerSong != null) {
                     mCache.putSong(provider, providerSong);
                 }
@@ -274,10 +272,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
-     * Called by the provider when the details of a song have been updated.
+     * Called by the providers when the details of a song have been updated.
      */
     @Override
-    public void onSongUpdate(IMusicProvider provider, Song s) throws RemoteException {
+    public void onSongUpdate(ProviderIdentifier provider, Song s) throws RemoteException {
         if (s.isLoaded()) {
             Log.i(TAG, "Song update: Title: " + s.getTitle());
             mCache.putSong(provider, s);
@@ -287,33 +285,33 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
-     * Called by the provider when the details of an album have been updated.
+     * Called by the providers when the details of an album have been updated.
      */
     @Override
-    public void onAlbumUpdate(IMusicProvider provider, Album a) throws RemoteException {
+    public void onAlbumUpdate(ProviderIdentifier provider, Album a) throws RemoteException {
 
     }
 
     /**
-     * Called by the provider when the details of an artist have been updated.
+     * Called by the providers when the details of an artist have been updated.
      */
     @Override
-    public void onArtistUpdate(IMusicProvider provider, Artist a) throws RemoteException {
+    public void onArtistUpdate(ProviderIdentifier provider, Artist a) throws RemoteException {
 
     }
 
     @Override
-    public void onSongPlaying(IMusicProvider provider, Song s) throws RemoteException {
+    public void onSongPlaying(ProviderIdentifier provider, Song s) throws RemoteException {
 
     }
 
     @Override
-    public void onSongPaused(IMusicProvider provider) throws RemoteException {
+    public void onSongPaused(ProviderIdentifier provider) throws RemoteException {
 
     }
 
     @Override
-    public void onSongStopped(IMusicProvider provider) throws RemoteException {
+    public void onSongStopped(ProviderIdentifier provider) throws RemoteException {
 
     }
 

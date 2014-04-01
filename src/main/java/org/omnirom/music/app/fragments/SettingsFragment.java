@@ -3,7 +3,6 @@ package org.omnirom.music.app.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
@@ -15,8 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.framework.PluginsLookup;
-import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.List;

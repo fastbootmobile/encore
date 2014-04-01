@@ -1,19 +1,20 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
-import android.database.DataSetObserver;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.ArrayList;
@@ -22,12 +23,11 @@ import java.util.List;
 /**
  *
  */
-public class PlaylistAdapter implements ListAdapter {
+public class PlaylistListAdapter extends BaseAdapter {
 
-    private static final int DEFERRED_DELAY = 50;
+    private static final int DEFERRED_DELAY = 20;
 
     private List<Playlist> mPlaylists;
-    private List<DataSetObserver> mObservers;
     private List<Playlist> mPendingPlaylists;
     private Handler mHandler;
 
@@ -39,7 +39,7 @@ public class PlaylistAdapter implements ListAdapter {
                 mPendingPlaylists.remove(0);
 
                 if (mPendingPlaylists.size() > 0) {
-                    mHandler.postDelayed(mDeferredUpdate, DEFERRED_DELAY);
+                    mHandler.post(mDeferredUpdate);
                 }
             }
         }
@@ -51,17 +51,10 @@ public class PlaylistAdapter implements ListAdapter {
         public TextView tvSubTitle;
     }
 
-    public PlaylistAdapter() {
+    public PlaylistListAdapter() {
         mPlaylists = new ArrayList<Playlist>();
         mPendingPlaylists = new ArrayList<Playlist>();
-        mObservers = new ArrayList<DataSetObserver>();
         mHandler = new Handler();
-    }
-
-    public void notifyDataSetChanged() {
-        for (DataSetObserver obs : mObservers) {
-            obs.onChanged();
-        }
     }
 
     public void addItem(Playlist p) {
@@ -88,27 +81,6 @@ public class PlaylistAdapter implements ListAdapter {
         return mPlaylists.contains(p);
     }
 
-
-    @Override
-    public boolean areAllItemsEnabled() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled(int position) {
-        return true;
-    }
-
-    @Override
-    public void registerDataSetObserver(DataSetObserver observer) {
-        mObservers.add(observer);
-    }
-
-    @Override
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        mObservers.remove(observer);
-    }
-
     @Override
     public int getCount() {
         return mPlaylists.size();
@@ -122,11 +94,6 @@ public class PlaylistAdapter implements ListAdapter {
     @Override
     public long getItemId(int position) {
         return mPlaylists.get(position).getRef().hashCode();
-    }
-
-    @Override
-    public boolean hasStableIds() {
-        return true;
     }
 
     @Override
@@ -163,17 +130,23 @@ public class PlaylistAdapter implements ListAdapter {
             tag.tvSubTitle.setText("Loading");
         }
 
+          //////////
+         // TEST //
         //////////
-        // TEST //
         root.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Play the first song of the playlist
                 String songRef = playlist.songs().next();
+                Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
+
                 try {
-                    ProviderAggregator.getDefault().getCache().getSongProvider(songRef).playSong(songRef);
+                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
                 } catch (RemoteException e) {
                     Log.e("TEST", "Unable to play song", e);
+                } catch (NullPointerException e) {
+                    Log.e("TEST", "SERVICE IS NOT BOUND?!");
+                    PluginsLookup.getDefault().connectPlayback();
                 }
             }
         });
@@ -182,18 +155,4 @@ public class PlaylistAdapter implements ListAdapter {
         return root;
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        return 0;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return 1;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return mPlaylists.isEmpty();
-    }
 }

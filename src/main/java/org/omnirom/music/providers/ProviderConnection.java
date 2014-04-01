@@ -9,9 +9,10 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
-import org.omnirom.music.app.framework.AudioSocketHost;
+import org.omnirom.music.framework.AudioSocketHost;
+import org.omnirom.music.framework.PluginsLookup;
 
-import java.io.IOException;
+import java.security.Provider;
 
 public class ProviderConnection implements ServiceConnection {
     private static final boolean DEBUG = BuildConfig.DEBUG;
@@ -25,6 +26,8 @@ public class ProviderConnection implements ServiceConnection {
     private IMusicProvider mBinder;
     private boolean mIsBound;
     private AudioSocketHost mAudioSocket;
+    private ProviderIdentifier mIdentifier;
+    private PluginsLookup.ConnectionListener mListener;
 
     public ProviderConnection(Context ctx, String providerName, String pkg, String serviceName,
                               String configActivity) {
@@ -36,8 +39,19 @@ public class ProviderConnection implements ServiceConnection {
 
         mIsBound = false;
 
+        // Retain a generic identity of this providers
+        mIdentifier = new ProviderIdentifier(mPackage, mServiceName, mProviderName);
+
         // Try to bind to the service
         bindService();
+    }
+
+    public void setListener(PluginsLookup.ConnectionListener listener) {
+        mListener = listener;
+    }
+
+    public ProviderIdentifier getIdentifier() {
+        return mIdentifier;
     }
 
     public IMusicProvider getBinder() {
@@ -79,7 +93,7 @@ public class ProviderConnection implements ServiceConnection {
         Intent i = new Intent();
         i.setClassName(mPackage, mServiceName);
         mContext.startService(i);
-        mContext.bindService(i, this, Context.BIND_IMPORTANT);
+        mContext.bindService(i, this, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -87,21 +101,17 @@ public class ProviderConnection implements ServiceConnection {
         mBinder = IMusicProvider.Stub.asInterface(service);
         ProviderAggregator.getDefault().registerProvider(this);
         mIsBound = true;
-        if (DEBUG) Log.d(TAG, "Connected to provider " + name);
+        if (DEBUG) Log.d(TAG, "Connected to providers " + name);
 
+        if (mListener != null) {
+            mListener.onServiceConnected(this);
+        }
 
         try {
-            // Assign the provider an audio socket
-            try {
-                final String socketName = "org.omnirom.music.AUDIO_SOCKET_" + mProviderName + "_" + mBinder.hashCode();
-                mAudioSocket = new AudioSocketHost(socketName);
-                mAudioSocket.startListening();
-                mBinder.setAudioSocketName(socketName);
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to setup the audio socket for the provider " + mProviderName);
-            }
+            // Tell the provider its identifier
+            mBinder.setIdentifier(mIdentifier);
 
-            // Automatically try to login the provider once bound
+            // Automatically try to login the providers once bound
             if (mBinder.isSetup()) {
                 if (!mBinder.isAuthenticated()) {
                     Log.d(TAG, "Provider is setup! Trying to log in!");
@@ -114,7 +124,7 @@ public class ProviderConnection implements ServiceConnection {
                 }
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote exception occurred on the set provider", e);
+            Log.e(TAG, "Remote exception occurred on the set providers", e);
         }
     }
 
@@ -124,13 +134,29 @@ public class ProviderConnection implements ServiceConnection {
         mBinder = null;
         mIsBound = false;
 
-        // Release the audio host socket
+        if (mListener != null) {
+            mListener.onServiceDisconnected(this);
+        }
+
+        if (DEBUG) Log.d(TAG, "Disconnected from providers " + name);
+    }
+
+    public AudioSocketHost createAudioSocket(final String socketName) {
+        // Remove the previous socket, if any
         if (mAudioSocket != null) {
             mAudioSocket.release();
             mAudioSocket = null;
         }
 
+        // Assign the provider an audio socket
+        try {
+            mAudioSocket = new AudioSocketHost(socketName);
+            mAudioSocket.startListening();
+            mBinder.setAudioSocketName(socketName);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to setup the audio socket for the providers " + mProviderName, e);
+        }
 
-        if (DEBUG) Log.d(TAG, "Disconnected from provider " + name);
+        return mAudioSocket;
     }
 }

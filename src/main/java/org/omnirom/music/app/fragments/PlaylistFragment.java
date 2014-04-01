@@ -4,18 +4,14 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
-import android.widget.ListView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.adapters.PlaylistAdapter;
+import org.omnirom.music.app.adapters.PlaylistListAdapter;
 import org.omnirom.music.app.ui.ExpandableHeightGridView;
-import org.omnirom.music.app.ui.FlowLayout;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -23,8 +19,6 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
-import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +32,7 @@ import java.util.List;
  */
 public class PlaylistFragment extends Fragment implements ILocalCallback {
 
-    private PlaylistAdapter mAdapter;
+    private PlaylistListAdapter mAdapter;
     private Handler mHandler;
     private final ArrayList<Playlist> mPlaylistsUpdated = new ArrayList<Playlist>();
 
@@ -70,7 +64,7 @@ public class PlaylistFragment extends Fragment implements ILocalCallback {
         return fragment;
     }
     public PlaylistFragment() {
-        mAdapter = new PlaylistAdapter();
+        mAdapter = new PlaylistListAdapter();
         mHandler = new Handler();
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
@@ -92,8 +86,17 @@ public class PlaylistFragment extends Fragment implements ILocalCallback {
         playlistLayout.setExpanded(true);
 
         // Set the initial playlists
-        List<Playlist> playlists = ProviderAggregator.getDefault().getAllPlaylists();
-        mAdapter.addAll(playlists);
+        new Thread() {
+            public void run() {
+                final List<Playlist> playlists = ProviderAggregator.getDefault().getAllPlaylists();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.addAll(playlists);
+                    }
+                });
+            }
+        }.start();
 
         return root;
     }

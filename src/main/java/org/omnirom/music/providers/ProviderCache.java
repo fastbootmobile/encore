@@ -7,7 +7,6 @@ import org.omnirom.music.model.Song;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,25 +16,30 @@ import java.util.Map;
 public class ProviderCache {
     private Map<String, Playlist> mPlaylists;
     private Map<String, Song> mSongs;
-    private Map<String, IMusicProvider> mSongsProvider;
+    private Map<String, ProviderIdentifier> mRefProvider;
     private Map<String, Album> mAlbums;
     private Map<String, Artist> mArtists;
 
     public ProviderCache() {
         mPlaylists = new HashMap<String, Playlist>();
         mSongs = new HashMap<String, Song>();
-        mSongsProvider = new HashMap<String, IMusicProvider>();
+        mRefProvider = new HashMap<String, ProviderIdentifier>();
         mAlbums = new HashMap<String, Album>();
         mArtists = new HashMap<String, Artist>();
     }
 
     public void purgeSongCache() {
         mSongs.clear();
-        mSongsProvider.clear();
+        mRefProvider.clear();
     }
 
-    public void putPlaylist(final Playlist pl) {
+    public ProviderIdentifier getRefProvider(final String ref) {
+        return mRefProvider.get(ref);
+    }
+
+    public void putPlaylist(final ProviderIdentifier provider, final Playlist pl) {
         mPlaylists.put(pl.getRef(), pl);
+        mRefProvider.put(pl.getRef(), provider);
     }
 
     public Playlist getPlaylist(final String ref) {
@@ -46,29 +50,27 @@ public class ProviderCache {
         return new ArrayList<Playlist>(mPlaylists.values());
     }
 
-    public void putSong(final IMusicProvider provider, final Song song) {
+    public void putSong(final ProviderIdentifier provider, final Song song) {
         mSongs.put(song.getRef(), song);
-        mSongsProvider.put(song.getRef(), provider);
+        mRefProvider.put(song.getRef(), provider);
     }
 
     public Song getSong(final String ref) {
         return mSongs.get(ref);
     }
 
-    public IMusicProvider getSongProvider(final String ref) {
-        return mSongsProvider.get(ref);
-    }
-
-    public void putAlbum(final Album album) {
+    public void putAlbum(final ProviderIdentifier provider, final Album album) {
         mAlbums.put(album.getRef(), album);
+        mRefProvider.put(album.getRef(), provider);
     }
 
     public Album getAlbum(final String ref) {
         return mAlbums.get(ref);
     }
 
-    public void putArtist(final Artist artist) {
+    public void putArtist(final ProviderIdentifier provider, final Artist artist) {
         mArtists.put(artist.getRef(), artist);
+        mRefProvider.put(artist.getRef(), provider);
     }
 
     public Artist getArtist(final String ref) {

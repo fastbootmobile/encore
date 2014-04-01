@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
-import org.omnirom.music.app.framework.PluginsLookup;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
 
 
@@ -62,6 +62,7 @@ public class MainActivity extends Activity
     protected void onResume() {
         // Setup the plugins system
         PluginsLookup.getDefault().initialize(getApplicationContext());
+        PluginsLookup.getDefault().connectPlayback();
 
         super.onResume();
     }
