@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
 /**
- *
+ * Host socket for the audio coming from a provider
  */
 public class AudioSocketHost {
 
@@ -39,14 +39,11 @@ public class AudioSocketHost {
         public void run() {
             try {
                 while (!mStop) {
-                    Log.e(TAG, "AudioSocketHost waiting on incoming connection...");
                     LocalSocket client = mSocket.accept();
-                    //BufferedInputStream bufferInput = new BufferedInputStream(client.getInputStream());
                     mInputStream = client.getInputStream();
-                    Log.e(TAG, "AudioSocketHost Client connected");
 
                     // We keep on reading data as long as the providers socket is connected.
-                    // We assume here that DataInputStream is blocking and that all packets
+                    // We assume here that InputStream is blocking and that all packets
                     // arrive in order.
                     while (!mStop) {
                         if (mInputStream == null) break;
@@ -65,6 +62,7 @@ public class AudioSocketHost {
                                 break;
 
                             default:
+                                // If the provider is shifting information
                                 Log.e(TAG, "Unhandled input opcode: " + opcode);
                                 throw new IOException("Unhandled input opcode " + opcode);
                         }
@@ -148,7 +146,7 @@ public class AudioSocketHost {
         if (t != null) {
             t.interrupt();
             try {
-                t.join(1000);
+                t.join(50);
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error while stopping thread", e);
             }

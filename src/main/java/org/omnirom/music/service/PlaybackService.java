@@ -18,6 +18,9 @@ import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.List;
 
+/**
+ * Service handling the playback of the audio and the play notification
+ */
 public class PlaybackService extends Service implements PluginsLookup.ConnectionListener {
 
     private static final String TAG = "PlaybackService";
@@ -53,11 +56,17 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         mPlaybackQueue = new PlaybackQueue();
     }
 
+    /**
+     * Resets the shutdown timeout (after which the service would stop)
+     */
     public void resetShutdownTimeout() {
         mHandler.removeCallbacks(mShutdownRunnable);
         mHandler.postDelayed(mShutdownRunnable, SHUTDOWN_TIMEOUT);
     }
 
+    /**
+     * Called when the service is created
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -77,6 +86,9 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         }
     }
 
+    /**
+     * Called when the service is destroyed
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -86,12 +98,24 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         // Shutdown DSP chain
     }
 
+    /**
+     * Called when the main app is calling startService on this service.
+     * @param intent The intent attached, not used
+     * @param flags The flags, not used
+     * @param startId The start id, not used
+     * @return a status integer
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service starting");
         return super.onStartCommand(intent, flags, startId);
     }
 
+    /**
+     * Called when the main app binds on this service
+     * @param intent The intent attached, not used
+     * @return The binder, in our case an IPlaybackService
+     */
     @Override
     public IBinder onBind(Intent intent) {
         mNumberBound++;
@@ -99,6 +123,11 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         return mBinder;
     }
 
+    /**
+     * Called when an app unbind from this service
+     * @param intent The intent attached, not used
+     * @return true
+     */
     @Override
     public boolean onUnbind(Intent intent) {
         mNumberBound--;
@@ -115,11 +144,20 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         assignProviderAudioSocket(connection);
     }
 
+    /**
+     * ProviderConnection listener: Called when a provider has disconnected
+     * @param connection The provider connected
+     */
     @Override
     public void onServiceDisconnected(ProviderConnection connection) {
-
+        // TODO: Release the audio socket, update the playback status if we were playing from
+        // this provider.
     }
 
+    /**
+     * Assigns the provided provider an audio client socket
+     * @param connection The provider
+     */
     private void assignProviderAudioSocket(ProviderConnection connection) {
         // Assign the providers an audio socket
         final String socketName = "org.omnirom.music.AUDIO_SOCKET_" + connection.getProviderName()
@@ -130,6 +168,9 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         Log.i(TAG, "Provider connected and socket set: " + connection.getProviderName());
     }
 
+    /**
+     * Starts playing the current playback queue
+     */
     private void startPlayingQueue() {
         if (mPlaybackQueue.size() > 0) {
             Song first = mPlaybackQueue.get(0);
@@ -144,6 +185,9 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         }
     }
 
+    /**
+     * The binder implementation of the remote methods
+     */
     IPlaybackService.Stub mBinder = new IPlaybackService.Stub() {
         @Override
         public void playPlaylist(Playlist p) throws RemoteException {

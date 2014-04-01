@@ -1,5 +1,8 @@
 package org.omnirom.music.service;
 
+/**
+ * Interface that allows the app to sink the audio data to various destinations
+ */
 public interface AudioSink {
 
     /**

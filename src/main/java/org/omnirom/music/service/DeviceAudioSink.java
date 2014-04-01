@@ -5,6 +5,9 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 
+/**
+ * AudioSink that outputs audio to the device audio chipset (speakers, earbuds, etc)
+ */
 public class DeviceAudioSink implements AudioSink {
 
     private static final String TAG = "DeviceAudioSink";
@@ -55,12 +58,19 @@ public class DeviceAudioSink implements AudioSink {
         }
     };
 
+    /**
+     * Default constructor
+     */
     public DeviceAudioSink() {
         mStop = false;
         mAudioPushThread = new Thread(mAudioPushRunnable);
         mAudioPushThread.start();
     }
 
+    /**
+     * Releases the provided thread
+     * @param t The thread to release
+     */
     private void releaseThread(Thread t) {
         if (t != null) {
             t.interrupt();
@@ -72,6 +82,9 @@ public class DeviceAudioSink implements AudioSink {
         }
     }
 
+    /**
+     * Releases all resources used by this audio sink
+     */
     @Override
     public void release() {
         mStop = true;
@@ -84,6 +97,12 @@ public class DeviceAudioSink implements AudioSink {
         }
     }
 
+    /**
+     * Configures this audio sink with the new settings
+     * @param samplerate The sample rate, in number of samples per second
+     * @param channels The number of channels, generally 1 for mono and 2 for stereo
+     * @return true if the settings are supported, false if an error occured
+     */
     @Override
     public boolean setup(int samplerate, int channels) {
         if (mAudioTrack != null) {
@@ -119,6 +138,12 @@ public class DeviceAudioSink implements AudioSink {
         return true;
     }
 
+    /**
+     * Writes audio data to the sink
+     * @param frames Frames to write
+     * @param numframes Number of frames
+     * @return The number of frames actually written
+     */
     @Override
     public int write(short[] frames, int numframes) {
         int maxReadable;

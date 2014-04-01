@@ -14,6 +14,9 @@ import org.omnirom.music.framework.PluginsLookup;
 
 import java.security.Provider;
 
+/**
+ * Represents a connection to an audio provider service
+ */
 public class ProviderConnection implements ServiceConnection {
     private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final String TAG = "ProviderConnection";
@@ -29,6 +32,14 @@ public class ProviderConnection implements ServiceConnection {
     private ProviderIdentifier mIdentifier;
     private PluginsLookup.ConnectionListener mListener;
 
+    /**
+     * Constructor
+     * @param ctx The context to which this connection should be bound
+     * @param providerName The name of the provider (example: 'Spotify')
+     * @param pkg The package in which the service can be found (example: org.example.music)
+     * @param serviceName The name of the service (example: .MusicService)
+     * @param configActivity The name of the configuration activity in the aforementioned package
+     */
     public ProviderConnection(Context ctx, String providerName, String pkg, String serviceName,
                               String configActivity) {
         mContext = ctx;
@@ -39,41 +50,67 @@ public class ProviderConnection implements ServiceConnection {
 
         mIsBound = false;
 
-        // Retain a generic identity of this providers
+        // Retain a generic identity of this provider
         mIdentifier = new ProviderIdentifier(mPackage, mServiceName, mProviderName);
 
         // Try to bind to the service
         bindService();
     }
 
+    /**
+     * Sets the listener for this provider connection
+     * @param listener The listener
+     */
     public void setListener(PluginsLookup.ConnectionListener listener) {
         mListener = listener;
     }
 
+    /**
+     * @return The provider identifier for this connection
+     */
     public ProviderIdentifier getIdentifier() {
         return mIdentifier;
     }
 
+    /**
+     * @return The remote binder for this connection, or null if the service is not bound
+     */
     public IMusicProvider getBinder() {
         return mBinder;
     }
 
+    /**
+     * @return The name of the package in which this service is
+     */
     public String getPackage() {
         return mPackage;
     }
 
+    /**
+     * @return The name of the actual service running this provider. See {@link #getProviderName()}
+     */
     public String getServiceName() {
         return mServiceName;
     }
 
+    /**
+     * @return The name of this provider
+     */
     public String getProviderName() {
         return mProviderName;
     }
 
+    /**
+     * @return Returns the canonical name of the class handling the configuration activity for this
+     *         provider
+     */
     public String getConfigurationActivity() {
         return mConfigurationActivity;
     }
 
+    /**
+     * Unbinds the service and unregisters the provider from this instance
+     */
     public void unbindService() {
         if (mIsBound) {
             if (DEBUG) Log.d(TAG, "Unbinding service...");
@@ -83,6 +120,10 @@ public class ProviderConnection implements ServiceConnection {
         }
     }
 
+    /**
+     * Binds the service. Only valid if the service isn't already bound. Note that a short delay
+     * might occur between the time of the bind request and the actual Binder being available.
+     */
     public void bindService() {
         if (mIsBound) {
             // Log.w(TAG, "bindService(): Service seems already bound");
@@ -141,6 +182,11 @@ public class ProviderConnection implements ServiceConnection {
         if (DEBUG) Log.d(TAG, "Disconnected from providers " + name);
     }
 
+    /**
+     * Assigns an audio socket to this provider and connects it to the provided name
+     * @param socketName The name of the local socket
+     * @return The AudioSocketHost that has been created
+     */
     public AudioSocketHost createAudioSocket(final String socketName) {
         // Remove the previous socket, if any
         if (mAudioSocket != null) {

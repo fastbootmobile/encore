@@ -20,6 +20,9 @@ public class ProviderCache {
     private Map<String, Album> mAlbums;
     private Map<String, Artist> mArtists;
 
+    /**
+     * Default constructor
+     */
     public ProviderCache() {
         mPlaylists = new HashMap<String, Playlist>();
         mSongs = new HashMap<String, Song>();
@@ -28,9 +31,11 @@ public class ProviderCache {
         mArtists = new HashMap<String, Artist>();
     }
 
+    /**
+     * Purges the songs cache in case the provider may change
+     */
     public void purgeSongCache() {
         mSongs.clear();
-        mRefProvider.clear();
     }
 
     public ProviderIdentifier getRefProvider(final String ref) {
