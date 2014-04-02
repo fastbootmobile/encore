@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -175,16 +176,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mDrawerLayout.getLayoutParams();
         // Calculate ActionBar height
-        int actionBarHeight = 0;
-        TypedValue tv = new TypedValue();
-        if (theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-            actionBarHeight += TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
-        }
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            actionBarHeight += getResources().getDimensionPixelSize(resourceId);
-        }
-        lp.topMargin = actionBarHeight;
+        lp.topMargin = Utils.getActionBarHeight(theme, getResources());
 
 
         // set a custom shadow that overlays the main content when the drawer opens

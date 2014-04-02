@@ -187,21 +187,22 @@ public class AudioSocketHost {
         in.read(mIntBuffer.array(), 0, 4);
         final int numFrames = mIntBuffer.getInt(0);
 
+        final int totalToRead = numFrames * 2; // 1 short = 2 bytes
         int totalRead = 0;
-        int sizeToRead = numFrames;
+        int sizeToRead = totalToRead;
 
-        while (totalRead < numFrames) {
+        while (totalRead < totalToRead) {
             int read = in.read(mSamplesBuffer.array(), totalRead, sizeToRead);
             if (read >= 0) {
                 totalRead += read;
             }
-            sizeToRead = numFrames - totalRead;
+            sizeToRead = totalToRead - totalRead;
         }
 
         mSamplesBuffer.asShortBuffer().get(mSamplesShortBuffer);
         mDSP.inputAudio(mSamplesShortBuffer, numFrames);
 
-        Log.i(TAG, "Read " + numFrames + " frames in " + (SystemClock.currentThreadTimeMillis() - timeMs) + "ms");
+        // Log.i(TAG, "Read " + numFrames + " frames in " + (SystemClock.currentThreadTimeMillis() - timeMs) + "ms");
     }
 
 }

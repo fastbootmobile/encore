@@ -6,7 +6,8 @@
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
 
         <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowBackground">@drawable/ab_background_textured_appnavbar</item>
+        <!-- <item name="android:windowBackground">@drawable/ab_background_textured_appnavbar</item> -->
+        <item name="android:windowActionBarOverlay">true</item>
 
         <item name="android:actionBarItemBackground">@drawable/selectable_background_appnavbar
         </item>
@@ -14,7 +15,7 @@
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Appnavbar</item>
         <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Appnavbar</item>
         <item name="android:actionDropDownStyle">@style/DropDownNav.Appnavbar</item>
-        <item name="android:actionBarStyle">@style/ActionBar.Solid.Appnavbar</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Transparent.Appnavbar</item>
         <item name="android:actionModeBackground">@drawable/cab_background_top_appnavbar</item>
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_appnavbar
         </item>

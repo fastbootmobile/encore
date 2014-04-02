@@ -82,6 +82,15 @@
     <style name="ActionBar.Transparent.Appnavbar" parent="@android:style/Widget.Holo.ActionBar">
         <item name="android:background">@drawable/ab_transparent_appnavbar</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Appnavbar</item>
+        <item name="android:titleTextStyle">@style/ActionBar.Transparent.Appnavbar.Text</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Appnavbar.Text" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:shadowColor">#333333</item>
+        <item name="android:shadowDx">2</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">2</item>
     </style>
 
     <style name="PopupMenu.Appnavbar" parent="@android:style/Widget.Holo.ListPopupWindow">

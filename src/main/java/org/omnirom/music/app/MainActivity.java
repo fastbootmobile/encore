@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
@@ -12,10 +13,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
+import org.omnirom.music.app.ui.KenBurnsView;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
 
@@ -56,6 +59,15 @@ public class MainActivity extends Activity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout), getTheme());
+
+        // Setup action bar animation.
+        KenBurnsView kbView = (KenBurnsView) findViewById(R.id.actionBarBackground);
+        kbView.addBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.test_cover_imagine_dragons)).getBitmap());
+        kbView.addBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.test_cover_rhcp)).getBitmap());
+
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) kbView.getLayoutParams();
+        lp.height = Utils.getActionBarHeight(getTheme(), getResources());
+        kbView.setLayoutParams(lp);
     }
 
     @Override
