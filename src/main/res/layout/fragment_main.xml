@@ -1,4 +1,4 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<org.omnirom.music.app.ui.ObservableScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/default_fragment_background"
     android:layout_width="match_parent"
@@ -10,8 +10,12 @@
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
         tools:context="org.omnirom.music.app.MainActivity$PlaceholderFragment">
+
+        <View style="@style/OmniMusic.SearchBoxPlaceholder"
+              android:layout_alignParentTop="true"
+              android:layout_alignParentStart="true"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"/>
 
         <!-- Large card test -->
         <TextView
@@ -19,10 +23,9 @@
             style="@style/RobotoCondensedItalicLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="false"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
+            android:layout_below="@id/sticky_search_box_placeholder"
             android:layout_marginBottom="8dp"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
             android:text="@string/here_are_suggestions"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/text_detail" />
@@ -286,5 +289,102 @@
 
         </LinearLayout>
 
+        <LinearLayout
+                android:id="@+id/linearLayout40"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/linearLayout4"
+                android:layout_marginTop="8dp"
+                android:baselineAligned="false"
+                android:gravity="top"
+                android:orientation="horizontal">
+
+            <LinearLayout
+                    android:id="@+id/linearLayout30"
+                    style="@style/OmniMusic.Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:layout_marginRight="4dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:measureWithLargestChild="false"
+                    android:orientation="vertical"
+                    android:weightSum="1"
+                    android:paddingBottom="16dp">
+
+                <ImageView
+                        android:id="@+id/imageView40"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/test_cover_within_temptation" />
+
+                <TextView
+                        android:id="@+id/textView120"
+                        style="@style/OmniMusic.MediumCard.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="4dp"
+                        android:text="Let Us Burn"
+                        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                <TextView
+                        android:id="@+id/textView130"
+                        style="@style/OmniMusic.MediumCard.SubTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="8dp"
+                        android:text="Within Temptation"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/linearLayout20"
+                    style="@style/OmniMusic.Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:layout_marginLeft="4dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:measureWithLargestChild="false"
+                    android:orientation="vertical"
+                    android:paddingBottom="16dp">
+
+                <ImageView
+                        android:id="@+id/imageView30"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/test_cover_ptx" />
+
+                <TextView
+                        android:id="@+id/textView110"
+                        style="@style/OmniMusic.MediumCard.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginTop="4dp"
+                        android:text="Daft Punk"
+                        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                <TextView
+                        android:id="@+id/textView100"
+                        style="@style/OmniMusic.MediumCard.SubTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="4dp"
+                        android:text="Pentatonix"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <EditText style="@style/OmniMusic.SearchBox"
+                  android:layout_marginTop="@dimen/activity_vertical_margin" />
+
     </RelativeLayout>
-</ScrollView>
+</org.omnirom.music.app.ui.ObservableScrollView>

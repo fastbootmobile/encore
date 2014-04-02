@@ -2,7 +2,6 @@ package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,7 +29,7 @@ import java.util.List;
  * create an instance of this fragment.
  *
  */
-public class PlaylistFragment extends Fragment implements ILocalCallback {
+public class PlaylistFragment extends AbstractRootFragment implements ILocalCallback {
 
     private PlaylistListAdapter mAdapter;
     private Handler mHandler;
@@ -97,6 +96,9 @@ public class PlaylistFragment extends Fragment implements ILocalCallback {
                 });
             }
         }.start();
+
+        // Setup the search box
+        setupSearchBox(root);
 
         return root;
     }

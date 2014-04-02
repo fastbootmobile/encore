@@ -20,11 +20,19 @@ public class Utils {
         if (theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
             actionBarHeight += TypedValue.complexToDimensionPixelSize(tv.data, res.getDisplayMetrics());
         }
-        int resourceId = res.getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            actionBarHeight += res.getDimensionPixelSize(resourceId);
-        }
+
+        // As we are a "fullscreen" activity, the actionbar is also the statusbar
+        actionBarHeight += getStatusBarHeight(res);
 
         return actionBarHeight;
+    }
+
+    public static int getStatusBarHeight(Resources res) {
+        int resourceId = res.getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return res.getDimensionPixelSize(resourceId);
+        } else {
+            return 0;
+        }
     }
 }

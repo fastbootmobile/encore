@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlend;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.util.AttributeSet;
 import android.view.View;
@@ -72,10 +73,20 @@ public class KenBurnsView extends FrameLayout {
         ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
         script.setInput(input);
 
-        script.setRadius(8);
+        script.setRadius(25);
         script.forEach(output);
 
+        // Dim down images with an "empty" allocation
+        ScriptIntrinsicBlend blend = ScriptIntrinsicBlend.create(rs, Element.U8_4(rs));
+
+        Bitmap tmpBmp = Bitmap.createBitmap(new int[]{0x70400000}, 1, 1, Bitmap.Config.ARGB_8888);
+        tmpBmp = Bitmap.createScaledBitmap(tmpBmp, bmp.getWidth(), bmp.getHeight(), false);
+        input = Allocation.createFromBitmap(rs, tmpBmp);
+
+        blend.forEachSrcOver(input, output);
+
         output.copyTo(bmp);
+
 
         mBitmaps.add(bmp);
         fillImageViews();

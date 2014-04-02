@@ -76,4 +76,24 @@
     <style name="NavDrawerItem.Selected">
         <item name="android:textStyle">bold</item>
     </style>
+
+    <style name="OmniMusic.SearchBox">
+        <item name="android:background">@drawable/omnibox</item>
+        <item name="android:layout_height">@dimen/search_box_height</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:id">@id/sticky_search_box</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:hint">@string/placeholder_search</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:imeOptions">actionSearch</item>
+    </style>
+
+    <style name="OmniMusic.SearchBoxPlaceholder">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/search_box_height</item>
+        <item name="android:id">@id/sticky_search_box_placeholder</item>
+    </style>
 </resources>
