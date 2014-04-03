@@ -8,4 +8,6 @@
     <dimen name="navigation_drawer_width">240dp</dimen>
 
     <dimen name="search_box_height">42dp</dimen>
+
+    <dimen name="playlist_view_item_height">72dp</dimen>
 </resources>

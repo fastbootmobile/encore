@@ -34,6 +34,12 @@
     <style name="RobotoCondensedSmall" parent="@android:style/TextAppearance.Small">
         <item name="android:fontFamily">sans-serif-condensed</item>
     </style>
+    <style name="RobotoCondensedCapsSmall" parent="@style/RobotoCondensedSmall">
+        <item name="android:textAllCaps">true</item>
+    </style>
+    <style name="RobotoCondensedCapsBoldSmall" parent="@style/RobotoCondensedCapsSmall">
+        <item name="android:textStyle">bold</item>
+    </style>
     <style name="RobotoCondensedItalicSmall" parent="@style/RobotoCondensedSmall">
         <item name="android:textStyle">italic</item>
     </style>

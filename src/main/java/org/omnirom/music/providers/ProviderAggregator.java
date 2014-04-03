@@ -51,7 +51,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     // Singleton
     private final static ProviderAggregator INSTANCE = new ProviderAggregator();
-    public final static ProviderAggregator getDefault() {
+    public static ProviderAggregator getDefault() {
         return INSTANCE;
     }
 
@@ -67,7 +67,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     /**
      * Posts the provided runnable to this class' Handler, and make sure
-     * @param r
+     * @param r The runnable
      */
     private void postOnce(Runnable r) {
         mHandler.removeCallbacks(r);
@@ -177,7 +177,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         if (provider.getBinder() != null) {
                             provider.getBinder().unregisterCallback(ProviderAggregator.this);
                         }
-                    } catch (RemoteException e) { }
+                    } catch (RemoteException e) {
+                        // This may perfectly happen if the provider died.
+                    }
                     provider.unbindService();
                 }
             }
@@ -203,8 +205,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     public List<Playlist> getAllPlaylists() {
         mUpdatePlaylistsRunnable.run();
-        List<Playlist> playlists = mCache.getAllPlaylists();
-        return playlists;
+        return mCache.getAllPlaylists();
     }
 
     /**
@@ -277,7 +278,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onSongUpdate(ProviderIdentifier provider, Song s) throws RemoteException {
         if (s.isLoaded()) {
-            Log.i(TAG, "Song update: Title: " + s.getTitle());
+            // Log.i(TAG, "Song update: Title: " + s.getTitle());
             mCache.putSong(provider, s);
         } else {
             Log.i(TAG, "Song update: Not loaded");
@@ -297,7 +298,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     @Override
     public void onArtistUpdate(ProviderIdentifier provider, Artist a) throws RemoteException {
-
+        mCache.putArtist(provider, a);
     }
 
     @Override

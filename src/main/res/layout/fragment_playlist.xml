@@ -3,7 +3,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        tools:context="org.omnirom.music.app.fragments.PlaylistFragment">
+        tools:context="org.omnirom.music.app.fragments.PlaylistListFragment">
 
     <FrameLayout
             android:layout_width="match_parent"

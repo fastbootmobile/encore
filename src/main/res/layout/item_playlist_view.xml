@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="@dimen/playlist_view_item_height"
+    android:minHeight="@dimen/playlist_view_item_height"
+    android:clickable="false"
+    android:weightSum="2">
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/tvTitle"
+        style="@style/OmniMusic.ShadowedText"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="0.85"
+        android:maxLines="2"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="8dp" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1.15"
+        android:layout_marginRight="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/tvArtist"
+            android:layout_gravity="center_vertical"
+            style="@style/OmniMusic.ShadowedText.CondensedBoldCaps"
+            android:singleLine="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="04:00"
+            android:id="@+id/tvDuration"
+            style="@style/OmniMusic.ShadowedText"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
+
+</LinearLayout>

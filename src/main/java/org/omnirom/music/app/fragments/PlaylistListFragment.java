@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
@@ -25,11 +26,11 @@ import java.util.List;
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass.
- * Use the {@link PlaylistFragment#newInstance} factory method to
+ * Use the {@link PlaylistListFragment#newInstance} factory method to
  * create an instance of this fragment.
  *
  */
-public class PlaylistFragment extends AbstractRootFragment implements ILocalCallback {
+public class PlaylistListFragment extends AbstractRootFragment implements ILocalCallback {
 
     private PlaylistListAdapter mAdapter;
     private Handler mHandler;
@@ -56,13 +57,13 @@ public class PlaylistFragment extends AbstractRootFragment implements ILocalCall
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment PlaylistFragment.
+     * @return A new instance of fragment PlaylistListFragment.
      */
-    public static PlaylistFragment newInstance() {
-        PlaylistFragment fragment = new PlaylistFragment();
+    public static PlaylistListFragment newInstance() {
+        PlaylistListFragment fragment = new PlaylistListFragment();
         return fragment;
     }
-    public PlaylistFragment() {
+    public PlaylistListFragment() {
         mAdapter = new PlaylistListAdapter();
         mHandler = new Handler();
 
@@ -99,6 +100,15 @@ public class PlaylistFragment extends AbstractRootFragment implements ILocalCall
 
         // Setup the search box
         setupSearchBox(root);
+
+        // Setup the click listener
+        playlistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MainActivity act = (MainActivity) getActivity();
+                act.showFragment(PlaylistViewFragment.newInstance(mAdapter.getItem(position)), false);
+            }
+        });
 
         return root;
     }

@@ -17,7 +17,7 @@ import android.widget.FrameLayout;
 
 import org.omnirom.music.app.fragments.AbstractRootFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
-import org.omnirom.music.app.fragments.PlaylistFragment;
+import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.app.ui.KenBurnsView;
 import org.omnirom.music.framework.PluginsLookup;
@@ -97,7 +97,7 @@ public class MainActivity extends Activity
             Fragment newFrag;
             switch (position+1) {
                 case SECTION_PLAYLISTS:
-                    newFrag = PlaylistFragment.newInstance();
+                    newFrag = PlaylistListFragment.newInstance();
                     break;
 
                 default:
@@ -117,7 +117,7 @@ public class MainActivity extends Activity
         mTitle = getString(R.string.action_settings);
     }
 
-    private void showFragment(Fragment f, boolean addToStack) {
+    public void showFragment(Fragment f, boolean addToStack) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();

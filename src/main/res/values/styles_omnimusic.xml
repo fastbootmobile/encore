@@ -96,4 +96,18 @@
         <item name="android:layout_height">@dimen/search_box_height</item>
         <item name="android:id">@id/sticky_search_box_placeholder</item>
     </style>
+
+    <style name="OmniMusic.ShadowedText">
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">2</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">2</item>
+    </style>
+
+    <style name="OmniMusic.ShadowedText.CondensedBoldCaps">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
 </resources>

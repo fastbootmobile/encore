@@ -14,9 +14,10 @@
     <string name="search">Search</string>
     <string name="here_are_suggestions">Here are some suggestions for you</string>
     <string name="play_now">Play now</string>
-    <string name="recently_listened_to">You recently listened to...</string>
+    <string name="recently_listened_to">You recently listened to…</string>
     <string name="settings">Settings</string>
     <string name="cast">Cast</string>
-    <string name="placeholder_search">Search your music...</string>
+    <string name="placeholder_search">Search your music…</string>
+    <string name="nb_tracks">%d tracks</string>
 
 </resources>

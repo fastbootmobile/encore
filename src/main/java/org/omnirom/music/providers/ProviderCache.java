@@ -1,5 +1,7 @@
 package org.omnirom.music.providers;
 
+import android.graphics.Bitmap;
+
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -19,6 +21,7 @@ public class ProviderCache {
     private Map<String, ProviderIdentifier> mRefProvider;
     private Map<String, Album> mAlbums;
     private Map<String, Artist> mArtists;
+    private Map<Song, String> mSongArtKeys;
 
     /**
      * Default constructor
@@ -29,6 +32,7 @@ public class ProviderCache {
         mRefProvider = new HashMap<String, ProviderIdentifier>();
         mAlbums = new HashMap<String, Album>();
         mArtists = new HashMap<String, Artist>();
+        mSongArtKeys = new HashMap<Song, String>();
     }
 
     /**
@@ -80,5 +84,13 @@ public class ProviderCache {
 
     public Artist getArtist(final String ref) {
         return mArtists.get(ref);
+    }
+
+    public void putSongArtKey(final Song song, final String key) {
+        mSongArtKeys.put(song, key);
+    }
+
+    public String getSongArtKey(final Song song) {
+        return mSongArtKeys.get(song);
     }
 }

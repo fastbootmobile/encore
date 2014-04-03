@@ -1,0 +1,75 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:context="org.omnirom.music.app.fragments.PlaylistViewFragment">
+
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="76dp"
+        android:id="@+id/frameLayout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/tvNumTracks"
+                style="@style/RobotoCondensedCapsSmall"
+                android:layout_gravity="left|bottom"
+                android:textColor="@color/text_detail"
+                android:text="123456"
+                android:layout_below="@+id/tvPlaylistName"
+                android:layout_alignStart="@+id/tvPlaylistName" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/tvPlaylistName"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                style="@style/RobotoLightLarge"
+                android:layout_gravity="left|top"
+                android:text="123456"
+                android:layout_toLeftOf="@+id/frameLayout2"
+                android:singleLine="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:longClickable="false"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:enabled="true" />
+
+        <FrameLayout
+            android:layout_width="64dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:paddingRight="16dp"
+            android:background="@drawable/card_background_action"
+            android:clickable="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
+            android:id="@+id/frameLayout2">
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:id="@+id/btnPlay"
+                android:src="@drawable/ic_action_play"
+                android:adjustViewBounds="true"
+                android:layout_gravity="right|center_vertical"
+                android:clickable="false"
+                android:contentDescription="@string/play_now" />
+        </FrameLayout>
+    </RelativeLayout>
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/lvPlaylistContents"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/frameLayout" />
+</RelativeLayout>

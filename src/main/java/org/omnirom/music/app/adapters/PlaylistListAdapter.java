@@ -129,7 +129,7 @@ public class PlaylistListAdapter extends BaseAdapter {
             tag.tvTitle.setText("Loading");
             tag.tvSubTitle.setText("Loading");
         }
-
+/*
           //////////
          // TEST //
         //////////
@@ -150,7 +150,7 @@ public class PlaylistListAdapter extends BaseAdapter {
                 }
             }
         });
-
+*/
 
         return root;
     }
