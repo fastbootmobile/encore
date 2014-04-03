@@ -43,6 +43,12 @@ public class KenBurnsView extends FrameLayout {
     private float maxScaleFactor = 1.5F;
     private float minScaleFactor = 1.2F;
 
+    private final RenderScript mRS;
+    private final Bitmap mTintBitmap = Bitmap.createBitmap(new int[]{0x70400000},
+            1, 1, Bitmap.Config.ARGB_8888);
+    private final ScriptIntrinsicBlur mBlur;
+    private final ScriptIntrinsicBlend mBlend;
+
     private Runnable mSwapImageRunnable = new Runnable() {
         @Override
         public void run() {
@@ -63,37 +69,44 @@ public class KenBurnsView extends FrameLayout {
         super(context, attrs, defStyle);
         mHandler = new Handler();
         mBitmaps = new ArrayList<Bitmap>();
+        mRS = RenderScript.create(getContext());
+        mBlur = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
+        mBlend = ScriptIntrinsicBlend.create(mRS, Element.U8_4(mRS));
     }
 
-    public void addBitmap(Bitmap bmp) {
-        RenderScript rs = RenderScript.create(getContext());
-        Allocation input = Allocation.createFromBitmap(rs, bmp, Allocation.MipmapControl.MIPMAP_FULL, Allocation.USAGE_SCRIPT);
-        Allocation output = Allocation.createTyped(rs, input.getType());
+    public void addBitmap(final Bitmap bmp) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Allocation input = Allocation.createFromBitmap(mRS, bmp, Allocation.MipmapControl.MIPMAP_FULL, Allocation.USAGE_SCRIPT);
+                Allocation output = Allocation.createTyped(mRS, input.getType());
 
-        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-        script.setInput(input);
+                // Blur the image
+                mBlur.setInput(input);
 
-        script.setRadius(25);
-        script.forEach(output);
+                mBlur.setRadius(25);
+                mBlur.forEach(output);
 
-        // Dim down images with an "empty" allocation
-        ScriptIntrinsicBlend blend = ScriptIntrinsicBlend.create(rs, Element.U8_4(rs));
+                // Dim down images with a tint color
+                input = Allocation.createFromBitmap(mRS,
+                        Bitmap.createScaledBitmap(mTintBitmap,
+                        bmp.getWidth(),
+                        bmp.getHeight(), false));
 
-        Bitmap tmpBmp = Bitmap.createBitmap(new int[]{0x70400000}, 1, 1, Bitmap.Config.ARGB_8888);
-        tmpBmp = Bitmap.createScaledBitmap(tmpBmp, bmp.getWidth(), bmp.getHeight(), false);
-        input = Allocation.createFromBitmap(rs, tmpBmp);
+                mBlend.forEachSrcOver(input, output);
 
-        blend.forEachSrcOver(input, output);
+                // We're done processing
+                output.copyTo(bmp);
 
-        output.copyTo(bmp);
+                mBitmaps.add(bmp);
+                fillImageViews();
 
+                if (mBitmaps.size() == 1) {
+                    swapImage();
+                }
+            }
+        });
 
-        mBitmaps.add(bmp);
-        fillImageViews();
-
-        if (mBitmaps.size() == 1) {
-            swapImage();
-        }
     }
 
     private void swapImage() {

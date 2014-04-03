@@ -6,7 +6,7 @@
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
 
         <item name="android:windowTranslucentStatus">true</item>
-        <!-- <item name="android:windowBackground">@drawable/ab_background_textured_appnavbar</item> -->
+        <item name="android:windowBackground">@color/default_fragment_background</item>
         <item name="android:windowActionBarOverlay">true</item>
 
         <item name="android:actionBarItemBackground">@drawable/selectable_background_appnavbar

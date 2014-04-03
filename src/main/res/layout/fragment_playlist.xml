@@ -1,7 +1,6 @@
 <org.omnirom.music.app.ui.ObservableScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:background="@color/default_fragment_background"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         tools:context="org.omnirom.music.app.fragments.PlaylistFragment">
