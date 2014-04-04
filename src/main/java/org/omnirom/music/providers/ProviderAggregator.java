@@ -40,7 +40,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         List<Playlist> playlist = conn.getBinder().getPlaylists();
                         ensurePlaylistsSongsCached(conn, playlist);
                     } else {
-                        Log.i(TAG, "Skipping a providers because it is not setup or authenticated");
+                        Log.i(TAG, "Skipping a providers because it is not setup or authenticated" +
+                                " ==> binder=" + conn.getBinder() + " ; isSetup=" +
+                                conn.getBinder().isSetup() + " ; isAuthenticated=" +
+                                conn.getBinder().isAuthenticated());
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to get playlists from a providers", e);

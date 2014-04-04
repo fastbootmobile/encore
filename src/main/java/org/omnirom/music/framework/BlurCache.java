@@ -1,6 +1,7 @@
 package org.omnirom.music.framework;
 
 import android.graphics.Bitmap;
+import android.util.LruCache;
 
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
@@ -13,10 +14,16 @@ public class BlurCache {
 
     private static BlurCache INSTANCE = new BlurCache();
 
-    private Map<String, SoftReference<Bitmap>> mCache;
+    private LruCache<String, Bitmap> mCache;
 
     private BlurCache() {
-        mCache = new HashMap<String, SoftReference<Bitmap>>();
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        mCache = new LruCache<String, Bitmap>(maxMemory / 8) {
+            @Override
+            protected int sizeOf(String key, Bitmap value) {
+                return value.getByteCount() / 1024;
+            }
+        };
     }
 
     public static BlurCache getDefault() {
@@ -24,15 +31,10 @@ public class BlurCache {
     }
 
     public void put(String key, Bitmap bmp) {
-        mCache.put(key, new SoftReference<Bitmap>(bmp));
+        mCache.put(key, bmp);
     }
 
     public Bitmap get(String key) {
-        SoftReference<Bitmap> entry = mCache.get(key);
-        if (entry != null) {
-            return entry.get();
-        } else {
-            return null;
-        }
+        return mCache.get(key);
     }
 }

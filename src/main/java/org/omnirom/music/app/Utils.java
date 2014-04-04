@@ -46,6 +46,10 @@ public class Utils {
     }
 
     public static Bitmap blurAndDim(Context context, Bitmap inBmp, float radius) {
+        if (inBmp == null) {
+            throw new IllegalArgumentException("blurAndDim: The input bitmap is null!");
+        }
+
         RenderScript renderScript = RenderScript.create(context);
         ScriptIntrinsicBlur intrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
 

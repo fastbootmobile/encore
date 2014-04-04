@@ -93,7 +93,6 @@ public class SettingsFragment extends PreferenceFragment {
                 int providerNum = Integer.parseInt((String) newValue);
                 mProviderInConfig = mProviders.get(providerNum);
 
-
                 Intent i = new Intent();
                 i.setClassName(mProviderInConfig.getPackage(),
                         mProviderInConfig.getConfigurationActivity());

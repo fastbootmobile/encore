@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
+import android.util.LruCache;
 
 import java.io.File;
 import java.io.FileNotFoundException;

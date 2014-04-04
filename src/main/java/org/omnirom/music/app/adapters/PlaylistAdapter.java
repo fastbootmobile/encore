@@ -51,7 +51,6 @@ public class PlaylistAdapter extends BaseAdapter {
     private Handler mHandler;
     private int mItemWidth;
     private int mItemHeight;
-    private Map<Song, BackgroundAsyncTask> mRunningTasks;
 
     // Using an AsyncTask to load the slow images in a background thread
     private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, Bitmap> {
@@ -71,7 +70,6 @@ public class PlaylistAdapter extends BaseAdapter {
         protected Bitmap doInBackground(ViewHolder... params) {
             v = params[0];
             mSong = v.song;
-            mRunningTasks.put(mSong, this);
 
             if (v.position != this.mPosition) {
                 // Cancel, we moved
@@ -93,35 +91,28 @@ public class PlaylistAdapter extends BaseAdapter {
 
             // Download the art image
             String artKey = cache.getSongArtKey(mSong);
+            String artUrl = null;
 
             if (artKey == null) {
                 Artist artist = cache.getArtist(mSong.getArtist());
                 if (artist != null) {
                     AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), mSong.getTitle());
                     if (albumInfo != null) {
-                        String artUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
-                        Log.e(TAG, "Album art url: " + artUrl);
+                        artUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
 
                         if (artUrl != null) {
                             artKey = artUrl.replaceAll("\\W+", "");
                             cache.putSongArtKey(mSong, artKey);
                         } else {
-                            Log.e(TAG, "No art key found for album id " + albumInfo.id);
                             cache.putSongArtKey(mSong, DEFAULT_ART);
                             artKey = DEFAULT_ART;
                         }
                     } else {
                         // No album found on musicbrainz
-                        Log.e(TAG, "No album found for " + mSong);
                         cache.putSongArtKey(mSong, DEFAULT_ART);
                         artKey = DEFAULT_ART;
                     }
                 }
-            }
-
-            if (v.position != this.mPosition) {
-                // Cancel, we moved
-                return null;
             }
 
             if (artKey != null && !artKey.equals(DEFAULT_ART)) {
@@ -130,13 +121,22 @@ public class PlaylistAdapter extends BaseAdapter {
 
                 try {
                     if (bmp == null) {
-                        byte[] imageData = HttpGet.getBytes(artKey, "", true);
-                        bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-                        ImageCache.getDefault().put(artKey, bmp);
+                        if (artUrl != null) {
+                            byte[] imageData = HttpGet.getBytes(artUrl, "", true);
+                            bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+                            ImageCache.getDefault().put(artKey, bmp);
+                        } else {
+                            bmp = drawable.getBitmap();
+                        }
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "Unable to get album art", e);
                 }
+            }
+
+            if (v.position != this.mPosition) {
+                // Cancel, we moved
+                return null;
             }
 
             // We blurAndDim our bitmap, if another executor didn't do it already
@@ -153,7 +153,6 @@ public class PlaylistAdapter extends BaseAdapter {
         @Override
         protected void onPostExecute(Bitmap result) {
             super.onPostExecute(result);
-            mRunningTasks.remove(v.song);
 
             if (v.position == mPosition && v.song == mSong && result != null) {
                 // If this item hasn't been recycled already, set and show the image
@@ -180,7 +179,6 @@ public class PlaylistAdapter extends BaseAdapter {
     public PlaylistAdapter(Context ctx) {
         mSongs = new ArrayList<Song>();
         mHandler = new Handler();
-        mRunningTasks = new HashMap<Song, BackgroundAsyncTask>();
 
         final Resources res = ctx.getResources();
         assert res != null;
@@ -277,26 +275,16 @@ public class PlaylistAdapter extends BaseAdapter {
             Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
 
             if (cachedBlur != null) {
-                Log.e(TAG, "Got cached blur for " + song + "; " + artKey);
                 root.setBackground(new BitmapDrawable(root.getResources(), cachedBlur));
             } else {
-                Log.e(TAG, "NOT HAVE cached blur for " + song + "; " + artKey);
                 root.setBackground(root.getResources().getDrawable(R.drawable.ab_background_textured_appnavbar));
-                //if (!mRunningTasks.containsKey(song)) {
-                    BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-                //} else {
-                //    mRunningTasks.get(song).setPosition(position);
-                //}
+                BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+                task.execute(tag);
             }
         } else {
             root.setBackground(root.getResources().getDrawable(R.drawable.ab_background_textured_appnavbar));
-            //if (!mRunningTasks.containsKey(song)) {
-                BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-            //} else {
-            //    mRunningTasks.get(song).setPosition(position);
-            //}
+            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+            task.execute(tag);
         }
 
 /*
@@ -322,7 +310,7 @@ public class PlaylistAdapter extends BaseAdapter {
         });
 */
 
-            return root;
-        }
-
+        return root;
     }
+
+}
