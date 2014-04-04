@@ -19,7 +19,7 @@ public class JsonGet {
      *              will be encoded properly.
      * @return A json object
      */
-    public static JSONObject getObject(String url, String query) throws IOException, JSONException {
-        return new JSONObject(HttpGet.get(url, query));
+    public static JSONObject getObject(String url, String query, boolean cached) throws IOException, JSONException {
+        return new JSONObject(HttpGet.get(url, query, cached));
     }
 }

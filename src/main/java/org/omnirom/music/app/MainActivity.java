@@ -6,8 +6,10 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,12 +22,18 @@ import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.app.ui.KenBurnsView;
+import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
+
+import java.io.File;
+import java.io.IOException;
 
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+
+    private static final String TAG = "MainActivity";
 
     public static final int SECTION_LISTEN_NOW = 1;
     public static final int SECTION_MY_SONGS   = 2;
@@ -51,7 +59,6 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -69,6 +76,18 @@ public class MainActivity extends Activity
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) kbView.getLayoutParams();
         lp.height = Utils.getActionBarHeight(getTheme(), getResources());
         kbView.setLayoutParams(lp);
+
+        // Setup network cache
+        try {
+            File httpCacheDir = new File(getCacheDir(), "http");
+            long httpCacheSize = 100 * 1024 * 1024; // 100 MiB
+            HttpResponseCache.install(httpCacheDir, httpCacheSize);
+        } catch (IOException e) {
+            Log.w(TAG, "HTTP response cache installation failed", e);
+        }
+
+         // Setup image cache
+        ImageCache.getDefault().initialize(getApplicationContext());
     }
 
     @Override
@@ -87,6 +106,15 @@ public class MainActivity extends Activity
         ProviderAggregator.getDefault().getCache().purgeSongCache();
 
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        HttpResponseCache cache = HttpResponseCache.getInstalled();
+        if (cache != null) {
+            cache.flush();
+        }
+        super.onStop();
     }
 
     @Override

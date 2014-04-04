@@ -44,7 +44,7 @@ public class MusicBrainzClient {
             if (!album.isEmpty()) {
                 query += URLEncoder.encode(" AND release:\"" + album + "\"", "UTF-8");
             }
-            JSONObject object = JsonGet.getObject(MAIN_EP + "/release/", "fmt=json&query=" + query);
+            JSONObject object = JsonGet.getObject(MAIN_EP + "/release/", "fmt=json&query=" + query, true);
 
             if (object.has("releases")) {
                 JSONArray releases = object.getJSONArray("releases");
@@ -91,7 +91,7 @@ public class MusicBrainzClient {
         }
 
         try {
-            JSONObject object = JsonGet.getObject(COVER_EP + albumId, "");
+            JSONObject object = JsonGet.getObject(COVER_EP + albumId, "", true);
 
             // We take the very first art here, no matter if it's front or back. Eventually some
             // day, we might filter only front art.

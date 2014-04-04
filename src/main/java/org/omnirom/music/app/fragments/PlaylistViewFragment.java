@@ -93,6 +93,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
             mAdapter.addItem(song);
         }
+        mAdapter.notifyDataSetChanged();
 
         // Fill the playlist information
         TextView tvPlaylistName = (TextView) root.findViewById(R.id.tvPlaylistName);

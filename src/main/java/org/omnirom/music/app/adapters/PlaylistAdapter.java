@@ -25,7 +25,8 @@ import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
-import org.omnirom.music.app.ui.BlurCache;
+import org.omnirom.music.framework.BlurCache;
+import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
@@ -34,7 +35,9 @@ import org.omnirom.music.providers.ProviderCache;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -42,32 +45,41 @@ import java.util.List;
 public class PlaylistAdapter extends BaseAdapter {
 
     private static final String TAG = "PlaylistAdapter";
+    private static final String DEFAULT_ART = "__DEFAULT_ALBUM_ART__";
 
     private List<Song> mSongs;
     private Handler mHandler;
     private int mItemWidth;
     private int mItemHeight;
+    private Map<Song, BackgroundAsyncTask> mRunningTasks;
 
     // Using an AsyncTask to load the slow images in a background thread
     private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, Bitmap> {
         private ViewHolder v;
-        private int position;
+        private int mPosition;
+        private Song mSong;
 
         public BackgroundAsyncTask(int position) {
-            this.position = position;
+            mPosition = position;
+        }
+
+        public void setPosition(int pos) {
+            mPosition = pos;
         }
 
         @Override
         protected Bitmap doInBackground(ViewHolder... params) {
             v = params[0];
+            mSong = v.song;
+            mRunningTasks.put(mSong, this);
 
-            if (v.position != this.position) {
+            if (v.position != this.mPosition) {
                 // Cancel, we moved
                 Log.e(TAG, "doInBackground cancelled, we moved");
                 return null;
             }
 
-            Log.e(TAG, "LOOKING FOR " + position);
+            Log.e(TAG, "LOOKING FOR " + mPosition);
 
             final Resources res = v.vRoot.getResources();
             final Context ctx = v.vRoot.getContext().getApplicationContext();
@@ -79,39 +91,52 @@ public class PlaylistAdapter extends BaseAdapter {
             BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.test_cover_imagine_dragons);
             Bitmap bmp = drawable.getBitmap();
 
-            Log.e(TAG, "Got default bitmap");
-
             // Download the art image
-            String artKey = cache.getSongArtKey(v.song);
+            String artKey = cache.getSongArtKey(mSong);
 
             if (artKey == null) {
-                Artist artist = cache.getArtist(v.song.getArtist());
+                Artist artist = cache.getArtist(mSong.getArtist());
                 if (artist != null) {
-                    Log.e(TAG, "Got artist, querying MusicBrainz");
-                    AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), v.song.getTitle());
+                    AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), mSong.getTitle());
                     if (albumInfo != null) {
-                        try {
-                            artKey = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
+                        String artUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
+                        Log.e(TAG, "Album art url: " + artUrl);
 
-                            if (artKey != null) {
-                                byte[] imageData = HttpGet.getBytes(artKey, v.song.getTitle());
-                                bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-
-                                cache.putSongArtKey(v.song, artKey);
-                            } else {
-                                Log.e(TAG, "No art key found for album id " + albumInfo.id);
-                            }
-                        } catch (IOException e) {
-                            Log.e(TAG, "Unable to get album art", e);
+                        if (artUrl != null) {
+                            artKey = artUrl.replaceAll("\\W+", "");
+                            cache.putSongArtKey(mSong, artKey);
+                        } else {
+                            Log.e(TAG, "No art key found for album id " + albumInfo.id);
+                            cache.putSongArtKey(mSong, DEFAULT_ART);
+                            artKey = DEFAULT_ART;
                         }
+                    } else {
+                        // No album found on musicbrainz
+                        Log.e(TAG, "No album found for " + mSong);
+                        cache.putSongArtKey(mSong, DEFAULT_ART);
+                        artKey = DEFAULT_ART;
                     }
                 }
             }
 
-            if (v.position != this.position) {
+            if (v.position != this.mPosition) {
                 // Cancel, we moved
-                Log.e(TAG, "doInBackground blurAndDim cancelled, we moved");
                 return null;
+            }
+
+            if (artKey != null && !artKey.equals(DEFAULT_ART)) {
+                // Check if we have it in our albumart local cache
+                bmp = ImageCache.getDefault().get(artKey);
+
+                try {
+                    if (bmp == null) {
+                        byte[] imageData = HttpGet.getBytes(artKey, "", true);
+                        bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+                        ImageCache.getDefault().put(artKey, bmp);
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Unable to get album art", e);
+                }
             }
 
             // We blurAndDim our bitmap, if another executor didn't do it already
@@ -123,13 +148,14 @@ public class PlaylistAdapter extends BaseAdapter {
             }
 
             return blur;
-
         }
 
         @Override
         protected void onPostExecute(Bitmap result) {
             super.onPostExecute(result);
-            if (v.position == position && result != null) {
+            mRunningTasks.remove(v.song);
+
+            if (v.position == mPosition && v.song == mSong && result != null) {
                 // If this item hasn't been recycled already, set and show the image
                 // We do a smooth transition from a white/transparent background to our blurred one
                 TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
@@ -154,6 +180,7 @@ public class PlaylistAdapter extends BaseAdapter {
     public PlaylistAdapter(Context ctx) {
         mSongs = new ArrayList<Song>();
         mHandler = new Handler();
+        mRunningTasks = new HashMap<Song, BackgroundAsyncTask>();
 
         final Resources res = ctx.getResources();
         assert res != null;
@@ -173,7 +200,6 @@ public class PlaylistAdapter extends BaseAdapter {
 
     public void addItem(Song p) {
         mSongs.add(p);
-        notifyDataSetChanged();
     }
 
     public boolean contains(Playlist p) {
@@ -245,18 +271,32 @@ public class PlaylistAdapter extends BaseAdapter {
         // Fetch background art
         final String artKey = ProviderAggregator.getDefault().getCache().getSongArtKey(song);
 
+        Log.e(TAG, "Art Key for " + song + "; " + artKey);
         if (artKey != null) {
+            // We already know the album art for this song (keyed in artKey)
             Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
 
             if (cachedBlur != null) {
+                Log.e(TAG, "Got cached blur for " + song + "; " + artKey);
                 root.setBackground(new BitmapDrawable(root.getResources(), cachedBlur));
             } else {
+                Log.e(TAG, "NOT HAVE cached blur for " + song + "; " + artKey);
                 root.setBackground(root.getResources().getDrawable(R.drawable.ab_background_textured_appnavbar));
-                new BackgroundAsyncTask(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+                //if (!mRunningTasks.containsKey(song)) {
+                    BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+                //} else {
+                //    mRunningTasks.get(song).setPosition(position);
+                //}
             }
         } else {
             root.setBackground(root.getResources().getDrawable(R.drawable.ab_background_textured_appnavbar));
-            new BackgroundAsyncTask(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+            //if (!mRunningTasks.containsKey(song)) {
+                BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+            //} else {
+            //    mRunningTasks.get(song).setPosition(position);
+            //}
         }
 
 /*

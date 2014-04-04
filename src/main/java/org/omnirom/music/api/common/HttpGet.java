@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -30,46 +31,55 @@ public class HttpGet {
 
     /**
      * Downloads the data from the provided URL.
-     * @param url The URL to get from
+     * @param inUrl The URL to get from
      * @param query The query field. '?' + query will be appended automatically, and the query data
      *              MUST be encoded properly.
      * @return A string with the data grabbed from the URL
      */
-    public static String get(String url, String query) throws IOException, JSONException {
-        final String formattedUrl = url + "?" + query;
-
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        org.apache.http.client.methods.HttpGet httpGet = new org.apache.http.client.methods.HttpGet(formattedUrl);
-
-        HttpResponse httpResponse = httpClient.execute(httpGet);
-        HttpEntity httpEntity = httpResponse.getEntity();
-
-        return EntityUtils.toString(httpEntity);
+    public static String get(String inUrl, String query, boolean cached) throws IOException, JSONException {
+        return new String(getBytes(inUrl, query, cached));
     }
 
     /**
      * Downloads the data from the provided URL.
-     * @param url The URL to get from
+     * @param inUrl The URL to get from
      * @param query The query field. '?' + query will be appended automatically, and the query data
-     *              will be encoded properly.
+     *              MUST be encoded properly.
      * @return A byte array of the data
      */
-    public static byte[] getBytes(String url, String query) throws IOException {
-        final String formattedUrl = url + "?" + URLEncoder.encode(query, "UTF-8");
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        org.apache.http.client.methods.HttpGet httpGet = new org.apache.http.client.methods.HttpGet(formattedUrl);
+    public static byte[] getBytes(String inUrl, String query, boolean cached) throws IOException {
+        final String formattedUrl = inUrl + (query.isEmpty() ? "" : ("?" + query));
 
-        HttpResponse httpResponse = httpClient.execute(httpGet);
-        HttpEntity httpEntity = httpResponse.getEntity();
+        URL url = new URL(formattedUrl);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setUseCaches(cached);
+        int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
+        urlConnection.addRequestProperty("Cache-Control", "max-stale=" + maxStale);
+        try {
+            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                int contentLength = urlConnection.getContentLength();
+                if (contentLength <= 0) {
+                    // No length? Let's allocate 100KB.
+                    contentLength = 100 * 1024;
+                }
+                ByteArrayBuffer bab = new ByteArrayBuffer(contentLength);
+                BufferedInputStream bis = new BufferedInputStream(in);
+                int character;
 
-        ByteArrayBuffer bab = new ByteArrayBuffer((int) httpEntity.getContentLength());
-        BufferedInputStream bis = new BufferedInputStream(httpEntity.getContent());
-        int character;
-
-        while ((character = bis.read()) != -1) {
-            bab.append(character);
+                while ((character = bis.read()) != -1) {
+                    bab.append(character);
+                }
+                return bab.toByteArray();
+            } else if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                // 404
+                return new byte[]{};
+            } else {
+                Log.e(TAG, "URL ERROR: " + formattedUrl);
+                return new byte[]{};
+            }
+        } finally {
+            urlConnection.disconnect();
         }
-
-        return bab.toByteArray();
     }
 }

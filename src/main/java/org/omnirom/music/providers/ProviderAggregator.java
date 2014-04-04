@@ -35,7 +35,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             // Then we query the providers
             for (ProviderConnection conn : providers) {
                 try {
-                    if (conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
+                    if (conn.getBinder() != null &&
+                            conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
                         List<Playlist> playlist = conn.getBinder().getPlaylists();
                         ensurePlaylistsSongsCached(conn, playlist);
                     } else {
