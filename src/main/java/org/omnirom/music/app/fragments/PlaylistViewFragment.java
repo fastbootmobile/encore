@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,6 +19,8 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
 import org.omnirom.music.app.ui.ExpandableHeightGridView;
+import org.omnirom.music.framework.PlaybackState;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -35,14 +40,15 @@ import java.util.List;
  * create an instance of this fragment.
  *
  */
-public class PlaylistViewFragment extends Fragment implements ILocalCallback {
+public class PlaylistViewFragment extends Fragment
+        implements ILocalCallback, PlaybackState.Listener {
 
     private static final String KEY_PLAYLIST = "playlist";
 
     private PlaylistAdapter mAdapter;
     private Handler mHandler;
     private Playlist mPlaylist;
-
+    private PlaybackState mPlaybackState;
 
     /**
      * Use this factory method to create a new instance of
@@ -57,10 +63,11 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         fragment.setArguments(bundle);
         return fragment;
     }
+
     public PlaylistViewFragment() {
         mHandler = new Handler();
 
-        ProviderAggregator.getDefault().addUpdateCallback(this);
+
     }
 
     @Override
@@ -95,6 +102,21 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         }
         mAdapter.notifyDataSetChanged();
 
+        // Set the list listener
+        lvPlaylistContents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                // Play the song
+                Song song = mAdapter.getItem(i);
+
+                try {
+                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
+                } catch (RemoteException e) {
+                    Log.e("TEST", "Unable to play song", e);
+                }
+            }
+        });
+
         // Fill the playlist information
         TextView tvPlaylistName = (TextView) root.findViewById(R.id.tvPlaylistName);
         TextView tvNumTracks = (TextView) root.findViewById(R.id.tvNumTracks);
@@ -108,7 +130,19 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ((MainActivity) activity).onSectionAttached(MainActivity.SECTION_PLAYLISTS);
+        MainActivity main = (MainActivity) activity;
+        main.onSectionAttached(MainActivity.SECTION_PLAYLISTS);
+        mPlaybackState = main.getPlaybackState();
+        mPlaybackState.addListener(this);
+
+        ProviderAggregator.getDefault().addUpdateCallback(this);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
+        mPlaybackState.removeListener(this);
     }
 
     @Override
@@ -133,6 +167,22 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
+
+    }
+
+    @Override
+    public void onCurrentSongChanged(PlaybackState state, Song song) {
+        mAdapter.setCurrentSong(song);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onPlaybackPositionChanged(PlaybackState state, int posMs) {
+
+    }
+
+    @Override
+    public void onPlaybackStateChanged(PlaybackState state, int newState) {
 
     }
 }

@@ -1,6 +1,9 @@
 package org.omnirom.music.service;
 
+import android.os.SystemClock;
 import android.util.Log;
+
+import org.omnirom.music.app.Utils;
 
 /**
  * Class responsible for grabbing the audio from a provider, pushing it through the DSP chain,
@@ -12,10 +15,16 @@ public class DSPProcessor {
 
     private static final int DEFAULT_SAMPLE_RATE = 44100;
     private static final int DEFAULT_CHANNELS = 2;
+    private static final int RMS_SAMPLING = 735 * 2; // 44100/60 2 channels
 
     private AudioSink mSink;
     private int mSampleRate = DEFAULT_SAMPLE_RATE;
     private int mChannels = DEFAULT_CHANNELS;
+    private short[] mRmsFrames = new short[128000];
+    private short[] mRmsFramesExtract = new short[128000];
+    private long mLastRmsPoll = 0;
+    private int mLastRms = 0;
+    private int mRmsOffset = 0;
 
     /**
      * Default constructor
@@ -72,7 +81,43 @@ public class DSPProcessor {
     public void inputAudio(short[] frames, int numframes) {
         // TODO: Write this to the DSP chain, then the DSP output to the sink
         if (mSink != null) {
+            int numRmsFrames = Math.min(numframes, mRmsFrames.length - mRmsOffset);
+            if (numRmsFrames > 0) {
+                try {
+                    System.arraycopy(frames, 0, mRmsFrames, mRmsOffset, numRmsFrames);
+                    mRmsOffset += numRmsFrames;
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    Log.e(TAG, "Error while writing RMS data", e);
+                }
+            }
+
             mSink.write(frames, numframes);
         }
+    }
+
+    /**
+     * Returns the current RMS level of the last 1/60 * sampleRate frames
+     * @return The RMS level
+     */
+    public int getRms() {
+        long currTime = SystemClock.currentThreadTimeMillis();
+        if (currTime - mLastRmsPoll >= 1000/60 && mRmsOffset >= RMS_SAMPLING) {
+            // We read the exact number of frames since the last call to be in sync with the
+            // playback.
+            int framesToRead = (int) ((currTime - mLastRmsPoll) * (mSampleRate / 50));
+            framesToRead = Math.min(mRmsOffset, framesToRead);
+
+            mLastRms = Utils.calculateRMSLevel(mRmsFrames, framesToRead /* Math.min(RMS_SAMPLING, framesToRead) */);
+            mRmsOffset -= framesToRead;
+            if (mRmsOffset > 0) {
+                System.arraycopy(mRmsFrames, framesToRead, mRmsFrames, 0, mRmsOffset);
+            } else {
+                mRmsOffset = 0;
+            }
+
+            mLastRmsPoll = currTime;
+        }
+
+        return mLastRms;
     }
 }

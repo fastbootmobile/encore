@@ -7,6 +7,11 @@
     android:clickable="false"
     android:weightSum="2">
 
+    <org.omnirom.music.app.ui.VuMeterView
+        android:layout_width="8dp"
+        android:layout_height="match_parent"
+        android:id="@+id/vuMeter" />
+
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -15,6 +20,7 @@
         style="@style/OmniMusic.ShadowedText"
         android:layout_gravity="center_vertical"
         android:layout_weight="0.85"
+        android:textColor="@drawable/playlist_item_text"
         android:maxLines="2"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="8dp" />
@@ -34,16 +40,18 @@
             android:id="@+id/tvArtist"
             android:layout_gravity="center_vertical"
             style="@style/OmniMusic.ShadowedText.CondensedBoldCaps"
+            android:textColor="@drawable/playlist_item_text"
             android:singleLine="true" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="04:00"
+            android:textColor="@drawable/playlist_item_text"
             android:id="@+id/tvDuration"
             style="@style/OmniMusic.ShadowedText"
             android:layout_gravity="center_vertical" />
+
     </LinearLayout>
 
 </LinearLayout>

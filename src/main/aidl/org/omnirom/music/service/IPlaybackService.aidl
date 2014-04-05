@@ -4,9 +4,12 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Artist;
-import org.omnirom.music.providers.IMusicProvider;
+
+import org.omnirom.music.service.IPlaybackCallback;
 
 interface IPlaybackService {
+
+    void setCallback(in IPlaybackCallback cb);
 
     /**
      * Plays the provided playlist fully, overwriting the existing listening queue
@@ -49,5 +52,10 @@ interface IPlaybackService {
      * Returns whether or not a song is currently playing
      */
     boolean isPlaying();
+
+    /**
+     * Returns the current RMS level of the currently playing output
+     */
+    int getCurrentRms();
 
 }

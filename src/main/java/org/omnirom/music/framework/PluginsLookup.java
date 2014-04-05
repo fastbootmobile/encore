@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
@@ -41,11 +42,19 @@ public class PluginsLookup {
     private List<ProviderConnection> mConnections;
     private List<ConnectionListener> mConnectionListeners;
     private IPlaybackService mPlaybackService;
+    private PlaybackCallbackImpl mPlaybackCallback;
+
     private ServiceConnection mPlaybackConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mPlaybackService = (IPlaybackService) iBinder;
             Log.i(TAG, "Connected to Playback Service");
+
+            try {
+                mPlaybackService.setCallback(mPlaybackCallback);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
@@ -94,10 +103,12 @@ public class PluginsLookup {
         mConnectionListeners.remove(listener);
     }
 
-    public void connectPlayback() {
+    public void connectPlayback(PlaybackCallbackImpl callback) {
         Intent i = new Intent(mContext, PlaybackService.class);
         mContext.startService(i);
-        mContext.bindService(i, mPlaybackConnection, 0);
+        mContext.bindService(i, mPlaybackConnection, Context.BIND_AUTO_CREATE);
+
+        mPlaybackCallback = callback;
     }
 
     public void updatePlugins() {
@@ -106,6 +117,7 @@ public class PluginsLookup {
     }
 
     public void tearDown() {
+        Log.i(TAG, "tearDown()");
         if (mPlaybackService != null) {
             mContext.unbindService(mPlaybackConnection);
         }
@@ -120,7 +132,6 @@ public class PluginsLookup {
 
     public ProviderConnection getProvider(ProviderIdentifier id) {
         for (ProviderConnection connection : mConnections) {
-            Log.e(TAG, "Connection " + connection.getIdentifier() + " equals " + id);
             if (connection.getIdentifier().equals(id)) {
                 return connection;
             }

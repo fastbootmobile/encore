@@ -51,6 +51,7 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
     private int mNumberBound = 0;
     private DSPProcessor mDSPProcessor;
     private PlaybackQueue mPlaybackQueue;
+    private IPlaybackCallback mCallback;
 
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
@@ -182,6 +183,14 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to play song", e);
             }
+
+            // TODO: Do on provider's songStarted callback
+            try {
+                mCallback.onSongStarted(first);
+                mCallback.onPlaybackResume();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -189,6 +198,11 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
      * The binder implementation of the remote methods
      */
     IPlaybackService.Stub mBinder = new IPlaybackService.Stub() {
+        @Override
+        public void setCallback(IPlaybackCallback cb) throws RemoteException {
+            mCallback = cb;
+        }
+
         @Override
         public void playPlaylist(Playlist p) throws RemoteException {
 
@@ -224,6 +238,11 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         @Override
         public boolean isPlaying() throws RemoteException {
             return false;
+        }
+
+        @Override
+        public int getCurrentRms() throws RemoteException {
+            return mDSPProcessor.getRms();
         }
     };
 

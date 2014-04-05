@@ -19,8 +19,9 @@ public class Utils {
 
     /**
      * Calculates and return the action bar height based on the current theme
+     *
      * @param theme The active theme
-     * @param res The resources context
+     * @param res   The resources context
      * @return The height of the action bar, in pixels
      */
     public static int getActionBarHeight(Resources.Theme theme, Resources res) {
@@ -66,7 +67,9 @@ public class Utils {
                 Bitmap.createScaledBitmap(Bitmap.createBitmap(new int[]{0x70000000},
                                 1, 1, Bitmap.Config.ARGB_8888),
                         inBmp.getWidth(),
-                        inBmp.getHeight(), false));
+                        inBmp.getHeight(), false
+                )
+        );
 
         ScriptIntrinsicBlend intrinsicBlend = ScriptIntrinsicBlend.create(renderScript,
                 Element.U8_4(renderScript));
@@ -94,5 +97,35 @@ public class Utils {
         } else {
             return "N/A";
         }
+    }
+
+    /**
+     * Calculates the RMS audio level from the provided short sample extract
+     *
+     * @param audioData The audio samples
+     * @return The RMS level
+     */
+    public static int calculateRMSLevel(short[] audioData, int numframes) {
+        long lSum = 0;
+        int numread = 0;
+        for (short s : audioData) {
+            lSum = lSum + s;
+            numread++;
+            if (numread == numframes) break;
+        }
+
+        double dAvg = lSum / numframes;
+        double sumMeanSquare = 0d;
+
+        numread = 0;
+        for (short anAudioData : audioData) {
+            sumMeanSquare = sumMeanSquare + Math.pow(anAudioData - dAvg, 2d);
+            numread++;
+            if (numread == numframes) break;
+        }
+
+        double averageMeanSquare = sumMeanSquare / numframes;
+
+        return (int) (Math.pow(averageMeanSquare, 0.5d) + 0.5);
     }
 }

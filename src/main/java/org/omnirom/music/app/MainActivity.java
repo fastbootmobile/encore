@@ -23,6 +23,8 @@ import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.app.ui.KenBurnsView;
 import org.omnirom.music.framework.ImageCache;
+import org.omnirom.music.framework.PlaybackCallbackImpl;
+import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
 
@@ -50,8 +52,10 @@ public class MainActivity extends Activity
      */
     private CharSequence mTitle;
 
-    public MainActivity() {
+    private PlaybackState mPlaybackState;
 
+    public MainActivity() {
+        mPlaybackState = new PlaybackState();
     }
 
     @Override
@@ -94,17 +98,13 @@ public class MainActivity extends Activity
     protected void onResume() {
         // Setup the plugins system
         PluginsLookup.getDefault().initialize(getApplicationContext());
-        PluginsLookup.getDefault().connectPlayback();
+        PluginsLookup.getDefault().connectPlayback(new PlaybackCallbackImpl(mPlaybackState));
 
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        // Release services connections
-        PluginsLookup.getDefault().tearDown();
-        ProviderAggregator.getDefault().getCache().purgeSongCache();
-
         super.onPause();
     }
 
@@ -114,6 +114,11 @@ public class MainActivity extends Activity
         if (cache != null) {
             cache.flush();
         }
+
+        // Release services connections
+        PluginsLookup.getDefault().tearDown();
+        ProviderAggregator.getDefault().getCache().purgeSongCache();
+
         super.onStop();
     }
 
@@ -198,6 +203,10 @@ public class MainActivity extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
+    }
+
+    public PlaybackState getPlaybackState() {
+        return mPlaybackState;
     }
 
     /**

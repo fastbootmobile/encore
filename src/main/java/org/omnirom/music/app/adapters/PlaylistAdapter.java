@@ -11,6 +11,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -25,19 +26,20 @@ import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
+import org.omnirom.music.app.ui.VuMeterView;
 import org.omnirom.music.framework.BlurCache;
 import org.omnirom.music.framework.ImageCache;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -51,6 +53,25 @@ public class PlaylistAdapter extends BaseAdapter {
     private Handler mHandler;
     private int mItemWidth;
     private int mItemHeight;
+    private Song mCurrentSong;
+    private VuMeterView mActiveVuMeter;
+    private Runnable mUpdateRMS = new Runnable() {
+        @Override
+        public void run() {
+            IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+            if (pbService != null) {
+                try {
+                    float rms = pbService.getCurrentRms() / 32768.0f;
+                    rms = -(1.0f-rms) * 48.0f;
+                    // Log.i(TAG, "RMS volume: " + rms);
+                    mActiveVuMeter.setAmplitude(rms);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+            mHandler.postDelayed(mUpdateRMS, 16);
+        }
+    };
 
     // Using an AsyncTask to load the slow images in a background thread
     private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, Bitmap> {
@@ -196,6 +217,10 @@ public class PlaylistAdapter extends BaseAdapter {
         mItemHeight = res.getDimensionPixelSize(R.dimen.playlist_view_item_height);
     }
 
+    public void setCurrentSong(Song p) {
+        mCurrentSong = p;
+    }
+
     public void addItem(Song p) {
         mSongs.add(p);
     }
@@ -269,7 +294,6 @@ public class PlaylistAdapter extends BaseAdapter {
         // Fetch background art
         final String artKey = ProviderAggregator.getDefault().getCache().getSongArtKey(song);
 
-        Log.e(TAG, "Art Key for " + song + "; " + artKey);
         if (artKey != null) {
             // We already know the album art for this song (keyed in artKey)
             Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
@@ -285,6 +309,16 @@ public class PlaylistAdapter extends BaseAdapter {
             root.setBackground(root.getResources().getDrawable(R.drawable.ab_background_textured_appnavbar));
             BackgroundAsyncTask task = new BackgroundAsyncTask(position);
             task.execute(tag);
+        }
+
+        final VuMeterView vuMeter = (VuMeterView) root.findViewById(R.id.vuMeter);
+        if (mCurrentSong != null && mCurrentSong.equals(song)) {
+            mActiveVuMeter = vuMeter;
+            mHandler.removeCallbacks(mUpdateRMS);
+            mHandler.post(mUpdateRMS);
+            vuMeter.setVisibility(View.VISIBLE);
+        } else {
+            vuMeter.setVisibility(View.GONE);
         }
 
 /*

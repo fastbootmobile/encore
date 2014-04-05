@@ -8,10 +8,4 @@
         android:title="@string/cast"
         android:icon="@drawable/ic_media_route_off_holo_dark" />
 
-    <item
-        android:id="@+id/action_search"
-        android:showAsAction="always"
-        android:title="@string/search"
-        android:icon="@drawable/ic_action_search" />
-
 </menu>

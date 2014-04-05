@@ -322,9 +322,6 @@ public class NavigationDrawerFragment extends Fragment {
         if (item.getItemId() == R.id.action_cast) {
             Toast.makeText(getActivity(), "Cast action.", Toast.LENGTH_SHORT).show();
             return true;
-        } else if (item.getItemId() == R.id.action_search) {
-            Toast.makeText(getActivity(), "Search action.", Toast.LENGTH_SHORT).show();
-            return true;
         }
 
         return super.onOptionsItemSelected(item);
