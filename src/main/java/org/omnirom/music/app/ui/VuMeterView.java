@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 /**
@@ -15,7 +14,8 @@ public class VuMeterView extends View {
 
     private Paint mGreenPaint;
     private Paint mRedPaint;
-    private float mAmplitude = -4.0f;
+    private float mTargetAmplitude = -72.0f;
+    private float mCurrentAmplitude = -72.0f;
     private RectF mBounds;
 
 
@@ -53,14 +53,14 @@ public class VuMeterView extends View {
      * @param amplitude The amplitude, in dB
      */
     public void setAmplitude(float amplitude) {
-        mAmplitude = amplitude;
+        mTargetAmplitude = amplitude;
         invalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mAmplitude < -48) return;
+        if (mTargetAmplitude < -48) return;
 
         final float percentageRed = 3.0f/48.0f;
         final float percentageGreen = 1.0f - percentageRed;
@@ -68,22 +68,30 @@ public class VuMeterView extends View {
         final float maxGreenHeight = mBounds.height() * percentageGreen;
         final float maxRedHeight = mBounds.height() * percentageRed;
 
+        float deltaAmplitude = mTargetAmplitude - mCurrentAmplitude;
+        mCurrentAmplitude += deltaAmplitude / 4.0f;
+
         /**
          * From -48 to -3 ==> green
          * 3 ==> -45 to 0
          */
-        if (mAmplitude >= -3.0f) {
+        if (mTargetAmplitude >= -3.0f) {
             // left, top, right, bottom, paint
             // at 0 ==> maxRedHeight - 0
             // at -3 ==> maxRedHeight - maxRedHeight
-            canvas.drawRect(mBounds.left, mBounds.top + maxRedHeight * -(mAmplitude / 3.0f),
+            canvas.drawRect(mBounds.left, mBounds.top + maxRedHeight * -(mCurrentAmplitude / 3.0f),
                     mBounds.right, mBounds.bottom, mRedPaint);
             canvas.drawRect(mBounds.left, mBounds.top + maxRedHeight,
                     mBounds.right, mBounds.bottom, mGreenPaint);
 
         } else {
-            canvas.drawRect(mBounds.left, mBounds.top + maxRedHeight + maxGreenHeight * -((mAmplitude + 3.0f) / 45.0f),
+            canvas.drawRect(mBounds.left, mBounds.top + maxRedHeight + maxGreenHeight * -((mCurrentAmplitude + 3.0f) / 45.0f),
                     mBounds.right, mBounds.bottom, mGreenPaint);
+        }
+
+        if (Math.abs(mTargetAmplitude - mCurrentAmplitude) > 0.01f) {
+            // Redraw again for a smooth bar
+            invalidate();
         }
     }
 }

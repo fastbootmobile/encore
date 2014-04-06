@@ -103,16 +103,6 @@ public class AudioSocketHost {
     public void startListening() {
         mStop = false;
 
-        // Release the previous listener, if any. As the thread might be waiting in accept(),
-        // we must first close the socket.
-        try {
-            mSocket.close();
-        } catch (IOException e) {
-            // Voluntarily left blank
-        }
-        releaseThread(mListenThread);
-
-        // We then restart the socket
         try {
             mSocket = new LocalServerSocket(mSocketName);
         } catch (IOException e) {

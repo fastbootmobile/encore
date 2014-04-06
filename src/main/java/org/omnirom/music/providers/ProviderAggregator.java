@@ -208,7 +208,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @return A list of playlists
      */
     public List<Playlist> getAllPlaylists() {
-        mUpdatePlaylistsRunnable.run();
+        new Thread(mUpdatePlaylistsRunnable).start();
         return mCache.getAllPlaylists();
     }
 

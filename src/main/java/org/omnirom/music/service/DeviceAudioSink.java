@@ -16,6 +16,8 @@ public class DeviceAudioSink implements AudioSink {
     private short[] mAudioBuffer = new short[262144];
     private int mAudioBufferOffset = 0;
     private Thread mAudioPushThread;
+    private int mWrittenSamples;
+    private final short[] mRmsSamples = new short[8192];
 
     private boolean mStop;
 
@@ -34,20 +36,31 @@ public class DeviceAudioSink implements AudioSink {
                         break;
                     }
 
+                    final int SIZE = 8192;
                     // Playback audio, if any
-                    if (mAudioBufferOffset > 0) {
-                        int ret = mAudioTrack.write(mAudioBuffer, 0, mAudioBufferOffset);
+                    while (mAudioBufferOffset > 0) {
+                        final int amountToWrite = Math.min(mAudioBufferOffset, SIZE);
+                        int ret = mAudioTrack.write(mAudioBuffer, 0, amountToWrite);
 
                         if (ret == AudioTrack.ERROR_INVALID_OPERATION) {
                             Log.e(TAG, "INVALID OPERATION while writing to AudioTrack");
                         } else if (ret == AudioTrack.ERROR_BAD_VALUE) {
                             Log.e(TAG, "BAD VALUE while writing to AudioTrack");
                         } else {
+                            mWrittenSamples += ret;
+
+                            // Copy the last written samples to the RMS buffer
+                            synchronized (mRmsSamples) {
+                                final int offset = Math.max(amountToWrite - mRmsSamples.length, 0);
+                                final int length = Math.min(mRmsSamples.length, amountToWrite);
+                                System.arraycopy(mAudioBuffer, offset, mRmsSamples, 0, length);
+                            }
+
                             if (ret < mAudioBufferOffset) {
-                                Log.w(TAG, "AudioTrack didn't write everything from the buffer!");
+                                //Log.w(TAG, "AudioTrack didn't write everything from the buffer!");
                                 final int remaining = mAudioBufferOffset - ret;
                                 System.arraycopy(mAudioBuffer, ret, mAudioBuffer, 0, remaining);
-                                mAudioBufferOffset = remaining + 1;
+                                mAudioBufferOffset = remaining;
                             } else {
                                 mAudioBufferOffset = 0;
                             }
@@ -123,7 +136,7 @@ public class DeviceAudioSink implements AudioSink {
                 mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, samplerate,
                         channels == 2 ? AudioFormat.CHANNEL_OUT_STEREO : AudioFormat.CHANNEL_OUT_MONO,
                         AudioFormat.ENCODING_PCM_16BIT,
-                        AudioTrack.getMinBufferSize(samplerate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT) * 8,
+                        AudioTrack.getMinBufferSize(samplerate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT),
                         AudioTrack.MODE_STREAM);
 
                 mAudioTrack.play();
@@ -158,5 +171,28 @@ public class DeviceAudioSink implements AudioSink {
         }
 
         return maxReadable;
+    }
+
+    @Override
+    public int getWrittenSamples() {
+        synchronized (mAudioPushRunnable) {
+            return mWrittenSamples;
+        }
+    }
+
+    @Override
+    public void flushSamples() {
+        synchronized (mAudioPushRunnable) {
+            mAudioBufferOffset = 0;
+            mAudioTrack.flush();
+        }
+        mWrittenSamples = 0;
+    }
+
+    @Override
+    public short[] getRmsSamples() {
+        synchronized (mRmsSamples) {
+            return mRmsSamples;
+        }
     }
 }

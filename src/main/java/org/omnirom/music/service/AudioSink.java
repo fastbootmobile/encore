@@ -26,4 +26,23 @@ public interface AudioSink {
      * @return The number of bytes actually written
      */
     public int write(short[] frames, int numframes);
+
+    /**
+     * Returns the number of samples written since the last call to flushSamples() has been made
+     * (or since the first written sample).
+     * @return A number of short samples written
+     */
+    public int getWrittenSamples();
+
+    /**
+     * Clears the pending audio data and reset the written samples counter
+     */
+    public void flushSamples();
+
+    /**
+     * Returns a buffer of samples containing the most recent data that has been written to (output
+     * by) the sink to calculate the current RMS audio level.
+     * @return A short array of samples
+     */
+    public short[] getRmsSamples();
 }

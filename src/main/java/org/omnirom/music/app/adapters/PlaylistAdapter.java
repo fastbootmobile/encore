@@ -55,21 +55,39 @@ public class PlaylistAdapter extends BaseAdapter {
     private int mItemHeight;
     private Song mCurrentSong;
     private VuMeterView mActiveVuMeter;
+    private float mCurrentRms;
     private Runnable mUpdateRMS = new Runnable() {
         @Override
         public void run() {
-            IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-            if (pbService != null) {
+            if (mActiveVuMeter != null) {
+                mActiveVuMeter.setAmplitude(mCurrentRms);
+            }
+        }
+    };
+    private final Thread mUpdateRMSThread = new Thread() {
+        public void run() {
+            while (!isInterrupted()) {
+                IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                if (pbService != null) {
+                    try {
+                        float rms = pbService.getCurrentRms() / 16384.0f;
+                        rms = -(1.0f - rms) * 48.0f;
+
+                        if (mCurrentRms != rms) {
+                            mCurrentRms = rms;
+                            mHandler.removeCallbacks(mUpdateRMS);
+                            mHandler.postAtFrontOfQueue(mUpdateRMS);
+                        }
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
                 try {
-                    float rms = pbService.getCurrentRms() / 32768.0f;
-                    rms = -(1.0f-rms) * 48.0f;
-                    // Log.i(TAG, "RMS volume: " + rms);
-                    mActiveVuMeter.setAmplitude(rms);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+                    Thread.sleep(16);
+                } catch (InterruptedException e) {
+                    break;
                 }
             }
-            mHandler.postDelayed(mUpdateRMS, 16);
         }
     };
 
@@ -114,7 +132,7 @@ public class PlaylistAdapter extends BaseAdapter {
             String artKey = cache.getSongArtKey(mSong);
             String artUrl = null;
 
-            if (artKey == null) {
+            if (artKey == null && mSong != null) {
                 Artist artist = cache.getArtist(mSong.getArtist());
                 if (artist != null) {
                     AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), mSong.getTitle());
@@ -314,8 +332,9 @@ public class PlaylistAdapter extends BaseAdapter {
         final VuMeterView vuMeter = (VuMeterView) root.findViewById(R.id.vuMeter);
         if (mCurrentSong != null && mCurrentSong.equals(song)) {
             mActiveVuMeter = vuMeter;
-            mHandler.removeCallbacks(mUpdateRMS);
-            mHandler.post(mUpdateRMS);
+            if (!mUpdateRMSThread.isAlive()) {
+                mUpdateRMSThread.start();
+            }
             vuMeter.setVisibility(View.VISIBLE);
         } else {
             vuMeter.setVisibility(View.GONE);
