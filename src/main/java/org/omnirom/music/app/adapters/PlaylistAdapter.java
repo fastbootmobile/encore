@@ -22,11 +22,13 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import org.omnirom.music.api.common.HttpGet;
+import org.omnirom.music.api.common.RateLimitException;
 import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.VuMeterView;
+import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.BlurCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
@@ -135,21 +137,34 @@ public class PlaylistAdapter extends BaseAdapter {
             if (artKey == null && mSong != null) {
                 Artist artist = cache.getArtist(mSong.getArtist());
                 if (artist != null) {
-                    AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), mSong.getTitle());
-                    if (albumInfo != null) {
-                        artUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
+                    // Check if we have it in cache
+                    artUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), mSong.getTitle());
+                    if (artUrl == null) {
+                        try {
+                            AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), mSong.getTitle());
+                            if (albumInfo != null) {
+                                artUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
 
-                        if (artUrl != null) {
-                            artKey = artUrl.replaceAll("\\W+", "");
-                            cache.putSongArtKey(mSong, artKey);
-                        } else {
-                            cache.putSongArtKey(mSong, DEFAULT_ART);
+                                if (artUrl != null) {
+                                    AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), mSong.getTitle(), artUrl);
+                                    artKey = artUrl.replaceAll("\\W+", "");
+                                    cache.putSongArtKey(mSong, artKey);
+                                } else {
+                                    cache.putSongArtKey(mSong, DEFAULT_ART);
+                                    artKey = DEFAULT_ART;
+                                }
+                            } else {
+                                // No album found on musicbrainz
+                                cache.putSongArtKey(mSong, DEFAULT_ART);
+                                artKey = DEFAULT_ART;
+                            }
+                        } catch (RateLimitException e) {
+                            // Retry later, rate limited
                             artKey = DEFAULT_ART;
                         }
                     } else {
-                        // No album found on musicbrainz
-                        cache.putSongArtKey(mSong, DEFAULT_ART);
-                        artKey = DEFAULT_ART;
+                        artKey = artUrl.replaceAll("\\W+", "");
+                        cache.putSongArtKey(mSong, artKey);
                     }
                 }
             }
@@ -161,9 +176,14 @@ public class PlaylistAdapter extends BaseAdapter {
                 try {
                     if (bmp == null) {
                         if (artUrl != null) {
-                            byte[] imageData = HttpGet.getBytes(artUrl, "", true);
-                            bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-                            ImageCache.getDefault().put(artKey, bmp);
+                            try {
+                                byte[] imageData = HttpGet.getBytes(artUrl, "", true);
+                                bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+                                ImageCache.getDefault().put(artKey, bmp);
+                            } catch (RateLimitException e) {
+                                Log.w(TAG, "Cannot get album art image data (rate limit)");
+                                bmp = drawable.getBitmap();
+                            }
                         } else {
                             bmp = drawable.getBitmap();
                         }
@@ -179,6 +199,10 @@ public class PlaylistAdapter extends BaseAdapter {
             }
 
             // We blurAndDim our bitmap, if another executor didn't do it already
+            if (artKey == null) {
+                artKey = DEFAULT_ART;
+            }
+
             Bitmap blur = BlurCache.getDefault().get(artKey);
             if (blur == null) {
                 Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
@@ -259,7 +283,7 @@ public class PlaylistAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return mSongs.get(position).getRef().hashCode();
+        return position;
     }
 
     @Override
@@ -321,12 +345,12 @@ public class PlaylistAdapter extends BaseAdapter {
             } else {
                 root.setBackground(root.getResources().getDrawable(R.drawable.ab_background_textured_appnavbar));
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-                task.execute(tag);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
             }
         } else {
             root.setBackground(root.getResources().getDrawable(R.drawable.ab_background_textured_appnavbar));
             BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-            task.execute(tag);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
         }
 
         final VuMeterView vuMeter = (VuMeterView) root.findViewById(R.id.vuMeter);

@@ -43,6 +43,7 @@ import java.util.List;
 public class PlaylistViewFragment extends Fragment
         implements ILocalCallback, PlaybackState.Listener {
 
+    private static final String TAG = "PlaylistViewFragment";
     private static final String KEY_PLAYLIST = "playlist";
 
     private PlaylistAdapter mAdapter;
@@ -109,10 +110,14 @@ public class PlaylistViewFragment extends Fragment
                 // Play the song
                 Song song = mAdapter.getItem(i);
 
-                try {
-                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
-                } catch (RemoteException e) {
-                    Log.e("TEST", "Unable to play song", e);
+                if (song != null) {
+                    try {
+                        PluginsLookup.getDefault().getPlaybackService().playSong(song);
+                    } catch (RemoteException e) {
+                        Log.e("TEST", "Unable to play song", e);
+                    }
+                } else {
+                    Log.e(TAG, "Trying to play null song!");
                 }
             }
         });
@@ -147,7 +152,7 @@ public class PlaylistViewFragment extends Fragment
 
     @Override
     public void onSongUpdate(Song s) {
-
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -157,7 +162,9 @@ public class PlaylistViewFragment extends Fragment
 
     @Override
     public void onPlaylistUpdate(final Playlist p) {
-
+        if (p.equals(mPlaylist)) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

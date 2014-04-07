@@ -31,7 +31,7 @@ public class KenBurnsView extends FrameLayout {
     private static final String TAG = "KenBurnsView";
 
     private final Handler mHandler;
-    private List<Bitmap> mBitmaps;
+    private final List<Bitmap> mBitmaps;
     private ImageView[] mImageViews;
     private int mActiveImageIndex = -1;
 
@@ -57,6 +57,51 @@ public class KenBurnsView extends FrameLayout {
         }
     };
 
+    private class AddBitmapRunnable implements Runnable {
+
+        private Bitmap mBitmap;
+
+        public AddBitmapRunnable(final Bitmap bmp) {
+            mBitmap = bmp;
+        }
+
+        @Override
+        public void run() {
+            Allocation input = Allocation.createFromBitmap(mRS, mBitmap,
+                    Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+            Allocation output = Allocation.createTyped(mRS, input.getType());
+
+            // Blur the image
+            mBlur.setInput(input);
+
+            mBlur.setRadius(25);
+            mBlur.forEach(output);
+
+            // Dim down images with a tint color
+            input = Allocation.createFromBitmap(mRS,
+                    Bitmap.createScaledBitmap(mTintBitmap,
+                            mBitmap.getWidth(),
+                            mBitmap.getHeight(), false));
+
+            mBlend.forEachSrcOver(input, output);
+
+            // We're done processing
+            output.copyTo(mBitmap);
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mBitmaps.add(mBitmap);
+                    fillImageViews();
+
+                    if (mBitmaps.size() == 1) {
+                        swapImage();
+                    }
+                }
+            });
+        }
+    }
+
     public KenBurnsView(Context context) {
         this(context, null);
     }
@@ -75,38 +120,7 @@ public class KenBurnsView extends FrameLayout {
     }
 
     public void addBitmap(final Bitmap bmp) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Allocation input = Allocation.createFromBitmap(mRS, bmp, Allocation.MipmapControl.MIPMAP_FULL, Allocation.USAGE_SCRIPT);
-                Allocation output = Allocation.createTyped(mRS, input.getType());
-
-                // Blur the image
-                mBlur.setInput(input);
-
-                mBlur.setRadius(25);
-                mBlur.forEach(output);
-
-                // Dim down images with a tint color
-                input = Allocation.createFromBitmap(mRS,
-                        Bitmap.createScaledBitmap(mTintBitmap,
-                        bmp.getWidth(),
-                        bmp.getHeight(), false));
-
-                mBlend.forEachSrcOver(input, output);
-
-                // We're done processing
-                output.copyTo(bmp);
-
-                mBitmaps.add(bmp);
-                fillImageViews();
-
-                if (mBitmaps.size() == 1) {
-                    swapImage();
-                }
-            }
-        });
-
+        new Thread(new AddBitmapRunnable(bmp)).start();
     }
 
     private void swapImage() {

@@ -92,7 +92,11 @@ public class PluginsLookup {
 
     public void initialize(Context context) {
         mContext = context;
-        updatePlugins();
+        new Thread() {
+            public void run() {
+                updatePlugins();
+            }
+        }.start();
     }
 
     public void registerProviderListener(ConnectionListener listener) {

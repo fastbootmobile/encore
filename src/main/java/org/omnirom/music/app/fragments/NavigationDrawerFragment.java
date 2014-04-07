@@ -98,7 +98,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         // Select either the default item (0) or the last selected item.
-        selectItem(mCurrentSelectedPosition);
+        selectItem(mCurrentSelectedPosition, savedInstanceState == null);
     }
 
     @Override
@@ -244,32 +244,38 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     private void selectItem(final int position) {
+        selectItem(position, true);
+    }
+
+    private void selectItem(final int position, boolean switchToFragment) {
         mCurrentSelectedPosition = position;
-        if (mDrawerListView != null) {
-            mDrawerListView.setItemChecked(position, true);
+        if (switchToFragment) {
+            if (mDrawerListView != null) {
+                mDrawerListView.setItemChecked(position, true);
 
-            if (mPreviousItem != null) {
-                mPreviousItem.setTypeface(mUnselectedTypeface);
-            }
-
-            View view = mDrawerListView.getChildAt(mCurrentSelectedPosition);
-            if (view != null) {
-                TextView tv = (TextView) view;
-                tv.setTypeface(mSelectedTypeface);
-                mPreviousItem = tv;
-            }
-        }
-        if (mDrawerLayout != null) {
-            mDrawerLayout.closeDrawer(mFragmentContainerView);
-        }
-        if (mCallbacks != null) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mCallbacks.onNavigationDrawerItemSelected(position);
+                if (mPreviousItem != null) {
+                    mPreviousItem.setTypeface(mUnselectedTypeface);
                 }
-            }, 0);
 
+                View view = mDrawerListView.getChildAt(mCurrentSelectedPosition);
+                if (view != null) {
+                    TextView tv = (TextView) view;
+                    tv.setTypeface(mSelectedTypeface);
+                    mPreviousItem = tv;
+                }
+            }
+            if (mDrawerLayout != null) {
+                mDrawerLayout.closeDrawer(mFragmentContainerView);
+            }
+            if (mCallbacks != null) {
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCallbacks.onNavigationDrawerItemSelected(position);
+                    }
+                }, 0);
+
+            }
         }
     }
 

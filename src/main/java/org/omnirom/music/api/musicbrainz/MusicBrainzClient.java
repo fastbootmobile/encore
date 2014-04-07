@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.omnirom.music.api.common.JsonGet;
+import org.omnirom.music.api.common.RateLimitException;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -34,7 +35,7 @@ public class MusicBrainzClient {
      * @return An {@link org.omnirom.music.api.musicbrainz.AlbumInfo} filled with the information
      * from musicbrainz, or null in case of error
      */
-    public static AlbumInfo getAlbum(String artist, String album) {
+    public static AlbumInfo getAlbum(String artist, String album) throws RateLimitException {
         if (mAlbumInfoCache.containsKey(Pair.create(artist, album))) {
             return mAlbumInfoCache.get(Pair.create(artist, album));
         }
@@ -59,6 +60,9 @@ public class MusicBrainzClient {
                     mAlbumInfoCache.put(Pair.create(artist, album), info);
                     return info;
                 }
+            } else if (object.has("error")) {
+                Log.w(TAG, "Rate limited by the API, will retry later");
+                throw new RateLimitException();
             }
 
             // We retry with just the artist instead, too bad for the album (if we didn't
@@ -71,7 +75,7 @@ public class MusicBrainzClient {
                 return null;
             }
         } catch (IOException e) {
-            Log.e(TAG, "Unable to get album info", e);
+            Log.e(TAG, "Unable to get album info (rate limit?)", e);
             return null;
         } catch (JSONException e) {
             Log.e(TAG, "JSON error while parsing album info", e);
@@ -85,7 +89,7 @@ public class MusicBrainzClient {
      * @param albumId The album ID
      * @return An album art URL, or null if none found
      */
-    public static String getAlbumArtUrl(String albumId) {
+    public static String getAlbumArtUrl(String albumId) throws RateLimitException {
         if (mAlbumArtCache.containsKey(albumId)) {
             return mAlbumArtCache.get(albumId);
         }

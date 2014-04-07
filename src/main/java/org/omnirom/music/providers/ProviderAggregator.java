@@ -13,6 +13,8 @@ import org.omnirom.music.model.Song;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class ProviderAggregator extends IProviderCallback.Stub {
 
@@ -22,6 +24,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     final private List<ProviderConnection> mProviders;
     private ProviderCache mCache;
     private Handler mHandler;
+    private ThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(4);
 
     private Runnable mUpdatePlaylistsRunnable = new Runnable() {
         @Override
@@ -63,6 +66,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * Default constructor
      */
     private ProviderAggregator() {
+        Log.e(TAG, " ___ CONSTRUCTOR ___");
         mUpdateCallbacks = new ArrayList<ILocalCallback>();
         mProviders = new ArrayList<ProviderConnection>();
         mCache = new ProviderCache();
@@ -109,7 +113,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return;
         }
 
-        mHandler.post(new Runnable() {
+        mExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 for (Playlist p : playlist) {
@@ -127,10 +131,14 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         try {
                             song = provider.getBinder().getSong(songRef);
                         } catch (RemoteException e) {
-                            e.printStackTrace();
+                            // ignore, provider likely died, we just skip its song
                         }
                         if (song != null) {
                             mCache.putSong(provider.getIdentifier(), song);
+
+                            for (ILocalCallback cb : mUpdateCallbacks) {
+                                cb.onSongUpdate(song);
+                            }
                         }
                     }
                 }
@@ -242,7 +250,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * name.
      */
     @Override
-    public void onPlaylistAddedOrUpdated(ProviderIdentifier provider, Playlist p) throws RemoteException {
+    public void onPlaylistAddedOrUpdated(final ProviderIdentifier provider, final Playlist p)
+            throws RemoteException {
         // We compare the provided copy with the one we have in cache. We only notify the callbacks
         // if it indeed changed.
         Playlist cached = mCache.getPlaylist(p.getRef());
@@ -257,22 +266,37 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
         // If something has actually changed
         if (notify) {
-            final IMusicProvider binder = PluginsLookup.getDefault().getProvider(provider).getBinder();
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    final IMusicProvider binder = PluginsLookup.getDefault().getProvider(provider).getBinder();
 
-            // First, we try to check if we need information for some of the songs
-            Iterator<String> it = p.songs();
-            while (it.hasNext()) {
-                String ref = it.next();
-                Song providerSong = binder.getSong(ref);
-                if (providerSong != null) {
-                    mCache.putSong(provider, providerSong);
+                    // First, we try to check if we need information for some of the songs
+                    Iterator<String> it = p.songs();
+                    while (it.hasNext()) {
+                        String ref = it.next();
+                        Song cachedSong = mCache.getSong(ref);
+                        // We only check for null songs here. We assume that songs already in the
+                        // cache but not loaded will be soon through callbacks, no need to recall
+                        // them.
+                        if (cachedSong == null) {
+                            try {
+                                Song providerSong = binder.getSong(ref);
+                                if (providerSong != null) {
+                                    mCache.putSong(provider, providerSong);
+                                }
+                            } catch (RemoteException e) {
+                                // ignored
+                            }
+                        }
+                    }
+
+                    // Then we notify the callbacks
+                    for (ILocalCallback cb : mUpdateCallbacks) {
+                        cb.onPlaylistUpdate(p);
+                    }
                 }
-            }
-
-            // Then we notify the callbacks
-            for (ILocalCallback cb : mUpdateCallbacks) {
-                cb.onPlaylistUpdate(p);
-            }
+            });
         }
     }
 
@@ -280,12 +304,21 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * Called by the providers when the details of a song have been updated.
      */
     @Override
-    public void onSongUpdate(ProviderIdentifier provider, Song s) throws RemoteException {
-        if (s.isLoaded()) {
+    public void onSongUpdate(ProviderIdentifier provider, final Song s) throws RemoteException {
+        Song cached = mCache.getSong(s.getRef());
+
+        if (cached == null || !cached.isLoaded()) {
             // Log.i(TAG, "Song update: Title: " + s.getTitle());
             mCache.putSong(provider, s);
-        } else {
-            Log.i(TAG, "Song update: Not loaded");
+
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    for (ILocalCallback cb : mUpdateCallbacks) {
+                        cb.onSongUpdate(s);
+                    }
+                }
+            });
         }
     }
 

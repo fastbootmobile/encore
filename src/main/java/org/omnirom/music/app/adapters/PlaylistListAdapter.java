@@ -18,6 +18,8 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -28,22 +30,7 @@ public class PlaylistListAdapter extends BaseAdapter {
     private static final int DEFERRED_DELAY = 20;
 
     private List<Playlist> mPlaylists;
-    private List<Playlist> mPendingPlaylists;
     private Handler mHandler;
-
-    private Runnable mDeferredUpdate = new Runnable() {
-        @Override
-        public void run() {
-            if (mPendingPlaylists.size() > 0) {
-                addItem(mPendingPlaylists.get(0));
-                mPendingPlaylists.remove(0);
-
-                if (mPendingPlaylists.size() > 0) {
-                    mHandler.post(mDeferredUpdate);
-                }
-            }
-        }
-    };
 
     private static class ViewHolder {
         public ImageView ivCover;
@@ -53,28 +40,49 @@ public class PlaylistListAdapter extends BaseAdapter {
 
     public PlaylistListAdapter() {
         mPlaylists = new ArrayList<Playlist>();
-        mPendingPlaylists = new ArrayList<Playlist>();
         mHandler = new Handler();
+    }
+
+    private void sortList() {
+        Collections.sort(mPlaylists, new Comparator<Playlist>() {
+            @Override
+            public int compare(Playlist playlist, Playlist playlist2) {
+                return playlist.getName().compareTo(playlist2.getName());
+            }
+        });
     }
 
     public void addItem(Playlist p) {
         mPlaylists.add(p);
-        notifyDataSetChanged();
+        sortList();
+    }
+
+    public void addItemUnique(Playlist p) {
+        if (!mPlaylists.contains(p)) {
+            mPlaylists.add(p);
+            sortList();
+        }
     }
 
     public void addAll(List<Playlist> ps) {
-        mPendingPlaylists.addAll(ps);
-        mHandler.postDelayed(mDeferredUpdate, DEFERRED_DELAY);
+        mPlaylists.addAll(ps);
+        sortList();
+        notifyDataSetChanged();
     }
 
     public void addAllUnique(List<Playlist> ps) {
+        boolean didChange = false;
         for (Playlist p : ps) {
             if (!mPlaylists.contains(p)) {
-                mPendingPlaylists.add(p);
+                mPlaylists.add(p);
+                didChange = true;
             }
         }
 
-        mHandler.postDelayed(mDeferredUpdate, DEFERRED_DELAY);
+        if (didChange) {
+            sortList();
+            notifyDataSetChanged();
+        }
     }
 
     public boolean contains(Playlist p) {
@@ -129,28 +137,6 @@ public class PlaylistListAdapter extends BaseAdapter {
             tag.tvTitle.setText("Loading");
             tag.tvSubTitle.setText("Loading");
         }
-/*
-          //////////
-         // TEST //
-        //////////
-        root.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Play the first song of the playlist
-                String songRef = playlist.songs().next();
-                Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
-
-                try {
-                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
-                } catch (RemoteException e) {
-                    Log.e("TEST", "Unable to play song", e);
-                } catch (NullPointerException e) {
-                    Log.e("TEST", "SERVICE IS NOT BOUND?!");
-                    PluginsLookup.getDefault().connectPlayback();
-                }
-            }
-        });
-*/
 
         return root;
     }

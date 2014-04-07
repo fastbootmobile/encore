@@ -41,15 +41,12 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
         public void run() {
             synchronized (mPlaylistsUpdated) {
                 for (Playlist p : mPlaylistsUpdated) {
-                    if (mAdapter.contains(p)) {
-                        mAdapter.notifyDataSetChanged();
-                    } else {
-                        mAdapter.addItem(p);
-                    }
+                    mAdapter.addItemUnique(p);
                 }
 
                 mPlaylistsUpdated.clear();
             }
+            mAdapter.notifyDataSetChanged();
         }
     };
 
@@ -92,7 +89,7 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mAdapter.addAll(playlists);
+                        mAdapter.addAllUnique(playlists);
                     }
                 });
             }
@@ -106,7 +103,7 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MainActivity act = (MainActivity) getActivity();
-                act.showFragment(PlaylistViewFragment.newInstance(mAdapter.getItem(position)), false);
+                act.showFragment(PlaylistViewFragment.newInstance(mAdapter.getItem(position)), true);
             }
         });
 
@@ -136,7 +133,7 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
         }
 
         mHandler.removeCallbacks(mUpdateListRunnable);
-        mHandler.post(mUpdateListRunnable);
+        mHandler.postDelayed(mUpdateListRunnable, 500);
     }
 
     @Override

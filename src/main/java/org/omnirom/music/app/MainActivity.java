@@ -80,27 +80,12 @@ public class MainActivity extends Activity
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) kbView.getLayoutParams();
         lp.height = Utils.getActionBarHeight(getTheme(), getResources());
         kbView.setLayoutParams(lp);
-
-        // Setup network cache
-        try {
-            File httpCacheDir = new File(getCacheDir(), "http");
-            long httpCacheSize = 100 * 1024 * 1024; // 100 MiB
-            HttpResponseCache.install(httpCacheDir, httpCacheSize);
-        } catch (IOException e) {
-            Log.w(TAG, "HTTP response cache installation failed", e);
-        }
-
-         // Setup image cache
-        ImageCache.getDefault().initialize(getApplicationContext());
     }
 
     @Override
     protected void onResume() {
-        // Setup the plugins system
-        PluginsLookup.getDefault().initialize(getApplicationContext());
-        PluginsLookup.getDefault().connectPlayback(new PlaybackCallbackImpl(mPlaybackState));
-
         super.onResume();
+        PluginsLookup.getDefault().connectPlayback(new PlaybackCallbackImpl(mPlaybackState));
     }
 
     @Override
@@ -153,12 +138,18 @@ public class MainActivity extends Activity
     public void showFragment(Fragment f, boolean addToStack) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
-        ft.replace(R.id.container, f);
-        if (addToStack) {
-            ft.addToBackStack(f.toString());
+        if (fragmentManager.getBackStackEntryCount() > 0 && !addToStack) {
+            fragmentManager.popBackStack();
         }
+
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        if (addToStack) {
+            ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
+            ft.addToBackStack(f.toString());
+        } else {
+            ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+        }
+        ft.replace(R.id.container, f);
         ft.commit();
     }
 

@@ -36,7 +36,8 @@ public class HttpGet {
      *              MUST be encoded properly.
      * @return A string with the data grabbed from the URL
      */
-    public static String get(String inUrl, String query, boolean cached) throws IOException, JSONException {
+    public static String get(String inUrl, String query, boolean cached)
+            throws IOException, JSONException, RateLimitException {
         return new String(getBytes(inUrl, query, cached));
     }
 
@@ -47,15 +48,18 @@ public class HttpGet {
      *              MUST be encoded properly.
      * @return A byte array of the data
      */
-    public static byte[] getBytes(String inUrl, String query, boolean cached) throws IOException {
+    public static byte[] getBytes(String inUrl, String query, boolean cached)
+            throws IOException, RateLimitException {
         final String formattedUrl = inUrl + (query.isEmpty() ? "" : ("?" + query));
 
         URL url = new URL(formattedUrl);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestProperty("User-Agent","OmniMusic/1.0-dev (http://www.omnirom.org)");
         urlConnection.setUseCaches(cached);
         int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
         urlConnection.addRequestProperty("Cache-Control", "max-stale=" + maxStale);
         try {
+            // MusicBrainz returns 503 Unavailable on rate limit errors. Parse the JSON anyway.
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                 int contentLength = urlConnection.getContentLength();
@@ -74,8 +78,12 @@ public class HttpGet {
             } else if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                 // 404
                 return new byte[]{};
+            } else if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+                return new byte[]{};
+            } else if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_UNAVAILABLE) {
+                throw new RateLimitException();
             } else {
-                Log.e(TAG, "URL ERROR: " + formattedUrl);
+                Log.e(TAG, "Error when fetching: " + formattedUrl);
                 return new byte[]{};
             }
         } finally {
