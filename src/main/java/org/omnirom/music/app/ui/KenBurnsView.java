@@ -114,9 +114,15 @@ public class KenBurnsView extends FrameLayout {
         super(context, attrs, defStyle);
         mHandler = new Handler();
         mBitmaps = new ArrayList<Bitmap>();
-        mRS = RenderScript.create(getContext());
-        mBlur = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
-        mBlend = ScriptIntrinsicBlend.create(mRS, Element.U8_4(mRS));
+        if (isInEditMode()) {
+            mRS = null;
+            mBlur = null;
+            mBlend = null;
+        } else {
+            mRS = RenderScript.create(getContext());
+            mBlur = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
+            mBlend = ScriptIntrinsicBlend.create(mRS, Element.U8_4(mRS));
+        }
     }
 
     public void addBitmap(final Bitmap bmp) {

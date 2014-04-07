@@ -10,4 +10,5 @@
     <dimen name="search_box_height">42dp</dimen>
 
     <dimen name="playlist_view_item_height">72dp</dimen>
+    <dimen name="playing_bar_height">64dp</dimen>
 </resources>

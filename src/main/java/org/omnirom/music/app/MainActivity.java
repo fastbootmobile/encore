@@ -9,27 +9,24 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import org.omnirom.music.app.fragments.AbstractRootFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
+import org.omnirom.music.app.ui.BlurringFrameLayout;
 import org.omnirom.music.app.ui.KenBurnsView;
-import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PlaybackCallbackImpl;
 import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
-
-import java.io.File;
-import java.io.IOException;
 
 
 public class MainActivity extends Activity
@@ -80,6 +77,10 @@ public class MainActivity extends Activity
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) kbView.getLayoutParams();
         lp.height = Utils.getActionBarHeight(getTheme(), getResources());
         kbView.setLayoutParams(lp);
+
+        final BlurringFrameLayout fl = (BlurringFrameLayout) findViewById(R.id.container);
+        final ImageView iv = (ImageView) findViewById(R.id.ivPlayingBarBackground);
+        fl.setImageRender(iv);
     }
 
     @Override
