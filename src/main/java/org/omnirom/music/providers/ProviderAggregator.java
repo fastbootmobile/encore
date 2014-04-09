@@ -276,10 +276,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     while (it.hasNext()) {
                         String ref = it.next();
                         Song cachedSong = mCache.getSong(ref);
-                        // We only check for null songs here. We assume that songs already in the
-                        // cache but not loaded will be soon through callbacks, no need to recall
-                        // them.
-                        if (cachedSong == null) {
+                        if (cachedSong == null || !cachedSong.isLoaded()) {
                             try {
                                 Song providerSong = binder.getSong(ref);
                                 if (providerSong != null) {

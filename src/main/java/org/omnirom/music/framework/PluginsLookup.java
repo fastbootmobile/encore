@@ -124,10 +124,12 @@ public class PluginsLookup {
         Log.i(TAG, "tearDown()");
         if (mPlaybackService != null) {
             mContext.unbindService(mPlaybackConnection);
+            mPlaybackService = null;
         }
         for (ProviderConnection connection : mConnections) {
             connection.unbindService();
         }
+        mConnections.clear();
     }
 
     public IPlaybackService getPlaybackService() {

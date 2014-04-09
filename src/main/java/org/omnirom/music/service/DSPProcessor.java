@@ -21,11 +21,13 @@ public class DSPProcessor {
     private int mChannels = DEFAULT_CHANNELS;
     private long mLastRmsPoll = 0;
     private int mLastRms = 0;
+    private PlaybackService mPlaybackService;
 
     /**
      * Default constructor
      */
-    public DSPProcessor() {
+    public DSPProcessor(PlaybackService pbs) {
+        mPlaybackService = pbs;
     }
 
     /**
@@ -79,6 +81,9 @@ public class DSPProcessor {
         if (mSink != null) {
             mSink.write(frames, numframes);
         }
+
+        // We have audio frames, so don't shutdown the service
+        mPlaybackService.resetShutdownTimeout();
     }
 
     /**

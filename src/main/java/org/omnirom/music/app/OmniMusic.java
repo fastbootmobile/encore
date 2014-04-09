@@ -34,6 +34,18 @@ public class OmniMusic extends Application {
         // Setup image cache
         AlbumArtCache.getDefault().initialize(getApplicationContext());
         ImageCache.getDefault().initialize(getApplicationContext());
+    }
 
+    @Override
+    public void onTerminate() {
+        HttpResponseCache cache = HttpResponseCache.getInstalled();
+        if (cache != null) {
+            cache.flush();
+        }
+
+        // Release services connections
+        PluginsLookup.getDefault().tearDown();
+
+        super.onTerminate();
     }
 }

@@ -1,5 +1,7 @@
 package org.omnirom.music.service;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -8,6 +10,8 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
+import org.omnirom.music.app.MainActivity;
+import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AudioSocketHost;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Playlist;
@@ -52,6 +56,7 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
     private DSPProcessor mDSPProcessor;
     private PlaybackQueue mPlaybackQueue;
     private IPlaybackCallback mCallback;
+    private Notification mNotification;
 
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
@@ -71,7 +76,7 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
     @Override
     public void onCreate() {
         super.onCreate();
-        mDSPProcessor = new DSPProcessor();
+        mDSPProcessor = new DSPProcessor(this);
         mDSPProcessor.setSink(new DeviceAudioSink());
 
         PluginsLookup.getDefault().initialize(getApplicationContext());
@@ -85,6 +90,13 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
                 assignProviderAudioSocket(conn);
             }
         }
+
+        mNotification = new Notification(R.drawable.ic_launcher, "Playing music!",
+                System.currentTimeMillis());
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        mNotification.setLatestEventInfo(this, "OmniMusic",
+                "This is an ugly notification. Beautify me.", pendingIntent);
     }
 
     /**
@@ -93,6 +105,7 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.i(TAG, "onDestroy()");
 
         // Remove audio hosts from providers
 
@@ -176,22 +189,30 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         if (mPlaybackQueue.size() > 0) {
             Song first = mPlaybackQueue.get(0);
             ProviderIdentifier providerIdentifier = first.getProvider();
-            IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder();
+            if (providerIdentifier != null) {
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder();
 
-            try {
-                provider.playSong(first.getRef());
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to play song", e);
-            }
+                try {
+                    provider.playSong(first.getRef());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to play song", e);
+                }
 
-            // TODO: Do on provider's songStarted callback
-            try {
-                mCallback.onSongStarted(first);
-                mCallback.onPlaybackResume();
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                // TODO: Do on provider's songStarted callback
+                try {
+                    mCallback.onSongStarted(first);
+                    mCallback.onPlaybackResume();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e(TAG, "Cannot play the first song of the queue because the Song's " +
+                        "ProviderIdentifier is null!");
             }
         }
+
+        // We're playing something, so make sure we stay on front
+        startForeground(1, mNotification);
     }
 
     /**

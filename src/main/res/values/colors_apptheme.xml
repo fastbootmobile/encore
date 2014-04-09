@@ -6,4 +6,7 @@
     <color name="separator">#dddddd</color>
     <color name="navdrawer_separator">#eaeaea</color>
     <color name="default_fragment_background">#eaeaea</color>
+    <color name="play_bar_background">#bbffffff</color>
+    <color name="play_bar_pressed">#bbcc0000</color>
+
 </resources>

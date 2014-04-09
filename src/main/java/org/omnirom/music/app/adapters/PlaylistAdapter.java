@@ -114,11 +114,8 @@ public class PlaylistAdapter extends BaseAdapter {
 
             if (v.position != this.mPosition) {
                 // Cancel, we moved
-                Log.e(TAG, "doInBackground cancelled, we moved");
                 return null;
             }
-
-            Log.e(TAG, "LOOKING FOR " + mPosition);
 
             final Resources res = v.vRoot.getResources();
             final Context ctx = v.vRoot.getContext().getApplicationContext();

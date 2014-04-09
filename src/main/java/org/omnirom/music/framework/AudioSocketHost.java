@@ -102,12 +102,13 @@ public class AudioSocketHost {
      */
     public void startListening() {
         mStop = false;
-
-        try {
-            mSocket = new LocalServerSocket(mSocketName);
-        } catch (IOException e) {
-            // Shouldn't happen
-            Log.e(TAG, "Cannot re-open server socket for audio input", e);
+        if (mListenThread != null) {
+            mListenThread.interrupt();
+            try {
+                mListenThread.join(10);
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
         mListenThread = new Thread(mListenRunnable);
         mListenThread.start();

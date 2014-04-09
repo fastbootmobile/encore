@@ -14,11 +14,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import org.omnirom.music.app.fragments.AbstractRootFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
+import org.omnirom.music.app.fragments.NowPlayingFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.app.ui.BlurringFrameLayout;
@@ -51,6 +55,10 @@ public class MainActivity extends Activity
 
     private PlaybackState mPlaybackState;
 
+    private RelativeLayout mPlayingBarLayout;
+
+    private boolean mRestoreBarOnBack;
+
     public MainActivity() {
         mPlaybackState = new PlaybackState();
     }
@@ -81,31 +89,43 @@ public class MainActivity extends Activity
         final BlurringFrameLayout fl = (BlurringFrameLayout) findViewById(R.id.container);
         final ImageView iv = (ImageView) findViewById(R.id.ivPlayingBarBackground);
         fl.setImageRender(iv);
+
+        mPlayingBarLayout = (RelativeLayout) findViewById(R.id.playingBarLayout);
+        mPlayingBarLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showFragment(NowPlayingFragment.newInstance(), true);
+                setPlayingBarVisible(false);
+                mRestoreBarOnBack = true;
+            }
+        });
+    }
+
+    public void setPlayingBarVisible(boolean visible) {
+        if (visible) {
+            mPlayingBarLayout.animate().yBy(-mPlayingBarLayout.getMeasuredHeight())
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .setDuration(300).start();
+        } else {
+            mPlayingBarLayout.animate().yBy(mPlayingBarLayout.getMeasuredHeight())
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .setDuration(300).start();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (mRestoreBarOnBack) {
+            setPlayingBarVisible(true);
+            mRestoreBarOnBack = false;
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         PluginsLookup.getDefault().connectPlayback(new PlaybackCallbackImpl(mPlaybackState));
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        HttpResponseCache cache = HttpResponseCache.getInstalled();
-        if (cache != null) {
-            cache.flush();
-        }
-
-        // Release services connections
-        PluginsLookup.getDefault().tearDown();
-        ProviderAggregator.getDefault().getCache().purgeSongCache();
-
-        super.onStop();
     }
 
     @Override
@@ -141,6 +161,10 @@ public class MainActivity extends Activity
         FragmentManager fragmentManager = getFragmentManager();
         if (fragmentManager.getBackStackEntryCount() > 0 && !addToStack) {
             fragmentManager.popBackStack();
+            if (mRestoreBarOnBack) {
+                setPlayingBarVisible(true);
+                mRestoreBarOnBack = false;
+            }
         }
 
         FragmentTransaction ft = fragmentManager.beginTransaction();
