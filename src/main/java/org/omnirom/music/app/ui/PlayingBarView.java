@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -96,7 +97,7 @@ public class PlayingBarView extends RelativeLayout {
                 IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
                 if (playbackService != null) {
                     try {
-                        PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
+                        playbackService.addCallback(mPlaybackCallback);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to register the main activity as a callback of the playback", e);
                     }
@@ -107,11 +108,32 @@ public class PlayingBarView extends RelativeLayout {
             }
         });
 
-        mScrobble = (ProgressBar) findViewById(R.id.pbScrobble);
-        mPlayPauseButton = (ImageView) findViewById(R.id.btnPlay);
-        mAlbumArt = (ImageView) findViewById(R.id.ivAlbumArt);
-        mArtistView = (TextView) findViewById(R.id.tvArtist);
-        mTitleView = (TextView) findViewById(R.id.tvTitle);
+        mScrobble           = (ProgressBar) findViewById(R.id.pbScrobble);
+        mPlayPauseButton    = (ImageView)   findViewById(R.id.btnPlay);
+        mAlbumArt           = (ImageView)   findViewById(R.id.ivAlbumArt);
+        mArtistView         = (TextView)    findViewById(R.id.tvArtist);
+        mTitleView          = (TextView)    findViewById(R.id.tvTitle);
+
+        // Setup click listeners
+        mPlayPauseButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+                if (mIsPlaying) {
+                    try {
+                        playbackService.pause();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to pause playback", e);
+                    }
+                } else {
+                    try {
+                        playbackService.play();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to resume playback", e);
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -130,10 +152,8 @@ public class PlayingBarView extends RelativeLayout {
      */
     public void setPlayButtonState(boolean play) {
         if (play) {
-            // Todo: white drawable toggle on press
             mPlayPauseButton.setImageResource(R.drawable.ic_btn_play);
         } else {
-            // Todo; white drawable toggle on press
             mPlayPauseButton.setImageResource(R.drawable.ic_btn_pause);
         }
     }

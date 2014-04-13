@@ -106,6 +106,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         mUpdateCallbacks.remove(cb);
     }
 
+    /**
+     * Queries in a thread the songs of the list of playlist passed in parameter, if needed
+     * Note that this method is only valid for playlists that have been provided by a provider.
+     * @param provider The provider that provided these playlists
+     * @param playlist The list of playlists to fetch
+     */
     private void ensurePlaylistsSongsCached(final ProviderConnection provider,
                                             final List<Playlist> playlist) {
         if (provider == null || playlist == null) {
@@ -127,17 +133,33 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     Iterator<String> songs = p.songs();
                     while (songs.hasNext()) {
                         String songRef = songs.next();
+
+                        // We first check that we don't already have the song in the cache
+                        Song cachedSong = mCache.getSong(songRef);
+
+                        if (cachedSong != null && cachedSong.isLoaded()) {
+                            // We already have that song, continue to the next one
+                            continue;
+                        }
+
+                        // Get the song from the provider
                         Song song = null;
                         try {
                             song = provider.getBinder().getSong(songRef);
                         } catch (RemoteException e) {
                             // ignore, provider likely died, we just skip its song
                         }
+
                         if (song != null) {
                             mCache.putSong(provider.getIdentifier(), song);
 
-                            for (ILocalCallback cb : mUpdateCallbacks) {
-                                cb.onSongUpdate(song);
+                            // We call the songUpdate callback only if the track has been loaded.
+                            // If it's not, we assume that the provider will call songUpdated
+                            // here when it has the data for the track.
+                            if (song.isLoaded()) {
+                                for (ILocalCallback cb : mUpdateCallbacks) {
+                                    cb.onSongUpdate(song);
+                                }
                             }
                         }
                     }
@@ -262,6 +284,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             notify = true;
         } else {
             notify = !cached.isIdentical(p);
+            if (notify) {
+                // The playlist changed, update the cache
+                mCache.putPlaylist(provider, p);
+            }
         }
 
         // If something has actually changed

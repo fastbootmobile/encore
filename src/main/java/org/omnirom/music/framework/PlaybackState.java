@@ -6,7 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Retains the current status of the playback
+ * Retains the current status of the playback.
+ * There are two ways for app modules to retrieve the playback status:
+ *  - Either poll here for changes, or register for a PlaybackState.Listener
+ *  - Or register directly against the PlaybackService listener system, but you will need
+ *    to re-register on it again if the connection to the playback service is lost.
  */
 public class PlaybackState {
 

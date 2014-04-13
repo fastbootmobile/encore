@@ -67,8 +67,6 @@ public class PlaylistViewFragment extends Fragment
 
     public PlaylistViewFragment() {
         mHandler = new Handler();
-
-
     }
 
     @Override
@@ -152,7 +150,21 @@ public class PlaylistViewFragment extends Fragment
 
     @Override
     public void onSongUpdate(Song s) {
-        mAdapter.notifyDataSetChanged();
+        // We check if the song belongs to this playlist
+        boolean hasPlaylist = false;
+        Iterator<String> songsRef = mPlaylist.songs();
+        while (songsRef.hasNext()) {
+            String ref = songsRef.next();
+            if (s.getRef().equals(ref)) {
+                hasPlaylist = true;
+                break;
+            }
+        }
+
+        // It does, update the list then
+        if (hasPlaylist) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -162,6 +174,7 @@ public class PlaylistViewFragment extends Fragment
 
     @Override
     public void onPlaylistUpdate(final Playlist p) {
+        // If the currently watched playlist is updated, update me
         if (p.equals(mPlaylist)) {
             mAdapter.notifyDataSetChanged();
         }

@@ -133,6 +133,7 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
         }
 
         mHandler.removeCallbacks(mUpdateListRunnable);
+        // We delay the update a little bit to group update requests together
         mHandler.postDelayed(mUpdateListRunnable, 500);
     }
 
