@@ -7,7 +7,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView"
+        android:id="@+id/ivShadow"
         android:layout_gravity="left|top"
         android:src="@drawable/test_cover_incubus"
         android:adjustViewBounds="true"
@@ -20,8 +20,8 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView2"
-        android:src="@drawable/ic_btn_pause"
+        android:id="@+id/ivAlbumArt"
+        android:src="@drawable/ic_btn_pause_red"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp" />
@@ -30,20 +30,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageView3"
-        android:layout_alignBottom="@+id/imageView2"
-        android:layout_toLeftOf="@+id/imageView2"
+        android:layout_alignBottom="@+id/ivAlbumArt"
+        android:layout_toLeftOf="@+id/ivAlbumArt"
         android:layout_marginRight="32dp"
-        android:layout_alignTop="@+id/imageView2"
+        android:layout_alignTop="@+id/ivAlbumArt"
         android:src="@drawable/ic_btn_previous" />
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageView4"
-        android:layout_alignTop="@+id/imageView2"
-        android:layout_toRightOf="@+id/imageView2"
+        android:layout_alignTop="@+id/ivAlbumArt"
+        android:layout_toRightOf="@+id/ivAlbumArt"
         android:layout_marginLeft="32dp"
-        android:layout_alignBottom="@+id/imageView2"
+        android:layout_alignBottom="@+id/ivAlbumArt"
         android:src="@drawable/ic_btn_next" />
 
     <TextView
@@ -51,8 +51,8 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Hotel California"
-        android:id="@+id/textView"
-        android:layout_below="@+id/imageView"
+        android:id="@+id/tvTitle"
+        android:layout_below="@+id/ivShadow"
         android:layout_alignParentStart="true"
         style="@style/OmniMusic.MediumCard.Title"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -63,19 +63,19 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="The Eagles"
-        android:id="@+id/textView2"
+        android:id="@+id/tvArtist"
         style="@style/OmniMusic.MediumCard.SubTitle"
-        android:layout_below="@+id/textView"
-        android:layout_alignStart="@+id/textView" />
+        android:layout_below="@+id/tvTitle"
+        android:layout_alignStart="@+id/tvTitle" />
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageView5"
         android:src="@drawable/ic_thumbs_up"
-        android:layout_alignBottom="@+id/textView2"
+        android:layout_alignBottom="@+id/tvArtist"
         android:layout_alignParentEnd="true"
-        android:layout_alignTop="@+id/textView"
+        android:layout_alignTop="@+id/tvTitle"
         android:adjustViewBounds="true"
         android:layout_marginRight="@dimen/activity_horizontal_margin" />
 
@@ -86,7 +86,7 @@
         android:layout_alignTop="@+id/imageView5"
         android:layout_toLeftOf="@+id/imageView5"
         android:src="@drawable/ic_thumbs_down"
-        android:layout_alignBottom="@+id/textView2"
+        android:layout_alignBottom="@+id/tvArtist"
         android:adjustViewBounds="true" />
 
     <TextView
@@ -94,8 +94,8 @@
         android:layout_height="1dp"
         android:background="#aaaaaa"
         android:autoText="true"
-        android:layout_below="@+id/textView2"
-        android:layout_alignStart="@+id/textView2"
+        android:layout_below="@+id/tvArtist"
+        android:layout_alignStart="@+id/tvArtist"
         android:layout_alignEnd="@+id/imageView5"
         android:layout_marginTop="8dp" />
 

@@ -51,7 +51,7 @@ public class PluginsLookup {
             Log.i(TAG, "Connected to Playback Service");
 
             try {
-                mPlaybackService.setCallback(mPlaybackCallback);
+                mPlaybackService.addCallback(mPlaybackCallback);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -123,6 +123,12 @@ public class PluginsLookup {
     public void tearDown() {
         Log.i(TAG, "tearDown()");
         if (mPlaybackService != null) {
+            try {
+                mPlaybackService.removeCallback(mPlaybackCallback);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Unable to remove Plugins playback callback", e);
+            }
+
             mContext.unbindService(mPlaybackConnection);
             mPlaybackService = null;
         }

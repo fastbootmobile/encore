@@ -9,7 +9,9 @@ import org.omnirom.music.service.IPlaybackCallback;
 
 interface IPlaybackService {
 
-    void setCallback(in IPlaybackCallback cb);
+    void addCallback(in IPlaybackCallback cb);
+
+    void removeCallback(in IPlaybackCallback cb);
 
     /**
      * Plays the provided playlist fully, overwriting the existing listening queue

@@ -8,7 +8,10 @@ import android.app.FragmentTransaction;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.RemoteException;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,10 +30,14 @@ import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.app.ui.BlurringFrameLayout;
 import org.omnirom.music.app.ui.KenBurnsView;
+import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.PlaybackCallbackImpl;
 import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.service.IPlaybackCallback;
+import org.omnirom.music.service.IPlaybackService;
 
 
 public class MainActivity extends Activity
@@ -55,9 +62,11 @@ public class MainActivity extends Activity
 
     private PlaybackState mPlaybackState;
 
-    private RelativeLayout mPlayingBarLayout;
+    private PlayingBarView mPlayingBarLayout;
 
     private boolean mRestoreBarOnBack;
+
+    private Handler mHandler;
 
     public MainActivity() {
         mPlaybackState = new PlaybackState();
@@ -67,6 +76,8 @@ public class MainActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mHandler = new Handler();
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -82,15 +93,18 @@ public class MainActivity extends Activity
         kbView.addBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.test_cover_imagine_dragons)).getBitmap());
         kbView.addBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.test_cover_rhcp)).getBitmap());
 
+        // Set the height of the "action bar background" layout to the height of the fullscreen AB
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) kbView.getLayoutParams();
         lp.height = Utils.getActionBarHeight(getTheme(), getResources());
         kbView.setLayoutParams(lp);
 
+        // Setup the blurring playing bar background
         final BlurringFrameLayout fl = (BlurringFrameLayout) findViewById(R.id.container);
         final ImageView iv = (ImageView) findViewById(R.id.ivPlayingBarBackground);
         fl.setImageRender(iv);
 
-        mPlayingBarLayout = (RelativeLayout) findViewById(R.id.playingBarLayout);
+        // Setup the playing bar click listener
+        mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
         mPlayingBarLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -99,18 +113,18 @@ public class MainActivity extends Activity
                 mRestoreBarOnBack = true;
             }
         });
+
+        // We start it hidden. As we don't have the exact size yet, we post it for later change
+        mPlayingBarLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mPlayingBarLayout.setTranslationY(mPlayingBarLayout.getMeasuredHeight());
+            }
+        });
     }
 
     public void setPlayingBarVisible(boolean visible) {
-        if (visible) {
-            mPlayingBarLayout.animate().yBy(-mPlayingBarLayout.getMeasuredHeight())
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .setDuration(300).start();
-        } else {
-            mPlayingBarLayout.animate().yBy(mPlayingBarLayout.getMeasuredHeight())
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .setDuration(300).start();
-        }
+        mPlayingBarLayout.animateVisibility(visible);
     }
 
     @Override
@@ -126,6 +140,11 @@ public class MainActivity extends Activity
     protected void onResume() {
         super.onResume();
         PluginsLookup.getDefault().connectPlayback(new PlaybackCallbackImpl(mPlaybackState));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override

@@ -49,7 +49,7 @@
                     android:src="@drawable/test_cover_imagine_dragons"/>
 
             <TextView
-                    android:id="@+id/textView"
+                    android:id="@+id/tvTitle"
                     style="@style/OmniMusic.LargeCard.Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -60,12 +60,12 @@
                     android:text="Night Visions"/>
 
             <TextView
-                    android:id="@+id/textView2"
+                    android:id="@+id/tvArtist"
                     style="@style/OmniMusic.LargeCard.SubTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignStart="@+id/textView"
-                    android:layout_below="@+id/textView"
+                    android:layout_alignStart="@+id/tvTitle"
+                    android:layout_below="@+id/tvTitle"
                     android:text="Imagine Dragons"/>
 
             <TextView
@@ -73,9 +73,9 @@
                     style="@style/OmniMusic.LargeCard.SubTitle.Emphasize"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/textView2"
+                    android:layout_alignTop="@+id/tvArtist"
                     android:layout_marginLeft="2dp"
-                    android:layout_toRightOf="@+id/textView2"
+                    android:layout_toRightOf="@+id/tvArtist"
                     android:text="2012"
                     android:textAppearance="?android:attr/textAppearanceSmall"/>
 
@@ -84,8 +84,8 @@
                     style="@style/OmniMusic.LargeCard.Details"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignStart="@+id/textView2"
-                    android:layout_below="@+id/textView2"
+                    android:layout_alignStart="@+id/tvArtist"
+                    android:layout_below="@+id/tvArtist"
                     android:layout_marginTop="16dp"
                     android:text="Last played 3 months ago"
                     android:textAppearance="?android:attr/textAppearanceSmall"/>
@@ -141,7 +141,7 @@
                     android:orientation="horizontal">
 
                 <ImageView
-                        android:id="@+id/imageView"
+                        android:id="@+id/ivShadow"
                         android:layout_width="39dp"
                         android:layout_height="39dp"
                         android:src="@drawable/test_cover_rhcp"/>
@@ -166,7 +166,7 @@
                     android:orientation="horizontal">
 
                 <ImageView
-                        android:id="@+id/imageView2"
+                        android:id="@+id/ivAlbumArt"
                         android:layout_width="39dp"
                         android:layout_height="39dp"
                         android:src="@drawable/test_cover_incubus"

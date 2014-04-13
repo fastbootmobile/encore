@@ -17,9 +17,11 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.IProviderCallback;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,11 +57,12 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
     private int mNumberBound = 0;
     private DSPProcessor mDSPProcessor;
     private PlaybackQueue mPlaybackQueue;
-    private IPlaybackCallback mCallback;
+    private List<IPlaybackCallback> mCallbacks;
     private Notification mNotification;
 
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
+        mCallbacks = new ArrayList<IPlaybackCallback>();
     }
 
     /**
@@ -199,11 +202,13 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
                 }
 
                 // TODO: Do on provider's songStarted callback
-                try {
-                    mCallback.onSongStarted(first);
-                    mCallback.onPlaybackResume();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+                for (IPlaybackCallback cb : mCallbacks) {
+                    try {
+                        cb.onSongStarted(first);
+                        cb.onPlaybackResume();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot call playback callback for song start event", e);
+                    }
                 }
             } else {
                 Log.e(TAG, "Cannot play the first song of the queue because the Song's " +
@@ -220,9 +225,12 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
      */
     IPlaybackService.Stub mBinder = new IPlaybackService.Stub() {
         @Override
-        public void setCallback(IPlaybackCallback cb) throws RemoteException {
-            mCallback = cb;
+        public void addCallback(IPlaybackCallback cb) throws RemoteException {
+            mCallbacks.add(cb);
         }
+
+        @Override
+        public void removeCallback(IPlaybackCallback cb) { mCallbacks.remove(cb); }
 
         @Override
         public void playPlaylist(Playlist p) throws RemoteException {
