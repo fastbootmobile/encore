@@ -1,6 +1,8 @@
 package org.omnirom.music.app.ui;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.AttributeSet;
@@ -13,12 +15,18 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * ViewGroup for the sticky bottom playing bar
@@ -27,10 +35,54 @@ public class PlayingBarView extends RelativeLayout {
 
     private static final String TAG = "PlayingBarView";
 
+    private Runnable mAlbumArtRunnable = new Runnable() {
+        @Override
+        public void run() {
+            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            final Song startSong = mSong;
+
+            // Prepare the placeholder/default
+            // TODO: Default background
+            BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.test_cover_imagine_dragons);
+            assert drawable != null;
+            Bitmap bmp = drawable.getBitmap();
+
+            // Download the art image
+            String artKey = cache.getSongArtKey(mSong);
+            String artUrl = null;
+
+            if (artKey == null) {
+                StringBuffer urlBuffer = new StringBuffer();
+                artKey = AlbumArtCache.getArtKey(mSong, urlBuffer);
+                artUrl = urlBuffer.toString();
+            }
+
+            if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
+            }
+
+            final Bitmap albumArtBitmap = bmp;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (startSong == mSong) {
+                        mAlbumArt.setImageBitmap(albumArtBitmap);
+                    }
+                }
+            });
+        }
+    };
+
     private IPlaybackCallback.Stub mPlaybackCallback = new IPlaybackCallback.Stub() {
 
         @Override
         public void onSongStarted(Song s) throws RemoteException {
+            mSong = s;
+
+            // Fill the album art
+            mExecutor.execute(mAlbumArtRunnable);
+
+            // Fill the views
             mTitleView.setText(s.getTitle());
 
             Artist artist = ProviderAggregator.getDefault().getCache().getArtist(s.getArtist());
@@ -38,6 +90,7 @@ public class PlayingBarView extends RelativeLayout {
 
             mScrobble.setMax(s.getDuration());
 
+            // Set the visibility and button state
             setPlayButtonState(false);
             animateVisibility(true);
             mIsPlaying = true;
@@ -62,6 +115,8 @@ public class PlayingBarView extends RelativeLayout {
         }
     };
 
+    private Executor mExecutor = new ScheduledThreadPoolExecutor(2);
+    private Song mSong;
     private boolean mIsPlaying;
     private ProgressBar mScrobble;
     private ImageView mPlayPauseButton;

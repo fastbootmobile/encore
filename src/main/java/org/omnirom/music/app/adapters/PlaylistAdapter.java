@@ -49,7 +49,6 @@ import java.util.List;
 public class PlaylistAdapter extends BaseAdapter {
 
     private static final String TAG = "PlaylistAdapter";
-    private static final String DEFAULT_ART = "__DEFAULT_ALBUM_ART__";
 
     private List<Song> mSongs;
     private Handler mHandler;
@@ -103,16 +102,12 @@ public class PlaylistAdapter extends BaseAdapter {
             mPosition = position;
         }
 
-        public void setPosition(int pos) {
-            mPosition = pos;
-        }
-
         @Override
         protected Bitmap doInBackground(ViewHolder... params) {
             v = params[0];
             mSong = v.song;
 
-            if (v.position != this.mPosition) {
+            if (v.position != this.mPosition || mSong == null) {
                 // Cancel, we moved
                 return null;
             }
@@ -124,70 +119,23 @@ public class PlaylistAdapter extends BaseAdapter {
             final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
             // Prepare the placeholder/default
+            // TODO: Default background
             BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.test_cover_imagine_dragons);
+            assert drawable != null;
             Bitmap bmp = drawable.getBitmap();
 
             // Download the art image
             String artKey = cache.getSongArtKey(mSong);
             String artUrl = null;
 
-            if (artKey == null && mSong != null) {
-                Artist artist = cache.getArtist(mSong.getArtist());
-                if (artist != null) {
-                    // Check if we have it in cache
-                    artUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), mSong.getTitle());
-                    if (artUrl == null) {
-                        try {
-                            AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), mSong.getTitle());
-                            if (albumInfo != null) {
-                                artUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
-
-                                if (artUrl != null) {
-                                    AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), mSong.getTitle(), artUrl);
-                                    artKey = artUrl.replaceAll("\\W+", "");
-                                    cache.putSongArtKey(mSong, artKey);
-                                } else {
-                                    cache.putSongArtKey(mSong, DEFAULT_ART);
-                                    artKey = DEFAULT_ART;
-                                }
-                            } else {
-                                // No album found on musicbrainz
-                                cache.putSongArtKey(mSong, DEFAULT_ART);
-                                artKey = DEFAULT_ART;
-                            }
-                        } catch (RateLimitException e) {
-                            // Retry later, rate limited
-                            artKey = DEFAULT_ART;
-                        }
-                    } else {
-                        artKey = artUrl.replaceAll("\\W+", "");
-                        cache.putSongArtKey(mSong, artKey);
-                    }
-                }
+            if (artKey == null) {
+                StringBuffer urlBuffer = new StringBuffer();
+                artKey = AlbumArtCache.getArtKey(mSong, urlBuffer);
+                artUrl = urlBuffer.toString();
             }
 
-            if (artKey != null && !artKey.equals(DEFAULT_ART)) {
-                // Check if we have it in our albumart local cache
-                bmp = ImageCache.getDefault().get(artKey);
-
-                try {
-                    if (bmp == null) {
-                        if (artUrl != null) {
-                            try {
-                                byte[] imageData = HttpGet.getBytes(artUrl, "", true);
-                                bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-                                ImageCache.getDefault().put(artKey, bmp);
-                            } catch (RateLimitException e) {
-                                Log.w(TAG, "Cannot get album art image data (rate limit)");
-                                bmp = drawable.getBitmap();
-                            }
-                        } else {
-                            bmp = drawable.getBitmap();
-                        }
-                    }
-                } catch (IOException e) {
-                    Log.e(TAG, "Unable to get album art", e);
-                }
+            if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
             }
 
             if (v.position != this.mPosition) {
@@ -197,7 +145,7 @@ public class PlaylistAdapter extends BaseAdapter {
 
             // We blurAndDim our bitmap, if another executor didn't do it already
             if (artKey == null) {
-                artKey = DEFAULT_ART;
+                artKey = AlbumArtCache.DEFAULT_ART;
             }
 
             Bitmap blur = BlurCache.getDefault().get(artKey);
@@ -262,10 +210,6 @@ public class PlaylistAdapter extends BaseAdapter {
 
     public void addItem(Song p) {
         mSongs.add(p);
-    }
-
-    public boolean contains(Playlist p) {
-        return mSongs.contains(p);
     }
 
     @Override
@@ -333,6 +277,9 @@ public class PlaylistAdapter extends BaseAdapter {
         // Fetch background art
         final String artKey = ProviderAggregator.getDefault().getCache().getSongArtKey(song);
 
+        final Resources res = root.getResources();
+        assert res != null;
+
         if (artKey != null) {
             // We already know the album art for this song (keyed in artKey)
             Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
@@ -340,12 +287,12 @@ public class PlaylistAdapter extends BaseAdapter {
             if (cachedBlur != null) {
                 root.setBackground(new BitmapDrawable(root.getResources(), cachedBlur));
             } else {
-                root.setBackground(root.getResources().getDrawable(R.drawable.ab_background_textured_appnavbar));
+                root.setBackground(res.getDrawable(R.drawable.ab_background_textured_appnavbar));
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
             }
         } else {
-            root.setBackground(root.getResources().getDrawable(R.drawable.ab_background_textured_appnavbar));
+            root.setBackground(res.getDrawable(R.drawable.ab_background_textured_appnavbar));
             BackgroundAsyncTask task = new BackgroundAsyncTask(position);
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
         }
@@ -360,29 +307,6 @@ public class PlaylistAdapter extends BaseAdapter {
         } else {
             vuMeter.setVisibility(View.GONE);
         }
-
-/*
-          //////////
-         // TEST //
-        //////////
-        root.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Play the first song of the playlist
-                String songRef = playlist.songs().next();
-                Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
-
-                try {
-                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
-                } catch (RemoteException e) {
-                    Log.e("TEST", "Unable to play song", e);
-                } catch (NullPointerException e) {
-                    Log.e("TEST", "SERVICE IS NOT BOUND?!");
-                    PluginsLookup.getDefault().connectPlayback();
-                }
-            }
-        });
-*/
 
         return root;
     }
