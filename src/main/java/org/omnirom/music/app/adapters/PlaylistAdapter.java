@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -93,7 +94,7 @@ public class PlaylistAdapter extends BaseAdapter {
     };
 
     // Using an AsyncTask to load the slow images in a background thread
-    private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, Bitmap> {
+    private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
         private ViewHolder v;
         private int mPosition;
         private Song mSong;
@@ -103,7 +104,7 @@ public class PlaylistAdapter extends BaseAdapter {
         }
 
         @Override
-        protected Bitmap doInBackground(ViewHolder... params) {
+        protected BitmapDrawable doInBackground(ViewHolder... params) {
             v = params[0];
             mSong = v.song;
 
@@ -119,9 +120,9 @@ public class PlaylistAdapter extends BaseAdapter {
             final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
             // Prepare the placeholder/default
-            // TODO: Default background
-            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.test_cover_imagine_dragons);
+            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_list_default_bg);
             assert drawable != null;
+            drawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
             Bitmap bmp = drawable.getBitmap();
 
             // Download the art image
@@ -143,23 +144,29 @@ public class PlaylistAdapter extends BaseAdapter {
                 return null;
             }
 
-            // We blurAndDim our bitmap, if another executor didn't do it already
-            if (artKey == null) {
+            // We blurAndDim our bitmap, if another executor didn't do it already and if it's not
+            // the default art
+            BitmapDrawable output;
+            if (artKey == null || artKey.equals(AlbumArtCache.DEFAULT_ART)) {
                 artKey = AlbumArtCache.DEFAULT_ART;
+                output = drawable;
+            } else {
+                Bitmap blur = BlurCache.getDefault().get(artKey);
+
+                if (blur == null) {
+                    Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
+                    blur = Utils.blurAndDim(ctx, thumb, 25);
+                    BlurCache.getDefault().put(artKey, blur);
+                }
+
+                output = new BitmapDrawable(res, blur);
             }
 
-            Bitmap blur = BlurCache.getDefault().get(artKey);
-            if (blur == null) {
-                Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
-                blur = Utils.blurAndDim(ctx, thumb, 25);
-                BlurCache.getDefault().put(artKey, blur);
-            }
-
-            return blur;
+            return output;
         }
 
         @Override
-        protected void onPostExecute(Bitmap result) {
+        protected void onPostExecute(BitmapDrawable result) {
             super.onPostExecute(result);
 
             if (v.position == mPosition && v.song == mSong && result != null) {
@@ -167,8 +174,9 @@ public class PlaylistAdapter extends BaseAdapter {
                 // We do a smooth transition from a white/transparent background to our blurred one
                 TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
                         v.vRoot.getBackground(),
-                        new BitmapDrawable(v.vRoot.getResources(), result)
+                        result
                 });
+
                 v.vRoot.setBackground(drawable);
                 drawable.startTransition(200);
             }
@@ -287,12 +295,12 @@ public class PlaylistAdapter extends BaseAdapter {
             if (cachedBlur != null) {
                 root.setBackground(new BitmapDrawable(root.getResources(), cachedBlur));
             } else {
-                root.setBackground(res.getDrawable(R.drawable.ab_background_textured_appnavbar));
+                root.setBackground(res.getDrawable(R.drawable.album_list_default_bg));
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
             }
         } else {
-            root.setBackground(res.getDrawable(R.drawable.ab_background_textured_appnavbar));
+            root.setBackground(res.getDrawable(R.drawable.album_list_default_bg));
             BackgroundAsyncTask task = new BackgroundAsyncTask(position);
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
         }

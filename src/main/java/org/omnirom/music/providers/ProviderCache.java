@@ -1,8 +1,5 @@
 package org.omnirom.music.providers;
 
-import android.graphics.Bitmap;
-
-import org.jetbrains.annotations.Nullable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -94,9 +91,8 @@ public class ProviderCache {
     /**
      * Get the art cache key of the album art for the provided song, or null if none found
      * @param song The song to lookup
-     * @return @Nullable The art key, or null if none found
+     * @return The art key, or null if none found
      */
-    @Nullable
     public String getSongArtKey(final Song song) {
         return mSongArtKeys.get(song);
     }
