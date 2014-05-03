@@ -1,102 +1,119 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="org.omnirom.music.app.fragments.NowPlayingFragment">
+<?xml version="1.0" encoding="utf-8"?>
 
-    <ImageView
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/ivShadow"
-        android:layout_gravity="left|top"
-        android:src="@drawable/test_cover_incubus"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="0dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="0dp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ivAlbumArt"
-        android:src="@drawable/ic_btn_pause_red"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="430dp"
+            android:layout_margin="16dp"
+            android:background="@drawable/card_background"
+            android:paddingBottom="4dp">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView3"
-        android:layout_alignBottom="@+id/ivAlbumArt"
-        android:layout_toLeftOf="@+id/ivAlbumArt"
-        android:layout_marginRight="32dp"
-        android:layout_alignTop="@+id/ivAlbumArt"
-        android:src="@drawable/ic_btn_previous" />
+            <org.omnirom.music.app.ui.VuMeterView
+                android:id="@+id/view"
+                android:layout_width="4dp"
+                android:layout_height="32dp"
+                android:layout_alignStart="@+id/textView"
+                android:layout_below="@+id/textView" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView4"
-        android:layout_alignTop="@+id/ivAlbumArt"
-        android:layout_toRightOf="@+id/ivAlbumArt"
-        android:layout_marginLeft="32dp"
-        android:layout_alignBottom="@+id/ivAlbumArt"
-        android:src="@drawable/ic_btn_next" />
+            <TextView
+                android:id="@+id/textView"
+                style="@style/OmniMusic.LargeCard.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:singleLine="true"
+                android:text="Daft Punk Medley" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Hotel California"
-        android:id="@+id/tvTitle"
-        android:layout_below="@+id/ivShadow"
-        android:layout_alignParentStart="true"
-        style="@style/OmniMusic.MediumCard.Title"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin" />
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="128dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/seekBar"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/textView3"
+                android:layout_marginTop="8dp"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/test_cover_ptx" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="The Eagles"
-        android:id="@+id/tvArtist"
-        style="@style/OmniMusic.MediumCard.SubTitle"
-        android:layout_below="@+id/tvTitle"
-        android:layout_alignStart="@+id/tvTitle" />
+            <TextView
+                android:id="@+id/textView2"
+                style="@style/OmniMusic.LargeCard.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView"
+                android:layout_toRightOf="@+id/view"
+                android:singleLine="true"
+                android:text="Pentatonix" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView5"
-        android:src="@drawable/ic_thumbs_up"
-        android:layout_alignBottom="@+id/tvArtist"
-        android:layout_alignParentEnd="true"
-        android:layout_alignTop="@+id/tvTitle"
-        android:adjustViewBounds="true"
-        android:layout_marginRight="@dimen/activity_horizontal_margin" />
+            <TextView
+                android:id="@+id/textView3"
+                style="@style/OmniMusic.LargeCard.Details"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/textView2"
+                android:layout_below="@+id/textView2"
+                android:singleLine="true"
+                android:text="PTX. Vol 2 (2013)" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView6"
-        android:layout_alignTop="@+id/imageView5"
-        android:layout_toLeftOf="@+id/imageView5"
-        android:src="@drawable/ic_thumbs_down"
-        android:layout_alignBottom="@+id/tvArtist"
-        android:adjustViewBounds="true" />
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:src="@drawable/ic_btn_pause" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="1dp"
-        android:background="#aaaaaa"
-        android:autoText="true"
-        android:layout_below="@+id/tvArtist"
-        android:layout_alignStart="@+id/tvArtist"
-        android:layout_alignEnd="@+id/imageView5"
-        android:layout_marginTop="8dp" />
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-</RelativeLayout>
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginRight="32dp"
+                    android:src="@drawable/ic_thumbs_down" />
+
+                <ImageView
+                    android:id="@+id/imageView4"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/ic_thumbs_up" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/linearLayout"
+                android:layout_alignEnd="@+id/imageView2"
+                android:layout_alignParentStart="true"
+                android:progress="50" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+</ScrollView>
