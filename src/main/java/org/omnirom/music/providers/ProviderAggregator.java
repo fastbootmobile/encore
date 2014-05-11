@@ -352,10 +352,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     @Override
     public void onAlbumUpdate(ProviderIdentifier provider, final Album a) throws RemoteException {
-        Log.e(TAG, "AlbumUpdate: " + a.toString());
-        Log.e(TAG, "Album name: " + a.getName());
-        Log.e(TAG, "Album song count: " + a.getSongsCount());
-
         Album cached = mCache.getAlbum(a.getRef());
 
         // See IProviderCallback.aidl in providerlib for more info about the logic of updating

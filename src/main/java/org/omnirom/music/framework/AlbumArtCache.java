@@ -84,10 +84,8 @@ public class AlbumArtCache {
             final Album album = cache.getAlbum(song.getAlbum());
             if (album != null && album.getName() != null && !album.getName().isEmpty()) {
                 albumStr = album.getName();
-                Log.i(TAG, "Using album name: " + albumStr);
             } else {
                 albumStr = song.getTitle();
-                Log.i(TAG, "Using song title: " + albumStr);
             }
 
             // Check if we have it in cache
