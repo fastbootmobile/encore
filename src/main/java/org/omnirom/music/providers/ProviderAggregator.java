@@ -42,11 +42,13 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                             conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
                         List<Playlist> playlist = conn.getBinder().getPlaylists();
                         ensurePlaylistsSongsCached(conn, playlist);
-                    } else {
+                    } else if (conn.getBinder() != null) {
                         Log.i(TAG, "Skipping a providers because it is not setup or authenticated" +
                                 " ==> binder=" + conn.getBinder() + " ; isSetup=" +
                                 conn.getBinder().isSetup() + " ; isAuthenticated=" +
                                 conn.getBinder().isAuthenticated());
+                    } else {
+                        unregisterProvider(conn);
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to get playlists from a providers", e);
@@ -349,8 +351,27 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * Called by the providers when the details of an album have been updated.
      */
     @Override
-    public void onAlbumUpdate(ProviderIdentifier provider, Album a) throws RemoteException {
+    public void onAlbumUpdate(ProviderIdentifier provider, final Album a) throws RemoteException {
+        Log.e(TAG, "AlbumUpdate: " + a.toString());
+        Log.e(TAG, "Album name: " + a.getName());
+        Log.e(TAG, "Album song count: " + a.getSongsCount());
 
+        Album cached = mCache.getAlbum(a.getRef());
+
+        // See IProviderCallback.aidl in providerlib for more info about the logic of updating
+        // the Album objects
+        if (cached == null || !cached.isLoaded() || cached.getSongsCount() < a.getSongsCount()) {
+            mCache.putAlbum(provider, a);
+
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    for (ILocalCallback cb : mUpdateCallbacks) {
+                        cb.onAlbumUpdate(a);
+                    }
+                }
+            });
+        }
     }
 
     /**

@@ -10,6 +10,7 @@ import org.omnirom.music.api.common.HttpGet;
 import org.omnirom.music.api.common.RateLimitException;
 import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
+import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -32,38 +33,75 @@ public class AlbumArtCache {
 
     public static AlbumArtCache getDefault() { return INSTANCE; }
 
+    /**
+     * Setups the album art cache. This is called during application initialization.
+     * @param ctx The application context
+     */
     public void initialize(Context ctx) {
         mContext = ctx;
         mPrefs = ctx.getSharedPreferences(TAG, 0);
         mEditor = mPrefs.edit();
     }
 
+    /**
+     * Returns the album art url for the provided artist and album name from the cache.
+     * @param artist Artist name
+     * @param album Album name
+     * @return An URL to an album art image, or null if none is cached
+     */
     public String getAlbumArtUrl(String artist, String album) {
         return mPrefs.getString(artist + album, null);
     }
 
+    /**
+     * Stores an album art url in the cache.
+     * @param artist Artist name
+     * @param album Album name
+     * @param key The album art cache key
+     */
     public void putAlbumArtUrl(String artist, String album, String key) {
         mEditor.putString(artist + album, key);
         mEditor.apply();
     }
 
+    /**
+     * Fetches an URL (and/or cache key) for the album art for the provided song. The art URL
+     * will be put in the StringBuffer passed in artUrl.
+     * This method does synchronous network calls, so it must NOT be called from the UI thread.
+     * @param song The song to fetch the album from
+     * @param artUrl The stringbuffer in which the album art will be put
+     * @return The cache key for the album art
+     */
     public static String getArtKey(final Song song, StringBuffer artUrl) {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         String artKey = DEFAULT_ART;
         final Artist artist = cache.getArtist(song.getArtist());
         if (artist != null) {
+            // If we have album information about this song, use the album name to fetch the cover.
+            // Otherwise, use the title.
+            String albumStr;
+            final Album album = cache.getAlbum(song.getAlbum());
+            if (album != null && album.getName() != null && !album.getName().isEmpty()) {
+                albumStr = album.getName();
+                Log.i(TAG, "Using album name: " + albumStr);
+            } else {
+                albumStr = song.getTitle();
+                Log.i(TAG, "Using song title: " + albumStr);
+            }
+
             // Check if we have it in cache
-            String tmpUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), song.getTitle());
+            String tmpUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), albumStr);
             if (tmpUrl == null) {
+                // We don't, fetch from MusicBrainz
                 try {
-                    AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), song.getTitle());
+                    AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), albumStr);
                     if (albumInfo != null) {
                         tmpUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
 
                         if (tmpUrl != null) {
                             artUrl.append(tmpUrl);
-                            AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), song.getTitle(), tmpUrl);
+                            AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), albumStr, tmpUrl);
                             artKey = tmpUrl.replaceAll("\\W+", "");
                             cache.putSongArtKey(song, artKey);
                         } else {
@@ -88,6 +126,14 @@ public class AlbumArtCache {
         return artKey;
     }
 
+    /**
+     * Fetches the album art from the provided URL (or returns the cached image). This method
+     * does synchronous network calls, so it must NOT be called from the UI thread.
+     * @param artKey The cache key for the album art
+     * @param artUrl The URL to the album art image
+     * @param def The default bitmap to return in case of error
+     * @return A bitmap containing the album art
+     */
     public static Bitmap getOrDownloadArt(final String artKey, final String artUrl, final Bitmap def) {
         // Check if we have it in our albumart local cache
         Bitmap bmp = ImageCache.getDefault().get(artKey);
