@@ -54,7 +54,11 @@ public class Utils {
         RenderScript renderScript = RenderScript.create(context);
         ScriptIntrinsicBlur intrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
 
-        Allocation input = Allocation.createFromBitmap(renderScript, inBmp);
+        final int scaledW = inBmp.getWidth() / 2;
+        final int scaledH = inBmp.getHeight() / 2;
+
+        Allocation input = Allocation.createFromBitmap(renderScript,
+                Bitmap.createScaledBitmap(inBmp, scaledW, scaledH, false));
         Allocation output = Allocation.createTyped(renderScript, input.getType());
 
         intrinsicBlur.setInput(input);
@@ -63,11 +67,11 @@ public class Utils {
         intrinsicBlur.forEach(output);
 
         // Dim down images with a tint color
+        input.destroy();
         input = Allocation.createFromBitmap(renderScript,
                 Bitmap.createScaledBitmap(Bitmap.createBitmap(new int[]{0x70000000},
                                 1, 1, Bitmap.Config.ARGB_8888),
-                        inBmp.getWidth(),
-                        inBmp.getHeight(), false
+                        scaledW, scaledH, false
                 )
         );
 
@@ -75,8 +79,14 @@ public class Utils {
                 Element.U8_4(renderScript));
         intrinsicBlend.forEachSrcOver(input, output);
 
-        Bitmap outBmp = Bitmap.createBitmap(inBmp.getWidth(), inBmp.getHeight(), inBmp.getConfig());
+        Bitmap outBmp = Bitmap.createBitmap(scaledW, scaledH, inBmp.getConfig());
         output.copyTo(outBmp);
+
+        input.destroy();
+        output.destroy();
+        intrinsicBlur.destroy();
+        intrinsicBlend.destroy();
+        renderScript.destroy();
 
         return outBmp;
     }

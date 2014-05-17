@@ -23,8 +23,8 @@ public class MusicBrainzClient {
     private static final String MAIN_EP = "http://musicbrains.org/ws/2";
     private static final String COVER_EP = "http://coverartarchive.org/release/";
 
-    private static final Map<Pair<String, String>, AlbumInfo> mAlbumInfoCache
-            = new HashMap<Pair<String, String>, AlbumInfo>();
+    private static final Map<Pair<String, String>, AlbumInfo[]> mAlbumInfoCache
+            = new HashMap<Pair<String, String>, AlbumInfo[]>();
     private static final Map<String, String> mAlbumArtCache = new HashMap<String, String>();
 
     /**
@@ -35,45 +35,46 @@ public class MusicBrainzClient {
      * @return An {@link org.omnirom.music.api.musicbrainz.AlbumInfo} filled with the information
      * from musicbrainz, or null in case of error
      */
-    public static AlbumInfo getAlbum(String artist, String album) throws RateLimitException {
+    public static AlbumInfo[] getAlbum(String artist, String album) throws RateLimitException {
         if (mAlbumInfoCache.containsKey(Pair.create(artist, album))) {
             return mAlbumInfoCache.get(Pair.create(artist, album));
         }
 
         try {
             String query = URLEncoder.encode("artist:\"" + artist + "\"", "UTF-8");
-            if (!album.isEmpty()) {
+            if (album != null && !album.isEmpty()) {
                 query += URLEncoder.encode(" AND release:\"" + album + "\"", "UTF-8");
             }
             JSONObject object = JsonGet.getObject(MAIN_EP + "/release/", "fmt=json&query=" + query, true);
 
             if (object.has("releases")) {
                 JSONArray releases = object.getJSONArray("releases");
-                if (releases.length() > 0) {
-                    AlbumInfo info = new AlbumInfo();
+                final int releasesCount = releases.length();
+                if (releasesCount > 0) {
+                    AlbumInfo[] infoArray = new AlbumInfo[releasesCount];
 
-                    JSONObject release = releases.getJSONObject(0);
+                    for (int i = 0; i < releasesCount; i++) {
+                        AlbumInfo info = new AlbumInfo();
 
-                    info.id = release.getString("id");
-                    info.track_count = release.getInt("track-count");
+                        JSONObject release = releases.getJSONObject(i);
 
-                    mAlbumInfoCache.put(Pair.create(artist, album), info);
-                    return info;
+                        info.id = release.getString("id");
+                        info.track_count = release.getInt("track-count");
+
+                        infoArray[i] = info;
+                    }
+
+                    mAlbumInfoCache.put(Pair.create(artist, album), infoArray);
+                    return infoArray;
                 }
             } else if (object.has("error")) {
                 Log.w(TAG, "Rate limited by the API, will retry later");
                 throw new RateLimitException();
             }
 
-            // We retry with just the artist instead, too bad for the album (if we didn't
-            // already).
+            // AlbumArtCache will retry with something else if needed
             mAlbumInfoCache.put(Pair.create(artist, album), null);
-            if (!album.isEmpty()) {
-                return getAlbum(artist, "");
-            } else {
-                // Log.e(TAG, "No match at all for the artist '" + artist + "' (" + MAIN_EP + "/release/?fmt=json&query=" + query + ")");
-                return null;
-            }
+            return null;
         } catch (IOException e) {
             Log.e(TAG, "Unable to get album info (rate limit?)", e);
             return null;

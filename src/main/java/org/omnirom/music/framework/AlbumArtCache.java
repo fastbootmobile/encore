@@ -79,46 +79,104 @@ public class AlbumArtCache {
         final Artist artist = cache.getArtist(song.getArtist());
         if (artist != null) {
             // If we have album information about this song, use the album name to fetch the cover.
-            // Otherwise, use the title.
-            String albumStr;
+            // Otherwise, use the title. However, if the upstream API doesn't have the cover for
+            // the exact album, try the song title. And if still no luck, any art from that
+            // artist will be fine.
+            String queryStr;
+            String initialQueryStr;
+            boolean retry = true;
+            boolean triedTitle = false;
+            boolean triedArtist = false;
+
             final Album album = cache.getAlbum(song.getAlbum());
             if (album != null && album.getName() != null && !album.getName().isEmpty()) {
-                albumStr = album.getName();
+                queryStr = album.getName();
             } else {
-                albumStr = song.getTitle();
+                queryStr = song.getTitle();
+                triedTitle = true;
             }
 
-            // Check if we have it in cache
-            String tmpUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), albumStr);
-            if (tmpUrl == null) {
-                // We don't, fetch from MusicBrainz
-                try {
-                    AlbumInfo albumInfo = MusicBrainzClient.getAlbum(artist.getName(), albumStr);
-                    if (albumInfo != null) {
-                        tmpUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
+            initialQueryStr = new String(queryStr);
 
-                        if (tmpUrl != null) {
-                            artUrl.append(tmpUrl);
-                            AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), albumStr, tmpUrl);
-                            artKey = tmpUrl.replaceAll("\\W+", "");
-                            cache.putSongArtKey(song, artKey);
+            // We try first the exact album, then the title, then just the artist
+            while (retry) {
+                // Escape the query
+                if (queryStr != null) {
+                    queryStr = queryStr.replace('"', ' ');
+                }
+
+                // Check if we have it in cache
+                String tmpUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), queryStr);
+                if (tmpUrl == null) {
+                    // We don't, fetch from MusicBrainz
+                    try {
+                        AlbumInfo[] albumInfoArray = MusicBrainzClient.getAlbum(artist.getName(), queryStr);
+
+                        if (albumInfoArray != null) {
+                            Log.e("XPLOD", "MBC found " + albumInfoArray.length + " albums");
+
+                            for (AlbumInfo albumInfo : albumInfoArray) {
+                                tmpUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
+
+                                if (tmpUrl != null) {
+                                    AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), initialQueryStr, tmpUrl);
+                                    artKey = tmpUrl.replaceAll("\\W+", "");
+                                    cache.putSongArtKey(song, artKey);
+                                    break;
+                                }
+                            }
+
+                            if (tmpUrl == null) {
+                                cache.putSongArtKey(song, DEFAULT_ART);
+                                artKey = DEFAULT_ART;
+                                Log.e("XPLOD", "No MBC match for this query!");
+                            } else {
+                                artUrl.append(tmpUrl);
+                                Log.e("XPLOD", "MBC found a match: " + tmpUrl + " (" + artUrl.toString() + ")");
+                            }
                         } else {
+                            // No album found on musicbrainz
                             cache.putSongArtKey(song, DEFAULT_ART);
                             artKey = DEFAULT_ART;
                         }
-                    } else {
-                        // No album found on musicbrainz
-                        cache.putSongArtKey(song, DEFAULT_ART);
+                    } catch (RateLimitException e) {
+                        // Retry later, rate limited
                         artKey = DEFAULT_ART;
                     }
-                } catch (RateLimitException e) {
-                    // Retry later, rate limited
-                    artKey = DEFAULT_ART;
+                } else {
+                    artKey = tmpUrl.replaceAll("\\W+", "");
+                    cache.putSongArtKey(song, artKey);
                 }
-            } else {
-                artKey = tmpUrl.replaceAll("\\W+", "");
-                cache.putSongArtKey(song, artKey);
+
+                if (artKey.equals(DEFAULT_ART)) {
+                    if (!triedTitle) {
+                        // Couldn't find the exact album, try the song title
+                        triedTitle = true;
+                        queryStr = song.getTitle();
+                        Log.e(TAG, "No exact match found for " + artist.getName() + ", trying title");
+                    } else if (!triedArtist) {
+                        // Coudln't find neither the exact album, nor the title, try the artist
+                        triedArtist = true;
+                        queryStr = null;
+                        Log.e(TAG, "No title match found for " + artist.getName() + ", trying artist");
+                    } else {
+                        // Really, we don't know these guys.
+                        retry = false;
+                        cache.putSongArtKey(song, DEFAULT_ART);
+                        tmpUrl = DEFAULT_ART;
+                        Log.e(TAG, "No match found for " + artist.getName() + ", at all");
+                    }
+                } else {
+                    retry = false;
+                }
+
+                if (!retry) {
+                    // Ensure we have this entry, even if it's not the exact original query (e.g.
+                    // used song title instead of album name) - we'll cache it for that.
+                    AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), initialQueryStr, tmpUrl);
+                }
             }
+
         }
 
         return artKey;
@@ -138,7 +196,7 @@ public class AlbumArtCache {
 
         try {
             if (bmp == null) {
-                if (artUrl != null) {
+                if (artUrl != null && !artUrl.isEmpty()) {
                     try {
                         byte[] imageData = HttpGet.getBytes(artUrl, "", true);
                         bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);

@@ -52,6 +52,8 @@ public class HttpGet {
             throws IOException, RateLimitException {
         final String formattedUrl = inUrl + (query.isEmpty() ? "" : ("?" + query));
 
+        Log.e(TAG, "Formatted URL: " + formattedUrl);
+
         URL url = new URL(formattedUrl);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestProperty("User-Agent","OmniMusic/1.0-dev (http://www.omnirom.org)");

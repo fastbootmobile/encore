@@ -43,6 +43,7 @@ import org.omnirom.music.service.IPlaybackService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  *
@@ -155,12 +156,31 @@ public class PlaylistAdapter extends BaseAdapter {
 
                 if (blur == null) {
                     Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
+
+                    if (v.position != this.mPosition) {
+                        // Cancel, we moved
+                        return null;
+                    }
+
                     blur = Utils.blurAndDim(ctx, thumb, 25);
-                    BlurCache.getDefault().put(artKey, blur);
+
+                    if (v.position != this.mPosition) {
+                        // Cancel, we moved
+                        return null;
+                    }
+
+                    BlurCache.getDefault().put(artKey, blur, true);
+                }
+
+                if (v.position != this.mPosition) {
+                    // Cancel, we moved
+                    return null;
                 }
 
                 output = new BitmapDrawable(res, blur);
             }
+
+            cache.putSongArtKey(mSong, artKey);
 
             return output;
         }
@@ -172,13 +192,13 @@ public class PlaylistAdapter extends BaseAdapter {
             if (v.position == mPosition && v.song == mSong && result != null) {
                 // If this item hasn't been recycled already, set and show the image
                 // We do a smooth transition from a white/transparent background to our blurred one
-                TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
+               /* TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
                         v.vRoot.getBackground(),
                         result
                 });
-
-                v.vRoot.setBackground(drawable);
-                drawable.startTransition(200);
+*/
+                v.vRoot.setBackground(result);
+                //drawable.startTransition(200);
             }
         }
     }
@@ -298,11 +318,13 @@ public class PlaylistAdapter extends BaseAdapter {
                 root.setBackground(res.getDrawable(R.drawable.album_list_default_bg));
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+                //task.execute(tag);
             }
         } else {
             root.setBackground(res.getDrawable(R.drawable.album_list_default_bg));
             BackgroundAsyncTask task = new BackgroundAsyncTask(position);
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+            //task.execute(tag);
         }
 
         final VuMeterView vuMeter = (VuMeterView) root.findViewById(R.id.vuMeter);

@@ -14,6 +14,8 @@ public class BlurCache {
 
     private static BlurCache INSTANCE = new BlurCache();
 
+    private static final String IMAGE_CACHE_SUFFIX = "____OM_BLUR";
+
     private LruCache<String, Bitmap> mCache;
 
     private BlurCache() {
@@ -30,11 +32,29 @@ public class BlurCache {
         return INSTANCE;
     }
 
-    public void put(String key, Bitmap bmp) {
+    public void put(String key, Bitmap bmp, boolean cacheFile) {
         mCache.put(key, bmp);
+
+        if (cacheFile) {
+            ImageCache.getDefault().put(key + IMAGE_CACHE_SUFFIX, bmp);
+        }
     }
 
     public Bitmap get(String key) {
-        return mCache.get(key);
+        // If we have the blurred image in memory, return it
+        Bitmap output = mCache.get(key);
+        if (output != null) {
+            return output;
+        }
+
+        // Else, try to see if we have it cached in a file in local storage, and add it to memory
+        output = ImageCache.getDefault().get(key + IMAGE_CACHE_SUFFIX);
+        if (output != null) {
+            put(key, output, false);
+            return output;
+        }
+
+        // Well, too bad then, we don't have it
+        return null;
     }
 }
