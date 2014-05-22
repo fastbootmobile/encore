@@ -64,7 +64,7 @@
         </FrameLayout>
     </RelativeLayout>
 
-    <ListView
+    <org.omnirom.music.app.ui.PlaylistListView
         android:id="@+id/lvPlaylistContents"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

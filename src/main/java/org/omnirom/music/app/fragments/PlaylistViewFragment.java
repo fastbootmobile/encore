@@ -2,6 +2,9 @@ package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -19,6 +22,7 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
 import org.omnirom.music.app.ui.ExpandableHeightGridView;
+import org.omnirom.music.app.ui.PlaylistListView;
 import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
@@ -51,6 +55,7 @@ public class PlaylistViewFragment extends Fragment
     private Playlist mPlaylist;
     private PlaybackState mPlaybackState;
 
+    private BitmapDrawable mCell;
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -88,7 +93,7 @@ public class PlaylistViewFragment extends Fragment
         View root = inflater.inflate(R.layout.fragment_playlist_view, container, false);
         assert root != null;
 
-        ListView lvPlaylistContents = (ListView) root.findViewById(R.id.lvPlaylistContents);
+        PlaylistListView lvPlaylistContents = (PlaylistListView) root.findViewById(R.id.lvPlaylistContents);
         mAdapter = new PlaylistAdapter(root.getContext());
         lvPlaylistContents.setAdapter(mAdapter);
 
@@ -120,6 +125,7 @@ public class PlaylistViewFragment extends Fragment
             }
         });
 
+
         // Fill the playlist information
         TextView tvPlaylistName = (TextView) root.findViewById(R.id.tvPlaylistName);
         TextView tvNumTracks = (TextView) root.findViewById(R.id.tvNumTracks);
@@ -129,6 +135,7 @@ public class PlaylistViewFragment extends Fragment
 
         return root;
     }
+
 
     @Override
     public void onAttach(Activity activity) {

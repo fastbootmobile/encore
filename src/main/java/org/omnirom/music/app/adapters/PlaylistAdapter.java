@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.omnirom.music.api.common.HttpGet;
@@ -53,6 +54,8 @@ public class PlaylistAdapter extends BaseAdapter {
     private static final String TAG = "PlaylistAdapter";
 
     private List<Song> mSongs;
+    private List<Integer> mVisible;
+    private List<Integer> mIds;
     private Handler mHandler;
     private int mItemWidth;
     private int mItemHeight;
@@ -202,6 +205,30 @@ public class PlaylistAdapter extends BaseAdapter {
             }
         }
     }
+    //Calls the proper handler to update the playlist order
+    public void updatePlaylist(){
+
+    }
+    //Swaps two elements and their properties
+    public void swap(int original, int newPosition){
+        Song temp = mSongs.get(original);
+        mSongs.set(original,mSongs.get(newPosition));
+        mSongs.set(newPosition,temp);
+        int tempVis = mVisible.get(original);
+        mVisible.set(original,mVisible.get(newPosition));
+        mVisible.set(newPosition,tempVis);
+        int tempId = mIds.get(original);
+        mIds.set(original, mIds.get(newPosition));
+        mIds.set(newPosition,tempId);
+    }
+    //Sets the visibility of a selected element to visibility
+    //Save the visibility to remember when the view is recycled
+    public void setVisibility(int position, int visibility){
+        if(position >= 0 && position < mVisible.size()) {
+            Log.d(TAG,position+" visibility "+visibility);
+            mVisible.set(position, visibility);
+        }
+    }
 
     private static class ViewHolder {
         public TextView tvTitle;
@@ -214,8 +241,9 @@ public class PlaylistAdapter extends BaseAdapter {
 
     public PlaylistAdapter(Context ctx) {
         mSongs = new ArrayList<Song>();
+        mVisible = new ArrayList<Integer>();
         mHandler = new Handler();
-
+        mIds = new ArrayList<Integer>();
         final Resources res = ctx.getResources();
         assert res != null;
 
@@ -238,6 +266,8 @@ public class PlaylistAdapter extends BaseAdapter {
 
     public void addItem(Song p) {
         mSongs.add(p);
+       mVisible.add(View.VISIBLE);
+        mIds.add(mSongs.size()-1);
     }
 
     @Override
@@ -252,7 +282,9 @@ public class PlaylistAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return position;
+        if(position >= 0 && position < mIds.size())
+            return mIds.get(position);
+        return -1;
     }
 
     @Override
@@ -338,6 +370,7 @@ public class PlaylistAdapter extends BaseAdapter {
             vuMeter.setVisibility(View.GONE);
         }
 
+        root.setVisibility(mVisible.get(position));
         return root;
     }
 
