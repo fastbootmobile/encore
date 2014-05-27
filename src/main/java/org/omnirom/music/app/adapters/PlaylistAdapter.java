@@ -39,6 +39,8 @@ import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.providers.ProviderConnection;
+import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.io.IOException;
@@ -62,6 +64,7 @@ public class PlaylistAdapter extends BaseAdapter {
     private Song mCurrentSong;
     private VuMeterView mActiveVuMeter;
     private float mCurrentRms;
+    private Playlist mPlaylist;
     private Runnable mUpdateRMS = new Runnable() {
         @Override
         public void run() {
@@ -96,7 +99,9 @@ public class PlaylistAdapter extends BaseAdapter {
             }
         }
     };
-
+    public void setPlaylist(Playlist playlist){
+        mPlaylist = playlist;
+    }
     // Using an AsyncTask to load the slow images in a background thread
     private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
         private ViewHolder v;
@@ -206,8 +211,20 @@ public class PlaylistAdapter extends BaseAdapter {
         }
     }
     //Calls the proper handler to update the playlist order
-    public void updatePlaylist(){
-
+    public void updatePlaylist(int oldPosition, int newPosition){
+       ProviderIdentifier providerIdentifier = ProviderAggregator.getDefault().getCache().getRefProvider(mPlaylist.getRef());
+        try {
+            PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().onUserSwapPlaylistItem(oldPosition, newPosition, mPlaylist.getRef());
+            Log.d(TAG,"swaping "+oldPosition+" and "+newPosition);
+            resetIds();
+        } catch(RemoteException e){
+            Log.e(TAG,"Error: "+e.getMessage());
+        }
+    }
+    private void resetIds(){
+        for(int i = 0; i < mIds.size();i++){
+            mIds.set(i,i);
+        }
     }
     //Swaps two elements and their properties
     public void swap(int original, int newPosition){

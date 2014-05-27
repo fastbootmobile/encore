@@ -105,7 +105,7 @@ public class PlaylistViewFragment extends Fragment
             mAdapter.addItem(song);
         }
         mAdapter.notifyDataSetChanged();
-
+        mAdapter.setPlaylist(mPlaylist);
         // Set the list listener
         lvPlaylistContents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

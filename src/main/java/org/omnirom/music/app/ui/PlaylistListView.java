@@ -72,7 +72,7 @@ public class PlaylistListView extends ListView {
     private long mAboveItemId = INVALID_ID;
     private long mMobileItemId = INVALID_ID;
     private long mBelowItemId = INVALID_ID;
-
+    private long mLastItemId = INVALID_ID;
     private BitmapDrawable mHoverCell;
     private Rect mHoverCellCurrentBounds;
     private Rect mHoverCellOriginalBounds;
@@ -321,7 +321,7 @@ public class PlaylistListView extends ListView {
                 updateNeighborViewsForID(mMobileItemId);
                 return;
             }
-
+            mLastItemId = switchItemID;
 
             PlaylistAdapter adapter = (PlaylistAdapter) getAdapter();
             //swapElements(adapter.getData(),originalItem, getPositionForView(switchView));
@@ -376,7 +376,9 @@ public class PlaylistListView extends ListView {
         final View mobileView = getViewForID(mMobileItemId);
         if(mCellIsMobile){
             PlaylistAdapter adapter = (PlaylistAdapter) getAdapter();
-            adapter.updatePlaylist();
+            Log.d(TAG, "We swap "+mMobileItemId+" and "+mLastItemId);
+            if(mLastItemId != INVALID_ID)
+                adapter.updatePlaylist((int)  mMobileItemId,(int) mLastItemId );
         }
         if (mCellIsMobile|| mIsWaitingForScrollFinish) {
             mCellIsMobile = false;
