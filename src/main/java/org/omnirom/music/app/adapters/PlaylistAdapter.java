@@ -216,6 +216,21 @@ public class PlaylistAdapter extends BaseAdapter {
         try {
             PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().onUserSwapPlaylistItem(oldPosition, newPosition, mPlaylist.getRef());
             Log.d(TAG,"swaping "+oldPosition+" and "+newPosition);
+           //// resetIds();
+        } catch(RemoteException e){
+            Log.e(TAG,"Error: "+e.getMessage());
+        }
+    }
+    public int getSize() {
+        return mSongs.size();
+    }
+    public void delete(int id){
+        ProviderIdentifier providerIdentifier = ProviderAggregator.getDefault().getCache().getRefProvider(mPlaylist.getRef());
+        try {
+            PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().deleteSongFromPlaylist(id, mPlaylist.getRef());
+            mSongs.remove(id);
+            mIds.remove(id);
+            mVisible.remove(id);
             resetIds();
         } catch(RemoteException e){
             Log.e(TAG,"Error: "+e.getMessage());

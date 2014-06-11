@@ -55,9 +55,10 @@ public class PlaylistListView extends ListView {
     private final int SMOOTH_SCROLL_AMOUNT_AT_EDGE = 15;
     private final int MOVE_DURATION = 150;
     private final int LINE_THICKNESS = 15;
-
+    private boolean mDeleted = false;
    private String TAG = "PlaylistListview";
     private int mLastEventY = -1;
+    private int mLastEventX = -1;
 
     private int mDownY = -1;
     private int mDownX = -1;
@@ -250,10 +251,22 @@ public class PlaylistListView extends ListView {
                 int pointerIndex = event.findPointerIndex(mActivePointerId);
 
                 mLastEventY = (int) event.getY(pointerIndex);
+                mLastEventX = (int) event.getX(pointerIndex);
+                int deltaX = mLastEventX - mDownX;
                 int deltaY = mLastEventY - mDownY;
 
                 if (mCellIsMobile) {
-                    mHoverCellCurrentBounds.offsetTo(mHoverCellOriginalBounds.left,
+                    int posX = mHoverCellOriginalBounds.left + deltaX;
+                    if(posX < 0)
+                        posX = 0;
+                    int alpha = Math.max(0,255*(mHoverCellCurrentBounds.width()*2/3-posX)/(mHoverCellCurrentBounds.width()*2/3));
+                    Log.d(TAG,"pos"+posX+" alpha:"+alpha+" width:"+mHoverCellCurrentBounds.width());
+                    if(alpha < 60 ) {
+                        Log.d(TAG, "Deletted");
+                        mDeleted = true;
+                    }
+                    mHoverCell.setAlpha(alpha);
+                    mHoverCellCurrentBounds.offsetTo(posX,
                             mHoverCellOriginalBounds.top + deltaY + mTotalOffset);
                     mHoverCell.setBounds(mHoverCellCurrentBounds);
                     invalidate();
@@ -374,7 +387,35 @@ public class PlaylistListView extends ListView {
     private void touchEventsEnded () {
 
         final View mobileView = getViewForID(mMobileItemId);
-        if(mCellIsMobile){
+        if(mCellIsMobile && mDeleted){
+            final PlaylistAdapter adapter = (PlaylistAdapter) getAdapter();
+            Log.d(TAG, "We delete "+mMobileItemId);
+            adapter.delete((int)mMobileItemId);
+            adapter.notifyDataSetChanged();
+
+            final ViewTreeObserver observer = getViewTreeObserver();
+            observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                public boolean onPreDraw() {
+                    observer.removeOnPreDrawListener(this);
+                    for(int i = (int)mMobileItemId; i < adapter.getSize();i++) {
+                        View switchView = getViewForID(i);
+                        if(switchView != null) {
+
+                            int delta = switchView.getHeight();
+
+                            switchView.setTranslationY(delta);
+
+                            ObjectAnimator animator = ObjectAnimator.ofFloat(switchView,
+                                    View.TRANSLATION_Y, 0);
+                            animator.setDuration(MOVE_DURATION);
+                            animator.start();
+                        }
+                    }
+                    return true;
+                }
+            });
+        }
+        else if(mCellIsMobile){
             PlaylistAdapter adapter = (PlaylistAdapter) getAdapter();
             Log.d(TAG, "We swap "+mMobileItemId+" and "+mLastItemId);
             if(mLastItemId != INVALID_ID)
