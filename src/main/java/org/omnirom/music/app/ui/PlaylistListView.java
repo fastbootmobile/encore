@@ -260,7 +260,6 @@ public class PlaylistListView extends ListView {
                     if(posX < 0)
                         posX = 0;
                     int alpha = Math.max(0,255*(mHoverCellCurrentBounds.width()*2/3-posX)/(mHoverCellCurrentBounds.width()*2/3));
-                    Log.d(TAG,"pos"+posX+" alpha:"+alpha+" width:"+mHoverCellCurrentBounds.width());
                     if(alpha < 60 ) {
                         Log.d(TAG, "Deletted");
                         mDeleted = true;
