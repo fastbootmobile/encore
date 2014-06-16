@@ -9,6 +9,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlend;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.util.TypedValue;
+import android.widget.Toast;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,6 +38,10 @@ public class Utils {
         return actionBarHeight;
     }
 
+    /**
+     * @param res The resources context
+     * @return The height of the status bar, in pixels
+     */
     public static int getStatusBarHeight(Resources res) {
         int resourceId = res.getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
@@ -46,6 +51,16 @@ public class Utils {
         }
     }
 
+    /**
+     * Blurs and dims (darken) a provided bitmap.
+     * Note that this method recreates and reallocates RenderScript data, so it is not a good idea
+     * to use it where performance is critical.
+     *
+     * @param context The application context
+     * @param inBmp The input bitmap
+     * @param radius The blur radius, max 25
+     * @return A blurred and dimmed copy of the input bitmap
+     */
     public static Bitmap blurAndDim(Context context, Bitmap inBmp, float radius) {
         if (inBmp == null) {
             throw new IllegalArgumentException("blurAndDim: The input bitmap is null!");
@@ -91,6 +106,15 @@ public class Utils {
         return outBmp;
     }
 
+    /**
+     * Format milliseconds into an human-readable track length.
+     * Examples:
+     *  - 01:48:24 for 1 hour, 48 minutes, 24 seconds
+     *  - 24:02 for 24 minutes, 2 seconds
+     *  - 52s for 52 seconds
+     * @param timeMs The time to format, in milliseconds
+     * @return A formatted string
+     */
     public static String formatTrackLength(int timeMs) {
         long hours = TimeUnit.MILLISECONDS.toHours(timeMs);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(timeMs) - TimeUnit.HOURS.toMinutes(hours);
@@ -137,5 +161,14 @@ public class Utils {
         double averageMeanSquare = sumMeanSquare / numframes;
 
         return (int) (Math.pow(averageMeanSquare, 0.5d) + 0.5);
+    }
+
+    /**
+     * Shows a short Toast style message
+     * @param context The application context
+     * @param res The String resource id
+     */
+    public static void shortToast(Context context, int res) {
+        Toast.makeText(context, res, Toast.LENGTH_SHORT).show();
     }
 }

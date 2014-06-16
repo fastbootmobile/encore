@@ -19,5 +19,6 @@
     <string name="cast">Cast</string>
     <string name="placeholder_search">Search your music…</string>
     <string name="nb_tracks">%d tracks</string>
+    <string name="no_settings_provider">This provider has no settings</string>
 
 </resources>
