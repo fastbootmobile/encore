@@ -86,8 +86,10 @@ public class PlayingBarView extends RelativeLayout {
             mTitleView.setText(s.getTitle());
 
             Artist artist = ProviderAggregator.getDefault().getCache().getArtist(s.getArtist());
-            mArtistView.setText(artist.getName());
-
+            if(artist != null)
+                mArtistView.setText(artist.getName());
+            else
+                mArtistView.setText("...");
             mScrobble.setMax(s.getDuration());
 
             // Set the visibility and button state

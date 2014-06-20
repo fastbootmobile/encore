@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import org.omnirom.music.app.fragments.AbstractRootFragment;
+import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.NowPlayingFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
@@ -157,7 +158,9 @@ public class MainActivity extends Activity
                 case SECTION_PLAYLISTS:
                     newFrag = PlaylistListFragment.newInstance();
                     break;
-
+                case SECTION_MY_SONGS :
+                    newFrag = MySongsFragment.newInstance();
+                    break;
                 default:
                     newFrag = PlaceholderFragment.newInstance(position + 1);
                     break;

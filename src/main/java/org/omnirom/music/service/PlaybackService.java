@@ -199,6 +199,8 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
                     provider.playSong(first.getRef());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to play song", e);
+                } catch (NullPointerException e)  {
+                    Log.e(TAG,"No provider attached",e);
                 }
 
                 // TODO: Do on provider's songStarted callback
