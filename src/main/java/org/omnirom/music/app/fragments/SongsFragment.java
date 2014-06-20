@@ -73,7 +73,10 @@ public class SongsFragment extends AbstractRootFragment implements ILocalCallbac
         return root;
     }
 
-
+    public static SongsFragment newInstance() {
+        SongsFragment fragment = new SongsFragment();
+        return fragment;
+    }
     @Override
     public void onSongUpdate(Song s) {
 

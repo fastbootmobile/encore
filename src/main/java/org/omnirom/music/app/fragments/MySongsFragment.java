@@ -33,7 +33,7 @@ public class MySongsFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_my_songs, container, false);
         assert root != null;
-        mySongsAdapter = new MySongsAdapter(getFragmentManager());
+        mySongsAdapter = new MySongsAdapter(getChildFragmentManager());
         mViewPager = (ViewPager) root.findViewById(R.id.pager);
        // PagerTitleStrip pagerTitleStrip = (PagerTitleStrip) root.findViewById(R.id.pager_title_strip);
 

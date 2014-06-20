@@ -26,16 +26,13 @@ public class MySongsAdapter extends FragmentStatePagerAdapter {
         Fragment fragment;
         switch (i){
             case 0:
-                fragment =  mSongsFragment;
+                fragment =  SongsFragment.newInstance();
                 break;
             case 1:
-                fragment = mPlaylistListFragment;
-                break;
-            case 2:
-                fragment = mPlaylistListFragment;
+                fragment = PlaylistListFragment.newInstance();
                 break;
             default:
-                fragment = mPlaylistListFragment;
+                fragment = PlaylistListFragment.newInstance();
                 break;
         }
         return fragment;
