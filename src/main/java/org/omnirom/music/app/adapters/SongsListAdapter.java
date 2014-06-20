@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -92,6 +93,8 @@ public class SongsListAdapter  extends BaseAdapter{
 
             Artist artist = cache.getArtist(song.getArtist());
             if (artist != null) {
+                Log.e("SongsListAdapter","artist found");
+                Log.e("SongsListAdapter",song.getArtist());
                 tag.tvArtist.setText(artist.getName());
             } else {
                 tag.tvArtist.setText("...");
