@@ -12,8 +12,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderConnection;
 
@@ -74,18 +76,20 @@ public class SettingsFragment extends PreferenceFragment {
 
         mProviders = mPluginsLookup.getAvailableProviders();
 
+        Log.e(TAG, "Providers: " + mProviders.size());
+
         CharSequence[] providerNames = new CharSequence[mProviders.size()];
         CharSequence[] providerValues = new CharSequence[mProviders.size()];
         int i = 0;
         for (ProviderConnection provider : mProviders) {
             providerNames[i] = provider.getProviderName();
             providerValues[i] = Integer.toString(i);
+            i++;
         }
         mslProvidersEnable.setEntries(providerNames);
         mslProvidersEnable.setEntryValues(providerValues);
         listProvidersConfig.setEntries(providerNames);
         listProvidersConfig.setEntryValues(providerValues);
-
 
         listProvidersConfig.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
@@ -93,10 +97,14 @@ public class SettingsFragment extends PreferenceFragment {
                 int providerNum = Integer.parseInt((String) newValue);
                 mProviderInConfig = mProviders.get(providerNum);
 
-                Intent i = new Intent();
-                i.setClassName(mProviderInConfig.getPackage(),
-                        mProviderInConfig.getConfigurationActivity());
-                startActivity(i);
+                if (mProviderInConfig.getConfigurationActivity() != null) {
+                    Intent i = new Intent();
+                    i.setClassName(mProviderInConfig.getPackage(),
+                            mProviderInConfig.getConfigurationActivity());
+                    startActivity(i);
+                } else {
+                    Utils.shortToast(getActivity(), R.string.no_settings_provider);
+                }
 
                 return true;
             }
