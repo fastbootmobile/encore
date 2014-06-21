@@ -56,6 +56,16 @@ interface IPlaybackService {
     boolean isPlaying();
 
     /**
+     * Returns the current song length, in milliseconds
+     */
+    int getCurrentTrackLength();
+
+    /**
+     * Returns the current playback position of the track, in milliseconds
+     */
+    int getCurrentTrackPosition();
+
+    /**
      * Returns the current RMS level of the currently playing output
      */
     int getCurrentRms();

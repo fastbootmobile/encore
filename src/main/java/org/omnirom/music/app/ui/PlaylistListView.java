@@ -404,7 +404,7 @@ public class PlaylistListView extends ListView {
 
             final ViewTreeObserver observer = getViewTreeObserver();
             assert observer != null;
-            
+
             observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
                     observer.removeOnPreDrawListener(this);

@@ -35,6 +35,9 @@ public class PlayingBarView extends RelativeLayout {
 
     private static final String TAG = "PlayingBarView";
 
+    // Delay after which the seek bar is updated (30Hz)
+    private static final int SEEK_BAR_UPDATE_DELAY = 1000/30;
+
     private Runnable mAlbumArtRunnable = new Runnable() {
         @Override
         public void run() {
@@ -42,8 +45,7 @@ public class PlayingBarView extends RelativeLayout {
             final Song startSong = mSong;
 
             // Prepare the placeholder/default
-            // TODO: Default background
-            BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.test_cover_imagine_dragons);
+            BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.album_list_default_bg);
             assert drawable != null;
             Bitmap bmp = drawable.getBitmap();
 
@@ -73,6 +75,29 @@ public class PlayingBarView extends RelativeLayout {
         }
     };
 
+    private Runnable mUpdateSeekBarRunnable = new Runnable() {
+        @Override
+        public void run() {
+            IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+            if (playbackService != null) {
+                try {
+                    if (playbackService.isPlaying()) {
+                        mScrobble.setMax(playbackService.getCurrentTrackLength());
+                        mScrobble.setProgress(playbackService.getCurrentTrackPosition());
+
+                        // Restart ourselves
+                        mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
+                    } else {
+                        mScrobble.setMax(1);
+                        mScrobble.setProgress(1);
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to update seek bar", e);
+                }
+            }
+        }
+    };
+
     private IPlaybackCallback.Stub mPlaybackCallback = new IPlaybackCallback.Stub() {
 
         @Override
@@ -96,6 +121,8 @@ public class PlayingBarView extends RelativeLayout {
             setPlayButtonState(false);
             animateVisibility(true);
             mIsPlaying = true;
+
+            mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
         }
 
         @Override

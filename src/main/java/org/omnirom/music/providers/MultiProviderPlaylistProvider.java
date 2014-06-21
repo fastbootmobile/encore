@@ -177,6 +177,16 @@ public class MultiProviderPlaylistProvider implements IMusicProvider {
     }
 
     @Override
+    public void pause() throws RemoteException {
+        Log.e(TAG, "NOT IMPLEMENTED");
+    }
+
+    @Override
+    public void resume() throws RemoteException {
+        Log.e(TAG, "NOT IMPLEMENTED");
+    }
+
+    @Override
     public boolean onUserSwapPlaylistItem(int oldPosition, int newPosition, String playlistRef) throws RemoteException {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
