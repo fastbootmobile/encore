@@ -59,6 +59,11 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
     private PlaybackQueue mPlaybackQueue;
     private List<IPlaybackCallback> mCallbacks;
     private Notification mNotification;
+    private Song mCurrentTrack;
+    private long mCurrentTrackStartTime;
+    private long mPauseLastTick;
+    private boolean mIsPlaying;
+    private boolean mIsPaused;
 
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
@@ -203,7 +208,11 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
                     Log.e(TAG,"No provider attached",e);
                 }
 
+                mCurrentTrack = first;
+
                 // TODO: Do on provider's songStarted callback
+                mCurrentTrackStartTime = System.currentTimeMillis();
+                mIsPlaying = true;
                 for (IPlaybackCallback cb : mCallbacks) {
                     try {
                         cb.onSongStarted(first);
@@ -258,17 +267,65 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
 
         @Override
         public void pause() throws RemoteException {
+            if (mCurrentTrack != null) {
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+                provider.pause();
+                mIsPaused = true;
+                mPauseLastTick = System.currentTimeMillis();
 
+                for (IPlaybackCallback cb : mCallbacks) {
+                    try {
+                        cb.onPlaybackPause();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                    }
+                }
+            }
         }
 
         @Override
         public boolean play() throws RemoteException {
-            return false;
+            if (mCurrentTrack != null) {
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+                provider.resume();
+                mIsPaused = false;
+
+                for (IPlaybackCallback cb : mCallbacks) {
+                    try {
+                        cb.onPlaybackResume();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot call playback callback for playback resume event", e);
+                    }
+                }
+
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
         public boolean isPlaying() throws RemoteException {
-            return false;
+            return mIsPlaying;
+        }
+
+        @Override
+        public int getCurrentTrackLength() throws RemoteException {
+            return mCurrentTrack.getDuration();
+        }
+
+        @Override
+        public int getCurrentTrackPosition() throws RemoteException {
+            if (mIsPaused) {
+                // When we are paused, we delay the track start time for as long as we are paused
+                // so that the song position actually pauses too. This is more a hack (hey, we
+                // mimic the official Spotify app bug!), and ideally we should calculate the elapsed
+                // time by counting the frames that are fed to the AudioSink.
+                mCurrentTrackStartTime += (System.currentTimeMillis() - mPauseLastTick);
+                mPauseLastTick = System.currentTimeMillis();
+            }
+
+            return (int) (System.currentTimeMillis() - mCurrentTrackStartTime);
         }
 
         @Override

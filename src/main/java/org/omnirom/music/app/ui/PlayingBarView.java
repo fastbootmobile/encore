@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -35,6 +36,9 @@ public class PlayingBarView extends RelativeLayout {
 
     private static final String TAG = "PlayingBarView";
 
+    // Delay after which the seek bar is updated (30Hz)
+    private static final int SEEK_BAR_UPDATE_DELAY = 1000/30;
+
     private Runnable mAlbumArtRunnable = new Runnable() {
         @Override
         public void run() {
@@ -42,8 +46,7 @@ public class PlayingBarView extends RelativeLayout {
             final Song startSong = mSong;
 
             // Prepare the placeholder/default
-            // TODO: Default background
-            BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.test_cover_imagine_dragons);
+            BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.album_list_default_bg);
             assert drawable != null;
             Bitmap bmp = drawable.getBitmap();
 
@@ -73,6 +76,29 @@ public class PlayingBarView extends RelativeLayout {
         }
     };
 
+    private Runnable mUpdateSeekBarRunnable = new Runnable() {
+        @Override
+        public void run() {
+            IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+            if (playbackService != null) {
+                try {
+                    if (playbackService.isPlaying()) {
+                        mScrobble.setMax(playbackService.getCurrentTrackLength());
+                        mScrobble.setProgress(playbackService.getCurrentTrackPosition());
+
+                        // Restart ourselves
+                        mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
+                    } else {
+                        mScrobble.setMax(1);
+                        mScrobble.setProgress(1);
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to update seek bar", e);
+                }
+            }
+        }
+    };
+
     private IPlaybackCallback.Stub mPlaybackCallback = new IPlaybackCallback.Stub() {
 
         @Override
@@ -96,6 +122,8 @@ public class PlayingBarView extends RelativeLayout {
             setPlayButtonState(false);
             animateVisibility(true);
             mIsPlaying = true;
+
+            mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
         }
 
         @Override
@@ -121,7 +149,8 @@ public class PlayingBarView extends RelativeLayout {
     private Song mSong;
     private boolean mIsPlaying;
     private ProgressBar mScrobble;
-    private ImageView mPlayPauseButton;
+    private FrameLayout mPlayPauseButton;
+    private ImageView mPlayPauseInner;
     private ImageView mAlbumArt;
     private TextView mArtistView;
     private TextView mTitleView;
@@ -166,7 +195,8 @@ public class PlayingBarView extends RelativeLayout {
         });
 
         mScrobble           = (ProgressBar) findViewById(R.id.pbScrobble);
-        mPlayPauseButton    = (ImageView)   findViewById(R.id.btnPlay);
+        mPlayPauseButton    = (FrameLayout)   findViewById(R.id.btnPlay);
+        mPlayPauseInner     = (ImageView)   findViewById(R.id.btnPlayInner);
         mAlbumArt           = (ImageView)   findViewById(R.id.ivAlbumArt);
         mArtistView         = (TextView)    findViewById(R.id.tvArtist);
         mTitleView          = (TextView)    findViewById(R.id.tvTitle);
@@ -209,9 +239,9 @@ public class PlayingBarView extends RelativeLayout {
      */
     public void setPlayButtonState(boolean play) {
         if (play) {
-            mPlayPauseButton.setImageResource(R.drawable.ic_btn_play);
+            mPlayPauseInner.setImageResource(R.drawable.ic_btn_play);
         } else {
-            mPlayPauseButton.setImageResource(R.drawable.ic_btn_pause);
+            mPlayPauseInner.setImageResource(R.drawable.ic_btn_pause);
         }
     }
 
