@@ -22,6 +22,8 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -44,7 +46,15 @@ public class SongsListAdapter  extends BaseAdapter{
     public void put(Song song){
         mSongs.add(song);
     }
+    public void sortAll(){
+        Collections.sort(mSongs, new Comparator<Song>() {
+            @Override
+            public int compare(Song lhs, Song rhs) {
+                return lhs.getTitle().compareTo(rhs.getTitle());
+            }
+        });
 
+    }
     @Override
     public int getCount(){
         return mSongs.size();
@@ -93,8 +103,6 @@ public class SongsListAdapter  extends BaseAdapter{
 
             Artist artist = cache.getArtist(song.getArtist());
             if (artist != null) {
-                Log.e("SongsListAdapter","artist found");
-                Log.e("SongsListAdapter",song.getArtist());
                 tag.tvArtist.setText(artist.getName());
             } else {
                 tag.tvArtist.setText("...");

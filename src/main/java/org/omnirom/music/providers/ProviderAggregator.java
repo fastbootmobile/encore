@@ -42,6 +42,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                             conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
                         List<Playlist> playlist = conn.getBinder().getPlaylists();
                         ensurePlaylistsSongsCached(conn, playlist);
+                        cacheSongs(conn,conn.getBinder().getSongs());
+                        cacheAlbums(conn,conn.getBinder().getAlbums());
+                        cacheArtists(conn,conn.getBinder().getArtists());
                     } else if (conn.getBinder() != null) {
                         Log.i(TAG, "Skipping a providers because it is not setup or authenticated" +
                                 " ==> binder=" + conn.getBinder() + " ; isSetup=" +
@@ -107,7 +110,42 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     public void removeUpdateCallback(ILocalCallback cb) {
         mUpdateCallbacks.remove(cb);
     }
-
+    public void cacheSongs(final ProviderConnection provider,final List<Song> songs){
+        if(provider == null)
+            return;
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                for(Song song : songs){
+                    mCache.putSong(provider.getIdentifier(),song);
+                }
+            }
+        });
+    }
+    public void cacheAlbums(final ProviderConnection provider,final List<Album> albums){
+        if(provider == null)
+            return;
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                for(Album album : albums){
+                    mCache.putAlbum(provider.getIdentifier(),album);
+                }
+            }
+        });
+    }
+    public void cacheArtists(final ProviderConnection provider,final List<Artist> artists){
+        if(provider == null)
+            return;
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                for(Artist artist : artists){
+                    mCache.putArtist(provider.getIdentifier(),artist);
+                }
+            }
+        });
+    }
     /**
      * Queries in a thread the songs of the list of playlist passed in parameter, if needed
      * Note that this method is only valid for playlists that have been provided by a provider.

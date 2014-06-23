@@ -42,16 +42,21 @@ public class SongsFragment extends AbstractRootFragment implements ILocalCallbac
         ListView songsList = (ListView)root.findViewById(R.id.songsList);
         mSongsListAdapter = new SongsListAdapter();
         songsList.setAdapter(mSongsListAdapter);
-        for(ProviderConnection providerConnection : PluginsLookup.getDefault().getAvailableProviders()){
-            try {
-                List<Song> Songs = providerConnection.getBinder().getSongs();
-                for(Song song : Songs){
-                    mSongsListAdapter.put(song);
+
+                for(ProviderConnection providerConnection : PluginsLookup.getDefault().getAvailableProviders()){
+                    try {
+                        List<Song> Songs = providerConnection.getBinder().getSongs();
+                        for(Song song : Songs){
+                            mSongsListAdapter.put(song);
+                        }
+                    } catch (Exception e){
+                        Log.d(TAG, e.toString());
+                    }
                 }
-            } catch (Exception e){
-                Log.d(TAG, e.toString());
-            }
-        }
+
+                mSongsListAdapter.sortAll();
+
+        mSongsListAdapter.notifyDataSetChanged();
         songsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {

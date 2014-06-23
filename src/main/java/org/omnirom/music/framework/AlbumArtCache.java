@@ -63,6 +63,21 @@ public class AlbumArtCache {
         mEditor.putString(artist + album, key);
         mEditor.apply();
     }
+    public static String getArtKey(final Album album,StringBuffer artUrl) {
+        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+        if(album == null  || album.songs() == null)
+            return DEFAULT_ART;
+        String songRef = album.songs().next();
+        Song song = cache.getSong(songRef);
+        String key = DEFAULT_ART;
+        if(song != null) {
+            key = getArtKey(song, artUrl);
+            if(key != DEFAULT_ART)
+                cache.putAlbumArtKey(album, key);
+        }
+        return key;
+    }
 
     /**
      * Fetches an URL (and/or cache key) for the album art for the provided song. The art URL
@@ -76,6 +91,10 @@ public class AlbumArtCache {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         String artKey = DEFAULT_ART;
+        if(song == null){
+            Log.e(TAG,"Song is null");
+            return artKey;
+        }
         final Artist artist = cache.getArtist(song.getArtist());
         if (artist != null) {
             // If we have album information about this song, use the album name to fetch the cover.

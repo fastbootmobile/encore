@@ -6,6 +6,8 @@ import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v13.app.FragmentStatePagerAdapter;
 
 
+import org.omnirom.music.app.fragments.AlbumsFragment;
+import org.omnirom.music.app.fragments.ArtistsFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.SongsFragment;
 
@@ -13,12 +15,9 @@ import org.omnirom.music.app.fragments.SongsFragment;
  * Created by h4o on 19/06/2014.
  */
 public class MySongsAdapter extends FragmentStatePagerAdapter {
-    private SongsFragment mSongsFragment;
-    private PlaylistListFragment mPlaylistListFragment;
     public MySongsAdapter(FragmentManager fm) {
        super(fm);
-        mSongsFragment = new SongsFragment();
-        mPlaylistListFragment = new PlaylistListFragment();
+
 
     }
     @Override
@@ -29,7 +28,11 @@ public class MySongsAdapter extends FragmentStatePagerAdapter {
                 fragment =  SongsFragment.newInstance();
                 break;
             case 1:
-                fragment = PlaylistListFragment.newInstance();
+                fragment = ArtistsFragment.newInstance();
+
+                break;
+            case 2:
+                fragment = AlbumsFragment.newInstance();
                 break;
             default:
                 fragment = PlaylistListFragment.newInstance();
@@ -39,7 +42,7 @@ public class MySongsAdapter extends FragmentStatePagerAdapter {
     }
     @Override
     public int getCount() {
-        return 2;
+        return 4;
     }
 
     @Override
@@ -50,10 +53,13 @@ public class MySongsAdapter extends FragmentStatePagerAdapter {
                 title = "ALL SONGS";
                 break;
             case 1:
-                title = "PLAYLISTS";
+                title = "ARTISTS";
+                break;
+            case 2:
+                title = "ALBUMS";
                 break;
             default:
-                title = "OBJECT "+position;
+                title = "PLAYLISTS";
                 break;
         }
         return title;

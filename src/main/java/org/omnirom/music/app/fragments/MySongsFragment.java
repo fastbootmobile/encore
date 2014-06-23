@@ -33,8 +33,11 @@ public class MySongsFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_my_songs, container, false);
         assert root != null;
+
         mySongsAdapter = new MySongsAdapter(getChildFragmentManager());
         mViewPager = (ViewPager) root.findViewById(R.id.pager);
+
+        //mViewPager.setOffscreenPageLimit(2);
        // PagerTitleStrip pagerTitleStrip = (PagerTitleStrip) root.findViewById(R.id.pager_title_strip);
 
     //    pagerTitleStrip.setTextColor(1);
