@@ -25,6 +25,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -76,29 +77,27 @@ public class ArtistsFragment extends AbstractRootFragment implements ILocalCallb
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        for(ProviderConnection providerConnection : PluginsLookup.getDefault().getAvailableProviders()) {
-                            try {
-
-                                List<Artist> artists = providerConnection.getBinder().getArtists();
-                                mAdapter.addAllUnique(artists);
-                            } catch (Exception e) {
-
-                            }
-                        }
+                        mAdapter.addAllUnique(ProviderAggregator.getDefault().getCache().getAllArtists());
                     }
                 });
             }
         }.start();
 
         // Setup the search box
-        setupSearchBox(root);
+       // setupSearchBox(root);
 
         // Setup the click listener
         artistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MainActivity act = (MainActivity) getActivity();
-                //act.showFragment(PlaylistViewFragment.newInstance(mAdapter.getItem(position)), true);
+                //We get all the albums from the artist
+                List<Album> albums = new ArrayList<Album>();
+                Iterator<String> albumRefs = mAdapter.getItem(position).albums();
+                while(albumRefs.hasNext()){
+                    albums.add(ProviderAggregator.getDefault().getCache().getAlbum(albumRefs.next()));//we create a new view containing the artist's albums
+                }
+                act.showFragment(AlbumsFragment.newInstance(albums), true);
             }
         });
 

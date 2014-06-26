@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<org.omnirom.music.app.ui.ObservableScrollView
+<!--<org.omnirom.music.app.ui.ObservableScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -13,16 +13,19 @@
             android:paddingBottom="@dimen/playing_bar_height"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin">
+            android:paddingTop="@dimen/activity_vertical_margin">-->
 
-        <LinearLayout
+       <!-- <LinearLayout
+
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="fill_parent">
-
-          <View style="@style/OmniMusic.SearchBoxPlaceholder" />
+                android:layout_height="fill_parent">-->
+<!--
+          <View style="@style/OmniMusic.SearchBoxPlaceholder" />-->
 
             <GridView
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
                     android:id="@+id/gvArtists"
                     android:layout_width="match_parent"
                     android:layout_height="fill_parent"
@@ -31,9 +34,9 @@
                     android:horizontalSpacing="8dp"
                     android:numColumns="2" />
 
-        </LinearLayout>
+<!--        </LinearLayout>-->
 
-        <EditText style="@style/OmniMusic.SearchBox" />
+      <!--  <EditText style="@style/OmniMusic.SearchBox" />
 
     </FrameLayout>
-</org.omnirom.music.app.ui.ObservableScrollView>
+</org.omnirom.music.app.ui.ObservableScrollView>-->

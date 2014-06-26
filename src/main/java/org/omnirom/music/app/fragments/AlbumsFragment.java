@@ -3,17 +3,21 @@ package org.omnirom.music.app.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ExpandableListView;
 import android.widget.GridView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.AlbumsAdapter;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
+import org.omnirom.music.app.ui.ExpandableGridView;
 import org.omnirom.music.app.ui.ExpandableHeightGridView;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
@@ -25,6 +29,8 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,7 +39,9 @@ import java.util.List;
 public class AlbumsFragment extends AbstractRootFragment implements ILocalCallback {
 
     private AlbumsAdapter mAdapter;
+    private List<Album> mAlbums;
     private Handler mHandler;
+    private static final String KEY_ALBUM_LIST = "album_list";
 //    private final ArrayList<Playlist> mPlaylistsUpdated = new ArrayList<Playlist>();
 
 
@@ -48,6 +56,15 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
         AlbumsFragment fragment = new AlbumsFragment();
         return fragment;
     }
+    public static AlbumsFragment newInstance(List<Album> albumList){
+        AlbumsFragment fragment = new AlbumsFragment();
+        Bundle bundle = new Bundle();
+        Object[] objects = albumList.toArray();
+        Album[] albums = Arrays.copyOf(objects,objects.length,Album[].class);
+        bundle.putParcelableArray(KEY_ALBUM_LIST,albums);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
     public AlbumsFragment() {
         mAdapter = new AlbumsAdapter();
         mHandler = new Handler();
@@ -58,6 +75,11 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle args = getArguments();
+        if(args != null) {
+            Album[] albums = (Album[]) args.getParcelableArray(KEY_ALBUM_LIST);
+            mAlbums = new ArrayList<Album>(Arrays.asList(albums));
+        }
     }
 
     @Override
@@ -67,40 +89,36 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
         View root = inflater.inflate(R.layout.fragment_albums, container, false);
         GridView albumLayout =
                 (GridView) root.findViewById(R.id.gvAlbums);
+        //albumLayout.setStretchMode(ExpandableGridView.AUTO_FIT);
         albumLayout.setAdapter(mAdapter);
+
        // albumLayout.setExpanded(true);
 
-
-        new Thread() {
-            public void run() {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(ProviderConnection providerConnection : PluginsLookup.getDefault().getAvailableProviders()) {
-                            try {
-
-                                List<Album> albums = providerConnection.getBinder().getAlbums();
-                                mAdapter.addAllUnique(albums);
-                            } catch (Exception e) {
-
-                            }
+        if(mAlbums == null) {
+            new Thread() {
+                public void run() {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.addAllUnique(ProviderAggregator.getDefault().getCache().getAllAlbums());
                         }
-                    }
-                });
-            }
-        }.start();
-
+                    });
+                }
+            }.start();
+        } else {
+            mAdapter.addAllUnique(mAlbums);
+        }
         // Setup the search box
         setupSearchBox(root);
-
+        albumLayout.setOnScrollListener(mAdapter.onScrollListener);
         // Setup the click listener
-      /*  albumLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      albumLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MainActivity act = (MainActivity) getActivity();
-                //act.showFragment(PlaylistViewFragment.newInstance(mAdapter.getItem(position)), true);
+                act.showFragment(AlbumViewFragment.newInstance(mAdapter.getItem(position)), true);
             }
-        });*/
+        });
 
         return root;
     }

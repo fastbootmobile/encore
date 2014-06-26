@@ -59,7 +59,9 @@ public class ProviderCache {
     public List<Playlist> getAllPlaylists() {
         return new ArrayList<Playlist>(mPlaylists.values());
     }
-
+    public List<Song> getAllSongs() { return new ArrayList<Song>(mSongs.values());}
+    public List<Artist> getAllArtists() { return  new ArrayList<Artist>(mArtists.values());}
+    public List<Album> getAllAlbums() { return  new ArrayList<Album>(mAlbums.values());}
     public void putSong(final ProviderIdentifier provider, final Song song) {
         mSongs.put(song.getRef(), song);
         mRefProvider.put(song.getRef(), provider);
@@ -102,5 +104,6 @@ public class ProviderCache {
     public String getAlbumArtKey(final Album album) { return  mAlbumArtKeys.get(album);}
     public void putAlbumArtKey(final Album album,final String key) {
         Log.e("ProviderCache","We put "+album.getName()+" in the cache " +key);
-        mAlbumArtKeys.put(album,key);}
+        mAlbumArtKeys.put(album,key);
+    }
 }

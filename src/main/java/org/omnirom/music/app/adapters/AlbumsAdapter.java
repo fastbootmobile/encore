@@ -12,7 +12,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,7 +43,7 @@ public class AlbumsAdapter  extends BaseAdapter {
     private String TAG = "AlbumsAdapter";
     private List<Album> mAlbums;
     private Handler mHandler;
-
+    private int mScrollState;
     private static class ViewHolder {
         public Album album;
         public ImageView ivCover;
@@ -97,7 +99,17 @@ public class AlbumsAdapter  extends BaseAdapter {
             notifyDataSetChanged();
         }
     }
+    public AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            mScrollState = scrollState;
+        }
 
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+        }
+    };
     public boolean contains(Album p) {
         return mAlbums.contains(p);
     }
@@ -114,6 +126,13 @@ public class AlbumsAdapter  extends BaseAdapter {
         protected BitmapDrawable doInBackground(ViewHolder... params) {
             v = params[0];
             mAlbum = v.album;
+            if(mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING){
+                try {
+                    this.wait(20);
+                }catch (Exception e){
+
+                }
+            }
           //  Log.e("AlbumAdapter","Fetching an image");
             if (v.position != this.mPosition || mAlbum == null) {
                 // Cancel, we moved
@@ -130,29 +149,35 @@ public class AlbumsAdapter  extends BaseAdapter {
             assert drawable != null;
             drawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
             Bitmap bmp = drawable.getBitmap();
-
-            // Download the art image
-            if(mAlbum == null)
-                Log.e("AlbumAdapter","null album !");
             String artKey = cache.getAlbumArtKey(mAlbum);
-            String artUrl = null;
-
-            if (artKey == null) {
-                StringBuffer urlBuffer = new StringBuffer();
-                artKey = AlbumArtCache.getArtKey(mAlbum, urlBuffer);
-                artUrl = urlBuffer.toString();
+            Bitmap cachedImage = null;
+            if(artKey != null){
+                cachedImage = ImageCache.getDefault().get(artKey);
             }
+            if(cachedImage != null){
+                bmp = cachedImage;
+            }else {
+                // Download the art image
+                if (mAlbum == null)
+                    Log.e("AlbumAdapter", "null album !");
+                String artUrl = null;
 
-            if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
+                if (artKey == null) {
+                    StringBuffer urlBuffer = new StringBuffer();
+                    artKey = AlbumArtCache.getArtKey(mAlbum, urlBuffer);
+                    artUrl = urlBuffer.toString();
+                }
+
+                if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
+                }
+
+                if (v.position != this.mPosition) {
+                    // Cancel, we moved
+                    return null;
+                }
+
             }
-
-            if (v.position != this.mPosition) {
-                // Cancel, we moved
-                return null;
-            }
-
-
 
                 BitmapDrawable output = new BitmapDrawable(res, bmp);
 
@@ -178,11 +203,8 @@ public class AlbumsAdapter  extends BaseAdapter {
     public int getCount() {
         return mAlbums.size();
     }
-
     @Override
-    public Album getItem(int position) {
-        return mAlbums.get(position);
-    }
+    public Album getItem(int position) { return mAlbums.get(position);}
 
     @Override
     public long getItemId(int position) {
@@ -232,17 +254,11 @@ public class AlbumsAdapter  extends BaseAdapter {
             if (artKey != null) {
                 Log.e(TAG, "we have an art key " +artKey + " album: "+album.getName());
                 // We already know the album art for this song (keyed in artKey)
-                Bitmap cachedImage = ImageCache.getDefault().get(artKey);
 
-                if (cachedImage != null) {
-                    Log.e(TAG,"There is a cached image");
-                    tag.ivCover.setBackground(new BitmapDrawable(root.getResources(), cachedImage));
-                } else {
+                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
 
-                    BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-                    //task.execute(tag);
-                }
+
             } else {
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);

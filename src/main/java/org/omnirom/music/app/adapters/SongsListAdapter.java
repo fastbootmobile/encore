@@ -3,18 +3,24 @@ package org.omnirom.music.app.adapters;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.VuMeterView;
+import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.BlurCache;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
@@ -31,9 +37,25 @@ import java.util.List;
  */
 public class SongsListAdapter  extends BaseAdapter{
     List<Song> mSongs;
+    private int mItemWidth;
+    private int mItemHeight;
 
-    public SongsListAdapter() {
+
+    public SongsListAdapter(Context ctx){
+        final Resources res = ctx.getResources();
+        assert res != null;
         mSongs = new ArrayList<Song>();
+        // Theoretically, we'd need the width and height of the root view. However, this thread
+        // might (and probably will) run before the view has been layout'd by the system, thus
+        // getMeasuredXxxx() returns 0, which is invalid for the thumbnail we want. Instead,
+        // we use the defined height dimension, and the screen width.
+        WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        mItemWidth = size.x;
+        mItemHeight = res.getDimensionPixelSize(R.dimen.playlist_view_item_height);
     }
     private static class ViewHolder {
         public TextView tvTitle;
@@ -54,6 +76,113 @@ public class SongsListAdapter  extends BaseAdapter{
             }
         });
 
+    }
+    private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
+        private ViewHolder v;
+        private int mPosition;
+        private Song mSong;
+
+        public BackgroundAsyncTask(int position) {
+            mPosition = position;
+        }
+
+        @Override
+        protected BitmapDrawable doInBackground(ViewHolder... params) {
+            v = params[0];
+            mSong = v.song;
+
+            if (v.position != this.mPosition || mSong == null) {
+                // Cancel, we moved
+                return null;
+            }
+
+            final Resources res = v.vRoot.getResources();
+            final Context ctx = v.vRoot.getContext().getApplicationContext();
+            assert res != null;
+
+            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+            // Prepare the placeholder/default
+            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_list_default_bg);
+            assert drawable != null;
+            drawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+            Bitmap bmp = drawable.getBitmap();
+
+            // Download the art image
+            String artKey = cache.getSongArtKey(mSong);
+            String artUrl = null;
+
+            if (artKey == null) {
+                StringBuffer urlBuffer = new StringBuffer();
+                artKey = AlbumArtCache.getArtKey(mSong, urlBuffer);
+                artUrl = urlBuffer.toString();
+            }
+
+            if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
+            }
+
+            if (v.position != this.mPosition) {
+                // Cancel, we moved
+                return null;
+            }
+
+            // We blurAndDim our bitmap, if another executor didn't do it already and if it's not
+            // the default art
+            BitmapDrawable output;
+            if (artKey == null || artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                artKey = AlbumArtCache.DEFAULT_ART;
+                output = drawable;
+            } else {
+                Bitmap blur = BlurCache.getDefault().get(artKey);
+
+                if (blur == null) {
+                    Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
+
+                    if (v.position != this.mPosition) {
+                        // Cancel, we moved
+                        return null;
+                    }
+
+                    blur = Utils.blurAndDim(ctx, thumb, 25);
+
+                    if (v.position != this.mPosition) {
+                        // Cancel, we moved
+                        return null;
+                    }
+
+                    BlurCache.getDefault().put(artKey, blur, true);
+                }
+
+                if (v.position != this.mPosition) {
+                    // Cancel, we moved
+                    return null;
+                }
+
+                output = new BitmapDrawable(res, blur);
+            }
+
+            cache.putSongArtKey(mSong, artKey);
+
+            return output;
+        }
+
+        @Override
+        protected void onPostExecute(BitmapDrawable result) {
+            super.onPostExecute(result);
+
+            if (v.position == mPosition && v.song == mSong && result != null) {
+                // If this item hasn't been recycled already, set and show the image
+                // We do a smooth transition from a white/transparent background to our blurred one
+               /* TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
+                        v.vRoot.getBackground(),
+                        result
+                });
+*/
+                v.vRoot.setBackground(result);
+                //drawable.startTransition(200);
+            }
+        }
     }
     @Override
     public int getCount(){
@@ -126,11 +255,15 @@ public class SongsListAdapter  extends BaseAdapter{
             if (cachedBlur != null) {
                 root.setBackground(new BitmapDrawable(root.getResources(), cachedBlur));
             } else {
-
+                root.setBackground(res.getDrawable(R.drawable.album_list_default_bg));
+                BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+                //task.execute(tag);
             }
         } else {
             root.setBackground(res.getDrawable(R.drawable.album_list_default_bg));
-
+            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
             //task.execute(tag);
         }
 
