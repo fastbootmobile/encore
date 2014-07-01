@@ -110,6 +110,7 @@ public class PlaylistViewFragment extends Fragment
         lvPlaylistContents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
                 // Play the song
                 Song song = mAdapter.getItem(i);
 

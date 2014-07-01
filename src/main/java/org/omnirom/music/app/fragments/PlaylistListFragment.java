@@ -102,6 +102,7 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
         playlistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                 MainActivity act = (MainActivity) getActivity();
                 act.showFragment(PlaylistViewFragment.newInstance(mAdapter.getItem(position)), true);
             }

@@ -13,6 +13,7 @@ import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
 import org.omnirom.music.providers.Constants;
+import org.omnirom.music.providers.MultiProviderPlaylistProvider;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackService;
@@ -43,7 +44,8 @@ public class PluginsLookup {
     private List<ConnectionListener> mConnectionListeners;
     private IPlaybackService mPlaybackService;
     private PlaybackCallbackImpl mPlaybackCallback;
-
+    private MultiProviderPlaylistProvider mMultiProviderPlaylistProvider;
+    private ProviderConnection mMultiProviderConnection;
     private ServiceConnection mPlaybackConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -92,11 +94,24 @@ public class PluginsLookup {
 
     public void initialize(Context context) {
         mContext = context;
+        mMultiProviderPlaylistProvider = new MultiProviderPlaylistProvider(mContext);
         new Thread() {
             public void run() {
                 updatePlugins();
             }
         }.start();
+        HashMap<String, String> item = new HashMap<String, String>();
+        item.put(DATA_PACKAGE,"org.omnirom.music.providers");
+        item.put(DATA_SERVICE,"org.omnirom.music.providers.MultiProviderPlaylistProvider");
+        item.put(DATA_NAME,"MultiProviderPlaylistProvider");
+        item.put(DATA_CONFIGCLASS,null);
+        mMultiProviderConnection = new ProviderConnection(mContext,item.get(DATA_NAME),
+                item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
+                item.get(DATA_CONFIGCLASS));
+
+        mMultiProviderConnection.setListener(mProviderListener);
+        mConnections.add(mMultiProviderConnection);
+       mMultiProviderConnection.onServiceConnected(new ComponentName("org.omnirom.music.providers","MultiProviderPlaylistProvider"),mMultiProviderPlaylistProvider.asBinder());
     }
 
     public void registerProviderListener(ConnectionListener listener) {
@@ -223,7 +238,18 @@ public class PluginsLookup {
                 services.add(item);
             }
         }
-
+        HashMap<String, String> item = new HashMap<String, String>();
+        item.put(DATA_PACKAGE,"org.omnirom.music.providers");
+        item.put(DATA_SERVICE,"org.omnirom.music.providers.MultiProviderPlaylistProvider");
+        item.put(DATA_NAME,"MultiProviderPlaylistProvider");
+        item.put(DATA_CONFIGCLASS,null);
+       // mMultiProviderConnection = new ProviderConnection(mContext,item.get(DATA_NAME),
+         //       item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
+        //        item.get(DATA_CONFIGCLASS));
+        services.add(item);
+        //mMultiProviderConnection.setListener(mProviderListener);
+      //  mConnections.add(mMultiProviderConnection);
+     //   multiConn.onServiceConnected(new ComponentName("org.omnirom.music.providers","MultiProviderPlaylistProvider"),mMultiProviderPlaylistProvider.asBinder());
         return services;
     }
 }

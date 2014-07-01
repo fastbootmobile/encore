@@ -44,12 +44,15 @@ public class PlaylistListAdapter extends BaseAdapter {
     }
 
     private void sortList() {
-        Collections.sort(mPlaylists, new Comparator<Playlist>() {
+       /* Collections.sort(mPlaylists, new Comparator<Playlist>() {
             @Override
             public int compare(Playlist playlist, Playlist playlist2) {
-                return playlist.getName().compareTo(playlist2.getName());
+                if(playlist != null && playlist2 != null)
+                    return playlist.getName().compareTo(playlist2.getName());
+                else
+                    return 0;
             }
-        });
+        });*/
     }
 
     public void addItem(Playlist p) {

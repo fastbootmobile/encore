@@ -1,5 +1,6 @@
 package org.omnirom.music.app.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -17,8 +18,11 @@ import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
+import org.omnirom.music.app.fragments.PlaylistChooserFragment;
+import org.omnirom.music.app.fragments.PlaylistViewFragment;
 import org.omnirom.music.app.ui.VuMeterView;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.BlurCache;
@@ -197,8 +201,8 @@ public class SongsListAdapter  extends BaseAdapter{
         return mSongs.get(i).getRef().hashCode();
     }
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Context ctx = parent.getContext();
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        final Context ctx = parent.getContext();
         assert ctx != null;
 
         View root = convertView;
@@ -224,7 +228,14 @@ public class SongsListAdapter  extends BaseAdapter{
         tag.position = position;
         tag.song = song;
         root.setTag(tag);
-
+        TextView addButton = (TextView)tag.vRoot.findViewById(R.id.addbutton);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
+                fragment.show(((Activity)ctx).getFragmentManager(),mSongs.get(position).getRef());
+            }
+        });
         // Fill fields
         if (song != null && song.isLoaded()) {
             tag.tvTitle.setText(song.getTitle());

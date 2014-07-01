@@ -36,6 +36,8 @@ import org.omnirom.music.framework.PlaybackCallbackImpl;
 import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
+
+import org.omnirom.music.providers.MultiProviderDatabaseHelper;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
@@ -69,6 +71,7 @@ public class MainActivity extends Activity
 
     private Handler mHandler;
 
+
     public MainActivity() {
         mPlaybackState = new PlaybackState();
     }
@@ -79,7 +82,6 @@ public class MainActivity extends Activity
         setContentView(R.layout.activity_main);
 
         mHandler = new Handler();
-
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -122,6 +124,8 @@ public class MainActivity extends Activity
                 mPlayingBarLayout.setTranslationY(mPlayingBarLayout.getMeasuredHeight());
             }
         });
+        //MultiProviderDatabaseHelper multiProviderDatabaseHelper = new MultiProviderDatabaseHelper(this);
+
     }
 
     public void setPlayingBarVisible(boolean visible) {

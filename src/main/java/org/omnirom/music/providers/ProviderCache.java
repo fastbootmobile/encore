@@ -103,7 +103,6 @@ public class ProviderCache {
     }
     public String getAlbumArtKey(final Album album) { return  mAlbumArtKeys.get(album);}
     public void putAlbumArtKey(final Album album,final String key) {
-        Log.e("ProviderCache","We put "+album.getName()+" in the cache " +key);
         mAlbumArtKeys.put(album,key);
     }
 }

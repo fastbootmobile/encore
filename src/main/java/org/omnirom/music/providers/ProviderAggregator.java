@@ -26,6 +26,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private Handler mHandler;
     private ThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(4);
 
+
     private Runnable mUpdatePlaylistsRunnable = new Runnable() {
         @Override
         public void run() {
@@ -154,7 +155,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     private void ensurePlaylistsSongsCached(final ProviderConnection provider,
                                             final List<Playlist> playlist) {
-        if (provider == null || playlist == null) {
+        if (provider == null || playlist == null ) {
             // playlist may be null if there are no playlists
             return;
         }
@@ -163,7 +164,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             @Override
             public void run() {
                 for (Playlist p : playlist) {
-                    if (p == null) {
+                    if (p == null || p.getName() == null) {
                         continue;
                     }
 

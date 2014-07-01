@@ -61,7 +61,7 @@
         android:layout_height="match_parent"
         android:text="+"
         android:clickable="true"
-        android:id="@+id/button"
+        android:id="@+id/addbutton"
         android:layout_gravity="center_vertical"
         android:layout_margin="0dp"
         android:padding="0dp"
