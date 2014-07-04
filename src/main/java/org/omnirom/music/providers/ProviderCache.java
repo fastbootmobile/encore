@@ -23,6 +23,7 @@ public class ProviderCache {
     private Map<String, Artist> mArtists;
     private Map<Song, String> mSongArtKeys;
     private Map<Album,String> mAlbumArtKeys;
+    private List<Playlist> mMultiProviderPlaylists;
     /**
      * Default constructor
      */
@@ -34,6 +35,7 @@ public class ProviderCache {
         mArtists = new HashMap<String, Artist>();
         mSongArtKeys = new HashMap<Song, String>();
         mAlbumArtKeys = new HashMap<Album, String>();
+        mMultiProviderPlaylists = new ArrayList<Playlist>();
     }
 
     /**
@@ -51,13 +53,18 @@ public class ProviderCache {
         mPlaylists.put(pl.getRef(), pl);
         mRefProvider.put(pl.getRef(), provider);
     }
-
+    public void putAllProviderPlaylist(List<Playlist> playlists){
+        mMultiProviderPlaylists = playlists;
+    }
     public Playlist getPlaylist(final String ref) {
         return mPlaylists.get(ref);
     }
 
     public List<Playlist> getAllPlaylists() {
         return new ArrayList<Playlist>(mPlaylists.values());
+    }
+    public List<Playlist> getAllMultiProviderPlaylists() {
+        return mMultiProviderPlaylists;
     }
     public List<Song> getAllSongs() { return new ArrayList<Song>(mSongs.values());}
     public List<Artist> getAllArtists() { return  new ArrayList<Artist>(mArtists.values());}

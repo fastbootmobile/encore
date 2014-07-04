@@ -2,7 +2,9 @@ package org.omnirom.music.providers;
 
 import android.content.Context;
 import android.media.MediaFormat;
+import android.os.DeadObjectException;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -39,17 +41,21 @@ import javax.xml.transform.stream.StreamResult;
  * Created by h4o on 17/06/2014.
  */
 public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
+
+
+    Handler mHandler = new Handler();
     private HashMap<String,Playlist> mPlaylists;
     private HashMap<String,ProviderIdentifier> mSongsProviders;
     private ProviderIdentifier mProviderIdentifier;
     private Context mContext;
     private String TAG = "MultiProviderPlaylistProvider";
+    private List<IProviderCallback> mCallbacks;
     private MultiProviderDatabaseHelper mMultiProviderDatabaseHelper;
     public MultiProviderPlaylistProvider(Context context){
         mContext = context;
         mPlaylists = new HashMap<String, Playlist>();
-        mMultiProviderDatabaseHelper = new MultiProviderDatabaseHelper(mContext);
-
+        mMultiProviderDatabaseHelper = new MultiProviderDatabaseHelper(mContext,mLocalCallback);
+        mCallbacks = new ArrayList<IProviderCallback>();
     }
 
     private IMusicProvider getBinder(ProviderIdentifier id) {
@@ -67,12 +73,16 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
 
     @Override
     public void registerCallback(IProviderCallback cb) throws RemoteException {
-
+        synchronized (mCallbacks) {
+            mCallbacks.add(cb);
+        }
     }
 
     @Override
     public void unregisterCallback(IProviderCallback cb) throws RemoteException {
-
+        synchronized (mCallbacks) {
+            mCallbacks.remove(cb);
+        }
     }
 
     @Override
@@ -154,7 +164,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
 
     @Override
     public boolean onUserSwapPlaylistItem(int oldPosition, int newPosition, String playlistRef) throws RemoteException {
-           return false;
+           return mMultiProviderDatabaseHelper.swapPlaylistItem(oldPosition,newPosition,playlistRef);
     }
 
     @Override
@@ -176,7 +186,35 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     public String addPlaylist(String playlistName) throws RemoteException {
          return mMultiProviderDatabaseHelper.addPlaylist(playlistName);
     }
+    private void removeCallback(final IProviderCallback cb) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
 
+            }
+        });
+    }
+    MultiProviderDatabaseHelper.LocalCallback mLocalCallback = new MultiProviderDatabaseHelper.LocalCallback() {
+        @Override
+        public void playlistUpdated(final Playlist playlist) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mCallbacks) {
+                        for (IProviderCallback cb : mCallbacks) {
+                            try {
+                                cb.onPlaylistAddedOrUpdated(mProviderIdentifier,playlist);
+                            } catch (DeadObjectException e) {
+                                removeCallback(cb);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "RemoteException when notifying a callback", e);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    };
 
 
 }

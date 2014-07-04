@@ -117,7 +117,9 @@ public class PluginsLookup {
     public void registerProviderListener(ConnectionListener listener) {
         mConnectionListeners.add(listener);
     }
-
+    public ProviderConnection getMultiProviderPlaylistProvider(){
+        return mMultiProviderConnection;
+    }
     public void removeProviderListener(ConnectionListener listener) {
         mConnectionListeners.remove(listener);
     }

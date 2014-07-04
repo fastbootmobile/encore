@@ -282,7 +282,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         new Thread(mUpdatePlaylistsRunnable).start();
         return mCache.getAllPlaylists();
     }
-
+    public List<Playlist> getAllMultiProviderPlaylists() {
+        return mCache.getAllMultiProviderPlaylists();
+    }
     /**
      * Called by the providers when a feedback is available about a login request
      *
