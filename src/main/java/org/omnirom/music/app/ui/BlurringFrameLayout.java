@@ -77,7 +77,9 @@ public class BlurringFrameLayout extends FrameLayout {
                     @Override
                     public void run() {
                         synchronized (mCroppedBlurredBitmap) {
-                            mImageRender.setImageBitmap(mCroppedBlurredBitmap);
+                            if (mImageRender != null) {
+                                mImageRender.setImageBitmap(mCroppedBlurredBitmap);
+                            }
                         }
                     }
                 });
@@ -101,31 +103,32 @@ public class BlurringFrameLayout extends FrameLayout {
     }
 
     private void init() {
-        mRenderScript = RenderScript.create(getContext());
-        mIntrinsicBlur = ScriptIntrinsicBlur.create(mRenderScript, Element.U8_4(mRenderScript));
+        if (!isInEditMode()) {
+            mRenderScript = RenderScript.create(getContext());
+            mIntrinsicBlur = ScriptIntrinsicBlur.create(mRenderScript, Element.U8_4(mRenderScript));
 
-        mBitmapPaint = new Paint();
-        mBitmapPaint.setAntiAlias(true);
-        mBitmapPaint.setDither(true);
-        mBitmapPaint.setFilterBitmap(true);
+            mBitmapPaint = new Paint();
+            mBitmapPaint.setAntiAlias(true);
+            mBitmapPaint.setDither(true);
+            mBitmapPaint.setFilterBitmap(true);
 
-        ViewTreeObserver treeObserver = getViewTreeObserver();
+            ViewTreeObserver treeObserver = getViewTreeObserver();
 
-        if (treeObserver != null) {
-            treeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    renderBlur();
-                }
-            });
-            treeObserver.addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
-                @Override
-                public void onScrollChanged() {
-                    renderBlur();
-                }
-            });
+            if (treeObserver != null) {
+                treeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        renderBlur();
+                    }
+                });
+                treeObserver.addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+                    @Override
+                    public void onScrollChanged() {
+                        renderBlur();
+                    }
+                });
+            }
         }
-
     }
 
     private void renderBlur() {
@@ -186,6 +189,10 @@ public class BlurringFrameLayout extends FrameLayout {
                 // And we notify the thread it can go ahead and blur it
                 mBlurThread.notify();
             }
+
+            // Reset clipping to render the view properly
+            setClipChildren(false);
+            setClipBounds(null);
         }
     }
 

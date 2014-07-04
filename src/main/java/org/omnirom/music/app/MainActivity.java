@@ -91,20 +91,8 @@ public class MainActivity extends Activity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout), getTheme());
 
-        // Setup action bar animation.
-        KenBurnsView kbView = (KenBurnsView) findViewById(R.id.actionBarBackground);
-        kbView.addBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.test_cover_imagine_dragons)).getBitmap());
-        kbView.addBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.test_cover_rhcp)).getBitmap());
-
-        // Set the height of the "action bar background" layout to the height of the fullscreen AB
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) kbView.getLayoutParams();
-        lp.height = Utils.getActionBarHeight(getTheme(), getResources());
-        kbView.setLayoutParams(lp);
-
         // Setup the blurring playing bar background
-        final BlurringFrameLayout fl = (BlurringFrameLayout) findViewById(R.id.container);
-        final ImageView iv = (ImageView) findViewById(R.id.ivPlayingBarBackground);
-        fl.setImageRender(iv);
+        final ImageView playingBarBackground = (ImageView) findViewById(R.id.ivPlayingBarBackground);
 
         // Setup the playing bar click listener
         mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
@@ -118,12 +106,12 @@ public class MainActivity extends Activity
         });
 
         // We start it hidden. As we don't have the exact size yet, we post it for later change
-        mPlayingBarLayout.post(new Runnable() {
+        /*mPlayingBarLayout.post(new Runnable() {
             @Override
             public void run() {
                 mPlayingBarLayout.setTranslationY(mPlayingBarLayout.getMeasuredHeight());
             }
-        });
+        });*/
         //MultiProviderDatabaseHelper multiProviderDatabaseHelper = new MultiProviderDatabaseHelper(this);
 
     }

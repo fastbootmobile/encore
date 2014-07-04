@@ -175,9 +175,6 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout = drawerLayout;
 
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mDrawerLayout.getLayoutParams();
-        // Calculate ActionBar height
-        lp.topMargin = Utils.getActionBarHeight(theme, getResources());
-
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
