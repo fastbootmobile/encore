@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
@@ -15,6 +16,7 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.Collections;
@@ -51,6 +53,7 @@ public class NewPlaylistFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View root = inflater.inflate(R.layout.dialog_new_playlist, null);
         final TextView playlistName = (TextView) root.findViewById(R.id.et_playlist_name);
+        final CheckBox multiProviderPlaylist = (CheckBox) root.findViewById(R.id.cb_provider_specific);
         builder.setView(root)
                 .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                     @Override
@@ -59,9 +62,17 @@ public class NewPlaylistFragment extends DialogFragment {
                         if (playlistName.getText() != "") {
                                 Log.d(TAG, "adding new playlist with name" + playlistName);
                                 try {
-                                    String playlistRef = PluginsLookup.getDefault().getProvider(mSong.getProvider()).getBinder().addPlaylist(playlistName.getText().toString());
+                                    ProviderConnection connection;
+                                    if(multiProviderPlaylist.isChecked()){
+                                        connection = PluginsLookup.getDefault().getMultiProviderPlaylistProvider();
+                                    }else {
+                                        connection = PluginsLookup.getDefault().getProvider(mSong.getProvider());
+                                    }
+                                    String playlistRef = connection.getBinder().addPlaylist(playlistName.getText().toString());
                                     if(playlistRef != null){
-                                        PluginsLookup.getDefault().getProvider(mSong.getProvider()).getBinder().addSongToPlaylist(mSong.getRef(),playlistRef,mSong.getProvider());
+
+                                        connection.getBinder().addSongToPlaylist(mSong.getRef(), playlistRef, mSong.getProvider());
+
                                     }
                                 } catch (Exception e) {
 

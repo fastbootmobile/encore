@@ -48,7 +48,7 @@ public class PlaylistChooserFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstance){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        final List<Playlist> playlistList = ProviderAggregator.getDefault().getAllPlaylists();
+        List<Playlist> playlistList = ProviderAggregator.getDefault().getAllPlaylists();
 
         Collections.sort(playlistList,new Comparator<Playlist>() {
             @Override
@@ -58,10 +58,16 @@ public class PlaylistChooserFragment extends DialogFragment {
         });
         List<String> choices = new ArrayList<String>();
         choices.add("new playlist");
+        final List<Playlist> playlistChoices = new ArrayList<Playlist>();
         for(Playlist playlist : playlistList){
             ProviderIdentifier providerIdentifier = ProviderAggregator.getDefault().getCache().getRefProvider(playlist.getRef());
-           // if(mSong.getProvider().equals(providerIdentifier))
-                choices.add(playlist.getName());
+            if(mSong.getProvider().equals(providerIdentifier) || PluginsLookup.getDefault().getMultiProviderPlaylistProvider().getIdentifier().equals(providerIdentifier)) {
+                String decoration = "";
+                if(mSong.getProvider().equals(providerIdentifier))
+                    decoration = " (*)";
+                choices.add(playlist.getName()+decoration);
+                playlistChoices.add(playlist);
+            }
         }
 
 
@@ -74,9 +80,9 @@ public class PlaylistChooserFragment extends DialogFragment {
                             fragment.show(getFragmentManager(),mSong.getRef()+"-newplaylist");
                        }else {
 
-                           ProviderIdentifier playlistChosenId = ProviderAggregator.getDefault().getCache().getRefProvider(playlistList.get(which-1).getRef());
+                           ProviderIdentifier playlistChosenId = ProviderAggregator.getDefault().getCache().getRefProvider(playlistChoices.get(which-1).getRef());
                            try {
-                               PluginsLookup.getDefault().getProvider(playlistChosenId).getBinder().addSongToPlaylist(mSong.getRef(), playlistList.get(which-1).getRef(), mSong.getProvider());
+                               PluginsLookup.getDefault().getProvider(playlistChosenId).getBinder().addSongToPlaylist(mSong.getRef(), playlistChoices.get(which-1).getRef(), mSong.getProvider());
                            } catch (Exception e) {
 
                            }

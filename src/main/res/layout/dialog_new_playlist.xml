@@ -12,7 +12,7 @@
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Load only playlist from"
+        android:text="Multi-provider playlist (omnimusic only)"
         android:id="@+id/cb_provider_specific"
         android:checked="true" />
 </LinearLayout>
