@@ -66,8 +66,10 @@ public class AlbumArtCache {
     public static String getArtKey(final Album album,StringBuffer artUrl) {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
-        if(album == null  || album.songs() == null)
+        if (album == null  || album.songs() == null || !album.songs().hasNext()) {
             return DEFAULT_ART;
+        }
+
         String songRef = album.songs().next();
         Song song = cache.getSong(songRef);
         String key = DEFAULT_ART;
