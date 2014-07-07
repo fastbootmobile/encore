@@ -99,9 +99,11 @@ public class PlaylistAdapter extends BaseAdapter {
             }
         }
     };
-    public void setPlaylist(Playlist playlist){
+
+    public void setPlaylist(Playlist playlist) {
         mPlaylist = playlist;
     }
+
     // Using an AsyncTask to load the slow images in a background thread
     private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
         private ViewHolder v;
@@ -210,21 +212,24 @@ public class PlaylistAdapter extends BaseAdapter {
             }
         }
     }
+
     //Calls the proper handler to update the playlist order
-    public void updatePlaylist(int oldPosition, int newPosition){
-       ProviderIdentifier providerIdentifier = ProviderAggregator.getDefault().getCache().getRefProvider(mPlaylist.getRef());
+    public void updatePlaylist(int oldPosition, int newPosition) {
+        ProviderIdentifier providerIdentifier = ProviderAggregator.getDefault().getCache().getRefProvider(mPlaylist.getRef());
         try {
             PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().onUserSwapPlaylistItem(oldPosition, newPosition, mPlaylist.getRef());
-            Log.d(TAG,"swaping "+oldPosition+" and "+newPosition);
-           //// resetIds();
-        } catch(RemoteException e){
-            Log.e(TAG,"Error: "+e.getMessage());
+            Log.d(TAG, "swaping " + oldPosition + " and " + newPosition);
+            //// resetIds();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error: " + e.getMessage());
         }
     }
+
     public int getSize() {
         return mSongs.size();
     }
-    public void delete(int id){
+
+    public void delete(int id) {
         ProviderIdentifier providerIdentifier = ProviderAggregator.getDefault().getCache().getRefProvider(mPlaylist.getRef());
         try {
             PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().deleteSongFromPlaylist(id, mPlaylist.getRef());
@@ -232,32 +237,35 @@ public class PlaylistAdapter extends BaseAdapter {
             mIds.remove(id);
             mVisible.remove(id);
             resetIds();
-        } catch(RemoteException e){
-            Log.e(TAG,"Error: "+e.getMessage());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error: " + e.getMessage());
         }
     }
-    private void resetIds(){
-        for(int i = 0; i < mIds.size();i++){
-            mIds.set(i,i);
+
+    private void resetIds() {
+        for (int i = 0; i < mIds.size(); i++) {
+            mIds.set(i, i);
         }
     }
+
     //Swaps two elements and their properties
-    public void swap(int original, int newPosition){
+    public void swap(int original, int newPosition) {
         Song temp = mSongs.get(original);
-        mSongs.set(original,mSongs.get(newPosition));
-        mSongs.set(newPosition,temp);
+        mSongs.set(original, mSongs.get(newPosition));
+        mSongs.set(newPosition, temp);
         int tempVis = mVisible.get(original);
-        mVisible.set(original,mVisible.get(newPosition));
-        mVisible.set(newPosition,tempVis);
+        mVisible.set(original, mVisible.get(newPosition));
+        mVisible.set(newPosition, tempVis);
         int tempId = mIds.get(original);
         mIds.set(original, mIds.get(newPosition));
-        mIds.set(newPosition,tempId);
+        mIds.set(newPosition, tempId);
     }
+
     //Sets the visibility of a selected element to visibility
     //Save the visibility to remember when the view is recycled
-    public void setVisibility(int position, int visibility){
-        if(position >= 0 && position < mVisible.size()) {
-            Log.d(TAG,position+" visibility "+visibility);
+    public void setVisibility(int position, int visibility) {
+        if (position >= 0 && position < mVisible.size()) {
+            Log.d(TAG, position + " visibility " + visibility);
             mVisible.set(position, visibility);
         }
     }
@@ -298,8 +306,8 @@ public class PlaylistAdapter extends BaseAdapter {
 
     public void addItem(Song p) {
         mSongs.add(p);
-       mVisible.add(View.VISIBLE);
-        mIds.add(mSongs.size()-1);
+        mVisible.add(View.VISIBLE);
+        mIds.add(mSongs.size() - 1);
     }
 
     @Override
@@ -314,7 +322,7 @@ public class PlaylistAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        if(position >= 0 && position < mIds.size())
+        if (position >= 0 && position < mIds.size())
             return mIds.get(position);
         return -1;
     }

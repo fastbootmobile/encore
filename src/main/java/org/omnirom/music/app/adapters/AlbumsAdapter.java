@@ -37,13 +37,14 @@ import java.util.List;
 /**
  * Created by h4o on 20/06/2014.
  */
-public class AlbumsAdapter  extends BaseAdapter {
+public class AlbumsAdapter extends BaseAdapter {
 
     private static final int DEFERRED_DELAY = 20;
     private String TAG = "AlbumsAdapter";
     private List<Album> mAlbums;
     private Handler mHandler;
     private int mScrollState;
+
     private static class ViewHolder {
         public Album album;
         public ImageView ivCover;
@@ -51,6 +52,89 @@ public class AlbumsAdapter  extends BaseAdapter {
         public TextView tvSubTitle;
         public View vRoot;
         public int position;
+    }
+
+    private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
+        private ViewHolder v;
+        private int mPosition;
+        private Album mAlbum;
+
+        public BackgroundAsyncTask(int position) {
+            mPosition = position;
+        }
+
+        @Override
+        protected BitmapDrawable doInBackground(ViewHolder... params) {
+            v = params[0];
+            mAlbum = v.album;
+            if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) {
+                try {
+                    this.wait(DEFERRED_DELAY);
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+
+            if (v.position != this.mPosition || mAlbum == null) {
+                // Cancel, we moved
+                return null;
+            }
+            final Resources res = v.vRoot.getResources();
+            final Context ctx = v.vRoot.getContext().getApplicationContext();
+            assert res != null;
+
+            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+            // Prepare the placeholder/default
+            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_placeholder);
+            assert drawable != null;
+            drawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+            Bitmap bmp = drawable.getBitmap();
+            String artKey = cache.getAlbumArtKey(mAlbum);
+            Bitmap cachedImage = null;
+            if (artKey != null) {
+                cachedImage = ImageCache.getDefault().get(artKey);
+            }
+            if (cachedImage != null) {
+                bmp = cachedImage;
+            } else {
+                String artUrl = null;
+
+                if (artKey == null) {
+                    StringBuffer urlBuffer = new StringBuffer();
+                    artKey = AlbumArtCache.getArtKey(mAlbum, urlBuffer);
+                    artUrl = urlBuffer.toString();
+                }
+
+                if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
+                }
+
+                if (v.position != this.mPosition) {
+                    // Cancel, we moved
+                    return null;
+                }
+
+            }
+
+            BitmapDrawable output = new BitmapDrawable(res, bmp);
+
+            cache.putAlbumArtKey(mAlbum, artKey);
+
+            return output;
+        }
+
+        @Override
+        protected void onPostExecute(BitmapDrawable result) {
+            super.onPostExecute(result);
+
+            if (v.position == mPosition && v.album == mAlbum && result != null) {
+
+                v.ivCover.setImageDrawable(result);
+            } else if (result != null) {
+                Log.e(TAG, "we have a result too late...");
+            }
+        }
     }
 
     public AlbumsAdapter() {
@@ -99,6 +183,7 @@ public class AlbumsAdapter  extends BaseAdapter {
             notifyDataSetChanged();
         }
     }
+
     public AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -110,101 +195,20 @@ public class AlbumsAdapter  extends BaseAdapter {
 
         }
     };
+
     public boolean contains(Album p) {
         return mAlbums.contains(p);
     }
-    private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
-        private ViewHolder v;
-        private int mPosition;
-        private Album mAlbum;
 
-        public BackgroundAsyncTask(int position) {
-            mPosition = position;
-        }
-
-        @Override
-        protected BitmapDrawable doInBackground(ViewHolder... params) {
-            v = params[0];
-            mAlbum = v.album;
-            if(mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING){
-                try {
-                    this.wait(20);
-                }catch (Exception e){
-
-                }
-            }
-          //  Log.e("AlbumAdapter","Fetching an image");
-            if (v.position != this.mPosition || mAlbum == null) {
-                // Cancel, we moved
-                return null;
-            }
-            final Resources res = v.vRoot.getResources();
-            final Context ctx = v.vRoot.getContext().getApplicationContext();
-            assert res != null;
-
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
-
-            // Prepare the placeholder/default
-            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_placeholder);
-            assert drawable != null;
-            drawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
-            Bitmap bmp = drawable.getBitmap();
-            String artKey = cache.getAlbumArtKey(mAlbum);
-            Bitmap cachedImage = null;
-            if(artKey != null){
-                cachedImage = ImageCache.getDefault().get(artKey);
-            }
-            if(cachedImage != null){
-                bmp = cachedImage;
-            }else {
-                // Download the art image
-                if (mAlbum == null)
-                    Log.e("AlbumAdapter", "null album !");
-                String artUrl = null;
-
-                if (artKey == null) {
-                    StringBuffer urlBuffer = new StringBuffer();
-                    artKey = AlbumArtCache.getArtKey(mAlbum, urlBuffer);
-                    artUrl = urlBuffer.toString();
-                }
-
-                if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
-                }
-
-                if (v.position != this.mPosition) {
-                    // Cancel, we moved
-                    return null;
-                }
-
-            }
-
-                BitmapDrawable output = new BitmapDrawable(res, bmp);
-
-
-            cache.putAlbumArtKey(mAlbum, artKey);
-
-            return output;
-        }
-
-        @Override
-        protected void onPostExecute(BitmapDrawable result) {
-            super.onPostExecute(result);
-
-            if  (v.position == mPosition && v.album == mAlbum && result != null) {
-
-                v.ivCover.setImageDrawable(result);
-            } else if( result != null){
-                Log.e(TAG, "we have a result too late...");
-            }
-        }
-    }
     @Override
     public int getCount() {
         return mAlbums.size();
     }
+
     @Override
-    public Album getItem(int position) { return mAlbums.get(position);}
+    public Album getItem(int position) {
+        return mAlbums.get(position);
+    }
 
     @Override
     public long getItemId(int position) {
@@ -215,7 +219,7 @@ public class AlbumsAdapter  extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         Context ctx = parent.getContext();
         assert ctx != null;
-        Log.e(TAG,"we get view position "+position);
+        Log.e(TAG, "we get view position " + position);
         View root = convertView;
         if (convertView == null) {
             // Recycle the existing view
@@ -241,7 +245,7 @@ public class AlbumsAdapter  extends BaseAdapter {
         tag.album = album;
         if (album.isLoaded()) {
             tag.tvTitle.setText(album.getName());
-            tag.tvSubTitle.setText(album.getSongsCount()+ " songs");
+            tag.tvSubTitle.setText(album.getSongsCount() + " songs");
         } else {
             tag.tvTitle.setText("Loading");
             tag.tvSubTitle.setText("");
@@ -251,19 +255,19 @@ public class AlbumsAdapter  extends BaseAdapter {
         final Resources res = root.getResources();
         assert res != null;
 
-            if (artKey != null) {
-                Log.e(TAG, "we have an art key " +artKey + " album: "+album.getName());
-                // We already know the album art for this song (keyed in artKey)
+        if (artKey != null) {
+            Log.e(TAG, "we have an art key " + artKey + " album: " + album.getName());
+            // We already know the album art for this song (keyed in artKey)
 
-                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
 
 
-            } else {
-                BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-                //task.execute(tag);
-            }
+        } else {
+            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+            //task.execute(tag);
+        }
 
         return root;
     }

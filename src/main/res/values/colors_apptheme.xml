@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="apptheme_color">#cc0000</color>
-    <color name="apptheme_color_pressed">#ffe7e7</color>
+
+    <!-- Red 500 -->
+    <color name="primary">#e51c23</color>
+
+    <!-- Red 700 -->
+    <color name="primary_dark">#d01716</color>
+
+    <!-- Indigo 500 -->
+    <color name="accent">#b0120a</color>
+
+    <!-- Standard colors -->
+    <color name="apptheme_color">@color/primary</color>
+    <color name="apptheme_color_pressed">@color/primary_dark</color>
     <color name="white">#ffffff</color>
     <color name="separator">#dddddd</color>
     <color name="navdrawer_separator">#eaeaea</color>
     <color name="default_fragment_background">#eaeaea</color>
+
+    <!-- Playbar -->
     <color name="play_bar_background">#bbffffff</color>
     <color name="play_bar_pressed">#bbcc0000</color>
+
+    <!-- Default lists/grids colors -->
+    <color name="default_album_art_background">#333333</color>
 
 </resources>

@@ -5,11 +5,13 @@
 
     <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
 
-        <item name="android:colorPrimary">#EF4437</item>
-        <item name="android:colorPrimaryDark">#B62025</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/default_fragment_background</item>
 
         <!-- <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowBackground">@color/default_fragment_background</item>
+
         <item name="android:windowActionBarOverlay">true</item> -->
 
     </style>

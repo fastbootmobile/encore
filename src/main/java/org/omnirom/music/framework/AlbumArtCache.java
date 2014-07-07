@@ -63,6 +63,7 @@ public class AlbumArtCache {
         mEditor.putString(artist + album, key);
         mEditor.apply();
     }
+
     public static String getArtKey(final Album album,StringBuffer artUrl) {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
@@ -81,6 +82,67 @@ public class AlbumArtCache {
         return key;
     }
 
+    public static String getArtKey(final Artist artist, StringBuffer artUrl) {
+        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+        String artKey = DEFAULT_ART;
+        if (artist != null) {
+            // Any art from that artist will be fine.
+            // Check if we have it in cache
+            String tmpUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), null);
+            if (tmpUrl == null) {
+                // We don't, fetch from MusicBrainz
+                try {
+                    AlbumInfo[] albumInfoArray = MusicBrainzClient.getAlbum(artist.getName(), null);
+
+                    if (albumInfoArray != null) {
+                        Log.e("XPLOD", "MBC found " + albumInfoArray.length + " albums");
+
+                        for (AlbumInfo albumInfo : albumInfoArray) {
+                            tmpUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
+
+                            if (tmpUrl != null) {
+                                AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), null, tmpUrl);
+                                artKey = tmpUrl.replaceAll("\\W+", "");
+                                cache.putArtistArtKey(artist, artKey);
+                                break;
+                            }
+                        }
+
+                        if (tmpUrl == null) {
+                            cache.putArtistArtKey(artist, DEFAULT_ART);
+                            artKey = DEFAULT_ART;
+                            Log.e("XPLOD", "No MBC match for this query!");
+                        } else {
+                            artUrl.append(tmpUrl);
+                            Log.e("XPLOD", "MBC found a match: " + tmpUrl + " (" + artUrl.toString() + ")");
+                        }
+                    } else {
+                        // No album found on musicbrainz
+                        cache.putArtistArtKey(artist, DEFAULT_ART);
+                        artKey = DEFAULT_ART;
+                    }
+                } catch (RateLimitException e) {
+                    // Retry later, rate limited / early exit (don't cache that)
+                    artKey = DEFAULT_ART;
+                    return artKey;
+                }
+            } else {
+                artKey = tmpUrl.replaceAll("\\W+", "");
+                cache.putArtistArtKey(artist, artKey);
+            }
+
+            if (artKey.equals(DEFAULT_ART)) {
+                // Really, we don't know these guys.
+                cache.putArtistArtKey(artist, DEFAULT_ART);
+                tmpUrl = DEFAULT_ART;
+                Log.e(TAG, "No match found for " + artist.getName() + ", at all");
+            }
+        }
+
+        return artKey;
+    }
+
     /**
      * Fetches an URL (and/or cache key) for the album art for the provided song. The art URL
      * will be put in the StringBuffer passed in artUrl.
@@ -93,10 +155,11 @@ public class AlbumArtCache {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         String artKey = DEFAULT_ART;
-        if(song == null){
-            Log.e(TAG,"Song is null");
+        if (song == null) {
+            Log.e(TAG, "Song is null");
             return artKey;
         }
+
         final Artist artist = cache.getArtist(song.getArtist());
         if (artist != null) {
             // If we have album information about this song, use the album name to fetch the cover.

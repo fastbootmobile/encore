@@ -35,8 +35,6 @@ public class ArtistsFragment extends AbstractRootFragment implements ILocalCallb
 
     private ArtistsAdapter mAdapter;
     private Handler mHandler;
-//    private final ArrayList<Playlist> mPlaylistsUpdated = new ArrayList<Playlist>();
-
 
 
     /**
@@ -82,9 +80,6 @@ public class ArtistsFragment extends AbstractRootFragment implements ILocalCallb
                 });
             }
         }.start();
-
-        // Setup the search box
-       // setupSearchBox(root);
 
         // Setup the click listener
         artistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
