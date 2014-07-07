@@ -2,12 +2,11 @@ package org.omnirom.music.app.adapters;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v13.app.FragmentStatePagerAdapter;
 
 
 import org.omnirom.music.app.fragments.AlbumsFragment;
-import org.omnirom.music.app.fragments.ArtistsFragment;
+import org.omnirom.music.app.fragments.ArtistsListFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.SongsFragment;
 
@@ -28,7 +27,7 @@ public class MySongsAdapter extends FragmentStatePagerAdapter {
                 fragment =  SongsFragment.newInstance();
                 break;
             case 1:
-                fragment = ArtistsFragment.newInstance();
+                fragment = ArtistsListFragment.newInstance();
 
                 break;
             case 2:

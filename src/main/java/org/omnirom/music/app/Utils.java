@@ -15,12 +15,16 @@ import android.util.TypedValue;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Utilities
  */
 public class Utils {
+
+    private static List<Bitmap> mBitmapQueue = new ArrayList<Bitmap>();
 
     /**
      * Calculates and return the action bar height based on the current theme
@@ -211,5 +215,15 @@ public class Utils {
         }
 
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+    }
+
+    public static void queueBitmap(Bitmap bmp) {
+        mBitmapQueue.add(bmp);
+    }
+
+    public static Bitmap dequeueBitmap() {
+        Bitmap bmp = mBitmapQueue.get(0);
+        mBitmapQueue.remove(0);
+        return bmp;
     }
 }

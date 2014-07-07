@@ -8,6 +8,7 @@ import android.util.Log;
 
 import org.omnirom.music.api.common.HttpGet;
 import org.omnirom.music.api.common.RateLimitException;
+import org.omnirom.music.api.freebase.FreeBaseClient;
 import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
 import org.omnirom.music.model.Album;
@@ -54,6 +55,15 @@ public class AlbumArtCache {
     }
 
     /**
+     * Returns the artist cover image for the provided artist from the cache
+     * @param artist Artist name
+     * @return An URL to an artist cover image, or null if none is cached
+     */
+    public String getArtistCoverUrl(String artist) {
+        return mPrefs.getString("___OM__ARTIST__COVER____" + artist, null);
+    }
+
+    /**
      * Stores an album art url in the cache.
      * @param artist Artist name
      * @param album Album name
@@ -61,6 +71,11 @@ public class AlbumArtCache {
      */
     public void putAlbumArtUrl(String artist, String album, String key) {
         mEditor.putString(artist + album, key);
+        mEditor.apply();
+    }
+
+    public void putArtistArtUrl(String artist, String url) {
+        mEditor.putString("___OM__ARTIST__COVER____" + artist, url);
         mEditor.apply();
     }
 
@@ -76,7 +91,7 @@ public class AlbumArtCache {
         String key = DEFAULT_ART;
         if(song != null) {
             key = getArtKey(song, artUrl);
-            if(key != DEFAULT_ART)
+            if(!key.equals(DEFAULT_ART))
                 cache.putAlbumArtKey(album, key);
         }
         return key;
@@ -89,41 +104,46 @@ public class AlbumArtCache {
         if (artist != null) {
             // Any art from that artist will be fine.
             // Check if we have it in cache
-            String tmpUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), null);
+            String tmpUrl = AlbumArtCache.getDefault().getArtistCoverUrl(artist.getName());
             if (tmpUrl == null) {
-                // We don't, fetch from MusicBrainz
+                // We don't, fetch from Freebase
                 try {
-                    AlbumInfo[] albumInfoArray = MusicBrainzClient.getAlbum(artist.getName(), null);
+                    tmpUrl = FreeBaseClient.getArtistImageUrl(artist.getName());
 
-                    if (albumInfoArray != null) {
-                        Log.e("XPLOD", "MBC found " + albumInfoArray.length + " albums");
-
-                        for (AlbumInfo albumInfo : albumInfoArray) {
-                            tmpUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
-
-                            if (tmpUrl != null) {
-                                AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), null, tmpUrl);
-                                artKey = tmpUrl.replaceAll("\\W+", "");
-                                cache.putArtistArtKey(artist, artKey);
-                                break;
-                            }
-                        }
+                    if (tmpUrl == null) {
+                        // FreeBase has nothing, we get an album art instead from MusicBrainz
+                        tmpUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), null);
 
                         if (tmpUrl == null) {
-                            cache.putArtistArtKey(artist, DEFAULT_ART);
-                            artKey = DEFAULT_ART;
-                            Log.e("XPLOD", "No MBC match for this query!");
-                        } else {
-                            artUrl.append(tmpUrl);
-                            Log.e("XPLOD", "MBC found a match: " + tmpUrl + " (" + artUrl.toString() + ")");
+                            AlbumInfo[] infos = MusicBrainzClient.getAlbum(artist.getName(), null);
+
+                            for (AlbumInfo info : infos) {
+                                tmpUrl = MusicBrainzClient.getAlbumArtUrl(info.id);
+                                if (tmpUrl != null) {
+                                    // Cache it for the album
+                                    AlbumArtCache.getDefault().putAlbumArtUrl(artist.getName(), null, tmpUrl);
+                                    break;
+                                }
+                            }
                         }
-                    } else {
-                        // No album found on musicbrainz
+                    }
+
+                    if (tmpUrl != null) {
+                        AlbumArtCache.getDefault().putArtistArtUrl(artist.getName(), tmpUrl);
+                        artKey = tmpUrl.replaceAll("\\W+", "");
+                        cache.putArtistArtKey(artist, artKey);
+
+                    }
+                    if (tmpUrl == null) {
                         cache.putArtistArtKey(artist, DEFAULT_ART);
                         artKey = DEFAULT_ART;
+                        Log.e("XPLOD", "No FB match for this query!");
+                    } else {
+                        artUrl.append(tmpUrl);
+                        Log.e("XPLOD", "FB found a match: " + tmpUrl + " (" + artUrl.toString() + ")");
                     }
-                } catch (RateLimitException e) {
-                    // Retry later, rate limited / early exit (don't cache that)
+                } catch (Exception e) {
+                    // Retry later, rate limited or network error / early exit (don't cache that)
                     artKey = DEFAULT_ART;
                     return artKey;
                 }
@@ -284,7 +304,12 @@ public class AlbumArtCache {
                     try {
                         byte[] imageData = HttpGet.getBytes(artUrl, "", true);
                         bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-                        ImageCache.getDefault().put(artKey, bmp);
+                        if (bmp != null) {
+                            ImageCache.getDefault().put(artKey, bmp);
+                        } else {
+                            // This may happen if the image is corrupted
+                            bmp = def;
+                        }
                     } catch (RateLimitException e) {
                         Log.w(TAG, "Cannot get album art image data (rate limit)");
                         bmp = def;

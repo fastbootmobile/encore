@@ -10,9 +10,23 @@
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:windowBackground">@color/default_fragment_background</item>
 
-        <!-- <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowSharedElementEnterTransition">@transition/artist_details</item>
+        <item name="android:windowSharedElementExitTransition">@transition/artist_details</item>
+    </style>
 
-        <item name="android:windowActionBarOverlay">true</item> -->
+    <style name="TransparentNavBar" parent="@android:style/Widget.Material.Light.ActionBar.Solid">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.TransparentNavBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:actionBarItemBackground">@android:color/transparent</item>
+        <item name="android:actionBarStyle">@style/TransparentNavBar</item>
+    </style>
+
+    <style name="AppTheme.TransparentNavBar.ArtistDetails">
 
     </style>
 

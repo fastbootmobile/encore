@@ -48,7 +48,7 @@ public class ArtistsAdapter extends BaseAdapter {
     private Handler mHandler;
     private int mScrollState;
 
-    private static class ViewHolder {
+    public static class ViewHolder {
         public LinearLayout llRoot;
         public ImageView ivCover;
         public TextView tvTitle;
@@ -247,7 +247,7 @@ public class ArtistsAdapter extends BaseAdapter {
         if (convertView == null) {
             // Recycle the existing view
             LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.medium_card_one_line, null);
+            root = inflater.inflate(R.layout.medium_card_one_line, parent, false);
             assert root != null;
 
             ViewHolder holder = new ViewHolder();
@@ -264,6 +264,9 @@ public class ArtistsAdapter extends BaseAdapter {
 
         tag.artist = artist;
         tag.position = position;
+
+        tag.ivCover.setViewName("grid:image:" + artist.getRef());
+        tag.tvTitle.setViewName("grid:title:" + artist.getRef());
 
         if (artist.isLoaded()) {
             tag.tvTitle.setText(artist.getName());

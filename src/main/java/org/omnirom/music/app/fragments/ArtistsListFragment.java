@@ -1,20 +1,27 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
-import org.omnirom.music.app.adapters.PlaylistListAdapter;
-import org.omnirom.music.app.ui.ExpandableHeightGridView;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -22,8 +29,8 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderConnection;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +38,7 @@ import java.util.List;
 /**
  * Created by h4o on 20/06/2014.
  */
-public class ArtistsFragment extends AbstractRootFragment implements ILocalCallback {
+public class ArtistsListFragment extends AbstractRootFragment implements ILocalCallback {
 
     private ArtistsAdapter mAdapter;
     private Handler mHandler;
@@ -43,11 +50,11 @@ public class ArtistsFragment extends AbstractRootFragment implements ILocalCallb
      *
      * @return A new instance of fragment PlaylistListFragment.
      */
-    public static ArtistsFragment newInstance() {
-        ArtistsFragment fragment = new ArtistsFragment();
+    public static ArtistsListFragment newInstance() {
+        ArtistsListFragment fragment = new ArtistsListFragment();
         return fragment;
     }
-    public ArtistsFragment() {
+    public ArtistsListFragment() {
         mAdapter = new ArtistsAdapter();
         mHandler = new Handler();
 
@@ -86,14 +93,25 @@ public class ArtistsFragment extends AbstractRootFragment implements ILocalCallb
         artistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MainActivity act = (MainActivity) getActivity();
-                //We get all the albums from the artist
-                List<Album> albums = new ArrayList<Album>();
-                Iterator<String> albumRefs = mAdapter.getItem(position).albums();
-                while(albumRefs.hasNext()){
-                    albums.add(ProviderAggregator.getDefault().getCache().getAlbum(albumRefs.next()));//we create a new view containing the artist's albums
-                }
-                act.showFragment(AlbumsFragment.newInstance(albums), true);
+                Intent intent = new Intent(getActivity(), ArtistActivity.class);
+
+                ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
+                ImageView ivCover = tag.ivCover;
+                TextView tvTitle = tag.tvTitle;
+
+                intent.putExtra(ArtistActivity.EXTRA_ARTIST_NAME,
+                        mAdapter.getItem(position).getName());
+
+                intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
+                        ((ColorDrawable) view.getBackground()).getColor());
+
+                Utils.queueBitmap(((BitmapDrawable) ivCover.getDrawable()).getBitmap());
+
+                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                        new Pair<View, String>(ivCover, "itemImage"),
+                        new Pair<View, String>(tvTitle, "artistName"));
+
+                startActivity(intent, opt.toBundle());
             }
         });
 
