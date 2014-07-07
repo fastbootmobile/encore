@@ -67,6 +67,7 @@ public class ArtistsFragment extends AbstractRootFragment implements ILocalCallb
         GridView artistLayout =
                 (GridView) root.findViewById(R.id.gvArtists);
         artistLayout.setAdapter(mAdapter);
+        mAdapter.registerScrollListener(artistLayout);
 
 
 

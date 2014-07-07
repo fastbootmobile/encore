@@ -19,15 +19,15 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
-import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.model.Artist;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 
@@ -52,10 +52,21 @@ public class ArtistsAdapter extends BaseAdapter {
         public LinearLayout llRoot;
         public ImageView ivCover;
         public TextView tvTitle;
-        public TextView tvSubTitle;
         public int position;
         public Artist artist;
     }
+
+    private AbsListView.OnScrollListener mScrollListener = new AbsListView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            mScrollState = scrollState;
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+        }
+    };
 
     private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
         private ViewHolder v;
@@ -70,13 +81,13 @@ public class ArtistsAdapter extends BaseAdapter {
         protected BitmapDrawable doInBackground(ViewHolder... params) {
             v = params[0];
             mArtist = v.artist;
-            /*if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) {
+            if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) {
                 try {
                     this.wait(DEFERRED_DELAY);
                 } catch (Exception e) {
                     return null;
                 }
-            }*/
+            }
 
             if (v.position != this.mPosition || mArtist == null) {
                 // Cancel, we moved
@@ -134,23 +145,7 @@ public class ArtistsAdapter extends BaseAdapter {
             super.onPostExecute(result);
 
             if (v.position == mPosition && v.artist == mArtist && result != null) {
-                v.ivCover.setImageDrawable(result);
-
-                // TEST - PALETTE
-                final Resources res = v.llRoot.getResources();
-                Palette palette = Palette.generate(result.getBitmap());
-                PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
-                PaletteItem darkMutedColor = palette.getDarkMutedColor();
-
-                if (darkVibrantColor != null) {
-                    v.llRoot.setBackgroundColor(darkVibrantColor.getRgb());
-                } else if (darkMutedColor != null) {
-                    v.llRoot.setBackgroundColor(darkMutedColor.getRgb());
-                } else {
-                    v.llRoot.setBackgroundColor(res.getColor(R.color.default_album_art_background));
-                }
-            } else {
-                Log.e("ARTIST", "We moved 1 (result = " + result + ")");
+                applyItemImage(v, result);
             }
         }
     }
@@ -158,6 +153,28 @@ public class ArtistsAdapter extends BaseAdapter {
     public ArtistsAdapter() {
         mArtists = new ArrayList<Artist>();
         mHandler = new Handler();
+    }
+
+    public void registerScrollListener(AbsListView listView) {
+        listView.setOnScrollListener(mScrollListener);
+    }
+
+    private void applyItemImage(ViewHolder tag, BitmapDrawable result) {
+        tag.ivCover.setImageDrawable(result);
+
+        // TEST - PALETTE
+        final Resources res = tag.llRoot.getResources();
+        Palette palette = Palette.generate(result.getBitmap());
+        PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
+        PaletteItem darkMutedColor = palette.getDarkMutedColor();
+
+        if (darkVibrantColor != null) {
+            tag.llRoot.setBackgroundColor(darkVibrantColor.getRgb());
+        } else if (darkMutedColor != null) {
+            tag.llRoot.setBackgroundColor(darkMutedColor.getRgb());
+        } else {
+            tag.llRoot.setBackgroundColor(res.getColor(R.color.default_album_art_background));
+        }
     }
 
     private void sortList() {
@@ -230,13 +247,12 @@ public class ArtistsAdapter extends BaseAdapter {
         if (convertView == null) {
             // Recycle the existing view
             LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.medium_card, null);
+            root = inflater.inflate(R.layout.medium_card_one_line, null);
             assert root != null;
 
             ViewHolder holder = new ViewHolder();
             holder.ivCover = (ImageView) root.findViewById(R.id.ivCover);
             holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
-            holder.tvSubTitle = (TextView) root.findViewById(R.id.tvSubTitle);
             holder.llRoot = (LinearLayout) root.findViewById(R.id.llRoot);
 
             root.setTag(holder);
@@ -249,38 +265,16 @@ public class ArtistsAdapter extends BaseAdapter {
         tag.artist = artist;
         tag.position = position;
 
-        tag.ivCover.setImageResource(R.drawable.album_placeholder);
-
         if (artist.isLoaded()) {
             tag.tvTitle.setText(artist.getName());
-            tag.tvSubTitle.setText("");
         } else {
             tag.tvTitle.setText("Loading");
-            tag.tvSubTitle.setText("");
         }
 
-        final String artKey = ProviderAggregator.getDefault().getCache().getArtistArtKey(artist);
-
-        final Resources res = root.getResources();
-        assert res != null;
-
-        Log.e("ArtistsAdapter", "Looking for art at artist pos" + position);
-
-        if (artKey != null) {
-            Log.e("ArtistsAdapter", "we have an art key " + artKey + " artist: " + artist.getName());
-            // We already know the album art for this song (keyed in artKey)
-
-            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-
-
-        } else {
-            Log.e("ArtistsAdapter", "we have an art key " + artKey + " artist: " + artist.getName());
-
-            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-            //task.execute(tag);
-        }
+        tag.ivCover.setImageResource(R.drawable.album_placeholder);
+        tag.llRoot.setBackgroundColor(tag.llRoot.getResources().getColor(R.color.default_album_art_background));
+        BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
 
         return root;
     }

@@ -2,8 +2,6 @@ package org.omnirom.music.app.adapters;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.RemoteException;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +10,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Playlist;
-import org.omnirom.music.model.Song;
-import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -116,7 +109,7 @@ public class PlaylistListAdapter extends BaseAdapter {
         if (convertView == null) {
             // Recycle the existing view
             LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.medium_card, null);
+            root = inflater.inflate(R.layout.medium_card_two_lines, null);
             assert root != null;
 
             ViewHolder holder = new ViewHolder();

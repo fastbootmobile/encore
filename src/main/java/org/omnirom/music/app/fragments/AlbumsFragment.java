@@ -110,7 +110,7 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
         }
         // Setup the search box
         setupSearchBox(root);
-        albumLayout.setOnScrollListener(mAdapter.onScrollListener);
+        mAdapter.registerScrollListener(albumLayout);
         // Setup the click listener
       albumLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

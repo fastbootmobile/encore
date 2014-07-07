@@ -22,9 +22,10 @@ public class ProviderCache {
     private final Map<String, Album> mAlbums;
     private final Map<String, Artist> mArtists;
     private final Map<Song, String> mSongArtKeys;
-    private final Map<Album,String> mAlbumArtKeys;
-    private final Map<Artist,String> mArtistArtKeys;
+    private final Map<Album, String> mAlbumArtKeys;
+    private final Map<Artist, String> mArtistArtKeys;
     private final List<Playlist> mMultiProviderPlaylists;
+
     /**
      * Default constructor
      */
@@ -55,9 +56,11 @@ public class ProviderCache {
         mPlaylists.put(pl.getRef(), pl);
         mRefProvider.put(pl.getRef(), provider);
     }
-    public void putAllProviderPlaylist(List<Playlist> playlists){
+
+    public void putAllProviderPlaylist(List<Playlist> playlists) {
         mMultiProviderPlaylists.addAll(playlists);
     }
+
     public Playlist getPlaylist(final String ref) {
         return mPlaylists.get(ref);
     }
@@ -65,14 +68,27 @@ public class ProviderCache {
     public List<Playlist> getAllPlaylists() {
         return new ArrayList<Playlist>(mPlaylists.values());
     }
+
     public List<Playlist> getAllMultiProviderPlaylists() {
         return mMultiProviderPlaylists;
     }
-    public List<Song> getAllSongs() { return new ArrayList<Song>(mSongs.values());}
-    public List<Artist> getAllArtists() { synchronized (mArtists) {
-        return  new ArrayList<Artist>(mArtists.values());
-    }}
-    public List<Album> getAllAlbums() { return  new ArrayList<Album>(mAlbums.values());}
+
+    public List<Song> getAllSongs() {
+        return new ArrayList<Song>(mSongs.values());
+    }
+
+    public List<Artist> getAllArtists() {
+        synchronized (mArtists) {
+            return new ArrayList<Artist>(mArtists.values());
+        }
+    }
+
+    public List<Album> getAllAlbums() {
+        synchronized (mAlbums) {
+            return new ArrayList<Album>(mAlbums.values());
+        }
+    }
+
     public void putSong(final ProviderIdentifier provider, final Song song) {
         mSongs.put(song.getRef(), song);
         mRefProvider.put(song.getRef(), provider);
@@ -106,18 +122,27 @@ public class ProviderCache {
 
     /**
      * Get the art cache key of the album art for the provided song, or null if none found
+     *
      * @param song The song to lookup
      * @return The art key, or null if none found
      */
     public String getSongArtKey(final Song song) {
         return mSongArtKeys.get(song);
     }
-    public String getAlbumArtKey(final Album album) { return  mAlbumArtKeys.get(album);}
-    public void putAlbumArtKey(final Album album,final String key) {
-        mAlbumArtKeys.put(album,key);
+
+    public String getAlbumArtKey(final Album album) {
+        return mAlbumArtKeys.get(album);
     }
-    public String getArtistArtKey(final Artist album) { return  mArtistArtKeys.get(album);}
-    public void putArtistArtKey(final Artist album,final String key) {
-        mArtistArtKeys.put(album,key);
+
+    public void putAlbumArtKey(final Album album, final String key) {
+        mAlbumArtKeys.put(album, key);
+    }
+
+    public String getArtistArtKey(final Artist album) {
+        return mArtistArtKeys.get(album);
+    }
+
+    public void putArtistArtKey(final Artist album, final String key) {
+        mArtistArtKeys.put(album, key);
     }
 }

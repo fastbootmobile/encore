@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
@@ -14,18 +13,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
-import org.omnirom.music.framework.BlurCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.model.Album;
-import org.omnirom.music.model.Artist;
-import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 
@@ -53,6 +48,18 @@ public class AlbumsAdapter extends BaseAdapter {
         public View vRoot;
         public int position;
     }
+
+    private AbsListView.OnScrollListener mScrollListener = new AbsListView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            mScrollState = scrollState;
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+        }
+    };
 
     private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
         private ViewHolder v;
@@ -184,17 +191,9 @@ public class AlbumsAdapter extends BaseAdapter {
         }
     }
 
-    public AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
-        @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
-            mScrollState = scrollState;
-        }
-
-        @Override
-        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-        }
-    };
+    public void registerScrollListener(AbsListView listView) {
+        listView.setOnScrollListener(mScrollListener);
+    }
 
     public boolean contains(Album p) {
         return mAlbums.contains(p);
@@ -224,7 +223,7 @@ public class AlbumsAdapter extends BaseAdapter {
         if (convertView == null) {
             // Recycle the existing view
             LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.medium_card, null);
+            root = inflater.inflate(R.layout.medium_card_two_lines, null);
             assert root != null;
 
             ViewHolder holder = new ViewHolder();

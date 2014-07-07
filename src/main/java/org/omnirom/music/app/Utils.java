@@ -3,12 +3,16 @@ package org.omnirom.music.app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlend;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.util.Log;
 import android.util.TypedValue;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.concurrent.TimeUnit;
@@ -170,5 +174,42 @@ public class Utils {
      */
     public static void shortToast(Context context, int res) {
         Toast.makeText(context, res, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Calculates the optimal size of the text based on the text view width
+     * @param textView The text view in which the text should fit
+     * @param desiredWidth The desired final text width, or -1 for the TextView's getMeasuredWidth
+     */
+    public static void adjustTextSize(TextView textView, int desiredWidth) {
+        if (desiredWidth <= 0) {
+            desiredWidth = textView.getMeasuredWidth();
+
+            if (desiredWidth <= 0) {
+                // Invalid width, don't do anything
+                Log.w("Utils", "adjustTextSize: Not doing anything (measured width invalid)");
+                return;
+            }
+        }
+
+        // Add some margin to width
+        desiredWidth *= 0.8f;
+
+        Paint paint = new Paint();
+        Rect bounds = new Rect();
+
+        paint.setTypeface(textView.getTypeface());
+        float textSize = textView.getTextSize() * 2.0f;
+        paint.setTextSize(textSize);
+        String text = textView.getText().toString();
+        paint.getTextBounds(text, 0, text.length(), bounds);
+
+        while (bounds.width() > desiredWidth) {
+            textSize--;
+            paint.setTextSize(textSize);
+            paint.getTextBounds(text, 0, text.length(), bounds);
+        }
+
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
     }
 }
