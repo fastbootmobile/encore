@@ -3,6 +3,7 @@ package org.omnirom.music.app;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -45,27 +46,40 @@ import java.security.Provider;
 public class ArtistActivity extends Activity {
 
     private static final String TAG = "ArtistActivity";
+    private static final String TAG_FRAGMENT = "fragment_inner";
 
     public static final String EXTRA_ARTIST = "artist";
     public static final String EXTRA_BACKGROUND_COLOR = "background_color";
+    private static final String EXTRA_RESTORE_INTENT = "restore_intent";
 
     private InnerFragment mActiveFragment;
+    private Bundle mInitialIntent;
+    private Bitmap mHero;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
 
+        FragmentManager fm = getFragmentManager();
+        mActiveFragment = (InnerFragment) fm.findFragmentByTag(TAG_FRAGMENT);
+
         if (savedInstanceState == null) {
-            Bitmap hero = Utils.dequeueBitmap();
+            mHero = Utils.dequeueBitmap();
+            mInitialIntent = getIntent().getExtras();
+        } else {
+            mHero = Utils.dequeueBitmap();
+            mInitialIntent = savedInstanceState.getBundle(EXTRA_RESTORE_INTENT);
+        }
 
+        if (mActiveFragment == null) {
             mActiveFragment = new InnerFragment();
-            mActiveFragment.setArguments(hero, getIntent());
-
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, mActiveFragment)
+            fm.beginTransaction()
+                    .add(R.id.container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
         }
+
+        mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
         getActionBar().setTitle("");
@@ -125,9 +139,10 @@ public class ArtistActivity extends Activity {
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        Log.e("XPLOD", "ON BACK PRESSED");
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBundle(EXTRA_RESTORE_INTENT, mInitialIntent);
+        Utils.queueBitmap(mHero);
     }
 
     @Override
@@ -251,10 +266,10 @@ public class ArtistActivity extends Activity {
             return mRootView.findViewById(id);
         }
 
-        public void setArguments(Bitmap hero, Intent intent) {
+        public void setArguments(Bitmap hero, Bundle extras) {
             mHeroImage = hero;
-            mBackgroundColor = intent.getIntExtra(EXTRA_BACKGROUND_COLOR, 0xFF333333);
-            mArtist = intent.getParcelableExtra(EXTRA_ARTIST);
+            mBackgroundColor = extras.getInt(EXTRA_BACKGROUND_COLOR, 0xFF333333);
+            mArtist = extras.getParcelable(EXTRA_ARTIST);
 
             // Prepare the palette to colorize the FAB
             Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
