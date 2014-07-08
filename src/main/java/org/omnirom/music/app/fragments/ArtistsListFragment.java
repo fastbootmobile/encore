@@ -102,8 +102,8 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
 
                 ((ViewGroup) tag.llRoot.getParent()).setTransitionGroup(false);
 
-                intent.putExtra(ArtistActivity.EXTRA_ARTIST_NAME,
-                        mAdapter.getItem(position).getName());
+                intent.putExtra(ArtistActivity.EXTRA_ARTIST,
+                        mAdapter.getItem(position));
 
                 intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
                         ((ColorDrawable) view.getBackground()).getColor());

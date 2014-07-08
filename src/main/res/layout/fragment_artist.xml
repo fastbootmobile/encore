@@ -1,51 +1,100 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="org.omnirom.music.app.ArtistActivity$PlaceholderFragment">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tvArtist"
-        android:layout_below="@+id/ivHero"
-        android:layout_alignStart="@+id/ivHero"
-        android:layout_alignEnd="@+id/ivHero"
-        android:textSize="22sp"
-        android:fontFamily="sans-serif-medium"
-        android:paddingLeft="24dp"
-        android:paddingRight="8dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        android:gravity="center_vertical|start"
-        android:textColor="@color/white"
-        android:background="#333"
-        android:viewName="artistName" />
-
-    <ImageView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:id="@+id/ivHero"
-        android:viewName="itemImage"
-        android:layout_alignParentStart="true"
-        android:src="@drawable/test_cover_ptx"
-        android:scaleType="centerCrop" />
+        android:layout_height="wrap_content"
+        tools:context="org.omnirom.music.app.ArtistActivity.InnerFragment">
 
-    <ImageButton
-        android:id="@+id/fabPlay"
-        android:layout_width="@dimen/floating_button_size"
-        android:layout_height="@dimen/floating_button_size"
+        <TextView
+            android:id="@+id/tvArtist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/ivHero"
+            android:layout_alignStart="@+id/ivHero"
+            android:layout_below="@+id/ivHero"
+            android:background="#333"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center_vertical|start"
+            android:paddingBottom="16dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="8dp"
+            android:paddingTop="16dp"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:viewName="artistName" />
 
-        android:background="@drawable/fab_background"
-        android:src="@drawable/ic_action_play_pressed"
+        <ImageView
+            android:id="@+id/ivHero"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentStart="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/test_cover_ptx"
+            android:viewName="itemImage" />
 
-        android:elevation="@dimen/button_elevation"
-        android:stateListAnimator="@anim/button_raise"
+        <ImageButton
+            android:id="@+id/fabPlay"
+            android:layout_width="@dimen/floating_button_size"
+            android:layout_height="@dimen/floating_button_size"
 
-        android:layout_above="@+id/tvArtist"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="48dp"
-        android:layout_marginBottom="-24dp" />
+            android:layout_above="@+id/tvArtist"
+            android:layout_alignParentEnd="true"
+
+            android:layout_marginBottom="-24dp"
+            android:layout_marginRight="48dp"
+
+            android:background="@drawable/fab_background"
+            android:elevation="@dimen/button_elevation"
+            android:src="@drawable/ic_action_play_pressed"
+            android:stateListAnimator="@anim/button_raise" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvArtist"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:orientation="vertical">
 
 
-</RelativeLayout>
+            <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="96dp"
+                card_view:cardBackgroundColor="#EAF2C0"
+                android:id="@+id/cardArtistSuggestion"
+                android:elevation="@dimen/card_elevation"
+                card_view:cardCornerRadius="@dimen/cardview_default_radius">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/ivArtistSuggestionCover"
+                        android:adjustViewBounds="true"
+                        android:layout_alignParentStart="true"
+                        android:src="@drawable/test_cover_imagine_dragons" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/ivArtistSuggestionCover"
+                        android:layout_margin="8dp"
+                        android:id="@+id/tvArtistSuggestionTitle" />
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.CardView>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+</ScrollView>

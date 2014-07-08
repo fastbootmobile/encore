@@ -11,8 +11,7 @@
         <item name="android:windowBackground">@color/default_fragment_background</item>
 
         <item name="android:windowContentTransitions">true</item>
-        <item name="android:windowSharedElementEnterTransition">@transition/artist_details</item>
-        <item name="android:windowSharedElementExitTransition">@transition/artist_details</item>
+
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowAllowExitTransitionOverlap">true</item>
     </style>
@@ -29,7 +28,10 @@
     </style>
 
     <style name="AppTheme.TransparentNavBar.ArtistDetails">
-
+        <item name="android:windowSharedElementEnterTransition">@transition/artist_details</item>
+        <item name="android:windowSharedElementExitTransition">@transition/artist_details</item>
+        <item name="android:windowEnterTransition">@transition/explode</item>
+        <item name="android:windowExitTransition">@transition/explode</item>
     </style>
 
 </resources>

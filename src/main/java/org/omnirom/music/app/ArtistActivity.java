@@ -1,19 +1,13 @@
 package org.omnirom.music.app;
 
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Outline;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.graphics.Palette;
@@ -26,22 +20,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.os.Build;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.omnirom.music.app.R;
+import org.omnirom.music.framework.Suggestor;
+import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Song;
 
 public class ArtistActivity extends Activity {
 
     private static final String TAG = "ArtistActivity";
 
-    public static final String EXTRA_ARTIST_NAME = "artist_name";
+    public static final String EXTRA_ARTIST = "artist";
     public static final String EXTRA_BACKGROUND_COLOR = "background_color";
 
-    private PlaceholderFragment mActiveFragment;
+    private InnerFragment mActiveFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +45,7 @@ public class ArtistActivity extends Activity {
         if (savedInstanceState == null) {
             Bitmap hero = Utils.dequeueBitmap();
 
-            mActiveFragment = new PlaceholderFragment();
+            mActiveFragment = new InnerFragment();
             mActiveFragment.setArguments(hero, getIntent());
 
             getFragmentManager().beginTransaction()
@@ -146,18 +140,18 @@ public class ArtistActivity extends Activity {
     }
 
     /**
-     * A placeholder fragment containing a simple view.
+     * A fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class InnerFragment extends Fragment {
 
         private Bitmap mHeroImage;
         private int mBackgroundColor;
-        private String mArtistName;
+        private Artist mArtist;
         private View mRootView;
         private Palette mPalette;
         private Handler mHandler;
 
-        public PlaceholderFragment() {
+        public InnerFragment() {
 
         }
 
@@ -168,15 +162,16 @@ public class ArtistActivity extends Activity {
         public void setArguments(Bitmap hero, Intent intent) {
             mHeroImage = hero;
             mBackgroundColor = intent.getIntExtra(EXTRA_BACKGROUND_COLOR, 0xFF333333);
-            mArtistName = intent.getStringExtra(EXTRA_ARTIST_NAME);
+            mArtist = intent.getParcelableExtra(EXTRA_ARTIST);
 
             // Prepare the palette to colorize the FAB
-            AsyncTask palette = Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
+            Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(final Palette palette) {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            mPalette = palette;
                             PaletteItem color = palette.getDarkMutedColor();
                             if (color != null && mRootView != null) {
                                 RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
@@ -201,10 +196,12 @@ public class ArtistActivity extends Activity {
 
             TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
             tvArtist.setBackgroundColor(mBackgroundColor);
-            tvArtist.setText(mArtistName);
+            tvArtist.setText(mArtist.getName());
 
             // Outline is required for the FAB shadow to be actually oval
             setOutlines(mRootView.findViewById(R.id.fabPlay));
+
+            loadRecommendation();
 
             return mRootView;
         }
@@ -216,6 +213,16 @@ public class ArtistActivity extends Activity {
             outline.setOval(0, 0, size, size);
 
             v.setOutline(outline);
+        }
+
+        private void loadRecommendation() {
+            Song recommended = Suggestor.getInstance().suggestBestForArtist(mArtist);
+            if (recommended != null) {
+                TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
+                tvTitle.setText(recommended.getTitle());
+            } else {
+                mRootView.findViewById(R.id.cardArtistSuggestion).setVisibility(View.GONE);
+            }
         }
     }
 }
