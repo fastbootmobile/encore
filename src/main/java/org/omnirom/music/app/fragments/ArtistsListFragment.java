@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +45,24 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
     private ArtistsAdapter mAdapter;
     private Handler mHandler;
 
+    private long mLastUpdate = 0;
+    private final List<Artist> mDelayedUpdateList = new ArrayList<Artist>();
+    private Runnable mDelayedUpdateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            int initialCount = mAdapter.getCount();
+
+            synchronized (mDelayedUpdateList) {
+                mAdapter.addAllUnique(mDelayedUpdateList);
+                mDelayedUpdateList.clear();
+            }
+
+            // Only notify and reload the gridview content if we actually have new elements
+            if (initialCount != mAdapter.getCount()) {
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     /**
      * Use this factory method to create a new instance of
@@ -81,10 +100,12 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
 
         new Thread() {
             public void run() {
+                final List<Artist> artists = ProviderAggregator.getDefault().getCache().getAllArtists();
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mAdapter.addAllUnique(ProviderAggregator.getDefault().getCache().getAllArtists());
+                        mAdapter.addAllUnique(artists);
+                        mLastUpdate = System.currentTimeMillis();
                     }
                 });
             }
@@ -128,8 +149,32 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
     }
 
     @Override
-    public void onSongUpdate(Song s) {
+    public void onDetach() {
+        super.onDetach();
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
+    }
 
+    private void postListUpdate() {
+        mHandler.removeCallbacks(mDelayedUpdateRunnable);
+
+        if (System.currentTimeMillis() - mLastUpdate > 2000) {
+            mHandler.post(mDelayedUpdateRunnable);
+        } else {
+            mHandler.postDelayed(mDelayedUpdateRunnable, 500);
+        }
+    }
+
+    @Override
+    public void onSongUpdate(Song s) {
+        String artistRef = s.getArtist();
+        Artist artist = ProviderAggregator.getDefault().getCache().getArtist(artistRef);
+
+        if (artist != null) {
+            if (!mDelayedUpdateList.contains(artist)) {
+                mDelayedUpdateList.add(artist);
+                postListUpdate();
+            }
+        }
     }
 
     @Override
@@ -144,7 +189,10 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
 
     @Override
     public void onArtistUpdate(Artist a) {
-
+        if (!mDelayedUpdateList.contains(a)) {
+            mDelayedUpdateList.add(a);
+            postListUpdate();
+        }
     }
 
     @Override

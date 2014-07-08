@@ -136,10 +136,7 @@ public class AlbumsAdapter extends BaseAdapter {
             super.onPostExecute(result);
 
             if (v.position == mPosition && v.album == mAlbum && result != null) {
-
                 v.ivCover.setImageDrawable(result);
-            } else if (result != null) {
-                Log.e(TAG, "we have a result too late...");
             }
         }
     }
@@ -218,7 +215,7 @@ public class AlbumsAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         Context ctx = parent.getContext();
         assert ctx != null;
-        Log.e(TAG, "we get view position " + position);
+
         View root = convertView;
         if (convertView == null) {
             // Recycle the existing view

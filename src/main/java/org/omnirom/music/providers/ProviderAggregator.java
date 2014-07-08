@@ -421,7 +421,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     Artist artist = mCache.getArtist(artistRef);
 
                     if (artist != null) {
-                        artist.addAlbum(song.getAlbum());
+                        artist.addAlbum(a.getRef());
                     }
                 }
             }

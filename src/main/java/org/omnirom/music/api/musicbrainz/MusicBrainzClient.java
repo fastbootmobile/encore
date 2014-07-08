@@ -77,7 +77,7 @@ public class MusicBrainzClient {
             return null;
         } catch (IOException e) {
             Log.e(TAG, "Unable to get album info (rate limit?)", e);
-            return null;
+            throw new RateLimitException();
         } catch (JSONException e) {
             Log.e(TAG, "JSON error while parsing album info", e);
             return null;
