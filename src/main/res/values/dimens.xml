@@ -12,11 +12,11 @@
     <dimen name="playlist_view_item_height">72dp</dimen>
     <dimen name="playing_bar_height">64dp</dimen>
 
-    <dimen name="button_elevation">2dp</dimen>
-    <dimen name="button_press_elevation">4dp</dimen>
+    <dimen name="button_elevation">4dp</dimen>
+    <dimen name="button_press_elevation">8dp</dimen>
 
-    <dimen name="card_elevation">4dp</dimen>
-    <dimen name="card_press_elevation">8dp</dimen>
+    <dimen name="card_elevation">6dp</dimen>
+    <dimen name="card_press_elevation">12dp</dimen>
 
     <dimen name="floating_button_size">72dp</dimen>
 </resources>

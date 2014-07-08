@@ -23,12 +23,22 @@ public class ImageCache {
     private ArrayList<String> mEntries;
     private File mCacheDir;
 
+    private LruCache<String, Bitmap> mMemoryCache;
+
     public static ImageCache getDefault() {
         return INSTANCE;
     }
 
     public ImageCache() {
         mEntries = new ArrayList<String>();
+
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        mMemoryCache = new LruCache<String, Bitmap>(maxMemory / 8) {
+            @Override
+            protected int sizeOf(String key, Bitmap value) {
+                return value.getByteCount() / 1024;
+            }
+        };
     }
 
     public void initialize(Context ctx) {
@@ -44,13 +54,24 @@ public class ImageCache {
     }
 
     public Bitmap get(final String key) {
+        if (key == null) {
+            return null;
+        }
+
         boolean contains;
         synchronized (this) {
             contains = mEntries.contains(key);
         }
 
         if (contains) {
-            return BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + key);
+            // Check if we have it in memory
+            Bitmap item = mMemoryCache.get(key);
+            if (item == null) {
+                item = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + key);
+                mMemoryCache.put(key, item);
+            }
+
+            return item;
         } else {
             return null;
         }

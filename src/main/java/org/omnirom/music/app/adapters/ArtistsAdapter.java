@@ -45,7 +45,7 @@ public class ArtistsAdapter extends BaseAdapter {
 
     private static final int DEFERRED_DELAY = 20;
 
-    private List<Artist> mArtists;
+    private final List<Artist> mArtists;
     private Handler mHandler;
     private int mScrollState;
 
@@ -190,55 +190,69 @@ public class ArtistsAdapter extends BaseAdapter {
     }
 
     public void addItem(Artist a) {
-        mArtists.add(a);
-        sortList();
-    }
-
-    public void addItemUnique(Artist a) {
-        if (!mArtists.contains(a)) {
+        synchronized (mArtists) {
             mArtists.add(a);
             sortList();
         }
     }
 
+    public void addItemUnique(Artist a) {
+        synchronized (mArtists) {
+            if (!mArtists.contains(a)) {
+                mArtists.add(a);
+                sortList();
+            }
+        }
+    }
+
     public void addAll(List<Artist> ps) {
-        mArtists.addAll(ps);
-        sortList();
-        notifyDataSetChanged();
+        synchronized (mArtists) {
+            mArtists.addAll(ps);
+            sortList();
+        }
     }
 
     public void addAllUnique(List<Artist> ps) {
-        boolean didChange = false;
-        for (Artist p : ps) {
-            if (!mArtists.contains(p)) {
-                mArtists.add(p);
-                didChange = true;
+        synchronized (mArtists) {
+            boolean didChange = false;
+            for (Artist p : ps) {
+                if (!mArtists.contains(p)) {
+                    mArtists.add(p);
+                    didChange = true;
+                }
             }
-        }
 
-        if (didChange) {
-            sortList();
-            notifyDataSetChanged();
+            if (didChange) {
+                sortList();
+            }
         }
     }
 
     public boolean contains(Artist p) {
-        return mArtists.contains(p);
+        synchronized (mArtists) {
+            return mArtists.contains(p);
+        }
     }
 
     @Override
     public int getCount() {
-        return mArtists.size();
+        synchronized (mArtists) {
+            return mArtists.size();
+        }
     }
 
     @Override
     public Artist getItem(int position) {
-        return mArtists.get(position);
+        synchronized (mArtists) {
+            return mArtists.get(position);
+        }
     }
 
     @Override
     public long getItemId(int position) {
-        return mArtists.get(position).getRef().hashCode();
+        synchronized (mArtists) {
+            return mArtists.get(position).getRef().hashCode();
+        }
     }
 
     @Override
@@ -277,10 +291,22 @@ public class ArtistsAdapter extends BaseAdapter {
             tag.tvTitle.setText("Loading");
         }
 
-        tag.ivCover.setImageResource(R.drawable.album_placeholder);
-        tag.llRoot.setBackgroundColor(tag.llRoot.getResources().getColor(R.color.default_album_art_background));
-        BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+        // Load the artist art
+        final String artKey = ProviderAggregator.getDefault().getCache().getArtistArtKey(artist);
+        final Bitmap cached = ImageCache.getDefault().get(artKey);
+
+        final Resources res = root.getResources();
+        assert res != null;
+
+        if (cached != null) {
+            // We already know the artist art, display it immediately
+            applyItemImage(tag, new BitmapDrawable(res, cached));
+        } else {
+            tag.ivCover.setImageResource(R.drawable.album_placeholder);
+            tag.llRoot.setBackgroundColor(tag.llRoot.getResources().getColor(R.color.default_album_art_background));
+            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+        }
 
         return root;
     }

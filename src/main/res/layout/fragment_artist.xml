@@ -74,12 +74,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <ImageView
+                    <org.omnirom.music.app.ui.SquareImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/ivArtistSuggestionCover"
                         android:adjustViewBounds="true"
                         android:layout_alignParentStart="true"
+                        android:scaleType="centerCrop"
                         android:src="@drawable/test_cover_imagine_dragons" />
 
                     <TextView
