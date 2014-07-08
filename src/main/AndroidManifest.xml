@@ -32,11 +32,7 @@
         <activity
             android:name=".ArtistActivity"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.omnirom.music.app.MainActivity" />
+            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
         </activity>
     </application>
 

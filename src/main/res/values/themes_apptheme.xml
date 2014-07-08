@@ -13,6 +13,8 @@
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowSharedElementEnterTransition">@transition/artist_details</item>
         <item name="android:windowSharedElementExitTransition">@transition/artist_details</item>
+        <item name="android:windowAllowEnterTransitionOverlap">true</item>
+        <item name="android:windowAllowExitTransitionOverlap">true</item>
     </style>
 
     <style name="TransparentNavBar" parent="@android:style/Widget.Material.Light.ActionBar.Solid">

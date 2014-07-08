@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Pair;
@@ -99,13 +100,15 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
                 ImageView ivCover = tag.ivCover;
                 TextView tvTitle = tag.tvTitle;
 
+                ((ViewGroup) tag.llRoot.getParent()).setTransitionGroup(false);
+
                 intent.putExtra(ArtistActivity.EXTRA_ARTIST_NAME,
                         mAdapter.getItem(position).getName());
 
                 intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
                         ((ColorDrawable) view.getBackground()).getColor());
 
-                Utils.queueBitmap(((BitmapDrawable) ivCover.getDrawable()).getBitmap());
+                Utils.queueBitmap(tag.srcBitmap);
 
                 ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                         new Pair<View, String>(ivCover, "itemImage"),

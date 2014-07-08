@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@color/default_album_art_background"
     android:measureWithLargestChild="false"
+    android:stateListAnimator="@anim/button_raise"
     android:orientation="vertical">
 
     <org.omnirom.music.app.ui.SquareImageView
@@ -28,7 +29,7 @@
         android:layout_weight="1"
         android:textSize="22sp"
         android:fontFamily="sans-serif-medium"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="24dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"

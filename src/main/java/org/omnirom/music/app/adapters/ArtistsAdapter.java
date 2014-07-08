@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 
@@ -52,6 +53,7 @@ public class ArtistsAdapter extends BaseAdapter {
         public LinearLayout llRoot;
         public ImageView ivCover;
         public TextView tvTitle;
+        public Bitmap srcBitmap;
         public int position;
         public Artist artist;
     }
@@ -160,6 +162,7 @@ public class ArtistsAdapter extends BaseAdapter {
     }
 
     private void applyItemImage(ViewHolder tag, BitmapDrawable result) {
+        tag.srcBitmap = result.getBitmap();
         tag.ivCover.setImageDrawable(result);
 
         // TEST - PALETTE

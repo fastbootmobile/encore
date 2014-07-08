@@ -4,16 +4,6 @@
     android:layout_height="match_parent"
     tools:context="org.omnirom.music.app.ArtistActivity$PlaceholderFragment">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:id="@+id/ivHero"
-        android:viewName="itemImage"
-        android:layout_alignParentBottom="false"
-        android:layout_alignParentStart="true"
-        android:src="@drawable/test_cover_ptx"
-        android:scaleType="centerCrop" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,7 +13,7 @@
         android:layout_alignEnd="@+id/ivHero"
         android:textSize="22sp"
         android:fontFamily="sans-serif-medium"
-        android:paddingLeft="8dp"
+        android:paddingLeft="24dp"
         android:paddingRight="8dp"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
@@ -31,6 +21,31 @@
         android:textColor="@color/white"
         android:background="#333"
         android:viewName="artistName" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:id="@+id/ivHero"
+        android:viewName="itemImage"
+        android:layout_alignParentStart="true"
+        android:src="@drawable/test_cover_ptx"
+        android:scaleType="centerCrop" />
+
+    <ImageButton
+        android:id="@+id/fabPlay"
+        android:layout_width="@dimen/floating_button_size"
+        android:layout_height="@dimen/floating_button_size"
+
+        android:background="@drawable/fab_background"
+        android:src="@drawable/ic_action_play_pressed"
+
+        android:elevation="@dimen/button_elevation"
+        android:stateListAnimator="@anim/button_raise"
+
+        android:layout_above="@+id/tvArtist"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="48dp"
+        android:layout_marginBottom="-24dp" />
 
 
 </RelativeLayout>
