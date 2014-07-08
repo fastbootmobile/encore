@@ -69,7 +69,7 @@ public class PlaylistListAdapter extends BaseAdapter {
     public void addAllUnique(List<Playlist> ps) {
         boolean didChange = false;
         for (Playlist p : ps) {
-            if (!mPlaylists.contains(p)) {
+            if (p != null && !mPlaylists.contains(p)) {
                 mPlaylists.add(p);
                 didChange = true;
             }
@@ -97,7 +97,11 @@ public class PlaylistListAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return mPlaylists.get(position).getRef().hashCode();
+        if (position >= 0 && position < mPlaylists.size()) {
+            return mPlaylists.get(position).getRef().hashCode();
+        } else {
+            return -1;
+        }
     }
 
     @Override

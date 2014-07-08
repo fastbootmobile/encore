@@ -39,7 +39,6 @@ public class ImageCache {
         if (entries != null) {
             for (File entry : entries) {
                 mEntries.add(entry.getName());
-                Log.e(TAG, "Entry: " + entry.getName());
             }
         }
     }
@@ -59,7 +58,6 @@ public class ImageCache {
 
     public void put(final String key, final Bitmap bmp) {
         try {
-            Log.e(TAG,"we put image for art key "+key);
             FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + key);
             bmp.compress(Bitmap.CompressFormat.WEBP, 90, out);
             out.close();

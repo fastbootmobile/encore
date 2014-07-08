@@ -1,6 +1,7 @@
 package org.omnirom.music.providers;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.media.MediaFormat;
 import android.os.DeadObjectException;
 import android.os.Environment;
@@ -12,6 +13,7 @@ import android.util.Log;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.w3c.dom.Document;
@@ -126,9 +128,19 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     @Override
+    public List<Genre> getGenres() throws RemoteException {
+        return null;
+    }
+
+    @Override
     public Song getSong(String ref) throws RemoteException {
         ProviderIdentifier providerId = mSongsProviders.get(ref);
         return getBinder(providerId).getSong(ref);
+    }
+
+    @Override
+    public Bitmap getSongArt(Song song) throws RemoteException {
+        return null;
     }
 
     @Override

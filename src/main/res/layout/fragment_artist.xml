@@ -87,6 +87,7 @@
                         android:layout_height="wrap_content"
                         android:layout_toRightOf="@id/ivArtistSuggestionCover"
                         android:layout_margin="8dp"
+                        android:textSize="22sp"
                         android:id="@+id/tvArtistSuggestionTitle" />
 
                 </RelativeLayout>

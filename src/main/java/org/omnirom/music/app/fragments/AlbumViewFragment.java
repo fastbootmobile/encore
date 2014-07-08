@@ -29,6 +29,8 @@ import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.providers.ProviderConnection;
+import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.security.Provider;
 import java.util.ArrayList;
@@ -169,11 +171,38 @@ public class AlbumViewFragment extends  AbstractRootFragment {
         ListView listView =  (ListView) root.findViewById(R.id.lvPlaylistContents);
         mAdapter = new SongsListAdapter(root.getContext());
         listView.setAdapter(mAdapter);
+
+        ProviderCache cache = ProviderAggregator.getDefault().getCache();
         Iterator<String> songs = mAlbum.songs();
         while (songs.hasNext()){
-            mAdapter.put(ProviderAggregator.getDefault().getCache().getSong(songs.next()));
+            String songRef = songs.next();
+            Song song = cache.getSong(songRef);
+
+            // If the song isn't loaded, try to get it from the provider, it might be loaded there
+            // but not cached for various reasons. For instance, Spotify loads the albums tracks
+            // info, but we're not tracking them in metadata_callback, so they're not actually
+            // pushed to the app's cache
+            if (song == null) {
+                ProviderConnection prov = PluginsLookup.getDefault().getProvider(mAlbum.getProvider());
+                try {
+                    song = prov.getBinder().getSong(songRef);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Remote exception while trying to get track info", e);
+                    continue;
+                }
+
+                if (song == null) {
+                    // Song is still unknown, we skip!
+                    continue;
+                }
+            }
+
+            Log.e("XPLOD", "Album song " + songRef + " (loaded: " + song.isLoaded() + ", title: " + song.getTitle() + ")");
+
+            mAdapter.put(song);
         }
         mAdapter.notifyDataSetChanged();
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {

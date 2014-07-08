@@ -3,15 +3,21 @@ package org.omnirom.music.app;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Outline;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
+import android.support.v7.widget.CardView;
 import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,12 +27,20 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.omnirom.music.framework.AlbumArtCache;
+import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.Suggestor;
+import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderCache;
+
+import java.security.Provider;
 
 public class ArtistActivity extends Activity {
 
@@ -139,6 +153,84 @@ public class ArtistActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    private static class BackgroundAsyncTask extends AsyncTask<Album, Void, BitmapDrawable> {
+        private Album mAlbum;
+        private Context mContext;
+        private ImageView mImageView;
+        private CardView mRootView;
+        private Palette mPalette;
+
+        public BackgroundAsyncTask(Context context, CardView cv, ImageView iv) {
+            mContext = context;
+            mImageView = iv;
+            mRootView = cv;
+        }
+
+        @Override
+        protected BitmapDrawable doInBackground(Album... params) {
+            mAlbum = params[0];
+
+            if (mAlbum == null) {
+                return null;
+            }
+            final Resources res = mContext.getResources();
+            assert res != null;
+
+            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+            // Prepare the placeholder/default
+            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_placeholder);
+            assert drawable != null;
+            Bitmap bmp = drawable.getBitmap();
+
+            String artKey = cache.getAlbumArtKey(mAlbum);
+            Bitmap cachedImage = null;
+            if (artKey != null) {
+                cachedImage = ImageCache.getDefault().get(artKey);
+            }
+            if (cachedImage != null) {
+                bmp = cachedImage;
+            } else {
+                String artUrl = null;
+
+                if (artKey == null) {
+                    StringBuffer urlBuffer = new StringBuffer();
+                    artKey = AlbumArtCache.getArtKey(mAlbum, urlBuffer);
+                    artUrl = urlBuffer.toString();
+                }
+
+                if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
+                }
+            }
+
+            BitmapDrawable output = new BitmapDrawable(res, bmp);
+
+            cache.putAlbumArtKey(mAlbum, artKey);
+
+            mPalette = Palette.generate(bmp);
+
+            return output;
+        }
+
+        @Override
+        protected void onPostExecute(BitmapDrawable result) {
+            super.onPostExecute(result);
+
+            if (result != null) {
+                mImageView.setImageDrawable(result);
+                PaletteItem lightVibrant = mPalette.getLightVibrantColor();
+                PaletteItem lightMuted = mPalette.getLightMutedColor();
+
+                if (lightVibrant != null) {
+                    mRootView.setBackgroundColor(lightVibrant.getRgb());
+                } else if (lightMuted != null) {
+                    mRootView.setBackgroundColor(lightMuted.getRgb());
+                }
+            }
+        }
+    }
+
     /**
      * A fragment containing a simple view.
      */
@@ -220,6 +312,15 @@ public class ArtistActivity extends Activity {
             if (recommended != null) {
                 TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
                 tvTitle.setText(recommended.getTitle());
+
+                ImageView ivCov = (ImageView) mRootView.findViewById(R.id.ivArtistSuggestionCover);
+                ivCov.setImageResource(R.drawable.album_placeholder);
+
+                CardView cvRec = (CardView) mRootView.findViewById(R.id.cardArtistSuggestion);
+
+                BackgroundAsyncTask task = new BackgroundAsyncTask(getActivity(), cvRec, ivCov);
+                ProviderCache cache = ProviderAggregator.getDefault().getCache();
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, cache.getAlbum(recommended.getAlbum()));
             } else {
                 mRootView.findViewById(R.id.cardArtistSuggestion).setVisibility(View.GONE);
             }

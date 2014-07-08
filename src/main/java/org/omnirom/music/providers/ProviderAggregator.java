@@ -7,6 +7,7 @@ import android.util.Log;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 
@@ -374,8 +375,16 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         Song cached = mCache.getSong(s.getRef());
 
         if (cached == null || !cached.isLoaded()) {
-            // Log.i(TAG, "Song update: Title: " + s.getTitle());
             mCache.putSong(provider, s);
+
+            // Match the album with the artist
+            Artist artist = mCache.getArtist(s.getArtist());
+            if (artist != null) {
+                Album album = mCache.getAlbum(s.getAlbum());
+                if (album != null) {
+                    artist.addAlbum(album.getRef());
+                }
+            }
 
             mExecutor.execute(new Runnable() {
                 @Override
@@ -400,6 +409,23 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         if (cached == null || !cached.isLoaded() || cached.getSongsCount() < a.getSongsCount()) {
             mCache.putAlbum(provider, a);
 
+            // Add the album to each artist of the song (once)
+            Iterator<String> songs = a.songs();
+
+            while (songs.hasNext()) {
+                String songRef = songs.next();
+                Song song = mCache.getSong(songRef);
+
+                if (song != null) {
+                    String artistRef = song.getArtist();
+                    Artist artist = mCache.getArtist(artistRef);
+
+                    if (artist != null) {
+                        artist.addAlbum(song.getAlbum());
+                    }
+                }
+            }
+
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -417,6 +443,11 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onArtistUpdate(ProviderIdentifier provider, Artist a) throws RemoteException {
         mCache.putArtist(provider, a);
+    }
+
+    @Override
+    public void onGenreUpdate(ProviderIdentifier provider, Genre g) throws RemoteException {
+
     }
 
     @Override
