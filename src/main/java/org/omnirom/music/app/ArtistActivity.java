@@ -446,11 +446,9 @@ public class ArtistActivity extends Activity {
                 fetchAlbums();
             }
 
-
             final LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
             llAlbums.removeAllViews();
 
-            // FIXME: Artist object isn't getting updated with the new albums
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
             Iterator<String> albumIt = mArtist.albums();
@@ -465,7 +463,11 @@ public class ArtistActivity extends Activity {
             Collections.sort(albums, new Comparator<Album>() {
                 @Override
                 public int compare(Album album, Album album2) {
-                    return album.getName().compareTo(album2.getName());
+                    if (album.getYear() != album2.getYear()) {
+                        return album.getYear() < album2.getYear() ? 1 : -1;
+                    } else {
+                        return album.getName().compareTo(album2.getName());
+                    }
                 }
             });
 
@@ -475,12 +477,15 @@ public class ArtistActivity extends Activity {
                 llAlbums.addView(viewRoot);
 
                 TextView tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
+                TextView tvAlbumYear = (TextView) viewRoot.findViewById(R.id.tvAlbumYear);
                 ImageView ivCover = (ImageView) viewRoot.findViewById(R.id.ivCover);
 
                 if (album.isLoaded()) {
                     tvAlbumName.setText(album.getName());
+                    tvAlbumYear.setText(Integer.toString(album.getYear()));
                 } else {
                     tvAlbumName.setText(getResources().getString(R.string.loading));
+                    tvAlbumYear.setText("");
                 }
 
                 BackgroundAsyncTask task = new BackgroundAsyncTask(getActivity(), null, ivCover);

@@ -24,4 +24,13 @@
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="32dp"
         style="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvAlbumYear"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="4dp"
+        style="?android:attr/textAppearanceMedium"
+        android:alpha="0.6" />
 </LinearLayout>
