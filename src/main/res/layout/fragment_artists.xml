@@ -4,6 +4,7 @@
     android:id="@+id/gvArtists"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
+    android:animateLayoutChanges="true"
     android:padding="8dp"
     android:horizontalSpacing="8dp"
     android:numColumns="2"

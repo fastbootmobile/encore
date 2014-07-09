@@ -29,7 +29,10 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
+import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.omnirom.music.framework.AlbumArtCache;
@@ -37,11 +40,15 @@ import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.Suggestor;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 
 import java.security.Provider;
+import java.util.Iterator;
 
 public class ArtistActivity extends Activity {
 
@@ -50,6 +57,7 @@ public class ArtistActivity extends Activity {
 
     public static final String EXTRA_ARTIST = "artist";
     public static final String EXTRA_BACKGROUND_COLOR = "background_color";
+    public static final String BITMAP_ARTIST_HERO = "artist_hero";
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
 
     private InnerFragment mActiveFragment;
@@ -65,10 +73,10 @@ public class ArtistActivity extends Activity {
         mActiveFragment = (InnerFragment) fm.findFragmentByTag(TAG_FRAGMENT);
 
         if (savedInstanceState == null) {
-            mHero = Utils.dequeueBitmap();
+            mHero = Utils.dequeueBitmap(BITMAP_ARTIST_HERO);
             mInitialIntent = getIntent().getExtras();
         } else {
-            mHero = Utils.dequeueBitmap();
+            mHero = Utils.dequeueBitmap(BITMAP_ARTIST_HERO);
             mInitialIntent = savedInstanceState.getBundle(EXTRA_RESTORE_INTENT);
         }
 
@@ -98,8 +106,8 @@ public class ArtistActivity extends Activity {
                 fab.setVisibility(View.VISIBLE);
 
                 // get the center for the clipping circle
-                int cx = fab.getMeasuredWidth()/2;
-                int cy = fab.getMeasuredHeight()/2;
+                int cx = fab.getMeasuredWidth() / 2;
+                int cy = fab.getMeasuredHeight() / 2;
 
                 // get the final radius for the clipping circle
                 final int finalRadius = fab.getWidth();
@@ -142,7 +150,7 @@ public class ArtistActivity extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBundle(EXTRA_RESTORE_INTENT, mInitialIntent);
-        Utils.queueBitmap(mHero);
+        Utils.queueBitmap(BITMAP_ARTIST_HERO, mHero);
     }
 
     @Override
@@ -234,13 +242,24 @@ public class ArtistActivity extends Activity {
 
             if (result != null) {
                 mImageView.setImageDrawable(result);
-                PaletteItem lightVibrant = mPalette.getLightVibrantColor();
-                PaletteItem lightMuted = mPalette.getLightMutedColor();
+                PaletteItem vibrant = mPalette.getVibrantColor();
 
-                if (lightVibrant != null) {
-                    mRootView.setBackgroundColor(lightVibrant.getRgb());
-                } else if (lightMuted != null) {
-                    mRootView.setBackgroundColor(lightMuted.getRgb());
+                if (vibrant != null) {
+                    mRootView.setBackgroundColor(vibrant.getRgb());
+                    float luminance = vibrant.getHsl()[2];
+
+                    TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
+                    TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
+                    Button btnPlay = (Button) mRootView.findViewById(R.id.btnArtistSuggestionPlay);
+
+                    int color = 0xFF333333;
+                    if (luminance < 0.6f) {
+                        color = 0xFFFFFFFF;
+                    }
+
+                    tvArtist.setTextColor(color);
+                    tvTitle.setTextColor(color);
+                    btnPlay.setTextColor(color);
                 }
             }
         }
@@ -249,7 +268,7 @@ public class ArtistActivity extends Activity {
     /**
      * A fragment containing a simple view.
      */
-    public static class InnerFragment extends Fragment {
+    public static class InnerFragment extends Fragment implements ILocalCallback {
 
         private Bitmap mHeroImage;
         private int mBackgroundColor;
@@ -309,6 +328,10 @@ public class ArtistActivity extends Activity {
             setOutlines(mRootView.findViewById(R.id.fabPlay));
 
             loadRecommendation();
+            loadAlbums();
+
+            // Register for updates
+            ProviderAggregator.getDefault().addUpdateCallback(this);
 
             return mRootView;
         }
@@ -325,8 +348,17 @@ public class ArtistActivity extends Activity {
         private void loadRecommendation() {
             Song recommended = Suggestor.getInstance().suggestBestForArtist(mArtist);
             if (recommended != null) {
+                Album album = ProviderAggregator.getDefault().getCache().getAlbum(recommended.getAlbum());
+
                 TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
+                TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
                 tvTitle.setText(recommended.getTitle());
+
+                if (album != null) {
+                    tvArtist.setText(getResources().getString(R.string.from_the_album, album.getName()));
+                } else {
+                    tvArtist.setText("");
+                }
 
                 ImageView ivCov = (ImageView) mRootView.findViewById(R.id.ivArtistSuggestionCover);
                 ivCov.setImageResource(R.drawable.album_placeholder);
@@ -339,6 +371,51 @@ public class ArtistActivity extends Activity {
             } else {
                 mRootView.findViewById(R.id.cardArtistSuggestion).setVisibility(View.GONE);
             }
+        }
+
+        private void loadAlbums() {
+            LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
+            llAlbums.removeAllViews();
+
+            Iterator<String> albumIt = mArtist.albums();
+            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            while (albumIt.hasNext()) {
+                String albumRef = albumIt.next();
+                Album album = cache.getAlbum(albumRef);
+
+                ViewGroup viewRoot = (ViewGroup) getActivity().getLayoutInflater().inflate(R.layout.expanded_albums_group, llAlbums);
+
+                TextView tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
+                ImageView ivCover = (ImageView) viewRoot.findViewById(R.id.ivCover);
+
+                tvAlbumName.setText(album.getName());
+            }
+
+        }
+
+        @Override
+        public void onSongUpdate(Song s) {
+
+        }
+
+        @Override
+        public void onAlbumUpdate(Album a) {
+
+        }
+
+        @Override
+        public void onPlaylistUpdate(Playlist p) {
+
+        }
+
+        @Override
+        public void onArtistUpdate(Artist a) {
+
+        }
+
+        @Override
+        public void onProviderConnected(IMusicProvider provider) {
+
         }
     }
 }

@@ -16,7 +16,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -24,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Utils {
 
-    private static List<Bitmap> mBitmapQueue = new ArrayList<Bitmap>();
+    private static final Map<String, Bitmap> mBitmapQueue = new HashMap<String, Bitmap>();
 
     /**
      * Calculates and return the action bar height based on the current theme
@@ -217,13 +221,13 @@ public class Utils {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
     }
 
-    public static void queueBitmap(Bitmap bmp) {
-        mBitmapQueue.add(bmp);
+    public static void queueBitmap(String key, Bitmap bmp) {
+        mBitmapQueue.put(key, bmp);
     }
 
-    public static Bitmap dequeueBitmap() {
-        Bitmap bmp = mBitmapQueue.get(0);
-        mBitmapQueue.remove(0);
+    public static Bitmap dequeueBitmap(String key) {
+        Bitmap bmp = mBitmapQueue.get(key);
+        mBitmapQueue.remove(key);
         return bmp;
     }
 }

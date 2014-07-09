@@ -257,58 +257,60 @@ public class ArtistsAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Context ctx = parent.getContext();
-        assert ctx != null;
+        synchronized (mArtists) {
+            Context ctx = parent.getContext();
+            assert ctx != null;
 
-        View root = convertView;
-        if (convertView == null) {
-            // Recycle the existing view
-            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.medium_card_one_line, parent, false);
-            assert root != null;
+            View root = convertView;
+            if (convertView == null) {
+                // Recycle the existing view
+                LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                root = inflater.inflate(R.layout.medium_card_one_line, parent, false);
+                assert root != null;
 
-            ViewHolder holder = new ViewHolder();
-            holder.ivCover = (ImageView) root.findViewById(R.id.ivCover);
-            holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
-            holder.llRoot = (LinearLayout) root.findViewById(R.id.llRoot);
+                ViewHolder holder = new ViewHolder();
+                holder.ivCover = (ImageView) root.findViewById(R.id.ivCover);
+                holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
+                holder.llRoot = (LinearLayout) root.findViewById(R.id.llRoot);
 
-            root.setTag(holder);
+                root.setTag(holder);
+            }
+
+            // Fill in the fields
+            final Artist artist = getItem(position);
+            final ViewHolder tag = (ViewHolder) root.getTag();
+
+            tag.artist = artist;
+            tag.position = position;
+
+            tag.ivCover.setViewName("grid:image:" + artist.getRef());
+            tag.tvTitle.setViewName("grid:title:" + artist.getRef());
+
+            if (artist.isLoaded()) {
+                tag.tvTitle.setText(artist.getName());
+            } else {
+                tag.tvTitle.setText("Loading");
+            }
+
+            // Load the artist art
+            final String artKey = ProviderAggregator.getDefault().getCache().getArtistArtKey(artist);
+            final Bitmap cached = ImageCache.getDefault().get(artKey);
+
+            final Resources res = root.getResources();
+            assert res != null;
+
+            if (cached != null) {
+                // We already know the artist art, display it immediately
+                applyItemImage(tag, new BitmapDrawable(res, cached));
+            } else {
+                tag.ivCover.setImageResource(R.drawable.album_placeholder);
+                tag.llRoot.setBackgroundColor(tag.llRoot.getResources().getColor(R.color.default_album_art_background));
+                BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+            }
+
+            return root;
         }
-
-        // Fill in the fields
-        final Artist artist = getItem(position);
-        final ViewHolder tag = (ViewHolder) root.getTag();
-
-        tag.artist = artist;
-        tag.position = position;
-
-        tag.ivCover.setViewName("grid:image:" + artist.getRef());
-        tag.tvTitle.setViewName("grid:title:" + artist.getRef());
-
-        if (artist.isLoaded()) {
-            tag.tvTitle.setText(artist.getName());
-        } else {
-            tag.tvTitle.setText("Loading");
-        }
-
-        // Load the artist art
-        final String artKey = ProviderAggregator.getDefault().getCache().getArtistArtKey(artist);
-        final Bitmap cached = ImageCache.getDefault().get(artKey);
-
-        final Resources res = root.getResources();
-        assert res != null;
-
-        if (cached != null) {
-            // We already know the artist art, display it immediately
-            applyItemImage(tag, new BitmapDrawable(res, cached));
-        } else {
-            tag.ivCover.setImageResource(R.drawable.album_placeholder);
-            tag.llRoot.setBackgroundColor(tag.llRoot.getResources().getColor(R.color.default_album_art_background));
-            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-        }
-
-        return root;
     }
 
 }

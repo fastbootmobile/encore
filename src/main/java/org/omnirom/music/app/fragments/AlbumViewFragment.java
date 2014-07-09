@@ -27,6 +27,7 @@ import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
@@ -185,7 +186,10 @@ public class AlbumViewFragment extends  AbstractRootFragment {
             if (song == null) {
                 ProviderConnection prov = PluginsLookup.getDefault().getProvider(mAlbum.getProvider());
                 try {
-                    song = prov.getBinder().getSong(songRef);
+                    IMusicProvider binder = prov.getBinder();
+                    if (binder != null) {
+                        song = prov.getBinder().getSong(songRef);
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Remote exception while trying to get track info", e);
                     continue;
@@ -196,8 +200,6 @@ public class AlbumViewFragment extends  AbstractRootFragment {
                     continue;
                 }
             }
-
-            Log.e("XPLOD", "Album song " + songRef + " (loaded: " + song.isLoaded() + ", title: " + song.getTitle() + ")");
 
             mAdapter.put(song);
         }

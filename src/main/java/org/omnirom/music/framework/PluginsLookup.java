@@ -100,18 +100,20 @@ public class PluginsLookup {
                 updatePlugins();
             }
         }.start();
+
+        // Inject our Multi-Provider Playlist provider
         HashMap<String, String> item = new HashMap<String, String>();
-        item.put(DATA_PACKAGE,"org.omnirom.music.providers");
-        item.put(DATA_SERVICE,"org.omnirom.music.providers.MultiProviderPlaylistProvider");
-        item.put(DATA_NAME,"MultiProviderPlaylistProvider");
-        item.put(DATA_CONFIGCLASS,null);
+        item.put(DATA_PACKAGE, "org.omnirom.music.providers");
+        item.put(DATA_SERVICE, "org.omnirom.music.providers.MultiProviderPlaylistProvider");
+        item.put(DATA_NAME, "MultiProviderPlaylistProvider");
+        item.put(DATA_CONFIGCLASS, null);
         mMultiProviderConnection = new ProviderConnection(mContext,item.get(DATA_NAME),
                 item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
                 item.get(DATA_CONFIGCLASS));
 
         mMultiProviderConnection.setListener(mProviderListener);
         mConnections.add(mMultiProviderConnection);
-       mMultiProviderConnection.onServiceConnected(new ComponentName("org.omnirom.music.providers","MultiProviderPlaylistProvider"),mMultiProviderPlaylistProvider.asBinder());
+        mMultiProviderConnection.onServiceConnected(new ComponentName("org.omnirom.music.providers","MultiProviderPlaylistProvider"),mMultiProviderPlaylistProvider.asBinder());
     }
 
     public void registerProviderListener(ConnectionListener listener) {

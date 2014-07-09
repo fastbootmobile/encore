@@ -22,5 +22,6 @@
     <string name="no_settings_provider">This provider has no settings</string>
     <string name="title_activity_artist">Artist</string>
     <string name="hello_world">Hello world!</string>
+    <string name="from_the_album">From the album \"%s\"</string>
 
 </resources>

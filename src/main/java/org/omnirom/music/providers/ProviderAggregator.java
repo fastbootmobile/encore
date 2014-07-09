@@ -148,6 +148,31 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             }
         });
     }
+
+    /**
+     * Retrieves a song from the provider, and put it in the cache
+     * @param ref The reference to the song
+     * @param provider The provider from which retrieve the song
+     * @return The song, or null if the provider says so
+     */
+    public Song retrieveSong(final String ref, final ProviderIdentifier provider) {
+        ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
+        IMusicProvider binder = pc.getBinder();
+
+        if (binder != null) {
+            try {
+                Song song = binder.getSong(ref);
+                onSongUpdate(provider, song);
+                return song;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to retrieve the song", e);
+                return null;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Queries in a thread the songs of the list of playlist passed in parameter, if needed
      * Note that this method is only valid for playlists that have been provided by a provider.

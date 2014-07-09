@@ -105,6 +105,7 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
                     @Override
                     public void run() {
                         mAdapter.addAllUnique(artists);
+                        mAdapter.notifyDataSetChanged();
                         mLastUpdate = System.currentTimeMillis();
                     }
                 });
@@ -129,7 +130,7 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
                 intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
                         ((ColorDrawable) view.getBackground()).getColor());
 
-                Utils.queueBitmap(tag.srcBitmap);
+                Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, tag.srcBitmap);
 
                 ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                         new Pair<View, String>(ivCover, "itemImage"),
@@ -170,9 +171,11 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
         Artist artist = ProviderAggregator.getDefault().getCache().getArtist(artistRef);
 
         if (artist != null) {
-            if (!mDelayedUpdateList.contains(artist)) {
-                mDelayedUpdateList.add(artist);
-                postListUpdate();
+            synchronized (mDelayedUpdateList) {
+                if (!mDelayedUpdateList.contains(artist)) {
+                    mDelayedUpdateList.add(artist);
+                    postListUpdate();
+                }
             }
         }
     }
@@ -189,9 +192,11 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
 
     @Override
     public void onArtistUpdate(Artist a) {
-        if (!mDelayedUpdateList.contains(a)) {
-            mDelayedUpdateList.add(a);
-            postListUpdate();
+        synchronized (mDelayedUpdateList) {
+            if (!mDelayedUpdateList.contains(a)) {
+                mDelayedUpdateList.add(a);
+                postListUpdate();
+            }
         }
     }
 
