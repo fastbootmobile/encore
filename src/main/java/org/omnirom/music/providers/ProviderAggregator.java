@@ -7,6 +7,7 @@ import android.util.Log;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 
@@ -386,6 +387,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 }
             });
         }
+    }
+    @Override
+    public void onGenreUpdate(ProviderIdentifier provider, final Genre g) throws RemoteException {
+
     }
 
     /**

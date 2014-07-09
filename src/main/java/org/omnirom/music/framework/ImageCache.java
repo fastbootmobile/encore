@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Image cache in the cache directory on internal storage
  */
-public class ImageCache {
+public class  ImageCache {
     private static final String TAG = "ImageCache";
     private static final ImageCache INSTANCE = new ImageCache();
 

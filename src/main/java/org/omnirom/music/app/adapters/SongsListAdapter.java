@@ -26,6 +26,7 @@ import org.omnirom.music.app.fragments.PlaylistViewFragment;
 import org.omnirom.music.app.ui.VuMeterView;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.BlurCache;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -110,52 +111,30 @@ public class SongsListAdapter  extends BaseAdapter{
             BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_list_default_bg);
             assert drawable != null;
             drawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
-            Bitmap bmp = drawable.getBitmap();
+            Bitmap bmp;
 
-            // Download the art image
-            String artKey = cache.getSongArtKey(mSong);
-            String artUrl = null;
+            try {
+                bmp = PluginsLookup.getDefault().getProvider(mSong.getProvider()).getBinder().getSongArt(mSong);
 
-            if (artKey == null) {
-                StringBuffer urlBuffer = new StringBuffer();
-                artKey = AlbumArtCache.getArtKey(mSong, urlBuffer);
-                artUrl = urlBuffer.toString();
+            } catch (Exception e){
+                bmp  = drawable.getBitmap();
             }
-
-            if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
-            }
-
-            if (v.position != this.mPosition) {
-                // Cancel, we moved
-                return null;
-            }
-
-            // We blurAndDim our bitmap, if another executor didn't do it already and if it's not
-            // the default art
+            String artKey;
             BitmapDrawable output;
-            if (artKey == null || artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                artKey = AlbumArtCache.DEFAULT_ART;
-                output = drawable;
-            } else {
-                Bitmap blur = BlurCache.getDefault().get(artKey);
+            Bitmap blur = bmp;
+            if(bmp == null) {
+                // Download the art image
+                artKey = cache.getSongArtKey(mSong);
+                String artUrl = null;
 
-                if (blur == null) {
-                    Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
+                if (artKey == null) {
+                    StringBuffer urlBuffer = new StringBuffer();
+                    artKey = AlbumArtCache.getArtKey(mSong, urlBuffer);
+                    artUrl = urlBuffer.toString();
+                }
 
-                    if (v.position != this.mPosition) {
-                        // Cancel, we moved
-                        return null;
-                    }
-
-                    blur = Utils.blurAndDim(ctx, thumb, 25);
-
-                    if (v.position != this.mPosition) {
-                        // Cancel, we moved
-                        return null;
-                    }
-
-                    BlurCache.getDefault().put(artKey, blur, true);
+                if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
                 }
 
                 if (v.position != this.mPosition) {
@@ -163,9 +142,58 @@ public class SongsListAdapter  extends BaseAdapter{
                     return null;
                 }
 
-                output = new BitmapDrawable(res, blur);
-            }
+                // We blurAndDim our bitmap, if another executor didn't do it already and if it's not
+                // the default art
 
+                if (artKey == null || artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                    artKey = AlbumArtCache.DEFAULT_ART;
+                    output = drawable;
+                } else {
+                    blur = BlurCache.getDefault().get(artKey);
+
+                    if (blur == null) {
+                        Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
+
+                        if (v.position != this.mPosition) {
+                            // Cancel, we moved
+                            return null;
+                        }
+
+                        blur = Utils.blurAndDim(ctx, thumb, 25);
+
+                        if (v.position != this.mPosition) {
+                            // Cancel, we moved
+                            return null;
+                        }
+
+                        BlurCache.getDefault().put(artKey, blur, true);
+                    }
+
+                    if (v.position != this.mPosition) {
+                        // Cancel, we moved
+                        return null;
+                    }
+
+
+                }
+            } else {
+                artKey = mSong.getRef().replace(":","");
+                Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
+                if (v.position != this.mPosition) {
+                    // Cancel, we moved
+                    return null;
+                }
+
+                blur = Utils.blurAndDim(ctx, thumb, 25);
+
+                if (v.position != this.mPosition) {
+                    // Cancel, we moved
+                    return null;
+                }
+
+                BlurCache.getDefault().put(artKey, blur, true);
+            }
+            output = new BitmapDrawable(res, blur);
             cache.putSongArtKey(mSong, artKey);
 
             return output;
