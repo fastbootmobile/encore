@@ -10,6 +10,8 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 
+import java.util.Iterator;
+
 /**
  * Created by xplodwild on 7/8/14.
  */
@@ -27,9 +29,10 @@ public class Suggestor {
 
     public Song suggestBestForArtist(Artist artist) {
         // TODO: Do a real algorithm
-        while (artist.albums().hasNext()) {
+        Iterator<String> albums = artist.albums();
+        while (albums.hasNext()) {
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            Album album = cache.getAlbum(artist.albums().next());
+            Album album = cache.getAlbum(albums.next());
 
             if (album.isLoaded() && album.getSongsCount() > 0) {
                 String songRef = album.songs().next();

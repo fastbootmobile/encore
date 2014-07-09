@@ -116,6 +116,7 @@ public class ProviderConnection implements ServiceConnection {
             if (DEBUG) Log.d(TAG, "Unbinding service...");
             ProviderAggregator.getDefault().unregisterProvider(this);
             mContext.unbindService(this);
+            mBinder = null;
             mIsBound = false;
         }
     }

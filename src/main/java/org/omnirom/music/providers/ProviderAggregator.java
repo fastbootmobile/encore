@@ -136,14 +136,20 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             }
         });
     }
-    public void cacheArtists(final ProviderConnection provider,final List<Artist> artists){
-        if(provider == null)
+    public void cacheArtists(final ProviderConnection provider, final List<Artist> artists){
+        if(provider == null) {
             return;
+        }
+
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 for(Artist artist : artists){
-                    mCache.putArtist(provider.getIdentifier(),artist);
+                    try {
+                        onArtistUpdate(provider.getIdentifier(), artist);
+                    } catch (RemoteException e) {
+                        // ignore
+                    }
                 }
             }
         });
@@ -408,6 +414,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 Album album = mCache.getAlbum(s.getAlbum());
                 if (album != null) {
                     artist.addAlbum(album.getRef());
+                } else {
+                    Log.e(TAG, "Album is null!");
                 }
             }
 
@@ -437,6 +445,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             // Add the album to each artist of the song (once)
             Iterator<String> songs = a.songs();
 
+            // Log.e("XPLOD", "Album " + a.getName() + " has " + a.getSongsCount() + " songs");
+
             while (songs.hasNext()) {
                 String songRef = songs.next();
                 Song song = mCache.getSong(songRef);
@@ -447,8 +457,13 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
                     if (artist != null) {
                         artist.addAlbum(a.getRef());
+                    } else {
+                        Log.e(TAG, "Artist is null!");
                     }
+                } else {
+                    Log.e(TAG, "Song is null!");
                 }
+
             }
 
             mExecutor.execute(new Runnable() {
@@ -467,7 +482,14 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     @Override
     public void onArtistUpdate(ProviderIdentifier provider, Artist a) throws RemoteException {
-        mCache.putArtist(provider, a);
+        Artist cached = mCache.getArtist(a.getRef());
+
+        if (cached == null) {
+            mCache.putArtist(provider, a);
+        } else {
+            cached.setName(a.getName());
+            cached.setIsLoaded(a.isLoaded());
+        }
     }
 
     @Override

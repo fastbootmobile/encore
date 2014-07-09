@@ -16,6 +16,7 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.CardView;
@@ -37,6 +38,7 @@ import android.widget.TextView;
 
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.framework.Suggestor;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -46,9 +48,15 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.providers.ProviderConnection;
+import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.security.Provider;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 public class ArtistActivity extends Activity {
 
@@ -244,7 +252,7 @@ public class ArtistActivity extends Activity {
                 mImageView.setImageDrawable(result);
                 PaletteItem vibrant = mPalette.getVibrantColor();
 
-                if (vibrant != null) {
+                if (vibrant != null && mRootView != null) {
                     mRootView.setBackgroundColor(vibrant.getRgb());
                     float luminance = vibrant.getHsl()[2];
 
@@ -276,6 +284,23 @@ public class ArtistActivity extends Activity {
         private View mRootView;
         private Palette mPalette;
         private Handler mHandler;
+        private boolean mRecommendationLoaded = false;
+
+        private Runnable mUpdateAlbumsRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // FIXME: Artist object isn't getting updated with the new albums
+                ProviderCache cache = ProviderAggregator.getDefault().getCache();
+                mArtist = cache.getArtist(mArtist.getRef());
+
+                if (!mRecommendationLoaded) {
+                    loadRecommendation();
+                }
+
+                loadAlbums(false);
+            }
+        };
+
 
         public InnerFragment() {
 
@@ -328,12 +353,24 @@ public class ArtistActivity extends Activity {
             setOutlines(mRootView.findViewById(R.id.fabPlay));
 
             loadRecommendation();
-            loadAlbums();
+            loadAlbums(true);
 
             // Register for updates
             ProviderAggregator.getDefault().addUpdateCallback(this);
 
             return mRootView;
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            ProviderAggregator.getDefault().removeUpdateCallback(this);
+        }
+
+        @Override
+        public void onDetach() {
+            super.onDetach();
+            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
         }
 
         private void setOutlines(View v) {
@@ -368,39 +405,99 @@ public class ArtistActivity extends Activity {
                 BackgroundAsyncTask task = new BackgroundAsyncTask(getActivity(), cvRec, ivCov);
                 ProviderCache cache = ProviderAggregator.getDefault().getCache();
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, cache.getAlbum(recommended.getAlbum()));
+
+                // If we were gone, animate in
+                if (cvRec.getVisibility() == View.GONE) {
+                    cvRec.setVisibility(View.VISIBLE);
+                    cvRec.setAlpha(0.0f);
+                    cvRec.animate().alpha(1.0f).setDuration(500).start();
+                }
+
+                mRecommendationLoaded = true;
             } else {
                 mRootView.findViewById(R.id.cardArtistSuggestion).setVisibility(View.GONE);
+                mRecommendationLoaded = false;
             }
         }
 
-        private void loadAlbums() {
-            LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
+        private void fetchAlbums() {
+            new Thread() {
+                public void run() {
+                    ProviderIdentifier pi = mArtist.getProvider();
+                    ProviderConnection pc = PluginsLookup.getDefault().getProvider(pi);
+                    if (pc != null) {
+                        IMusicProvider provider = pc.getBinder();
+                        if (provider != null) {
+                            try {
+                                boolean hasMore = provider.fetchArtistAlbums(mArtist.getRef());
+                                Log.e("XPLOD", "Have more? " + hasMore);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Unable to fetch artist albums", e);
+                            }
+                        }
+                    }
+                }
+            }.start();
+        }
+
+        private void loadAlbums(boolean request) {
+            if (request) {
+                // Make sure we loaded all the albums for that artist
+                fetchAlbums();
+            }
+
+
+            final LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
             llAlbums.removeAllViews();
 
-            Iterator<String> albumIt = mArtist.albums();
+            // FIXME: Artist object isn't getting updated with the new albums
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            while (albumIt.hasNext()) {
-                String albumRef = albumIt.next();
-                Album album = cache.getAlbum(albumRef);
 
-                ViewGroup viewRoot = (ViewGroup) getActivity().getLayoutInflater().inflate(R.layout.expanded_albums_group, llAlbums);
+            Iterator<String> albumIt = mArtist.albums();
+            List<Album> albums = new ArrayList<Album>();
+
+            while (albumIt.hasNext()) {
+                Album album = cache.getAlbum(albumIt.next());
+                albums.add(album);
+            }
+
+            // Sort it from album names
+            Collections.sort(albums, new Comparator<Album>() {
+                @Override
+                public int compare(Album album, Album album2) {
+                    return album.getName().compareTo(album2.getName());
+                }
+            });
+
+            // Then inflate views
+            for (Album album : albums) {
+                ViewGroup viewRoot = (ViewGroup) getActivity().getLayoutInflater().inflate(R.layout.expanded_albums_group, null);
+                llAlbums.addView(viewRoot);
 
                 TextView tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
                 ImageView ivCover = (ImageView) viewRoot.findViewById(R.id.ivCover);
 
-                tvAlbumName.setText(album.getName());
-            }
+                if (album.isLoaded()) {
+                    tvAlbumName.setText(album.getName());
+                } else {
+                    tvAlbumName.setText(getResources().getString(R.string.loading));
+                }
 
+                BackgroundAsyncTask task = new BackgroundAsyncTask(getActivity(), null, ivCover);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, album);
+            }
         }
 
         @Override
         public void onSongUpdate(Song s) {
-
+            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+            mHandler.postDelayed(mUpdateAlbumsRunnable, 200);
         }
 
         @Override
         public void onAlbumUpdate(Album a) {
-
+            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+            mHandler.postDelayed(mUpdateAlbumsRunnable, 200);
         }
 
         @Override

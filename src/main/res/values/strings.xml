@@ -8,9 +8,7 @@
     <string name="title_section_automix">Automix</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="action_example">Example action</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="search">Search</string>
     <string name="here_are_suggestions">Here are some suggestions for you</string>
     <string name="play_now">Play now</string>
@@ -23,5 +21,6 @@
     <string name="title_activity_artist">Artist</string>
     <string name="hello_world">Hello world!</string>
     <string name="from_the_album">From the album \"%s\"</string>
+    <string name="loading">Loading…</string>
 
 </resources>

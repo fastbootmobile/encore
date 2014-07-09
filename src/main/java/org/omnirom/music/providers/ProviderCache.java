@@ -99,21 +99,29 @@ public class ProviderCache {
     }
 
     public void putAlbum(final ProviderIdentifier provider, final Album album) {
-        mAlbums.put(album.getRef(), album);
-        mRefProvider.put(album.getRef(), provider);
+        synchronized (mAlbums) {
+            mAlbums.put(album.getRef(), album);
+            mRefProvider.put(album.getRef(), provider);
+        }
     }
 
     public Album getAlbum(final String ref) {
-        return mAlbums.get(ref);
+        synchronized (mAlbums) {
+            return mAlbums.get(ref);
+        }
     }
 
     public void putArtist(final ProviderIdentifier provider, final Artist artist) {
-        mArtists.put(artist.getRef(), artist);
-        mRefProvider.put(artist.getRef(), provider);
+        synchronized (mArtists) {
+            mArtists.put(artist.getRef(), artist);
+            mRefProvider.put(artist.getRef(), provider);
+        }
     }
 
     public Artist getArtist(final String ref) {
-        return mArtists.get(ref);
+        synchronized (mArtists) {
+            return mArtists.get(ref);
+        }
     }
 
     public void putSongArtKey(final Song song, final String key) {
