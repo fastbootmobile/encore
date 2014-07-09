@@ -497,11 +497,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     @Override
-    public void onGenreUpdate(ProviderIdentifier provider, Genre g) throws RemoteException {
-
-    }
-
-    @Override
     public void onSongPlaying(ProviderIdentifier provider, Song s) throws RemoteException {
 
     }

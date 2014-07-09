@@ -128,21 +128,10 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     @Override
-    public List<Genre> getGenres() throws RemoteException {
-        return null;
-    }
-
-    @Override
     public Song getSong(String ref) throws RemoteException {
         ProviderIdentifier providerId = mSongsProviders.get(ref);
         return getBinder(providerId).getSong(ref);
     }
-
-    @Override
-    public Bitmap getSongArt(Song song) throws RemoteException {
-        return null;
-    }
-
     @Override
     public boolean fetchArtistAlbums(String artistRef) {
         return false;
