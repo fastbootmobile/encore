@@ -203,6 +203,14 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     public String addPlaylist(String playlistName) throws RemoteException {
          return mMultiProviderDatabaseHelper.addPlaylist(playlistName);
     }
+    @Override
+    public Bitmap getSongArt(Song song) throws RemoteException {
+        return PluginsLookup.getDefault().getProvider(song.getProvider()).getBinder().getSongArt(song);
+    }
+    @Override
+    public List<Genre> getGenres(){
+        return null;
+    }
     private void removeCallback(final IProviderCallback cb) {
         mHandler.post(new Runnable() {
             @Override

@@ -429,6 +429,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             });
         }
     }
+    @Override
+    public void onGenreUpdate(ProviderIdentifier provider, final Genre g) throws RemoteException {
+
+    }
 
     /**
      * Called by the providers when the details of an album have been updated.
