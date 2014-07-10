@@ -1,125 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="OmniMusic">
-
     </style>
 
-    <!-- Cards styles -->
-    <style name="OmniMusic.Card">
-        <item name="android:background">@drawable/card_background</item>
-        <item name="android:paddingBottom">3dp</item>
+    <!-- Styles based on Google Design Spec http://google.com/design/spec -->
+
+    <!-- Spec root -->
+    <style name="OmniMusic.Spec">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
-    <style name="OmniMusic.LargeCard" parent="OmniMusic.Card" />
-
-    <style name="OmniMusic.LargeCard.Title" parent="RobotoCondensedBoldLarge">
-        <item name="android:textColor">@color/card_title</item>
-    </style>
-    <style name="OmniMusic.LargeCard.SubTitle" parent="RobotoLightCapsSmall" />
-    <style name="OmniMusic.LargeCard.SubTitle.Emphasize" parent="RobotoLightCapsSmallBright" />
-    <style name="OmniMusic.LargeCard.Details" parent="RobotoLightSmall" />
-
-    <style name="OmniMusic.LargeCard.Action" parent="android:Widget.Holo.Button.Borderless.Small">
-        <item name="android:fontFamily">sans-serif-light</item>
-        <item name="android:textColor">@drawable/card_foreground_action</item>
-        <item name="android:background">@drawable/card_background_action</item>
-
-        <item name="android:paddingLeft">8dp</item>
-    </style>
-
-    <style name="OmniMusic.MediumCard" parent="OmniMusic.Card" />
-
-    <style name="OmniMusic.MediumCard.Title" parent="android:Widget.Holo.TextView">
-        <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@color/card_title</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:singleLine">true</item>
-    </style>
-
-    <style name="OmniMusic.MediumCard.SubTitle" parent="RobotoLightCapsSmall">
-        <item name="android:ellipsize">end</item>
-        <item name="android:singleLine">true</item>
-    </style>
-
-    <style name="OmniMusic.SmallCard" parent="OmniMusic.Card" />
-
-    <style name="OmniMusic.SmallCard.Text" parent="android:Widget.Holo.TextView">
-        <item name="android:textAllCaps">true</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:gravity">left|center_vertical</item>
-        <item name="android:paddingLeft">8dp</item>
-        <item name="android:textColor">@color/text_detail</item>
-    </style>
-
-    <!-- Separator and UI tools -->
-    <style name="OmniMusic.Separator">
-        <item name="android:background">@color/separator</item>
-    </style>
-
-    <style name="OmniMusic.Separator.Vertical">
-        <item name="android:layout_width">1dp</item>
-        <item name="android:layout_height">match_parent</item>
-    </style>
-
-    <style name="OmniMusic.Separator.Horizontal">
-        <item name="android:layout_height">1dp</item>
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <style name="NavDrawerItem" parent="RobotoLightLarge">
-        <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@color/text_regular</item>
-        <item name="android:background">@drawable/navdrawer_item_background</item>
-    </style>
-
-    <style name="NavDrawerItem.Selected">
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="OmniMusic.SearchBox">
-        <item name="android:background">@drawable/omnibox</item>
-        <item name="android:layout_height">@dimen/search_box_height</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:id">@id/sticky_search_box</item>
-        <item name="android:paddingLeft">12dp</item>
-        <item name="android:paddingRight">12dp</item>
-        <item name="android:hint">@string/placeholder_search</item>
-        <item name="android:fontFamily">sans-serif-light</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:imeOptions">actionSearch</item>
-    </style>
-
-    <style name="OmniMusic.SearchBoxPlaceholder">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/search_box_height</item>
-        <item name="android:id">@id/sticky_search_box_placeholder</item>
-    </style>
-
-    <style name="OmniMusic.ShadowedText">
-        <item name="android:textColor">@color/white</item>
-        <item name="android:shadowColor">#000000</item>
-        <item name="android:shadowDx">2</item>
-        <item name="android:shadowDy">2</item>
-        <item name="android:shadowRadius">2</item>
-    </style>
-
-    <style name="OmniMusic.ShadowedText.CondensedBoldCaps">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textAllCaps">true</item>
-    </style>
-
-    <style name="OmniMusic.ShadowedTextAction" parent="android:Widget.Holo.Button.Borderless.Small">
-        <item name="android:fontFamily">sans-serif-light</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:background">@drawable/card_background_action</item>
-        <item name="android:paddingLeft">8dp</item>
-
-        <item name="android:shadowColor">#000000</item>
-        <item name="android:shadowDx">2</item>
-        <item name="android:shadowDy">2</item>
-        <item name="android:shadowRadius">2</item>
+    <!-- Spec: Components: Subheaders -->
+    <style name="OmniMusic.Spec.Subheader">
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginRight">16dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:gravity">center_vertical</item>
     </style>
 </resources>

@@ -6,11 +6,13 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Outline;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.AsyncTask;
@@ -28,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.Button;
@@ -290,6 +293,8 @@ public class ArtistActivity extends Activity {
             @Override
             public void run() {
                 // FIXME: Artist object isn't getting updated with the new albums
+                // Reason: Artist object is copied when serialized in the bundle. When retrieved
+                // in the intent here, it's a copy with the existing attributes at that time
                 ProviderCache cache = ProviderAggregator.getDefault().getCache();
                 mArtist = cache.getArtist(mArtist.getRef());
 
@@ -300,6 +305,62 @@ public class ArtistActivity extends Activity {
                 loadAlbums(false);
             }
         };
+
+        private class AlbumGroupClickListener implements View.OnClickListener {
+            private Album mAlbum;
+            private LinearLayout mContainer;
+            private LinearLayout mItemHost;
+            private View mHeader;
+            private boolean mOpen;
+            private View mHeaderDivider;
+            private View mLastItemDivider;
+
+            public AlbumGroupClickListener(Album a, LinearLayout container, View header) {
+                mAlbum = a;
+                mContainer = container;
+                mOpen = false;
+                mHeader = header;
+
+                mHeaderDivider = header.findViewById(R.id.divider);
+                mHeaderDivider.setVisibility(View.VISIBLE);
+                mHeaderDivider.setAlpha(0.0f);
+            }
+
+            @Override
+            public void onClick(View view) {
+                toggle();
+            }
+
+            public void toggle() {
+                if (mOpen) {
+                    mItemHost.startAnimation(Utils.animateExpand(mItemHost, false));
+                    mOpen = false;
+
+                    mLastItemDivider.animate().alpha(0.0f).setDuration(500).start();
+                    mHeaderDivider.animate().alpha(0.0f).setDuration(500).start();
+                } else {
+                    if (mItemHost == null) {
+                        mItemHost = new LinearLayout(getActivity());
+                        mItemHost.setOrientation(LinearLayout.VERTICAL);
+
+                        // We insert the view below the group
+                        int index = ((LinearLayout) mHeader.getParent()).indexOfChild(mHeader);
+                        mContainer.addView(mItemHost, index + 1);
+
+                        showAlbumTracks(mAlbum, mItemHost);
+
+                        // Add the divider at the end
+                        LayoutInflater inflater = getActivity().getLayoutInflater();
+                        mLastItemDivider = inflater.inflate(R.layout.divider, mItemHost, false);
+                        mItemHost.addView(mLastItemDivider);
+                    }
+                    mItemHost.startAnimation(Utils.animateExpand(mItemHost, true));
+                    mHeaderDivider.animate().alpha(1.0f).setDuration(500).start();
+
+                    mOpen = true;
+                }
+            }
+        }
 
 
         public InnerFragment() {
@@ -392,7 +453,7 @@ public class ArtistActivity extends Activity {
                 tvTitle.setText(recommended.getTitle());
 
                 if (album != null) {
-                    tvArtist.setText(getResources().getString(R.string.from_the_album, album.getName()));
+                    tvArtist.setText(getString(R.string.from_the_album, album.getName()));
                 } else {
                     tvArtist.setText("");
                 }
@@ -472,8 +533,9 @@ public class ArtistActivity extends Activity {
             });
 
             // Then inflate views
+            LayoutInflater inflater = getActivity().getLayoutInflater();
             for (Album album : albums) {
-                ViewGroup viewRoot = (ViewGroup) getActivity().getLayoutInflater().inflate(R.layout.expanded_albums_group, null);
+                final View viewRoot = inflater.inflate(R.layout.expanded_albums_group, llAlbums, false);
                 llAlbums.addView(viewRoot);
 
                 TextView tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
@@ -482,14 +544,67 @@ public class ArtistActivity extends Activity {
 
                 if (album.isLoaded()) {
                     tvAlbumName.setText(album.getName());
-                    tvAlbumYear.setText(Integer.toString(album.getYear()));
+                    if (album.getYear() > 0) {
+                        tvAlbumYear.setVisibility(View.VISIBLE);
+                        tvAlbumYear.setText(Integer.toString(album.getYear()));
+                    } else {
+                        tvAlbumYear.setVisibility(View.GONE);
+                    }
+
+                    AlbumGroupClickListener listener =
+                            new AlbumGroupClickListener(album, llAlbums, viewRoot);
+                    viewRoot.setOnClickListener(listener);
                 } else {
-                    tvAlbumName.setText(getResources().getString(R.string.loading));
-                    tvAlbumYear.setText("");
+                    tvAlbumName.setText(getString(R.string.loading));
+                    tvAlbumYear.setVisibility(View.GONE);
                 }
+
+                // TODO: Refactor that in a proper asynchronous task that sets both the ripple
+                // based on the album art, and fetches the album art for the item
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mPalette != null) {
+                            PaletteItem mutedBgColor = mPalette.getMutedColor();
+                            if (mutedBgColor != null) {
+                                RippleDrawable bg = (RippleDrawable) viewRoot.getBackground();
+                                bg.setColor(ColorStateList.valueOf(mutedBgColor.getRgb()));
+                                viewRoot.setBackground(bg);
+                            }
+                        } else {
+                            // Palette not generated yet, go ahead again
+                            mHandler.postDelayed(this, 100);
+                        }
+                    }
+                });
 
                 BackgroundAsyncTask task = new BackgroundAsyncTask(getActivity(), null, ivCover);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, album);
+            }
+        }
+
+        private void showAlbumTracks(Album album, LinearLayout container) {
+            Iterator<String> songsIt = album.songs();
+
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+            while (songsIt.hasNext()) {
+                View itemRoot = inflater.inflate(R.layout.expanded_albums_item, container, false);
+                container.addView(itemRoot);
+
+                TextView tvTrackName = (TextView) itemRoot.findViewById(R.id.tvTrackName);
+                TextView tvTrackDuration = (TextView) itemRoot.findViewById(R.id.tvTrackDuration);
+
+                Song song = cache.getSong(songsIt.next());
+
+                if (song != null && song.isLoaded()) {
+                    tvTrackName.setText(song.getTitle());
+                    tvTrackDuration.setText(Utils.formatTrackLength(song.getDuration()));
+                } else {
+                    tvTrackName.setText(getString(R.string.loading));
+                    tvTrackDuration.setText("");
+                }
             }
         }
 

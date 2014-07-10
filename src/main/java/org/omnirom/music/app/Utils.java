@@ -12,9 +12,13 @@ import android.renderscript.ScriptIntrinsicBlend;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -221,13 +225,77 @@ public class Utils {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
     }
 
+    /**
+     * Temporarily store a bitmap
+     * @param key The key
+     * @param bmp The bitmap
+     */
     public static void queueBitmap(String key, Bitmap bmp) {
         mBitmapQueue.put(key, bmp);
     }
 
+    /**
+     * Retrieve a bitmap from the store, and removes it
+     * @param key The key used in queueBitmap
+     * @return The bitmap associated with the key
+     */
     public static Bitmap dequeueBitmap(String key) {
         Bitmap bmp = mBitmapQueue.get(key);
         mBitmapQueue.remove(key);
         return bmp;
+    }
+
+    /**
+     * Animate a view expansion
+     * @param v The view to animate
+     * @param expand True to animate expanding, false to animate closing
+     * @return The animation object created
+     */
+    public static Animation animateExpand(final View v, final boolean expand) {
+        try {
+            Method m = v.getClass().getDeclaredMethod("onMeasure", int.class, int.class);
+            m.setAccessible(true);
+            m.invoke(
+                    v,
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(((View) v.getParent()).getMeasuredWidth(), View.MeasureSpec.UNSPECIFIED)
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        final int initialHeight = v.getMeasuredHeight();
+
+        if (expand) {
+            v.getLayoutParams().height = 0;
+        }
+        else {
+            v.getLayoutParams().height = initialHeight;
+        }
+        v.setVisibility(View.VISIBLE);
+
+        Animation a = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                int newHeight;
+                if (expand) {
+                    newHeight = (int) (initialHeight * interpolatedTime);
+                } else {
+                    newHeight = (int) (initialHeight * (1 - interpolatedTime));
+                }
+                v.getLayoutParams().height = newHeight;
+                v.requestLayout();
+
+                if (interpolatedTime == 1 && !expand)
+                    v.setVisibility(View.GONE);
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+        a.setDuration(500);
+        return a;
     }
 }

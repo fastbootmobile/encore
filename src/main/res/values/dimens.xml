@@ -19,4 +19,6 @@
     <dimen name="card_press_elevation">12dp</dimen>
 
     <dimen name="floating_button_size">72dp</dimen>
+
+    <dimen name="one_dp">1dp</dimen>
 </resources>

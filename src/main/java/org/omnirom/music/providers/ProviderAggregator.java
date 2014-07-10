@@ -419,6 +419,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 }
             }
 
+            // TODO: Batch updates instead of creating new runnable for every song
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -470,6 +471,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
             }
 
+            // TODO: Batch updates instead of creating new runnable for every song
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {

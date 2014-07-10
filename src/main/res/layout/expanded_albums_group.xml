@@ -1,36 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="fill_parent"
-    android:layout_height="64dp"
+    android:layout_height="wrap_content"
     android:clickable="true"
-    android:paddingTop="8dp"
     android:paddingBottom="8dp"
     android:background="?android:attr/selectableItemBackground">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/divider"
+        android:visibility="invisible"
+        android:background="#DDDDDD"
+        android:layout_alignParentTop="true" />
+
     <org.omnirom.music.app.ui.SquareImageView
-        android:layout_width="wrap_content"
+        android:layout_width="64dp"
         android:layout_height="64dp"
+        android:layout_marginTop="8dp"
         android:id="@+id/ivCover"
         android:src="@drawable/album_placeholder"
         android:scaleType="centerCrop"
-        android:adjustViewBounds="true" />
+        android:adjustViewBounds="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" />
 
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tvAlbumName"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="32dp"
-        style="?android:attr/textAppearanceMedium" />
+        android:gravity="center_vertical"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/ivCover"
+        android:layout_marginLeft="36dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tvAlbumYear"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="4dp"
-        style="?android:attr/textAppearanceMedium"
-        android:alpha="0.6" />
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvAlbumName"
+            android:layout_gravity="center_vertical"
+            android:text="Crash Love"
+            style="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/tvAlbumYear"
+            android:layout_toRightOf="@+id/ivCover"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvAlbumYear"
+            android:layout_gravity="center_vertical"
+            android:text="2009"
+            style="?android:attr/textAppearanceMedium"
+            android:alpha="0.6"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/tvAlbumName" />
+    </LinearLayout>
+
+</RelativeLayout>
