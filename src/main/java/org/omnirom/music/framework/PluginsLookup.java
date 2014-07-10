@@ -179,7 +179,8 @@ public class PluginsLookup {
      */
     public List<ProviderConnection> getAvailableProviders() {
         Log.e(TAG, "Available providers: " + mConnections.size());
-        return mConnections;
+        // That list may be modified, so we return a copy
+        return new ArrayList<ProviderConnection>(mConnections);
     }
 
     /**

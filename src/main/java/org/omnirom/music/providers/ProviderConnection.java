@@ -138,7 +138,7 @@ public class ProviderConnection implements ServiceConnection {
         Intent i = new Intent();
         i.setClassName(mPackage, mServiceName);
         mContext.startService(i);
-        mContext.bindService(i, this, 0);
+        mContext.bindService(i, this, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -158,15 +158,13 @@ public class ProviderConnection implements ServiceConnection {
 
             // Automatically try to login the providers once bound
             if (mBinder.isSetup()) {
-                Log.d(TAG, "Provider is setup! Trying to see if authenticated");
+                Log.d(TAG, "Provider " + mProviderName + " is setup! Trying to see if auth");
                 if (!mBinder.isAuthenticated()) {
-                    Log.d(TAG, "Provider is setup but not authenticated! Trying to log in!");
                     if (!mBinder.login()) {
                         Log.e(TAG, "Error while requesting login!");
                     }
                 } else {
                     // Update playlists
-                    Log.d(TAG, "Provider is already authenticated, getting playlists");
                     ProviderAggregator.getDefault().getAllPlaylists();
                 }
             }
