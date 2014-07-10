@@ -141,6 +141,26 @@ public class MainActivity extends Activity
     }
 
     @Override
+    protected void onDestroy() {
+        HttpResponseCache cache = HttpResponseCache.getInstalled();
+        if (cache != null) {
+            cache.flush();
+        }
+
+        // Release services connections if playback isn't happening
+        IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+        try {
+            if (!playbackService.isPlaying()) {
+                PluginsLookup.getDefault().tearDown();
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot determine if playbackservice is running");
+        }
+
+        super.onDestroy();
+    }
+
+    @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         try {

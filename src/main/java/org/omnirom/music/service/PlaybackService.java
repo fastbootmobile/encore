@@ -154,6 +154,12 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
     public boolean onUnbind(Intent intent) {
         mNumberBound--;
         Log.i(TAG, "Client unbound service (" + mNumberBound + " left)");
+
+        if (mNumberBound == 0 && ! mIsPlaying) {
+            mHandler.removeCallbacks(mShutdownRunnable);
+            mShutdownRunnable.run();
+        }
+
         return super.onUnbind(intent);
     }
 

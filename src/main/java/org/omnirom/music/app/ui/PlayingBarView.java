@@ -24,6 +24,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
+import org.omnirom.music.service.PlaybackService;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -226,8 +227,12 @@ public class PlayingBarView extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+
+        IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
         try {
-            PluginsLookup.getDefault().getPlaybackService().removeCallback(mPlaybackCallback);
+            if (playbackService != null) {
+                playbackService.removeCallback(mPlaybackCallback);
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to remove the playing bar callback from the playback", e);
         }
