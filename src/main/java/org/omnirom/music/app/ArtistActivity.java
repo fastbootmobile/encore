@@ -9,6 +9,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Outline;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
@@ -48,6 +49,8 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.service.IPlaybackService;
+import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -281,6 +284,7 @@ public class ArtistActivity extends Activity {
         private View mRootView;
         private Palette mPalette;
         private Handler mHandler;
+        private View mPreviousSongGroup;
         private boolean mRecommendationLoaded = false;
 
         private Runnable mUpdateAlbumsRunnable = new Runnable() {
@@ -353,6 +357,40 @@ public class ArtistActivity extends Activity {
 
                     mOpen = true;
                 }
+            }
+        }
+
+        public class SongClickListener implements View.OnClickListener {
+            private Song mSong;
+            private View mLayout;
+
+            public SongClickListener(Song s, View songLayout) {
+                mSong = s;
+                mLayout = songLayout;
+            }
+
+            @Override
+            public void onClick(View view) {
+                try {
+                    PluginsLookup.getDefault().getPlaybackService().playSong(mSong);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to play song", e);
+                    return;
+                }
+
+                TextView tvTrackName = (TextView) mLayout.findViewById(R.id.tvTrackName);
+                TextView tvTrackDuration = (TextView) mLayout.findViewById(R.id.tvTrackDuration);
+                tvTrackName.setTypeface(null, Typeface.BOLD);
+                tvTrackDuration.setTypeface(null, Typeface.BOLD);
+
+                if (mPreviousSongGroup != null){
+                    tvTrackName = (TextView) mPreviousSongGroup.findViewById(R.id.tvTrackName);
+                    tvTrackDuration = (TextView) mPreviousSongGroup.findViewById(R.id.tvTrackDuration);
+                    tvTrackName.setTypeface(null, Typeface.NORMAL);
+                    tvTrackDuration.setTypeface(null, Typeface.NORMAL);
+                }
+
+                mPreviousSongGroup = mLayout;
             }
         }
 
@@ -612,10 +650,32 @@ public class ArtistActivity extends Activity {
                 if (song != null && song.isLoaded()) {
                     tvTrackName.setText(song.getTitle());
                     tvTrackDuration.setText(Utils.formatTrackLength(song.getDuration()));
+
+                    // Set song click listener
+                    SongClickListener listener = new SongClickListener(song, itemRoot);
+                    itemRoot.setOnClickListener(listener);
+
+                    // Bold if already playing
+                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                    try {
+                        if (pbService.isPlaying()) {
+                            Song currentSong = pbService.getCurrentTrack();
+                            if (currentSong != null && song.equals(currentSong)) {
+                                tvTrackDuration.setTypeface(null, Typeface.BOLD);
+                                tvTrackName.setTypeface(null, Typeface.BOLD);
+                                mPreviousSongGroup = itemRoot;
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     tvTrackName.setText(getString(R.string.loading));
                     tvTrackDuration.setText("");
                 }
+
+
+
             }
         }
 

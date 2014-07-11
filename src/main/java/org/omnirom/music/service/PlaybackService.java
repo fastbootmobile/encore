@@ -256,6 +256,7 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
 
         @Override
         public void playSong(Song s) throws RemoteException {
+            Log.e(TAG, "Play song: " + s.getRef());
             mPlaybackQueue.clear();
             mPlaybackQueue.addSong(s, true);
             startPlayingQueue();
@@ -332,6 +333,11 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
             }
 
             return (int) (System.currentTimeMillis() - mCurrentTrackStartTime);
+        }
+
+        @Override
+        public Song getCurrentTrack() throws RemoteException {
+            return mCurrentTrack;
         }
 
         @Override

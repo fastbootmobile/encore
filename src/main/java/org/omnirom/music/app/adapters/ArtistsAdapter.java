@@ -93,7 +93,6 @@ public class ArtistsAdapter extends BaseAdapter {
 
             if (v.position != this.mPosition || mArtist == null) {
                 // Cancel, we moved
-                Log.e("ARTIST", "We moved 2");
                 return null;
             }
             final Resources res = v.llRoot.getResources();
@@ -129,7 +128,6 @@ public class ArtistsAdapter extends BaseAdapter {
 
                 if (v.position != this.mPosition) {
                     // Cancel, we moved
-                    Log.e("ARTIST", "We moved 3");
                     return null;
                 }
 
@@ -165,7 +163,6 @@ public class ArtistsAdapter extends BaseAdapter {
         tag.srcBitmap = result.getBitmap();
         tag.ivCover.setImageDrawable(result);
 
-        // TEST - PALETTE
         final Resources res = tag.llRoot.getResources();
         Palette palette = Palette.generate(result.getBitmap());
         PaletteItem darkVibrantColor = palette.getDarkVibrantColor();

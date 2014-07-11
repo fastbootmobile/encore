@@ -66,6 +66,11 @@ interface IPlaybackService {
     int getCurrentTrackPosition();
 
     /**
+     * Returns the currently playing track, or null if none
+     */
+    Song getCurrentTrack();
+
+    /**
      * Returns the current RMS level of the currently playing output
      */
     int getCurrentRms();
