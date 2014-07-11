@@ -249,20 +249,23 @@ public class PlayPauseDrawable extends Drawable {
 
             if (progress >= 1.0f) {
                 mCurrentShape = mRequestShape;
+            } else {
+                mTransitionAccumulator += System.currentTimeMillis() - mLastTransitionTick;
+                mLastTransitionTick = System.currentTimeMillis();
             }
         }
 
-        mTransitionAccumulator += System.currentTimeMillis() - mLastTransitionTick;
-        mLastTransitionTick = System.currentTimeMillis();
-
         canvas.drawPath(mPath, mPaint);
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                invalidateSelf();
-            }
-        });
+        if (mCurrentShape != mRequestShape) {
+            // Invalidate ourselves to redraw the next animation frame
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    invalidateSelf();
+                }
+            });
+        }
     }
 
     @Override
