@@ -246,7 +246,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @param provider The providers that connected
      */
     public void registerProvider(ProviderConnection provider) {
-        Log.e("XPLOD", "REGISTER PROVIDER");
         boolean added = false;
         synchronized (mProviders) {
             //if (!mProviders.contains(provider)) {
@@ -257,7 +256,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
         if (added) {
             try {
-                Log.e("XPLOD", "REGISTERING CALLBACK ON PROVIDER " + provider.getProviderName());
                 provider.getBinder().registerCallback(this);
 
                 for (ILocalCallback cb : mUpdateCallbacks) {
@@ -416,8 +414,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 Album album = mCache.getAlbum(s.getAlbum());
                 if (album != null) {
                     artist.addAlbum(album.getRef());
-                } else {
-                    Log.e(TAG, "Album is null!");
                 }
             }
 

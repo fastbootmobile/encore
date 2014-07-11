@@ -10,12 +10,14 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
@@ -84,14 +86,14 @@ public class PlayingBarView extends RelativeLayout {
             if (playbackService != null) {
                 try {
                     if (playbackService.isPlaying()) {
-                        mScrobble.setMax(playbackService.getCurrentTrackLength());
-                        mScrobble.setProgress(playbackService.getCurrentTrackPosition());
+                        /*mScrobble.setMax(playbackService.getCurrentTrackLength())
+                        mScrobble.setProgress(playbackService.getCurrentTrackPosition());*/
 
                         // Restart ourselves
                         mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
                     } else {
-                        mScrobble.setMax(1);
-                        mScrobble.setProgress(1);
+                        /*mScrobble.setMax(1);
+                        mScrobble.setProgress(1);*/
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to update seek bar", e);
@@ -117,7 +119,7 @@ public class PlayingBarView extends RelativeLayout {
                 mArtistView.setText(artist.getName());
             else
                 mArtistView.setText("...");
-            mScrobble.setMax(s.getDuration());
+            //mScrobble.setMax(s.getDuration());
 
             // Set the visibility and button state
             setPlayButtonState(false);
@@ -129,7 +131,7 @@ public class PlayingBarView extends RelativeLayout {
 
         @Override
         public void onSongScrobble(int timeMs) throws RemoteException {
-            mScrobble.setProgress(timeMs);
+            /*mScrobble.setProgress(timeMs);*/
         }
 
         @Override
@@ -149,12 +151,10 @@ public class PlayingBarView extends RelativeLayout {
     private Executor mExecutor = new ScheduledThreadPoolExecutor(2);
     private Song mSong;
     private boolean mIsPlaying;
-    private ProgressBar mScrobble;
-    private FrameLayout mPlayPauseButton;
-    private ImageView mPlayPauseInner;
     private ImageView mAlbumArt;
     private TextView mArtistView;
     private TextView mTitleView;
+    private ImageButton mPlayFab;
     private Handler mHandler = new Handler();
     private final int mAnimationDuration;
 
@@ -195,15 +195,16 @@ public class PlayingBarView extends RelativeLayout {
             }
         });
 
-        mScrobble           = (ProgressBar) findViewById(R.id.pbScrobble);
-        mPlayPauseButton    = (FrameLayout)   findViewById(R.id.btnPlay);
-        mPlayPauseInner     = (ImageView)   findViewById(R.id.btnPlayInner);
         mAlbumArt           = (ImageView)   findViewById(R.id.ivAlbumArt);
         mArtistView         = (TextView)    findViewById(R.id.tvArtist);
         mTitleView          = (TextView)    findViewById(R.id.tvTitle);
+        mPlayFab            = (ImageButton) findViewById(R.id.fabPlayBarButton);
+
+        // Set FAB info
+        Utils.setSmallFabOutline(new View[]{mPlayFab});
 
         // Setup click listeners
-        mPlayPauseButton.setOnClickListener(new OnClickListener() {
+        /*mPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
@@ -221,7 +222,7 @@ public class PlayingBarView extends RelativeLayout {
                     }
                 }
             }
-        });
+        });*/
     }
 
     @Override
@@ -243,11 +244,11 @@ public class PlayingBarView extends RelativeLayout {
      * @param play true will set the image to a "play" image, false will set to "pause"
      */
     public void setPlayButtonState(boolean play) {
-        if (play) {
+        /*if (play) {
             mPlayPauseInner.setImageResource(R.drawable.ic_btn_play);
         } else {
             mPlayPauseInner.setImageResource(R.drawable.ic_btn_pause);
-        }
+        }*/
     }
 
     public void animateVisibility(boolean visible) {

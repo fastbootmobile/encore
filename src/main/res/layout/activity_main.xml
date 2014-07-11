@@ -24,7 +24,7 @@
             <include
                 layout="@layout/fragment_playing_bar"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/playing_bar_height"
+                android:layout_height="wrap_content"
                 android:layout_gravity="bottom" />
         </FrameLayout>
 

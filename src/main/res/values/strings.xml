@@ -22,5 +22,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="from_the_album">From the album \"%s\"</string>
     <string name="loading">Loading…</string>
+    <string name="recommended_for_you">Recommended for you</string>
+    <string name="albums">Albums</string>
 
 </resources>

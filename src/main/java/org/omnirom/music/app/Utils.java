@@ -3,6 +3,7 @@ package org.omnirom.music.app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.renderscript.Allocation;
@@ -297,5 +298,26 @@ public class Utils {
         };
         a.setDuration(500);
         return a;
+    }
+
+
+    public static void setLargeFabOutline(View[] views) {
+        setFabOutline(R.dimen.floating_button_large_size, views);
+    }
+
+    public static void setSmallFabOutline(View[] views) {
+        setFabOutline(R.dimen.floating_button_small_size, views);
+    }
+
+    private static void setFabOutline(int dimenRes, View[] views) {
+        Resources res = views[0].getResources();
+        int size = res.getDimensionPixelSize(dimenRes);
+
+        Outline outline = new Outline();
+        outline.setOval(0, 0, size, size);
+
+        for (View v : views) {
+            v.setOutline(outline);
+        }
     }
 }

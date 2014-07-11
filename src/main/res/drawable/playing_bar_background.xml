@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true"
-        android:state_focused="true"
-        android:drawable="@color/play_bar_pressed"/>
-    <item android:state_pressed="true"
-        android:state_focused="false"
-        android:drawable="@color/play_bar_pressed"/>
-
-    <item android:drawable="@color/play_bar_background" />
-</selector>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="@color/primary_light">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/white" />
+        </shape>
+    </item>
+</ripple>

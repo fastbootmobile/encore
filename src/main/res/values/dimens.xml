@@ -15,10 +15,14 @@
     <dimen name="button_elevation">4dp</dimen>
     <dimen name="button_press_elevation">8dp</dimen>
 
+    <dimen name="small_button_elevation">1dp</dimen>
+    <dimen name="small_button_press_elevation">2dp</dimen>
+
     <dimen name="card_elevation">6dp</dimen>
     <dimen name="card_press_elevation">12dp</dimen>
 
-    <dimen name="floating_button_size">72dp</dimen>
+    <dimen name="floating_button_large_size">72dp</dimen>
+    <dimen name="floating_button_small_size">48dp</dimen>
 
     <dimen name="one_dp">1dp</dimen>
 </resources>

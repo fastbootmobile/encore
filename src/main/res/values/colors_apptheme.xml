@@ -10,6 +10,9 @@
     <!-- Red 900 -->
     <color name="accent">#b0120a</color>
 
+    <!-- Red 300 -->
+    <color name="primary_light">#f36c60</color>
+
     <!-- Standard colors -->
     <color name="apptheme_color">@color/primary</color>
     <color name="apptheme_color_pressed">@color/primary_dark</color>

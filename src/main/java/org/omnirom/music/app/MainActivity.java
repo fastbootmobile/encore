@@ -96,14 +96,14 @@ public class MainActivity extends Activity
 
         // Setup the playing bar click listener
         mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
-        mPlayingBarLayout.setOnClickListener(new View.OnClickListener() {
+        /*mPlayingBarLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showFragment(NowPlayingFragment.newInstance(), true);
                 setPlayingBarVisible(false);
                 mRestoreBarOnBack = true;
             }
-        });
+        });*/
 
         // We start it hidden. As we don't have the exact size yet, we post it for later change
         /*mPlayingBarLayout.post(new Runnable() {

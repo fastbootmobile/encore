@@ -36,8 +36,8 @@
 
         <ImageButton
             android:id="@+id/fabPlay"
-            android:layout_width="@dimen/floating_button_size"
-            android:layout_height="@dimen/floating_button_size"
+            android:layout_width="@dimen/floating_button_large_size"
+            android:layout_height="@dimen/floating_button_large_size"
 
             android:layout_above="@+id/tvArtist"
             android:layout_alignParentEnd="true"
@@ -66,7 +66,7 @@
                 android:id="@+id/tvArtistSuggestionNote"
                 android:layout_marginLeft="0dp"
                 android:layout_marginRight="0dp"
-                android:text="Recommended for you" />
+                android:text="@string/recommended_for_you" />
 
 
             <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
@@ -125,12 +125,20 @@
 
             </android.support.v7.widget.CardView>
 
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/pbArtistLoading"
+                android:indeterminate="true"
+                />
+
             <TextView
                 style="@style/OmniMusic.Spec.Subheader"
                 android:layout_marginLeft="0dp"
                 android:layout_marginRight="0dp"
                 android:layout_marginTop="16dp"
-                android:text="Albums" />
+                android:text="@string/albums" />
 
             <LinearLayout
                 android:id="@+id/llAlbums"

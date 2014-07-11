@@ -5,14 +5,11 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Outline;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.AsyncTask;
@@ -30,13 +27,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.AbsListView;
 import android.widget.Button;
-import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.omnirom.music.framework.AlbumArtCache;
@@ -54,7 +49,6 @@ import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
-import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -435,12 +429,17 @@ public class ArtistActivity extends Activity {
         }
 
         private void setOutlines(View v) {
-            int size = getResources().getDimensionPixelSize(R.dimen.floating_button_size);
+            Utils.setLargeFabOutline(new View[]{v});
+        }
 
-            Outline outline = new Outline();
-            outline.setOval(0, 0, size, size);
-
-            v.setOutline(outline);
+        private void showLoadingSpinner(final boolean show) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ProgressBar pb = (ProgressBar) mRootView.findViewById(R.id.pbArtistLoading);
+                    pb.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
         }
 
         private void loadRecommendation() {
@@ -472,11 +471,17 @@ public class ArtistActivity extends Activity {
                     cvRec.setVisibility(View.VISIBLE);
                     cvRec.setAlpha(0.0f);
                     cvRec.animate().alpha(1.0f).setDuration(500).start();
+
+                    View suggestionTitle = mRootView.findViewById(R.id.tvArtistSuggestionNote);
+                    suggestionTitle.setVisibility(View.VISIBLE);
+                    suggestionTitle.setAlpha(0.0f);
+                    suggestionTitle.animate().alpha(1.0f).setDuration(500).start();
                 }
 
                 mRecommendationLoaded = true;
             } else {
                 mRootView.findViewById(R.id.cardArtistSuggestion).setVisibility(View.GONE);
+                mRootView.findViewById(R.id.tvArtistSuggestionNote).setVisibility(View.GONE);
                 mRecommendationLoaded = false;
             }
         }
@@ -491,11 +496,15 @@ public class ArtistActivity extends Activity {
                         if (provider != null) {
                             try {
                                 boolean hasMore = provider.fetchArtistAlbums(mArtist.getRef());
-                                Log.e("XPLOD", "Have more? " + hasMore);
+                                showLoadingSpinner(hasMore);
                             } catch (RemoteException e) {
                                 Log.e(TAG, "Unable to fetch artist albums", e);
                             }
+                        } else {
+                            showLoadingSpinner(false);
                         }
+                    } else {
+                        showLoadingSpinner(false);
                     }
                 }
             }.start();
@@ -581,6 +590,8 @@ public class ArtistActivity extends Activity {
                 BackgroundAsyncTask task = new BackgroundAsyncTask(getActivity(), null, ivCover);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, album);
             }
+
+            showLoadingSpinner(false);
         }
 
         private void showAlbumTracks(Album album, LinearLayout container) {
