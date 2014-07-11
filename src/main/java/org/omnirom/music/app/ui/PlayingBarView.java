@@ -151,6 +151,7 @@ public class PlayingBarView extends RelativeLayout {
     private TextView mArtistView;
     private TextView mTitleView;
     private ImageButton mPlayFab;
+    private PlayPauseDrawable mPlayFabDrawable;
     private Handler mHandler = new Handler();
     private final int mAnimationDuration;
 
@@ -199,26 +200,11 @@ public class PlayingBarView extends RelativeLayout {
         // Set FAB info
         Utils.setSmallFabOutline(new View[]{mPlayFab});
 
-        final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources());
-        drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        mPlayFab.setImageDrawable(drawable);
+        mPlayFabDrawable = new PlayPauseDrawable(getResources());
+        mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+        mPlayFab.setImageDrawable(mPlayFabDrawable);
 
         mPlayFab.setOnClickListener(new OnClickListener() {
-            boolean isPlaying = false;
-            @Override
-            public void onClick(View view) {
-                if (!isPlaying) {
-                    drawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                    isPlaying = true;
-                } else {
-                    drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                    isPlaying = false;
-                }
-            }
-        });
-
-        // Setup click listeners
-        /*mPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
@@ -236,7 +222,7 @@ public class PlayingBarView extends RelativeLayout {
                     }
                 }
             }
-        });*/
+        });
     }
 
     @Override
@@ -258,11 +244,11 @@ public class PlayingBarView extends RelativeLayout {
      * @param play true will set the image to a "play" image, false will set to "pause"
      */
     public void setPlayButtonState(boolean play) {
-        /*if (play) {
-            mPlayPauseInner.setImageResource(R.drawable.ic_btn_play);
+        if (play) {
+            mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         } else {
-            mPlayPauseInner.setImageResource(R.drawable.ic_btn_pause);
-        }*/
+            mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+        }
     }
 
     public void animateVisibility(boolean visible) {

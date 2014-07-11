@@ -47,7 +47,6 @@
 
             android:background="@drawable/fab_background"
             android:elevation="@dimen/button_elevation"
-            android:src="@drawable/ic_action_play_pressed"
             android:stateListAnimator="@anim/button_raise" />
 
         <LinearLayout

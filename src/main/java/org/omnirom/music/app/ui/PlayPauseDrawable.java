@@ -40,21 +40,28 @@ public class PlayPauseDrawable extends Drawable {
     private long mTransitionAccumulator;
     private long mLastTransitionTick;
 
+    private Resources mResources;
     private Handler mHandler;
 
 
     public PlayPauseDrawable(Resources res) {
-        mHalfPadding = (res.getDimensionPixelSize(R.dimen.one_dp) * 32) / 2;
+        mResources = res;
+        setPaddingDp(32);
         mCurrentShape = mRequestShape = -1;
         mPath = new Path();
         mPaint = new Paint();
         mHandler = new Handler();
+
 
         mPaint.setColor(Color.WHITE);
         mPaint.setStyle(Paint.Style.FILL);
 
         mInitialDrawDone = false;
         mTransitionInterpolator = new AccelerateDecelerateInterpolator();
+    }
+
+    public void setPaddingDp(int paddingDp) {
+        setPadding(mResources.getDimensionPixelSize(R.dimen.one_dp) * paddingDp) ;
     }
 
     public void setPadding(int padding) {
@@ -67,6 +74,14 @@ public class PlayPauseDrawable extends Drawable {
             mTransitionAccumulator = 0;
             mLastTransitionTick = System.currentTimeMillis();
         }
+    }
+
+    public int getCurrentShape() {
+        return mCurrentShape;
+    }
+
+    public int getRequestedShape() {
+        return mRequestShape;
     }
 
     private float getProgress() {

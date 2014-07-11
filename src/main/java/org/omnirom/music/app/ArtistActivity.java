@@ -30,11 +30,13 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
@@ -443,13 +445,33 @@ public class ArtistActivity extends Activity {
             tvArtist.setText(mArtist.getName());
 
             // Outline is required for the FAB shadow to be actually oval
-            setOutlines(mRootView.findViewById(R.id.fabPlay));
+            ImageButton fabPlay = (ImageButton) mRootView.findViewById(R.id.fabPlay);
+            setOutlines(fabPlay);
 
-            loadRecommendation();
-            loadAlbums(true);
+            // Set the FAB animated drawable
+            final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources());
+            drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+            drawable.setPaddingDp(48);
+            fabPlay.setImageDrawable(drawable);
+            fabPlay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (drawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PAUSE) {
+                        drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    } else {
+                        drawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    }
+                    Utils.shortToast(getActivity(), R.string.please_program_me);
+                }
+            });
 
             // Register for updates
             ProviderAggregator.getDefault().addUpdateCallback(this);
+
+            // Load recommendation and albums
+            loadRecommendation();
+            loadAlbums(true);
+
 
             return mRootView;
         }
