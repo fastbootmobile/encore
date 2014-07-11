@@ -7,10 +7,12 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -25,6 +27,8 @@ import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 
+import java.security.Provider;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -42,7 +46,7 @@ public class PlayingBarView extends RelativeLayout {
         @Override
         public void run() {
             final ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            final Song startSong = mSong;
+            final Song startSong = mCurrentSong;
 
             // Prepare the placeholder/default
             BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.album_list_default_bg);
@@ -50,12 +54,12 @@ public class PlayingBarView extends RelativeLayout {
             Bitmap bmp = drawable.getBitmap();
 
             // Download the art image
-            String artKey = cache.getSongArtKey(mSong);
+            String artKey = cache.getSongArtKey(mCurrentSong);
             String artUrl = null;
 
             if (artKey == null) {
                 StringBuffer urlBuffer = new StringBuffer();
-                artKey = AlbumArtCache.getArtKey(mSong, urlBuffer);
+                artKey = AlbumArtCache.getArtKey(mCurrentSong, urlBuffer);
                 artUrl = urlBuffer.toString();
             }
 
@@ -67,8 +71,8 @@ public class PlayingBarView extends RelativeLayout {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (startSong == mSong) {
-                        mAlbumArt.setImageBitmap(albumArtBitmap);
+                    if (startSong == mCurrentSong) {
+                        // mAlbumArt.setImageBitmap(albumArtBitmap);
                     }
                 }
             });
@@ -102,8 +106,10 @@ public class PlayingBarView extends RelativeLayout {
 
         @Override
         public void onSongStarted(Song s) throws RemoteException {
-            mSong = s;
+            mCurrentSong = s;
 
+            updatePlayingQueue();
+/*
             // Fill the album art
             mExecutor.execute(mAlbumArtRunnable);
 
@@ -116,7 +122,7 @@ public class PlayingBarView extends RelativeLayout {
             else
                 mArtistView.setText("...");
             //mScrobble.setMax(s.getDuration());
-
+*/
             // Set the visibility and button state
             setPlayButtonState(false);
             animateVisibility(true);
@@ -145,11 +151,9 @@ public class PlayingBarView extends RelativeLayout {
     };
 
     private Executor mExecutor = new ScheduledThreadPoolExecutor(2);
-    private Song mSong;
+    private Song mCurrentSong;
     private boolean mIsPlaying;
-    private ImageView mAlbumArt;
-    private TextView mArtistView;
-    private TextView mTitleView;
+    private LinearLayout mTracksLayout;
     private ImageButton mPlayFab;
     private PlayPauseDrawable mPlayFabDrawable;
     private Handler mHandler = new Handler();
@@ -183,7 +187,7 @@ public class PlayingBarView extends RelativeLayout {
                     try {
                         playbackService.addCallback(mPlaybackCallback);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to register the main activity as a callback of the playback", e);
+                        Log.e(TAG, "Unable to register the playbar as a callback of the playback", e);
                     }
                 } else {
                     // Retry, playback connection not established yet
@@ -192,12 +196,9 @@ public class PlayingBarView extends RelativeLayout {
             }
         });
 
-        mAlbumArt           = (ImageView)   findViewById(R.id.ivAlbumArt);
-        mArtistView         = (TextView)    findViewById(R.id.tvArtist);
-        mTitleView          = (TextView)    findViewById(R.id.tvTitle);
-        mPlayFab            = (ImageButton) findViewById(R.id.fabPlayBarButton);
 
         // Set FAB info
+        mPlayFab = (ImageButton) findViewById(R.id.fabPlayBarButton);
         Utils.setSmallFabOutline(new View[]{mPlayFab});
 
         mPlayFabDrawable = new PlayPauseDrawable(getResources());
@@ -223,6 +224,10 @@ public class PlayingBarView extends RelativeLayout {
                 }
             }
         });
+
+        // Load playing queue
+        mTracksLayout = (LinearLayout) findViewById(R.id.playBarTracksLayout);
+        updatePlayingQueue();
     }
 
     @Override
@@ -261,5 +266,64 @@ public class PlayingBarView extends RelativeLayout {
                     .setInterpolator(new AccelerateDecelerateInterpolator())
                     .setDuration(mAnimationDuration).start();
         }
+    }
+
+    public void updatePlayingQueue() {
+        IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+
+        if (playbackService == null) {
+            // Service not bound yet
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updatePlayingQueue();
+                }
+            });
+            return;
+        }
+
+        List<Song> queue = null;
+        try {
+            queue = playbackService.getCurrentPlaybackQueue();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to retrieve the current playback queue");
+        }
+
+
+        if (queue != null) {
+            queue.addAll(queue);
+
+            // Inflate views and make the list out of the first 4 items (or less)
+            int i = 0;
+            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            for (Song song : queue) {
+                if (i == 4) {
+                    break;
+                }
+
+                View itemRoot = inflater.inflate(R.layout.item_playbar, mTracksLayout, false);
+                mTracksLayout.addView(itemRoot);
+
+                TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
+                TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
+                ImageView ivAlbumArt = (ImageView) itemRoot.findViewById(R.id.ivAlbumArt);
+
+                Artist artist = cache.getArtist(song.getArtist());
+                if (artist != null) {
+                    tvArtist.setText(artist.getName());
+                } else {
+                    tvArtist.setText(getContext().getString(R.string.loading));
+                }
+
+                tvTitle.setText(song.getTitle());
+
+                // TODO: ivAlbumArt
+                ivAlbumArt.setImageResource(R.drawable.album_placeholder);
+
+                i++;
+            }
+        }
+
     }
 }

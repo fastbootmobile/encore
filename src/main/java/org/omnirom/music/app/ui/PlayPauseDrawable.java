@@ -27,7 +27,7 @@ public class PlayPauseDrawable extends Drawable {
     public static final int SHAPE_STOP = 1;
     public static final int SHAPE_PLAY = 2;
 
-    private static final float TRANSITION_DURATION = 500;
+    private static final float TRANSITION_DURATION = 300;
     private static final float PAUSE_TRIM_RATIO = 0.12f;
 
     private int mHalfPadding;

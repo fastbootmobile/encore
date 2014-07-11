@@ -71,6 +71,11 @@ interface IPlaybackService {
     Song getCurrentTrack();
 
     /**
+     * Returns the current playback queue, including the currently playing track
+     */
+    List<Song> getCurrentPlaybackQueue();
+
+    /**
      * Returns the current RMS level of the currently playing output
      */
     int getCurrentRms();

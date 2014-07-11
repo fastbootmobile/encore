@@ -341,6 +341,11 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         }
 
         @Override
+        public List<Song> getCurrentPlaybackQueue() {
+            return mPlaybackQueue;
+        }
+
+        @Override
         public int getCurrentRms() throws RemoteException {
             return mDSPProcessor.getRms();
         }

@@ -91,19 +91,9 @@ public class MainActivity extends Activity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout), getTheme());
 
-        // Setup the blurring playing bar background
-        final ImageView playingBarBackground = (ImageView) findViewById(R.id.ivPlayingBarBackground);
 
         // Setup the playing bar click listener
         mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
-        /*mPlayingBarLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showFragment(NowPlayingFragment.newInstance(), true);
-                setPlayingBarVisible(false);
-                mRestoreBarOnBack = true;
-            }
-        });*/
 
         // We start it hidden. As we don't have the exact size yet, we post it for later change
         /*mPlayingBarLayout.post(new Runnable() {
@@ -112,8 +102,6 @@ public class MainActivity extends Activity
                 mPlayingBarLayout.setTranslationY(mPlayingBarLayout.getMeasuredHeight());
             }
         });*/
-        //MultiProviderDatabaseHelper multiProviderDatabaseHelper = new MultiProviderDatabaseHelper(this);
-
     }
 
     public void setPlayingBarVisible(boolean visible) {

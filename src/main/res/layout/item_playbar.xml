@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:autoText="false">
+
+
+    <org.omnirom.music.app.ui.SquareImageView
+        android:id="@+id/ivAlbumArt"
+        android:layout_width="@dimen/playing_bar_height"
+        android:layout_height="@dimen/playing_bar_height"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="4dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/test_cover_incubus" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/playing_bar_height"
+        android:layout_toEndOf="@+id/ivAlbumArt"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_alignTop="@+id/ivAlbumArt"
+        android:layout_alignParentEnd="true"
+        android:layout_marginLeft="16dp">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:text="The Walker"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#333333" />
+
+        <TextView
+            android:id="@+id/tvArtist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:text="Fits &amp; The Tantrums"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+
+    </LinearLayout>
+
+</RelativeLayout>
