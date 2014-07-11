@@ -79,6 +79,5 @@
 
         android:background="@drawable/fab_background"
         android:elevation="@dimen/small_button_elevation"
-        android:src="@drawable/ic_action_play_pressed"
         android:stateListAnimator="@anim/small_button_raise" />
 </org.omnirom.music.app.ui.PlayingBarView>

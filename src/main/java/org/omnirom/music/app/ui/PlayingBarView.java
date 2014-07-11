@@ -9,10 +9,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -26,11 +24,9 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
-import org.omnirom.music.service.PlaybackService;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * ViewGroup for the sticky bottom playing bar
@@ -202,6 +198,24 @@ public class PlayingBarView extends RelativeLayout {
 
         // Set FAB info
         Utils.setSmallFabOutline(new View[]{mPlayFab});
+
+        final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources());
+        drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+        mPlayFab.setImageDrawable(drawable);
+
+        mPlayFab.setOnClickListener(new OnClickListener() {
+            boolean isPlaying = false;
+            @Override
+            public void onClick(View view) {
+                if (!isPlaying) {
+                    drawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    isPlaying = true;
+                } else {
+                    drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    isPlaying = false;
+                }
+            }
+        });
 
         // Setup click listeners
         /*mPlayPauseButton.setOnClickListener(new OnClickListener() {
