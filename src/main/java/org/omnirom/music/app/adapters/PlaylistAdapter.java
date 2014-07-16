@@ -142,7 +142,7 @@ public class PlaylistAdapter extends BaseAdapter {
 
             if (artKey == null) {
                 StringBuffer urlBuffer = new StringBuffer();
-                artKey = AlbumArtCache.getArtKey(mSong, urlBuffer);
+                artKey = AlbumArtCache.getDefault().getArtKey(mSong, urlBuffer);
                 artUrl = urlBuffer.toString();
             }
 

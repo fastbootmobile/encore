@@ -31,6 +31,7 @@ import android.widget.TextView;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
+import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
@@ -71,7 +72,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private View mPreviousSongGroup;
     private View mPreviousAlbumGroup;
     private boolean mRecommendationLoaded = false;
-    private SongClickListener mSongClickListener = new SongClickListener();
     private HashMap<Song, View> mSongToViewMap = new HashMap<Song, View>();
     private HashMap<String, View> mAlbumToViewMap = new HashMap<String, View>();
 
@@ -93,91 +93,38 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     };
 
 
-    private static class BackgroundAsyncTask extends AsyncTask<Album, Void, BitmapDrawable> {
-        private Album mAlbum;
-        private Context mContext;
-        private ImageView mImageView;
-        private CardView mRootView;
-        private Palette mPalette;
+    private class AlbumArtLoadListener implements AlbumArtImageView.OnArtLoadedListener {
+        private View mRootView;
 
-        public BackgroundAsyncTask(Context context, CardView cv, ImageView iv) {
-            mContext = context;
-            mImageView = iv;
-            mRootView = cv;
+        public AlbumArtLoadListener(View rootView) {
+            mRootView = rootView;
         }
 
         @Override
-        protected BitmapDrawable doInBackground(Album... params) {
-            mAlbum = params[0];
-
-            if (mAlbum == null) {
-                return null;
-            }
-            final Resources res = mContext.getResources();
-            assert res != null;
-
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
-
-            // Prepare the placeholder/default
-            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_placeholder);
-            assert drawable != null;
-            Bitmap bmp = drawable.getBitmap();
-
-            String artKey = cache.getAlbumArtKey(mAlbum);
-            Bitmap cachedImage = null;
-            if (artKey != null) {
-                cachedImage = ImageCache.getDefault().get(artKey);
-            }
-            if (cachedImage != null) {
-                bmp = cachedImage;
-            } else {
-                String artUrl = null;
-
-                if (artKey == null) {
-                    StringBuffer urlBuffer = new StringBuffer();
-                    artKey = AlbumArtCache.getArtKey(mAlbum, urlBuffer);
-                    artUrl = urlBuffer.toString();
-                }
-
-                if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
-                }
+        public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
+            if (drawable == null) {
+                return;
             }
 
-            BitmapDrawable output = new BitmapDrawable(res, bmp);
+            Palette palette = Palette.generate(drawable.getBitmap());
+            PaletteItem vibrant = palette.getVibrantColor();
 
-            cache.putAlbumArtKey(mAlbum, artKey);
+            if (vibrant != null && mRootView != null) {
+                mRootView.setBackgroundColor(vibrant.getRgb());
+                float luminance = vibrant.getHsl()[2];
 
-            mPalette = Palette.generate(bmp);
+                TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
+                TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
+                Button btnPlay = (Button) mRootView.findViewById(R.id.btnArtistSuggestionPlay);
 
-            return output;
-        }
-
-        @Override
-        protected void onPostExecute(BitmapDrawable result) {
-            super.onPostExecute(result);
-
-            if (result != null) {
-                mImageView.setImageDrawable(result);
-                PaletteItem vibrant = mPalette.getVibrantColor();
-
-                if (vibrant != null && mRootView != null) {
-                    mRootView.setBackgroundColor(vibrant.getRgb());
-                    float luminance = vibrant.getHsl()[2];
-
-                    TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
-                    TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
-                    Button btnPlay = (Button) mRootView.findViewById(R.id.btnArtistSuggestionPlay);
-
-                    int color = 0xFF333333;
-                    if (luminance < 0.6f) {
-                        color = 0xFFFFFFFF;
-                    }
-
-                    tvArtist.setTextColor(color);
-                    tvTitle.setTextColor(color);
-                    btnPlay.setTextColor(color);
+                int color = 0xFF333333;
+                if (luminance < 0.6f) {
+                    color = 0xFFFFFFFF;
                 }
+
+                tvArtist.setTextColor(color);
+                tvTitle.setTextColor(color);
+                btnPlay.setTextColor(color);
             }
         }
     }
@@ -238,7 +185,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
-    public class SongClickListener implements View.OnClickListener {
+    private View.OnClickListener mSongClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             Song song = (Song) view.getTag();
@@ -253,7 +200,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             boldPlayingTrack(song);
             updatePlayingAlbum(song.getAlbum());
         }
-    }
+    };
 
 
     public ArtistFragment() {
@@ -366,6 +313,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         if (recommended != null) {
             Album album = ProviderAggregator.getDefault().getCache().getAlbum(recommended.getAlbum());
 
+            CardView cvRec = (CardView) mRootView.findViewById(R.id.cardArtistSuggestion);
             TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
             TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
             tvTitle.setText(recommended.getTitle());
@@ -376,14 +324,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 tvArtist.setText("");
             }
 
-            ImageView ivCov = (ImageView) mRootView.findViewById(R.id.ivArtistSuggestionCover);
-            ivCov.setImageResource(R.drawable.album_placeholder);
-
-            CardView cvRec = (CardView) mRootView.findViewById(R.id.cardArtistSuggestion);
-
-            BackgroundAsyncTask task = new BackgroundAsyncTask(getActivity(), cvRec, ivCov);
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, cache.getAlbum(recommended.getAlbum()));
+            AlbumArtImageView ivCov = (AlbumArtImageView) mRootView.findViewById(R.id.ivArtistSuggestionCover);
+            ivCov.setOnArtLoadedListener(new AlbumArtLoadListener(cvRec));
+            ivCov.loadArtForAlbum(cache.getAlbum(recommended.getAlbum()));
 
             // If we were gone, animate in
             if (cvRec.getVisibility() == View.GONE) {
@@ -465,11 +409,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         for (final Album album : albums) {
             final View viewRoot = inflater.inflate(R.layout.expanded_albums_group, llAlbums, false);
             llAlbums.addView(viewRoot);
-            mAlbumToViewMap.put(album.getRef(), viewRoot);
 
             TextView tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
             TextView tvAlbumYear = (TextView) viewRoot.findViewById(R.id.tvAlbumYear);
-            ImageView ivCover = (ImageView) viewRoot.findViewById(R.id.ivCover);
+            AlbumArtImageView ivCover = (AlbumArtImageView) viewRoot.findViewById(R.id.ivCover);
             ImageView ivPlayAlbum = (ImageView) viewRoot.findViewById(R.id.ivPlayAlbum);
 
             if (album.isLoaded()) {
@@ -542,27 +485,25 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 ivPlayAlbum.setVisibility(View.GONE);
             }
 
-            // TODO: Refactor that in a proper asynchronous task that sets both the ripple
-            // based on the album art, and fetches the album art for the item
-            mHandler.post(new Runnable() {
+            // Load the album art
+            ivCover.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
                 @Override
-                public void run() {
-                    if (mPalette != null) {
-                        PaletteItem mutedBgColor = mPalette.getMutedColor();
-                        if (mutedBgColor != null) {
-                            RippleDrawable bg = (RippleDrawable) viewRoot.getBackground();
-                            bg.setColor(ColorStateList.valueOf(mutedBgColor.getRgb()));
-                            viewRoot.setBackground(bg);
-                        }
-                    } else {
-                        // Palette not generated yet, go ahead again
-                        mHandler.postDelayed(this, 100);
+                public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
+                    if (drawable == null) {
+                        return;
+                    }
+                    Palette palette = Palette.generate(drawable.getBitmap());
+                    PaletteItem mutedBgColor = palette.getMutedColor();
+                    if (mutedBgColor != null) {
+                        RippleDrawable bg = (RippleDrawable) viewRoot.getBackground();
+                        bg.setColor(ColorStateList.valueOf(mutedBgColor.getRgb()));
+                        viewRoot.setBackground(bg);
                     }
                 }
             });
+            ivCover.loadArtForAlbum(album);
 
-            BackgroundAsyncTask task = new BackgroundAsyncTask(getActivity(), null, ivCover);
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, album);
+            mAlbumToViewMap.put(album.getRef(), viewRoot);
         }
 
         showLoadingSpinner(false);
@@ -622,9 +563,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 tvTrackDuration.setText("");
                 ivOverflow.setVisibility(View.GONE);
             }
-
-
-
         }
     }
 

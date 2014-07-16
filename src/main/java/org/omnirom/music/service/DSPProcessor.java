@@ -7,7 +7,7 @@ import org.omnirom.music.app.Utils;
 
 /**
  * Class responsible for grabbing the audio from a provider, pushing it through the DSP chain,
- * and output it to a sink
+ * and drawable it to a sink
  */
 public class DSPProcessor {
 
@@ -77,7 +77,7 @@ public class DSPProcessor {
      * @param numframes The number of frames to read from the array
      */
     public void inputAudio(short[] frames, int numframes) {
-        // TODO: Write this to the DSP chain, then the DSP output to the sink
+        // TODO: Write this to the DSP chain, then the DSP drawable to the sink
         if (mSink != null) {
             mSink.write(frames, numframes);
         }

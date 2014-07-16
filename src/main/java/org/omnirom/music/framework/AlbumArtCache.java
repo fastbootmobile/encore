@@ -13,11 +13,14 @@ import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Album art key store
@@ -28,9 +31,9 @@ public class AlbumArtCache {
     private static final AlbumArtCache INSTANCE = new AlbumArtCache();
     public static final String DEFAULT_ART = "__DEFAULT_ALBUM_ART__";
 
-    private Context mContext;
     private SharedPreferences mPrefs;
     private SharedPreferences.Editor mEditor;
+    private final List<BoundEntity> mRunningQueries = new ArrayList<BoundEntity>();
 
     public static AlbumArtCache getDefault() { return INSTANCE; }
 
@@ -39,7 +42,6 @@ public class AlbumArtCache {
      * @param ctx The application context
      */
     public void initialize(Context ctx) {
-        mContext = ctx;
         mPrefs = ctx.getSharedPreferences(TAG, 0);
         mEditor = mPrefs.edit();
     }
@@ -74,12 +76,47 @@ public class AlbumArtCache {
         mEditor.apply();
     }
 
+    /**
+     * Stores an artist art url in the cache
+     * @param artist Artist name
+     * @param url The URL at which the artist illustration resides
+     */
     public void putArtistArtUrl(String artist, String url) {
         mEditor.putString("___OM__ARTIST__COVER____" + artist, url);
         mEditor.apply();
     }
 
-    public static String getArtKey(final Album album,StringBuffer artUrl) {
+    /**
+     * Returns whether or not a query is currently running for the provided song
+     * @param song The song for which we need the album art
+     * @return true if a request is currently running, false if nothing is currently looking for
+     * that song's art
+     */
+    public boolean isQueryRunning(final BoundEntity song) {
+        synchronized (mRunningQueries) {
+            return mRunningQueries.contains(song);
+        }
+    }
+
+    public void notifyQueryRunning(final BoundEntity song) {
+        synchronized (mRunningQueries) {
+            mRunningQueries.add(song);
+        }
+    }
+
+    public void notifyQueryStopped(final BoundEntity song) {
+        synchronized (mRunningQueries) {
+            mRunningQueries.remove(song);
+        }
+    }
+
+    /**
+     * Returns an art cache key for the provided album
+     * @param album The album to fetch
+     * @param artUrl The URL at which the download should occur, if necessary
+     * @return The art key
+     */
+    public String getArtKey(final Album album, StringBuffer artUrl) {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         if (album == null  || album.songs() == null || !album.songs().hasNext()) {
@@ -91,20 +128,27 @@ public class AlbumArtCache {
         String key = DEFAULT_ART;
         if(song != null) {
             key = getArtKey(song, artUrl);
-            if(!key.equals(DEFAULT_ART))
+            if(!key.equals(DEFAULT_ART)) {
                 cache.putAlbumArtKey(album, key);
+            }
         }
         return key;
     }
 
-    public static String getArtKey(final Artist artist, StringBuffer artUrl) {
+    /**
+     * Returns an art cache key for the provided artist
+     * @param artist The artist to fetch
+     * @param artUrl The URL at which the download should occur, if necessary
+     * @return The art key
+     */
+    public String getArtKey(final Artist artist, StringBuffer artUrl) {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         String artKey = DEFAULT_ART;
         if (artist != null) {
             // Any art from that artist will be fine.
             // Check if we have it in cache
-            String tmpUrl = AlbumArtCache.getDefault().getArtistCoverUrl(artist.getName());
+            String tmpUrl = getArtistCoverUrl(artist.getName());
             if (tmpUrl == null) {
                 // We don't, fetch from Freebase
                 try {
@@ -129,7 +173,7 @@ public class AlbumArtCache {
                     }
 
                     if (tmpUrl != null) {
-                        AlbumArtCache.getDefault().putArtistArtUrl(artist.getName(), tmpUrl);
+                        putArtistArtUrl(artist.getName(), tmpUrl);
                         artKey = tmpUrl.replaceAll("\\W+", "");
                         cache.putArtistArtKey(artist, artKey);
 
@@ -137,10 +181,8 @@ public class AlbumArtCache {
                     if (tmpUrl == null) {
                         cache.putArtistArtKey(artist, DEFAULT_ART);
                         artKey = DEFAULT_ART;
-                        Log.e("XPLOD", "No FB match for this query!");
                     } else {
                         artUrl.append(tmpUrl);
-                        Log.e("XPLOD", "FB found a match: " + tmpUrl + " (" + artUrl.toString() + ")");
                     }
                 } catch (Exception e) {
                     // Retry later, rate limited or network error / early exit (don't cache that)
@@ -171,7 +213,7 @@ public class AlbumArtCache {
      * @param artUrl The stringbuffer in which the album art will be put
      * @return The cache key for the album art
      */
-    public static String getArtKey(final Song song, StringBuffer artUrl) {
+    public String getArtKey(final Song song, StringBuffer artUrl) {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         String artKey = DEFAULT_ART;
@@ -217,8 +259,6 @@ public class AlbumArtCache {
                         AlbumInfo[] albumInfoArray = MusicBrainzClient.getAlbum(artist.getName(), queryStr);
 
                         if (albumInfoArray != null) {
-                            Log.e("XPLOD", "MBC found " + albumInfoArray.length + " albums");
-
                             for (AlbumInfo albumInfo : albumInfoArray) {
                                 tmpUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
 
@@ -233,10 +273,8 @@ public class AlbumArtCache {
                             if (tmpUrl == null) {
                                 cache.putSongArtKey(song, DEFAULT_ART);
                                 artKey = DEFAULT_ART;
-                                Log.e("XPLOD", "No MBC match for this query!");
                             } else {
                                 artUrl.append(tmpUrl);
-                                Log.e("XPLOD", "MBC found a match: " + tmpUrl + " (" + artUrl.toString() + ")");
                             }
                         } else {
                             // No album found on musicbrainz
@@ -257,18 +295,18 @@ public class AlbumArtCache {
                         // Couldn't find the exact album, try the song title
                         triedTitle = true;
                         queryStr = song.getTitle();
-                        Log.e(TAG, "No exact match found for " + artist.getName() + ", trying title");
+                        Log.i(TAG, "No exact match found for " + artist.getName() + ", trying title");
                     } else if (!triedArtist) {
                         // Coudln't find neither the exact album, nor the title, try the artist
                         triedArtist = true;
                         queryStr = null;
-                        Log.e(TAG, "No title match found for " + artist.getName() + ", trying artist");
+                        Log.i(TAG, "No title match found for " + artist.getName() + ", trying artist");
                     } else {
                         // Really, we don't know these guys.
                         retry = false;
                         cache.putSongArtKey(song, DEFAULT_ART);
                         tmpUrl = DEFAULT_ART;
-                        Log.e(TAG, "No match found for " + artist.getName() + ", at all");
+                        Log.w(TAG, "No match found for " + artist.getName() + ", at all");
                     }
                 } else {
                     retry = false;

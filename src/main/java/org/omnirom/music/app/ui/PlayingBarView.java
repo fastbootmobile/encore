@@ -60,7 +60,7 @@ public class PlayingBarView extends RelativeLayout {
 
             if (artKey == null) {
                 StringBuffer urlBuffer = new StringBuffer();
-                artKey = AlbumArtCache.getArtKey(mCurrentSong, urlBuffer);
+                artKey = AlbumArtCache.getDefault().getArtKey(mCurrentSong, urlBuffer);
                 artUrl = urlBuffer.toString();
             }
 

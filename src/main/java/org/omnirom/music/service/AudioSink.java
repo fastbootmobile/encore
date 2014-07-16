@@ -40,7 +40,7 @@ public interface AudioSink {
     public void flushSamples();
 
     /**
-     * Returns a buffer of samples containing the most recent data that has been written to (output
+     * Returns a buffer of samples containing the most recent data that has been written to (drawable
      * by) the sink to calculate the current RMS audio level.
      * @return A short array of samples
      */

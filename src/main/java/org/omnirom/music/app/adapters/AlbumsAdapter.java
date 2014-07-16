@@ -109,7 +109,7 @@ public class AlbumsAdapter extends BaseAdapter {
 
                 if (artKey == null) {
                     StringBuffer urlBuffer = new StringBuffer();
-                    artKey = AlbumArtCache.getArtKey(mAlbum, urlBuffer);
+                    artKey = AlbumArtCache.getDefault().getArtKey(mAlbum, urlBuffer);
                     artUrl = urlBuffer.toString();
                 }
 
