@@ -299,8 +299,7 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         @Override
         public void pause() throws RemoteException {
             if (mCurrentTrack != null) {
-                mHandler.post(new Runnable() {
-                    @Override
+                new Thread() {
                     public void run() {
                         IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
                         try {
@@ -311,15 +310,20 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
                         mIsPaused = true;
                         mPauseLastTick = System.currentTimeMillis();
 
-                        for (IPlaybackCallback cb : mCallbacks) {
-                            try {
-                                cb.onPlaybackPause();
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                for (IPlaybackCallback cb : mCallbacks) {
+                                    try {
+                                        cb.onPlaybackPause();
+                                    } catch (RemoteException e) {
+                                        Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                                    }
+                                }
                             }
-                        }
+                        });
                     }
-                });
+                }.start();
             }
         }
 

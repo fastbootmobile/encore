@@ -7,7 +7,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AlbumArtCache;
@@ -81,11 +80,9 @@ public class AlbumArtImageView extends SquareImageView {
                 // Don't allow other views to run the same query
                 if (artCache.isQueryRunning(mEntity)) {
                     // A query is already running for this entity, we'll revisit it later
-                    Log.e("XPLOD", "WILL RETRY, A QUERY IS RUNNING FOR IT");
                     output.retry = true;
                     return output;
                 } else {
-                    Log.e("XPLOD", "NO QUERY FOR THAT ALBUM");
                     artCache.notifyQueryRunning(mEntity);
                 }
 
@@ -146,7 +143,6 @@ public class AlbumArtImageView extends SquareImageView {
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Log.e("XPLOD", "WE WILL REVISIT");
                         mTask = new BackgroundTask();
                         mTask.executeOnExecutor(THREAD_POOL_EXECUTOR, result.request);
                     }

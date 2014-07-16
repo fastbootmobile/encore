@@ -2,7 +2,6 @@ package org.omnirom.music.app.ui;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -12,7 +11,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 
 import org.omnirom.music.app.R;
 
@@ -72,7 +70,7 @@ public class PlayPauseDrawable extends Drawable {
     }
 
     public void setShape(int shape) {
-        if (mCurrentShape != shape) {
+        if (mCurrentShape != shape || mRequestShape != mCurrentShape) {
             mRequestShape = shape;
             mTransitionAccumulator = 0;
             mLastTransitionTick = System.currentTimeMillis();
