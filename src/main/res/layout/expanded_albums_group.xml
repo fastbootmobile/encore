@@ -34,7 +34,8 @@
         android:gravity="center_vertical"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/ivCover"
-        android:layout_marginLeft="36dp">
+        android:layout_marginLeft="36dp"
+        android:layout_alignParentEnd="false">
 
         <TextView
             android:layout_width="wrap_content"
@@ -60,5 +61,18 @@
             android:layout_centerVertical="true"
             android:layout_toRightOf="@+id/tvAlbumName" />
     </LinearLayout>
+
+    <org.omnirom.music.app.ui.SquareImageView
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivPlayAlbum"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:scaleType="center"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="false"
+        android:layout_centerVertical="true" />
 
 </RelativeLayout>

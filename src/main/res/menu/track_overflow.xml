@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_play_now"
+        android:title="@string/play_now" />
+    <item
+        android:id="@+id/menu_add_to_queue"
+        android:title="@string/add_to_queue" />
+    <item
+        android:id="@+id/menu_add_album_to_queue"
+        android:title="@string/add_album_to_queue" />
+    <item
+        android:id="@+id/menu_hide_from_library"
+        android:title="@string/hide_from_library" />
+
+</menu>

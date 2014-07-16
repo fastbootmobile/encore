@@ -37,7 +37,7 @@
                 android:text="Daft Punk Medley" />
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/ivOverflow"
                 android:layout_width="128dp"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/seekBar"
@@ -74,10 +74,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_btn_pause_white"
-                android:layout_alignTop="@+id/imageView"
-                android:layout_alignStart="@+id/imageView"
-                android:layout_alignBottom="@+id/imageView"
-                android:layout_alignEnd="@+id/imageView" />
+                android:layout_alignTop="@+id/ivOverflow"
+                android:layout_alignStart="@+id/ivOverflow"
+                android:layout_alignBottom="@+id/ivOverflow"
+                android:layout_alignEnd="@+id/ivOverflow" />
 
             <SeekBar
                 android:id="@+id/seekBar"
@@ -86,7 +86,7 @@
                 android:progress="50"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
-                android:layout_alignStart="@+id/imageView" />
+                android:layout_alignStart="@+id/ivOverflow" />
 
             <ImageView
                 android:id="@+id/imageView4"
@@ -94,7 +94,7 @@
                 android:layout_height="32dp"
                 android:src="@drawable/ic_thumbs_up"
                 android:layout_alignParentTop="true"
-                android:layout_alignEnd="@+id/imageView"
+                android:layout_alignEnd="@+id/ivOverflow"
                 android:layout_marginTop="8dp"
                 android:layout_marginRight="8dp" />
 

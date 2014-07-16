@@ -14,14 +14,18 @@ import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AudioSocketHost;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.IProviderCallback;
+import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -263,6 +267,21 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         }
 
         @Override
+        public void playAlbum(Album a) throws RemoteException {
+            Log.e(TAG, "Play album: " + a.getRef());
+            mPlaybackQueue.clear();
+            Iterator<String> songsIt = a.songs();
+
+            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            while (songsIt.hasNext()) {
+                String ref = songsIt.next();
+                mPlaybackQueue.addSong(cache.getSong(ref), false);
+            }
+
+            startPlayingQueue();
+        }
+
+        @Override
         public void queuePlaylist(Playlist p, boolean top) throws RemoteException {
 
         }
@@ -273,20 +292,34 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         }
 
         @Override
+        public void queueAlbum(Album p, boolean top) throws RemoteException {
+
+        }
+
+        @Override
         public void pause() throws RemoteException {
             if (mCurrentTrack != null) {
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
-                provider.pause();
-                mIsPaused = true;
-                mPauseLastTick = System.currentTimeMillis();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+                        try {
+                            provider.pause();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot pause the track!", e);
+                        }
+                        mIsPaused = true;
+                        mPauseLastTick = System.currentTimeMillis();
 
-                for (IPlaybackCallback cb : mCallbacks) {
-                    try {
-                        cb.onPlaybackPause();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                        for (IPlaybackCallback cb : mCallbacks) {
+                            try {
+                                cb.onPlaybackPause();
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                            }
+                        }
                     }
-                }
+                });
             }
         }
 

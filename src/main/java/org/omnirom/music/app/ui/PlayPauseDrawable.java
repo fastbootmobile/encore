@@ -52,12 +52,15 @@ public class PlayPauseDrawable extends Drawable {
         mPaint = new Paint();
         mHandler = new Handler();
 
-
-        mPaint.setColor(Color.WHITE);
+        mPaint.setColor(0xCCFFFFFF);
         mPaint.setStyle(Paint.Style.FILL);
 
         mInitialDrawDone = false;
         mTransitionInterpolator = new AccelerateDecelerateInterpolator();
+    }
+
+    public void setColor(int color) {
+        mPaint.setColor(color);
     }
 
     public void setPaddingDp(int paddingDp) {
@@ -73,6 +76,7 @@ public class PlayPauseDrawable extends Drawable {
             mRequestShape = shape;
             mTransitionAccumulator = 0;
             mLastTransitionTick = System.currentTimeMillis();
+            invalidateSelf();
         }
     }
 
@@ -225,7 +229,7 @@ public class PlayPauseDrawable extends Drawable {
             }
             // Play to Stop
             else if (mCurrentShape == SHAPE_PLAY && mRequestShape == SHAPE_STOP) {
-                transitionPauseToStop(progress);
+                transitionPlayToStop(progress);
             }
             // Pause to Play
             else if (mCurrentShape == SHAPE_PAUSE && mRequestShape == SHAPE_PLAY) {

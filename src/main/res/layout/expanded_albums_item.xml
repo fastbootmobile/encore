@@ -26,6 +26,19 @@
         android:id="@+id/tvTrackName"
         android:layout_alignTop="@+id/tvTrackDuration"
         android:layout_toRightOf="@+id/tvTrackDuration"
-        android:layout_marginLeft="8dp" />
+        android:layout_marginLeft="8dp"
+        android:layout_toLeftOf="@+id/ivOverflow" />
+
+    <org.omnirom.music.app.ui.SquareImageView
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivOverflow"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_more_vert_dark"
+        android:layout_alignParentTop="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:scaleType="center" />
 
 </RelativeLayout>

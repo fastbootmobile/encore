@@ -26,6 +26,12 @@ interface IPlaybackService {
     void playSong(in Song s);
 
     /**
+     * Plays the provided album fully, overwriting the existing listening queue
+     * @param a The Album to play right now
+     */
+    void playAlbum(in Album a);
+
+    /**
      * Queue the provided playlist in the listening queue
      * @param p The playlist to queue
      * @param top If set to true, the playlist will be queued at the top of the queue
@@ -38,6 +44,13 @@ interface IPlaybackService {
      * @param top If set to true, the song will be queued at the top of the queue
      */
     void queueSong(in Song s, boolean top);
+
+    /**
+     * Queue the provided album in the listening queue
+     * @param a The album to queue
+     * @param top If set to true, the album will be queued at the top of the queue
+     */
+    void queueAlbum(in Album p, boolean top);
 
     /**
      * Pauses the playback

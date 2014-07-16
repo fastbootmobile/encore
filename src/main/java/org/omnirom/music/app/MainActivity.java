@@ -104,16 +104,12 @@ public class MainActivity extends Activity
         });*/
     }
 
-    public void setPlayingBarVisible(boolean visible) {
-        mPlayingBarLayout.animateVisibility(visible);
-    }
-
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        if (mRestoreBarOnBack) {
-            setPlayingBarVisible(true);
-            mRestoreBarOnBack = false;
+        if (!mPlayingBarLayout.isWrapped()) {
+            mPlayingBarLayout.setWrapped(true);
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -184,7 +180,6 @@ public class MainActivity extends Activity
         if (fragmentManager.getBackStackEntryCount() > 0 && !addToStack) {
             fragmentManager.popBackStack();
             if (mRestoreBarOnBack) {
-                setPlayingBarVisible(true);
                 mRestoreBarOnBack = false;
             }
         }

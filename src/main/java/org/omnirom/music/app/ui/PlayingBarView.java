@@ -28,6 +28,7 @@ import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.security.Provider;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -125,7 +126,6 @@ public class PlayingBarView extends RelativeLayout {
 */
             // Set the visibility and button state
             setPlayButtonState(false);
-            animateVisibility(true);
             mIsPlaying = true;
 
             mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
@@ -145,7 +145,6 @@ public class PlayingBarView extends RelativeLayout {
         @Override
         public void onPlaybackResume() throws RemoteException {
             setPlayButtonState(false);
-            animateVisibility(true);
             mIsPlaying = true;
         }
     };
@@ -156,8 +155,10 @@ public class PlayingBarView extends RelativeLayout {
     private LinearLayout mTracksLayout;
     private ImageButton mPlayFab;
     private PlayPauseDrawable mPlayFabDrawable;
+    private List<Song> mLastQueue;
     private Handler mHandler = new Handler();
     private final int mAnimationDuration;
+    private boolean mWrapped;
 
     public PlayingBarView(Context context) {
         super(context);
@@ -256,18 +257,6 @@ public class PlayingBarView extends RelativeLayout {
         }
     }
 
-    public void animateVisibility(boolean visible) {
-        if (visible) {
-            animate().translationY(0)
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .setDuration(mAnimationDuration).start();
-        } else {
-            animate().translationY(getMeasuredHeight())
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .setDuration(mAnimationDuration).start();
-        }
-    }
-
     public void updatePlayingQueue() {
         IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
 
@@ -290,8 +279,10 @@ public class PlayingBarView extends RelativeLayout {
         }
 
 
-        if (queue != null) {
-            queue.addAll(queue);
+        if (queue != null && queue.size() > 0) {
+            mLastQueue = new ArrayList<Song>(queue);
+            mTracksLayout.removeAllViews();
+            mTracksLayout.setVisibility(View.VISIBLE);
 
             // Inflate views and make the list out of the first 4 items (or less)
             int i = 0;
@@ -321,9 +312,74 @@ public class PlayingBarView extends RelativeLayout {
                 // TODO: ivAlbumArt
                 ivAlbumArt.setImageResource(R.drawable.album_placeholder);
 
+                if (i == 0) {
+                    itemRoot.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (mWrapped) {
+                                setWrapped(false);
+                            }
+                        }
+                    });
+                }
+
                 i++;
+            }
+
+            // Add the "View full queue" item entry
+            View itemRoot = inflater.inflate(R.layout.item_playbar, mTracksLayout, false);
+            mTracksLayout.addView(itemRoot);
+
+            TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
+            TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
+            ImageView ivAlbumArt = (ImageView) itemRoot.findViewById(R.id.ivAlbumArt);
+
+            tvArtist.setVisibility(View.GONE);
+            tvTitle.setText("View full queue...");
+            ivAlbumArt.setImageResource(R.drawable.ic_reduce);
+            ivAlbumArt.setScaleType(ImageView.ScaleType.CENTER);
+
+            ivAlbumArt.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setWrapped(true);
+                }
+            });
+
+            // Update wrap status
+            setWrapped(mWrapped, false);
+        } else {
+            mWrapped = true;
+            mTracksLayout.setVisibility(View.GONE);
+        }
+    }
+
+    public void setWrapped(boolean wrapped, boolean animation) {
+        if (wrapped && mLastQueue != null) {
+            final int itemHeight = getResources().getDimensionPixelSize(R.dimen.playing_bar_height);
+            if (animation) {
+                animate().translationY(itemHeight * mLastQueue.size())
+                        .setDuration(mAnimationDuration)
+                        .start();
+            } else {
+                setTranslationY(itemHeight * mLastQueue.size());
+            }
+        } else {
+            if (animation) {
+                animate().translationY(0).setDuration(mAnimationDuration).start();
+            } else {
+                setTranslationY(0);
             }
         }
 
+        mWrapped = wrapped;
+    }
+
+    public void setWrapped(boolean wrapped) {
+        setWrapped(wrapped, true);
+    }
+
+    public boolean isWrapped() {
+        return mWrapped;
     }
 }

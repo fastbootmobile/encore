@@ -3,8 +3,7 @@
 <org.omnirom.music.app.ui.PlayingBarView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/playingBarLayout"
-    android:clickable="true">
+    android:id="@+id/playingBarLayout">
 
 
     <LinearLayout
@@ -13,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:id="@+id/playBarTracksLayout"
-        android:background="@drawable/playing_bar_background">
+        android:background="@color/white">
 
     </LinearLayout>
 

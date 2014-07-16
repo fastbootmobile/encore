@@ -25,5 +25,9 @@
     <string name="recommended_for_you">Recommended for you</string>
     <string name="albums">Albums</string>
     <string name="please_program_me">I am a lonely button waiting to be programmed</string>
+    <string name="add_to_queue">Add to queue</string>
+    <string name="more_from">More from %s</string>
+    <string name="hide_from_library">Hide from library</string>
+    <string name="add_album_to_queue">Add album to queue</string>
 
 </resources>
