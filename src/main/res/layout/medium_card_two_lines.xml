@@ -36,18 +36,16 @@
 
     <TextView
         android:id="@+id/tvSubTitle"
-        style="@style/OmniMusic.MediumCard.SubTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/white"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:textSize="22sp"
-        android:fontFamily="sans-serif-medium"
+        android:textSize="16sp"
         android:layout_marginLeft="24dp"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
         android:gravity="center_vertical|start" />
 

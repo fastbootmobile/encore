@@ -131,23 +131,32 @@ public class AlbumArtCache {
         String initialQueryStr = new String(queryStr);
 
         // Escape the query
-        if (queryStr != null) {
-            queryStr = queryStr.replace('"', ' ');
+        queryStr = queryStr.replace('"', ' ');
+
+        Artist artist = null;
+        String artistName = null;
+        if (album.getSongsCount() > 0 && album.songs().hasNext()) {
+            Song song = cache.getSong(album.songs().next());
+            artist = cache.getArtist(song.getAlbum());
+
+            if (artist != null) {
+                artistName = artist.getName();
+            }
         }
 
         // Check if we have it in cache
-        String tmpUrl = getAlbumArtUrl(null, queryStr);
+        String tmpUrl = getAlbumArtUrl(artistName, queryStr);
         if (tmpUrl == null) {
             // We don't, fetch from MusicBrainz
             try {
-                AlbumInfo[] albumInfoArray = MusicBrainzClient.getAlbum(null, queryStr);
+                AlbumInfo[] albumInfoArray = MusicBrainzClient.getAlbum(artistName, queryStr);
 
                 if (albumInfoArray != null) {
                     for (AlbumInfo albumInfo : albumInfoArray) {
                         tmpUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
 
                         if (tmpUrl != null) {
-                            putAlbumArtUrl(null, initialQueryStr, tmpUrl);
+                            putAlbumArtUrl(artistName, initialQueryStr, tmpUrl);
                             artKey = tmpUrl.replaceAll("\\W+", "");
                             cache.putAlbumArtKey(album, artKey);
                             break;
@@ -176,7 +185,7 @@ public class AlbumArtCache {
 
         // Ensure we have this entry, even if it's not the exact original query (e.g.
         // used song title instead of album name) - we'll cache it for that.
-        putAlbumArtUrl(null, initialQueryStr, tmpUrl);
+        putAlbumArtUrl(artistName, initialQueryStr, tmpUrl);
 
         return artKey;
     }

@@ -17,6 +17,14 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Created by Guigui on 16/07/2014.
  */
@@ -144,7 +152,7 @@ public class AlbumArtImageView extends SquareImageView {
                     @Override
                     public void run() {
                         mTask = new BackgroundTask();
-                        mTask.executeOnExecutor(THREAD_POOL_EXECUTOR, result.request);
+                        mTask.executeOnExecutor(ART_POOL_EXECUTOR, result.request);
                     }
                 }, 100);
             }
@@ -154,6 +162,24 @@ public class AlbumArtImageView extends SquareImageView {
     private Handler mHandler;
     private OnArtLoadedListener mOnArtLoadedListener;
     private BackgroundTask mTask;
+    private BoundEntity mRequestedEntity;
+
+    private static final int DELAY_BEFORE_START = 150;
+    private static final int CORE_POOL_SIZE = 4;
+    private static final int MAXIMUM_POOL_SIZE = 256;
+    private static final int KEEP_ALIVE = 5;
+    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
+        private final AtomicInteger mCount = new AtomicInteger(1);
+
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "Art AsyncTask #" + mCount.getAndIncrement());
+        }
+    };
+    private static final BlockingQueue<Runnable> sPoolWorkQueue =
+            new LinkedBlockingQueue<Runnable>(10);
+    private static final Executor ART_POOL_EXECUTOR
+            = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
+            TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
 
     public AlbumArtImageView(Context context) {
         super(context);
@@ -180,19 +206,32 @@ public class AlbumArtImageView extends SquareImageView {
         mOnArtLoadedListener = listener;
     }
 
-    public void loadArtForSong(Song song) {
-        if (mTask != null) {
-            mTask.cancel(true);
-        }
-        mTask = new BackgroundTask();
-        mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, song);
+    public void loadArtForSong(final Song song) {
+        loadArtImpl(song);
+
     }
 
-    public void loadArtForAlbum(Album album) {
+    public void loadArtForAlbum(final Album album) {
+        loadArtImpl(album);
+    }
+
+    private void loadArtImpl(final BoundEntity ent) {
         if (mTask != null) {
             mTask.cancel(true);
         }
-        mTask = new BackgroundTask();
-        mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, album);
+
+        // We delay the loading slightly to make sure we don't uselessly load an image that is
+        // being quickly flinged through (the requested entity will change in-between as the
+        // view is recycled).
+        mRequestedEntity = ent;
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mRequestedEntity == ent) {
+                    mTask = new BackgroundTask();
+                    mTask.executeOnExecutor(ART_POOL_EXECUTOR, ent);
+                }
+            }
+        }, DELAY_BEFORE_START);
     }
 }
