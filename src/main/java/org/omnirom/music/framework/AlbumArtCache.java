@@ -119,20 +119,66 @@ public class AlbumArtCache {
     public String getArtKey(final Album album, StringBuffer artUrl) {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
-        if (album == null  || album.songs() == null || !album.songs().hasNext()) {
-            return DEFAULT_ART;
+        String artKey = DEFAULT_ART;
+        if (album == null) {
+            Log.e(TAG, "Album is null");
+            return artKey;
         }
 
-        String songRef = album.songs().next();
-        Song song = cache.getSong(songRef);
-        String key = DEFAULT_ART;
-        if(song != null) {
-            key = getArtKey(song, artUrl);
-            if(!key.equals(DEFAULT_ART)) {
-                cache.putAlbumArtKey(album, key);
-            }
+        String queryStr;
+
+        queryStr = album.getName();
+        String initialQueryStr = new String(queryStr);
+
+        // Escape the query
+        if (queryStr != null) {
+            queryStr = queryStr.replace('"', ' ');
         }
-        return key;
+
+        // Check if we have it in cache
+        String tmpUrl = getAlbumArtUrl(null, queryStr);
+        if (tmpUrl == null) {
+            // We don't, fetch from MusicBrainz
+            try {
+                AlbumInfo[] albumInfoArray = MusicBrainzClient.getAlbum(null, queryStr);
+
+                if (albumInfoArray != null) {
+                    for (AlbumInfo albumInfo : albumInfoArray) {
+                        tmpUrl = MusicBrainzClient.getAlbumArtUrl(albumInfo.id);
+
+                        if (tmpUrl != null) {
+                            putAlbumArtUrl(null, initialQueryStr, tmpUrl);
+                            artKey = tmpUrl.replaceAll("\\W+", "");
+                            cache.putAlbumArtKey(album, artKey);
+                            break;
+                        }
+                    }
+
+                    if (tmpUrl == null) {
+                        cache.putAlbumArtKey(album, DEFAULT_ART);
+                        artKey = DEFAULT_ART;
+                    } else {
+                        artUrl.append(tmpUrl);
+                    }
+                } else {
+                    // No album found on musicbrainz
+                    cache.putAlbumArtKey(album, DEFAULT_ART);
+                    artKey = DEFAULT_ART;
+                }
+            } catch (RateLimitException e) {
+                // Retry later, rate limited
+                artKey = DEFAULT_ART;
+            }
+        } else {
+            artKey = tmpUrl.replaceAll("\\W+", "");
+            cache.putAlbumArtKey(album, artKey);
+        }
+
+        // Ensure we have this entry, even if it's not the exact original query (e.g.
+        // used song title instead of album name) - we'll cache it for that.
+        putAlbumArtUrl(null, initialQueryStr, tmpUrl);
+
+        return artKey;
     }
 
     /**

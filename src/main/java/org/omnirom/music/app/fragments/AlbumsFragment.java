@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,33 +39,22 @@ import java.util.List;
  */
 public class AlbumsFragment extends AbstractRootFragment implements ILocalCallback {
 
+    private static final String TAG = "AlbumsFragment";
+
     private AlbumsAdapter mAdapter;
-    private List<Album> mAlbums;
     private Handler mHandler;
     private static final String KEY_ALBUM_LIST = "album_list";
-//    private final ArrayList<Playlist> mPlaylistsUpdated = new ArrayList<Playlist>();
-
-
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment PlaylistListFragment.
+     * @return A new instance of fragment AlbumsFragment.
      */
     public static AlbumsFragment newInstance() {
-        AlbumsFragment fragment = new AlbumsFragment();
-        return fragment;
+        return new AlbumsFragment();
     }
-    public static AlbumsFragment newInstance(List<Album> albumList){
-        AlbumsFragment fragment = new AlbumsFragment();
-        Bundle bundle = new Bundle();
-        Object[] objects = albumList.toArray();
-        Album[] albums = Arrays.copyOf(objects,objects.length,Album[].class);
-        bundle.putParcelableArray(KEY_ALBUM_LIST,albums);
-        fragment.setArguments(bundle);
-        return fragment;
-    }
+
     public AlbumsFragment() {
         mAdapter = new AlbumsAdapter();
         mHandler = new Handler();
@@ -75,11 +65,6 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
-        if(args != null) {
-            Album[] albums = (Album[]) args.getParcelableArray(KEY_ALBUM_LIST);
-            mAlbums = new ArrayList<Album>(Arrays.asList(albums));
-        }
     }
 
     @Override
@@ -89,30 +74,14 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
         View root = inflater.inflate(R.layout.fragment_albums, container, false);
         GridView albumLayout =
                 (GridView) root.findViewById(R.id.gvAlbums);
-        //albumLayout.setStretchMode(ExpandableGridView.AUTO_FIT);
         albumLayout.setAdapter(mAdapter);
 
-       // albumLayout.setExpanded(true);
+        List<Album> allAlbums = ProviderAggregator.getDefault().getCache().getAllAlbums();
+        mAdapter.addAllUnique(allAlbums);
+        mAdapter.notifyDataSetChanged();
 
-        if(mAlbums == null) {
-            new Thread() {
-                public void run() {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAdapter.addAllUnique(ProviderAggregator.getDefault().getCache().getAllAlbums());
-                        }
-                    });
-                }
-            }.start();
-        } else {
-            mAdapter.addAllUnique(mAlbums);
-        }
-        // Setup the search box
-        setupSearchBox(root);
-        mAdapter.registerScrollListener(albumLayout);
         // Setup the click listener
-      albumLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        albumLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MainActivity act = (MainActivity) getActivity();
@@ -135,7 +104,15 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
     }
 
     @Override
-    public void onAlbumUpdate(Album a) {
+    public void onAlbumUpdate(final Album a) {
+        Log.e(TAG, "onAlbumUpdate");
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.addItemUnique(a);
+                mAdapter.notifyDataSetChanged();
+            }
+        });
 
     }
 
@@ -151,11 +128,6 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
-        /*mHandler.post(new Runnable() {
-            @Override
-            public void run() {
 
-            }
-        });*/
     }
 }

@@ -3,37 +3,52 @@
     android:id="@+id/llRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="top"
-    android:layout_weight="1"
     android:background="@color/default_album_art_background"
     android:measureWithLargestChild="false"
-    android:orientation="vertical"
-    android:paddingBottom="16dp">
+    android:stateListAnimator="@anim/button_raise"
+    android:orientation="vertical">
 
-    <org.omnirom.music.app.ui.SquareImageView
+    <org.omnirom.music.app.ui.AlbumArtImageView
         android:id="@+id/ivCover"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
-        android:contentDescription="@string/app_name" />
+        android:viewName="cover"
+        android:contentDescription="@string/app_name"
+        android:layout_weight="0" />
 
     <TextView
         android:id="@+id/tvTitle"
         style="@style/OmniMusic.MediumCard.Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="4dp"
         android:textColor="@color/white"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:textSize="22sp"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical|start" />
 
     <TextView
         android:id="@+id/tvSubTitle"
         style="@style/OmniMusic.MediumCard.SubTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:textColor="@color/white"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:textSize="22sp"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical|start" />
+
 </LinearLayout>

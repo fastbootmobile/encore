@@ -439,16 +439,33 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onAlbumUpdate(ProviderIdentifier provider, final Album a) throws RemoteException {
         Album cached = mCache.getAlbum(a.getRef());
+        boolean modified = false;
 
         // See IProviderCallback.aidl in providerlib for more info about the logic of updating
         // the Album objects
-        if (cached == null || !cached.isLoaded() || cached.getSongsCount() < a.getSongsCount()) {
+        if (cached == null) {
             mCache.putAlbum(provider, a);
+            cached = a;
+            modified = true;
+        } else if (!cached.isLoaded() || !cached.isIdentical(a)) {
+            cached.setName(a.getName());
+            cached.setYear(a.getYear());
+            cached.setIsLoaded(a.isLoaded());
 
+            if (cached.getSongsCount() != a.getSongsCount()) {
+                Iterator<String> songsIt = a.songs();
+                while (songsIt.hasNext()) {
+                    String songRef = songsIt.next();
+                    cached.addSong(songRef);
+                }
+            }
+
+            modified = true;
+        }
+
+        if (modified) {
             // Add the album to each artist of the song (once)
             Iterator<String> songs = a.songs();
-
-            // Log.e("XPLOD", "Album " + a.getName() + " has " + a.getSongsCount() + " songs");
 
             while (songs.hasNext()) {
                 String songRef = songs.next();
@@ -466,15 +483,15 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 } else {
                     Log.e(TAG, "Song is null!");
                 }
-
             }
 
+            final Album finalCachedAlbum = cached;
             // TODO: Batch updates instead of creating new runnable for every song
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     for (ILocalCallback cb : mUpdateCallbacks) {
-                        cb.onAlbumUpdate(a);
+                        cb.onAlbumUpdate(finalCachedAlbum);
                     }
                 }
             });

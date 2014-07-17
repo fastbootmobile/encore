@@ -41,7 +41,10 @@ public class MusicBrainzClient {
         }
 
         try {
-            String query = URLEncoder.encode("artist:\"" + artist + "\"", "UTF-8");
+            String query = "";
+            if (artist != null) {
+                query += URLEncoder.encode("artist:\"" + artist + "\"", "UTF-8");
+            }
             if (album != null && !album.isEmpty()) {
                 query += URLEncoder.encode(" AND release:\"" + album + "\"", "UTF-8");
             }
