@@ -149,7 +149,8 @@ public class PlayingBarView extends RelativeLayout {
         }
     };
 
-    private Executor mExecutor = new ScheduledThreadPoolExecutor(2);
+    private static final int MAX_PEEK_QUEUE_SIZE = 4;
+
     private Song mCurrentSong;
     private boolean mIsPlaying;
     private LinearLayout mTracksLayout;
@@ -289,7 +290,7 @@ public class PlayingBarView extends RelativeLayout {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
             for (Song song : queue) {
-                if (i == 4) {
+                if (i == MAX_PEEK_QUEUE_SIZE) {
                     break;
                 }
 
@@ -357,12 +358,13 @@ public class PlayingBarView extends RelativeLayout {
     public void setWrapped(boolean wrapped, boolean animation) {
         if (wrapped && mLastQueue != null) {
             final int itemHeight = getResources().getDimensionPixelSize(R.dimen.playing_bar_height);
+            final int translationY = itemHeight * Math.min(mLastQueue.size(), MAX_PEEK_QUEUE_SIZE);
             if (animation) {
-                animate().translationY(itemHeight * mLastQueue.size())
+                animate().translationY(translationY)
                         .setDuration(mAnimationDuration)
                         .start();
             } else {
-                setTranslationY(itemHeight * mLastQueue.size());
+                setTranslationY(translationY);
             }
         } else {
             if (animation) {
