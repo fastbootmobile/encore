@@ -58,9 +58,21 @@ public class AlbumViewFragment extends AbstractRootFragment implements ILocalCal
         public void run() {
             final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
+            ProviderIdentifier pi = mAlbum.getProvider();
+            IMusicProvider provider = PluginsLookup.getDefault().getProvider(pi).getBinder();
+
+            boolean hasMore = false;
+            if (provider != null) {
+                try {
+                    hasMore = provider.fetchAlbumTracks(mAlbum.getRef());
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+
             if (mAlbum.getSongsCount() > 0) {
                 View loadingBar = findViewById(R.id.pbAlbumLoading);
-                if (loadingBar.getVisibility() == View.VISIBLE) {
+                if (loadingBar.getVisibility() == View.VISIBLE && !hasMore) {
                     loadingBar.setVisibility(View.GONE);
                 }
 
@@ -99,16 +111,7 @@ public class AlbumViewFragment extends AbstractRootFragment implements ILocalCal
                 mRootView.invalidate();
             } else {
                 findViewById(R.id.pbAlbumLoading).setVisibility(View.VISIBLE);
-                ProviderIdentifier pi = mAlbum.getProvider();
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(pi).getBinder();
 
-                if (provider != null) {
-                    try {
-                        provider.fetchAlbumTracks(mAlbum.getRef());
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
     };

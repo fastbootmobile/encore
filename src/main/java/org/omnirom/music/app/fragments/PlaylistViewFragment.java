@@ -199,9 +199,15 @@ public class PlaylistViewFragment extends Fragment
     }
 
     @Override
-    public void onCurrentSongChanged(PlaybackState state, Song song) {
-        mAdapter.setCurrentSong(song);
-        mAdapter.notifyDataSetChanged();
+    public void onCurrentSongChanged(PlaybackState state, final Song song) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.setCurrentSong(song);
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+
     }
 
     @Override
