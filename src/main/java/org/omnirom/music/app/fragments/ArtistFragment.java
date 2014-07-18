@@ -583,7 +583,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 try {
                     if (pbService.isPlaying()) {
                         Song currentSong = pbService.getCurrentTrack();
-                        if (currentSong != null && song.equals(currentSong)) {
+                        if (currentSong != null && song.getRef().equals(currentSong.getRef())) {
                             boldPlayingTrack(currentSong);
                         }
                     }

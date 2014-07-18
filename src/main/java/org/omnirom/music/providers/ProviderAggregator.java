@@ -10,6 +10,7 @@ import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -514,7 +515,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     @Override
-    public void onSongPlaying(ProviderIdentifier provider, Song s) throws RemoteException {
+    public void onSongPlaying(ProviderIdentifier provider) throws RemoteException {
 
     }
 
@@ -524,7 +525,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     @Override
-    public void onSongStopped(ProviderIdentifier provider) throws RemoteException {
+    public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
 
     }
 

@@ -16,4 +16,5 @@ public interface ILocalCallback {
     void onArtistUpdate(Artist a);
 
     void onProviderConnected(IMusicProvider provider);
+
 }

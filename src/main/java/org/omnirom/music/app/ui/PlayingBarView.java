@@ -109,24 +109,29 @@ public class PlayingBarView extends RelativeLayout {
         public void onSongStarted(Song s) throws RemoteException {
             mCurrentSong = s;
 
-            updatePlayingQueue();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updatePlayingQueue();
 /*
-            // Fill the album art
-            mExecutor.execute(mAlbumArtRunnable);
+                    // Fill the album art
+                    mExecutor.execute(mAlbumArtRunnable);
 
-            // Fill the views
-            mTitleView.setText(s.getTitle());
+                    // Fill the views
+                    mTitleView.setText(s.getTitle());
 
-            Artist artist = ProviderAggregator.getDefault().getCache().getArtist(s.getArtist());
-            if(artist != null)
-                mArtistView.setText(artist.getName());
-            else
-                mArtistView.setText("...");
-            //mScrobble.setMax(s.getDuration());
+                    Artist artist = ProviderAggregator.getDefault().getCache().getArtist(s.getArtist());
+                    if(artist != null)
+                        mArtistView.setText(artist.getName());
+                    else
+                        mArtistView.setText("...");
+                    //mScrobble.setMax(s.getDuration());
 */
-            // Set the visibility and button state
-            setPlayButtonState(false);
-            mIsPlaying = true;
+                    // Set the visibility and button state
+                    setPlayButtonState(false);
+                    mIsPlaying = true;
+                }
+            });
 
             mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
         }
@@ -138,14 +143,24 @@ public class PlayingBarView extends RelativeLayout {
 
         @Override
         public void onPlaybackPause() throws RemoteException {
-            setPlayButtonState(true);
-            mIsPlaying = false;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    setPlayButtonState(true);
+                    mIsPlaying = false;
+                }
+            });
         }
 
         @Override
         public void onPlaybackResume() throws RemoteException {
-            setPlayButtonState(false);
-            mIsPlaying = true;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    setPlayButtonState(false);
+                    mIsPlaying = true;
+                }
+            });
         }
     };
 

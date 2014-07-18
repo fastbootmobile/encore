@@ -5,7 +5,9 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -15,8 +17,11 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AudioSocketHost;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.IProviderCallback;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -24,6 +29,7 @@ import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +37,8 @@ import java.util.List;
 /**
  * Service handling the playback of the audio and the play notification
  */
-public class PlaybackService extends Service implements PluginsLookup.ConnectionListener {
+public class PlaybackService extends Service
+        implements PluginsLookup.ConnectionListener, ILocalCallback {
 
     private static final String TAG = "PlaybackService";
     private static final boolean DEBUG = BuildConfig.DEBUG;
@@ -109,6 +116,17 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         mNotification.setLatestEventInfo(this, "OmniMusic",
                 "This is an ugly notification. Beautify me.", pendingIntent);
+
+        // Bind to all provider
+        List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+        for (ProviderConnection pc : providers) {
+            try {
+                pc.getBinder().registerCallback(mProviderCallback);
+                Log.e(TAG, "Registered callback on " + pc.getServiceName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot register callback", e);
+            }
+        }
     }
 
     /**
@@ -118,6 +136,8 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "onDestroy()");
+
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
 
         // Remove audio hosts from providers
 
@@ -146,6 +166,7 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
     public IBinder onBind(Intent intent) {
         mNumberBound++;
         Log.i(TAG, "Client bound service (" + mNumberBound + ")");
+        ProviderAggregator.getDefault().addUpdateCallback(this);
         return mBinder;
     }
 
@@ -219,18 +240,6 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
                 }
 
                 mCurrentTrack = first;
-
-                // TODO: Do on provider's songStarted callback
-                mCurrentTrackStartTime = System.currentTimeMillis();
-                mIsPlaying = true;
-                for (IPlaybackCallback cb : mCallbacks) {
-                    try {
-                        cb.onSongStarted(first);
-                        cb.onPlaybackResume();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot call playback callback for song start event", e);
-                    }
-                }
             } else {
                 Log.e(TAG, "Cannot play the first song of the queue because the Song's " +
                         "ProviderIdentifier is null!");
@@ -299,6 +308,7 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         @Override
         public void pause() throws RemoteException {
             if (mCurrentTrack != null) {
+                // TODO: Refactor that with a threaded Handler that handles messages
                 new Thread() {
                     public void run() {
                         IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
@@ -307,21 +317,6 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
                         } catch (RemoteException e) {
                             Log.e(TAG, "Cannot pause the track!", e);
                         }
-                        mIsPaused = true;
-                        mPauseLastTick = System.currentTimeMillis();
-
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                for (IPlaybackCallback cb : mCallbacks) {
-                                    try {
-                                        cb.onPlaybackPause();
-                                    } catch (RemoteException e) {
-                                        Log.e(TAG, "Cannot call playback callback for playback pause event", e);
-                                    }
-                                }
-                            }
-                        });
                     }
                 }.start();
             }
@@ -386,6 +381,109 @@ public class PlaybackService extends Service implements PluginsLookup.Connection
         public int getCurrentRms() throws RemoteException {
             return mDSPProcessor.getRms();
         }
+    };
+
+    @Override
+    public void onSongUpdate(Song s) {
+        // ignore
+    }
+
+    @Override
+    public void onAlbumUpdate(Album a) {
+        // ignore
+    }
+
+    @Override
+    public void onPlaylistUpdate(Playlist p) {
+        // TODO: Update playback queue if it's the playlist we're playing
+    }
+
+    @Override
+    public void onArtistUpdate(Artist a) {
+
+    }
+
+    @Override
+    public void onProviderConnected(IMusicProvider provider) {
+        Log.e(TAG, "PROVIDER CONNECTED IN PLAYBACK SERVICE");
+        try {
+            provider.registerCallback(mProviderCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to register self as callback of provider " + provider + "!", e);
+        }
+    }
+
+    private IProviderCallback.Stub mProviderCallback = new IProviderCallback.Stub() {
+        @Override
+        public void onLoggedIn(ProviderIdentifier provider, boolean success) throws RemoteException {
+
+        }
+
+        @Override
+        public void onLoggedOut(ProviderIdentifier provider) throws RemoteException {
+
+        }
+
+        @Override
+        public void onPlaylistAddedOrUpdated(ProviderIdentifier provider, Playlist p) throws RemoteException {
+
+        }
+
+        @Override
+        public void onSongUpdate(ProviderIdentifier provider, Song s) throws RemoteException {
+
+        }
+
+        @Override
+        public void onAlbumUpdate(ProviderIdentifier provider, Album a) throws RemoteException {
+
+        }
+
+        @Override
+        public void onArtistUpdate(ProviderIdentifier provider, Artist a) throws RemoteException {
+
+        }
+
+        @Override
+        public void onGenreUpdate(ProviderIdentifier provider, Genre g) throws RemoteException {
+
+        }
+
+        @Override
+        public void onSongPlaying(ProviderIdentifier provider) throws RemoteException {
+            mCurrentTrackStartTime = System.currentTimeMillis();
+            mIsPlaying = true;
+
+            for (IPlaybackCallback cb : mCallbacks) {
+                try {
+                    cb.onSongStarted(mCurrentTrack);
+                    cb.onPlaybackResume();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot call playback callback for song start event", e);
+                }
+            }
+        }
+
+        @Override
+        public void onSongPaused(ProviderIdentifier provider) throws RemoteException {
+            mIsPaused = true;
+            mPauseLastTick = System.currentTimeMillis();
+
+            Log.e(TAG, "onSongPaused");
+            for (IPlaybackCallback cb : mCallbacks) {
+                try {
+                    cb.onPlaybackPause();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                }
+            }
+        }
+
+        @Override
+        public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
+
+        }
+
     };
 
 }
