@@ -1,5 +1,6 @@
 package org.omnirom.music.app.ui;
 
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -16,8 +17,11 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -193,6 +197,7 @@ public class PlayingBarView extends RelativeLayout {
         mPlayFabDrawable = new PlayPauseDrawable(getResources());
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         mPlayFab.setImageDrawable(mPlayFabDrawable);
+        mPlayFab.setVisibility(View.INVISIBLE);
 
         mPlayFab.setOnClickListener(new OnClickListener() {
             @Override
@@ -368,10 +373,52 @@ public class PlayingBarView extends RelativeLayout {
 
             // Update wrap status
             setWrapped(mWrapped, false);
+            setFabVisible(true);
         } else {
             mWrapped = true;
             mTracksLayout.setVisibility(View.GONE);
+            setFabVisible(false);
         }
+    }
+
+    public void setFabVisible(boolean visible) {
+        if (visible && mPlayFab.getVisibility() == View.VISIBLE
+                || !visible && mPlayFab.getVisibility() == View.INVISIBLE) {
+            return;
+        }
+        int startRadius;
+        int finalRadius;
+
+        // get the center for the clipping circle
+        final int cx = mPlayFab.getMeasuredWidth() / 2;
+        final int cy = mPlayFab.getMeasuredHeight() / 2;
+
+        if (visible) {
+            mPlayFab.setVisibility(View.VISIBLE);
+
+            startRadius = 0;
+            finalRadius = mPlayFab.getWidth();
+        } else {
+            startRadius = mPlayFab.getWidth();
+            finalRadius = 0;
+        }
+
+        // create and start the animator for this view (the start radius is zero)
+        ValueAnimator anim =
+                ViewAnimationUtils.createCircularReveal(mPlayFab, cx, cy, 0, finalRadius);
+        anim.setInterpolator(new DecelerateInterpolator());
+
+        if (!visible) {
+            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    mPlayFab.setVisibility(View.INVISIBLE);
+                }
+            });
+        }
+
+        anim.start();
+
     }
 
     public void setWrapped(boolean wrapped, boolean animation) {
