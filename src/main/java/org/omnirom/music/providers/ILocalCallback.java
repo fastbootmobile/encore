@@ -5,15 +5,17 @@ import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 
+import java.util.List;
+
 public interface ILocalCallback {
 
-    void onSongUpdate(Song s);
+    void onSongUpdate(List<Song> s);
 
-    void onAlbumUpdate(Album a);
+    void onAlbumUpdate(List<Album> a);
 
-    void onPlaylistUpdate(Playlist p);
+    void onPlaylistUpdate(List<Playlist> p);
 
-    void onArtistUpdate(Artist a);
+    void onArtistUpdate(List<Artist> a);
 
     void onProviderConnected(IMusicProvider provider);
 

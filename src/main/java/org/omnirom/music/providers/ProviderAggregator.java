@@ -21,12 +21,65 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ProviderAggregator extends IProviderCallback.Stub {
 
     private static final String TAG = "ProviderAggregator";
+    private static final int PROPAGATION_DELAY = 20;
 
     private List<ILocalCallback> mUpdateCallbacks;
     final private List<ProviderConnection> mProviders;
     private ProviderCache mCache;
     private Handler mHandler;
+    private final List<Song> mPostedUpdateSongs = new ArrayList<Song>();
+    private final List<Album> mPostedUpdateAlbums = new ArrayList<Album>();
+    private final List<Artist> mPostedUpdateArtists = new ArrayList<Artist>();
+    private final List<Playlist> mPostedUpdatePlaylists = new ArrayList<Playlist>();
     private ThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(4);
+
+    private Runnable mPostSongsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mPostedUpdateSongs) {
+                for (ILocalCallback cb : mUpdateCallbacks) {
+                    cb.onSongUpdate(mPostedUpdateSongs);
+                }
+                mPostedUpdateSongs.clear();
+            }
+        }
+    };
+
+    private Runnable mPostAlbumsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mPostedUpdateAlbums) {
+                for (ILocalCallback cb : mUpdateCallbacks) {
+                    cb.onAlbumUpdate(mPostedUpdateAlbums);
+                }
+                mPostedUpdateAlbums.clear();
+            }
+        }
+    };
+
+    private Runnable mPostArtistsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mPostedUpdateArtists) {
+                for (ILocalCallback cb : mUpdateCallbacks) {
+                    cb.onArtistUpdate(mPostedUpdateArtists);
+                }
+                mPostedUpdateArtists.clear();
+            }
+        }
+    };
+
+    private Runnable mPostPlaylistsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mPostedUpdatePlaylists) {
+                for (ILocalCallback cb : mUpdateCallbacks) {
+                    cb.onPlaylistUpdate(mPostedUpdatePlaylists);
+                }
+                mPostedUpdatePlaylists.clear();
+            }
+        }
+    };
 
 
     private Runnable mUpdatePlaylistsRunnable = new Runnable() {
@@ -231,9 +284,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                             // If it's not, we assume that the provider will call songUpdated
                             // here when it has the data for the track.
                             if (song.isLoaded()) {
-                                for (ILocalCallback cb : mUpdateCallbacks) {
-                                    cb.onSongUpdate(song);
-                                }
+                                postSongForUpdate(song);
                             }
                         }
                     }
@@ -315,9 +366,43 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         new Thread(mUpdatePlaylistsRunnable).start();
         return mCache.getAllPlaylists();
     }
+
     public List<Playlist> getAllMultiProviderPlaylists() {
         return mCache.getAllMultiProviderPlaylists();
     }
+
+    public void postSongForUpdate(Song s) {
+        mHandler.removeCallbacks(mPostSongsRunnable);
+        synchronized (mPostedUpdateSongs) {
+            mPostedUpdateSongs.add(s);
+        }
+        mHandler.postDelayed(mPostSongsRunnable, PROPAGATION_DELAY);
+    }
+
+    public void postAlbumForUpdate(Album a) {
+        mHandler.removeCallbacks(mPostAlbumsRunnable);
+        synchronized (mPostedUpdateAlbums) {
+            mPostedUpdateAlbums.add(a);
+        }
+        mHandler.postDelayed(mPostAlbumsRunnable, PROPAGATION_DELAY);
+    }
+
+    public void postArtistForUpdate(Artist a) {
+        mHandler.removeCallbacks(mPostArtistsRunnable);
+        synchronized (mPostedUpdateArtists) {
+            mPostedUpdateArtists.add(a);
+        }
+        mHandler.postDelayed(mPostArtistsRunnable, PROPAGATION_DELAY);
+    }
+
+    public void postPlaylistForUpdate(Playlist p) {
+        mHandler.removeCallbacks(mPostPlaylistsRunnable);
+        synchronized (mPostedUpdatePlaylists) {
+            mPostedUpdatePlaylists.add(p);
+        }
+        mHandler.postDelayed(mPostPlaylistsRunnable, PROPAGATION_DELAY);
+    }
+
     /**
      * Called by the providers when a feedback is available about a login request
      *
@@ -391,9 +476,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     }
 
                     // Then we notify the callbacks
-                    for (ILocalCallback cb : mUpdateCallbacks) {
-                        cb.onPlaylistUpdate(p);
-                    }
+                    postPlaylistForUpdate(p);
                 }
             });
         }
@@ -418,15 +501,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 }
             }
 
-            // TODO: Batch updates instead of creating new runnable for every song
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    for (ILocalCallback cb : mUpdateCallbacks) {
-                        cb.onSongUpdate(s);
-                    }
-                }
-            });
+            postSongForUpdate(s);
         }
     }
     @Override
@@ -486,16 +561,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 }
             }
 
-            final Album finalCachedAlbum = cached;
-            // TODO: Batch updates instead of creating new runnable for every song
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    for (ILocalCallback cb : mUpdateCallbacks) {
-                        cb.onAlbumUpdate(finalCachedAlbum);
-                    }
-                }
-            });
+            postAlbumForUpdate(cached);
         }
     }
 

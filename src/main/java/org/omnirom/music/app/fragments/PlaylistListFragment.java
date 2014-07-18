@@ -118,28 +118,27 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
     }
 
     @Override
-    public void onSongUpdate(Song s) {
+    public void onSongUpdate(List<Song> s) {
 
     }
 
     @Override
-    public void onAlbumUpdate(Album a) {
+    public void onAlbumUpdate(List<Album> a) {
 
     }
 
     @Override
-    public void onPlaylistUpdate(final Playlist p) {
+    public void onPlaylistUpdate(final List<Playlist> p) {
         synchronized (mPlaylistsUpdated) {
-            mPlaylistsUpdated.add(p);
+            mPlaylistsUpdated.addAll(p);
         }
 
         mHandler.removeCallbacks(mUpdateListRunnable);
-        // We delay the update a little bit to group update requests together
-        mHandler.postDelayed(mUpdateListRunnable, 500);
+        mHandler.post(mUpdateListRunnable);
     }
 
     @Override
-    public void onArtistUpdate(Artist a) {
+    public void onArtistUpdate(List<Artist> a) {
 
     }
 

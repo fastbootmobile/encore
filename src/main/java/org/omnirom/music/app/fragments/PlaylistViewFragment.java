@@ -157,14 +157,20 @@ public class PlaylistViewFragment extends Fragment
     }
 
     @Override
-    public void onSongUpdate(Song s) {
+    public void onSongUpdate(List<Song> s) {
         // We check if the song belongs to this playlist
         boolean hasPlaylist = false;
         Iterator<String> songsRef = mPlaylist.songs();
         while (songsRef.hasNext()) {
             String ref = songsRef.next();
-            if (s.getRef().equals(ref)) {
-                hasPlaylist = true;
+            for (Song song : s) {
+                if (song.getRef().equals(ref)) {
+                    hasPlaylist = true;
+                    break;
+                }
+            }
+
+            if (hasPlaylist) {
                 break;
             }
         }
@@ -176,12 +182,12 @@ public class PlaylistViewFragment extends Fragment
     }
 
     @Override
-    public void onAlbumUpdate(Album a) {
+    public void onAlbumUpdate(List<Album> a) {
 
     }
 
     @Override
-    public void onPlaylistUpdate(final Playlist p) {
+    public void onPlaylistUpdate(final List<Playlist> p) {
         // If the currently watched playlist is updated, update me
         if (p.equals(mPlaylist)) {
             mAdapter.notifyDataSetChanged();
@@ -189,7 +195,7 @@ public class PlaylistViewFragment extends Fragment
     }
 
     @Override
-    public void onArtistUpdate(Artist a) {
+    public void onArtistUpdate(List<Artist> a) {
 
     }
 

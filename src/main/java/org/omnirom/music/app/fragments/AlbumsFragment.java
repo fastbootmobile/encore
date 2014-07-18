@@ -122,16 +122,16 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
     }
 
     @Override
-    public void onSongUpdate(Song s) {
+    public void onSongUpdate(List<Song> s) {
 
     }
 
     @Override
-    public void onAlbumUpdate(final Album a) {
+    public void onAlbumUpdate(final List<Album> a) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (mAdapter.addItemUnique(a)) {
+                if (mAdapter.addAllUnique(a)) {
                     mAdapter.notifyDataSetChanged();
                 }
             }
@@ -140,12 +140,12 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
     }
 
     @Override
-    public void onPlaylistUpdate(final Playlist p) {
+    public void onPlaylistUpdate(List<Playlist> p) {
 
     }
 
     @Override
-    public void onArtistUpdate(Artist a) {
+    public void onArtistUpdate(List<Artist> a) {
 
     }
 

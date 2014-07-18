@@ -83,22 +83,22 @@ public class SongsFragment extends AbstractRootFragment implements ILocalCallbac
         return fragment;
     }
     @Override
-    public void onSongUpdate(Song s) {
+    public void onSongUpdate(List<Song> s) {
 
     }
 
     @Override
-    public void onAlbumUpdate(Album a) {
+    public void onAlbumUpdate(List<Album> a) {
 
     }
 
     @Override
-    public void onPlaylistUpdate(final Playlist p) {
+    public void onPlaylistUpdate(final List<Playlist> p) {
 
     }
 
     @Override
-    public void onArtistUpdate(Artist a) {
+    public void onArtistUpdate(List<Artist> a) {
 
     }
 

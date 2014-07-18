@@ -385,22 +385,22 @@ public class PlaybackService extends Service
     };
 
     @Override
-    public void onSongUpdate(Song s) {
+    public void onSongUpdate(List<Song> s) {
         // ignore
     }
 
     @Override
-    public void onAlbumUpdate(Album a) {
+    public void onAlbumUpdate(List<Album> a) {
         // ignore
     }
 
     @Override
-    public void onPlaylistUpdate(Playlist p) {
+    public void onPlaylistUpdate(List<Playlist> p) {
         // TODO: Update playback queue if it's the playlist we're playing
     }
 
     @Override
-    public void onArtistUpdate(Artist a) {
+    public void onArtistUpdate(List<Artist> a) {
 
     }
 

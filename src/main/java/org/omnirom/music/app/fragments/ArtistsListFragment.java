@@ -157,44 +157,41 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
 
     private void postListUpdate() {
         mHandler.removeCallbacks(mDelayedUpdateRunnable);
-
-        if (System.currentTimeMillis() - mLastUpdate > 2000) {
-            mHandler.post(mDelayedUpdateRunnable);
-        } else {
-            mHandler.postDelayed(mDelayedUpdateRunnable, 500);
-        }
+        mHandler.post(mDelayedUpdateRunnable);
     }
 
     @Override
-    public void onSongUpdate(Song s) {
-        String artistRef = s.getArtist();
-        Artist artist = ProviderAggregator.getDefault().getCache().getArtist(artistRef);
+    public void onSongUpdate(List<Song> s) {
+        for (Song song : s) {
+            String artistRef = song.getArtist();
+            Artist artist = ProviderAggregator.getDefault().getCache().getArtist(artistRef);
 
-        if (artist != null) {
-            synchronized (mDelayedUpdateList) {
-                if (!mDelayedUpdateList.contains(artist)) {
-                    mDelayedUpdateList.add(artist);
-                    postListUpdate();
+            if (artist != null) {
+                synchronized (mDelayedUpdateList) {
+                    if (!mDelayedUpdateList.contains(artist)) {
+                        mDelayedUpdateList.add(artist);
+                        postListUpdate();
+                    }
                 }
             }
         }
     }
 
     @Override
-    public void onAlbumUpdate(Album a) {
+    public void onAlbumUpdate(List<Album> a) {
 
     }
 
     @Override
-    public void onPlaylistUpdate(final Playlist p) {
+    public void onPlaylistUpdate(final List<Playlist> p) {
 
     }
 
     @Override
-    public void onArtistUpdate(Artist a) {
+    public void onArtistUpdate(List<Artist> a) {
         synchronized (mDelayedUpdateList) {
-            if (!mDelayedUpdateList.contains(a)) {
-                mDelayedUpdateList.add(a);
+            if (!mDelayedUpdateList.containsAll(a)) {
+                mDelayedUpdateList.addAll(a);
                 postListUpdate();
             }
         }

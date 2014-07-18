@@ -37,6 +37,7 @@ import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by h4o on 26/06/2014.
@@ -252,28 +253,33 @@ public class AlbumViewFragment extends AbstractRootFragment implements ILocalCal
     }
 
     @Override
-    public void onSongUpdate(Song s) {
-        if (s.getAlbum().equals(mAlbum.getRef())) {
-            Log.e(TAG, "onSongUpdate");
-            loadSongs();
+    public void onSongUpdate(List<Song> s) {
+        for (Song song : s) {
+            if (song.getAlbum().equals(mAlbum.getRef())) {
+                loadSongs();
+                break;
+            }
         }
     }
 
     @Override
-    public void onAlbumUpdate(Album a) {
-        if (a.getRef().equals(mAlbum.getRef())) {
-            Log.e(TAG, "onAlbumUpdate");
-            loadSongs();
+    public void onAlbumUpdate(List<Album> a) {
+        for (Album album : a) {
+            if (album.getRef().equals(mAlbum.getRef())) {
+                Log.e(TAG, "onAlbumUpdate");
+                loadSongs();
+                break;
+            }
         }
     }
 
     @Override
-    public void onPlaylistUpdate(Playlist p) {
+    public void onPlaylistUpdate(List<Playlist> p) {
 
     }
 
     @Override
-    public void onArtistUpdate(Artist a) {
+    public void onArtistUpdate(List<Artist> a) {
 
     }
 

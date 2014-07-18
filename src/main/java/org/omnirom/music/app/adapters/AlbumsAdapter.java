@@ -85,7 +85,7 @@ public class AlbumsAdapter extends BaseAdapter {
         sortList();
     }
 
-    public void addAllUnique(List<Album> ps) {
+    public boolean addAllUnique(List<Album> ps) {
         boolean didChange = false;
         for (Album p : ps) {
             if (!mAlbums.contains(p)) {
@@ -97,6 +97,8 @@ public class AlbumsAdapter extends BaseAdapter {
         if (didChange) {
             sortList();
         }
+
+        return didChange;
     }
 
     public boolean contains(Album p) {

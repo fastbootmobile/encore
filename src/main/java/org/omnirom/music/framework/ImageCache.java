@@ -68,7 +68,9 @@ public class  ImageCache {
             Bitmap item = mMemoryCache.get(key);
             if (item == null) {
                 item = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + key);
-                mMemoryCache.put(key, item);
+                if (item != null) {
+                    mMemoryCache.put(key, item);
+                }
             }
 
             return item;

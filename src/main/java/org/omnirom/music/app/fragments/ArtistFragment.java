@@ -658,24 +658,24 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
-    public void onSongUpdate(Song s) {
+    public void onSongUpdate(List<Song> s) {
         mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-        mHandler.postDelayed(mUpdateAlbumsRunnable, 200);
+        mHandler.post(mUpdateAlbumsRunnable);
     }
 
     @Override
-    public void onAlbumUpdate(Album a) {
+    public void onAlbumUpdate(List<Album> a) {
         mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-        mHandler.postDelayed(mUpdateAlbumsRunnable, 200);
+        mHandler.post(mUpdateAlbumsRunnable);
     }
 
     @Override
-    public void onPlaylistUpdate(Playlist p) {
+    public void onPlaylistUpdate(List<Playlist> p) {
 
     }
 
     @Override
-    public void onArtistUpdate(Artist a) {
+    public void onArtistUpdate(List<Artist> a) {
 
     }
 
