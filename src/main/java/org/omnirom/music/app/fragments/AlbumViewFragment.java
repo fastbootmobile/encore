@@ -23,6 +23,7 @@ import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.SongsListAdapter;
+import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -48,7 +49,9 @@ public class AlbumViewFragment extends AbstractRootFragment implements ILocalCal
     private Album mAlbum;
     private Handler mHandler;
     private Bitmap mHeroImage;
+    private PlayPauseDrawable mFabDrawable;
     private int mBackgroundColor;
+    private boolean mFabShouldResume = false;
 
     private Runnable mLoadSongsRunnable = new Runnable() {
         @Override
@@ -127,6 +130,43 @@ public class AlbumViewFragment extends AbstractRootFragment implements ILocalCal
         ImageButton fabPlay = (ImageButton) mRootView.findViewById(R.id.fabPlay);
         Utils.setLargeFabOutline(new View[]{fabPlay});
 
+        // Set the FAB animated drawable
+        mFabDrawable = new PlayPauseDrawable(getResources());
+        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+        mFabDrawable.setPaddingDp(48);
+        fabPlay.setImageDrawable(mFabDrawable);
+        fabPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mFabDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
+                    if (mFabShouldResume) {
+                        try {
+                            PluginsLookup.getDefault().getPlaybackService().play();
+                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot resume playback", e);
+                        }
+                    } else {
+                        try {
+                            PluginsLookup.getDefault().getPlaybackService().playAlbum(mAlbum);
+                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot start playing album " + mAlbum.getRef(), e);
+                        }
+                    }
+                } else {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabShouldResume = true;
+                    try {
+                        PluginsLookup.getDefault().getPlaybackService().pause();
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot pause playback", e);
+                    }
+                }
+            }
+        });
+
         ivHero.setImageBitmap(mHeroImage);
 
         ListView listView =  (ListView) mRootView.findViewById(R.id.lvAlbumContents);
@@ -142,6 +182,9 @@ public class AlbumViewFragment extends AbstractRootFragment implements ILocalCal
                 if (song != null) {
                     try {
                         PluginsLookup.getDefault().getPlaybackService().playSong(song);
+                        // TODO: Add everything else from the album to the queue
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        mFabShouldResume = true;
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to play song", e);
                     }
