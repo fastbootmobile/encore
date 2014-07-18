@@ -94,22 +94,15 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
         albumLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), AlbumActivity.class);
-
                 AlbumsAdapter.ViewHolder tag = (AlbumsAdapter.ViewHolder) view.getTag();
                 ImageView ivCover = tag.ivCover;
                 TextView tvTitle = tag.tvTitle;
 
-                ((ViewGroup) tag.vRoot.getParent()).setTransitionGroup(false);
-
-                intent.putExtra(AlbumActivity.EXTRA_ALBUM,
-                        mAdapter.getItem(position));
-
-                intent.putExtra(AlbumActivity.EXTRA_BACKGROUND_COLOR,
-                        ((ColorDrawable) tag.vRoot.getBackground()).getColor());
-
                 Bitmap hero = ((BitmapDrawable) tag.ivCover.getDrawable()).getBitmap();
-                Utils.queueBitmap(AlbumActivity.BITMAP_ALBUM_HERO, hero);
+                Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
+                        mAdapter.getItem(position), ((ColorDrawable) tag.vRoot.getBackground()).getColor());
+
+                ((ViewGroup) tag.vRoot.getParent()).setTransitionGroup(false);
 
                 ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                         new Pair<View, String>(ivCover, "itemImage"),

@@ -1,14 +1,22 @@
 package org.omnirom.music.app.ui;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -16,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
@@ -42,43 +51,6 @@ public class PlayingBarView extends RelativeLayout {
 
     // Delay after which the seek bar is updated (30Hz)
     private static final int SEEK_BAR_UPDATE_DELAY = 1000/30;
-
-    private Runnable mAlbumArtRunnable = new Runnable() {
-        @Override
-        public void run() {
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            final Song startSong = mCurrentSong;
-
-            // Prepare the placeholder/default
-            BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.album_list_default_bg);
-            assert drawable != null;
-            Bitmap bmp = drawable.getBitmap();
-
-            // Download the art image
-            String artKey = cache.getSongArtKey(mCurrentSong);
-            String artUrl = null;
-
-            if (artKey == null) {
-                StringBuffer urlBuffer = new StringBuffer();
-                artKey = AlbumArtCache.getDefault().getArtKey(mCurrentSong, urlBuffer);
-                artUrl = urlBuffer.toString();
-            }
-
-            if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
-            }
-
-            final Bitmap albumArtBitmap = bmp;
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (startSong == mCurrentSong) {
-                        // mAlbumArt.setImageBitmap(albumArtBitmap);
-                    }
-                }
-            });
-        }
-    };
 
     private Runnable mUpdateSeekBarRunnable = new Runnable() {
         @Override
@@ -304,7 +276,7 @@ public class PlayingBarView extends RelativeLayout {
             int i = 0;
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            for (Song song : queue) {
+            for (final Song song : queue) {
                 if (i == MAX_PEEK_QUEUE_SIZE) {
                     break;
                 }
@@ -314,7 +286,7 @@ public class PlayingBarView extends RelativeLayout {
 
                 TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
                 TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
-                ImageView ivAlbumArt = (ImageView) itemRoot.findViewById(R.id.ivAlbumArt);
+                AlbumArtImageView ivAlbumArt = (AlbumArtImageView) itemRoot.findViewById(R.id.ivAlbumArt);
 
                 Artist artist = cache.getArtist(song.getArtist());
                 if (artist != null) {
@@ -324,9 +296,41 @@ public class PlayingBarView extends RelativeLayout {
                 }
 
                 tvTitle.setText(song.getTitle());
+                ivAlbumArt.loadArtForSong(song);
+                ivAlbumArt.setViewName(song.getRef() + i);
 
-                // TODO: ivAlbumArt
-                ivAlbumArt.setImageResource(R.drawable.album_placeholder);
+                ivAlbumArt.setOnClickListener(new View.OnClickListener() {
+                    Palette mPalette;
+
+                    @Override
+                    public void onClick(View view) {
+                        Bitmap hero = ((BitmapDrawable) ((ImageView) view).getDrawable()).getBitmap();
+                        if (mPalette == null) {
+                            mPalette = Palette.generate(hero);
+                        }
+                        PaletteItem darkVibrantColor = mPalette.getDarkVibrantColor();
+                        PaletteItem darkMutedColor = mPalette.getDarkMutedColor();
+
+                        int color;
+                        if (darkVibrantColor != null) {
+                            color = darkVibrantColor.getRgb();
+                        } else if (darkMutedColor != null) {
+                            color = darkMutedColor.getRgb();
+                        } else {
+                            color = getResources().getColor(R.color.default_album_art_background);
+                        }
+
+                        ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+                        Intent intent = AlbumActivity.craftIntent(getContext(), hero,
+                                cache.getAlbum(song.getAlbum()), color);
+
+                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
+                                view, "itemImage");
+
+                        getContext().startActivity(intent, opt.toBundle());
+                    }
+                });
 
                 if (i == 0) {
                     itemRoot.setOnClickListener(new OnClickListener() {
@@ -351,7 +355,7 @@ public class PlayingBarView extends RelativeLayout {
             ImageView ivAlbumArt = (ImageView) itemRoot.findViewById(R.id.ivAlbumArt);
 
             tvArtist.setVisibility(View.GONE);
-            tvTitle.setText("View full queue...");
+            tvTitle.setText(getContext().getString(R.string.view_full_queue));
             ivAlbumArt.setImageResource(R.drawable.ic_reduce);
             ivAlbumArt.setScaleType(ImageView.ScaleType.CENTER);
 

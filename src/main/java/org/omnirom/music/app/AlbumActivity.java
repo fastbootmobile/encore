@@ -3,17 +3,26 @@ package org.omnirom.music.app;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.transition.Transition;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import org.omnirom.music.app.adapters.AlbumsAdapter;
 import org.omnirom.music.app.fragments.AlbumViewFragment;
 import org.omnirom.music.app.fragments.ArtistFragment;
+import org.omnirom.music.model.Album;
 
 public class AlbumActivity extends Activity {
 
@@ -28,6 +37,16 @@ public class AlbumActivity extends Activity {
     private AlbumViewFragment mActiveFragment;
     private Bundle mInitialIntent;
     private Bitmap mHero;
+
+    public static Intent craftIntent(Context context, Bitmap hero, Album album, int backColor) {
+        Intent intent = new Intent(context, AlbumActivity.class);
+
+        intent.putExtra(AlbumActivity.EXTRA_ALBUM, album);
+        intent.putExtra(AlbumActivity.EXTRA_BACKGROUND_COLOR, backColor);
+        Utils.queueBitmap(BITMAP_ALBUM_HERO, hero);
+
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,59 +76,6 @@ public class AlbumActivity extends Activity {
         // Remove the activity title as we don't want it here
         getActionBar().setTitle("");
         getActionBar().setDisplayHomeAsUpEnabled(true);
-/*
-        getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
-            @Override
-            public void onTransitionStart(Transition transition) {
-                View fab = mActiveFragment.findViewById(R.id.fabPlay);
-                fab.setVisibility(View.INVISIBLE);
-            }
-
-            @Override
-            public void onTransitionEnd(Transition transition) {
-                View fab = mActiveFragment.findViewById(R.id.fabPlay);
-                fab.setVisibility(View.VISIBLE);
-
-                // get the center for the clipping circle
-                int cx = fab.getMeasuredWidth() / 2;
-                int cy = fab.getMeasuredHeight() / 2;
-
-                // get the final radius for the clipping circle
-                final int finalRadius = fab.getWidth();
-
-                // create and start the animator for this view
-                // (the start radius is zero)
-                ValueAnimator anim =
-                        ViewAnimationUtils.createCircularReveal(fab, cx, cy, 0, finalRadius);
-                anim.setInterpolator(new DecelerateInterpolator());
-                anim.start();
-
-                fab.setTranslationX(-fab.getMeasuredWidth() / 4.0f);
-                fab.setTranslationY(-fab.getMeasuredHeight() / 4.0f);
-                fab.animate().translationX(0.0f).translationY(0.0f)
-                        .setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime))
-                        .setInterpolator(new DecelerateInterpolator())
-                        .start();
-
-                getWindow().getEnterTransition().removeListener(this);
-            }
-
-            @Override
-            public void onTransitionCancel(Transition transition) {
-
-            }
-
-            @Override
-            public void onTransitionPause(Transition transition) {
-
-            }
-
-            @Override
-            public void onTransitionResume(Transition transition) {
-
-            }
-        });
-        */
     }
 
     @Override

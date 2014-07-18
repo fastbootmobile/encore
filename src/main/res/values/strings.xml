@@ -30,5 +30,6 @@
     <string name="hide_from_library">Hide from library</string>
     <string name="add_album_to_queue">Add album to queue</string>
     <string name="add_to_playlist">Add to playlist</string>
+    <string name="view_full_queue">View full queue...</string>
 
 </resources>

@@ -121,8 +121,9 @@ public class PlaybackService extends Service
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
         for (ProviderConnection pc : providers) {
             try {
-                pc.getBinder().registerCallback(mProviderCallback);
-                Log.e(TAG, "Registered callback on " + pc.getServiceName());
+                if (pc.getBinder() != null) {
+                    pc.getBinder().registerCallback(mProviderCallback);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot register callback", e);
             }

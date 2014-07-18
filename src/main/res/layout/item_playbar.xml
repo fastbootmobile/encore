@@ -8,7 +8,7 @@
     android:autoText="false">
 
 
-    <org.omnirom.music.app.ui.SquareImageView
+    <org.omnirom.music.app.ui.AlbumArtImageView
         android:id="@+id/ivAlbumArt"
         android:layout_width="@dimen/playing_bar_height"
         android:layout_height="@dimen/playing_bar_height"
@@ -17,8 +17,7 @@
         android:background="@drawable/playing_bar_item_background"
         android:padding="4dp"
         android:adjustViewBounds="true"
-        android:clickable="true"
-        android:src="@drawable/test_cover_incubus" />
+        android:clickable="true" />
 
     <LinearLayout
         android:layout_width="wrap_content"
