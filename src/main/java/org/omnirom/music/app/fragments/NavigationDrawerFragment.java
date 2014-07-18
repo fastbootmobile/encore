@@ -265,12 +265,12 @@ public class NavigationDrawerFragment extends Fragment {
                 mDrawerLayout.closeDrawer(mFragmentContainerView);
             }
             if (mCallbacks != null) {
-                mHandler.postDelayed(new Runnable() {
+                mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         mCallbacks.onNavigationDrawerItemSelected(position);
                     }
-                }, 0);
+                });
 
             }
         }

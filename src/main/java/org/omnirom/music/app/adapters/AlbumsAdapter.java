@@ -7,6 +7,8 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.PaletteItem;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,8 +40,9 @@ public class AlbumsAdapter extends BaseAdapter {
 
     private String TAG = "AlbumsAdapter";
     private List<Album> mAlbums;
+    private Handler mHandler;
 
-    private static class ViewHolder {
+    public static class ViewHolder {
         public Album album;
         public AlbumArtImageView ivCover;
         public TextView tvTitle;
@@ -50,6 +53,7 @@ public class AlbumsAdapter extends BaseAdapter {
 
     public AlbumsAdapter() {
         mAlbums = new ArrayList<Album>();
+        mHandler = new Handler();
     }
 
     private void sortList() {
@@ -66,10 +70,13 @@ public class AlbumsAdapter extends BaseAdapter {
         sortList();
     }
 
-    public void addItemUnique(Album a) {
+    public boolean addItemUnique(Album a) {
         if (!mAlbums.contains(a)) {
             mAlbums.add(a);
             sortList();
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -143,6 +150,9 @@ public class AlbumsAdapter extends BaseAdapter {
         tag.vRoot = root;
         tag.album = album;
 
+        tag.ivCover.setViewName("list:albums:cover:" + album.getRef());
+        tag.tvTitle.setViewName("list:albums:title:" + album.getRef());
+
         if (album.getName() != null && !album.getName().isEmpty()) {
             tag.tvTitle.setText(album.getName());
 
@@ -152,7 +162,32 @@ public class AlbumsAdapter extends BaseAdapter {
             } else {
                 tag.tvSubTitle.setVisibility(View.INVISIBLE);
             }
+
             tag.ivCover.loadArtForAlbum(album);
+            tag.ivCover.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
+                @Override
+                public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
+                    Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+                        @Override
+                        public void onGenerated(final Palette palette) {
+                            mHandler.post(new Runnable() {
+                                public void run() {
+                                    PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
+                                    PaletteItem darkMutedColor = palette.getDarkMutedColor();
+
+                                    if (darkVibrantColor != null) {
+                                        tag.vRoot.setBackgroundColor(darkVibrantColor.getRgb());
+                                    } else if (darkMutedColor != null) {
+                                        tag.vRoot.setBackgroundColor(darkMutedColor.getRgb());
+                                    } else {
+                                        tag.vRoot.setBackgroundColor(res.getColor(R.color.default_album_art_background));
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         } else {
             tag.tvTitle.setText(res.getString(R.string.loading));
             tag.tvSubTitle.setText("");

@@ -1,12 +1,15 @@
 package org.omnirom.music.app.fragments;
 
+import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.AsyncTask;
@@ -17,6 +20,7 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +35,7 @@ import android.widget.TextView;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
+import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.AlbumArtCache;
@@ -67,10 +72,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private int mBackgroundColor;
     private Artist mArtist;
     private View mRootView;
-    private Palette mPalette;
     private Handler mHandler;
     private View mPreviousSongGroup;
     private View mPreviousAlbumGroup;
+    private PlayPauseDrawable mFabDrawable;
+    private Song mRecommendedSong;
+    private boolean mFabShouldResume;
     private boolean mRecommendationLoaded = false;
     private HashMap<Song, View> mSongToViewMap = new HashMap<Song, View>();
     private HashMap<String, View> mAlbumToViewMap = new HashMap<String, View>();
@@ -204,7 +211,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
 
     public ArtistFragment() {
-
+        mFabShouldResume = false;
     }
 
     public View findViewById(int id) {
@@ -223,7 +230,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mPalette = palette;
                         PaletteItem color = palette.getDarkMutedColor();
                         if (color != null && mRootView != null) {
                             RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
@@ -255,19 +261,34 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         setOutlines(fabPlay);
 
         // Set the FAB animated drawable
-        final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources());
-        drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        drawable.setPaddingDp(48);
-        fabPlay.setImageDrawable(drawable);
+        mFabDrawable = new PlayPauseDrawable(getResources());
+        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+        mFabDrawable.setPaddingDp(48);
+        fabPlay.setImageDrawable(mFabDrawable);
         fabPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (drawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PAUSE) {
-                    drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                if (mFabDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
+                    if (mFabShouldResume) {
+                        try {
+                            PluginsLookup.getDefault().getPlaybackService().play();
+                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot resume playback", e);
+                        }
+                    } else {
+                        playRecommendation();
+                    }
                 } else {
-                    drawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabShouldResume = true;
+                    try {
+                        PluginsLookup.getDefault().getPlaybackService().pause();
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot pause playback", e);
+                    }
                 }
-                Utils.shortToast(getActivity(), R.string.please_program_me);
             }
         });
 
@@ -311,11 +332,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private void loadRecommendation() {
         Song recommended = Suggestor.getInstance().suggestBestForArtist(mArtist);
         if (recommended != null) {
+            mRecommendedSong = recommended;
             Album album = ProviderAggregator.getDefault().getCache().getAlbum(recommended.getAlbum());
 
             CardView cvRec = (CardView) mRootView.findViewById(R.id.cardArtistSuggestion);
             TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
             TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
+            Button btnPlayNow = (Button) mRootView.findViewById(R.id.btnArtistSuggestionPlay);
             tvTitle.setText(recommended.getTitle());
 
             if (album != null) {
@@ -340,6 +363,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 suggestionTitle.setAlpha(0.0f);
                 suggestionTitle.animate().alpha(1.0f).setDuration(500).start();
             }
+
+            btnPlayNow.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    playRecommendation();
+                }
+            });
 
             mRecommendationLoaded = true;
         } else {
@@ -452,6 +482,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     public void onClick(View view) {
                         if (drawable.getRequestedShape() == PlayPauseDrawable.SHAPE_STOP) {
                             drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                             new Thread() {
                                 public void run() {
                                     try {
@@ -463,6 +494,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                             }.start();
                         } else {
                             drawable.setShape(PlayPauseDrawable.SHAPE_STOP);
+                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                             try {
                                 pbService.playAlbum(album);
                             } catch (RemoteException e) {
@@ -609,6 +641,20 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
 
         mPreviousSongGroup = view;
+    }
+
+    private void playRecommendation() {
+        if (mRecommendationLoaded && mRecommendedSong != null) {
+            try {
+                PluginsLookup.getDefault().getPlaybackService().playSong(mRecommendedSong);
+                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                mFabShouldResume = true;
+                boldPlayingTrack(mRecommendedSong);
+                updatePlayingAlbum(mRecommendedSong.getAlbum());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to play recommended song", e);
+            }
+        }
     }
 
     @Override

@@ -30,7 +30,13 @@
         </service>
 
         <activity
-            android:name=".ArtistActivity"
+        android:name=".ArtistActivity"
+        android:label="@string/title_activity_artist"
+        android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
+        </activity>
+
+        <activity
+            android:name=".AlbumActivity"
             android:label="@string/title_activity_artist"
             android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
         </activity>

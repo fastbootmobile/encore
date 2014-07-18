@@ -138,6 +138,11 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     @Override
+    public boolean fetchAlbumTracks(String albumRef) throws RemoteException {
+        return false;
+    }
+
+    @Override
     public void setAudioSocketName(String socketName) throws RemoteException {
 
     }

@@ -70,9 +70,15 @@ public class SongsListAdapter  extends BaseAdapter{
         public int position;
         public Song song;
     }
+
+    public void clear() {
+        mSongs.clear();
+    }
+
     public void put(Song song){
         mSongs.add(song);
     }
+
     public void sortAll(){
         Collections.sort(mSongs, new Comparator<Song>() {
             @Override

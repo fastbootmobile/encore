@@ -1,11 +1,17 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,9 +19,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import org.omnirom.music.app.AlbumActivity;
+import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.AlbumsAdapter;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.ui.ExpandableGridView;
@@ -43,7 +54,6 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
 
     private AlbumsAdapter mAdapter;
     private Handler mHandler;
-    private static final String KEY_ALBUM_LIST = "album_list";
 
     /**
      * Use this factory method to create a new instance of
@@ -84,8 +94,28 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
         albumLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MainActivity act = (MainActivity) getActivity();
-                act.showFragment(AlbumViewFragment.newInstance(mAdapter.getItem(position)), true);
+                Intent intent = new Intent(getActivity(), AlbumActivity.class);
+
+                AlbumsAdapter.ViewHolder tag = (AlbumsAdapter.ViewHolder) view.getTag();
+                ImageView ivCover = tag.ivCover;
+                TextView tvTitle = tag.tvTitle;
+
+                ((ViewGroup) tag.vRoot.getParent()).setTransitionGroup(false);
+
+                intent.putExtra(AlbumActivity.EXTRA_ALBUM,
+                        mAdapter.getItem(position));
+
+                intent.putExtra(AlbumActivity.EXTRA_BACKGROUND_COLOR,
+                        ((ColorDrawable) tag.vRoot.getBackground()).getColor());
+
+                Bitmap hero = ((BitmapDrawable) tag.ivCover.getDrawable()).getBitmap();
+                Utils.queueBitmap(AlbumActivity.BITMAP_ALBUM_HERO, hero);
+
+                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                        new Pair<View, String>(ivCover, "itemImage"),
+                        new Pair<View, String>(tvTitle, "albumName"));
+
+                startActivity(intent, opt.toBundle());
             }
         });
 
@@ -105,12 +135,12 @@ public class AlbumsFragment extends AbstractRootFragment implements ILocalCallba
 
     @Override
     public void onAlbumUpdate(final Album a) {
-        Log.e(TAG, "onAlbumUpdate");
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mAdapter.addItemUnique(a);
-                mAdapter.notifyDataSetChanged();
+                if (mAdapter.addItemUnique(a)) {
+                    mAdapter.notifyDataSetChanged();
+                }
             }
         });
 

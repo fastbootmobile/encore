@@ -39,6 +39,12 @@ public class DeviceAudioSink implements AudioSink {
                     final int SIZE = 8192;
                     // Playback audio, if any
                     while (mAudioBufferOffset > 0) {
+                        if (mAudioTrack == null) {
+                            // There might be rare race conditions where audio is pushed while
+                            // the sink config changes. We just try again whenever possible.
+                            // FIXME: Proper synchronization needed here
+                            continue;
+                        }
                         final int amountToWrite = Math.min(mAudioBufferOffset, SIZE);
                         int ret = mAudioTrack.write(mAudioBuffer, 0, amountToWrite);
 
