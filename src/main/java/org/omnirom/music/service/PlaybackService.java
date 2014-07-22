@@ -266,7 +266,10 @@ public class PlaybackService extends Service
 
         @Override
         public void playPlaylist(Playlist p) throws RemoteException {
-
+            Log.e(TAG, "Play playlist: " + p.getRef());
+            mPlaybackQueue.clear();
+            queuePlaylist(p, false);
+            startPlayingQueue();
         }
 
         @Override
@@ -281,30 +284,36 @@ public class PlaybackService extends Service
         public void playAlbum(Album a) throws RemoteException {
             Log.e(TAG, "Play album: " + a.getRef());
             mPlaybackQueue.clear();
-            Iterator<String> songsIt = a.songs();
-
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            while (songsIt.hasNext()) {
-                String ref = songsIt.next();
-                mPlaybackQueue.addSong(cache.getSong(ref), false);
-            }
+            queueAlbum(a, false);
 
             startPlayingQueue();
         }
 
         @Override
         public void queuePlaylist(Playlist p, boolean top) throws RemoteException {
+            Iterator<String> songsIt = p.songs();
 
+            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            while (songsIt.hasNext()) {
+                String ref = songsIt.next();
+                mPlaybackQueue.addSong(cache.getSong(ref), top);
+            }
         }
 
         @Override
         public void queueSong(Song s, boolean top) throws RemoteException {
-
+            mPlaybackQueue.addSong(s, top);
         }
 
         @Override
         public void queueAlbum(Album p, boolean top) throws RemoteException {
+            Iterator<String> songsIt = p.songs();
 
+            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            while (songsIt.hasNext()) {
+                String ref = songsIt.next();
+                mPlaybackQueue.addSong(cache.getSong(ref), top);
+            }
         }
 
         @Override

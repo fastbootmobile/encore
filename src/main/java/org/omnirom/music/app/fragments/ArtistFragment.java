@@ -249,6 +249,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         mRootView = inflater.inflate(R.layout.fragment_artist, container, false);
 
+        IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+
         ImageView heroImage = (ImageView) mRootView.findViewById(R.id.ivHero);
         heroImage.setImageBitmap(mHeroImage);
 
@@ -263,6 +265,21 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources());
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+
+        try {
+            Song currentTrack = playbackService.getCurrentTrack();
+            if (currentTrack != null && currentTrack.getArtist().equals(mArtist.getRef())) {
+                if (playbackService.isPlaying()) {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                } else {
+                    mFabShouldResume = true;
+                }
+            }
+        } catch (RemoteException e) {
+            // ignore
+        }
+
+
         mFabDrawable.setPaddingDp(48);
         fabPlay.setImageDrawable(mFabDrawable);
         fabPlay.setOnClickListener(new View.OnClickListener() {
@@ -646,11 +663,16 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private void playRecommendation() {
         if (mRecommendationLoaded && mRecommendedSong != null) {
             try {
-                PluginsLookup.getDefault().getPlaybackService().playSong(mRecommendedSong);
+                IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                pbService.playSong(mRecommendedSong);
                 mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                 mFabShouldResume = true;
                 boldPlayingTrack(mRecommendedSong);
                 updatePlayingAlbum(mRecommendedSong.getAlbum());
+
+                // TODO: Figure out a better algorithm to find things to play from an artist
+                ProviderCache cache = ProviderAggregator.getDefault().getCache();
+                pbService.queueAlbum(cache.getAlbum(mRecommendedSong.getAlbum()), false);
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to play recommended song", e);
             }
