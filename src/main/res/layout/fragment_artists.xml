@@ -7,6 +7,6 @@
     android:layout_marginBottom="@dimen/playing_bar_height"
     android:animateLayoutChanges="true"
     android:padding="4dp"
-    android:numColumns="2"
+    android:numColumns="@integer/main_grids_column_count"
     android:horizontalSpacing="4dp"
     android:verticalSpacing="4dp" />
