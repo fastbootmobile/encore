@@ -1,6 +1,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
@@ -42,7 +43,7 @@ import java.util.List;
 /**
  * Created by h4o on 26/06/2014.
  */
-public class AlbumViewFragment extends AbstractRootFragment implements ILocalCallback {
+public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "AlbumViewFragment";
     private SongsListAdapter mAdapter;

@@ -28,26 +28,26 @@
             style="@style/FontCardLine1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/tile_text_padding"
             android:layout_marginRight="@dimen/tile_text_padding"
-            android:layout_marginTop="16dp"
             android:layout_weight="1"
-            android:gravity="center_vertical|start"
-            android:textColor="@color/white" />
+            android:singleLine="true"
+            android:gravity="start|bottom"
+            android:textColor="@color/white"
+            android:text="First Line" />
 
         <TextView
             android:id="@+id/tvSubTitle"
-            style="@style/FontCardLine1"
+            style="@style/FontCardLine2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginBottom="16dp"
             android:layout_marginLeft="@dimen/tile_text_padding"
             android:layout_marginRight="@dimen/tile_text_padding"
-            android:layout_marginTop="8dp"
             android:layout_weight="1"
-            android:gravity="center_vertical|start"
-            android:textColor="@color/white" />
+            android:gravity="start|top"
+            android:textColor="@color/white"
+            android:text="Second Line"
+            android:paddingTop="4dp" />
     </LinearLayout>
 </LinearLayout>

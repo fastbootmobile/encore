@@ -2,6 +2,7 @@ package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -48,7 +49,7 @@ import java.util.List;
 /**
  * Created by h4o on 20/06/2014.
  */
-public class AlbumsFragment extends AbstractRootFragment implements ILocalCallback {
+public class AlbumsFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "AlbumsFragment";
 
