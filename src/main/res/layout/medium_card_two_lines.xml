@@ -5,48 +5,49 @@
     android:layout_height="wrap_content"
     android:background="@color/default_album_art_background"
     android:measureWithLargestChild="false"
-    android:stateListAnimator="@anim/button_raise"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:stateListAnimator="@anim/button_raise">
 
     <org.omnirom.music.app.ui.AlbumArtImageView
         android:id="@+id/ivCover"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
         android:adjustViewBounds="true"
-        android:viewName="cover"
         android:contentDescription="@string/app_name"
-        android:layout_weight="0" />
+        android:scaleType="centerCrop"
+        android:viewName="cover" />
 
-    <TextView
-        android:id="@+id/tvTitle"
-        style="@style/OmniMusic.MediumCard.Title"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:textSize="22sp"
-        android:fontFamily="sans-serif-medium"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="16dp"
-        android:gravity="center_vertical|start" />
+        android:layout_height="@dimen/tile_dual_text_height">
 
-    <TextView
-        android:id="@+id/tvSubTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:textSize="16sp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        android:gravity="center_vertical|start" />
+        <TextView
+            android:id="@+id/tvTitle"
+            style="@style/FontCardLine1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/tile_text_padding"
+            android:layout_marginRight="@dimen/tile_text_padding"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical|start"
+            android:textColor="@color/white" />
 
+        <TextView
+            android:id="@+id/tvSubTitle"
+            style="@style/FontCardLine1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="@dimen/tile_text_padding"
+            android:layout_marginRight="@dimen/tile_text_padding"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical|start"
+            android:textColor="@color/white" />
+    </LinearLayout>
 </LinearLayout>

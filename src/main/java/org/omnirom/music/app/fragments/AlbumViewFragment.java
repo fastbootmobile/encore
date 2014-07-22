@@ -60,6 +60,11 @@ public class AlbumViewFragment extends AbstractRootFragment implements ILocalCal
             final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
             ProviderIdentifier pi = mAlbum.getProvider();
+            if (pi == null) {
+                Log.e(TAG, "Album provider for " + mAlbum.getRef() + " is null!");
+                return;
+            }
+
             IMusicProvider provider = PluginsLookup.getDefault().getProvider(pi).getBinder();
 
             boolean hasMore = false;

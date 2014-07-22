@@ -16,14 +16,13 @@
             android:layout_alignStart="@+id/ivHero"
             android:layout_below="@+id/ivHero"
             android:background="#333"
-            android:fontFamily="sans-serif-medium"
+            style="@style/FontHeadline"
             android:gravity="center_vertical|start"
             android:paddingBottom="16dp"
             android:paddingLeft="24dp"
             android:paddingRight="8dp"
             android:paddingTop="16dp"
             android:textColor="@color/white"
-            android:textSize="22sp"
             android:viewName="artistName" />
 
         <ImageView
@@ -80,21 +79,21 @@
                     android:layout_height="match_parent">
 
                     <org.omnirom.music.app.ui.AlbumArtImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="64dp"
+                        android:layout_height="148dp"
                         android:id="@+id/ivArtistSuggestionCover"
                         android:adjustViewBounds="true"
                         android:layout_alignParentStart="true"
+                        android:layout_alignParentBottom="true"
                         android:scaleType="centerCrop" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_toRightOf="@id/ivArtistSuggestionCover"
-                        android:textSize="22sp"
                         android:id="@+id/tvArtistSuggestionTitle"
                         android:layout_margin="8dp"
-                        android:fontFamily="sans-serif-medium"
+                        style="@style/FontCardLine1"
                         android:layout_alignParentEnd="true" />
 
                     <TextView
@@ -102,7 +101,7 @@
                         android:layout_height="wrap_content"
                         android:layout_toRightOf="@id/ivArtistSuggestionCover"
                         android:layout_below="@id/tvArtistSuggestionTitle"
-                        android:textSize="18sp"
+                        style="@style/FontCardLine2"
                         android:id="@+id/tvArtistSuggestionArtist"
                         android:alpha="0.6"
                         android:layout_marginLeft="8dp"

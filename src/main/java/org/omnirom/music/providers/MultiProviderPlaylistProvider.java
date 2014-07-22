@@ -197,6 +197,12 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     public String addPlaylist(String playlistName) throws RemoteException {
          return mMultiProviderDatabaseHelper.addPlaylist(playlistName);
     }
+
+    @Override
+    public void startSearch(String query) throws RemoteException {
+
+    }
+
     @Override
     public Bitmap getSongArt(Song song) throws RemoteException {
         return PluginsLookup.getDefault().getProvider(song.getProvider()).getBinder().getSongArt(song);

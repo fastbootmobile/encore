@@ -9,6 +9,7 @@ import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.service.IPlaybackService;
 
@@ -185,6 +186,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             @Override
             public void run() {
                 for(Album album : albums){
+                    if (album.getProvider() == null) {
+                        Log.e(TAG, "Album " + album.getRef() + " is being cached with a null provider!");
+                    }
                     mCache.putAlbum(provider.getIdentifier(),album);
                 }
             }
@@ -527,6 +531,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             cached.setName(a.getName());
             cached.setYear(a.getYear());
             cached.setIsLoaded(a.isLoaded());
+            cached.setProvider(a.getProvider());
 
             if (cached.getSongsCount() != a.getSongsCount()) {
                 Iterator<String> songsIt = a.songs();
@@ -537,6 +542,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             }
 
             modified = true;
+        }
+
+        if (cached.getProvider() == null) {
+            Log.e(TAG, "Provider for " + cached.getRef() + " is null!");
         }
 
         if (modified) {
@@ -592,6 +601,16 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     @Override
     public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
+
+    }
+
+    @Override
+    public void onSongStopped(ProviderIdentifier provider) throws RemoteException {
+
+    }
+
+    @Override
+    public void onSearchResult(SearchResult searchResult) throws RemoteException {
 
     }
 

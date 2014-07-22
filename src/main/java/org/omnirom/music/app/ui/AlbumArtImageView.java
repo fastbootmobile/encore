@@ -154,7 +154,7 @@ public class AlbumArtImageView extends SquareImageView {
                         mTask = new BackgroundTask();
                         mTask.executeOnExecutor(ART_POOL_EXECUTOR, result.request);
                     }
-                }, 100);
+                }, DELAY_BEFORE_RETRY);
             }
         }
     }
@@ -165,6 +165,7 @@ public class AlbumArtImageView extends SquareImageView {
     private BoundEntity mRequestedEntity;
 
     private static final int DELAY_BEFORE_START = 150;
+    private static final int DELAY_BEFORE_RETRY = 60;
     private static final int CORE_POOL_SIZE = 4;
     private static final int MAXIMUM_POOL_SIZE = 256;
     private static final int KEEP_ALIVE = 5;

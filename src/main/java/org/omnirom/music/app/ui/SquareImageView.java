@@ -2,6 +2,8 @@ package org.omnirom.music.app.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 /**
@@ -25,8 +27,13 @@ public class SquareImageView extends ImageView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int width = getMeasuredWidth();
-        setMeasuredDimension(width, width);
+        // Only set a square size if we're not defining an exact size
+        ViewGroup.LayoutParams layoutParams = getLayoutParams();
+        if (layoutParams.width == ViewGroup.LayoutParams.MATCH_PARENT
+            || layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT) {
+            int width = getMeasuredWidth();
+            setMeasuredDimension(width, width);
+        }
     }
 
 }
