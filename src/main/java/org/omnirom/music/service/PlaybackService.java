@@ -1,8 +1,10 @@
 package org.omnirom.music.service;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -56,7 +58,7 @@ public class PlaybackService extends Service
     private Runnable mShutdownRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mNumberBound == 0) {
+            if (mNumberBound == 0 || (!mIsPlaying || mIsPaused)) {
                 Log.w(TAG, "Shutting down because of timeout and nothing bound");
                 stopSelf();
             } else {
@@ -182,7 +184,7 @@ public class PlaybackService extends Service
         mNumberBound--;
         Log.i(TAG, "Client unbound service (" + mNumberBound + " left)");
 
-        if (mNumberBound == 0 && ! mIsPlaying) {
+        if (mNumberBound == 0 && (!mIsPlaying || mIsPaused)) {
             mHandler.removeCallbacks(mShutdownRunnable);
             mShutdownRunnable.run();
         }
