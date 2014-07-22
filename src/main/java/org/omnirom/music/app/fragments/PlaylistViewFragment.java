@@ -102,6 +102,9 @@ public class PlaylistViewFragment extends Fragment
         while (songIt.hasNext()) {
             String songRef = songIt.next();
             Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
+            if (song == null) {
+                song = ProviderAggregator.getDefault().retrieveSong(songRef, mPlaylist.getProvider());
+            }
             mAdapter.addItem(song);
         }
         mAdapter.notifyDataSetChanged();

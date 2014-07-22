@@ -221,16 +221,18 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     public Song retrieveSong(final String ref, final ProviderIdentifier provider) {
         ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
-        IMusicProvider binder = pc.getBinder();
+        if (pc != null) {
+            IMusicProvider binder = pc.getBinder();
 
-        if (binder != null) {
-            try {
-                Song song = binder.getSong(ref);
-                onSongUpdate(provider, song);
-                return song;
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to retrieve the song", e);
-                return null;
+            if (binder != null) {
+                try {
+                    Song song = binder.getSong(ref);
+                    onSongUpdate(provider, song);
+                    return song;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to retrieve the song", e);
+                    return null;
+                }
             }
         }
 
@@ -449,11 +451,18 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             notify = true;
         } else {
             notify = !cached.isIdentical(p);
+
+            // If the playlist isn't identical, update it
             if (notify) {
+                // Update the name
+                cached.setName(p.getName());
+
+                // Empty the playlist
                 while (cached.getSongsCount() > 0) {
                     cached.removeSong(0);
                 }
 
+                // Re-add the songs to it
                 Iterator<String> songIt = p.songs();
                 while (songIt.hasNext()) {
                     cached.addSong(songIt.next());

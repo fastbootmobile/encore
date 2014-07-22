@@ -1,5 +1,6 @@
 package org.omnirom.music.app.fragments;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.content.Context;
@@ -22,6 +23,7 @@ import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -565,7 +567,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         while (songsIt.hasNext()) {
-            Song song = cache.getSong(songsIt.next());
+            final Song song = cache.getSong(songsIt.next());
 
             View itemRoot = inflater.inflate(R.layout.expanded_albums_item, container, false);
             container.addView(itemRoot);
@@ -592,6 +594,22 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                         PopupMenu popupMenu = new PopupMenu(getActivity(), ivOverflow);
                         popupMenu.inflate(R.menu.track_overflow);
                         popupMenu.show();
+
+                        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem menuItem) {
+                                switch (menuItem.getItemId()) {
+                                    case R.id.menu_add_to_playlist:
+                                        PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
+                                        fragment.show(getActivity().getFragmentManager(), song.getRef());
+                                        break;
+
+                                    default:
+                                        return false;
+                                }
+                                return true;
+                            }
+                        });
                     }
                 });
 
