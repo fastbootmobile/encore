@@ -3,10 +3,66 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/playingTracksLayout"
+        android:id="@+id/llRoot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="120dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.omnirom.music.app.ui.AlbumArtImageView
+                    android:id="@+id/ivCurrentPlayAlbumArt"
+                    android:layout_width="64dp"
+                    android:layout_height="120dp"
+                    android:scaleType="centerCrop"
+                    android:layout_alignParentStart="true"
+                    android:viewName="playback:firstitem:art"
+                    />
+
+                <TextView
+                    android:id="@+id/tvCurrentTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/FontTitle"
+                    android:layout_margin="8dp"
+                    android:layout_toEndOf="@id/ivCurrentPlayAlbumArt"
+                    android:viewName="playback:firstitem:title" />
+
+                <TextView
+                    android:id="@+id/tvCurrentArtist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/FontSubhead"
+                    android:layout_alignStart="@id/tvCurrentTitle"
+                    android:layout_below="@id/tvCurrentTitle"
+                    android:viewName="playback:firstitem:artist" />
+
+                <ImageView
+                    android:id="@+id/ivPlayPause"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_margin="8dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true" />
+
+            </RelativeLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <LinearLayout
+            android:id="@+id/playingTracksLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -450,8 +450,14 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         } else {
             notify = !cached.isIdentical(p);
             if (notify) {
-                // The playlist changed, update the cache
-                mCache.putPlaylist(provider, p);
+                while (cached.getSongsCount() > 0) {
+                    cached.removeSong(0);
+                }
+
+                Iterator<String> songIt = p.songs();
+                while (songIt.hasNext()) {
+                    cached.addSong(songIt.next());
+                }
             }
         }
 

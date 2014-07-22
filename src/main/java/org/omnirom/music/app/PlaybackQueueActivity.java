@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
@@ -28,6 +29,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlaybackQueueActivity extends Activity {
@@ -119,20 +121,54 @@ public class PlaybackQueueActivity extends Activity {
             View rootView = inflater.inflate(R.layout.fragment_playback_queue, container, false);
             ViewGroup tracksContainer = (ViewGroup) rootView.findViewById(R.id.playingTracksLayout);
 
-            // Load and inflate the playback queue
-            IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+            // Set play pause drawable
+            ImageView ivPlayPause = (ImageView) rootView.findViewById(R.id.ivPlayPause);
+            PlayPauseDrawable playDrawable = new PlayPauseDrawable(getResources());
+            playDrawable.setColor(0xAA333333);
+            playDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+            ivPlayPause.setImageDrawable(playDrawable);
 
+            final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+            try {
+                if (playbackService.isPlaying() && !playbackService.isPaused()) {
+                    playDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                }
+            } catch (RemoteException e) {
+                // ignore
+            }
+
+            // Load the current playing track
+            try {
+                Song currentTrack = playbackService.getCurrentTrack();
+
+                TextView tvCurrentTitle = (TextView) rootView.findViewById(R.id.tvCurrentTitle);
+                TextView tvCurrentArtist = (TextView) rootView.findViewById(R.id.tvCurrentArtist);
+                AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) rootView.findViewById(R.id.ivCurrentPlayAlbumArt);
+
+                tvCurrentTitle.setText(currentTrack.getTitle());
+                tvCurrentArtist.setText(cache.getArtist(currentTrack.getArtist()).getName());
+                ivCurrentPlayAlbumArt.loadArtForSong(currentTrack);
+            } catch (RemoteException e) {
+                // ignore, if the playback service is disconnected we're not playing anything
+            }
+
+
+            // Load and inflate the playback queue
             List<Song> songs;
             try {
-                songs = playbackService.getCurrentPlaybackQueue();
+                // We make a copy
+                songs = new ArrayList<Song>(playbackService.getCurrentPlaybackQueue());
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to get current playback queue", e);
                 return rootView;
             }
 
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            // We remove the first song as it's the currently playing song we displayed above
+            songs.remove(0);
 
-            int i = 0;
+            int i = 1;
             for (Song song : songs) {
                 View itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
                 itemView.setViewName("playbackqueue:" + i);

@@ -31,6 +31,6 @@
     <string name="add_album_to_queue">Add album to queue</string>
     <string name="add_to_playlist">Add to playlist</string>
     <string name="view_full_queue">View full queue…</string>
-    <string name="title_activity_playback_queue">In queue</string>
+    <string name="title_activity_playback_queue">Now playing</string>
 
 </resources>

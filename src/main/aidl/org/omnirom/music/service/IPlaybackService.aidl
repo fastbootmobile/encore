@@ -69,6 +69,11 @@ interface IPlaybackService {
     boolean isPlaying();
 
     /**
+     * Returns whether or not the current song is paused
+     */
+    boolean isPaused();
+
+    /**
      * Returns the current song length, in milliseconds
      */
     int getCurrentTrackLength();

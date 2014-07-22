@@ -155,6 +155,8 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     public boolean addSongToPlaylist(String songref, String playlistref, ProviderIdentifier providerIdentifier){
         if(mPlayListRefID.containsKey(playlistref)) {
             long playlist_id = mPlayListRefID.get(playlistref);
+            Playlist p = mPlaylists.get(playlistref);
+            Log.d(TAG, "playlist contains " + p.getSongsCount());
             SQLiteDatabase db = this.getWritableDatabase();
             ContentValues cv = new ContentValues();
             cv.put(KEY_PLAYLIST_ID, playlist_id);
@@ -163,11 +165,12 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
             cv.put(KEY_SERVICE, providerIdentifier.mService);
             cv.put(KEY_PROVIDER, providerIdentifier.mName);
             cv.put(KEY_POSITION, mPlaylists.get(playlistref).songsList().size());
-            mPlaylists.get(playlistref).addSong(songref);
+            p.addSong(songref);
             long song_id = db.insert(TABLE_SONGS, null, cv);
             Log.d(TAG, "adding song to playlist, song id:"+song_id);
+            Log.d(TAG, "playlist contains now " + p.getSongsCount());
             mSongRefID.put(playlistref+":"+songref,song_id);
-            mCallback.playlistUpdated(mPlaylists.get(playlistref));
+            mCallback.playlistUpdated(p);
             return true;
         }else
             return false;

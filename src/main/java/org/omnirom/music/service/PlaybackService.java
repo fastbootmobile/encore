@@ -360,6 +360,9 @@ public class PlaybackService extends Service
         }
 
         @Override
+        public boolean isPaused() { return mIsPaused; }
+
+        @Override
         public int getCurrentTrackLength() throws RemoteException {
             return mCurrentTrack.getDuration();
         }
