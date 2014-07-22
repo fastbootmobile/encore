@@ -6,6 +6,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -16,7 +18,9 @@ import android.util.Log;
 import org.omnirom.music.app.BuildConfig;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.AudioSocketHost;
+import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -58,9 +62,10 @@ public class PlaybackService extends Service
     private Runnable mShutdownRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mNumberBound == 0 || (!mIsPlaying || mIsPaused)) {
+            if ((!mIsPlaying || mIsPaused)) {
                 Log.w(TAG, "Shutting down because of timeout and nothing bound");
                 stopSelf();
+                stopForeground(true);
             } else {
                 resetShutdownTimeout();
             }
@@ -73,6 +78,7 @@ public class PlaybackService extends Service
     private PlaybackQueue mPlaybackQueue;
     private List<IPlaybackCallback> mCallbacks;
     private Notification mNotification;
+    private Notification.Builder mNotificationBuilder;
     private Song mCurrentTrack;
     private long mCurrentTrackStartTime;
     private long mPauseLastTick;
@@ -116,14 +122,11 @@ public class PlaybackService extends Service
         // Setup
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        Notification.Builder builder = new Notification.Builder(this);
-        builder.setSmallIcon(R.drawable.ic_launcher);
-        builder.setContentIntent(pendingIntent);
-        mNotification = builder.build();
+        mNotificationBuilder = new Notification.Builder(this);
+        mNotificationBuilder.setSmallIcon(R.drawable.ic_launcher);
+        mNotificationBuilder.setContentIntent(pendingIntent);
+        mNotification = mNotificationBuilder.build();
 
-
-        mNotification.setLatestEventInfo(this, "OmniMusic",
-                "This is an ugly notification. Beautify me.", pendingIntent);
 
         // Bind to all provider
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
@@ -249,6 +252,16 @@ public class PlaybackService extends Service
                 }
 
                 mCurrentTrack = first;
+
+                Artist artist = ProviderAggregator.getDefault().getCache().getArtist(mCurrentTrack.getArtist());
+                mNotificationBuilder.setContentTitle(mCurrentTrack.getTitle());
+                mNotificationBuilder.setContentText(artist.getName());
+
+                // TODO: Album art
+                Bitmap albumArt = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
+                mNotificationBuilder.setLargeIcon(albumArt);
+
+                mNotification = mNotificationBuilder.build();
             } else {
                 Log.e(TAG, "Cannot play the first song of the queue because the Song's " +
                         "ProviderIdentifier is null!");
@@ -354,6 +367,8 @@ public class PlaybackService extends Service
                         Log.e(TAG, "Cannot call playback callback for playback resume event", e);
                     }
                 }
+
+                startForeground(1, mNotification);
 
                 return true;
             } else {
@@ -474,6 +489,7 @@ public class PlaybackService extends Service
         public void onSongPlaying(ProviderIdentifier provider) throws RemoteException {
             mCurrentTrackStartTime = System.currentTimeMillis();
             mIsPlaying = true;
+            mIsPaused = false;
 
             for (IPlaybackCallback cb : mCallbacks) {
                 try {
