@@ -618,10 +618,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
 
     }
-
     @Override
-    public void onSearchResult(SearchResult searchResult) throws RemoteException {
+    public void onSearchResult(SearchResult searchResult){
+
 
     }
-
 }

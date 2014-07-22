@@ -240,6 +240,8 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
             });
         }
     };
-
+    public void startSearch(String query){
+        return;
+    }
 
 }
