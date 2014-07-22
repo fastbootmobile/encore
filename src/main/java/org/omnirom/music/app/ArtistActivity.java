@@ -1,6 +1,7 @@
 package org.omnirom.music.app;
 
 import android.animation.ValueAnimator;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.graphics.Bitmap;
@@ -54,8 +55,11 @@ public class ArtistActivity extends Activity {
         mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
-        getActionBar().setTitle("");
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle("");
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
             @Override

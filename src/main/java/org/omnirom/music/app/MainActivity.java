@@ -5,10 +5,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -17,29 +15,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import org.omnirom.music.app.fragments.AbstractRootFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
-import org.omnirom.music.app.fragments.NowPlayingFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
-import org.omnirom.music.app.ui.BlurringFrameLayout;
-import org.omnirom.music.app.ui.KenBurnsView;
 import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.PlaybackCallbackImpl;
 import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.model.Song;
 
-import org.omnirom.music.providers.MultiProviderDatabaseHelper;
-import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 
 
@@ -69,8 +55,6 @@ public class MainActivity extends Activity
 
     private boolean mRestoreBarOnBack;
 
-    private Handler mHandler;
-
 
     public MainActivity() {
         mPlaybackState = new PlaybackState();
@@ -81,7 +65,6 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mHandler = new Handler();
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -94,14 +77,6 @@ public class MainActivity extends Activity
 
         // Setup the playing bar click listener
         mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
-
-        // We start it hidden. As we don't have the exact size yet, we post it for later change
-        /*mPlayingBarLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mPlayingBarLayout.setTranslationY(mPlayingBarLayout.getMeasuredHeight());
-            }
-        });*/
     }
 
     @Override
@@ -148,7 +123,6 @@ public class MainActivity extends Activity
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         try {
-            FragmentManager fragmentManager = getFragmentManager();
             Fragment newFrag;
             switch (position+1) {
                 case SECTION_PLAYLISTS:
@@ -214,9 +188,10 @@ public class MainActivity extends Activity
 
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setTitle(mTitle);
+        }
     }
 
 

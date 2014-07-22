@@ -29,6 +29,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.omnirom.music.app.AlbumActivity;
+import org.omnirom.music.app.PlaybackQueueActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
@@ -278,16 +279,19 @@ public class PlayingBarView extends RelativeLayout {
             mTracksLayout.setVisibility(View.VISIBLE);
 
             // Inflate views and make the list out of the first 4 items (or less)
-            int i = 0;
+            int shownCount = 0;
+            View itemViews[] = new View[MAX_PEEK_QUEUE_SIZE];
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
             for (final Song song : queue) {
-                if (i == MAX_PEEK_QUEUE_SIZE) {
+                if (shownCount == MAX_PEEK_QUEUE_SIZE) {
                     break;
                 }
 
                 View itemRoot = inflater.inflate(R.layout.item_playbar, mTracksLayout, false);
+                itemRoot.setViewName("playbackqueue:preview:" + shownCount);
                 mTracksLayout.addView(itemRoot);
+                itemViews[shownCount] = itemRoot;
 
                 TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
                 TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
@@ -302,7 +306,7 @@ public class PlayingBarView extends RelativeLayout {
 
                 tvTitle.setText(song.getTitle());
                 ivAlbumArt.loadArtForSong(song);
-                ivAlbumArt.setViewName(song.getRef() + i);
+                ivAlbumArt.setViewName(song.getRef() + shownCount);
 
                 ivAlbumArt.setOnClickListener(new View.OnClickListener() {
                     Palette mPalette;
@@ -337,7 +341,7 @@ public class PlayingBarView extends RelativeLayout {
                     }
                 });
 
-                if (i == 0) {
+                if (shownCount == 0) {
                     itemRoot.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -348,11 +352,11 @@ public class PlayingBarView extends RelativeLayout {
                     });
                 }
 
-                i++;
+                shownCount++;
             }
 
-            // Add the "View full queue" item entry
-            View itemRoot = inflater.inflate(R.layout.item_playbar, mTracksLayout, false);
+            // Add the "View full queue" item entry, using the album art as "wrap" button
+            final View itemRoot = inflater.inflate(R.layout.item_playbar, mTracksLayout, false);
             mTracksLayout.addView(itemRoot);
 
             TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
@@ -368,6 +372,25 @@ public class PlayingBarView extends RelativeLayout {
                 @Override
                 public void onClick(View view) {
                     setWrapped(true);
+                }
+            });
+
+            final int finalShownCount = shownCount;
+            final View[] finalItemViews = itemViews;
+            itemRoot.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getContext(), PlaybackQueueActivity.class);
+
+                    Pair[] itemsTransition = new Pair[finalShownCount];
+                    for (int i = 0; i < finalShownCount; i++) {
+                        itemsTransition[i] = Pair.create(finalItemViews[i], "playbackqueue:" + i);
+                    }
+
+                    ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
+                            itemsTransition);
+
+                    getContext().startActivity(intent, opt.toBundle());
                 }
             });
 

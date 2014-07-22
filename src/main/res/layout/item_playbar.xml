@@ -4,8 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/playing_bar_item_background"
-    android:clickable="true"
-    android:autoText="false">
+    android:clickable="true">
 
 
     <org.omnirom.music.app.ui.AlbumArtImageView
@@ -34,7 +33,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
-            android:text="The Walker"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="#333333" />
 
@@ -43,7 +41,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:alpha="0.7"
-            android:text="Fits &amp; The Tantrums"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
 
