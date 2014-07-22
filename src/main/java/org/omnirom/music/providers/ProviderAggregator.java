@@ -620,11 +620,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     @Override
-    public void onSongStopped(ProviderIdentifier provider) throws RemoteException {
-
-    }
-
-    @Override
     public void onSearchResult(SearchResult searchResult) throws RemoteException {
 
     }

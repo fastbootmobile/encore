@@ -113,10 +113,15 @@ public class PlaybackService extends Service
             }
         }
 
-        mNotification = new Notification(R.drawable.ic_launcher, "Playing music!",
-                System.currentTimeMillis());
+        // Setup
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setSmallIcon(R.drawable.ic_launcher);
+        builder.setContentIntent(pendingIntent);
+        mNotification = builder.build();
+
+
         mNotification.setLatestEventInfo(this, "OmniMusic",
                 "This is an ugly notification. Beautify me.", pendingIntent);
 
@@ -497,12 +502,21 @@ public class PlaybackService extends Service
 
         @Override
         public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
+            // Move to the next track
+            mPlaybackQueue.remove(0);
 
-        }
-
-        @Override
-        public void onSongStopped(ProviderIdentifier provider) throws RemoteException {
-
+            if (mPlaybackQueue.size() > 0) {
+                // We restart the queue in an handler. In the case of the Spotify provider, the
+                // endOfTrack callback locks the main API thread, leading to a dead lock if we
+                // try to play a track here while still being in the callstack of the endOfTrack
+                // callback.
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        startPlayingQueue();
+                    }
+                });
+            }
         }
 
         @Override
