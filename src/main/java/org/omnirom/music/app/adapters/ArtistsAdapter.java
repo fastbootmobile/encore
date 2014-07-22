@@ -302,6 +302,7 @@ public class ArtistsAdapter extends BaseAdapter {
             } else {
                 tag.ivCover.setImageResource(R.drawable.album_placeholder);
                 tag.llRoot.setBackgroundColor(tag.llRoot.getResources().getColor(R.color.default_album_art_background));
+                tag.srcBitmap = ((BitmapDrawable) res.getDrawable(R.drawable.album_placeholder)).getBitmap();
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
             }
