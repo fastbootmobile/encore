@@ -15,10 +15,10 @@ import org.omnirom.music.framework.PluginsLookup;
 import java.security.Provider;
 
 /**
- * Represents a connection to an audio provider service
+ * Represents a connection to an audio provider (music source or DSP) service
  */
 public class ProviderConnection implements ServiceConnection {
-    private static final boolean DEBUG = BuildConfig.DEBUG;
+    protected static final boolean DEBUG = BuildConfig.DEBUG;
     private static final String TAG = "ProviderConnection";
 
     private String mProviderName;
@@ -27,10 +27,10 @@ public class ProviderConnection implements ServiceConnection {
     private String mConfigurationActivity;
     private Context mContext;
     private IMusicProvider mBinder;
-    private boolean mIsBound;
-    private AudioSocketHost mAudioSocket;
-    private ProviderIdentifier mIdentifier;
-    private PluginsLookup.ConnectionListener mListener;
+    protected boolean mIsBound;
+    protected AudioSocketHost mAudioSocket;
+    protected ProviderIdentifier mIdentifier;
+    protected PluginsLookup.ConnectionListener mListener;
 
     /**
      * Constructor
@@ -73,7 +73,8 @@ public class ProviderConnection implements ServiceConnection {
     }
 
     /**
-     * @return The remote binder for this connection, or null if the service is not bound
+     * @return The remote binder for a music provider for this connection, or null if the service
+     * is not bound
      */
     public IMusicProvider getBinder() {
         return mBinder;
@@ -207,6 +208,10 @@ public class ProviderConnection implements ServiceConnection {
             Log.e(TAG, "Unable to setup the audio socket for the providers " + mProviderName, e);
         }
 
+        return mAudioSocket;
+    }
+
+    public AudioSocketHost getAudioSocket() {
         return mAudioSocket;
     }
 }

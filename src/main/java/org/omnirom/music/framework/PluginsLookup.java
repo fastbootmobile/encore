@@ -13,6 +13,7 @@ import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
 import org.omnirom.music.providers.Constants;
+import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.MultiProviderPlaylistProvider;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
@@ -41,6 +42,7 @@ public class PluginsLookup {
 
     private Context mContext;
     private List<ProviderConnection> mConnections;
+    private List<DSPConnection> mDSPConnections;
     private List<ConnectionListener> mConnectionListeners;
     private IPlaybackService mPlaybackService;
     private PlaybackCallbackImpl mPlaybackCallback;
@@ -89,6 +91,7 @@ public class PluginsLookup {
 
     private PluginsLookup() {
         mConnections = new ArrayList<ProviderConnection>();
+        mDSPConnections = new ArrayList<DSPConnection>();
         mConnectionListeners = new ArrayList<ConnectionListener>();
     }
 
@@ -136,7 +139,7 @@ public class PluginsLookup {
 
     public void updatePlugins() {
         fetchProviders();
-        // mDSPs = fetchDSPs();
+        fetchDSPs();
     }
 
     public void tearDown() {
@@ -183,6 +186,10 @@ public class PluginsLookup {
         return new ArrayList<ProviderConnection>(mConnections);
     }
 
+    public List<DSPConnection> getAvailableDSPs() {
+        return new ArrayList<DSPConnection>(mDSPConnections);
+    }
+
     /**
      * Read all the services providers from the package manager for the PICK_PROVIDER action
      */
@@ -190,10 +197,18 @@ public class PluginsLookup {
         Intent baseIntent = new Intent(Constants.ACTION_PICK_PROVIDER);
         // baseIntent.setFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
 
-        return fetchServicesForIntent(baseIntent);
+        return fetchServicesForIntent(baseIntent, false);
     }
 
-    private List<HashMap<String, String>> fetchServicesForIntent(Intent intent) {
+    /**
+     * Read all the services providers from the package manager for the PICK_DSP_PROVIDER action
+     */
+    private List<HashMap<String, String>> fetchDSPs() {
+        Intent baseIntent = new Intent(Constants.ACTION_PICK_DSP_PROVIDER);
+        return fetchServicesForIntent(baseIntent, true);
+    }
+
+    private List<HashMap<String, String>> fetchServicesForIntent(Intent intent, boolean isDSP) {
         PackageManager pm = mContext.getPackageManager();
         assert(pm != null);
 
@@ -222,7 +237,7 @@ public class PluginsLookup {
 
                 if (providerName != null) {
                     boolean found = false;
-                    for (ProviderConnection conn : mConnections) {
+                    for (DSPConnection conn : mDSPConnections) {
                         if (conn.getPackage().equals(sinfo.packageName)
                                 && conn.getServiceName().equals(sinfo.name)) {
                             found = true;
@@ -232,29 +247,46 @@ public class PluginsLookup {
                     }
 
                     if (!found) {
-                        ProviderConnection conn = new ProviderConnection(mContext, providerName,
-                                item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
-                                item.get(DATA_CONFIGCLASS));
-                        conn.setListener(mProviderListener);
-                        mConnections.add(conn);
+                        for (ProviderConnection conn : mConnections) {
+                            if (conn.getPackage().equals(sinfo.packageName)
+                                    && conn.getServiceName().equals(sinfo.name)) {
+                                found = true;
+                                conn.bindService();
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!found) {
+                        Log.e(TAG, "Binding to " + providerName + ", isDSP? " + isDSP);
+                        if (isDSP) {
+                            DSPConnection conn = new DSPConnection(mContext, providerName,
+                                    item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
+                                    item.get(DATA_CONFIGCLASS));
+                            conn.setListener(mProviderListener);
+                            mDSPConnections.add(conn);
+                        } else {
+                            ProviderConnection conn = new ProviderConnection(mContext, providerName,
+                                    item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
+                                    item.get(DATA_CONFIGCLASS));
+                            conn.setListener(mProviderListener);
+                            mConnections.add(conn);
+                        }
+
                     }
                 }
 
                 services.add(item);
             }
         }
+
         HashMap<String, String> item = new HashMap<String, String>();
         item.put(DATA_PACKAGE,"org.omnirom.music.providers");
         item.put(DATA_SERVICE,"org.omnirom.music.providers.MultiProviderPlaylistProvider");
         item.put(DATA_NAME,"MultiProviderPlaylistProvider");
         item.put(DATA_CONFIGCLASS,null);
-       // mMultiProviderConnection = new ProviderConnection(mContext,item.get(DATA_NAME),
-         //       item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
-        //        item.get(DATA_CONFIGCLASS));
         services.add(item);
-        //mMultiProviderConnection.setListener(mProviderListener);
-      //  mConnections.add(mMultiProviderConnection);
-     //   multiConn.onServiceConnected(new ComponentName("org.omnirom.music.providers","MultiProviderPlaylistProvider"),mMultiProviderPlaylistProvider.asBinder());
+
         return services;
     }
 }

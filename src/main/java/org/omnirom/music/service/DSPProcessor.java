@@ -4,6 +4,14 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import org.omnirom.music.app.Utils;
+import org.omnirom.music.framework.AudioSocketHost;
+import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.providers.DSPConnection;
+import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Class responsible for grabbing the audio from a provider, pushing it through the DSP chain,
@@ -23,11 +31,43 @@ public class DSPProcessor {
     private int mLastRms = 0;
     private PlaybackService mPlaybackService;
 
+    private AudioSocketHost.AudioSocketCallback mProviderCallback = new AudioSocketHost.AudioSocketCallback() {
+        @Override
+        public void onAudioInput(short[] frames, int numFrames) {
+            inputProviderAudio(frames, numFrames);
+        }
+
+        @Override
+        public void onFormatInput(int channels, int sampleRate) {
+            setupSink(sampleRate, channels);
+        }
+    };
+
+    private AudioSocketHost.AudioSocketCallback mDSPCallback = new AudioSocketHost.AudioSocketCallback() {
+        @Override
+        public void onAudioInput(short[] frames, int numFrames) {
+            inputDSPAudio(frames, numFrames);
+        }
+
+        @Override
+        public void onFormatInput(int channels, int sampleRate) {
+
+        }
+    };
+
     /**
      * Default constructor
      */
     public DSPProcessor(PlaybackService pbs) {
         mPlaybackService = pbs;
+    }
+
+    public AudioSocketHost.AudioSocketCallback getProviderCallback() {
+        return mProviderCallback;
+    }
+
+    public AudioSocketHost.AudioSocketCallback getDSPCallback() {
+        return mDSPCallback;
     }
 
     /**
@@ -76,8 +116,24 @@ public class DSPProcessor {
      * @param frames Incoming frames, as short samples (only INT16 is supported)
      * @param numframes The number of frames to read from the array
      */
-    public void inputAudio(short[] frames, int numframes) {
-        // TODO: Write this to the DSP chain, then the DSP drawable to the sink
+    public void inputProviderAudio(short[] frames, int numframes) {
+        List<DSPConnection> dsps = PluginsLookup.getDefault().getAvailableDSPs();
+        for (DSPConnection conn : dsps) {
+            AudioSocketHost host = conn.getAudioSocket();
+            if (host == null) {
+                // DSP effects don't signal their connectivity state, so they're not set-up at the
+                // same time as the providers
+                host = mPlaybackService.assignProviderAudioSocket(conn);
+            }
+            try {
+                host.writeAudioData(frames, numframes);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void inputDSPAudio(short[] frames, int numframes) {
         if (mSink != null) {
             mSink.write(frames, numframes);
         }

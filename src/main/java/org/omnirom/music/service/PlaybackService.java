@@ -28,6 +28,7 @@ import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.IProviderCallback;
@@ -49,6 +50,7 @@ public class PlaybackService extends Service
 
     private static final String TAG = "PlaybackService";
     private static final boolean DEBUG = BuildConfig.DEBUG;
+    private static final int FOREGROUND_ID = 1;
 
     /**
      * Time after which the service will shutdown if nothing happens
@@ -223,14 +225,25 @@ public class PlaybackService extends Service
      * Assigns the provided provider an audio client socket
      * @param connection The provider
      */
-    private void assignProviderAudioSocket(ProviderConnection connection) {
-        // Assign the providers an audio socket
-        final String socketName = "org.omnirom.music.AUDIO_SOCKET_" + connection.getProviderName()
-                + "_" + System.currentTimeMillis();
-        AudioSocketHost socket = connection.createAudioSocket(socketName);
-        socket.setDSP(mDSPProcessor);
+    public AudioSocketHost assignProviderAudioSocket(ProviderConnection connection) {
+        AudioSocketHost socket = connection.getAudioSocket();
 
-        Log.i(TAG, "Provider connected and socket set: " + connection.getProviderName());
+        if (socket == null) {
+            // Assign the providers an audio socket
+            final String socketName = "org.omnirom.music.AUDIO_SOCKET_" + connection.getProviderName()
+                    + "_" + System.currentTimeMillis();
+            socket = connection.createAudioSocket(socketName);
+
+            if (connection instanceof DSPConnection) {
+                socket.setCallback(mDSPProcessor.getDSPCallback());
+            } else {
+                socket.setCallback(mDSPProcessor.getProviderCallback());
+            }
+
+            Log.i(TAG, "Provider connected and socket set: " + connection.getProviderName());
+        }
+
+        return socket;
     }
 
     /**
@@ -269,7 +282,7 @@ public class PlaybackService extends Service
         }
 
         // We're playing something, so make sure we stay on front
-        startForeground(1, mNotification);
+        startForeground(FOREGROUND_ID, mNotification);
     }
 
     /**
@@ -368,7 +381,7 @@ public class PlaybackService extends Service
                     }
                 }
 
-                startForeground(1, mNotification);
+                startForeground(FOREGROUND_ID, mNotification);
 
                 return true;
             } else {

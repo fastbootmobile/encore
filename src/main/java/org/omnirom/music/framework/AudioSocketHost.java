@@ -10,6 +10,7 @@ import org.omnirom.music.service.DSPProcessor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
@@ -17,6 +18,11 @@ import java.nio.ShortBuffer;
  * Host socket for the audio coming from a provider
  */
 public class AudioSocketHost {
+
+    public interface AudioSocketCallback {
+        public void onAudioInput(short[] frames, int numFrames);
+        public void onFormatInput(int channels, int sampleRate);
+    }
 
     private static final String TAG = "AudioSocketHost";
 
@@ -27,9 +33,10 @@ public class AudioSocketHost {
     private boolean mStop = false;
     private LocalServerSocket mSocket;
     private Thread mListenThread;
-    private DSPProcessor mDSP;
     private String mSocketName;
     private InputStream mInputStream;
+    private OutputStream mOutputStream;
+    private AudioSocketCallback mCallback;
 
     /**
      * Runnable for the thread responsible for processing network data
@@ -41,6 +48,9 @@ public class AudioSocketHost {
                 while (!mStop) {
                     LocalSocket client = mSocket.accept();
                     mInputStream = client.getInputStream();
+                    mOutputStream = client.getOutputStream();
+
+                    Log.e(TAG, "NOT STOP: " + mOutputStream);
 
                     // We keep on reading data as long as the providers socket is connected.
                     // We assume here that InputStream is blocking and that all packets
@@ -90,8 +100,8 @@ public class AudioSocketHost {
         Log.i(TAG, "Created AudioSocketHost " + socketName);
     }
 
-    public void setDSP(DSPProcessor dsp) {
-        mDSP = dsp;
+    public void setCallback(AudioSocketCallback callback) {
+        mCallback = callback;
     }
 
     /**
@@ -161,8 +171,8 @@ public class AudioSocketHost {
 
         Log.i(TAG, "Handling packet format: " + channels + ", sampleRate=" + sampleRate);
 
-        if (mDSP != null) {
-            mDSP.setupSink(sampleRate, channels);
+        if (mCallback != null) {
+            mCallback.onFormatInput(channels, sampleRate);
         }
     }
 
@@ -173,9 +183,11 @@ public class AudioSocketHost {
      * @throws IOException
      */
     private void handlePacketData(InputStream in) throws IOException {
-        long timeMs = SystemClock.currentThreadTimeMillis();
+        // long timeMs = SystemClock.currentThreadTimeMillis();
 
-        in.read(mIntBuffer.array(), 0, 4);
+        if (in.read(mIntBuffer.array(), 0, 4) != 4) {
+            Log.e(TAG, "Reading an int but read didn't return 4 bytes!");
+        }
         final int numFrames = mIntBuffer.getInt(0);
 
         final int totalToRead = numFrames * 2; // 1 short = 2 bytes
@@ -191,9 +203,40 @@ public class AudioSocketHost {
         }
 
         mSamplesBuffer.asShortBuffer().get(mSamplesShortBuffer);
-        mDSP.inputAudio(mSamplesShortBuffer, numFrames);
+        if (mCallback != null) {
+            mCallback.onAudioInput(mSamplesShortBuffer, numFrames);
+        }
 
         // Log.i(TAG, "Read " + numFrames + " frames in " + (SystemClock.currentThreadTimeMillis() - timeMs) + "ms");
     }
 
+    /**
+     * Writes audio data back to the socket
+     * @param frames The frames to write
+     */
+    public void writeAudioData(short[] frames, int numFrames) throws IOException {
+        if (numFrames > mSamplesBuffer.capacity()) {
+            throw new IllegalArgumentException("You must not pass more than " +
+                    mSamplesBuffer.capacity() + " samples at a time");
+        }
+        /**
+         * Audio data packet:
+         * OPCODE_DATA      [byte]
+         * NUM_FRAMES       [int] (number of short values to read)
+         * SAMPLES          [short[]]
+         */
+        if (numFrames > 0 && mOutputStream != null) {
+            mOutputStream.write(AudioSocket.OPCODE_DATA);
+            mIntBuffer.rewind();
+            mIntBuffer.putInt(numFrames);
+            mOutputStream.write(mIntBuffer.array());
+
+            mSamplesBuffer.rewind();
+            mSamplesBuffer.asShortBuffer().put(frames, 0, numFrames);
+
+            mOutputStream.write(mSamplesBuffer.array(), 0, numFrames * 2);
+
+            mOutputStream.flush();
+        }
+    }
 }
