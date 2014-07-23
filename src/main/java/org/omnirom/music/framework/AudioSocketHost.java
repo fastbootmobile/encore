@@ -20,8 +20,8 @@ import java.nio.ShortBuffer;
 public class AudioSocketHost {
 
     public interface AudioSocketCallback {
-        public void onAudioInput(short[] frames, int numFrames);
-        public void onFormatInput(int channels, int sampleRate);
+        public void onAudioInput(AudioSocketHost socket, short[] frames, int numFrames);
+        public void onFormatInput(AudioSocketHost socket, int channels, int sampleRate);
     }
 
     private static final String TAG = "AudioSocketHost";
@@ -100,6 +100,10 @@ public class AudioSocketHost {
         Log.i(TAG, "Created AudioSocketHost " + socketName);
     }
 
+    public String getName() {
+        return mSocketName;
+    }
+
     public void setCallback(AudioSocketCallback callback) {
         mCallback = callback;
     }
@@ -172,7 +176,7 @@ public class AudioSocketHost {
         Log.i(TAG, "Handling packet format: " + channels + ", sampleRate=" + sampleRate);
 
         if (mCallback != null) {
-            mCallback.onFormatInput(channels, sampleRate);
+            mCallback.onFormatInput(this, channels, sampleRate);
         }
     }
 
@@ -204,7 +208,7 @@ public class AudioSocketHost {
 
         mSamplesBuffer.asShortBuffer().get(mSamplesShortBuffer);
         if (mCallback != null) {
-            mCallback.onAudioInput(mSamplesShortBuffer, numFrames);
+            mCallback.onAudioInput(this, mSamplesShortBuffer, numFrames);
         }
 
         // Log.i(TAG, "Read " + numFrames + " frames in " + (SystemClock.currentThreadTimeMillis() - timeMs) + "ms");

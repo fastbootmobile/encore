@@ -174,6 +174,16 @@ public class PluginsLookup {
         return null;
     }
 
+    public DSPConnection getDSP(ProviderIdentifier id) {
+        for (DSPConnection connection : mDSPConnections) {
+            if (connection.getIdentifier().equals(id)) {
+                return connection;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Returns the list of available music content providers. See DATA_** for the list of keys
      * available
