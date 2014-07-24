@@ -431,6 +431,16 @@ public class PlaybackService extends Service
         public int getCurrentRms() throws RemoteException {
             return mDSPProcessor.getRms();
         }
+
+        @Override
+        public List<ProviderIdentifier> getDSPChain() throws RemoteException {
+            return mDSPProcessor.getActiveChain();
+        }
+
+        @Override
+        public void setDSPChain(List<ProviderIdentifier> chain) throws RemoteException {
+            mDSPProcessor.setActiveChain(chain);
+        }
     };
 
     @Override

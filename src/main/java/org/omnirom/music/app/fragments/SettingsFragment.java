@@ -33,8 +33,8 @@ public class SettingsFragment extends PreferenceFragment {
 
     private static final String TAG = "SettingsFragment";
 
-    private static final String KEY_MULTISEL_PROVIDERS_ENABLE = "multisel_providers_enable";
     private static final String KEY_LIST_PROVIDERS_CONFIG = "list_providers_config";
+    private static final String KEY_LIST_DSP_CONFIG = "list_dsp_config";
 
     /**
      * Use this factory method to create a new instance of
@@ -69,6 +69,9 @@ public class SettingsFragment extends PreferenceFragment {
         Preference listProvidersConfig =  pm.findPreference(KEY_LIST_PROVIDERS_CONFIG);
         assert listProvidersConfig != null;
 
+        Preference listDspConfig = pm.findPreference(KEY_LIST_DSP_CONFIG);
+        assert listDspConfig != null;
+
         listProvidersConfig.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -83,25 +86,21 @@ public class SettingsFragment extends PreferenceFragment {
                 return true;
             }
         });
-/*
-        listProvidersConfig.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                int providerNum = Integer.parseInt((String) newValue);
-                mProviderInConfig = mProviders.get(providerNum);
 
-                if (mProviderInConfig.getConfigurationActivity() != null) {
-                    Intent i = new Intent();
-                    i.setClassName(mProviderInConfig.getPackage(),
-                            mProviderInConfig.getConfigurationActivity());
-                    startActivity(i);
-                } else {
-                    Utils.shortToast(getActivity(), R.string.no_settings_provider);
-                }
+        listDspConfig.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                FragmentManager fragmentManager = getActivity().getFragmentManager();
+                Fragment f = new DspProvidersFragment();
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+                ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
+                ft.addToBackStack(f.toString());
+                ft.replace(R.id.container, f);
+                ft.commit();
 
                 return true;
             }
-        });*/
+        });
     }
 
 }

@@ -5,6 +5,8 @@ import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Artist;
 
+import org.omnirom.music.providers.ProviderIdentifier;
+
 import org.omnirom.music.service.IPlaybackCallback;
 
 interface IPlaybackService {
@@ -97,5 +99,15 @@ interface IPlaybackService {
      * Returns the current RMS level of the currently playing output
      */
     int getCurrentRms();
+
+    /**
+     * Returns the current DSP chain
+     */
+    List<ProviderIdentifier> getDSPChain();
+
+    /**
+     * Sets the active DSP chain to use
+     */
+    void setDSPChain(in List<ProviderIdentifier> chain);
 
 }

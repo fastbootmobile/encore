@@ -8,7 +8,7 @@
             android:summary="Enable, disable, and configure the installed music providers plug-ins"
             android:title="Music providers" />
 
-        <ListPreference
+        <Preference
             android:key="list_dsp_config"
             android:summary="Enable, disable, and configure the installed sound processing plug-ins to use in your effects chain"
             android:title="Sound processing plugins" />

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/add_effect"
+        android:id="@+id/menu_add_effect"
+        android:showAsAction="always" />
+</menu>

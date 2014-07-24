@@ -187,4 +187,13 @@ public class DSPProcessor {
 
         return mLastRms;
     }
+
+    public void setActiveChain(List<ProviderIdentifier> chain) {
+        // We make a copy to avoid any external modification
+        mDSPChain = new ArrayList<ProviderIdentifier>(chain);
+    }
+
+    public List<ProviderIdentifier> getActiveChain() {
+        return mDSPChain;
+    }
 }
