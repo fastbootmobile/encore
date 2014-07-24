@@ -67,16 +67,10 @@ public class SettingsFragment extends PreferenceFragment {
         assert pm != null;
 
         // Fill in the entries and values
-        MultiSelectListPreference mslProvidersEnable =
-                (MultiSelectListPreference) pm.findPreference(KEY_MULTISEL_PROVIDERS_ENABLE);
-        assert mslProvidersEnable != null;
-
         ListPreference listProvidersConfig = (ListPreference) pm.findPreference(KEY_LIST_PROVIDERS_CONFIG);
         assert listProvidersConfig != null;
 
         mProviders = mPluginsLookup.getAvailableProviders();
-
-        Log.e(TAG, "Providers: " + mProviders.size());
 
         CharSequence[] providerNames = new CharSequence[mProviders.size()];
         CharSequence[] providerValues = new CharSequence[mProviders.size()];
@@ -86,8 +80,6 @@ public class SettingsFragment extends PreferenceFragment {
             providerValues[i] = Integer.toString(i);
             i++;
         }
-        mslProvidersEnable.setEntries(providerNames);
-        mslProvidersEnable.setEntryValues(providerValues);
         listProvidersConfig.setEntries(providerNames);
         listProvidersConfig.setEntryValues(providerValues);
 
@@ -114,8 +106,6 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
-        view.setBackgroundColor(getResources().getColor(R.color.default_fragment_background));
-
         return view;
     }
 

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -20,7 +21,6 @@ import org.omnirom.music.app.fragments.AbstractRootFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
-import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.PlaybackCallbackImpl;
 import org.omnirom.music.framework.PlaybackState;
@@ -142,12 +142,6 @@ public class MainActivity extends Activity
         }
     }
 
-    @Override
-    public void onSettingsButtonPressed() {
-        showFragment(SettingsFragment.newInstance(), true);
-        mTitle = getString(R.string.action_settings);
-    }
-
     public void showFragment(Fragment f, boolean addToStack) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
@@ -210,6 +204,11 @@ public class MainActivity extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 

@@ -28,6 +28,7 @@ import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.AbstractProviderConnection;
 import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
@@ -207,7 +208,7 @@ public class PlaybackService extends Service
      * @param connection The provider connection
      */
     @Override
-    public void onServiceConnected(ProviderConnection connection) {
+    public void onServiceConnected(AbstractProviderConnection connection) {
         assignProviderAudioSocket(connection);
     }
 
@@ -216,7 +217,7 @@ public class PlaybackService extends Service
      * @param connection The provider connected
      */
     @Override
-    public void onServiceDisconnected(ProviderConnection connection) {
+    public void onServiceDisconnected(AbstractProviderConnection connection) {
         // TODO: Release the audio socket, update the playback status if we were playing from
         // this provider.
     }
@@ -225,7 +226,7 @@ public class PlaybackService extends Service
      * Assigns the provided provider an audio client socket
      * @param connection The provider
      */
-    public AudioSocketHost assignProviderAudioSocket(ProviderConnection connection) {
+    public AudioSocketHost assignProviderAudioSocket(AbstractProviderConnection connection) {
         AudioSocketHost socket = connection.getAudioSocket();
 
         if (socket == null) {

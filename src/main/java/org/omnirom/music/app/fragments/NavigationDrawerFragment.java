@@ -114,23 +114,6 @@ public class NavigationDrawerFragment extends Fragment {
         LinearLayout rootView = (LinearLayout) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
 
-        Button settingsBtn = (Button) rootView.findViewById(R.id.btn_nav_settings);
-        settingsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCallbacks.onSettingsButtonPressed();
-
-                if (mPreviousItem != null) {
-                    mPreviousItem.setTypeface(mUnselectedTypeface);
-                    mPreviousItem = null;
-                }
-
-                if (mDrawerLayout != null) {
-                    mDrawerLayout.closeDrawer(mFragmentContainerView);
-                }
-            }
-        });
-
         mDrawerListView = (ListView) rootView.findViewById(R.id.nav_drawer_list);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -353,10 +336,5 @@ public class NavigationDrawerFragment extends Fragment {
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected(int position);
-
-        /**
-         * Called when the Settings special entry is selected
-         */
-        void onSettingsButtonPressed();
     }
 }

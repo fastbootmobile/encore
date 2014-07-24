@@ -15,16 +15,4 @@
         android:dividerHeight="1dp"
         tools:context="org.omnirom.music.app.fragments.NavigationDrawerFragment" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/settings"
-        android:id="@+id/btn_nav_settings"
-        android:layout_gravity="center_vertical"
-        style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
-        android:textAllCaps="true"
-        android:textColor="#666666"
-        android:drawableLeft="@drawable/ic_nav_settings"
-        android:gravity="center_vertical|left"
-        android:paddingStart="8dp" />
 </LinearLayout>

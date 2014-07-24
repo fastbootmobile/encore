@@ -12,6 +12,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
+import org.omnirom.music.providers.AbstractProviderConnection;
 import org.omnirom.music.providers.Constants;
 import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.MultiProviderPlaylistProvider;
@@ -33,11 +34,12 @@ public class PluginsLookup {
     public static final String DATA_PACKAGE = "package";
     public static final String DATA_SERVICE = "service";
     public static final String DATA_NAME = "name";
+    public static final String DATA_AUTHOR = "author";
     public static final String DATA_CONFIGCLASS = "configclass";
 
     public static interface ConnectionListener {
-        public void onServiceConnected(ProviderConnection connection);
-        public void onServiceDisconnected(ProviderConnection connection);
+        public void onServiceConnected(AbstractProviderConnection connection);
+        public void onServiceDisconnected(AbstractProviderConnection connection);
     }
 
     private Context mContext;
@@ -69,14 +71,14 @@ public class PluginsLookup {
 
     private ConnectionListener mProviderListener = new ConnectionListener() {
         @Override
-        public void onServiceConnected(ProviderConnection connection) {
+        public void onServiceConnected(AbstractProviderConnection connection) {
             for (ConnectionListener listener : mConnectionListeners) {
                 listener.onServiceConnected(connection);
             }
         }
 
         @Override
-        public void onServiceDisconnected(ProviderConnection connection) {
+        public void onServiceDisconnected(AbstractProviderConnection connection) {
             for (ConnectionListener listener : mConnectionListeners) {
                 listener.onServiceDisconnected(connection);
             }
@@ -109,14 +111,17 @@ public class PluginsLookup {
         item.put(DATA_PACKAGE, "org.omnirom.music.providers");
         item.put(DATA_SERVICE, "org.omnirom.music.providers.MultiProviderPlaylistProvider");
         item.put(DATA_NAME, "MultiProviderPlaylistProvider");
+        item.put(DATA_AUTHOR, "The OmniROM Project");
         item.put(DATA_CONFIGCLASS, null);
         mMultiProviderConnection = new ProviderConnection(mContext,item.get(DATA_NAME),
+                item.get(DATA_AUTHOR),
                 item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
                 item.get(DATA_CONFIGCLASS));
 
         mMultiProviderConnection.setListener(mProviderListener);
         mConnections.add(mMultiProviderConnection);
-        mMultiProviderConnection.onServiceConnected(new ComponentName("org.omnirom.music.providers","MultiProviderPlaylistProvider"),mMultiProviderPlaylistProvider.asBinder());
+        mMultiProviderConnection.onServiceConnected(new ComponentName("org.omnirom.music.providers","org.omnirom.music.providers.MultiProviderPlaylistProvider"),
+                mMultiProviderPlaylistProvider.asBinder());
     }
 
     public void registerProviderListener(ConnectionListener listener) {
@@ -239,6 +244,7 @@ public class PluginsLookup {
                 if (sinfo.metaData != null) {
                     item.put(DATA_NAME, sinfo.metaData.getString(Constants.METADATA_PROVIDER_NAME));
                     item.put(DATA_CONFIGCLASS, sinfo.metaData.getString(Constants.METADATA_CONFIG_CLASS));
+                    item.put(DATA_AUTHOR, sinfo.metaData.getString(Constants.METADATA_PROVIDER_AUTHOR));
                 }
 
                 String providerName = item.get(DATA_NAME);
@@ -268,15 +274,16 @@ public class PluginsLookup {
                     }
 
                     if (!found) {
-                        Log.e(TAG, "Binding to " + providerName + ", isDSP? " + isDSP);
                         if (isDSP) {
                             DSPConnection conn = new DSPConnection(mContext, providerName,
+                                    item.get(DATA_AUTHOR),
                                     item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
                                     item.get(DATA_CONFIGCLASS));
                             conn.setListener(mProviderListener);
                             mDSPConnections.add(conn);
                         } else {
                             ProviderConnection conn = new ProviderConnection(mContext, providerName,
+                                    item.get(DATA_AUTHOR),
                                     item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
                                     item.get(DATA_CONFIGCLASS));
                             conn.setListener(mProviderListener);
@@ -294,8 +301,9 @@ public class PluginsLookup {
         item.put(DATA_PACKAGE,"org.omnirom.music.providers");
         item.put(DATA_SERVICE,"org.omnirom.music.providers.MultiProviderPlaylistProvider");
         item.put(DATA_NAME,"MultiProviderPlaylistProvider");
+        item.put(DATA_AUTHOR, "The OmniROM Project");
         item.put(DATA_CONFIGCLASS,null);
-        services.add(item);
+        //services.add(item);
 
         return services;
     }

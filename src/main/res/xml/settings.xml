@@ -1,40 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
-        android:title="Providers">
-
-        <MultiSelectListPreference
-            android:key="multisel_providers_enable"
-            android:title="Enabled providers"
-            android:summary="Enable or disable installed music providers" />
+    <PreferenceCategory android:title="Plug-ins">
 
         <ListPreference
             android:key="list_providers_config"
-            android:title="Configure provider"
-            android:summary="Select a provider to configure it" />
+            android:summary="Enable, disable, and configure the installed music providers plug-ins"
+            android:title="Music providers" />
+
+        <ListPreference
+            android:key="list_dsp_config"
+            android:summary="Enable, disable, and configure the installed sound processing plug-ins to use in your effects chain"
+            android:title="Sound processing plugins" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Automix">
+    <PreferenceCategory android:title="Automix">
 
         <CheckBoxPreference
             android:key="cb_auto_send_like"
-            android:title="Automatically save what I like"
-            android:summary="Helps making better suggestions by storing the kind of songs you like"
-            />
+            android:summary="Send anonymous information to help better determine songs I'm likely to like"
+            android:title="Learn my taste" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Other">
+    <PreferenceCategory android:title="General">
+        <CheckBoxPreference
+            android:key="cb_download_album_art"
+            android:checked="true"
+            android:summary="Beautify the navigation by download appropriate album art"
+            android:title="Download album art" />
+
+        <CheckBoxPreference
+            android:key="cb_wifi_streaming_only"
+            android:checked="true"
+            android:summary="Automatically enable offline mode when leaving Wi-Fi network"
+            android:title="Wi-Fi streaming only" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Other">
 
         <PreferenceScreen
-            android:title="Licenses"
-            android:summary="Open Source and Third-Party Licenses">
+            android:summary="Open Source and Third-Party Licenses"
+            android:title="Licenses">
 
-            <intent android:action="android.intent.action.VIEW"
+            <intent
+                android:action="android.intent.action.VIEW"
                 android:data="http://www.android.com" />
 
         </PreferenceScreen>

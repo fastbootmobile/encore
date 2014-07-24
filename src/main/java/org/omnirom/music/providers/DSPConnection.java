@@ -11,7 +11,7 @@ import org.omnirom.music.framework.AudioSocketHost;
 /**
  * Created by Guigui on 23/07/2014.
  */
-public class DSPConnection extends ProviderConnection {
+public class DSPConnection extends AbstractProviderConnection {
 
     private static final String TAG = "DSPConnection";
 
@@ -26,14 +26,27 @@ public class DSPConnection extends ProviderConnection {
      * @param serviceName    The name of the service (example: .BassBoostService)
      * @param configActivity The name of the configuration activity in the aforementioned package
      */
-    public DSPConnection(Context ctx, String providerName, String pkg, String serviceName, String configActivity) {
-        super(ctx, providerName, pkg, serviceName, configActivity);
+    public DSPConnection(Context ctx, String providerName, String authorName, String pkg, String serviceName, String configActivity) {
+        super(ctx, providerName, authorName, pkg, serviceName, configActivity);
+    }
+
+    public IDSPProvider getBinder() {
+        return mBinder;
+    }
+
+    @Override
+    public void unbindService() {
+        if (mIsBound) {
+            mBinder = null;
+        }
+
+        super.unbindService();
     }
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         mBinder = IDSPProvider.Stub.asInterface(service);
-        mIsBound = true;
+
         if (DEBUG) Log.d(TAG, "Connected to providers " + name);
 
         if (mListener != null) {
@@ -48,27 +61,23 @@ public class DSPConnection extends ProviderConnection {
         }
     }
 
-    public IDSPProvider getDSPBinder() {
-        return mBinder;
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        // Release the binder
+        mBinder = null;
+        super.onServiceDisconnected(name);
     }
 
     @Override
     public AudioSocketHost createAudioSocket(final String socketName) {
-        // Remove the previous socket, if any
-        if (mAudioSocket != null) {
-            mAudioSocket.release();
-            mAudioSocket = null;
-        }
+        AudioSocketHost host = super.createAudioSocket(socketName);
 
-        // Assign the provider an audio socket
         try {
-            mAudioSocket = new AudioSocketHost(socketName);
-            mAudioSocket.startListening();
             mBinder.setAudioSocketName(socketName);
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to setup the audio socket for the providers " + getProviderName(), e);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
         }
 
-        return mAudioSocket;
+        return host;
     }
 }

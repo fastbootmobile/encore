@@ -43,6 +43,10 @@
             android:name=".PlaybackQueueActivity"
             android:label="@string/title_activity_playback_queue" >
         </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
     </application>
 
 </manifest>

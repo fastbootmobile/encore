@@ -181,7 +181,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         ListView listView =  (ListView) mRootView.findViewById(R.id.lvAlbumContents);
         mAdapter = new SongsListAdapter(getActivity());
-        listView.setAdapter(mAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -205,6 +204,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         });
 
         loadSongs();
+
+        listView.setAdapter(mAdapter);
 
         return mRootView;
     }
@@ -254,8 +255,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     }
 
     private void loadSongs() {
-        mHandler.removeCallbacks(mLoadSongsRunnable);
-        mHandler.postDelayed(mLoadSongsRunnable, 10);
+        mLoadSongsRunnable.run();
     }
 
     @Override
