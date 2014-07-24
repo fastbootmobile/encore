@@ -1,6 +1,9 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -15,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.SettingsActivity;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderConnection;
@@ -31,10 +35,6 @@ public class SettingsFragment extends PreferenceFragment {
 
     private static final String KEY_MULTISEL_PROVIDERS_ENABLE = "multisel_providers_enable";
     private static final String KEY_LIST_PROVIDERS_CONFIG = "list_providers_config";
-
-    private PluginsLookup mPluginsLookup;
-    private List<ProviderConnection> mProviders;
-    private ProviderConnection mProviderInConfig;
 
     /**
      * Use this factory method to create a new instance of
@@ -53,7 +53,6 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mPluginsLookup = PluginsLookup.getDefault();
     }
 
     @Override
@@ -67,22 +66,24 @@ public class SettingsFragment extends PreferenceFragment {
         assert pm != null;
 
         // Fill in the entries and values
-        ListPreference listProvidersConfig = (ListPreference) pm.findPreference(KEY_LIST_PROVIDERS_CONFIG);
+        Preference listProvidersConfig =  pm.findPreference(KEY_LIST_PROVIDERS_CONFIG);
         assert listProvidersConfig != null;
 
-        mProviders = mPluginsLookup.getAvailableProviders();
+        listProvidersConfig.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                FragmentManager fragmentManager = getActivity().getFragmentManager();
+                Fragment f = new SettingsProvidersFragment();
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+                ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
+                ft.addToBackStack(f.toString());
+                ft.replace(R.id.container, f);
+                ft.commit();
 
-        CharSequence[] providerNames = new CharSequence[mProviders.size()];
-        CharSequence[] providerValues = new CharSequence[mProviders.size()];
-        int i = 0;
-        for (ProviderConnection provider : mProviders) {
-            providerNames[i] = provider.getProviderName();
-            providerValues[i] = Integer.toString(i);
-            i++;
-        }
-        listProvidersConfig.setEntries(providerNames);
-        listProvidersConfig.setEntryValues(providerValues);
-
+                return true;
+            }
+        });
+/*
         listProvidersConfig.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -100,22 +101,7 @@ public class SettingsFragment extends PreferenceFragment {
 
                 return true;
             }
-        });
+        });*/
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
-
-        if (mProviderInConfig != null) {
-            mProviderInConfig.bindService();
-        }
-    }
 }

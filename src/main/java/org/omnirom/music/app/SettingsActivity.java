@@ -11,7 +11,7 @@ import org.omnirom.music.app.fragments.SettingsFragment;
 public class SettingsActivity extends Activity {
 
     private static final String TAG = "SettingsActivity";
-    private static final String TAG_FRAGMENT = "fragment_inner";
+    public static final String TAG_FRAGMENT = "fragment_inner";
 
     private SettingsFragment mActiveFragment;
 

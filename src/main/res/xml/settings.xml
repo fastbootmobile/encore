@@ -3,7 +3,7 @@
 
     <PreferenceCategory android:title="Plug-ins">
 
-        <ListPreference
+        <Preference
             android:key="list_providers_config"
             android:summary="Enable, disable, and configure the installed music providers plug-ins"
             android:title="Music providers" />
