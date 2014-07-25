@@ -2,6 +2,7 @@ package org.omnirom.music.service;
 
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AudioSocketHost;
@@ -169,7 +170,17 @@ public class DSPProcessor {
         try {
             host.writeAudioData(frames, numFrames);
         } catch (IOException e) {
-            e.printStackTrace();
+            // Plugin died, try to reconnect the socket and try again
+            mPlaybackService.assignProviderAudioSocket(conn);
+
+            try {
+                host.writeAudioData(frames, numFrames);
+            } catch (IOException e1) {
+                // Failed again, fallback to output
+                if (mSink != null){
+                    mSink.write(frames, numFrames);
+                }
+            }
         }
     }
 

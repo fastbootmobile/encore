@@ -16,6 +16,7 @@ public class DSPConnection extends AbstractProviderConnection {
     private static final String TAG = "DSPConnection";
 
     private IDSPProvider mBinder;
+    private AudioSocketHost mSocket;
 
     /**
      * Constructor
@@ -59,6 +60,14 @@ public class DSPConnection extends AbstractProviderConnection {
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception occurred on the set DSP effect", e);
         }
+
+        if (mSocket != null) {
+            try {
+                mBinder.setAudioSocketName(mSocket.getName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot restore audio socket to DSP effect", e);
+            }
+        }
     }
 
     @Override
@@ -70,14 +79,18 @@ public class DSPConnection extends AbstractProviderConnection {
 
     @Override
     public AudioSocketHost createAudioSocket(final String socketName) {
-        AudioSocketHost host = super.createAudioSocket(socketName);
+        mSocket = super.createAudioSocket(socketName);
 
-        try {
-            mBinder.setAudioSocketName(socketName);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
+        if (mBinder != null) {
+            try {
+                mBinder.setAudioSocketName(socketName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
+            }
+        } else {
+            bindService();
         }
 
-        return host;
+        return mSocket;
     }
 }

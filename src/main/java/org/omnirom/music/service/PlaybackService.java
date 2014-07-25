@@ -220,6 +220,8 @@ public class PlaybackService extends Service
     public void onServiceDisconnected(AbstractProviderConnection connection) {
         // TODO: Release the audio socket, update the playback status if we were playing from
         // this provider.
+        Log.w(TAG, "Provider disconnected, rebinding before it's too late");
+        connection.bindService();
     }
 
     /**

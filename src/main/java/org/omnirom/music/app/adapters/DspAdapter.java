@@ -25,11 +25,21 @@ import java.util.List;
 public class DspAdapter extends BaseAdapter {
 
     private List<DSPConnection> mProviders;
+    private ClickListener mListener;
+
+    public interface ClickListener {
+        public void onDeleteClicked(int position);
+        public void onUpClicked(int position);
+        public void onDownClicked(int position);
+    }
 
     private class ViewHolder {
         TextView tvProviderName;
         TextView tvProviderAuthor;
         ImageView ivProviderIcon;
+        ImageView btnUp;
+        ImageView btnDown;
+        ImageView btnDelete;
     }
 
     public DspAdapter(List<ProviderIdentifier> list) {
@@ -39,8 +49,20 @@ public class DspAdapter extends BaseAdapter {
         }
     }
 
+    public void updateChain(List<ProviderIdentifier> list) {
+        mProviders.clear();
+        for (ProviderIdentifier id : list) {
+            mProviders.add(PluginsLookup.getDefault().getDSP(id));
+        }
+        notifyDataSetChanged();
+    }
+
     public void addProvider(DSPConnection connection) {
         mProviders.add(connection);
+    }
+
+    public void setClickListener(ClickListener listener) {
+        mListener = listener;
     }
 
     @Override
@@ -59,17 +81,20 @@ public class DspAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(final int i, View view, ViewGroup viewGroup) {
         ViewHolder tag;
         Context context = viewGroup.getContext();
 
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.item_provider, viewGroup, false);
+            view = inflater.inflate(R.layout.item_dsp, viewGroup, false);
             tag = new ViewHolder();
             tag.tvProviderAuthor = (TextView) view.findViewById(R.id.tvProviderAuthor);
             tag.tvProviderName = (TextView) view.findViewById(R.id.tvProviderName);
             tag.ivProviderIcon = (ImageView) view.findViewById(R.id.ivProviderLogo);
+            tag.btnDelete = (ImageView) view.findViewById(R.id.btnDelete);
+            tag.btnUp = (ImageView) view.findViewById(R.id.btnUp);
+            tag.btnDown = (ImageView) view.findViewById(R.id.btnDown);
             view.setTag(tag);
         } else {
             tag = (ViewHolder) view.getTag();
@@ -85,6 +110,33 @@ public class DspAdapter extends BaseAdapter {
         } catch (PackageManager.NameNotFoundException e) {
             // ignore
         }
+
+        tag.btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onDeleteClicked(i);
+                }
+            }
+        });
+
+        tag.btnUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onUpClicked(i);
+                }
+            }
+        });
+
+        tag.btnDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onDownClicked(i);
+                }
+            }
+        });
 
         return view;
     }

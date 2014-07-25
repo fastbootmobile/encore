@@ -96,7 +96,9 @@ public class ProviderConnection extends AbstractProviderConnection {
         AudioSocketHost host = super.createAudioSocket(socketName);
 
         try {
-            mBinder.setAudioSocketName(socketName);
+            if (mBinder != null) {
+                mBinder.setAudioSocketName(socketName);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
         }
