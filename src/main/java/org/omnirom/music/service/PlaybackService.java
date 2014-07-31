@@ -475,6 +475,11 @@ public class PlaybackService extends Service
         }
     }
 
+    @Override
+    public void onSearchResult(SearchResult searchResult) {
+
+    }
+
     private IProviderCallback.Stub mProviderCallback = new IProviderCallback.Stub() {
         @Override
         public void onLoggedIn(ProviderIdentifier provider, boolean success) throws RemoteException {
@@ -565,7 +570,14 @@ public class PlaybackService extends Service
         public void onSearchResult(SearchResult searchResult) throws RemoteException {
 
         }
+        @Override
+        public void onSearchResult(SearchResult searchResult) throws  RemoteException {
 
+        }
+        @Override
+        public void onSongStopped(ProviderIdentifier providerIdentifier) throws  RemoteException {
+
+        }
     };
 
 }

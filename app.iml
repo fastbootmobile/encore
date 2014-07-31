@@ -63,6 +63,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="support-v13-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-21.0.0-rc1" level="project" />
+    <orderEntry type="library" exported="" name="fadingactionbar-3.1.2" level="project" />
     <orderEntry type="library" exported="" name="support-v4-21.0.0-rc1" level="project" />
     <orderEntry type="library" exported="" name="cardview-v7-21.0.0-rc1" level="project" />
     <orderEntry type="library" exported="" name="palette-v7-21.0.0-rc1" level="project" />

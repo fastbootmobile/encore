@@ -27,6 +27,7 @@ import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
@@ -205,5 +206,10 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
 
             }
         });
+    }
+
+    @Override
+    public void onSearchResult(SearchResult searchResult) {
+
     }
 }

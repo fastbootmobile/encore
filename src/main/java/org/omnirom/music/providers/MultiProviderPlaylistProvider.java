@@ -15,6 +15,7 @@ import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -239,9 +240,30 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
                 }
             });
         }
+        @Override
+        public void searchFinished(final SearchResult searchResult){
+            if(searchResult != null) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (mCallbacks) {
+                            for (IProviderCallback cb : mCallbacks) {
+                                try {
+                                    cb.onSearchResult(searchResult);
+                                } catch (DeadObjectException e) {
+                                    removeCallback(cb);
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "RemoteException when notifying a callback", e);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
     };
     public void startSearch(String query){
-        return;
+        mMultiProviderDatabaseHelper.startSearch(query);
     }
 
 }

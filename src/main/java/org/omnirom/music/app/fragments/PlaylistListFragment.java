@@ -15,6 +15,7 @@ import org.omnirom.music.app.ui.ExpandableHeightGridView;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
@@ -150,5 +151,10 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
                 mAdapter.addAllUnique(ProviderAggregator.getDefault().getAllPlaylists());
             }
         });
+    }
+
+    @Override
+    public void onSearchResult(SearchResult searchResult) {
+
     }
 }

@@ -76,6 +76,7 @@ public class AlbumActivity extends Activity {
         // Remove the activity title as we don't want it here
         getActionBar().setTitle("");
         getActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
 
     @Override

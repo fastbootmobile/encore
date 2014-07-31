@@ -23,7 +23,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     private static final String TAG = "ProviderAggregator";
     private static final int PROPAGATION_DELAY = 20;
-
+    private SearchResult cacheSearch;
     private List<ILocalCallback> mUpdateCallbacks;
     final private List<ProviderConnection> mProviders;
     private ProviderCache mCache;
@@ -620,7 +620,40 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
     @Override
     public void onSearchResult(SearchResult searchResult){
+        if(searchResult == null)
+            return;
+        if(cacheSearch == null || !cacheSearch.getQuery().equals(searchResult.getQuery())){
+            Log.d(TAG,"new search cache");
+            cacheSearch = searchResult;
+        } else {
+         //if we don't have the same search cache we merge the new and the cache
+         Log.d(TAG,"updating search result");
+            for(String song: searchResult.getSongsList()){
+                if(!cacheSearch.getSongsList().contains(song))
+                    cacheSearch.getSongsList().add(song);
+            }
+            for(String artist: searchResult.getArtistList()){
+                if(!cacheSearch.getArtistList().contains(artist))
+                    cacheSearch.getArtistList().add(artist);
+            }
+            for(String album: searchResult.getAlbumsList()){
+                if(!cacheSearch.getAlbumsList().contains(album))
+                    cacheSearch.getAlbumsList().add(album);
+            }
+            for(String playlist: searchResult.getPlaylistList()){
+                if(!cacheSearch.getPlaylistList().contains(playlist))
+                    cacheSearch.getPlaylistList().add(playlist);
+            }
+        }
+        for(ILocalCallback cb : mUpdateCallbacks){
+            cb.onSearchResult(cacheSearch);
+        }
+    }
+    @Override
+    public void onSongStopped(ProviderIdentifier providerIdentifier) throws  RemoteException{
 
 
     }
+
+
 }

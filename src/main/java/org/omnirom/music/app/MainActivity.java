@@ -6,6 +6,10 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+
+import android.app.SearchManager;
+import android.content.Context;
+
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -16,6 +20,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.SearchView;
+
 
 import org.omnirom.music.app.fragments.AbstractRootFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
@@ -182,10 +194,16 @@ public class MainActivity extends Activity
 
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
+
         if (actionBar != null) {
             actionBar.setDisplayShowTitleEnabled(true);
             actionBar.setTitle(mTitle);
         }
+
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setTitle(mTitle);
+
     }
 
 
@@ -196,6 +214,11 @@ public class MainActivity extends Activity
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+                   .getActionView();
+            searchView.setSearchableInfo(searchManager
+                    .getSearchableInfo(getComponentName()));
             restoreActionBar();
             return true;
         }

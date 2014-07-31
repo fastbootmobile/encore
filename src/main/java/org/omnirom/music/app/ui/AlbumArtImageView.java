@@ -12,6 +12,7 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -68,6 +69,8 @@ public class AlbumArtImageView extends SquareImageView {
                 artKey = cache.getAlbumArtKey((Album) mEntity);
             } else if (mEntity instanceof Song) {
                 artKey = cache.getSongArtKey((Song) mEntity);
+            } else if (mEntity instanceof  Artist) {
+                artKey = cache.getArtistArtKey((Artist) mEntity);
             } else {
                 throw new RuntimeException("Album art entity should be a song or an album");
             }
@@ -101,6 +104,8 @@ public class AlbumArtImageView extends SquareImageView {
                         artKey = AlbumArtCache.getDefault().getArtKey((Album) mEntity, urlBuffer);
                     } else if (mEntity instanceof Song) {
                         artKey = AlbumArtCache.getDefault().getArtKey((Song) mEntity, urlBuffer);
+                    } else if (mEntity instanceof Artist) {
+                        artKey = AlbumArtCache.getDefault().getArtKey((Artist) mEntity,urlBuffer);
                     }
 
                     artUrl = urlBuffer.toString();
@@ -121,6 +126,8 @@ public class AlbumArtImageView extends SquareImageView {
                 cache.putAlbumArtKey((Album) mEntity, artKey);
             } else if (mEntity instanceof Song) {
                 cache.putSongArtKey((Song) mEntity, artKey);
+            } else if (mEntity instanceof  Artist) {
+                cache.putArtistArtKey((Artist) mEntity, artKey);
             }
 
             // In all cases, we tell that this entity is loaded
@@ -215,7 +222,7 @@ public class AlbumArtImageView extends SquareImageView {
     public void loadArtForAlbum(final Album album) {
         loadArtImpl(album);
     }
-
+    public void loadArtForArtist(final Artist artist) { loadArtImpl(artist);}
     private void loadArtImpl(final BoundEntity ent) {
         if (mTask != null) {
             mTask.cancel(true);

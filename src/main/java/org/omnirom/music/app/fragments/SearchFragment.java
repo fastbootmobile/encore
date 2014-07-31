@@ -1,0 +1,222 @@
+package org.omnirom.music.app.fragments;
+
+import android.app.ActivityOptions;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.PaletteItem;
+import android.util.Log;
+import android.util.Pair;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ExpandableListView;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import org.omnirom.music.app.AlbumActivity;
+import org.omnirom.music.app.ArtistActivity;
+import org.omnirom.music.app.MainActivity;
+import org.omnirom.music.app.PlaylistActivity;
+import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
+import org.omnirom.music.app.adapters.SearchAdapter;
+import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
+import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
+import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.ProviderAggregator;
+
+import java.lang.reflect.Array;
+import java.util.List;
+
+
+/**
+ * Created by h4o on 22/07/2014.
+ */
+public class SearchFragment extends AbstractRootFragment implements ILocalCallback {
+    private SearchAdapter mAdapter;
+    private SearchResult mSearchResult;
+    private Handler mHandler;
+    private static final String KEY_PLAYLIST = "playlist";
+    private String TAG = "SearchFragment";
+
+    public SearchFragment(){
+        ProviderAggregator.getDefault().addUpdateCallback(this);
+        mHandler = new Handler();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState){
+        View root = inflater.inflate(R.layout.fragment_search, container, false);
+        assert root != null;
+        mAdapter = new SearchAdapter();
+        ExpandableListView expandableListView = (ExpandableListView) root.findViewById(R.id.expandablelv_search);
+        expandableListView.setAdapter(mAdapter);
+        expandableListView.setGroupIndicator(null);
+        for(int i = 0; i<4;i++){
+            expandableListView.expandGroup(i,false);
+        }
+       expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener(){
+
+            @Override
+            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i2, long l) {
+                Log.d(TAG,"child click");
+                if(mSearchResult != null) {
+                    switch (i){
+                        case SearchAdapter.ARTIST:
+                            onArtistClick(i2,view);
+
+                            break;
+                        case SearchAdapter.ALBUM:
+                            onAlbumClick(i2,view);
+                            break;
+                        case SearchAdapter.SONG:
+                            onSongClick(i2);
+                            break;
+                        case SearchAdapter.PLAYLIST:
+                            onPlaylistClick(i2,view);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    return true;
+                }
+                else
+                    return false;
+            }
+        });
+        return root;
+    }
+
+    private void onSongClick(int i){
+        List<String> list = mSearchResult.getSongsList();
+        if(i == Math.max(10,list.size()+1))
+        return;
+        else {
+            Song song = ProviderAggregator.getDefault().getCache().getSong(list.get(i));
+            if(song != null) {
+                try {
+                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
+                } catch (Exception e) {
+
+                }
+            }
+        }
+
+    }
+    private void onAlbumClick(int i,View v){
+        SearchAdapter.ViewHolder  holder = (SearchAdapter.ViewHolder) v.getTag();
+        ImageView ivCover = holder.albumArtImageView;
+        TextView tvTitle = holder.divider;
+        Bitmap hero = ((BitmapDrawable)holder.albumArtImageView.getDrawable()).getBitmap();
+        int color = 0xffffff;
+        if(hero != null) {
+            Palette palette = Palette.generate(hero);
+            PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
+            PaletteItem darkMutedColor = palette.getDarkMutedColor();
+
+            if (darkVibrantColor != null) {
+                color = darkVibrantColor.getRgb();
+            } else if (darkMutedColor != null) {
+               color = darkMutedColor.getRgb();
+            } else {
+                color = getResources().getColor(R.color.default_album_art_background);
+            }
+        }
+        Album album = ProviderAggregator.getDefault().getCache().getAlbum((String)mAdapter.getChild(SearchAdapter.ALBUM,i));
+        Intent intent = AlbumActivity.craftIntent(getActivity(), hero,album, color);
+        ((ViewGroup) holder.vRoot.getParent()).setTransitionGroup(false);
+
+        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                new Pair<View, String>(ivCover, "itemImage"),
+                new Pair<View, String>(tvTitle, "albumName"));
+        startActivity(intent, opt.toBundle());
+    }
+    private void onArtistClick(int i, View v){
+        SearchAdapter.ViewHolder  holder = (SearchAdapter.ViewHolder) v.getTag();
+        ImageView ivCover = holder.albumArtImageView;
+        TextView tvTitle = holder.divider;
+        Bitmap hero = ((BitmapDrawable)holder.albumArtImageView.getDrawable()).getBitmap();
+        Artist artist = ProviderAggregator.getDefault().getCache().getArtist((String)mAdapter.getChild(SearchAdapter.ARTIST,i));
+        int color = 0xffffff;
+        if(hero != null) {
+            Palette palette = Palette.generate(hero);
+            PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
+            PaletteItem darkMutedColor = palette.getDarkMutedColor();
+
+            if (darkVibrantColor != null) {
+                color = darkVibrantColor.getRgb();
+            } else if (darkMutedColor != null) {
+                color = darkMutedColor.getRgb();
+            } else {
+                color = getResources().getColor(R.color.default_album_art_background);
+            }
+        }
+        Intent intent = new Intent(getActivity(), ArtistActivity.class);
+        intent.putExtra(ArtistActivity.EXTRA_ARTIST,artist);
+        intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
+                color);
+        Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, hero);
+        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                new Pair<View, String>(ivCover, "itemImage"),
+                new Pair<View, String>(tvTitle, "albumName"));
+        startActivity(intent,opt.toBundle());
+    }
+    private void onPlaylistClick(int i, View v){
+        Playlist playlist = ProviderAggregator.getDefault().getCache().getPlaylist((String)mAdapter.getChild(SearchAdapter.PLAYLIST,i));
+        Intent intent = PlaylistActivity.craftIntent(getActivity(),playlist);
+        startActivity(intent);
+    }
+    @Override
+    public void onSongUpdate(List<Song> s) {
+
+    }
+
+    @Override
+    public void onAlbumUpdate(List<Album> a) {
+
+    }
+
+    @Override
+    public void onPlaylistUpdate(List<Playlist> p) {
+
+    }
+
+    @Override
+    public void onArtistUpdate(List<Artist> a) {
+
+    }
+
+    @Override
+    public void onProviderConnected(IMusicProvider provider) {
+
+    }
+
+    @Override
+    public void onSearchResult(final SearchResult searchResult) {
+        Log.d(TAG, "search result received "+searchResult);
+        mSearchResult = searchResult;
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if(mAdapter != null) {
+                    mAdapter.updateSearchResults(searchResult);
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+}

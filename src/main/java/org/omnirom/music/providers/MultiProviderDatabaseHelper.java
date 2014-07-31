@@ -9,13 +9,17 @@ import android.os.DeadObjectException;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by h4o on 01/07/2014.
@@ -55,9 +59,11 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     private HashMap<String,ProviderIdentifier> mRefProviderId;
     private SQLiteDatabase db;
     private LocalCallback mCallback;
+    private SearchResult mSearchResult;
 
     public interface LocalCallback {
         public void playlistUpdated(final Playlist playlist);
+        public void searchFinished(final SearchResult searchResult);
     }
 
     public MultiProviderDatabaseHelper(Context ctx, LocalCallback localCallback){
@@ -218,6 +224,47 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         }
         return false;//not supported yet
     }
+    public void startSearch(final String query) {
+        Log.d(TAG,"searching for "+query);
+        if(mSearchResult != null && mSearchResult.getQuery().hashCode() != query.hashCode() || mSearchResult == null){
+            mSearchResult = new SearchResult(query);
+            final String regex = ".*"+query+".*";
+            Thread searchThread = new Thread(){
+                public void run(){
+
+                    Log.d(TAG,"starting search thread");
+                    Pattern p;
+                    try {
+                        p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+                    } catch (Exception e){
+                        return;
+                    }
+                    List<String> songsList = new ArrayList<String>();
+                    List<String> albumList = new ArrayList<String>();
+                    List<String> playlistList = new ArrayList<String>();
+                    List<String> artistList = new ArrayList<String>();
+
+
+
+                    for(Playlist playlist : mPlaylists.values()){
+                        if(p.matcher(playlist.getName()).matches()){
+                            playlistList.add(playlist.getRef());
+                        }
+                    }
+                    if(mSearchResult.getQuery().hashCode() == query.hashCode()){
+                        mSearchResult.setPlaylistList(playlistList);
+                        mCallback.searchFinished(mSearchResult);
+                    }
+                    mSearchResult = null;
+                }
+
+            };
+            searchThread.start();
+            //searchThread.run();
+
+    }
+
+}
 
 
 

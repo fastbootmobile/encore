@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">OmniMusic</string>
+    <string name="search_hint">Search music</string>
     <string name="title_section_listen_now">Listen now</string>
     <string name="title_section_my_songs">My songs</string>
     <string name="title_section_playlists">Playlists</string>

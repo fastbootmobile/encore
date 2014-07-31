@@ -28,6 +28,7 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
@@ -48,7 +49,7 @@ public class PlaylistViewFragment extends Fragment
         implements ILocalCallback, PlaybackState.Listener {
 
     private static final String TAG = "PlaylistViewFragment";
-    private static final String KEY_PLAYLIST = "playlist";
+    public static final String KEY_PLAYLIST = "playlist";
 
     private PlaylistAdapter mAdapter;
     private Handler mHandler;
@@ -79,6 +80,7 @@ public class PlaylistViewFragment extends Fragment
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if (args == null) {
+
             throw new IllegalArgumentException("This fragment must have a valid playlist");
         }
 
@@ -144,9 +146,9 @@ public class PlaylistViewFragment extends Fragment
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        MainActivity main = (MainActivity) activity;
-        main.onSectionAttached(MainActivity.SECTION_PLAYLISTS);
-        mPlaybackState = main.getPlaybackState();
+/*        MainActivity main = (MainActivity) activity;
+        main.onSectionAttached(MainActivity.SECTION_PLAYLISTS);*/
+        mPlaybackState = new PlaybackState();
         mPlaybackState.addListener(this);
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
@@ -204,6 +206,11 @@ public class PlaylistViewFragment extends Fragment
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
+
+    }
+
+    @Override
+    public void onSearchResult(SearchResult searchResult) {
 
     }
 

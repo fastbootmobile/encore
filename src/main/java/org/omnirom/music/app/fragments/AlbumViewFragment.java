@@ -3,6 +3,7 @@ package org.omnirom.music.app.fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
@@ -14,21 +15,27 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
+
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.SongsListAdapter;
+import org.omnirom.music.app.ui.AlbumListView;
+import org.omnirom.music.app.ui.ParallaxScrollListView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
@@ -47,13 +54,16 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "AlbumViewFragment";
     private SongsListAdapter mAdapter;
+    private ParallaxScrollListView listView;
     private View mRootView;
     private Album mAlbum;
     private Handler mHandler;
     private Bitmap mHeroImage;
     private PlayPauseDrawable mFabDrawable;
     private int mBackgroundColor;
+    private ImageView ivHero;
     private boolean mFabShouldResume = false;
+    private FadingActionBarHelper mFadingHelper;
 
     private Runnable mLoadSongsRunnable = new Runnable() {
         @Override
@@ -131,13 +141,13 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_album_view, container, false);
         assert mRootView != null;
-
-        ImageView ivHero = (ImageView) mRootView.findViewById(R.id.ivHero);
-        TextView tvAlbumName = (TextView) mRootView.findViewById(R.id.tvAlbumName);
+        View mHeaderView = inflater.inflate(R.layout.album_view_header,container,false);
+        ivHero = (ImageView) mHeaderView.findViewById(R.id.ivHero);
+        TextView tvAlbumName = (TextView) mHeaderView.findViewById(R.id.tvAlbumName);
         tvAlbumName.setBackgroundColor(mBackgroundColor);
         tvAlbumName.setText(mAlbum.getName());
 
-        ImageButton fabPlay = (ImageButton) mRootView.findViewById(R.id.fabPlay);
+        ImageButton fabPlay = (ImageButton) mHeaderView.findViewById(R.id.fabPlay);
         Utils.setLargeFabOutline(new View[]{fabPlay});
 
         // Set the FAB animated drawable
@@ -179,8 +189,15 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         ivHero.setImageBitmap(mHeroImage);
 
-        ListView listView =  (ListView) mRootView.findViewById(R.id.lvAlbumContents);
+        listView =  (ParallaxScrollListView) mRootView.findViewById(R.id.lvAlbumContents);
         mAdapter = new SongsListAdapter(getActivity());
+
+        listView.setAdapter(mAdapter);
+        listView.setParallaxImageView(ivHero);
+        listView.addHeaderView(mHeaderView);
+        listView.setViewsBounds(2);
+        listView.setFab(fabPlay);
+       // listView.setOnScrollListener(mScrollListener);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -205,15 +222,32 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         loadSongs();
 
-        listView.setAdapter(mAdapter);
 
         return mRootView;
     }
+    private AbsListView.OnScrollListener mScrollListener = new AbsListView.OnScrollListener() {
 
+        @Override
+        public void onScrollStateChanged(AbsListView absListView, int i) {
+
+        }
+
+        @Override
+        public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+
+        }
+
+        };
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         ProviderAggregator.getDefault().addUpdateCallback(this);
+       /* mFadingHelper = new FadingActionBarHelper()
+                .actionBarBackground(mBackgroundColor)
+                .headerLayout(R.layout.header_light)
+                .contentLayout(R.layout.activity_scrollview)
+                .lightActionBar(mBackgroundColor);
+        mFadingHelper.initActionBar(activity);*/
     }
 
     @Override
@@ -291,6 +325,11 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
+
+    }
+
+    @Override
+    public void onSearchResult(SearchResult searchResult) {
 
     }
 }

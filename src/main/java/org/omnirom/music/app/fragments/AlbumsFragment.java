@@ -36,6 +36,7 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
@@ -152,6 +153,11 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
+
+    }
+
+    @Override
+    public void onSearchResult(SearchResult searchResult) {
 
     }
 }
