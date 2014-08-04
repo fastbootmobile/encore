@@ -87,7 +87,9 @@ public class AlbumsAdapter extends BaseAdapter {
 
     public boolean addAllUnique(List<Album> ps) {
         boolean didChange = false;
-        for (Album p : ps) {
+        // Do a copy to prevent host doing concurrent modifications
+        List<Album> psCopy = new ArrayList<Album>(ps);
+        for (Album p : psCopy) {
             if (!mAlbums.contains(p)) {
                 mAlbums.add(p);
                 didChange = true;

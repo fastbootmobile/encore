@@ -62,7 +62,12 @@ public class MusicBrainzClient {
                         JSONObject release = releases.getJSONObject(i);
 
                         info.id = release.getString("id");
-                        info.track_count = release.getInt("track-count");
+                        try {
+                            info.track_count = release.getInt("track-count");
+                        } catch (JSONException e) {
+                            // No track count info, too bad
+                            info.track_count = 0;
+                        }
 
                         infoArray[i] = info;
                     }

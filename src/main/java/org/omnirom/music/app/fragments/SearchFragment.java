@@ -214,6 +214,13 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
     public void onSearchResult(final SearchResult searchResult) {
         Log.d(TAG, "search result received " + searchResult + " (" + searchResult.getIdentifier() + " / " + searchResult.mIdentifier + ")");
 
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                getActivity().setTitle("'" + searchResult.getQuery() + "'");
+            }
+        });
+
         if (false) {
             Log.e(TAG, "============================");
             Log.e(TAG, "= Result contents: ");

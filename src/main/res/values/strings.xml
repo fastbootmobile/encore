@@ -40,5 +40,10 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_effect">Add effect</string>
     <string name="cancel">Cancel</string>
+    <string name="new_playlist">New playlist…</string>
+    <string name="add_to">Add to…</string>
+    <string name="create">Create</string>
+    <string name="multi_provider_playlist">Multi-provider playlist (local only)</string>
+    <string name="enter_name">Enter a name</string>
 
 </resources>

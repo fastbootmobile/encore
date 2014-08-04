@@ -13,6 +13,8 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.model.Playlist;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -37,15 +39,15 @@ public class PlaylistListAdapter extends BaseAdapter {
     }
 
     private void sortList() {
-       /* Collections.sort(mPlaylists, new Comparator<Playlist>() {
+        Collections.sort(mPlaylists, new Comparator<Playlist>() {
             @Override
             public int compare(Playlist playlist, Playlist playlist2) {
-                if(playlist != null && playlist2 != null)
+                if (playlist != null && playlist2 != null)
                     return playlist.getName().compareTo(playlist2.getName());
                 else
                     return 0;
             }
-        });*/
+        });
     }
 
     public void addItem(Playlist p) {

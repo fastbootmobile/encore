@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
@@ -30,23 +31,26 @@ public class NewPlaylistFragment extends DialogFragment {
     private static final String KEY_PROVIDER_IDENTIFIER = "provider_identifier";
     private static final String KEY_SONG = "song";
     private Song mSong;
-    public static  NewPlaylistFragment newInstance(Song song){
+
+    public static NewPlaylistFragment newInstance(Song song) {
         NewPlaylistFragment fragment = new NewPlaylistFragment();
         Bundle bundle = new Bundle();
-        bundle.putParcelable(KEY_SONG,song);
+        bundle.putParcelable(KEY_SONG, song);
         fragment.setArguments(bundle);
         return fragment;
     }
+
     @Override
-    public void onCreate(Bundle savedInstance){
+    public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         Bundle args = getArguments();
-        if(args == null){
+        if (args == null) {
             throw new IllegalArgumentException("This fragment requires a song");
         }
         mSong = args.getParcelable(KEY_SONG);
 
     }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstance) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -55,39 +59,42 @@ public class NewPlaylistFragment extends DialogFragment {
         final TextView playlistName = (TextView) root.findViewById(R.id.et_playlist_name);
         final CheckBox multiProviderPlaylist = (CheckBox) root.findViewById(R.id.cb_provider_specific);
         builder.setView(root)
-                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.create), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        String playlistNameStr = playlistName.getText().toString().trim();
+                        if (!playlistNameStr.isEmpty()) {
+                            Log.d(TAG, "Adding new playlist with name" + playlistNameStr);
 
-                        if (playlistName.getText() != "") {
-                                Log.d(TAG, "adding new playlist with name" + playlistName);
-                                try {
-                                    ProviderConnection connection;
-                                    if(multiProviderPlaylist.isChecked()){
-                                        connection = PluginsLookup.getDefault().getMultiProviderPlaylistProvider();
-                                    }else {
-                                        connection = PluginsLookup.getDefault().getProvider(mSong.getProvider());
-                                    }
-                                    String playlistRef = connection.getBinder().addPlaylist(playlistName.getText().toString());
-                                    if(playlistRef != null){
-
-                                        connection.getBinder().addSongToPlaylist(mSong.getRef(), playlistRef, mSong.getProvider());
-
-                                    }
-                                } catch (Exception e) {
-
+                            try {
+                                ProviderConnection connection;
+                                if (multiProviderPlaylist.isChecked()) {
+                                    connection = PluginsLookup.getDefault().getMultiProviderPlaylistProvider();
+                                } else {
+                                    connection = PluginsLookup.getDefault().getProvider(mSong.getProvider());
                                 }
 
+                                String playlistRef = connection.getBinder().addPlaylist(playlistName.getText().toString());
+
+                                if (playlistRef != null) {
+                                    connection.getBinder().addSongToPlaylist(mSong.getRef(), playlistRef, mSong.getProvider());
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Unable to add playlist", e);
+                            }
+
+                        } else {
+                            Utils.shortToast(getActivity(), R.string.enter_name);
                         }
                     }
 
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
                     }
-                }).setTitle("New playlist");
+                }).setTitle(getString(R.string.new_playlist));
         return builder.create();
 
     }
