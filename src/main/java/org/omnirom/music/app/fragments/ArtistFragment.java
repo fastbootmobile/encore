@@ -224,7 +224,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     public void setArguments(Bitmap hero, Bundle extras) {
         mHeroImage = hero;
         mBackgroundColor = extras.getInt(ArtistActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
-        mArtist = extras.getParcelable(ArtistActivity.EXTRA_ARTIST);
+        String artistRef = extras.getString(ArtistActivity.EXTRA_ARTIST);
+        Log.d(TAG, "Artist: " + artistRef);
+        mArtist = ProviderAggregator.getDefault().getCache().getArtist(artistRef);
+
+        if (mArtist == null) {
+            Log.e(TAG, "No artist found in cache for " + artistRef + "!");
+        }
 
         // Prepare the palette to colorize the FAB
         Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {

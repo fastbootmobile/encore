@@ -130,9 +130,26 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
 
     @Override
     public Song getSong(String ref) throws RemoteException {
+        // TODO: This is broken! mSongsProvider isn't even created
         ProviderIdentifier providerId = mSongsProviders.get(ref);
         return getBinder(providerId).getSong(ref);
     }
+
+    @Override
+    public Artist getArtist(String ref) throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public Album getAlbum(String ref) throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public Playlist getPlaylist(String ref) throws RemoteException {
+        return null;
+    }
+
     @Override
     public boolean fetchArtistAlbums(String artistRef) {
         return false;
@@ -200,18 +217,15 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     @Override
-    public void startSearch(String query) throws RemoteException {
-
-    }
-
-    @Override
     public Bitmap getSongArt(Song song) throws RemoteException {
         return PluginsLookup.getDefault().getProvider(song.getProvider()).getBinder().getSongArt(song);
     }
+
     @Override
     public List<Genre> getGenres(){
         return null;
     }
+
     private void removeCallback(final IProviderCallback cb) {
         mHandler.post(new Runnable() {
             @Override
@@ -220,6 +234,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
             }
         });
     }
+
     MultiProviderDatabaseHelper.LocalCallback mLocalCallback = new MultiProviderDatabaseHelper.LocalCallback() {
         @Override
         public void playlistUpdated(final Playlist playlist) {
@@ -240,6 +255,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
                 }
             });
         }
+
         @Override
         public void searchFinished(final SearchResult searchResult){
             if(searchResult != null) {
@@ -262,6 +278,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
             }
         }
     };
+
     public void startSearch(String query){
         mMultiProviderDatabaseHelper.startSearch(query);
     }

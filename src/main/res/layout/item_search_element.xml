@@ -40,14 +40,14 @@
         android:layout_toRightOf="@+id/ivCover"
         android:layout_marginLeft="36dp"
         android:layout_toStartOf="@+id/ivPlayAlbum"
-        android:focusable="false">
+        android:focusable="false"
+        android:layout_alignParentEnd="true">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/tvTitle"
             android:layout_gravity="center_vertical"
-            android:text="Crash Love"
             style="?android:attr/textAppearanceMedium"
             android:layout_below="@+id/tvSubTitle"
             android:layout_toRightOf="@+id/ivCover"
@@ -61,7 +61,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/tvSubTitle"
             android:layout_gravity="center_vertical"
-            android:text="2009"
             style="?android:attr/textAppearanceMedium"
             android:alpha="0.6"
             android:layout_centerVertical="true"

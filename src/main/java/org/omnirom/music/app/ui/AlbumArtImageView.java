@@ -210,6 +210,10 @@ public class AlbumArtImageView extends SquareImageView {
         mHandler = new Handler();
     }
 
+    public void setDefaultArt() {
+        setImageResource(R.drawable.album_placeholder);
+    }
+
     public void setOnArtLoadedListener(OnArtLoadedListener listener) {
         mOnArtLoadedListener = listener;
     }

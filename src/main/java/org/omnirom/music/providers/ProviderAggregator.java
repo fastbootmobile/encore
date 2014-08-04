@@ -11,7 +11,6 @@ import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
-import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +22,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     private static final String TAG = "ProviderAggregator";
     private static final int PROPAGATION_DELAY = 20;
-    private SearchResult cacheSearch;
+    private SearchResult mCachedSearch;
     private List<ILocalCallback> mUpdateCallbacks;
     final private List<ProviderConnection> mProviders;
     private ProviderCache mCache;
@@ -99,9 +98,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                             conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
                         List<Playlist> playlist = conn.getBinder().getPlaylists();
                         ensurePlaylistsSongsCached(conn, playlist);
-                        cacheSongs(conn,conn.getBinder().getSongs());
-                        cacheAlbums(conn,conn.getBinder().getAlbums());
-                        cacheArtists(conn,conn.getBinder().getArtists());
+                        cacheSongs(conn, conn.getBinder().getSongs());
+                        cacheAlbums(conn, conn.getBinder().getAlbums());
+                        cacheArtists(conn, conn.getBinder().getArtists());
                     } else if (conn.getBinder() != null) {
                         Log.i(TAG, "Skipping a providers because it is not setup or authenticated" +
                                 " ==> binder=" + conn.getBinder() + " ; isSetup=" +
@@ -120,6 +119,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     // Singleton
     private final static ProviderAggregator INSTANCE = new ProviderAggregator();
+
     public static ProviderAggregator getDefault() {
         return INSTANCE;
     }
@@ -137,6 +137,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     /**
      * Posts the provided runnable to this class' Handler, and make sure
+     *
      * @param r The runnable
      */
     private void postOnce(Runnable r) {
@@ -154,6 +155,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     /**
      * Registers a LocalCallback class, which will be called when various events happen from
      * any of the registered providers.
+     *
      * @param cb The callback to add
      */
     public void addUpdateCallback(ILocalCallback cb) {
@@ -162,47 +164,51 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     /**
      * Unregisters a local update callback
+     *
      * @param cb The callback to remove
      */
     public void removeUpdateCallback(ILocalCallback cb) {
         mUpdateCallbacks.remove(cb);
     }
-    public void cacheSongs(final ProviderConnection provider,final List<Song> songs){
-        if(provider == null)
+
+    public void cacheSongs(final ProviderConnection provider, final List<Song> songs) {
+        if (provider == null)
             return;
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                for(Song song : songs){
-                    mCache.putSong(provider.getIdentifier(),song);
+                for (Song song : songs) {
+                    mCache.putSong(provider.getIdentifier(), song);
                 }
             }
         });
     }
-    public void cacheAlbums(final ProviderConnection provider,final List<Album> albums){
-        if(provider == null)
+
+    public void cacheAlbums(final ProviderConnection provider, final List<Album> albums) {
+        if (provider == null)
             return;
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                for(Album album : albums){
+                for (Album album : albums) {
                     if (album.getProvider() == null) {
                         Log.e(TAG, "Album " + album.getRef() + " is being cached with a null provider!");
                     }
-                    mCache.putAlbum(provider.getIdentifier(),album);
+                    mCache.putAlbum(provider.getIdentifier(), album);
                 }
             }
         });
     }
-    public void cacheArtists(final ProviderConnection provider, final List<Artist> artists){
-        if(provider == null) {
+
+    public void cacheArtists(final ProviderConnection provider, final List<Artist> artists) {
+        if (provider == null) {
             return;
         }
 
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                for(Artist artist : artists){
+                for (Artist artist : artists) {
                     try {
                         onArtistUpdate(provider.getIdentifier(), artist);
                     } catch (RemoteException e) {
@@ -215,7 +221,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     /**
      * Retrieves a song from the provider, and put it in the cache
-     * @param ref The reference to the song
+     *
+     * @param ref      The reference to the song
      * @param provider The provider from which retrieve the song
      * @return The song, or null if the provider says so
      */
@@ -240,14 +247,96 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
+     * Retrieves an artist from the provider, and put it in the cache
+     *
+     * @param ref      The reference to the artist
+     * @param provider The provider from which retrieve the artist
+     * @return The artist, or null if the provider says so
+     */
+    public Artist retrieveArtist(final String ref, final ProviderIdentifier provider) {
+        ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
+        if (pc != null) {
+            IMusicProvider binder = pc.getBinder();
+
+            if (binder != null) {
+                try {
+                    Artist artist = binder.getArtist(ref);
+                    onArtistUpdate(provider, artist);
+                    return artist;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to retrieve the artist", e);
+                    return null;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves an album from the provider, and put it in the cache
+     *
+     * @param ref      The reference to the album
+     * @param provider The provider from which retrieve the album
+     * @return The album, or null if the provider says so
+     */
+    public Album retrieveAlbum(final String ref, final ProviderIdentifier provider) {
+        ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
+        if (pc != null) {
+            IMusicProvider binder = pc.getBinder();
+
+            if (binder != null) {
+                try {
+                    Album album = binder.getAlbum(ref);
+                    onAlbumUpdate(provider, album);
+                    return album;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to retrieve the album", e);
+                    return null;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves an album from the provider, and put it in the cache
+     *
+     * @param ref      The reference to the album
+     * @param provider The provider from which retrieve the album
+     * @return The album, or null if the provider says so
+     */
+    public Playlist retrievePlaylist(final String ref, final ProviderIdentifier provider) {
+        ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
+        if (pc != null) {
+            IMusicProvider binder = pc.getBinder();
+
+            if (binder != null) {
+                try {
+                    Playlist playlist = binder.getPlaylist(ref);
+                    onPlaylistAddedOrUpdated(provider, playlist);
+                    return playlist;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to retrieve the playlist", e);
+                    return null;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Queries in a thread the songs of the list of playlist passed in parameter, if needed
      * Note that this method is only valid for playlists that have been provided by a provider.
+     *
      * @param provider The provider that provided these playlists
      * @param playlist The list of playlists to fetch
      */
     private void ensurePlaylistsSongsCached(final ProviderConnection provider,
                                             final List<Playlist> playlist) {
-        if (provider == null || playlist == null ) {
+        if (provider == null || playlist == null) {
             // playlist may be null if there are no playlists
             return;
         }
@@ -301,14 +390,15 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     /**
      * Registers a new providers service that has been bound, and add the aggregator as a callback
+     *
      * @param provider The providers that connected
      */
     public void registerProvider(ProviderConnection provider) {
         boolean added = false;
         synchronized (mProviders) {
             //if (!mProviders.contains(provider)) {
-                mProviders.add(provider);
-                added = true;
+            mProviders.add(provider);
+            added = true;
             //}
         }
 
@@ -330,6 +420,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * Removes the connection to a providers. This may be called either if the connection to a
      * service has been lost (e.g. in case of a DeadObjectException if the service crashed), or
      * simply if the app closes and a service is not needed anymore.
+     *
      * @param provider The providers to remove
      */
     public void unregisterProvider(final ProviderConnection provider) {
@@ -354,7 +445,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     /**
      * Perform a search query for the provided terms on all providers. The results are pushed
      * progressively as they are given by the providers to the callback.
-     * @param query The search terms
+     *
+     * @param query    The search terms
      * @param callback The callback to call with results
      */
     public void search(final String query, final ISearchCallback callback) {
@@ -523,6 +615,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             postSongForUpdate(s);
         }
     }
+
     @Override
     public void onGenreUpdate(ProviderIdentifier provider, final Genre g) throws RemoteException {
 
@@ -618,42 +711,40 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
 
     }
+
     @Override
-    public void onSearchResult(SearchResult searchResult){
-        if(searchResult == null)
+    public void onSearchResult(SearchResult searchResult) {
+        if (searchResult == null) {
             return;
-        if(cacheSearch == null || !cacheSearch.getQuery().equals(searchResult.getQuery())){
-            Log.d(TAG,"new search cache");
-            cacheSearch = searchResult;
+        }
+
+        if (mCachedSearch == null || !mCachedSearch.getQuery().equals(searchResult.getQuery())) {
+            Log.d(TAG, "new search cache");
+            mCachedSearch = searchResult;
         } else {
-         //if we don't have the same search cache we merge the new and the cache
-         Log.d(TAG,"updating search result");
-            for(String song: searchResult.getSongsList()){
-                if(!cacheSearch.getSongsList().contains(song))
-                    cacheSearch.getSongsList().add(song);
+            //if we don't have the same search cache we merge the new and the cache
+            Log.d(TAG, "updating search result");
+            mCachedSearch.setIdentifier(searchResult.getIdentifier());
+            for (String song : searchResult.getSongsList()) {
+                if (!mCachedSearch.getSongsList().contains(song))
+                    mCachedSearch.getSongsList().add(song);
             }
-            for(String artist: searchResult.getArtistList()){
-                if(!cacheSearch.getArtistList().contains(artist))
-                    cacheSearch.getArtistList().add(artist);
+            for (String artist : searchResult.getArtistList()) {
+                if (!mCachedSearch.getArtistList().contains(artist))
+                    mCachedSearch.getArtistList().add(artist);
             }
-            for(String album: searchResult.getAlbumsList()){
-                if(!cacheSearch.getAlbumsList().contains(album))
-                    cacheSearch.getAlbumsList().add(album);
+            for (String album : searchResult.getAlbumsList()) {
+                if (!mCachedSearch.getAlbumsList().contains(album))
+                    mCachedSearch.getAlbumsList().add(album);
             }
-            for(String playlist: searchResult.getPlaylistList()){
-                if(!cacheSearch.getPlaylistList().contains(playlist))
-                    cacheSearch.getPlaylistList().add(playlist);
+            for (String playlist : searchResult.getPlaylistList()) {
+                if (!mCachedSearch.getPlaylistList().contains(playlist))
+                    mCachedSearch.getPlaylistList().add(playlist);
             }
         }
-        for(ILocalCallback cb : mUpdateCallbacks){
-            cb.onSearchResult(cacheSearch);
+        for (ILocalCallback cb : mUpdateCallbacks) {
+            cb.onSearchResult(mCachedSearch);
         }
     }
-    @Override
-    public void onSongStopped(ProviderIdentifier providerIdentifier) throws  RemoteException{
-
-
-    }
-
 
 }

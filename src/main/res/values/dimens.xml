@@ -25,11 +25,8 @@
     <dimen name="floating_button_small_size">48dp</dimen>
 
     <dimen name="one_dp">1dp</dimen>
-<<<<<<< HEAD
     <dimen name="tile_text_padding">16dp</dimen>
     <dimen name="tile_single_text_height">48dp</dimen>
     <dimen name="tile_dual_text_height">68dp</dimen>
-=======
     <dimen name="header_size">0dp</dimen>
->>>>>>> various changes including search and parallax
 </resources>

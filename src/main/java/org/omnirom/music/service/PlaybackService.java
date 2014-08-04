@@ -570,14 +570,6 @@ public class PlaybackService extends Service
         public void onSearchResult(SearchResult searchResult) throws RemoteException {
 
         }
-        @Override
-        public void onSearchResult(SearchResult searchResult) throws  RemoteException {
-
-        }
-        @Override
-        public void onSongStopped(ProviderIdentifier providerIdentifier) throws  RemoteException {
-
-        }
     };
 
 }
