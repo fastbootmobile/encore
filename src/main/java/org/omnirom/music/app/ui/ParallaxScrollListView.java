@@ -1,229 +1,41 @@
 package org.omnirom.music.app.ui;
 
-
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.Transformation;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 
-import org.omnirom.music.app.R;
+public class ParallaxScrollListView extends ListView {
 
+    private ParallaxListViewHelper helper;
 
-public class ParallaxScrollListView extends ListView implements OnScrollListener {
-
-
-    public final static double NO_ZOOM = 1;
-    public final static double ZOOM_X2 = 2;
-
-    private boolean mMoved;
-    private ImageView mImageView;
-    private int mDrawableMaxHeight = -1;
-    private int mImageViewHeight = -1;
-    private int mDefaultImageViewHeight = 0;
-    private ImageButton mFab;
-    private static String TAG = "ParallaxScrollListView";
-
-    private interface OnOverScrollByListener {
-        public boolean overScrollBy(int deltaX, int deltaY, int scrollX,
-                                    int scrollY, int scrollRangeX, int scrollRangeY,
-                                    int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent);
-    }
-
-
-    private interface OnTouchEventListener {
-        public void onTouchEvent(MotionEvent ev);
-    }
-
-
-    public ParallaxScrollListView(Context context, AttributeSet attrs,
-                                 int defStyle) {
+    public ParallaxScrollListView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init(context);
+        init(context, attrs);
     }
-
 
     public ParallaxScrollListView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        init(context, attrs);
     }
 
-
-    public ParallaxScrollListView(Context context) {
-        super(context);
-        init(context);
+    protected void init(Context context, AttributeSet attrs) {
+        helper = new ParallaxListViewHelper(context, attrs, this);
+        super.setOnScrollListener(helper);
     }
-
-
-    public void init(Context context) {
-        mDefaultImageViewHeight = context.getResources().getDimensionPixelSize(R.dimen.header_size);
-        mMoved = false;
-    }
-
-    public void setFab(ImageButton fab){
-        mFab = fab;
-    }
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-    }
-
 
     @Override
-    protected boolean overScrollBy(int deltaX, int deltaY, int scrollX,
-                                   int scrollY, int scrollRangeX, int scrollRangeY,
-                                   int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
-        boolean isCollapseAnimation = false;
-
-
-        isCollapseAnimation = scrollByListener.overScrollBy(deltaX, deltaY,
-                scrollX, scrollY, scrollRangeX, scrollRangeY, maxOverScrollX,
-                maxOverScrollY, isTouchEvent)
-                || isCollapseAnimation;
-
-
-        return isCollapseAnimation ? true : super.overScrollBy(deltaX, deltaY,
-                scrollX, scrollY, scrollRangeX, scrollRangeY, maxOverScrollX,
-                maxOverScrollY, isTouchEvent);
+    public void setOnScrollListener(OnScrollListener l) {
+        helper.setOnScrollListener(l);
     }
 
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem,
-                         int visibleItemCount, int totalItemCount) {
-        Log.d(TAG,"scroll event");
-        if(mFab != null && mImageView.getLayoutParams().height <= mFab.getLayoutParams().height){
-            mMoved = true;
-            mFab.animate().translationY(mFab.getHeight()).start();
-        } else if( mFab != null && mImageView.getLayoutParams().height > mFab.getLayoutParams().height && mMoved ){
-            mMoved = false;
-            
-            mFab.animate().translationY(-mFab.getHeight()).start();
-        }
+    public void addParallaxedHeaderView(View v) {
+        super.addHeaderView(v);
+        helper.addParallaxedHeaderView(v);
     }
 
-
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-        View firstView = (View) mImageView.getParent();
-        // firstView.getTop < getPaddingTop means mImageView will be covered by top padding,
-        // so we can layout it to make it shorter
-        if (firstView.getTop() < getPaddingTop() ) {
-            mImageView.getLayoutParams().height = Math.max(mImageView.getHeight() - (getPaddingTop() - firstView.getTop()), mImageViewHeight);
-
-            // to set the firstView.mTop to 0,
-            // maybe use View.setTop() is more easy, but it just support from Android 3.0 (API 11)
-            firstView.layout(firstView.getLeft(), 0, firstView.getRight(), firstView.getHeight());
-            mImageView.requestLayout();
-        }
-    }
-
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        touchListener.onTouchEvent(ev);
-        return super.onTouchEvent(ev);
-    }
-
-
-    public void setParallaxImageView(ImageView iv) {
-        mImageView = iv;
-        mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-    }
-
-
-
-    public void setViewsBounds(double zoomRatio) {
-        if (mImageViewHeight == -1) {
-            mImageViewHeight = mImageView.getHeight();
-            if (mImageViewHeight <= 0) {
-                mImageViewHeight = mDefaultImageViewHeight;
-            }
-            double ratio = ((double) mImageView.getDrawable().getIntrinsicWidth()) / ((double) mImageView.getWidth());
-
-
-            mDrawableMaxHeight = mImageView.getDrawable().getIntrinsicHeight();
-            Log.d(TAG,"Drawable max Height "+ mImageView.getDrawable().getIntrinsicHeight()+ "ratio"+ ratio);
-
-        }
-        setOnScrollListener(this);
-    }
-
-
-    private OnOverScrollByListener scrollByListener = new OnOverScrollByListener() {
-        @Override
-        public boolean overScrollBy(int deltaX, int deltaY, int scrollX,
-                                    int scrollY, int scrollRangeX, int scrollRangeY,
-                                    int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
-            Log.d(TAG,"overscrollBy");
-            if (mImageView.getHeight() <= mDrawableMaxHeight && isTouchEvent) {
-                if (deltaY < 0) {
-                    if (mImageView.getHeight() - deltaY / 2 >= mImageViewHeight) {
-                        mImageView.getLayoutParams().height = mImageView.getHeight() - deltaY / 2 < mDrawableMaxHeight ?
-                                mImageView.getHeight() - deltaY / 2 : mDrawableMaxHeight;
-                        mImageView.requestLayout();
-                    }
-                } else {
-                    if (mImageView.getHeight() > mImageViewHeight) {
-                        mImageView.getLayoutParams().height = mImageView.getHeight() - deltaY > mImageViewHeight ?
-                                mImageView.getHeight() - deltaY : mImageViewHeight;
-                        mImageView.requestLayout();
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    };
-
-
-    private OnTouchEventListener touchListener = new OnTouchEventListener() {
-        @Override
-        public void onTouchEvent(MotionEvent ev) {
-            if (ev.getAction() == MotionEvent.ACTION_UP) {
-              /*  if (mImageViewHeight - 1 < mImageView.getHeight()) {
-                   ResetAnimimation animation = new ResetAnimimation(
-                            mImageView, mImageViewHeight);
-                    animation.setDuration(300);
-                    mImageView.startAnimation(animation);
-                }*/
-            }
-        }
-    };
-
-
-    public class ResetAnimimation extends Animation {
-        int targetHeight;
-        int originalHeight;
-        int extraHeight;
-        View mView;
-
-
-        protected ResetAnimimation(View view, int targetHeight) {
-            this.mView = view;
-            this.targetHeight = targetHeight;
-            originalHeight = view.getHeight();
-            extraHeight = this.targetHeight - originalHeight;
-        }
-
-
-        @Override
-        protected void applyTransformation(float interpolatedTime,
-                                           Transformation t) {
-
-
-            int newHeight;
-            newHeight = (int) (targetHeight - extraHeight * (1 - interpolatedTime));
-            mView.getLayoutParams().height = newHeight;
-            mView.requestLayout();
-        }
+    public void addParallaxedHeaderView(View v, Object data, boolean isSelectable) {
+        super.addHeaderView(v, data, isSelectable);
+        helper.addParallaxedHeaderView(v, data, isSelectable);
     }
 }

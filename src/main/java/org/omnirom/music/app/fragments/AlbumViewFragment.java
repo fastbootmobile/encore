@@ -192,11 +192,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mAdapter = new SongsListAdapter(getActivity());
 
         listView.setAdapter(mAdapter);
-        listView.setParallaxImageView(ivHero);
-        listView.addHeaderView(headerView);
-        listView.setViewsBounds(2);
-        listView.setFab(fabPlay);
-       // listView.setOnScrollListener(mScrollListener);
+        listView.addParallaxedHeaderView(headerView);
+        // listView.setOnScrollListener(mScrollListener);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

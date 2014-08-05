@@ -6,7 +6,8 @@
     android:minHeight="@dimen/playlist_view_item_height"
     android:clickable="false"
     android:descendantFocusability="blocksDescendants"
-    android:weightSum="2">
+    android:weightSum="2"
+    android:background="@color/default_fragment_background">
 
     <org.omnirom.music.app.ui.VuMeterView
         android:layout_width="8dp"
