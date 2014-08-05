@@ -160,7 +160,7 @@ public class SongsListAdapter  extends BaseAdapter{
                     if (blur == null) {
                         Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
 
-                        if (v.position != this.mPosition) {
+                        if (v.position != this.mPosition || thumb == null) {
                             // Cancel, we moved
                             return null;
                         }
