@@ -1,4 +1,4 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<org.omnirom.music.app.ui.ParallaxScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -7,6 +7,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:context="org.omnirom.music.app.ArtistActivity.InnerFragment">
+
+        <!-- android:viewName="itemImage" -->
+        <ImageView
+            android:id="@+id/ivHero"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentStart="true"
+            android:scaleType="centerCrop"
+            />
 
         <!-- android:viewName="artistName" -->
         <TextView
@@ -26,14 +35,7 @@
             android:textColor="@color/white"
              />
 
-        <!-- android:viewName="itemImage" -->
-        <ImageView
-            android:id="@+id/ivHero"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_alignParentStart="true"
-            android:scaleType="centerCrop"
-             />
+
 
         <!-- android:elevation="@dimen/button_elevation"
             android:stateListAnimator="@anim/button_raise" -->
@@ -59,7 +61,8 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingBottom="@dimen/activity_vertical_margin"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@color/default_fragment_background">
 
 
             <TextView
@@ -154,4 +157,4 @@
 
 
     </RelativeLayout>
-</ScrollView>
+</org.omnirom.music.app.ui.ParallaxScrollView>
