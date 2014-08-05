@@ -175,35 +175,36 @@ public class PlaybackQueueActivity extends Activity {
             }
 
             // We remove the first song as it's the currently playing song we displayed above
-            songs.remove(0);
+            if (songs.size() > 0) {
+                songs.remove(0);
 
-            int i = 1;
-            for (Song song : songs) {
-                View itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    // itemView.setViewName("playbackqueue:" + i);
+                int i = 1;
+                for (Song song : songs) {
+                    View itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                        // itemView.setViewName("playbackqueue:" + i);
+                    }
+                    TextView tvTitle = (TextView) itemView.findViewById(R.id.tvTitle),
+                            tvArtist = (TextView) itemView.findViewById(R.id.tvArtist);
+                    AlbumArtImageView ivCover = (AlbumArtImageView) itemView.findViewById(R.id.ivAlbumArt);
+
+                    Artist artist = cache.getArtist(song.getArtist());
+
+                    tvTitle.setText(song.getTitle());
+                    tvArtist.setText(artist.getName());
+                    ivCover.loadArtForSong(song);
+
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                        // ivCover.setViewName("playbackqueue:" + i + ":cover:" + song.getRef());
+                    }
+
+                    ivCover.setTag(song);
+                    ivCover.setOnClickListener(mArtClickListener);
+
+                    tracksContainer.addView(itemView);
+                    i++;
                 }
-                TextView tvTitle = (TextView) itemView.findViewById(R.id.tvTitle),
-                        tvArtist = (TextView) itemView.findViewById(R.id.tvArtist);
-                AlbumArtImageView ivCover = (AlbumArtImageView) itemView.findViewById(R.id.ivAlbumArt);
-
-                Artist artist = cache.getArtist(song.getArtist());
-
-                tvTitle.setText(song.getTitle());
-                tvArtist.setText(artist.getName());
-                ivCover.loadArtForSong(song);
-
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    // ivCover.setViewName("playbackqueue:" + i + ":cover:" + song.getRef());
-                }
-
-                ivCover.setTag(song);
-                ivCover.setOnClickListener(mArtClickListener);
-
-                tracksContainer.addView(itemView);
-                i++;
             }
-
 
             return rootView;
         }
