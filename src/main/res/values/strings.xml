@@ -46,4 +46,10 @@
     <string name="multi_provider_playlist">Multi-provider playlist (local only)</string>
     <string name="enter_name">Enter a name</string>
 
+    <!--  Strings for possible PreferenceActivity Back/Next buttons -->
+    <string name="back_button_label">Back</string>
+    <string name="next_button_label">Next</string>
+
+    <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
+    <string name="skip_button_label">Skip</string>
 </resources>

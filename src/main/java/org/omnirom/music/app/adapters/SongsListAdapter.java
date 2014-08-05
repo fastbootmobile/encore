@@ -9,6 +9,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -267,7 +268,7 @@ public class SongsListAdapter  extends BaseAdapter{
             @Override
             public void onClick(View v) {
                 PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
-                fragment.show(((Activity)ctx).getFragmentManager(),mSongs.get(position).getRef());
+                fragment.show(((FragmentActivity)ctx).getSupportFragmentManager(),mSongs.get(position).getRef());
             }
         });
         // Fill fields

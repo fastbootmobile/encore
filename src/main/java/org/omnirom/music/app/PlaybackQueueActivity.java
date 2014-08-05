@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
 import android.util.Log;
@@ -33,7 +34,7 @@ import org.omnirom.music.service.IPlaybackService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlaybackQueueActivity extends Activity {
+public class PlaybackQueueActivity extends FragmentActivity {
 
     private static final String TAG = "PlaybackQueueActivity";
 

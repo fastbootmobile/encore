@@ -2,7 +2,8 @@ package org.omnirom.music.app;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -24,7 +25,7 @@ import org.omnirom.music.app.fragments.AlbumViewFragment;
 import org.omnirom.music.app.fragments.ArtistFragment;
 import org.omnirom.music.model.Album;
 
-public class AlbumActivity extends Activity {
+public class AlbumActivity extends FragmentActivity {
 
     private static final String TAG = "AlbumActivity";
     private static final String TAG_FRAGMENT = "fragment_inner";
@@ -53,7 +54,7 @@ public class AlbumActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
 
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (AlbumViewFragment) fm.findFragmentByTag(TAG_FRAGMENT);
 
         if (savedInstanceState == null) {

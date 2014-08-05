@@ -1,15 +1,16 @@
 package org.omnirom.music.app;
 
 import android.app.Activity;
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import org.omnirom.music.app.fragments.SettingsFragment;
 
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends FragmentActivity {
 
     private static final String TAG = "SettingsActivity";
     public static final String TAG_FRAGMENT = "fragment_inner";
@@ -21,7 +22,7 @@ public class SettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
 
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (SettingsFragment) fm.findFragmentByTag(TAG_FRAGMENT);
 
         if (mActiveFragment == null) {

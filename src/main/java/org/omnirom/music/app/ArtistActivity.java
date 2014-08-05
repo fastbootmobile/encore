@@ -3,10 +3,11 @@ package org.omnirom.music.app;
 import android.animation.ValueAnimator;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.transition.Transition;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +16,7 @@ import android.view.animation.DecelerateInterpolator;
 
 import org.omnirom.music.app.fragments.ArtistFragment;
 
-public class ArtistActivity extends Activity {
+public class ArtistActivity extends FragmentActivity {
 
     private static final String TAG = "ArtistActivity";
     private static final String TAG_FRAGMENT = "fragment_inner";
@@ -34,7 +35,7 @@ public class ArtistActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
 
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (ArtistFragment) fm.findFragmentByTag(TAG_FRAGMENT);
 
         if (savedInstanceState == null) {

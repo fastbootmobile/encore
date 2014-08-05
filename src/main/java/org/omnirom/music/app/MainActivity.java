@@ -2,9 +2,10 @@ package org.omnirom.music.app;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.os.Build;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.content.Intent;
 
 import android.app.SearchManager;
@@ -13,6 +14,7 @@ import android.content.Context;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,11 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SearchView;
 
 
@@ -41,7 +38,7 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.service.IPlaybackService;
 
 
-public class MainActivity extends Activity
+public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     private static final String TAG = "MainActivity";
@@ -78,7 +75,7 @@ public class MainActivity extends Activity
         setContentView(R.layout.activity_main);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getFragmentManager().findFragmentById(R.id.navigation_drawer);
+                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
 
         // Set up the drawer.
@@ -156,7 +153,7 @@ public class MainActivity extends Activity
 
     public void showFragment(Fragment f, boolean addToStack) {
         // update the main content by replacing fragments
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragmentManager.getBackStackEntryCount() > 0 && !addToStack) {
             fragmentManager.popBackStack();
             if (mRestoreBarOnBack) {
@@ -166,10 +163,14 @@ public class MainActivity extends Activity
 
         FragmentTransaction ft = fragmentManager.beginTransaction();
         if (addToStack) {
-            ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
+            }
             ft.addToBackStack(f.toString());
         } else {
-            ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+            }
         }
         ft.replace(R.id.container, f);
         ft.commit();

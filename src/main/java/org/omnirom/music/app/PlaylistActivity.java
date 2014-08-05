@@ -1,12 +1,12 @@
 package org.omnirom.music.app;
 
 import android.app.Activity;
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.widget.SearchView;
@@ -21,7 +21,7 @@ import org.omnirom.music.providers.ProviderConnection;
 /**
  * Created by h4o on 28/07/2014.
  */
-public class PlaylistActivity extends Activity {
+public class PlaylistActivity extends FragmentActivity {
     private String TAG = "PlaylistActivity";
     private String TAG_FRAGMENT = "fragment_inner";
     private PlaylistViewFragment mActiveFragment;
@@ -40,9 +40,8 @@ public class PlaylistActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstance){
         super.onCreate(savedInstance);
-        Log.d(TAG, "launched");
         setContentView(R.layout.activity_playlist);
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (PlaylistViewFragment) fm.findFragmentByTag(TAG_FRAGMENT);
         if(savedInstance == null){
             mInitialIntent = getIntent().getExtras();

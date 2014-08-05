@@ -29,4 +29,12 @@
     <dimen name="tile_single_text_height">48dp</dimen>
     <dimen name="tile_dual_text_height">68dp</dimen>
     <dimen name="header_size">0dp</dimen>
+
+
+    <!-- Preference fragment padding, bottom -->
+    <dimen name="preference_fragment_padding_bottom">0dp</dimen>
+    <!-- Preference fragment padding, sides -->
+    <dimen name="preference_fragment_padding_side">16dp</dimen>
+
+    <integer name="preference_fragment_scrollbarStyle">0x02000000</integer> <!-- outsideOverlay -->
 </resources>
