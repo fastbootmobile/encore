@@ -1,12 +1,13 @@
 package org.omnirom.music.app;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.widget.SearchView;
@@ -19,7 +20,7 @@ import org.omnirom.music.providers.ProviderConnection;
 /**
  * Created by h4o on 22/07/2014.
  */
-public class SearchActivity extends Activity {
+public class SearchActivity extends FragmentActivity {
     private String TAG = "SearchActivity";
     private String TAG_FRAGMENT = "fragment_inner";
     private SearchFragment mActiveFragment;
@@ -28,7 +29,7 @@ public class SearchActivity extends Activity {
         super.onCreate(savedInstance);
         Log.d(TAG,"searched intent");
         setContentView(R.layout.activity_search);
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         mActiveFragment =(SearchFragment) fm.findFragmentByTag(TAG_FRAGMENT);
         if(mActiveFragment == null){
             mActiveFragment = new SearchFragment();

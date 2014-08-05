@@ -2,7 +2,7 @@ package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -612,7 +612,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                                 switch (menuItem.getItemId()) {
                                     case R.id.menu_add_to_playlist:
                                         PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
-                                        fragment.show(getActivity().getFragmentManager(), song.getRef());
+                                        fragment.show(getActivity().getSupportFragmentManager(), song.getRef());
                                         break;
 
                                     default:

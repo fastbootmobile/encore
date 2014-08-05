@@ -1,6 +1,6 @@
 package org.omnirom.music.app.fragments;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;

@@ -1,9 +1,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.support.v4.app.Fragment;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,15 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
-import org.omnirom.music.app.adapters.PlaylistListAdapter;
-import org.omnirom.music.app.ui.ExpandableHeightGridView;
 import org.omnirom.music.app.ui.PlaylistListView;
 import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
@@ -34,7 +27,6 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
