@@ -11,13 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
-        android:clipToPadding="false"
-        android:duplicateParentState="true"
-        android:scrollingCache="false"
-        android:headerDividersEnabled="false"
-        android:footerDividersEnabled="false"
-        android:overScrollMode="never"
-        android:scrollbars="none"/>
+        android:background="@color/default_fragment_background"/>
 
 
 </RelativeLayout>

@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ProviderAggregator extends IProviderCallback.Stub {
 
     private static final String TAG = "ProviderAggregator";
-    private static final int PROPAGATION_DELAY = 20;
+    private static final int PROPAGATION_DELAY = 200;
     private SearchResult mCachedSearch;
     private List<ILocalCallback> mUpdateCallbacks;
     final private List<ProviderConnection> mProviders;
