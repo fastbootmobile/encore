@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.graphics.Palette;
@@ -141,12 +142,15 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
         }
         Album album = ProviderAggregator.getDefault().getCache().getAlbum((String) mAdapter.getChild(SearchAdapter.ALBUM, i));
         Intent intent = AlbumActivity.craftIntent(getActivity(), hero, album, color);
-        ((ViewGroup) holder.vRoot.getParent()).setTransitionGroup(false);
 
-        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                new Pair<View, String>(ivCover, "itemImage"),
-                new Pair<View, String>(tvTitle, "albumName"));
-        startActivity(intent, opt.toBundle());
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            /*ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                    new Pair<View, String>(ivCover, "itemImage"),
+                    new Pair<View, String>(tvTitle, "albumName"));
+            startActivity(intent, opt.toBundle());*/
+        } else {
+            startActivity(intent);
+        }
     }
 
     private void onArtistClick(int i, View v) {
@@ -173,10 +177,15 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
         intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
                 color);
         Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, hero);
-        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                new Pair<View, String>(ivCover, "itemImage"),
-                new Pair<View, String>(tvTitle, "albumName"));
-        startActivity(intent, opt.toBundle());
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                    new Pair<View, String>(ivCover, "itemImage"),
+                    new Pair<View, String>(tvTitle, "albumName"));
+            startActivity(intent, opt.toBundle()); */
+        } else {
+            startActivity(intent);
+        }
     }
 
     private void onPlaylistClick(int i, View v) {

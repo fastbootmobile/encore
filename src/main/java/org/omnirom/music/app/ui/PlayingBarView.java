@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v7.graphics.Palette;
@@ -17,10 +18,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -32,7 +29,6 @@ import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaybackQueueActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
-import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
@@ -290,7 +286,9 @@ public class PlayingBarView extends RelativeLayout {
                 }
 
                 View itemRoot = inflater.inflate(R.layout.item_playbar, mTracksLayout, false);
-                itemRoot.setViewName("playbackqueue:preview:" + shownCount);
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    // itemRoot.setViewName("playbackqueue:preview:" + shownCount);
+                }
                 mTracksLayout.addView(itemRoot);
                 itemViews[shownCount] = itemRoot;
 
@@ -298,10 +296,11 @@ public class PlayingBarView extends RelativeLayout {
                 TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
                 AlbumArtImageView ivAlbumArt = (AlbumArtImageView) itemRoot.findViewById(R.id.ivAlbumArt);
 
-                tvArtist.setViewName("playbackqueue:preview:" + shownCount + ":artist");
-                tvTitle.setViewName("playbackqueue:preview:" + shownCount + ":title");
-                ivAlbumArt.setViewName("playbackqueue:preview:" + shownCount + ":art");
-
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    //tvArtist.setViewName("playbackqueue:preview:" + shownCount + ":artist");
+                    //tvTitle.setViewName("playbackqueue:preview:" + shownCount + ":title");
+                    //ivAlbumArt.setViewName("playbackqueue:preview:" + shownCount + ":art");
+                }
                 Artist artist = cache.getArtist(song.getArtist());
                 if (artist != null) {
                     tvArtist.setText(artist.getName());
@@ -311,7 +310,9 @@ public class PlayingBarView extends RelativeLayout {
 
                 tvTitle.setText(song.getTitle());
                 ivAlbumArt.loadArtForSong(song);
-                ivAlbumArt.setViewName(song.getRef() + shownCount);
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    // ivAlbumArt.setViewName(song.getRef() + shownCount);
+                }
 
                 ivAlbumArt.setOnClickListener(new View.OnClickListener() {
                     Palette mPalette;
@@ -339,10 +340,14 @@ public class PlayingBarView extends RelativeLayout {
                         Intent intent = AlbumActivity.craftIntent(getContext(), hero,
                                 cache.getAlbum(song.getAlbum()), color);
 
-                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
-                                view, "itemImage");
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                            /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
+                                    view, "itemImage");
 
-                        getContext().startActivity(intent, opt.toBundle());
+                            getContext().startActivity(intent, opt.toBundle()); */
+                        } else {
+                            getContext().startActivity(intent);
+                        }
                     }
                 });
 
@@ -407,11 +412,14 @@ public class PlayingBarView extends RelativeLayout {
                         i++;
                     }
 
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                        /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
+                                viewsToTransition);
 
-                    ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
-                            viewsToTransition);
-
-                    getContext().startActivity(intent, opt.toBundle());
+                        getContext().startActivity(intent, opt.toBundle()); */
+                    } else {
+                        getContext().startActivity(intent);
+                    }
                 }
             });
 
@@ -448,20 +456,24 @@ public class PlayingBarView extends RelativeLayout {
         }
 
         // create and start the animator for this view (the start radius is zero)
-        ValueAnimator anim =
-                ViewAnimationUtils.createCircularReveal(mPlayFab, cx, cy, 0, finalRadius);
-        anim.setInterpolator(new DecelerateInterpolator());
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            /* ValueAnimator anim =
+                    ViewAnimationUtils.createCircularReveal(mPlayFab, cx, cy, 0, finalRadius);
+            anim.setInterpolator(new DecelerateInterpolator());
 
-        if (!visible) {
-            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    mPlayFab.setVisibility(View.INVISIBLE);
-                }
-            });
+            if (!visible) {
+                anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                        mPlayFab.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+
+            anim.start(); */
+        } else {
+            // TODO: Kitkat animation
         }
-
-        anim.start();
 
     }
 

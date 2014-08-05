@@ -7,6 +7,7 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v7.graphics.Palette;
@@ -69,7 +70,11 @@ public class PlaybackQueueActivity extends Activity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == android.R.id.home) {
-            finishAfterTransition();
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                // finishAfterTransition();
+            } else {
+                finish();
+            }
             return true;
         }
 
@@ -105,10 +110,14 @@ public class PlaybackQueueActivity extends Activity {
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
                         cache.getAlbum(song.getAlbum()), color);
 
-                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                        view, "itemImage");
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                            view, "itemImage");
 
-                getActivity().startActivity(intent, opt.toBundle());
+                    getActivity().startActivity(intent, opt.toBundle()); */
+                } else {
+                    getActivity().startActivity(intent);
+                }
             }
         };
 
@@ -171,7 +180,9 @@ public class PlaybackQueueActivity extends Activity {
             int i = 1;
             for (Song song : songs) {
                 View itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
-                itemView.setViewName("playbackqueue:" + i);
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    // itemView.setViewName("playbackqueue:" + i);
+                }
                 TextView tvTitle = (TextView) itemView.findViewById(R.id.tvTitle),
                         tvArtist = (TextView) itemView.findViewById(R.id.tvArtist);
                 AlbumArtImageView ivCover = (AlbumArtImageView) itemView.findViewById(R.id.ivAlbumArt);
@@ -182,7 +193,9 @@ public class PlaybackQueueActivity extends Activity {
                 tvArtist.setText(artist.getName());
                 ivCover.loadArtForSong(song);
 
-                ivCover.setViewName("playbackqueue:" + i + ":cover:" + song.getRef());
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    // ivCover.setViewName("playbackqueue:" + i + ":cover:" + song.getRef());
+                }
 
                 ivCover.setTag(song);
                 ivCover.setOnClickListener(mArtClickListener);

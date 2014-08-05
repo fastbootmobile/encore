@@ -3,9 +3,9 @@ package org.omnirom.music.app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -310,14 +310,16 @@ public class Utils {
     }
 
     private static void setFabOutline(int dimenRes, View[] views) {
-        Resources res = views[0].getResources();
-        int size = res.getDimensionPixelSize(dimenRes);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            /* Resources res = views[0].getResources();
+            int size = res.getDimensionPixelSize(dimenRes);
 
-        Outline outline = new Outline();
-        outline.setOval(0, 0, size, size);
+            Outline outline = new Outline();
+            outline.setOval(0, 0, size, size);
 
-        for (View v : views) {
-            v.setOutline(outline);
+            for (View v : views) {
+                v.setOutline(outline);
+            } */
         }
     }
 }

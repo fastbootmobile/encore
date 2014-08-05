@@ -49,7 +49,7 @@
         android:src="@drawable/ic_delete"
         android:scaleType="centerCrop"
         android:layout_toStartOf="@+id/btnDown"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:background="?android:attr/selectableItemBackground"
         android:padding="8dp"
         android:clickable="true" />
 
@@ -61,7 +61,7 @@
         android:scaleType="centerCrop"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:background="?android:attr/selectableItemBackground"
         android:padding="8dp"
         android:clickable="true" />
 
@@ -73,7 +73,7 @@
         android:scaleType="centerCrop"
         android:layout_toStartOf="@+id/btnUp"
         android:layout_centerVertical="true"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:background="?android:attr/selectableItemBackground"
         android:padding="8dp"
         android:clickable="true" />
 

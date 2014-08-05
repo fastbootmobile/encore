@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+    There is currently no way to keep v21 stuff when buliding pre-L (e.g. Kitkat, API 19). We
+    comment this out for now until the SDK allows us to do that.
+    -->
+
+
+<!--
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
+
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorControlHighlight">@color/primary_light</item>
+        <item name="android:windowBackground">@color/default_fragment_background</item>
+
+        <item name="android:windowContentTransitions">true</item>
+
+        <item name="android:windowAllowEnterTransitionOverlap">true</item>
+        <item name="android:windowAllowExitTransitionOverlap">true</item>
+
+        <item name="android:actionBarStyle">@style/AppActionBar</item>
+    </style>
+
+    <style name="AppActionBar" parent="@android:style/Widget.Material.Light.ActionBar">
+        <item name="android:background">@color/primary</item>
+        <item name="android:titleTextStyle">@style/AppActionBarText</item>
+    </style>
+
+    <style name="AppActionBarText" parent="android:TextAppearance.Material.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="TransparentNavBar" parent="@android:style/Widget.Material.Light.ActionBar.Solid">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:shadowColor">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="AppTheme.TransparentNavBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:actionBarItemBackground">@android:color/transparent</item>
+        <item name="android:actionBarStyle">@style/TransparentNavBar</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="AppTheme.TransparentNavBar.ArtistDetails">
+        <item name="android:windowSharedElementEnterTransition">@transition/artist_details</item>
+        <item name="android:windowSharedElementExitTransition">@transition/artist_details</item>
+        <item name="android:windowEnterTransition">@transition/explode</item>
+        <item name="android:windowExitTransition">@transition/explode</item>
+    </style>
+-->
+</resources>

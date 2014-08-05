@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.RippleDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -123,8 +123,6 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
                 ImageView ivCover = tag.ivCover;
                 TextView tvTitle = tag.tvTitle;
 
-                ((ViewGroup) tag.llRoot.getParent()).setTransitionGroup(false);
-
                 intent.putExtra(ArtistActivity.EXTRA_ARTIST,
                         mAdapter.getItem(position).getRef());
 
@@ -133,11 +131,15 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
 
                 Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, tag.srcBitmap);
 
-                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                        new Pair<View, String>(ivCover, "itemImage"),
-                        new Pair<View, String>(tvTitle, "artistName"));
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                            new Pair<View, String>(ivCover, "itemImage"),
+                            new Pair<View, String>(tvTitle, "artistName"));
 
-                startActivity(intent, opt.toBundle());
+                    startActivity(intent, opt.toBundle()); */
+                } else {
+                    startActivity(intent);
+                }
             }
         });
 

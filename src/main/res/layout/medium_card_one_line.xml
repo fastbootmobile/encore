@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+    <!-- android:stateListAnimator="@anim/button_raise" -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/llRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/default_album_art_background"
     android:measureWithLargestChild="false"
-    android:stateListAnimator="@anim/button_raise"
     android:orientation="vertical">
 
+    <!-- android:viewName="cover" -->
     <org.omnirom.music.app.ui.SquareImageView
         android:id="@+id/ivCover"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
-        android:viewName="cover"
+
         android:contentDescription="@string/app_name"
         android:layout_weight="0" />
 

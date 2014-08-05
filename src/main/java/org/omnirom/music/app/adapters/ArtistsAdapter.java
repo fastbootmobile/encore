@@ -5,14 +5,13 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 
 
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +19,8 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.model.Artist;
@@ -280,8 +277,10 @@ public class ArtistsAdapter extends BaseAdapter {
             tag.artist = artist;
             tag.position = position;
 
-            tag.ivCover.setViewName("grid:image:" + artist.getRef());
-            tag.tvTitle.setViewName("grid:title:" + artist.getRef());
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                // tag.ivCover.setViewName("grid:image:" + artist.getRef());
+                // tag.tvTitle.setViewName("grid:title:" + artist.getRef());
+            }
 
             if (artist.isLoaded()) {
                 tag.tvTitle.setText(artist.getName());

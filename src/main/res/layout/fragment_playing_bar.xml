@@ -16,6 +16,10 @@
 
     </LinearLayout>
 
+    <!--
+    android:elevation="@dimen/small_button_elevation"
+        android:stateListAnimator="@anim/small_button_raise"
+    -->
     <ImageButton
         android:id="@+id/fabPlayBarButton"
         android:layout_width="@dimen/floating_button_small_size"
@@ -27,6 +31,5 @@
         android:layout_marginRight="16dp"
 
         android:background="@drawable/fab_background"
-        android:elevation="@dimen/small_button_elevation"
-        android:stateListAnimator="@anim/small_button_raise" />
+         />
 </org.omnirom.music.app.ui.PlayingBarView>

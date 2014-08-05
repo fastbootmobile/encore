@@ -5,7 +5,7 @@ import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -140,13 +140,13 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_album_view, container, false);
         assert mRootView != null;
-        View mHeaderView = inflater.inflate(R.layout.album_view_header,container,false);
-        ivHero = (ImageView) mHeaderView.findViewById(R.id.ivHero);
-        TextView tvAlbumName = (TextView) mHeaderView.findViewById(R.id.tvAlbumName);
+        View headerView = inflater.inflate(R.layout.album_view_header, null);
+        ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
+        TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
         tvAlbumName.setBackgroundColor(mBackgroundColor);
         tvAlbumName.setText(mAlbum.getName());
 
-        ImageButton fabPlay = (ImageButton) mHeaderView.findViewById(R.id.fabPlay);
+        ImageButton fabPlay = (ImageButton) headerView.findViewById(R.id.fabPlay);
         Utils.setLargeFabOutline(new View[]{fabPlay});
 
         // Set the FAB animated drawable
@@ -193,7 +193,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         listView.setAdapter(mAdapter);
         listView.setParallaxImageView(ivHero);
-        listView.addHeaderView(mHeaderView);
+        listView.addHeaderView(headerView);
         listView.setViewsBounds(2);
         listView.setFab(fabPlay);
        // listView.setOnScrollListener(mScrollListener);
@@ -220,7 +220,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         });
 
         loadSongs();
-
 
         return mRootView;
     }
@@ -273,9 +272,11 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     public void run() {
                         PaletteItem color = palette.getDarkMutedColor();
                         if (color != null && mRootView != null) {
-                            RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
-                            GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
-                            back.setColor(color.getRgb());
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                                // RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
+                                // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
+                                // back.setColor(color.getRgb());
+                            }
                         }
                     }
                 });

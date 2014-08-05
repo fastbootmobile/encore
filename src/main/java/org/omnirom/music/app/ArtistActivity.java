@@ -5,12 +5,12 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.transition.Transition;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 
 import org.omnirom.music.app.fragments.ArtistFragment;
@@ -61,57 +61,62 @@ public class ArtistActivity extends Activity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
-            @Override
-            public void onTransitionStart(Transition transition) {
-                View fab = mActiveFragment.findViewById(R.id.fabPlay);
-                fab.setVisibility(View.INVISIBLE);
-            }
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            /*
+            getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
+                @Override
+                public void onTransitionStart(Transition transition) {
+                    View fab = mActiveFragment.findViewById(R.id.fabPlay);
+                    fab.setVisibility(View.INVISIBLE);
+                }
 
-            @Override
-            public void onTransitionEnd(Transition transition) {
-                View fab = mActiveFragment.findViewById(R.id.fabPlay);
-                fab.setVisibility(View.VISIBLE);
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    View fab = mActiveFragment.findViewById(R.id.fabPlay);
+                    fab.setVisibility(View.VISIBLE);
 
-                // get the center for the clipping circle
-                int cx = fab.getMeasuredWidth() / 2;
-                int cy = fab.getMeasuredHeight() / 2;
+                    // get the center for the clipping circle
+                    int cx = fab.getMeasuredWidth() / 2;
+                    int cy = fab.getMeasuredHeight() / 2;
 
-                // get the final radius for the clipping circle
-                final int finalRadius = fab.getWidth();
+                    // get the final radius for the clipping circle
+                    final int finalRadius = fab.getWidth();
 
-                // create and start the animator for this view
-                // (the start radius is zero)
-                ValueAnimator anim =
-                        ViewAnimationUtils.createCircularReveal(fab, cx, cy, 0, finalRadius);
-                anim.setInterpolator(new DecelerateInterpolator());
-                anim.start();
+                    // create and start the animator for this view
+                    // (the start radius is zero)
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                        ValueAnimator anim =
+                                ViewAnimationUtils.createCircularReveal(fab, cx, cy, 0, finalRadius);
+                        anim.setInterpolator(new DecelerateInterpolator());
+                        anim.start();
+                    }
 
-                fab.setTranslationX(-fab.getMeasuredWidth() / 4.0f);
-                fab.setTranslationY(-fab.getMeasuredHeight() / 4.0f);
-                fab.animate().translationX(0.0f).translationY(0.0f)
-                        .setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime))
-                        .setInterpolator(new DecelerateInterpolator())
-                        .start();
+                    fab.setTranslationX(-fab.getMeasuredWidth() / 4.0f);
+                    fab.setTranslationY(-fab.getMeasuredHeight() / 4.0f);
+                    fab.animate().translationX(0.0f).translationY(0.0f)
+                            .setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime))
+                            .setInterpolator(new DecelerateInterpolator())
+                            .start();
 
-                getWindow().getEnterTransition().removeListener(this);
-            }
+                    getWindow().getEnterTransition().removeListener(this);
+                }
 
-            @Override
-            public void onTransitionCancel(Transition transition) {
+                @Override
+                public void onTransitionCancel(Transition transition) {
 
-            }
+                }
 
-            @Override
-            public void onTransitionPause(Transition transition) {
+                @Override
+                public void onTransitionPause(Transition transition) {
 
-            }
+                }
 
-            @Override
-            public void onTransitionResume(Transition transition) {
+                @Override
+                public void onTransitionResume(Transition transition) {
 
-            }
-        });
+                }
+            });*/
+        }
     }
 
     @Override
@@ -137,7 +142,11 @@ public class ArtistActivity extends Activity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == android.R.id.home) {
-            finishAfterTransition();
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                // finishAfterTransition();
+            } else {
+                finish();
+            }
             return true;
         }
 

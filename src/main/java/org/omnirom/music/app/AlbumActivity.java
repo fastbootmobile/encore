@@ -7,13 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.transition.Transition;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
@@ -102,7 +102,11 @@ public class AlbumActivity extends Activity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == android.R.id.home) {
-            finishAfterTransition();
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                // finishAfterTransition();
+            } else {
+                finish();
+            }
             return true;
         }
 

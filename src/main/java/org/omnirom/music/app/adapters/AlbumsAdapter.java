@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
@@ -154,8 +155,10 @@ public class AlbumsAdapter extends BaseAdapter {
         tag.vRoot = root;
         tag.album = album;
 
-        tag.ivCover.setViewName("list:albums:cover:" + album.getRef());
-        tag.tvTitle.setViewName("list:albums:title:" + album.getRef());
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            // tag.ivCover.setViewName("list:albums:cover:" + album.getRef());
+            // tag.tvTitle.setViewName("list:albums:title:" + album.getRef());
+        }
 
         if (album.getName() != null && !album.getName().isEmpty()) {
             tag.tvTitle.setText(album.getName());

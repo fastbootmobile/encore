@@ -1,6 +1,7 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -240,8 +241,10 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         if (artist != null && artist.isLoaded()) {
             tag.tvTitle.setText(artist.getName());
             tag.tvSubtitle.setText("");
-            tag.albumArtImageView.setViewName("local:artist:cover:" + artistRef);
-            tag.divider.setViewName("local:artist:name:" + artistRef);
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                // tag.albumArtImageView.setViewName("local:artist:cover:" + artistRef);
+                // tag.divider.setViewName("local:artist:name:" + artistRef);
+            }
             tag.albumArtImageView.loadArtForArtist(artist);
             tag.content = artist;
         } else {
@@ -266,8 +269,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             } else {
                 tag.tvSubtitle.setText("");
             }
-            tag.albumArtImageView.setViewName("local:album:cover:" + albumRef);
-            tag.divider.setViewName("local:album:title:" + albumRef);
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                // tag.albumArtImageView.setViewName("local:album:cover:" + albumRef);
+                // tag.divider.setViewName("local:album:title:" + albumRef);
+            }
             tag.albumArtImageView.loadArtForAlbum(album);
             tag.content = album;
         } else {

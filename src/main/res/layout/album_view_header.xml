@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     tools:context="org.omnirom.music.app.ArtistActivity.InnerFragment">
 
+    <!-- android:viewName="albumName" -->
     <TextView
         android:id="@+id/tvAlbumName"
         android:layout_width="wrap_content"
@@ -19,17 +20,19 @@
         android:paddingRight="8dp"
         android:paddingTop="16dp"
         android:textColor="@color/white"
-        android:textSize="22sp"
-        android:viewName="albumName" />
+        android:textSize="22sp" />
 
+    <!-- android:viewName="itemImage" -->
     <ImageView
         android:id="@+id/ivHero"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_alignParentStart="true"
         android:scaleType="centerCrop"
-        android:viewName="itemImage" />
+        />
 
+    <!-- android:elevation="@dimen/button_elevation"
+        android:stateListAnimator="@anim/button_raise" -->
     <ImageButton
         android:id="@+id/fabPlay"
         android:layout_width="@dimen/floating_button_large_size"
@@ -42,8 +45,7 @@
         android:layout_marginRight="48dp"
 
         android:background="@drawable/fab_background"
-        android:elevation="@dimen/button_elevation"
-        android:stateListAnimator="@anim/button_raise" />
+         />
 
 
     <ProgressBar
@@ -52,6 +54,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:indeterminate="true"
-        android:layout_alignTop="@+id/lvAlbumContents"
         android:layout_centerHorizontal="true" />
     </RelativeLayout>

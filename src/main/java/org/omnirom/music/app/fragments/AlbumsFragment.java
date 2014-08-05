@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
@@ -104,13 +105,15 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
                         mAdapter.getItem(position), ((ColorDrawable) tag.vRoot.getBackground()).getColor());
 
-                ((ViewGroup) tag.vRoot.getParent()).setTransitionGroup(false);
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                            new Pair<View, String>(ivCover, "itemImage"),
+                            new Pair<View, String>(tvTitle, "albumName"));
 
-                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                        new Pair<View, String>(ivCover, "itemImage"),
-                        new Pair<View, String>(tvTitle, "albumName"));
-
-                startActivity(intent, opt.toBundle());
+                    startActivity(intent, opt.toBundle()); */
+                } else {
+                    startActivity(intent);
+                }
             }
         });
 

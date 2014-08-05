@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="AppTheme.TransparentNavBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:actionBarItemBackground">@android:color/transparent</item>
+        <item name="android:actionBarStyle">@style/TransparentNavBar</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>

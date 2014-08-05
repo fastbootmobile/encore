@@ -2,6 +2,7 @@ package org.omnirom.music.app;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -50,7 +51,11 @@ public class SettingsActivity extends Activity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == android.R.id.home) {
-            finishAfterTransition();
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                //finishAfterTransition();
+            } else {
+                finish();
+            }
             return true;
         }
 

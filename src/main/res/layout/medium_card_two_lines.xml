@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+    <!-- android:stateListAnimator="@anim/button_raise" -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/llRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/default_album_art_background"
     android:measureWithLargestChild="false"
-    android:orientation="vertical"
-    android:stateListAnimator="@anim/button_raise">
+    android:orientation="vertical">
 
+    <!-- android:viewName="cover" -->
     <org.omnirom.music.app.ui.AlbumArtImageView
         android:id="@+id/ivCover"
         android:layout_width="match_parent"
@@ -15,8 +16,7 @@
         android:layout_weight="0"
         android:adjustViewBounds="true"
         android:contentDescription="@string/app_name"
-        android:scaleType="centerCrop"
-        android:viewName="cover" />
+        android:scaleType="centerCrop" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -33,8 +33,7 @@
             android:layout_weight="1"
             android:singleLine="true"
             android:gravity="start|bottom"
-            android:textColor="@color/white"
-            android:text="First Line" />
+            android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/tvSubTitle"
@@ -47,7 +46,6 @@
             android:layout_weight="1"
             android:gravity="start|top"
             android:textColor="@color/white"
-            android:text="Second Line"
             android:paddingTop="4dp" />
     </LinearLayout>
 </LinearLayout>

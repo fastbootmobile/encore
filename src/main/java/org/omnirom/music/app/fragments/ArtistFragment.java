@@ -12,8 +12,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -241,9 +241,11 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     public void run() {
                         PaletteItem color = palette.getDarkMutedColor();
                         if (color != null && mRootView != null) {
-                            RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
-                            GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
-                            back.setColor(color.getRgb());
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                                // RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
+                                // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
+                                // back.setColor(color.getRgb());
+                            }
                         }
                     }
                 });
@@ -553,9 +555,11 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     Palette palette = Palette.generate(drawable.getBitmap());
                     PaletteItem mutedBgColor = palette.getMutedColor();
                     if (mutedBgColor != null) {
-                        RippleDrawable bg = (RippleDrawable) viewRoot.getBackground();
-                        bg.setColor(ColorStateList.valueOf(mutedBgColor.getRgb()));
-                        viewRoot.setBackground(bg);
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                            /* RippleDrawable bg = (RippleDrawable) viewRoot.getBackground();
+                            bg.setColor(ColorStateList.valueOf(mutedBgColor.getRgb()));
+                            viewRoot.setBackground(bg); */
+                        }
                     }
                 }
             });
