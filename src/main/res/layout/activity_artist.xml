@@ -3,8 +3,5 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="48dp"
     tools:context="org.omnirom.music.app.ArtistActivity"
     tools:ignore="MergeRootFrame" />
-    <!-- FIXME: There's a bug in L which assumes the navbar is
-         FIXME: translucent when translucent status is enabled, hence the marginBottom-->
