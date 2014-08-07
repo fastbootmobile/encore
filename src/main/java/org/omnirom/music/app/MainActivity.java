@@ -163,14 +163,12 @@ public class MainActivity extends FragmentActivity
 
         FragmentTransaction ft = fragmentManager.beginTransaction();
         if (addToStack) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
-            }
+            // No animations for you, 4.1 users!
+            // ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
             ft.addToBackStack(f.toString());
         } else {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
-            }
+            // No animations for you, 4.1 users!
+            // ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
         }
         ft.replace(R.id.container, f);
         ft.commit();

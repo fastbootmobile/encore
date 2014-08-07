@@ -36,6 +36,11 @@ public class MusicBrainzClient {
      * from musicbrainz, or null in case of error
      */
     public static AlbumInfo[] getAlbum(String artist, String album) throws RateLimitException {
+        if (artist == null || album == null) {
+            Log.e(TAG, "Null artist or album in getAlbum call!");
+            return new AlbumInfo[]{};
+        }
+
         if (mAlbumInfoCache.containsKey(Pair.create(artist, album))) {
             return mAlbumInfoCache.get(Pair.create(artist, album));
         }

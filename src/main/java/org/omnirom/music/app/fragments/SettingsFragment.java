@@ -78,7 +78,8 @@ public class SettingsFragment extends PreferenceFragment {
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 Fragment f = new SettingsProvidersFragment();
                 FragmentTransaction ft = fragmentManager.beginTransaction();
-                ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
+                // Our lords told us to support 4.1
+                // ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
                 ft.addToBackStack(f.toString());
                 ft.replace(R.id.container, f);
                 ft.commit();
@@ -93,7 +94,8 @@ public class SettingsFragment extends PreferenceFragment {
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 Fragment f = new DspProvidersFragment();
                 FragmentTransaction ft = fragmentManager.beginTransaction();
-                ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
+                // Our lords told us to support 4.1
+                // ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
                 ft.addToBackStack(f.toString());
                 ft.replace(R.id.container, f);
                 ft.commit();

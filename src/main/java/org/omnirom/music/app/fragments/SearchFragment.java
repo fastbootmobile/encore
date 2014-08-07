@@ -219,7 +219,11 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                getActivity().setTitle("'" + searchResult.getQuery() + "'");
+                if (getActivity() != null) {
+                    getActivity().setTitle("'" + searchResult.getQuery() + "'");
+                } else {
+                    mHandler.post(this);
+                }
             }
         });
 

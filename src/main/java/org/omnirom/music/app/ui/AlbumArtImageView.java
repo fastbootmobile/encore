@@ -228,7 +228,7 @@ public class AlbumArtImageView extends SquareImageView {
     }
     public void loadArtForArtist(final Artist artist) { loadArtImpl(artist);}
     private void loadArtImpl(final BoundEntity ent) {
-        if (mTask != null) {
+        /*if (mTask != null) {
             mTask.cancel(true);
         }
 
@@ -244,6 +244,6 @@ public class AlbumArtImageView extends SquareImageView {
                     mTask.executeOnExecutor(ART_POOL_EXECUTOR, ent);
                 }
             }
-        }, DELAY_BEFORE_START);
+        }, DELAY_BEFORE_START);*/
     }
 }
