@@ -5,6 +5,8 @@
     style="@style/NavDrawerItem"
     android:gravity="center_vertical"
     android:paddingStart="8dp"
+    android:paddingLeft="8dp"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:paddingRight="16dp"
     android:minHeight="?android:attr/listPreferredItemHeight"
     />

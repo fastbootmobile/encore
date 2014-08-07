@@ -52,4 +52,7 @@
 
     <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
     <string name="skip_button_label">Skip</string>
+    <string name="raise">Raise</string>
+    <string name="lower">Lower</string>
+    <string name="remove">Remove</string>
 </resources>

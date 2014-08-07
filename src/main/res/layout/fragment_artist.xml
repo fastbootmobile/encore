@@ -14,8 +14,9 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:scaleType="centerCrop"
-            />
+            android:contentDescription="@string/title_activity_artist" />
 
         <!-- android:viewName="artistName" -->
         <TextView
@@ -23,13 +24,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignEnd="@+id/ivHero"
+            android:layout_alignRight="@+id/ivHero"
             android:layout_alignStart="@+id/ivHero"
+            android:layout_alignLeft="@+id/ivHero"
             android:layout_below="@+id/ivHero"
             android:background="#333"
             style="@style/FontHeadline"
             android:gravity="center_vertical|start"
             android:paddingBottom="16dp"
+            android:paddingStart="24dp"
             android:paddingLeft="24dp"
+            android:paddingEnd="8dp"
             android:paddingRight="8dp"
             android:paddingTop="16dp"
             android:textColor="@color/white"
@@ -46,12 +51,14 @@
 
             android:layout_above="@+id/tvArtist"
             android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
 
             android:layout_marginBottom="-24dp"
+            android:layout_marginEnd="48dp"
             android:layout_marginRight="48dp"
 
             android:background="@drawable/fab_background"
-             />
+            android:contentDescription="@string/play_now" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -90,36 +97,44 @@
                         android:id="@+id/ivArtistSuggestionCover"
                         android:adjustViewBounds="true"
                         android:layout_alignParentStart="true"
+                        android:layout_alignParentLeft="true"
                         android:layout_alignParentBottom="true"
                         android:scaleType="centerCrop" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_toEndOf="@id/ivArtistSuggestionCover"
                         android:layout_toRightOf="@id/ivArtistSuggestionCover"
                         android:id="@+id/tvArtistSuggestionTitle"
                         android:layout_margin="8dp"
                         style="@style/FontCardLine1"
-                        android:layout_alignParentEnd="true" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_toEndOf="@id/ivArtistSuggestionCover"
                         android:layout_toRightOf="@id/ivArtistSuggestionCover"
                         android:layout_below="@id/tvArtistSuggestionTitle"
                         style="@style/FontCardLine2"
                         android:id="@+id/tvArtistSuggestionArtist"
                         android:alpha="0.6"
+                        android:layout_marginStart="8dp"
                         android:layout_marginLeft="8dp"
                         android:layout_marginTop="2dp"
-                        android:layout_alignParentEnd="true" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"/>
 
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:layout_alignEnd="@+id/tvArtistSuggestionTitle"
+                        android:layout_alignRight="@+id/tvArtistSuggestionTitle"
                         android:layout_marginBottom="4dp"
+                        android:layout_marginEnd="4dp"
                         android:layout_marginRight="4dp"
                         android:id="@+id/btnArtistSuggestionPlay"
                         android:text="@string/play_now"

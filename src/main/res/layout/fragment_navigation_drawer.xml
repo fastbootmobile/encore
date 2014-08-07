@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:background="#ffe1e1e1"
     android:orientation="vertical"
-    android:textAlignment="viewEnd">
+    android:textAlignment="viewEnd"
+    android:gravity="end">
 
     <ListView
         android:id="@+id/nav_drawer_list"

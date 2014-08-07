@@ -12,11 +12,13 @@
         android:layout_height="48dp"
         android:id="@+id/ivProviderLogo"
         android:scaleType="centerInside"
+        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
+        android:layout_marginStart="0dp"
         android:layout_marginLeft="0dp"
         android:layout_alignParentTop="true"
         android:layout_marginTop="0dp"
-        android:src="@drawable/test_cover_ptx" />
+        android:contentDescription="@string/loading" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -24,9 +26,12 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/ivProviderLogo"
+        android:layout_toRightOf="@+id/ivProviderLogo"
+        android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_alignBottom="@+id/ivProviderLogo"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:gravity="center_vertical">
 
         <TextView

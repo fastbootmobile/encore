@@ -8,10 +8,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
         android:id="@+id/tv_search_separator"
 
-        android:layout_gravity="left"
+        android:layout_gravity="start"
         style="@style/RobotoCondensedBoldLarge"
         android:alpha="0.6" />
 </LinearLayout>

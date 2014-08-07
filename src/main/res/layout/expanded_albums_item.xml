@@ -10,23 +10,26 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="04:12"
         android:id="@+id/tvTrackDuration"
         android:layout_gravity="center_vertical"
+        android:layout_marginStart="72dp"
         android:layout_marginLeft="72dp"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:alpha="0.6" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Daft Punk Medley"
         android:id="@+id/tvTrackName"
         android:layout_alignTop="@+id/tvTrackDuration"
+        android:layout_toEndOf="@+id/tvTrackDuration"
         android:layout_toRightOf="@+id/tvTrackDuration"
+        android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_toStartOf="@+id/ivOverflow"
         android:layout_toLeftOf="@+id/ivOverflow" />
 
     <org.omnirom.music.app.ui.SquareImageView
@@ -35,6 +38,7 @@
         android:id="@+id/ivOverflow"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:src="@drawable/ic_more_vert_dark"
         android:layout_alignParentTop="true"
         android:background="?android:attr/selectableItemBackground"

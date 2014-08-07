@@ -12,6 +12,7 @@
         android:layout_width="@dimen/playing_bar_height"
         android:layout_height="@dimen/playing_bar_height"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:background="@drawable/playing_bar_item_background"
         android:padding="4dp"
@@ -22,10 +23,13 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/playing_bar_height"
         android:layout_toEndOf="@+id/ivAlbumArt"
+        android:layout_toRightOf="@+id/ivAlbumArt"
         android:gravity="center_vertical"
         android:orientation="vertical"
         android:layout_alignTop="@+id/ivAlbumArt"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp">
 
         <TextView

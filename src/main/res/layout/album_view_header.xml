@@ -10,7 +10,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/ivHero"
+        android:layout_alignRight="@+id/ivHero"
         android:layout_alignStart="@+id/ivHero"
+        android:layout_alignLeft="@+id/ivHero"
         android:layout_below="@+id/ivHero"
         android:background="#333"
         android:fontFamily="sans-serif-medium"
@@ -28,6 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:scaleType="centerCrop"
         />
 
@@ -40,6 +43,7 @@
 
         android:layout_above="@+id/tvAlbumName"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
 
         android:layout_marginBottom="-24dp"
         android:layout_marginRight="48dp"
