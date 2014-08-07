@@ -24,6 +24,7 @@
         android:src="@drawable/album_placeholder"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true" />
 

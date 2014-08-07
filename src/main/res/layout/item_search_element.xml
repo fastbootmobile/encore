@@ -5,29 +5,25 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="?android:attr/selectableItemBackground">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/divider"
+        android:visibility="invisible"
+        android:background="#DDDDDD"
+        android:layout_alignParentTop="true" />
 
     <org.omnirom.music.app.ui.AlbumArtImageView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="8dp"
         android:id="@+id/ivCover"
         android:src="@drawable/album_placeholder"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:focusable="false"/>
-
-    <TextView
-        android:layout_width="1dp"
-        android:layout_height="64dp"
-        android:id="@+id/divider"
-        android:background="#000000"
-        android:layout_toEndOf="@+id/ivCover"
-        android:layout_toRightOf="@+id/ivCover"
-        android:enabled="false"
-        android:gravity="start|top" />
+        android:layout_alignParentTop="true" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -35,15 +31,15 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/ivCover"
-        android:layout_toRightOf="@+id/ivCover"
-        android:layout_marginStart="36dp"
-        android:layout_marginLeft="36dp"
-        android:layout_toStartOf="@+id/ivPlayAlbum"
-        android:layout_toLeftOf="@+id/ivPlayAlbum"
-        android:focusable="false"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true">
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:paddingStart="72dp"
+        android:paddingEnd="8dp"
+        android:paddingLeft="72dp"
+        android:paddingRight="8dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
+
 
         <TextView
             android:layout_width="match_parent"
@@ -53,8 +49,7 @@
             style="?android:attr/textAppearanceMedium"
             android:maxLines="1"
             android:singleLine="true"
-            android:ellipsize="end"
-            android:focusable="false"/>
+            android:ellipsize="end" />
 
         <TextView
             android:layout_width="match_parent"
@@ -62,11 +57,7 @@
             android:id="@+id/tvSubTitle"
             android:layout_gravity="center_vertical"
             style="?android:attr/textAppearanceMedium"
-            android:alpha="0.6"
-            android:focusable="false"/>
-
+            android:alpha="0.6" />
     </LinearLayout>
-
-
 
 </RelativeLayout>

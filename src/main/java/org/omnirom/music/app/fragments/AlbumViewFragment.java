@@ -192,7 +192,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mAdapter = new SongsListAdapter(getActivity());
         listView.addParallaxedHeaderView(headerView);
         listView.setAdapter(mAdapter);
-        // listView.setOnScrollListener(mScrollListener);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -219,19 +218,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         return mRootView;
     }
-    private AbsListView.OnScrollListener mScrollListener = new AbsListView.OnScrollListener() {
 
-        @Override
-        public void onScrollStateChanged(AbsListView absListView, int i) {
-
-        }
-
-        @Override
-        public void onScroll(AbsListView absListView, int i, int i2, int i3) {
-
-        }
-
-        };
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);

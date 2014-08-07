@@ -3,7 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="fill_parent"
-    android:layout_height="56dp"
+    android:layout_height="@dimen/list_item_height"
     android:clickable="true"
     android:background="?android:attr/selectableItemBackground">
 

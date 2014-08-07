@@ -117,7 +117,6 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                 return -2;
             }
         } else {
-            Log.e(TAG, "RETURNING OUT OF BOUNDS CHILD ID");
             return -1;
         }
     }

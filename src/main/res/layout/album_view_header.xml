@@ -18,7 +18,9 @@
         android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical|start"
         android:paddingBottom="16dp"
+        android:paddingStart="24dp"
         android:paddingLeft="24dp"
+        android:paddingEnd="8dp"
         android:paddingRight="8dp"
         android:paddingTop="16dp"
         android:textColor="@color/white"
@@ -32,7 +34,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:scaleType="centerCrop"
-        />
+        android:contentDescription="@string/albums" />
 
     <!-- android:elevation="@dimen/button_elevation"
         android:stateListAnimator="@anim/button_raise" -->
@@ -46,10 +48,11 @@
         android:layout_alignParentRight="true"
 
         android:layout_marginBottom="-24dp"
+        android:layout_marginEnd="48dp"
         android:layout_marginRight="48dp"
 
         android:background="@drawable/fab_background"
-         />
+        android:contentDescription="@string/play_now" />
 
 
     <ProgressBar
@@ -58,5 +61,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:indeterminate="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
+
     </RelativeLayout>
