@@ -319,7 +319,7 @@ public class PlayingBarView extends RelativeLayout {
 
                     @Override
                     public void onClick(View view) {
-                        Bitmap hero = ((BitmapDrawable) ((ImageView) view).getDrawable()).getBitmap();
+                        Bitmap hero = ((MaterialTransitionDrawable) ((ImageView) view).getDrawable()).getFinalDrawable().getBitmap();
                         if (mPalette == null) {
                             mPalette = Palette.generate(hero);
                         }

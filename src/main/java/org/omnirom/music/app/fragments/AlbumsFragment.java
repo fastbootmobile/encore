@@ -33,6 +33,7 @@ import org.omnirom.music.app.adapters.AlbumsAdapter;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.ui.ExpandableGridView;
 import org.omnirom.music.app.ui.ExpandableHeightGridView;
+import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -101,7 +102,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
                 ImageView ivCover = tag.ivCover;
                 TextView tvTitle = tag.tvTitle;
 
-                Bitmap hero = ((BitmapDrawable) tag.ivCover.getDrawable()).getBitmap();
+                Bitmap hero = ((MaterialTransitionDrawable) tag.ivCover.getDrawable()).getFinalDrawable().getBitmap();
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
                         mAdapter.getItem(position), ((ColorDrawable) tag.vRoot.getBackground()).getColor());
 

@@ -2,32 +2,20 @@ package org.omnirom.music.app.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.AlbumArtImageView;
-import org.omnirom.music.framework.AlbumArtCache;
-import org.omnirom.music.framework.ImageCache;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
-import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -150,10 +138,12 @@ public class AlbumsAdapter extends BaseAdapter {
         final Album album = getItem(position);
         final ViewHolder tag = (ViewHolder) root.getTag();
 
-        tag.ivCover.setImageResource(R.drawable.album_placeholder);
+        tag.ivCover.setDefaultArt();
         tag.position = position;
         tag.vRoot = root;
         tag.album = album;
+
+        tag.vRoot.setBackgroundColor(res.getColor(R.color.default_album_art_background));
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
             // tag.ivCover.setViewName("list:albums:cover:" + album.getRef());

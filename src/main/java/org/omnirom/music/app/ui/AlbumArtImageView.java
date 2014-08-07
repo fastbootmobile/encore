@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AlbumArtCache;
@@ -149,7 +150,10 @@ public class AlbumArtImageView extends SquareImageView {
 
             // If we have an actual result, display it!
             if (result != null && result.drawable != null && !result.retry) {
-                setImageDrawable(result.drawable);
+                mDrawable.transitionTo(getResources(), result.drawable);
+                //invalidateDrawable(mDrawable);
+                //postInvalidate();
+
 
                 if (mOnArtLoadedListener != null) {
                     mOnArtLoadedListener.onArtLoaded(AlbumArtImageView.this, result.drawable);
@@ -170,6 +174,7 @@ public class AlbumArtImageView extends SquareImageView {
     private OnArtLoadedListener mOnArtLoadedListener;
     private BackgroundTask mTask;
     private BoundEntity mRequestedEntity;
+    private MaterialTransitionDrawable mDrawable;
 
     private static final int DELAY_BEFORE_START = 150;
     private static final int DELAY_BEFORE_RETRY = 60;
@@ -206,12 +211,13 @@ public class AlbumArtImageView extends SquareImageView {
 
     private void initialize() {
         // Set the placeholder art first-hand
-        setImageResource(R.drawable.album_placeholder);
         mHandler = new Handler();
+        mDrawable = new MaterialTransitionDrawable((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
+        setImageDrawable(mDrawable);
     }
 
     public void setDefaultArt() {
-        setImageResource(R.drawable.album_placeholder);
+        mDrawable.setImmediateTo((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
     }
 
     public void setOnArtLoadedListener(OnArtLoadedListener listener) {
@@ -220,15 +226,18 @@ public class AlbumArtImageView extends SquareImageView {
 
     public void loadArtForSong(final Song song) {
         loadArtImpl(song);
-
     }
 
     public void loadArtForAlbum(final Album album) {
         loadArtImpl(album);
     }
-    public void loadArtForArtist(final Artist artist) { loadArtImpl(artist);}
+
+    public void loadArtForArtist(final Artist artist) {
+        loadArtImpl(artist);
+    }
+
     private void loadArtImpl(final BoundEntity ent) {
-        /*if (mTask != null) {
+        if (mTask != null) {
             mTask.cancel(true);
         }
 
@@ -244,6 +253,6 @@ public class AlbumArtImageView extends SquareImageView {
                     mTask.executeOnExecutor(ART_POOL_EXECUTOR, ent);
                 }
             }
-        }, DELAY_BEFORE_START);*/
+        }, DELAY_BEFORE_START);
     }
 }
