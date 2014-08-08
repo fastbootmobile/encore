@@ -1,12 +1,12 @@
 package org.omnirom.music.api.musicbrainz;
 
 import android.util.Log;
-import android.util.Pair;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.omnirom.music.api.common.JsonGet;
+import org.omnirom.music.api.common.Pair;
 import org.omnirom.music.api.common.RateLimitException;
 
 import java.io.IOException;
