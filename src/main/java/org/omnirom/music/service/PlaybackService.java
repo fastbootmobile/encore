@@ -13,6 +13,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
@@ -81,7 +82,7 @@ public class PlaybackService extends Service
     private PlaybackQueue mPlaybackQueue;
     private List<IPlaybackCallback> mCallbacks;
     private Notification mNotification;
-    private Notification.Builder mNotificationBuilder;
+    private NotificationCompat.Builder mNotificationBuilder;
     private Song mCurrentTrack;
     private long mCurrentTrackStartTime;
     private long mPauseLastTick;
@@ -125,7 +126,7 @@ public class PlaybackService extends Service
         // Setup
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        mNotificationBuilder = new Notification.Builder(this);
+        mNotificationBuilder = new NotificationCompat.Builder(this);
         mNotificationBuilder.setSmallIcon(R.drawable.ic_launcher);
         mNotificationBuilder.setContentIntent(pendingIntent);
         mNotification = mNotificationBuilder.build();

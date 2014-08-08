@@ -218,7 +218,7 @@ public class SongsListAdapter  extends BaseAdapter{
                         result
                 });
 */
-                v.vRoot.setBackground(result);
+                Utils.setViewBackground(v.vRoot, result);
                 //drawable.startTransition(200);
             }
         }
@@ -299,15 +299,15 @@ public class SongsListAdapter  extends BaseAdapter{
             Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
 
             if (cachedBlur != null) {
-                root.setBackground(new BitmapDrawable(root.getResources(), cachedBlur));
+                Utils.setViewBackground(root, new BitmapDrawable(root.getResources(), cachedBlur));
             } else {
-                root.setBackground(res.getDrawable(R.drawable.album_list_default_bg));
+                Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
                 //task.execute(tag);
             }
         } else {
-            root.setBackground(res.getDrawable(R.drawable.album_list_default_bg));
+            Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
             BackgroundAsyncTask task = new BackgroundAsyncTask(position);
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
             //task.execute(tag);

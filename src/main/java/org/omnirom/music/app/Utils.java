@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -326,6 +327,17 @@ public class Utils {
             for (View v : views) {
                 v.setOutline(outline);
             } */
+        }
+    }
+
+    /**
+     * Provides an API-independent way to set a Drawable background on a view
+     */
+    public static void setViewBackground(View v, Drawable d) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            v.setBackground(d);
+        } else {
+            v.setBackgroundDrawable(d);
         }
     }
 }

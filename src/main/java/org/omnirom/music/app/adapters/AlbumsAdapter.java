@@ -17,6 +17,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.model.Album;
 
@@ -191,7 +192,7 @@ public class AlbumsAdapter extends BaseAdapter {
                                         ColorDrawable drawable2 = new ColorDrawable(targetColor);
                                         TransitionDrawable transitionDrawable
                                                 = new TransitionDrawable(new Drawable[]{drawable1, drawable2});
-                                        tag.vRoot.setBackground(transitionDrawable);
+                                        Utils.setViewBackground(tag.vRoot, transitionDrawable);
                                         transitionDrawable.startTransition(1000);
                                         tag.itemColor = targetColor;
                                     } else {
