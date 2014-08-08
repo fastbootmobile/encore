@@ -3,6 +3,9 @@ package org.omnirom.music.app.adapters;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.support.v7.graphics.Palette;
@@ -38,6 +41,7 @@ public class AlbumsAdapter extends BaseAdapter {
         public TextView tvSubTitle;
         public View vRoot;
         public int position;
+        public int itemColor;
     }
 
     public AlbumsAdapter() {
@@ -143,7 +147,9 @@ public class AlbumsAdapter extends BaseAdapter {
         tag.vRoot = root;
         tag.album = album;
 
-        tag.vRoot.setBackgroundColor(res.getColor(R.color.default_album_art_background));
+        final int defaultColor = res.getColor(R.color.default_album_art_background);
+        tag.vRoot.setBackgroundColor(defaultColor);
+        tag.itemColor = defaultColor;
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
             // tag.ivCover.setViewName("list:albums:cover:" + album.getRef());
@@ -172,13 +178,26 @@ public class AlbumsAdapter extends BaseAdapter {
                                     PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
                                     PaletteItem darkMutedColor = palette.getDarkMutedColor();
 
+                                    int targetColor = defaultColor;
+
                                     if (darkVibrantColor != null) {
-                                        tag.vRoot.setBackgroundColor(darkVibrantColor.getRgb());
+                                        targetColor = darkVibrantColor.getRgb();
                                     } else if (darkMutedColor != null) {
-                                        tag.vRoot.setBackgroundColor(darkMutedColor.getRgb());
-                                    } else {
-                                        tag.vRoot.setBackgroundColor(res.getColor(R.color.default_album_art_background));
+                                        targetColor = darkMutedColor.getRgb();
                                     }
+
+                                    if (targetColor != defaultColor) {
+                                        ColorDrawable drawable1 = new ColorDrawable(defaultColor);
+                                        ColorDrawable drawable2 = new ColorDrawable(targetColor);
+                                        TransitionDrawable transitionDrawable
+                                                = new TransitionDrawable(new Drawable[]{drawable1, drawable2});
+                                        tag.vRoot.setBackground(transitionDrawable);
+                                        transitionDrawable.startTransition(1000);
+                                        tag.itemColor = targetColor;
+                                    } else {
+                                        tag.vRoot.setBackgroundColor(targetColor);
+                                    }
+
                                 }
                             });
                         }

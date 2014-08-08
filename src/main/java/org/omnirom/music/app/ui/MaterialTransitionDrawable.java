@@ -86,7 +86,7 @@ public class MaterialTransitionDrawable extends Drawable {
             mTargetDrawable.setBounds(getBounds());
             mTargetGrayDrawable.setBounds(getBounds());
 
-            mStartTime = SystemClock.uptimeMillis();
+            mStartTime = -1;
             mAnimating = true;
             invalidateSelf();
         }
@@ -128,6 +128,10 @@ public class MaterialTransitionDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
         if (mAnimating) {
+            if (mStartTime < 0) {
+                mStartTime = SystemClock.uptimeMillis();
+            }
+
             final float rawProgress = Math.min(1.0f,
                     ((float) (SystemClock.uptimeMillis() - mStartTime)) / ((float) mDuration));
 

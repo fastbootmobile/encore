@@ -2,6 +2,7 @@ package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.graphics.drawable.TransitionDrawable;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -104,7 +105,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
 
                 Bitmap hero = ((MaterialTransitionDrawable) tag.ivCover.getDrawable()).getFinalDrawable().getBitmap();
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
-                        mAdapter.getItem(position), ((ColorDrawable) tag.vRoot.getBackground()).getColor());
+                        mAdapter.getItem(position), tag.itemColor);
 
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                     /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),

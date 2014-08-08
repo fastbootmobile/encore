@@ -254,15 +254,18 @@ public class PlaybackService extends Service
      */
     private void startPlayingQueue() {
         if (mPlaybackQueue.size() > 0) {
-            // Pause the previously playing track to avoid overlap
-            try {
-                mBinder.pause();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to pause the previously playing song");
+            final Song first = mPlaybackQueue.get(0);
+            final ProviderIdentifier providerIdentifier = first.getProvider();
+
+            if (mCurrentTrack != null && !mCurrentTrack.getProvider().equals(providerIdentifier)) {
+                // Pause the previously playing track to avoid overlap if it's not the same provider
+                try {
+                    mBinder.pause();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to pause the previously playing song");
+                }
             }
 
-            Song first = mPlaybackQueue.get(0);
-            ProviderIdentifier providerIdentifier = first.getProvider();
             if (providerIdentifier != null) {
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder();
 
