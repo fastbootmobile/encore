@@ -83,44 +83,50 @@ public class Utils {
             throw new IllegalArgumentException("blurAndDim: The input bitmap is null!");
         }
 
-        RenderScript renderScript = RenderScript.create(context);
-        ScriptIntrinsicBlur intrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
+        // RenderScript intrinsics were added in Android 4.2
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            RenderScript renderScript = RenderScript.create(context);
+            ScriptIntrinsicBlur intrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
 
-        final int scaledW = inBmp.getWidth() / 2;
-        final int scaledH = inBmp.getHeight() / 2;
+            final int scaledW = inBmp.getWidth() / 2;
+            final int scaledH = inBmp.getHeight() / 2;
 
-        Allocation input = Allocation.createFromBitmap(renderScript,
-                Bitmap.createScaledBitmap(inBmp, scaledW, scaledH, false));
-        Allocation output = Allocation.createTyped(renderScript, input.getType());
+            Allocation input = Allocation.createFromBitmap(renderScript,
+                    Bitmap.createScaledBitmap(inBmp, scaledW, scaledH, false));
+            Allocation output = Allocation.createTyped(renderScript, input.getType());
 
-        intrinsicBlur.setInput(input);
-        intrinsicBlur.setRadius(radius);
+            intrinsicBlur.setInput(input);
+            intrinsicBlur.setRadius(radius);
 
-        intrinsicBlur.forEach(output);
+            intrinsicBlur.forEach(output);
 
-        // Dim down images with a tint color
-        input.destroy();
-        input = Allocation.createFromBitmap(renderScript,
-                Bitmap.createScaledBitmap(Bitmap.createBitmap(new int[]{0x70000000},
-                                1, 1, Bitmap.Config.ARGB_8888),
-                        scaledW, scaledH, false
-                )
-        );
+            // Dim down images with a tint color
+            input.destroy();
+            input = Allocation.createFromBitmap(renderScript,
+                    Bitmap.createScaledBitmap(Bitmap.createBitmap(new int[]{0x70000000},
+                                    1, 1, Bitmap.Config.ARGB_8888),
+                            scaledW, scaledH, false
+                    )
+            );
 
-        ScriptIntrinsicBlend intrinsicBlend = ScriptIntrinsicBlend.create(renderScript,
-                Element.U8_4(renderScript));
-        intrinsicBlend.forEachSrcOver(input, output);
+            ScriptIntrinsicBlend intrinsicBlend = ScriptIntrinsicBlend.create(renderScript,
+                    Element.U8_4(renderScript));
+            intrinsicBlend.forEachSrcOver(input, output);
 
-        Bitmap outBmp = Bitmap.createBitmap(scaledW, scaledH, inBmp.getConfig());
-        output.copyTo(outBmp);
+            Bitmap outBmp = Bitmap.createBitmap(scaledW, scaledH, inBmp.getConfig());
+            output.copyTo(outBmp);
 
-        input.destroy();
-        output.destroy();
-        intrinsicBlur.destroy();
-        intrinsicBlend.destroy();
-        renderScript.destroy();
+            input.destroy();
+            output.destroy();
+            intrinsicBlur.destroy();
+            intrinsicBlend.destroy();
+            renderScript.destroy();
 
-        return outBmp;
+            return outBmp;
+        } else {
+            // For Android 4.1, we simply return the original bitmap
+            return inBmp;
+        }
     }
 
     /**

@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -250,7 +251,15 @@ public class AlbumArtImageView extends SquareImageView {
             public void run() {
                 if (mRequestedEntity == ent) {
                     mTask = new BackgroundTask();
-                    mTask.executeOnExecutor(ART_POOL_EXECUTOR, ent);
+
+                    // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the
+                    // predefined pool, as the custom one causes the app to just crash without any
+                    // kind of error message for no reason (at least in the emulator).
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        mTask.executeOnExecutor(ART_POOL_EXECUTOR, ent);
+                    } else {
+                        mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ent);
+                    }
                 }
             }
         }, DELAY_BEFORE_START);
