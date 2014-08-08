@@ -58,11 +58,13 @@ public class HttpGet {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestProperty("User-Agent","OmniMusic/1.0-dev (http://www.omnirom.org)");
         urlConnection.setUseCaches(cached);
+        urlConnection.setInstanceFollowRedirects(true);
         int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
         urlConnection.addRequestProperty("Cache-Control", "max-stale=" + maxStale);
         try {
+            final int status = urlConnection.getResponseCode();
             // MusicBrainz returns 503 Unavailable on rate limit errors. Parse the JSON anyway.
-            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            if (status == HttpURLConnection.HTTP_OK) {
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                 int contentLength = urlConnection.getContentLength();
                 if (contentLength <= 0) {
@@ -77,15 +79,23 @@ public class HttpGet {
                     bab.append(character);
                 }
                 return bab.toByteArray();
-            } else if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            } else if (status == HttpURLConnection.HTTP_NOT_FOUND) {
                 // 404
                 return new byte[]{};
-            } else if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+            } else if (status == HttpURLConnection.HTTP_FORBIDDEN) {
                 return new byte[]{};
-            } else if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_UNAVAILABLE) {
+            } else if (status == HttpURLConnection.HTTP_UNAVAILABLE) {
                 throw new RateLimitException();
+            } else if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                    || status == HttpURLConnection.HTTP_MOVED_PERM
+                    || status == 307 /* HTTP/1.1 TEMPORARY REDIRECT */
+                    || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                // We've been redirected, follow the new URL
+                final String followUrl = urlConnection.getHeaderField("Location");
+                Log.e(TAG, "Redirected to: " +  followUrl);
+                return getBytes(followUrl, "", cached);
             } else {
-                Log.e(TAG, "Error when fetching: " + formattedUrl);
+                Log.e(TAG, "Error when fetching: " + formattedUrl + " (" + urlConnection.getResponseCode() + ")");
                 return new byte[]{};
             }
         } finally {
