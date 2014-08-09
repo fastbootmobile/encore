@@ -78,7 +78,8 @@ public class ProvidersAdapter extends BaseAdapter {
             Drawable icon = context.getPackageManager().getApplicationIcon(provider.getPackage());
             tag.ivProviderIcon.setImageDrawable(icon);
         } catch (PackageManager.NameNotFoundException e) {
-            // ignore
+            // set default icon
+            tag.ivProviderIcon.setImageResource(R.drawable.ic_launcher);
         }
 
         return view;

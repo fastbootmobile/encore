@@ -10,6 +10,7 @@
     <style name="AppActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">@color/primary</item>
         <item name="android:titleTextStyle">@style/AppActionBarText</item>
+        <item name="android:icon">@drawable/ic_launcher_white</item>
     </style>
 
     <style name="AppActionBarText" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">

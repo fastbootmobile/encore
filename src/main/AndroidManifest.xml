@@ -48,25 +48,30 @@
         <activity
             android:name=".ArtistActivity"
             android:label="@string/title_activity_artist"
+            android:icon="@drawable/ic_launcher_white"
             android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
         </activity>
 
         <activity
             android:name=".PlaylistActivity"
             android:label="@string/title_activity_artist"
+            android:icon="@drawable/ic_launcher_white"
             android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
         </activity>
         <activity
             android:name=".AlbumActivity"
             android:label="@string/title_activity_artist"
+            android:icon="@drawable/ic_launcher_white"
             android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
         </activity>
         <activity
             android:name=".PlaybackQueueActivity"
+            android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_playback_queue" >
         </activity>
         <activity
             android:name=".SettingsActivity"
+            android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_settings" >
         </activity>
     </application>

@@ -95,9 +95,7 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void onBackPressed() {
-        if (!mSearchView.isIconified()) {
-            mSearchView.setIconified(true);
-        } else if (!mPlayingBarLayout.isWrapped()) {
+        if (!mPlayingBarLayout.isWrapped()) {
             mPlayingBarLayout.setWrapped(true);
         } else {
             super.onBackPressed();

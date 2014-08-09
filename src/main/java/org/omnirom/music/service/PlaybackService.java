@@ -127,7 +127,7 @@ public class PlaybackService extends Service
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         mNotificationBuilder = new NotificationCompat.Builder(this);
-        mNotificationBuilder.setSmallIcon(R.drawable.ic_launcher);
+        mNotificationBuilder.setSmallIcon(R.drawable.ic_launcher_white);
         mNotificationBuilder.setContentIntent(pendingIntent);
         mNotification = mNotificationBuilder.build();
 
