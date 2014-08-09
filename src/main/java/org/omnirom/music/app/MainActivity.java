@@ -23,7 +23,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 
 import org.omnirom.music.app.fragments.AbstractRootFragment;
@@ -64,6 +67,8 @@ public class MainActivity extends FragmentActivity
 
     private boolean mRestoreBarOnBack;
 
+    private SearchView mSearchView;
+
 
     public MainActivity() {
         mPlaybackState = new PlaybackState();
@@ -90,7 +95,9 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void onBackPressed() {
-        if (!mPlayingBarLayout.isWrapped()) {
+        if (!mSearchView.isIconified()) {
+            mSearchView.setIconified(true);
+        } else if (!mPlayingBarLayout.isWrapped()) {
             mPlayingBarLayout.setWrapped(true);
         } else {
             super.onBackPressed();
@@ -214,10 +221,21 @@ public class MainActivity extends FragmentActivity
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
             SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+
+            mSearchView = (SearchView) menu.findItem(R.id.action_search)
                    .getActionView();
-            searchView.setSearchableInfo(searchManager
+            mSearchView.setSearchableInfo(searchManager
                     .getSearchableInfo(getComponentName()));
+
+            int searchTextViewId = mSearchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            TextView searchTextView = (TextView) mSearchView.findViewById(searchTextViewId);
+            searchTextView.setHintTextColor(getResources().getColor(R.color.white));
+
+            // Google, why is searchView using a Gingerbread-era enforced icon?
+            int searchImgId = getResources().getIdentifier("android:id/search_button", null, null);
+            ImageView v = (ImageView) mSearchView.findViewById(searchImgId);
+            v.setImageResource(R.drawable.ic_action_search);
+
             restoreActionBar();
             return true;
         }
