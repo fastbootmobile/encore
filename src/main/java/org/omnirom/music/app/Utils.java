@@ -12,6 +12,7 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlend;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -339,5 +340,10 @@ public class Utils {
         } else {
             v.setBackgroundDrawable(d);
         }
+    }
+
+    public static int dpToPx(Resources res, int dp) {
+        DisplayMetrics displayMetrics = res.getDisplayMetrics();
+        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 }

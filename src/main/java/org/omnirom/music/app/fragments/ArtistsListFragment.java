@@ -147,12 +147,6 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        ((MainActivity) activity).onSectionAttached(MainActivity.SECTION_PLAYLISTS);
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         ProviderAggregator.getDefault().removeUpdateCallback(this);

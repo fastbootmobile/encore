@@ -123,12 +123,6 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        ((MainActivity) activity).onSectionAttached(MainActivity.SECTION_PLAYLISTS);
-    }
-
-    @Override
     public void onSongUpdate(List<Song> s) {
 
     }

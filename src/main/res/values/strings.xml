@@ -55,4 +55,8 @@
     <string name="raise">Raise</string>
     <string name="lower">Lower</string>
     <string name="remove">Remove</string>
+    <string name="tab_all_songs">All Songs</string>
+    <string name="tab_artists">Artists</string>
+    <string name="tab_albums">Albums</string>
+    <string name="tab_playlists">Playlists</string>
 </resources>

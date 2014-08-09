@@ -135,7 +135,7 @@ public class MainActivity extends FragmentActivity
             Fragment newFrag;
             switch (position+1) {
                 case SECTION_PLAYLISTS:
-                    newFrag = PlaylistListFragment.newInstance();
+                    newFrag = PlaylistListFragment.newInstance(true);
                     break;
                 case SECTION_MY_SONGS :
                     newFrag = MySongsFragment.newInstance();

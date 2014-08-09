@@ -7,9 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
 import org.omnirom.music.app.ui.ExpandableHeightGridView;
 import org.omnirom.music.model.Album;
@@ -35,6 +37,7 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
 
     private PlaylistListAdapter mAdapter;
     private Handler mHandler;
+    private boolean mIsStandalone;
     private final ArrayList<Playlist> mPlaylistsUpdated = new ArrayList<Playlist>();
 
     private Runnable mUpdateListRunnable = new Runnable() {
@@ -55,10 +58,12 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
+     * @param isStandalone Whether this fragment is embedded in My Songs or is the Playlists section
      * @return A new instance of fragment PlaylistListFragment.
      */
-    public static PlaylistListFragment newInstance() {
+    public static PlaylistListFragment newInstance(boolean isStandalone) {
         PlaylistListFragment fragment = new PlaylistListFragment();
+        fragment.setIsStandalone(isStandalone);
         return fragment;
     }
     public PlaylistListFragment() {
@@ -66,6 +71,10 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
         mHandler = new Handler();
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
+    }
+
+    public void setIsStandalone(boolean isStandalone) {
+        mIsStandalone = isStandalone;
     }
 
     @Override
@@ -82,6 +91,13 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
                 (ExpandableHeightGridView) root.findViewById(R.id.gvPlaylists);
         playlistLayout.setAdapter(mAdapter);
         playlistLayout.setExpanded(true);
+
+        // If we're not standalone, remove the huge padding
+        if (!mIsStandalone) {
+            FrameLayout frameLayout = (FrameLayout) root.findViewById(R.id.flPlaylistsRoot);
+            int fourDp = Utils.dpToPx(getResources(), 4);
+            frameLayout.setPadding(fourDp, fourDp, fourDp, fourDp);
+        }
 
         // Set the initial playlists
         new Thread() {
@@ -115,7 +131,9 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ((MainActivity) activity).onSectionAttached(MainActivity.SECTION_PLAYLISTS);
+        if (mIsStandalone) {
+            ((MainActivity) activity).onSectionAttached(MainActivity.SECTION_PLAYLISTS);
+        }
     }
 
     @Override
