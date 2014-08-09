@@ -1,18 +1,13 @@
 package org.omnirom.music.app;
 
-import android.animation.ValueAnimator;
 import android.app.ActionBar;
-import android.app.Activity;
-import android.support.v4.app.FragmentManager;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.transition.Transition;
+import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 
 import org.omnirom.music.app.fragments.ArtistFragment;
 

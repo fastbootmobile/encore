@@ -152,9 +152,7 @@ public class AlbumArtImageView extends SquareImageView {
             // If we have an actual result, display it!
             if (result != null && result.drawable != null && !result.retry) {
                 mDrawable.transitionTo(getResources(), result.drawable);
-                //invalidateDrawable(mDrawable);
-                //postInvalidate();
-
+                forceDrawableReload();
 
                 if (mOnArtLoadedListener != null) {
                     mOnArtLoadedListener.onArtLoaded(AlbumArtImageView.this, result.drawable);
@@ -177,7 +175,7 @@ public class AlbumArtImageView extends SquareImageView {
     private BoundEntity mRequestedEntity;
     private MaterialTransitionDrawable mDrawable;
 
-    private static final int DELAY_BEFORE_START = 150;
+    private static final int DELAY_BEFORE_START = 500;
     private static final int DELAY_BEFORE_RETRY = 60;
     private static final int CORE_POOL_SIZE = 4;
     private static final int MAXIMUM_POOL_SIZE = 256;
@@ -218,8 +216,18 @@ public class AlbumArtImageView extends SquareImageView {
         setImageDrawable(mDrawable);
     }
 
+    private void forceDrawableReload() {
+        // Our drawable is likely changing bounds. From ImageView source code, it seems
+        // like there's no way for the drawable to tell the view "hey, I resized", so we
+        // manually trigger "updateDrawable()" (a private method in ImageView) by setting
+        // the drawable again when we know it changes
+        setImageDrawable(null);
+        setImageDrawable(mDrawable);
+    }
+
     public void setDefaultArt() {
         mDrawable.setImmediateTo((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
+        forceDrawableReload();
     }
 
     public void setOnArtLoadedListener(OnArtLoadedListener listener) {

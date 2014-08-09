@@ -79,10 +79,17 @@ public class  ImageCache {
         }
     }
 
+
     public void put(final String key, final Bitmap bmp) {
+        put(key, bmp, false);
+    }
+
+    public void put(final String key, final Bitmap bmp, final boolean asPNG) {
+        mMemoryCache.put(key, bmp);
+
         try {
             FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + key);
-            bmp.compress(Bitmap.CompressFormat.WEBP, 90, out);
+            bmp.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
             out.close();
         } catch (IOException e) {
             Log.e(TAG, "Unable to write the file to cache", e);

@@ -9,13 +9,12 @@
     android:orientation="vertical">
 
     <!-- android:viewName="cover" -->
-    <org.omnirom.music.app.ui.SquareImageView
+    <org.omnirom.music.app.ui.AlbumArtImageView
         android:id="@+id/ivCover"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
-
         android:contentDescription="@string/app_name"
         android:layout_weight="0" />
 

@@ -40,7 +40,10 @@ public class MaterialTransitionDrawable extends Drawable {
     private long mStartTime;
     private boolean mAnimating;
     private long mDuration = DEFAULT_DURATION;
-    private GrayscaleRS mGrayscaler;
+
+    private static final Object mGrayscalerSync = new Object();
+    private static GrayscaleRS mGrayscaler;
+
 
     public MaterialTransitionDrawable(Context ctx, Bitmap base) {
         this(ctx, new BitmapDrawable(ctx.getResources(), base));
@@ -56,8 +59,12 @@ public class MaterialTransitionDrawable extends Drawable {
         mInterpolator = new AccelerateDecelerateInterpolator();
         mAnimating = false;
 
-        RenderScript renderScript = RenderScript.create(ctx);
-        mGrayscaler = new GrayscaleRS(renderScript);
+        synchronized (mGrayscalerSync) {
+            if (mGrayscaler == null) {
+                RenderScript renderScript = RenderScript.create(ctx);
+                mGrayscaler = new GrayscaleRS(renderScript);
+            }
+        }
     }
 
     public BitmapDrawable getFinalDrawable() {
@@ -110,7 +117,7 @@ public class MaterialTransitionDrawable extends Drawable {
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
 
-        if (mBaseDrawable != null) {
+        if (mBaseDrawable != null & !mAnimating) {
             mBaseDrawable.setBounds(bounds);
         }
         if (mTargetDrawable != null) {
@@ -144,7 +151,26 @@ public class MaterialTransitionDrawable extends Drawable {
             final float progressSaturation = mInterpolator.getInterpolation(rawProgress);
 
             if (mBaseDrawable != null) {
+                // Pad the base drawable to be at the center of the target size
+                final float targetWidth = mTargetDrawable.getIntrinsicWidth();
+                final float targetHeight = mTargetDrawable.getIntrinsicHeight();
+                Rect baseBounds = mBaseDrawable.getBounds();
+                final float baseWidth = baseBounds.width();
+                final float baseHeight = baseBounds.height();
+
+                canvas.save();
+
+                float scaling = Math.min(targetWidth / baseWidth, targetHeight / baseHeight);
+
+                final float scaledBaseWidth = scaling * baseWidth;
+                final float scaledBaseHeight = scaling * baseHeight;
+
+                canvas.translate((targetWidth - scaledBaseWidth) * 0.5f,
+                        (targetHeight - scaledBaseHeight) * 0.5f);
+                canvas.scale(scaling, scaling);
+
                 mBaseDrawable.draw(canvas);
+                canvas.restore();
             }
 
             mTargetGrayDrawable.setAlpha((int) (255 * progressOpacity));
@@ -168,23 +194,23 @@ public class MaterialTransitionDrawable extends Drawable {
 
     @Override
     public int getIntrinsicHeight() {
-        if (mBaseDrawable != null) {
-            return mBaseDrawable.getIntrinsicHeight();
-        } else if (mTargetDrawable != null) {
+        if (mAnimating && mTargetDrawable != null) {
             return mTargetDrawable.getIntrinsicHeight();
+        } else if (mBaseDrawable != null) {
+            return mBaseDrawable.getIntrinsicHeight();
         } else {
-            return -1;
+            return super.getIntrinsicHeight();
         }
     }
 
     @Override
     public int getIntrinsicWidth() {
-        if (mBaseDrawable != null) {
-            return mBaseDrawable.getIntrinsicWidth();
-        } else if (mTargetDrawable != null) {
+        if (mAnimating && mTargetDrawable != null) {
             return mTargetDrawable.getIntrinsicWidth();
+        } else if (mBaseDrawable != null) {
+            return mBaseDrawable.getIntrinsicWidth();
         } else {
-            return -1;
+            return super.getIntrinsicWidth();
         }
     }
 

@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -314,6 +315,10 @@ public class PluginsLookup {
                 IMusicProvider binder = getProvider(id).getBinder();
                 if (binder != null) {
                     output = getProvider(id).getBinder().getLogo(ref);
+
+                    if (output != null) {
+                        ImageCache.getDefault().put(ref, output, true);
+                    }
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to get source logo", e);

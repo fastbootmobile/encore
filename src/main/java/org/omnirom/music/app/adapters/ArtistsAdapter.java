@@ -5,6 +5,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -21,6 +24,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.omnirom.music.app.Utils;
+import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.model.Artist;
@@ -40,138 +45,22 @@ import java.util.List;
  */
 public class ArtistsAdapter extends BaseAdapter {
 
-    private static final int DEFERRED_DELAY = 20;
-
     private final List<Artist> mArtists;
     private Handler mHandler;
-    private int mScrollState;
 
     public static class ViewHolder {
         public LinearLayout llRoot;
-        public ImageView ivCover;
+        public AlbumArtImageView ivCover;
         public TextView tvTitle;
         public Bitmap srcBitmap;
         public int position;
         public Artist artist;
-    }
-
-    private AbsListView.OnScrollListener mScrollListener = new AbsListView.OnScrollListener() {
-        @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
-            mScrollState = scrollState;
-        }
-
-        @Override
-        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-        }
-    };
-
-    private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
-        private ViewHolder v;
-        private int mPosition;
-        private Artist mArtist;
-
-        public BackgroundAsyncTask(int position) {
-            mPosition = position;
-        }
-
-        @Override
-        protected BitmapDrawable doInBackground(ViewHolder... params) {
-            v = params[0];
-            mArtist = v.artist;
-            if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) {
-                try {
-                    this.wait(DEFERRED_DELAY);
-                } catch (Exception e) {
-                    return null;
-                }
-            }
-
-            if (v.position != this.mPosition || mArtist == null) {
-                // Cancel, we moved
-                return null;
-            }
-            final Resources res = v.llRoot.getResources();
-            final Context ctx = v.llRoot.getContext().getApplicationContext();
-            assert res != null;
-
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
-
-            // Prepare the placeholder/default
-            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_placeholder);
-            assert drawable != null;
-            drawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
-            Bitmap bmp = drawable.getBitmap();
-            String artKey = cache.getArtistArtKey(mArtist);
-            Bitmap cachedImage = null;
-            if (artKey != null) {
-                cachedImage = ImageCache.getDefault().get(artKey);
-            }
-            if (cachedImage != null) {
-                bmp = cachedImage;
-            } else {
-                String artUrl = null;
-
-                if (artKey == null) {
-                    StringBuffer urlBuffer = new StringBuffer();
-                    artKey = AlbumArtCache.getDefault().getArtKey(mArtist, urlBuffer);
-                    artUrl = urlBuffer.toString();
-                }
-
-                if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
-                }
-
-                if (v.position != this.mPosition) {
-                    // Cancel, we moved
-                    return null;
-                }
-
-            }
-
-            BitmapDrawable output = new BitmapDrawable(res, bmp);
-
-            cache.putArtistArtKey(mArtist, artKey);
-
-            return output;
-        }
-
-        @Override
-        protected void onPostExecute(BitmapDrawable result) {
-            super.onPostExecute(result);
-
-            if (v.position == mPosition && v.artist == mArtist && result != null) {
-                applyItemImage(v, result);
-            }
-        }
+        public int itemColor;
     }
 
     public ArtistsAdapter() {
         mArtists = new ArrayList<Artist>();
         mHandler = new Handler();
-    }
-
-    public void registerScrollListener(AbsListView listView) {
-        listView.setOnScrollListener(mScrollListener);
-    }
-
-    private void applyItemImage(ViewHolder tag, BitmapDrawable result) {
-        tag.srcBitmap = result.getBitmap();
-        tag.ivCover.setImageDrawable(result);
-
-        final Resources res = tag.llRoot.getResources();
-        Palette palette = Palette.generate(result.getBitmap());
-        PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
-        PaletteItem darkMutedColor = palette.getDarkMutedColor();
-
-        if (darkVibrantColor != null) {
-            tag.llRoot.setBackgroundColor(darkVibrantColor.getRgb());
-        } else if (darkMutedColor != null) {
-            tag.llRoot.setBackgroundColor(darkMutedColor.getRgb());
-        } else {
-            tag.llRoot.setBackgroundColor(res.getColor(R.color.default_album_art_background));
-        }
     }
 
     private void sortList() {
@@ -263,7 +152,7 @@ public class ArtistsAdapter extends BaseAdapter {
                 assert root != null;
 
                 ViewHolder holder = new ViewHolder();
-                holder.ivCover = (ImageView) root.findViewById(R.id.ivCover);
+                holder.ivCover = (AlbumArtImageView) root.findViewById(R.id.ivCover);
                 holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
                 holder.llRoot = (LinearLayout) root.findViewById(R.id.llRoot);
 
@@ -285,26 +174,56 @@ public class ArtistsAdapter extends BaseAdapter {
             if (artist.isLoaded()) {
                 tag.tvTitle.setText(artist.getName());
             } else {
-                tag.tvTitle.setText("Loading");
+                tag.tvTitle.setText("...");
             }
 
             // Load the artist art
-            final String artKey = ProviderAggregator.getDefault().getCache().getArtistArtKey(artist);
-            final Bitmap cached = ImageCache.getDefault().get(artKey);
+            final Resources res = tag.llRoot.getResources();
+            final int defaultColor = res.getColor(R.color.default_album_art_background);
 
-            final Resources res = root.getResources();
-            assert res != null;
+            tag.llRoot.setBackgroundColor(defaultColor);
+            tag.itemColor = defaultColor;
+            tag.ivCover.setDefaultArt();
+            tag.ivCover.loadArtForArtist(artist);
+            tag.ivCover.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
+                @Override
+                public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
+                    tag.srcBitmap = drawable.getBitmap();
 
-            if (cached != null) {
-                // We already know the artist art, display it immediately
-                applyItemImage(tag, new BitmapDrawable(res, cached));
-            } else {
-                tag.ivCover.setImageResource(R.drawable.album_placeholder);
-                tag.llRoot.setBackgroundColor(tag.llRoot.getResources().getColor(R.color.default_album_art_background));
-                tag.srcBitmap = ((BitmapDrawable) res.getDrawable(R.drawable.album_placeholder)).getBitmap();
-                BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-            }
+                    Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+                        @Override
+                        public void onGenerated(final Palette palette) {
+                            mHandler.post(new Runnable() {
+                                public void run() {
+                                    PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
+                                    PaletteItem darkMutedColor = palette.getDarkMutedColor();
+
+                                    int targetColor = defaultColor;
+
+                                    if (darkVibrantColor != null) {
+                                        targetColor = darkVibrantColor.getRgb();
+                                    } else if (darkMutedColor != null) {
+                                        targetColor = darkMutedColor.getRgb();
+                                    }
+
+                                    if (targetColor != defaultColor) {
+                                        ColorDrawable drawable1 = new ColorDrawable(defaultColor);
+                                        ColorDrawable drawable2 = new ColorDrawable(targetColor);
+                                        TransitionDrawable transitionDrawable
+                                                = new TransitionDrawable(new Drawable[]{drawable1, drawable2});
+                                        Utils.setViewBackground(tag.llRoot, transitionDrawable);
+                                        transitionDrawable.startTransition(1000);
+                                        tag.itemColor = targetColor;
+                                    } else {
+                                        tag.llRoot.setBackgroundColor(targetColor);
+                                    }
+
+                                }
+                            });
+                        }
+                    });
+                }
+            });
 
             return root;
         }

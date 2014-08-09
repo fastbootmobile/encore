@@ -24,6 +24,7 @@ import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
+import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -95,9 +96,6 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
         GridView artistLayout =
                 (GridView) root.findViewById(R.id.gvArtists);
         artistLayout.setAdapter(mAdapter);
-        mAdapter.registerScrollListener(artistLayout);
-
-
 
         new Thread() {
             public void run() {
@@ -120,14 +118,13 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
                 Intent intent = new Intent(getActivity(), ArtistActivity.class);
 
                 ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
-                ImageView ivCover = tag.ivCover;
+                AlbumArtImageView ivCover = tag.ivCover;
                 TextView tvTitle = tag.tvTitle;
 
                 intent.putExtra(ArtistActivity.EXTRA_ARTIST,
                         mAdapter.getItem(position).getRef());
 
-                intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
-                        ((ColorDrawable) view.getBackground()).getColor());
+                intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR, tag.itemColor);
 
                 Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, tag.srcBitmap);
 
