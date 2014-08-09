@@ -2,6 +2,7 @@ package org.omnirom.music.app;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
@@ -24,6 +25,8 @@ import org.omnirom.music.app.adapters.AlbumsAdapter;
 import org.omnirom.music.app.fragments.AlbumViewFragment;
 import org.omnirom.music.app.fragments.ArtistFragment;
 import org.omnirom.music.model.Album;
+import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderCache;
 
 public class AlbumActivity extends FragmentActivity {
 
@@ -38,6 +41,7 @@ public class AlbumActivity extends FragmentActivity {
     private AlbumViewFragment mActiveFragment;
     private Bundle mInitialIntent;
     private Bitmap mHero;
+    private Handler mHandler;
 
     public static Intent craftIntent(Context context, Bitmap hero, Album album, int backColor) {
         Intent intent = new Intent(context, AlbumActivity.class);
@@ -53,6 +57,8 @@ public class AlbumActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
+
+        mHandler = new Handler();
 
         FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (AlbumViewFragment) fm.findFragmentByTag(TAG_FRAGMENT);
@@ -88,9 +94,30 @@ public class AlbumActivity extends FragmentActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.album, menu);
+
+        // Keep in tune with the XML!
+        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        final Runnable updateMenuArtist = new Runnable() {
+            @Override
+            public void run() {
+                String artistRef = mActiveFragment.getArtist();
+                MenuItem item = menu.getItem(2);
+
+                if (artistRef != null) {
+                    item.setTitle(getString(R.string.more_from, cache.getArtist(artistRef).getName()));
+                    item.setVisible(true);
+                } else {
+                    // We don't have the tracks for that album yet, try again.
+                    mHandler.postDelayed(this, 1000);
+                    item.setVisible(false);
+                }
+            }
+        };
+        updateMenuArtist.run();
+
         return true;
     }
 

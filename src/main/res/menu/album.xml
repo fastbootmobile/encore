@@ -3,6 +3,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:title="@string/add_to_queue" />
     <item android:title="@string/add_to_playlist" />
-    <item android:title="@string/more_from" />
+    <item android:title="@string/more_from" /> <!-- Keep in tune with AlbumActivity -->
     <item android:title="@string/hide_from_library" />
 </menu>

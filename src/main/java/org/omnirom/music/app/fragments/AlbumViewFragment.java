@@ -283,6 +283,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mLoadSongsRunnable.run();
     }
 
+    public String getArtist() {
+        return Utils.getMainArtist(mAlbum);
+    }
+
     @Override
     public void onSongUpdate(List<Song> s) {
         for (Song song : s) {
