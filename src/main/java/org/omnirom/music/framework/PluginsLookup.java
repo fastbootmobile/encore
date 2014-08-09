@@ -7,14 +7,17 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.graphics.Bitmap;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.providers.AbstractProviderConnection;
 import org.omnirom.music.providers.Constants;
 import org.omnirom.music.providers.DSPConnection;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.MultiProviderPlaylistProvider;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
@@ -297,14 +300,27 @@ public class PluginsLookup {
             }
         }
 
-        HashMap<String, String> item = new HashMap<String, String>();
-        item.put(DATA_PACKAGE,"org.omnirom.music.providers");
-        item.put(DATA_SERVICE,"org.omnirom.music.providers.MultiProviderPlaylistProvider");
-        item.put(DATA_NAME,"MultiProviderPlaylistProvider");
-        item.put(DATA_AUTHOR, "The OmniROM Project");
-        item.put(DATA_CONFIGCLASS,null);
-        //services.add(item);
-
         return services;
     }
+
+    public Bitmap getCachedLogo(BoundEntity entity) {
+        return getCachedLogo(entity.getProvider(), entity.getLogo());
+    }
+
+    public Bitmap getCachedLogo(ProviderIdentifier id, String ref) {
+        Bitmap output = ImageCache.getDefault().get(ref);
+        if (output == null && id != null) {
+            try {
+                IMusicProvider binder = getProvider(id).getBinder();
+                if (binder != null) {
+                    output = getProvider(id).getBinder().getLogo(ref);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to get source logo", e);
+            }
+        }
+
+        return output;
+    }
+
 }

@@ -150,6 +150,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         ImageButton fabPlay = (ImageButton) headerView.findViewById(R.id.fabPlay);
         Utils.setLargeFabOutline(new View[]{fabPlay});
 
+        // Set source logo
+        ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
+        ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(mAlbum));
+
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources());
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
@@ -260,6 +264,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                                 // RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
                                 // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
                                 // back.setColor(color.getRgb());
+                            } else {
+                                GradientDrawable shape = (GradientDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
+                                shape.setColor(color.getRgb());
                             }
                         }
                     }

@@ -10,18 +10,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/ivHero"
+        android:layout_alignLeft="@+id/ivHero"
         android:layout_alignRight="@+id/ivHero"
         android:layout_alignStart="@+id/ivHero"
-        android:layout_alignLeft="@+id/ivHero"
         android:layout_below="@+id/ivHero"
         android:background="#333"
         android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical|start"
         android:paddingBottom="16dp"
-        android:paddingStart="24dp"
-        android:paddingLeft="24dp"
         android:paddingEnd="8dp"
+        android:paddingLeft="24dp"
         android:paddingRight="8dp"
+        android:paddingStart="24dp"
         android:paddingTop="16dp"
         android:textColor="@color/white"
         android:textSize="22sp" />
@@ -31,10 +31,10 @@
         android:id="@+id/ivHero"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:scaleType="centerCrop"
-        android:contentDescription="@string/albums" />
+        android:layout_alignParentStart="true"
+        android:contentDescription="@string/albums"
+        android:scaleType="centerCrop" />
 
     <!-- android:elevation="@dimen/button_elevation"
         android:stateListAnimator="@anim/button_raise" -->
@@ -59,9 +59,21 @@
         android:id="@+id/pbAlbumLoading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:indeterminate="true" />
 
-    </RelativeLayout>
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:id="@+id/ivSourceLogo"
+        android:layout_alignTop="@+id/tvAlbumName"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@+id/tvAlbumName"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:scaleType="centerInside" />
+
+</RelativeLayout>

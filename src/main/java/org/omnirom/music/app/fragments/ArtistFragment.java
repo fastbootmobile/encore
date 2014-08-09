@@ -2,6 +2,8 @@ package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
@@ -245,6 +247,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                                 // RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
                                 // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
                                 // back.setColor(color.getRgb());
+                            } else {
+                                GradientDrawable shape = (GradientDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
+                                shape.setColor(color.getRgb());
                             }
                         }
                     }
@@ -268,6 +273,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
         tvArtist.setBackgroundColor(mBackgroundColor);
         tvArtist.setText(mArtist.getName());
+
+        ImageView ivSource = (ImageView) mRootView.findViewById(R.id.ivSourceLogo);
+        ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(mArtist));
 
         // Outline is required for the FAB shadow to be actually oval
         ImageButton fabPlay = (ImageButton) mRootView.findViewById(R.id.fabPlay);

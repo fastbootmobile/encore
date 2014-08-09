@@ -170,6 +170,20 @@
 
         </LinearLayout>
 
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:id="@+id/ivSourceLogo"
+            android:layout_alignEnd="@+id/tvArtist"
+            android:layout_alignRight="@+id/tvArtist"
+            android:layout_alignBottom="@+id/tvArtist"
+            android:layout_alignTop="@+id/tvArtist"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/app_name"
+            android:scaleType="centerInside"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"/>
+
 
     </RelativeLayout>
 </org.omnirom.music.app.ui.ParallaxScrollView>
