@@ -129,7 +129,7 @@
 
                     <Button
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="36dp"
                         android:layout_alignParentBottom="true"
                         android:layout_alignEnd="@+id/tvArtistSuggestionTitle"
                         android:layout_alignRight="@+id/tvArtistSuggestionTitle"
@@ -138,7 +138,7 @@
                         android:layout_marginRight="4dp"
                         android:id="@+id/btnArtistSuggestionPlay"
                         android:text="@string/play_now"
-                        style="@android:style/Widget.Holo.Button.Borderless.Small" />
+                        style="@style/OmniMusic.Spec.BorderlessButton" />
 
                 </RelativeLayout>
 
