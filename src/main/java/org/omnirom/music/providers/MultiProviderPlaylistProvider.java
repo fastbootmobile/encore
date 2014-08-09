@@ -283,4 +283,9 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
         mMultiProviderDatabaseHelper.startSearch(query);
     }
 
+    @Override
+    public Bitmap getLogo(String ref) throws RemoteException {
+        return null;
+    }
+
 }

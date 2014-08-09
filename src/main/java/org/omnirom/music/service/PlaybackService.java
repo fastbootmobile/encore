@@ -478,7 +478,6 @@ public class PlaybackService extends Service
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
-        Log.e(TAG, "PROVIDER CONNECTED IN PLAYBACK SERVICE");
         try {
             provider.registerCallback(mProviderCallback);
         } catch (RemoteException e) {
