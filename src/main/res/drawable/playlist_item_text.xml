@@ -3,10 +3,10 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true"
         android:state_focused="true"
-        android:color="@color/text_action"/>
+        android:color="@color/primary"/>
     <item android:state_pressed="true"
         android:state_focused="false"
-        android:color="@color/text_action"/>
+        android:color="@color/primary"/>
 
-    <item android:color="@color/white" />
+    <item android:color="@color/text_regular" />
 </selector>

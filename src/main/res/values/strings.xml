@@ -46,7 +46,7 @@
     <string name="multi_provider_playlist">Multi-provider playlist (local only)</string>
     <string name="enter_name">Enter a name</string>
 
-    <!--  Strings for possible PreferenceActivity Back/Next buttons -->
+    <!-- Strings for possible PreferenceActivity Back/Next buttons -->
     <string name="back_button_label">Back</string>
     <string name="next_button_label">Next</string>
 
@@ -59,4 +59,12 @@
     <string name="tab_artists">Artists</string>
     <string name="tab_albums">Albums</string>
     <string name="tab_playlists">Playlists</string>
+    <string name="options">Options</string>
+    <string name="title_activity_automix">Automix</string>
+    <string name="tracks">Tracks</string>
+    <string name="biography">Biography</string>
+    <string name="Similar">Similar</string>
+    <string name="more_on_the_web">More on the web</string>
+    <string name="unable_fetch_artist_info">Unable to get artist information</string>
+
 </resources>

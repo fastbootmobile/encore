@@ -3,10 +3,10 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true"
         android:state_focused="true"
-        android:drawable="@color/apptheme_color"/>
+        android:drawable="@color/primary_light"/>
     <item android:state_pressed="true"
         android:state_focused="false"
-        android:drawable="@color/apptheme_color"/>
+        android:drawable="@color/primary_light"/>
 
     <item android:drawable="@android:color/transparent" />
 </selector>

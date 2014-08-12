@@ -40,7 +40,7 @@ public class SongsFragment extends AbstractRootFragment implements ILocalCallbac
         View root = inflater.inflate(R.layout.fragment_songs, container, false);
         assert root != null;
         ListView songsList = (ListView)root.findViewById(R.id.songsList);
-        mSongsListAdapter = new SongsListAdapter(root.getContext());
+        mSongsListAdapter = new SongsListAdapter(root.getContext(), true);
         songsList.setAdapter(mSongsListAdapter);
 
                 for(ProviderConnection providerConnection : PluginsLookup.getDefault().getAvailableProviders()){

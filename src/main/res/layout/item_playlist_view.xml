@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/tvTitle"
-        style="@style/OmniMusic.ShadowedText"
+        style="@style/FontBody1"
         android:layout_gravity="center_vertical"
         android:layout_weight="0.85"
         android:textColor="@drawable/playlist_item_text"
@@ -41,10 +41,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
             android:id="@+id/tvArtist"
             android:layout_gravity="center_vertical"
-            style="@style/OmniMusic.ShadowedText.CondensedBoldCaps"
+            style="@style/FontBody2"
             android:textColor="@drawable/playlist_item_text"
             android:singleLine="true" />
 
@@ -54,21 +53,19 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@drawable/playlist_item_text"
             android:id="@+id/tvDuration"
-            style="@style/OmniMusic.ShadowedText"
+            style="@style/FontCaption"
             android:layout_gravity="center_vertical" />
 
     </LinearLayout>
 
-    <TextView
-        style="@style/OmniMusic.ShadowedTextAction"
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:text="+"
         android:clickable="true"
-        android:id="@+id/addbutton"
+        android:background="@drawable/transparent_action_background"
+        android:id="@+id/ivOverflow"
         android:layout_gravity="center_vertical"
-        android:layout_margin="0dp"
-        android:padding="0dp"
-        android:textColor="@color/white" />
+        android:src="@drawable/ic_more_vert_dark"
+        android:contentDescription="@string/options" />
 
 </LinearLayout>

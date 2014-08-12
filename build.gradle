@@ -27,4 +27,6 @@ dependencies {
     compile 'com.android.support:palette-v7:21.0.0-rc1'
     compile project(':providerlib')
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files('src/main/libs/jEN.jar')
+    compile files('src/main/libs/json_simple-1.1.jar')
 }

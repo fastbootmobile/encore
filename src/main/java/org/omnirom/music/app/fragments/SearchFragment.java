@@ -22,6 +22,7 @@ import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.SearchAdapter;
+import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -118,7 +119,7 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
         SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
         ImageView ivCover = holder.albumArtImageView;
         TextView tvTitle = holder.divider;
-        Bitmap hero = ((BitmapDrawable) holder.albumArtImageView.getDrawable()).getBitmap();
+        Bitmap hero = ((MaterialTransitionDrawable) holder.albumArtImageView.getDrawable()).getFinalDrawable().getBitmap();
         int color = 0xffffff;
         if (hero != null) {
             Palette palette = Palette.generate(hero);
@@ -150,7 +151,7 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
         SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
         ImageView ivCover = holder.albumArtImageView;
         TextView tvTitle = holder.divider;
-        Bitmap hero = ((BitmapDrawable) holder.albumArtImageView.getDrawable()).getBitmap();
+        Bitmap hero = ((MaterialTransitionDrawable) holder.albumArtImageView.getDrawable()).getFinalDrawable().getBitmap();
         int color = 0xffffff;
         if (hero != null) {
             Palette palette = Palette.generate(hero);

@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
+        android:divider="@color/text_regular"
         android:background="@color/default_fragment_background"/>
 
 

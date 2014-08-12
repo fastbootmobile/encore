@@ -30,6 +30,7 @@ import android.widget.TextView;
 
 
 import org.omnirom.music.app.fragments.AbstractRootFragment;
+import org.omnirom.music.app.fragments.AutomixFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
@@ -142,8 +143,11 @@ public class MainActivity extends FragmentActivity
                 case SECTION_PLAYLISTS:
                     newFrag = PlaylistListFragment.newInstance(true);
                     break;
-                case SECTION_MY_SONGS :
+                case SECTION_MY_SONGS:
                     newFrag = MySongsFragment.newInstance();
+                    break;
+                case SECTION_AUTOMIX:
+                    newFrag = AutomixFragment.newInstance();
                     break;
                 default:
                     newFrag = PlaceholderFragment.newInstance(position + 1);

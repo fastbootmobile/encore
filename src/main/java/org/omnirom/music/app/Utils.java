@@ -12,15 +12,19 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlend;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.omnirom.music.app.fragments.PlaylistChooserFragment;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -392,5 +396,28 @@ public class Utils {
         } else {
             return null;
         }
+    }
+
+    public static void showSongOverflow(final FragmentActivity context, final View parent,
+                                        final Song song) {
+        PopupMenu popupMenu = new PopupMenu(context, parent);
+        popupMenu.inflate(R.menu.track_overflow);
+        popupMenu.show();
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.menu_add_to_playlist:
+                        PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
+                        fragment.show(context.getSupportFragmentManager(), song.getRef());
+                        break;
+
+                    default:
+                        return false;
+                }
+                return true;
+            }
+        });
     }
 }

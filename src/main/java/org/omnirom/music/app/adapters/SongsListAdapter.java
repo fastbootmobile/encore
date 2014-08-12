@@ -13,10 +13,13 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import org.omnirom.music.app.MainActivity;
@@ -41,16 +44,28 @@ import java.util.List;
 /**
  * Created by h4o on 19/06/2014.
  */
-public class SongsListAdapter  extends BaseAdapter{
+public class SongsListAdapter extends BaseAdapter {
     List<Song> mSongs;
     private int mItemWidth;
     private int mItemHeight;
+    private boolean mBlurBackground;
 
+    private static class ViewHolder {
+        public TextView tvTitle;
+        public TextView tvArtist;
+        public TextView tvDuration;
+        public ImageView ivOverflow;
+        public View vRoot;
+        public int position;
+        public Song song;
+    }
 
-    public SongsListAdapter(Context ctx){
+    public SongsListAdapter(Context ctx, boolean blurBackground) {
         final Resources res = ctx.getResources();
         assert res != null;
         mSongs = new ArrayList<Song>();
+        mBlurBackground = blurBackground;
+
         // Theoretically, we'd need the width and height of the root view. However, this thread
         // might (and probably will) run before the view has been layout'd by the system, thus
         // getMeasuredXxxx() returns 0, which is invalid for the thumbnail we want. Instead,
@@ -63,24 +78,16 @@ public class SongsListAdapter  extends BaseAdapter{
         mItemWidth = size.x;
         mItemHeight = res.getDimensionPixelSize(R.dimen.playlist_view_item_height);
     }
-    private static class ViewHolder {
-        public TextView tvTitle;
-        public TextView tvArtist;
-        public TextView tvDuration;
-        public View vRoot;
-        public int position;
-        public Song song;
-    }
 
     public void clear() {
         mSongs.clear();
     }
 
-    public void put(Song song){
+    public void put(Song song) {
         mSongs.add(song);
     }
 
-    public void sortAll(){
+    public void sortAll() {
         Collections.sort(mSongs, new Comparator<Song>() {
             @Override
             public int compare(Song lhs, Song rhs) {
@@ -89,6 +96,7 @@ public class SongsListAdapter  extends BaseAdapter{
         });
 
     }
+
     private class BackgroundAsyncTask extends AsyncTask<ViewHolder, Void, BitmapDrawable> {
         private ViewHolder v;
         private int mPosition;
@@ -123,13 +131,13 @@ public class SongsListAdapter  extends BaseAdapter{
             try {
                 bmp = PluginsLookup.getDefault().getProvider(mSong.getProvider()).getBinder().getSongArt(mSong);
 
-            } catch (Exception e){
-                bmp  = drawable.getBitmap();
+            } catch (Exception e) {
+                bmp = drawable.getBitmap();
             }
             String artKey;
             BitmapDrawable output;
             Bitmap blur = bmp;
-            if(bmp == null) {
+            if (bmp == null) {
                 // Download the art image
                 artKey = cache.getSongArtKey(mSong);
                 String artUrl = null;
@@ -184,7 +192,7 @@ public class SongsListAdapter  extends BaseAdapter{
 
                 }
             } else {
-                artKey = mSong.getRef().replace(":","");
+                artKey = mSong.getRef().replace(":", "");
                 Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
                 if (v.position != this.mPosition) {
                     // Cancel, we moved
@@ -223,20 +231,24 @@ public class SongsListAdapter  extends BaseAdapter{
             }
         }
     }
+
     @Override
-    public int getCount(){
+    public int getCount() {
         return mSongs.size();
     }
+
     @Override
-    public Song getItem(int i){
+    public Song getItem(int i) {
         return mSongs.get(i);
     }
+
     @Override
-    public long getItemId(int i){
+    public long getItemId(int i) {
         return mSongs.get(i).getRef().hashCode();
     }
+
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, final View convertView, ViewGroup parent) {
         final Context ctx = parent.getContext();
         assert ctx != null;
 
@@ -244,13 +256,14 @@ public class SongsListAdapter  extends BaseAdapter{
         if (convertView == null) {
             // Recycle the existing view
             LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.item_playlist_view, null);
+            root = inflater.inflate(R.layout.item_playlist_view, parent, false);
             assert root != null;
 
             ViewHolder holder = new ViewHolder();
             holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
             holder.tvArtist = (TextView) root.findViewById(R.id.tvArtist);
             holder.tvDuration = (TextView) root.findViewById(R.id.tvDuration);
+            holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
             holder.vRoot = root;
 
             root.setTag(holder);
@@ -263,14 +276,14 @@ public class SongsListAdapter  extends BaseAdapter{
         tag.position = position;
         tag.song = song;
         root.setTag(tag);
-        TextView addButton = (TextView)tag.vRoot.findViewById(R.id.addbutton);
-        addButton.setOnClickListener(new View.OnClickListener() {
+        tag.ivOverflow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
-                fragment.show(((FragmentActivity)ctx).getSupportFragmentManager(),mSongs.get(position).getRef());
+                final Context context = tag.vRoot.getContext();
+                Utils.showSongOverflow((FragmentActivity) context, tag.ivOverflow, song);
             }
         });
+
         // Fill fields
         if (song != null && song.isLoaded()) {
             tag.tvTitle.setText(song.getTitle());
@@ -288,31 +301,32 @@ public class SongsListAdapter  extends BaseAdapter{
             tag.tvArtist.setText("...");
         }
 
-        // Fetch background art
-        final String artKey = ProviderAggregator.getDefault().getCache().getSongArtKey(song);
+        if (mBlurBackground) {
+            // Fetch background art
+            final String artKey = ProviderAggregator.getDefault().getCache().getSongArtKey(song);
 
-        final Resources res = root.getResources();
-        assert res != null;
+            final Resources res = root.getResources();
+            assert res != null;
 
-        if (artKey != null) {
-            // We already know the album art for this song (keyed in artKey)
-            Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
+            if (artKey != null) {
+                // We already know the album art for this song (keyed in artKey)
+                Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
 
-            if (cachedBlur != null) {
-                Utils.setViewBackground(root, new BitmapDrawable(root.getResources(), cachedBlur));
+                if (cachedBlur != null) {
+                    Utils.setViewBackground(root, new BitmapDrawable(root.getResources(), cachedBlur));
+                } else {
+                    Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
+                    BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+                }
             } else {
                 Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-                //task.execute(tag);
             }
         } else {
-            Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
-            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-            //task.execute(tag);
+            root.setBackgroundColor(0xFFFFFFFF);
         }
-
 
         return root;
     }

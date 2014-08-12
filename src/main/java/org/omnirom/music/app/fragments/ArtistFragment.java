@@ -1,29 +1,24 @@
 package org.omnirom.music.app.fragments;
 
-import android.app.Activity;
-import android.app.ActivityOptions;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.support.v4.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.PagerTabStrip;
+import android.support.v4.view.ViewPager;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.CardView;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,14 +31,18 @@ import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.echonest.api.v4.Biography;
+import com.echonest.api.v4.EchoNestException;
+
+import org.omnirom.music.api.echonest.EchoNest;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
-import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.app.ui.ObservableScrollView;
+import org.omnirom.music.app.ui.ParallaxScrollView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
-import org.omnirom.music.framework.AlbumArtCache;
-import org.omnirom.music.framework.ImageCache;
+import org.omnirom.music.app.ui.WrapContentHeightViewPager;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.framework.Suggestor;
 import org.omnirom.music.model.Album;
@@ -72,20 +71,21 @@ import java.util.List;
 public class ArtistFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "ArtistFragment";
+    private static final int FRAGMENT_ID_TRACKS = 0;
+    private static final int FRAGMENT_ID_BIOGRAPHY = 1;
+    private static final int FRAGMENT_ID_SIMILAR = 2;
+    private static final int FRAGMENT_COUNT = 3;
 
     private Bitmap mHeroImage;
     private int mBackgroundColor;
     private Artist mArtist;
-    private View mRootView;
+    private ParallaxScrollView mRootView;
     private Handler mHandler;
-    private View mPreviousSongGroup;
-    private View mPreviousAlbumGroup;
     private PlayPauseDrawable mFabDrawable;
-    private Song mRecommendedSong;
     private boolean mFabShouldResume;
-    private boolean mRecommendationLoaded = false;
-    private HashMap<Song, View> mSongToViewMap = new HashMap<Song, View>();
-    private HashMap<String, View> mAlbumToViewMap = new HashMap<String, View>();
+    private ArtistTracksFragment mArtistTracksFragment;
+    private ArtistInfoFragment mArtistInfoFragment;
+    private ArtistSimilarFragment mArtistSimilarFragment;
 
     private Runnable mUpdateAlbumsRunnable = new Runnable() {
         @Override
@@ -96,16 +96,59 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
             mArtist = cache.getArtist(mArtist.getRef());
 
-            if (!mRecommendationLoaded) {
-                loadRecommendation();
-            }
+            mArtistTracksFragment.loadRecommendation();
 
-            loadAlbums(false);
+            mArtistTracksFragment.loadAlbums(false);
         }
     };
 
+    private class ViewPagerAdapter extends FragmentPagerAdapter {
 
-    private class AlbumArtLoadListener implements AlbumArtImageView.OnArtLoadedListener {
+        public ViewPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int i) {
+            switch (i) {
+                case FRAGMENT_ID_TRACKS:
+                    return mArtistTracksFragment;
+
+                case FRAGMENT_ID_BIOGRAPHY:
+                    return mArtistInfoFragment;
+
+                case FRAGMENT_ID_SIMILAR:
+                    return mArtistSimilarFragment;
+            }
+
+            // should never happen
+            return null;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case FRAGMENT_ID_TRACKS:
+                    return getString(R.string.tracks).toUpperCase();
+
+                case FRAGMENT_ID_BIOGRAPHY:
+                    return getString(R.string.biography).toUpperCase();
+
+                case FRAGMENT_ID_SIMILAR:
+                    return getString(R.string.Similar).toUpperCase();
+            }
+
+            return "Error";
+        }
+
+        @Override
+        public int getCount() {
+            return FRAGMENT_COUNT;
+        }
+    }
+
+
+    private static class AlbumArtLoadListener implements AlbumArtImageView.OnArtLoadedListener {
         private View mRootView;
 
         public AlbumArtLoadListener(View rootView) {
@@ -123,6 +166,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
             if (vibrant != null && mRootView != null) {
                 mRootView.setBackgroundColor(vibrant.getRgb());
+
                 float luminance = vibrant.getHsl()[2];
 
                 TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
@@ -141,7 +185,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
-    private class AlbumGroupClickListener implements View.OnClickListener {
+    private static class AlbumGroupClickListener implements View.OnClickListener {
         private Album mAlbum;
         private LinearLayout mContainer;
         private LinearLayout mItemHost;
@@ -149,12 +193,17 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private boolean mOpen;
         private View mHeaderDivider;
         private View mLastItemDivider;
+        private Context mContext;
+        private ArtistTracksFragment mTracksFragment;
 
-        public AlbumGroupClickListener(Album a, LinearLayout container, View header) {
+        public AlbumGroupClickListener(Album a, LinearLayout container, View header,
+                                       ArtistTracksFragment tracksFragment) {
             mAlbum = a;
             mContainer = container;
             mOpen = false;
             mHeader = header;
+            mContext = header.getContext();
+            mTracksFragment = tracksFragment;
 
             mHeaderDivider = header.findViewById(R.id.divider);
             mHeaderDivider.setVisibility(View.VISIBLE);
@@ -175,17 +224,17 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 mHeaderDivider.animate().alpha(0.0f).setDuration(500).start();
             } else {
                 if (mItemHost == null) {
-                    mItemHost = new LinearLayout(getActivity());
+                    mItemHost = new LinearLayout(mContext);
                     mItemHost.setOrientation(LinearLayout.VERTICAL);
 
                     // We insert the view below the group
                     int index = ((LinearLayout) mHeader.getParent()).indexOfChild(mHeader);
                     mContainer.addView(mItemHost, index + 1);
 
-                    showAlbumTracks(mAlbum, mItemHost);
+                    mTracksFragment.showAlbumTracks(mAlbum, mItemHost);
 
                     // Add the divider at the end
-                    LayoutInflater inflater = getActivity().getLayoutInflater();
+                    LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     mLastItemDivider = inflater.inflate(R.layout.divider, mItemHost, false);
                     mItemHost.addView(mLastItemDivider);
                 }
@@ -196,24 +245,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
     }
-
-    private View.OnClickListener mSongClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            Song song = (Song) view.getTag();
-
-            try {
-                PluginsLookup.getDefault().getPlaybackService().playSong(song);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to play song", e);
-                return;
-            }
-
-            boldPlayingTrack(song);
-            updatePlayingAlbum(song.getAlbum());
-        }
-    };
-
 
     public ArtistFragment() {
         mFabShouldResume = false;
@@ -227,7 +258,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mHeroImage = hero;
         mBackgroundColor = extras.getInt(ArtistActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
         String artistRef = extras.getString(ArtistActivity.EXTRA_ARTIST);
-        Log.d(TAG, "Artist: " + artistRef);
         mArtist = ProviderAggregator.getDefault().getCache().getArtist(artistRef);
 
         if (mArtist == null) {
@@ -260,20 +290,74 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         mHandler = new Handler();
+        final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
 
-        mRootView = inflater.inflate(R.layout.fragment_artist, container, false);
+        // Setup the inside fragments
+        mArtistTracksFragment = new ArtistTracksFragment();
+        mArtistTracksFragment.setParentFragment(this);
 
-        IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+        mArtistInfoFragment = new ArtistInfoFragment();
+        mArtistInfoFragment.setArguments(mArtist);
 
+        mArtistSimilarFragment = new ArtistSimilarFragment();
+
+        // Inflate the main fragment view
+        mRootView = (ParallaxScrollView) inflater.inflate(R.layout.fragment_artist, container, false);
+
+        // Set the hero image and artist from arguments
         ImageView heroImage = (ImageView) mRootView.findViewById(R.id.ivHero);
         heroImage.setImageBitmap(mHeroImage);
 
-        TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
+        final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
         tvArtist.setBackgroundColor(mBackgroundColor);
         tvArtist.setText(mArtist.getName());
 
+        // Setup the subfragments pager
+        final WrapContentHeightViewPager pager = (WrapContentHeightViewPager) mRootView.findViewById(R.id.pagerArtist);
+        pager.setAdapter(new ViewPagerAdapter(getActivity().getSupportFragmentManager()));
+        pager.setOffscreenPageLimit(FRAGMENT_COUNT);
+
+        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                if (mRootView.getScrollY() > tvArtist.getTop()) {
+                    mRootView.smoothScrollTo(0, tvArtist.getTop());
+                }
+                pager.requestLayout();
+
+                if (i == FRAGMENT_ID_BIOGRAPHY) {
+                    mArtistInfoFragment.notifyActive();
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
+
+        PagerTabStrip strip = (PagerTabStrip) mRootView.findViewById(R.id.pagerArtistStrip);
+        strip.setBackgroundColor(mBackgroundColor);
+
+        mRootView.setOnScrollListener(new ObservableScrollView.ScrollViewListener() {
+            @Override
+            public void onScroll(ObservableScrollView scrollView, int x, int y, int oldx, int oldy) {
+                if (y >= tvArtist.getTop()) {
+                    getActivity().getActionBar().hide();
+                } else {
+                    getActivity().getActionBar().show();
+                }
+            }
+        });
+
+        // Setup the source logo
         ImageView ivSource = (ImageView) mRootView.findViewById(R.id.ivSourceLogo);
         ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(mArtist));
 
@@ -313,7 +397,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                             Log.e(TAG, "Cannot resume playback", e);
                         }
                     } else {
-                        playRecommendation();
+                        mArtistTracksFragment.playRecommendation();
                     }
                 } else {
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
@@ -330,11 +414,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         // Register for updates
         ProviderAggregator.getDefault().addUpdateCallback(this);
-
-        // Load recommendation and albums
-        loadRecommendation();
-        loadAlbums(true);
-
 
         return mRootView;
     }
@@ -355,364 +434,490 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         Utils.setLargeFabOutline(new View[]{v});
     }
 
-    private void showLoadingSpinner(final boolean show) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ProgressBar pb = (ProgressBar) mRootView.findViewById(R.id.pbArtistLoading);
-                pb.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        });
+    private void setFabShape(int shape) {
+        mFabDrawable.setShape(shape);
     }
 
-    private void loadRecommendation() {
-        Song recommended = Suggestor.getInstance().suggestBestForArtist(mArtist);
-        if (recommended != null) {
-            mRecommendedSong = recommended;
-            Album album = ProviderAggregator.getDefault().getCache().getAlbum(recommended.getAlbum());
+    private void setFabShouldResume(boolean shouldResume) {
+        mFabShouldResume = shouldResume;
+    }
 
-            CardView cvRec = (CardView) mRootView.findViewById(R.id.cardArtistSuggestion);
-            TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
-            TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
-            Button btnPlayNow = (Button) mRootView.findViewById(R.id.btnArtistSuggestionPlay);
-            tvTitle.setText(recommended.getTitle());
+    public Artist getArtist() {
+        return mArtist;
+    }
 
-            if (album != null) {
-                tvArtist.setText(getString(R.string.from_the_album, album.getName()));
-            } else {
-                tvArtist.setText("");
+    public static class ArtistTracksFragment extends Fragment {
+        private Song mRecommendedSong;
+        private boolean mRecommendationLoaded = false;
+        private View mRootView;
+        private ArtistFragment mParent;
+        private HashMap<Song, View> mSongToViewMap = new HashMap<Song, View>();
+        private HashMap<String, View> mAlbumToViewMap = new HashMap<String, View>();
+        private View mPreviousSongGroup;
+        private View mPreviousAlbumGroup;
+
+        private View.OnClickListener mSongClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Song song = (Song) view.getTag();
+
+                try {
+                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to play song", e);
+                    return;
+                }
+
+                boldPlayingTrack(song);
+                updatePlayingAlbum(song.getAlbum());
             }
+        };
 
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            AlbumArtImageView ivCov = (AlbumArtImageView) mRootView.findViewById(R.id.ivArtistSuggestionCover);
-            ivCov.setOnArtLoadedListener(new AlbumArtLoadListener(cvRec));
-            ivCov.loadArtForAlbum(cache.getAlbum(recommended.getAlbum()));
+        @Override
+        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            mRootView = inflater.inflate(R.layout.fragment_artist_tracks, container, false);
 
-            // If we were gone, animate in
-            if (cvRec.getVisibility() == View.GONE) {
-                cvRec.setVisibility(View.VISIBLE);
-                cvRec.setAlpha(0.0f);
-                cvRec.animate().alpha(1.0f).setDuration(500).start();
+            // Load recommendation and albums
+            loadRecommendation();
+            loadAlbums(true);
 
-                View suggestionTitle = mRootView.findViewById(R.id.tvArtistSuggestionNote);
-                suggestionTitle.setVisibility(View.VISIBLE);
-                suggestionTitle.setAlpha(0.0f);
-                suggestionTitle.animate().alpha(1.0f).setDuration(500).start();
-            }
+            return mRootView;
+        }
 
-            btnPlayNow.setOnClickListener(new View.OnClickListener() {
+        public void setParentFragment(ArtistFragment parent) {
+            mParent = parent;
+        }
+
+        private void showLoadingSpinner(final boolean show) {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
-                public void onClick(View view) {
-                    playRecommendation();
+                public void run() {
+                    ProgressBar pb = (ProgressBar) mRootView.findViewById(R.id.pbArtistLoading);
+                    pb.setVisibility(show ? View.VISIBLE : View.GONE);
                 }
             });
-
-            mRecommendationLoaded = true;
-        } else {
-            mRootView.findViewById(R.id.cardArtistSuggestion).setVisibility(View.GONE);
-            mRootView.findViewById(R.id.tvArtistSuggestionNote).setVisibility(View.GONE);
-            mRecommendationLoaded = false;
         }
-    }
 
-    private void fetchAlbums() {
-        new Thread() {
-            public void run() {
-                ProviderIdentifier pi = mArtist.getProvider();
-                ProviderConnection pc = PluginsLookup.getDefault().getProvider(pi);
-                if (pc != null) {
-                    IMusicProvider provider = pc.getBinder();
-                    if (provider != null) {
-                        try {
-                            boolean hasMore = provider.fetchArtistAlbums(mArtist.getRef());
-                            showLoadingSpinner(hasMore);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Unable to fetch artist albums", e);
+        private void playRecommendation() {
+            if (mRecommendationLoaded && mRecommendedSong != null) {
+                try {
+                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                    pbService.playSong(mRecommendedSong);
+                    mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mParent.setFabShouldResume(true);
+
+                    boldPlayingTrack(mRecommendedSong);
+                    updatePlayingAlbum(mRecommendedSong.getAlbum());
+
+                    // TODO: Figure out a better algorithm to find things to play from an artist
+                    ProviderCache cache = ProviderAggregator.getDefault().getCache();
+                    pbService.queueAlbum(cache.getAlbum(mRecommendedSong.getAlbum()), false);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to play recommended song", e);
+                }
+            }
+        }
+
+        private void loadRecommendation() {
+            if (mRecommendationLoaded) {
+                return;
+            }
+
+            Song recommended = Suggestor.getInstance().suggestBestForArtist(mParent.getArtist());
+            if (recommended != null) {
+                mRecommendedSong = recommended;
+                Album album = ProviderAggregator.getDefault().getCache().getAlbum(recommended.getAlbum());
+
+                CardView cvRec = (CardView) mRootView.findViewById(R.id.cardArtistSuggestion);
+                TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
+                TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
+                Button btnPlayNow = (Button) mRootView.findViewById(R.id.btnArtistSuggestionPlay);
+                tvTitle.setText(recommended.getTitle());
+
+                if (album != null) {
+                    tvArtist.setText(getString(R.string.from_the_album, album.getName()));
+                } else {
+                    tvArtist.setText("");
+                }
+
+                ProviderCache cache = ProviderAggregator.getDefault().getCache();
+                AlbumArtImageView ivCov = (AlbumArtImageView) mRootView.findViewById(R.id.ivArtistSuggestionCover);
+                ivCov.setOnArtLoadedListener(new AlbumArtLoadListener(cvRec));
+                ivCov.loadArtForAlbum(cache.getAlbum(recommended.getAlbum()));
+
+                // If we were gone, animate in
+                if (cvRec.getVisibility() == View.GONE) {
+                    cvRec.setVisibility(View.VISIBLE);
+                    cvRec.setAlpha(0.0f);
+                    cvRec.animate().alpha(1.0f).setDuration(500).start();
+
+                    View suggestionTitle = mRootView.findViewById(R.id.tvArtistSuggestionNote);
+                    suggestionTitle.setVisibility(View.VISIBLE);
+                    suggestionTitle.setAlpha(0.0f);
+                    suggestionTitle.animate().alpha(1.0f).setDuration(500).start();
+                }
+
+                btnPlayNow.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        playRecommendation();
+                    }
+                });
+
+                mRecommendationLoaded = true;
+            } else {
+                mRootView.findViewById(R.id.cardArtistSuggestion).setVisibility(View.GONE);
+                mRootView.findViewById(R.id.tvArtistSuggestionNote).setVisibility(View.GONE);
+                mRecommendationLoaded = false;
+            }
+        }
+
+        private void fetchAlbums() {
+            new Thread() {
+                public void run() {
+                    ProviderIdentifier pi = mParent.getArtist().getProvider();
+                    ProviderConnection pc = PluginsLookup.getDefault().getProvider(pi);
+                    if (pc != null) {
+                        IMusicProvider provider = pc.getBinder();
+                        if (provider != null) {
+                            try {
+                                boolean hasMore = provider.fetchArtistAlbums(mParent.getArtist().getRef());
+                                showLoadingSpinner(hasMore);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Unable to fetch artist albums", e);
+                            }
+                        } else {
+                            showLoadingSpinner(false);
                         }
                     } else {
                         showLoadingSpinner(false);
                     }
-                } else {
-                    showLoadingSpinner(false);
                 }
-            }
-        }.start();
-    }
-
-    private void loadAlbums(boolean request) {
-        if (request) {
-            // Make sure we loaded all the albums for that artist
-            fetchAlbums();
+            }.start();
         }
 
-        final LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
-        llAlbums.removeAllViews();
-
-        ProviderCache cache = ProviderAggregator.getDefault().getCache();
-
-        Iterator<String> albumIt = mArtist.albums();
-        List<Album> albums = new ArrayList<Album>();
-
-        while (albumIt.hasNext()) {
-            Album album = cache.getAlbum(albumIt.next());
-            albums.add(album);
-        }
-
-        // Sort it from album names
-        Collections.sort(albums, new Comparator<Album>() {
-            @Override
-            public int compare(Album album, Album album2) {
-                if (album.getYear() != album2.getYear()) {
-                    return album.getYear() < album2.getYear() ? 1 : -1;
-                } else {
-                    return album.getName().compareTo(album2.getName());
-                }
-            }
-        });
-
-        // Then inflate views
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        for (final Album album : albums) {
-            final View viewRoot = inflater.inflate(R.layout.expanded_albums_group, llAlbums, false);
-            llAlbums.addView(viewRoot);
-
-            TextView tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
-            TextView tvAlbumYear = (TextView) viewRoot.findViewById(R.id.tvAlbumYear);
-            AlbumArtImageView ivCover = (AlbumArtImageView) viewRoot.findViewById(R.id.ivCover);
-            ImageView ivPlayAlbum = (ImageView) viewRoot.findViewById(R.id.ivPlayAlbum);
-
-            if (album.isLoaded()) {
-                tvAlbumName.setText(album.getName());
-                if (album.getYear() > 0) {
-                    tvAlbumYear.setVisibility(View.VISIBLE);
-                    tvAlbumYear.setText(Integer.toString(album.getYear()));
-                } else {
-                    tvAlbumYear.setVisibility(View.GONE);
-                }
-
-                AlbumGroupClickListener listener =
-                        new AlbumGroupClickListener(album, llAlbums, viewRoot);
-                viewRoot.setOnClickListener(listener);
-
-                ivPlayAlbum.setVisibility(View.VISIBLE);
-                final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources());
-                drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                drawable.setColor(0xCC333333);
-
-                // Set play or pause based on if this album is playing
-                final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                try {
-                    if (pbService.isPlaying()) {
-                        Song currentSong = pbService.getCurrentTrack();
-                        if (currentSong != null && album.getRef().equals(currentSong.getAlbum())) {
-                            updatePlayingAlbum(currentSong.getAlbum());
-                        }
-                    }
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-
-                ivPlayAlbum.setImageDrawable(drawable);
-                ivPlayAlbum.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (drawable.getRequestedShape() == PlayPauseDrawable.SHAPE_STOP) {
-                            drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                            new Thread() {
-                                public void run() {
-                                    try {
-                                        pbService.pause();
-                                    } catch (RemoteException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }.start();
-                        } else {
-                            drawable.setShape(PlayPauseDrawable.SHAPE_STOP);
-                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                            try {
-                                pbService.playAlbum(album);
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
-                            }
-
-                            // Bold the corresponding track
-                            Iterator<String> songs = album.songs();
-                            if (songs.hasNext()) {
-                                String songRef = songs.next();
-                                Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
-                                boldPlayingTrack(song);
-                            }
-                        }
-                    }
-                });
-            } else {
-                tvAlbumName.setText(getString(R.string.loading));
-                tvAlbumYear.setVisibility(View.GONE);
-                ivPlayAlbum.setVisibility(View.GONE);
+        private void loadAlbums(boolean request) {
+            if (request) {
+                // Make sure we loaded all the albums for that artist
+                fetchAlbums();
             }
 
-            // Load the album art
-            ivCover.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
+            final LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
+            llAlbums.removeAllViews();
+
+            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+            Iterator<String> albumIt = mParent.getArtist().albums();
+            List<Album> albums = new ArrayList<Album>();
+
+            while (albumIt.hasNext()) {
+                Album album = cache.getAlbum(albumIt.next());
+                albums.add(album);
+            }
+
+            // Sort it from album names
+            Collections.sort(albums, new Comparator<Album>() {
                 @Override
-                public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
-                    if (drawable == null) {
-                        return;
-                    }
-                    Palette palette = Palette.generate(drawable.getBitmap());
-                    PaletteItem mutedBgColor = palette.getMutedColor();
-                    if (mutedBgColor != null) {
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                            /* RippleDrawable bg = (RippleDrawable) viewRoot.getBackground();
-                            bg.setColor(ColorStateList.valueOf(mutedBgColor.getRgb()));
-                            viewRoot.setBackground(bg); */
-                        }
+                public int compare(Album album, Album album2) {
+                    if (album.getYear() != album2.getYear()) {
+                        return album.getYear() < album2.getYear() ? 1 : -1;
+                    } else {
+                        return album.getName().compareTo(album2.getName());
                     }
                 }
             });
-            ivCover.loadArtForAlbum(album);
 
-            mAlbumToViewMap.put(album.getRef(), viewRoot);
-        }
+            // Then inflate views
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            for (final Album album : albums) {
+                final View viewRoot = inflater.inflate(R.layout.expanded_albums_group, llAlbums, false);
+                llAlbums.addView(viewRoot);
 
-        showLoadingSpinner(false);
-    }
+                TextView tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
+                TextView tvAlbumYear = (TextView) viewRoot.findViewById(R.id.tvAlbumYear);
+                AlbumArtImageView ivCover = (AlbumArtImageView) viewRoot.findViewById(R.id.ivCover);
+                ImageView ivPlayAlbum = (ImageView) viewRoot.findViewById(R.id.ivPlayAlbum);
 
-    private void showAlbumTracks(Album album, LinearLayout container) {
-        Iterator<String> songsIt = album.songs();
-
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        ProviderCache cache = ProviderAggregator.getDefault().getCache();
-
-        while (songsIt.hasNext()) {
-            final Song song = cache.getSong(songsIt.next());
-
-            View itemRoot = inflater.inflate(R.layout.expanded_albums_item, container, false);
-            container.addView(itemRoot);
-            itemRoot.setTag(song);
-
-            mSongToViewMap.put(song, itemRoot);
-
-            TextView tvTrackName = (TextView) itemRoot.findViewById(R.id.tvTrackName);
-            TextView tvTrackDuration = (TextView) itemRoot.findViewById(R.id.tvTrackDuration);
-            final ImageView ivOverflow = (ImageView) itemRoot.findViewById(R.id.ivOverflow);
-
-            if (song != null && song.isLoaded()) {
-                tvTrackName.setText(song.getTitle());
-                tvTrackDuration.setText(Utils.formatTrackLength(song.getDuration()));
-                ivOverflow.setVisibility(View.VISIBLE);
-
-                // Set song click listener
-                itemRoot.setOnClickListener(mSongClickListener);
-
-                // Set overflow popup
-                ivOverflow.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        PopupMenu popupMenu = new PopupMenu(getActivity(), ivOverflow);
-                        popupMenu.inflate(R.menu.track_overflow);
-                        popupMenu.show();
-
-                        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem menuItem) {
-                                switch (menuItem.getItemId()) {
-                                    case R.id.menu_add_to_playlist:
-                                        PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
-                                        fragment.show(getActivity().getSupportFragmentManager(), song.getRef());
-                                        break;
-
-                                    default:
-                                        return false;
-                                }
-                                return true;
-                            }
-                        });
+                if (album.isLoaded()) {
+                    tvAlbumName.setText(album.getName());
+                    if (album.getYear() > 0) {
+                        tvAlbumYear.setVisibility(View.VISIBLE);
+                        tvAlbumYear.setText(Integer.toString(album.getYear()));
+                    } else {
+                        tvAlbumYear.setVisibility(View.GONE);
                     }
-                });
 
-                // Bold if already playing
-                IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                try {
-                    if (pbService.isPlaying()) {
-                        Song currentSong = pbService.getCurrentTrack();
-                        if (currentSong != null && song.getRef().equals(currentSong.getRef())) {
-                            boldPlayingTrack(currentSong);
+                    AlbumGroupClickListener listener =
+                            new AlbumGroupClickListener(album, llAlbums, viewRoot, this);
+                    viewRoot.setOnClickListener(listener);
+
+                    ivPlayAlbum.setVisibility(View.VISIBLE);
+                    final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources());
+                    drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    drawable.setColor(0xCC333333);
+
+                    // Set play or pause based on if this album is playing
+                    final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                    try {
+                        if (pbService.isPlaying()) {
+                            Song currentSong = pbService.getCurrentTrack();
+                            if (currentSong != null && album.getRef().equals(currentSong.getAlbum())) {
+                                updatePlayingAlbum(currentSong.getAlbum());
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
+                    ivPlayAlbum.setImageDrawable(drawable);
+                    ivPlayAlbum.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (drawable.getRequestedShape() == PlayPauseDrawable.SHAPE_STOP) {
+                                drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                                mParent.setFabShape(PlayPauseDrawable.SHAPE_PLAY);
+                                new Thread() {
+                                    public void run() {
+                                        try {
+                                            pbService.pause();
+                                        } catch (RemoteException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }.start();
+                            } else {
+                                drawable.setShape(PlayPauseDrawable.SHAPE_STOP);
+                                mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
+                                try {
+                                    pbService.playAlbum(album);
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
+
+                                // Bold the corresponding track
+                                Iterator<String> songs = album.songs();
+                                if (songs.hasNext()) {
+                                    String songRef = songs.next();
+                                    Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
+                                    boldPlayingTrack(song);
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    tvAlbumName.setText(getString(R.string.loading));
+                    tvAlbumYear.setVisibility(View.GONE);
+                    ivPlayAlbum.setVisibility(View.GONE);
+                }
+
+                // Load the album art
+                ivCover.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
+                    @Override
+                    public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
+                        if (drawable == null) {
+                            return;
+                        }
+                        Palette palette = Palette.generate(drawable.getBitmap());
+                        PaletteItem mutedBgColor = palette.getMutedColor();
+                        if (mutedBgColor != null) {
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                            /* RippleDrawable bg = (RippleDrawable) viewRoot.getBackground();
+                            bg.setColor(ColorStateList.valueOf(mutedBgColor.getRgb()));
+                            viewRoot.setBackground(bg); */
+                            }
                         }
                     }
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+                });
+                ivCover.loadArtForAlbum(album);
+
+                mAlbumToViewMap.put(album.getRef(), viewRoot);
+            }
+
+            showLoadingSpinner(false);
+        }
+
+        private void showAlbumTracks(Album album, LinearLayout container) {
+            Iterator<String> songsIt = album.songs();
+
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+            while (songsIt.hasNext()) {
+                final Song song = cache.getSong(songsIt.next());
+
+                View itemRoot = inflater.inflate(R.layout.expanded_albums_item, container, false);
+                container.addView(itemRoot);
+                itemRoot.setTag(song);
+
+                mSongToViewMap.put(song, itemRoot);
+
+                TextView tvTrackName = (TextView) itemRoot.findViewById(R.id.tvTrackName);
+                TextView tvTrackDuration = (TextView) itemRoot.findViewById(R.id.tvTrackDuration);
+                final ImageView ivOverflow = (ImageView) itemRoot.findViewById(R.id.ivOverflow);
+
+                if (song != null && song.isLoaded()) {
+                    tvTrackName.setText(song.getTitle());
+                    tvTrackDuration.setText(Utils.formatTrackLength(song.getDuration()));
+                    ivOverflow.setVisibility(View.VISIBLE);
+
+                    // Set song click listener
+                    itemRoot.setOnClickListener(mSongClickListener);
+
+                    // Set overflow popup
+                    ivOverflow.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            PopupMenu popupMenu = new PopupMenu(getActivity(), ivOverflow);
+                            popupMenu.inflate(R.menu.track_overflow);
+                            popupMenu.show();
+
+                            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem menuItem) {
+                                    switch (menuItem.getItemId()) {
+                                        case R.id.menu_add_to_playlist:
+                                            PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
+                                            fragment.show(getActivity().getSupportFragmentManager(), song.getRef());
+                                            break;
+
+                                        default:
+                                            return false;
+                                    }
+                                    return true;
+                                }
+                            });
+                        }
+                    });
+
+                    // Bold if already playing
+                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                    try {
+                        if (pbService.isPlaying()) {
+                            Song currentSong = pbService.getCurrentTrack();
+                            if (currentSong != null && song.getRef().equals(currentSong.getRef())) {
+                                boldPlayingTrack(currentSong);
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    tvTrackName.setText(getString(R.string.loading));
+                    tvTrackDuration.setText("");
+                    ivOverflow.setVisibility(View.GONE);
                 }
+            }
+        }
+
+        private void updatePlayingAlbum(String albumRef) {
+            View view = mAlbumToViewMap.get(albumRef);
+            ImageView ivPlayAlbum;
+
+            if (mPreviousAlbumGroup != null) {
+                ivPlayAlbum = (ImageView) mPreviousAlbumGroup.findViewById(R.id.ivPlayAlbum);
+                PlayPauseDrawable drawable = (PlayPauseDrawable) ivPlayAlbum.getDrawable();
+                drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+            }
+
+            if (view != null) {
+                ivPlayAlbum = (ImageView) view.findViewById(R.id.ivPlayAlbum);
+                PlayPauseDrawable drawable = (PlayPauseDrawable) ivPlayAlbum.getDrawable();
+                drawable.setShape(PlayPauseDrawable.SHAPE_STOP);
+            }
+
+            mPreviousAlbumGroup = view;
+        }
+
+        private void boldPlayingTrack(Song s) {
+            View view = mSongToViewMap.get(s);
+
+            TextView tvTrackName, tvTrackDuration;
+
+            if (mPreviousSongGroup != null) {
+                tvTrackName = (TextView) mPreviousSongGroup.findViewById(R.id.tvTrackName);
+                tvTrackDuration = (TextView) mPreviousSongGroup.findViewById(R.id.tvTrackDuration);
+                tvTrackName.setTypeface(null, Typeface.NORMAL);
+                tvTrackDuration.setTypeface(null, Typeface.NORMAL);
+            }
+
+            if (view != null) {
+                tvTrackName = (TextView) view.findViewById(R.id.tvTrackName);
+                tvTrackDuration = (TextView) view.findViewById(R.id.tvTrackDuration);
+                tvTrackName.setTypeface(null, Typeface.BOLD);
+                tvTrackDuration.setTypeface(null, Typeface.BOLD);
             } else {
-                tvTrackName.setText(getString(R.string.loading));
-                tvTrackDuration.setText("");
-                ivOverflow.setVisibility(View.GONE);
+                // This is perfectly normal, if the user hasn't unwrapped an album, the views won't be
+                // created.
+                Log.d(TAG, "No view for track " + s.getRef());
+            }
+
+            mPreviousSongGroup = view;
+        }
+    }
+
+    public static class ArtistInfoFragment extends Fragment {
+        private Artist mArtist;
+        private Handler mHandler;
+        private TextView mArtistInfo;
+        private boolean mInfoLoaded;
+        private ProgressBar mLoadingSpinner;
+
+        public ArtistInfoFragment() {
+            mHandler = new Handler();
+            mInfoLoaded = false;
+        }
+
+        public void setArguments(Artist artist) {
+            mArtist = artist;
+        }
+
+        public void notifyActive() {
+            if (!mInfoLoaded) {
+                mInfoLoaded = true;
+                new Thread() {
+                    public void run() {
+                        loadBiographySync();
+                    }
+                }.start();
             }
         }
-    }
 
-    private void updatePlayingAlbum(String albumRef) {
-        View view = mAlbumToViewMap.get(albumRef);
-        ImageView ivPlayAlbum;
-
-        if (mPreviousAlbumGroup != null) {
-            ivPlayAlbum = (ImageView) mPreviousAlbumGroup.findViewById(R.id.ivPlayAlbum);
-            PlayPauseDrawable drawable = (PlayPauseDrawable) ivPlayAlbum.getDrawable();
-            drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        }
-
-        if (view != null) {
-            ivPlayAlbum = (ImageView) view.findViewById(R.id.ivPlayAlbum);
-            PlayPauseDrawable drawable = (PlayPauseDrawable) ivPlayAlbum.getDrawable();
-            drawable.setShape(PlayPauseDrawable.SHAPE_STOP);
-        }
-
-        mPreviousAlbumGroup = view;
-    }
-
-    private void boldPlayingTrack(Song s) {
-        View view = mSongToViewMap.get(s);
-
-        TextView tvTrackName, tvTrackDuration;
-
-        if (mPreviousSongGroup != null) {
-            tvTrackName = (TextView) mPreviousSongGroup.findViewById(R.id.tvTrackName);
-            tvTrackDuration = (TextView) mPreviousSongGroup.findViewById(R.id.tvTrackDuration);
-            tvTrackName.setTypeface(null, Typeface.NORMAL);
-            tvTrackDuration.setTypeface(null, Typeface.NORMAL);
-        }
-
-        if (view != null) {
-            tvTrackName = (TextView) view.findViewById(R.id.tvTrackName);
-            tvTrackDuration = (TextView) view.findViewById(R.id.tvTrackDuration);
-            tvTrackName.setTypeface(null, Typeface.BOLD);
-            tvTrackDuration.setTypeface(null, Typeface.BOLD);
-        } else {
-            // This is perfectly normal, if the user hasn't unwrapped an album, the views won't be
-            // created.
-            Log.d(TAG, "No view for track " + s.getRef());
-        }
-
-        mPreviousSongGroup = view;
-    }
-
-    private void playRecommendation() {
-        if (mRecommendationLoaded && mRecommendedSong != null) {
+        private void loadBiographySync() {
+            final EchoNest echoNest = new EchoNest();
             try {
-                IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                pbService.playSong(mRecommendedSong);
-                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                mFabShouldResume = true;
-                boldPlayingTrack(mRecommendedSong);
-                updatePlayingAlbum(mRecommendedSong.getAlbum());
-
-                // TODO: Figure out a better algorithm to find things to play from an artist
-                ProviderCache cache = ProviderAggregator.getDefault().getCache();
-                pbService.queueAlbum(cache.getAlbum(mRecommendedSong.getAlbum()), false);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to play recommended song", e);
+                com.echonest.api.v4.Artist enArtist = echoNest.searchArtistByName(mArtist.getName());
+                if (enArtist != null) {
+                    final Biography bio = echoNest.getArtistBiography(enArtist);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mArtistInfo.setText(bio.getText() + "\n\nSource:\n" + bio.getSite()
+                                    + " (" + bio.getURL() + ")\n" + bio.getLicenseType() + " - "
+                                    + bio.getLicenseAttribution());
+                            mLoadingSpinner.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            } catch (EchoNestException e) {
+                Log.e(TAG, "Unable to get artist information", e);
+                Utils.shortToast(getActivity(), R.string.unable_fetch_artist_info);
             }
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_artist_info, container, false);
+            mArtistInfo = (TextView) rootView.findViewById(R.id.tvArtistInfo);
+            mLoadingSpinner = (ProgressBar) rootView.findViewById(R.id.pbArtistInfo);
+            return rootView;
+        }
+    }
+
+    public static class ArtistSimilarFragment extends Fragment {
+        @Override
+        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_artist_similar, container, false);
+            return rootView;
         }
     }
 
