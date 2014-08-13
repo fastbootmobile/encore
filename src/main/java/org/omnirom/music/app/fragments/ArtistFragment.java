@@ -973,10 +973,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private boolean mSimilarLoaded;
         private ArtistsAdapter mAdapter;
         private Handler mHandler;
+        private List<Artist> mSimilarArtists;
 
         public ArtistSimilarFragment() {
             mAdapter = new ArtistsAdapter();
             mHandler = new Handler();
+            mSimilarArtists = new ArrayList<Artist>();
         }
 
         public void setArguments(Artist artist) {
@@ -994,8 +996,18 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
-        public void notifyArtistUpdate() {
-            mAdapter.notifyDataSetChanged();
+        public void notifyArtistUpdate(List<Artist> artists) {
+            boolean contains = false;
+            for (Artist artist : artists) {
+                if (mSimilarArtists.contains(artist)) {
+                    contains = true;
+                    break;
+                }
+            }
+
+            if (contains) {
+                mAdapter.notifyDataSetChanged();
+            }
         }
 
         public void loadSimilarSync() {
@@ -1019,6 +1031,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                             Artist artist = ProviderAggregator.getDefault().retrieveArtist(ref, rosettaProvider);
                             if (artist != null) {
                                 mAdapter.addItemUnique(artist);
+                                mSimilarArtists.add(artist);
                             } else {
                                 Log.e(TAG, "Null artist for similar");
                             }
@@ -1094,8 +1107,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
-    public void onArtistUpdate(List<Artist> a) {
-        mArtistSimilarFragment.notifyArtistUpdate();
+    public void onArtistUpdate(final List<Artist> a) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mArtistSimilarFragment.notifyArtistUpdate(a);
+            }
+        });
     }
 
     @Override

@@ -716,9 +716,11 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
         if (cached == null) {
             mCache.putArtist(provider, a);
+            postArtistForUpdate(a);
         } else if (!cached.getName().equals(a.getName()) || cached.isLoaded() != a.isLoaded()) {
             cached.setName(a.getName());
             cached.setIsLoaded(a.isLoaded());
+            postArtistForUpdate(a);
         }
     }
 
