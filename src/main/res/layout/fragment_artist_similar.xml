@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/default_fragment_background">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tvArtistSimilar" />
-</LinearLayout>
+<org.omnirom.music.app.ui.ExpandableHeightGridView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gvSimilarArtists"
+    android:background="@color/default_fragment_background"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:padding="4dp"
+    android:numColumns="@integer/main_grids_column_count"
+    android:horizontalSpacing="4dp"
+    android:verticalSpacing="4dp" />

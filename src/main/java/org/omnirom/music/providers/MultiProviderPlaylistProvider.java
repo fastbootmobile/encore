@@ -52,7 +52,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     private ProviderIdentifier mProviderIdentifier;
     private Context mContext;
     private String TAG = "MultiProviderPlaylistProvider";
-    private List<IProviderCallback> mCallbacks;
+    private final List<IProviderCallback> mCallbacks;
     private MultiProviderDatabaseHelper mMultiProviderDatabaseHelper;
     public MultiProviderPlaylistProvider(Context context){
         mContext = context;
@@ -285,6 +285,11 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
 
     @Override
     public Bitmap getLogo(String ref) throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public List<String> getSupportedRosettaPrefix() throws RemoteException {
         return null;
     }
 

@@ -15,6 +15,8 @@ import com.echonest.api.v4.Review;
 import com.echonest.api.v4.Video;
 import com.echonest.api.v4.examples.ArtistExamples;
 
+import org.omnirom.music.providers.ProviderAggregator;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -36,6 +38,8 @@ public class EchoNest {
     private static final Map<String, Artist> sArtistSearchCache = new HashMap<String, Artist>();
     private static final Map<Artist, Biography> sArtistBiographyCache = new HashMap<Artist, Biography>();
     private static final Map<Artist, Map<String, String>> sArtistUrlsCache = new HashMap<Artist, Map<String, String>>();
+    private static final Map<Artist, List<Artist>> sArtistSimilarCache = new HashMap<Artist, List<Artist>>();
+    private static final Map<Artist, Map<String, String>> sArtistForeignIDs = new HashMap<Artist, Map<String, String>>();
 
     public EchoNest() {
         // Read API Key from file for now... ;)
@@ -125,7 +129,6 @@ public class EchoNest {
             List<Artist> results = mEchoNest.searchArtists(p);
             if (results.size() > 0) {
                 result = results.get(0);
-
                 synchronized (sArtistSearchCache) {
                     sArtistSearchCache.put(name, result);
                 }
@@ -175,28 +178,64 @@ public class EchoNest {
 
         if (result == null) {
             result = artist.getUrls();
-            sArtistUrlsCache.put(artist, result);
+            synchronized (sArtistUrlsCache) {
+                sArtistUrlsCache.put(artist, result);
+            }
         }
 
         return result;
     }
 
-    // ============================
+    public boolean hasArtistSimilarCached(Artist artist) {
+        synchronized (sArtistSimilarCache) {
+            return sArtistSimilarCache.containsKey(artist);
+        }
+    }
 
-    public void randomWalk(String seedName, int count) throws EchoNestException {
-        List<Artist> artists = mEchoNest.searchArtists(seedName);
-        if (artists.size() > 0) {
-            Artist seed = artists.get(0);
-            for (int i = 0; i < count; i++) {
-                dumpArtist(seed);
-                List<Artist> sims = seed.getSimilar(10);
-                if (sims.size() > 0) {
-                    Collections.shuffle(sims);
-                    seed = sims.get(0);
-                } else {
-                    break;
+    public List<Artist> getArtistSimilar(Artist artist) throws EchoNestException {
+        List<Artist> result;
+        synchronized (sArtistSimilarCache) {
+            result = sArtistSimilarCache.get(artist);
+        }
+
+        if (result == null) {
+            // Get similar artists
+            result = artist.getSimilar(6);
+            synchronized (sArtistSimilarCache) {
+                sArtistSimilarCache.put(artist, result);
+            }
+
+            // Put rosetta stone IDs for each for linking
+            List<String> rosettaPrefixes = ProviderAggregator.getDefault().getRosettaStonePrefix();
+            for (Artist similar : result) {
+                Map<String, String> linksMap;
+                synchronized (sArtistForeignIDs) {
+                    linksMap = sArtistForeignIDs.get(similar);
+                    if (linksMap == null) {
+                        linksMap = new HashMap<String, String>();
+                        sArtistForeignIDs.put(similar, linksMap);
+                    }
+                }
+
+                for (String prefix : rosettaPrefixes) {
+                    String rosettaLink = similar.getForeignID(prefix);
+                    synchronized (sArtistForeignIDs) {
+                        linksMap.put(prefix, rosettaLink);
+                    }
                 }
             }
         }
+
+        return result;
+    }
+
+    public String getArtistForeignID(Artist artist, String prefix) {
+        synchronized (sArtistForeignIDs) {
+            Map<String, String> rosettaMap = sArtistForeignIDs.get(artist);
+            if (rosettaMap != null) {
+                return rosettaMap.get(prefix);
+            }
+        }
+        return null;
     }
 }

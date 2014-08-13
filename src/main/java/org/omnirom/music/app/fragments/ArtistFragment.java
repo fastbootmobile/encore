@@ -1,6 +1,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
@@ -23,7 +24,9 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,7 +41,9 @@ import org.omnirom.music.api.echonest.EchoNest;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
+import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.app.ui.ExpandableHeightGridView;
 import org.omnirom.music.app.ui.ObservableScrollView;
 import org.omnirom.music.app.ui.ParallaxScrollView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
@@ -72,8 +77,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "ArtistFragment";
     private static final int FRAGMENT_ID_TRACKS = 0;
-    private static final int FRAGMENT_ID_BIOGRAPHY = 1;
-    private static final int FRAGMENT_ID_SIMILAR = 2;
+    private static final int FRAGMENT_ID_SIMILAR = 1;
+    private static final int FRAGMENT_ID_BIOGRAPHY = 2;
     private static final int FRAGMENT_COUNT = 3;
 
     private Bitmap mHeroImage;
@@ -97,28 +102,34 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mArtist = cache.getArtist(mArtist.getRef());
 
             mArtistTracksFragment.loadRecommendation();
-
             mArtistTracksFragment.loadAlbums(false);
         }
     };
 
     private class ViewPagerAdapter extends FragmentPagerAdapter {
 
+        private boolean mHasRosetta;
+
         public ViewPagerAdapter(FragmentManager fm) {
             super(fm);
+            mHasRosetta = ProviderAggregator.getDefault().getRosettaStonePrefix().size() > 0;
         }
 
         @Override
         public Fragment getItem(int i) {
             switch (i) {
-                case FRAGMENT_ID_TRACKS:
+                case 0:
                     return mArtistTracksFragment;
 
-                case FRAGMENT_ID_BIOGRAPHY:
-                    return mArtistInfoFragment;
+                case 1:
+                    if (mHasRosetta) {
+                        return mArtistSimilarFragment;
+                    } else {
+                        return mArtistInfoFragment;
+                    }
 
-                case FRAGMENT_ID_SIMILAR:
-                    return mArtistSimilarFragment;
+                case 2:
+                    return mArtistInfoFragment;
             }
 
             // should never happen
@@ -127,15 +138,16 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case FRAGMENT_ID_TRACKS:
-                    return getString(R.string.tracks).toUpperCase();
-
-                case FRAGMENT_ID_BIOGRAPHY:
-                    return getString(R.string.biography).toUpperCase();
-
-                case FRAGMENT_ID_SIMILAR:
+            if (position == 0) {
+                return getString(R.string.tracks).toUpperCase();
+            } else if (position == 1) {
+                if (mHasRosetta) {
                     return getString(R.string.Similar).toUpperCase();
+                } else {
+                    return getString(R.string.biography).toUpperCase();
+                }
+            } else if (position == 2) {
+                return getString(R.string.biography).toUpperCase();
             }
 
             return "Error";
@@ -143,7 +155,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         @Override
         public int getCount() {
-            return FRAGMENT_COUNT;
+            // Similar only works if we have one provider supporting Rosetta Stone
+            if (mHasRosetta) {
+                return FRAGMENT_COUNT;
+            } else {
+                return FRAGMENT_COUNT - 1;
+            }
         }
     }
 
@@ -302,6 +319,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mArtistInfoFragment.setArguments(mArtist);
 
         mArtistSimilarFragment = new ArtistSimilarFragment();
+        mArtistSimilarFragment.setArguments(mArtist);
 
         // Inflate the main fragment view
         mRootView = (ParallaxScrollView) inflater.inflate(R.layout.fragment_artist, container, false);
@@ -334,6 +352,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
                 if (i == FRAGMENT_ID_BIOGRAPHY) {
                     mArtistInfoFragment.notifyActive();
+                } else if (i == FRAGMENT_ID_SIMILAR) {
+                    mArtistSimilarFragment.notifyActive();
                 }
             }
 
@@ -455,6 +475,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private HashMap<String, View> mAlbumToViewMap = new HashMap<String, View>();
         private View mPreviousSongGroup;
         private View mPreviousAlbumGroup;
+        private Handler mHandler;
 
         private View.OnClickListener mSongClickListener = new View.OnClickListener() {
             @Override
@@ -476,6 +497,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             mRootView = inflater.inflate(R.layout.fragment_artist_tracks, container, false);
+            mHandler = new Handler();
 
             // Load recommendation and albums
             loadRecommendation();
@@ -572,6 +594,15 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
+        private void postToast(final int string) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Utils.shortToast(getActivity(), string);
+                }
+            });
+        }
+
         private void fetchAlbums() {
             new Thread() {
                 public void run() {
@@ -585,12 +616,17 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                                 showLoadingSpinner(hasMore);
                             } catch (RemoteException e) {
                                 Log.e(TAG, "Unable to fetch artist albums", e);
+                                postToast(R.string.plugin_error);
                             }
                         } else {
                             showLoadingSpinner(false);
+                            Log.e(TAG, "Provider is null, cannot fetch albums");
+                            postToast(R.string.plugin_error);
                         }
                     } else {
                         showLoadingSpinner(false);
+                        Log.e(TAG, "ProviderConnection is null, cannot fetch albums");
+                        postToast(R.string.plugin_error);
                     }
                 }
             }.start();
@@ -932,9 +968,110 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     }
 
     public static class ArtistSimilarFragment extends Fragment {
+        private ExpandableHeightGridView mArtistsGrid;
+        private Artist mArtist;
+        private boolean mSimilarLoaded;
+        private ArtistsAdapter mAdapter;
+        private Handler mHandler;
+
+        public ArtistSimilarFragment() {
+            mAdapter = new ArtistsAdapter();
+            mHandler = new Handler();
+        }
+
+        public void setArguments(Artist artist) {
+            mArtist = artist;
+        }
+
+        public void notifyActive() {
+            if (!mSimilarLoaded) {
+                mSimilarLoaded = true;
+                new Thread() {
+                    public void run() {
+                        loadSimilarSync();
+                    }
+                }.start();
+            }
+        }
+
+        public void notifyArtistUpdate() {
+            mAdapter.notifyDataSetChanged();
+        }
+
+        public void loadSimilarSync() {
+            EchoNest echoNest = new EchoNest();
+            try {
+                com.echonest.api.v4.Artist enArtist = echoNest.searchArtistByName(mArtist.getName());
+                if (enArtist != null) {
+                    List<com.echonest.api.v4.Artist> similars = echoNest.getArtistSimilar(enArtist);
+
+                    List<String> rosettas = ProviderAggregator.getDefault().getRosettaStonePrefix();
+                    String rosettaPreferred = null;
+                    ProviderIdentifier rosettaProvider = null;
+                    if (rosettas != null && rosettas.size() > 0) {
+                        rosettaPreferred = rosettas.get(0);
+                        rosettaProvider = ProviderAggregator.getDefault().getRosettaStoneIdentifier(rosettaPreferred);
+                    }
+
+                    for (com.echonest.api.v4.Artist similar : similars) {
+                        if (rosettaPreferred != null) {
+                            String ref = echoNest.getArtistForeignID(similar, rosettaPreferred);
+                            Artist artist = ProviderAggregator.getDefault().retrieveArtist(ref, rosettaProvider);
+                            if (artist != null) {
+                                mAdapter.addItemUnique(artist);
+                            } else {
+                                Log.e(TAG, "Null artist for similar");
+                            }
+                        }
+                    }
+
+                    mAdapter.notifyDataSetChanged();
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mArtistsGrid.setAdapter(mAdapter);
+                        }
+                    });
+                }
+            } catch (EchoNestException e) {
+                Log.e(TAG, "Cannot get similar artist", e);
+                Utils.shortToast(getActivity(), R.string.unable_fetch_artist_info);
+            }
+        }
+
         @Override
-        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                                 @Nullable Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_artist_similar, container, false);
+            mArtistsGrid = (ExpandableHeightGridView) rootView.findViewById(R.id.gvSimilarArtists);
+            mArtistsGrid.setExpanded(true);
+            mArtistsGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Intent intent = new Intent(getActivity(), ArtistActivity.class);
+
+                    ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
+                    AlbumArtImageView ivCover = tag.ivCover;
+                    TextView tvTitle = tag.tvTitle;
+
+                    intent.putExtra(ArtistActivity.EXTRA_ARTIST,
+                            mAdapter.getItem(position).getRef());
+
+                    intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR, tag.itemColor);
+
+                    Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, tag.srcBitmap);
+
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                            new Pair<View, String>(ivCover, "itemImage"),
+                            new Pair<View, String>(tvTitle, "artistName"));
+
+                    startActivity(intent, opt.toBundle()); */
+                    } else {
+                        startActivity(intent);
+                    }
+                }
+            });
             return rootView;
         }
     }
@@ -958,7 +1095,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onArtistUpdate(List<Artist> a) {
-
+        mArtistSimilarFragment.notifyArtistUpdate();
     }
 
     @Override

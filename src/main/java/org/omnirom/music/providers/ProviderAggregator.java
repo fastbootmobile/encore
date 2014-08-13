@@ -13,8 +13,10 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -31,6 +33,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private final List<Album> mPostedUpdateAlbums = new ArrayList<Album>();
     private final List<Artist> mPostedUpdateArtists = new ArrayList<Artist>();
     private final List<Playlist> mPostedUpdatePlaylists = new ArrayList<Playlist>();
+    private List<String> mRosettaStonePrefix = new ArrayList<String>();
+    private Map<String, ProviderIdentifier> mRosettaStoneMap = new HashMap<String, ProviderIdentifier>();
     private ThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(4);
 
     private Runnable mPostSongsRunnable = new Runnable() {
@@ -128,7 +132,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * Default constructor
      */
     private ProviderAggregator() {
-        Log.e(TAG, " ___ CONSTRUCTOR ___");
         mUpdateCallbacks = new ArrayList<ILocalCallback>();
         mProviders = new ArrayList<ProviderConnection>();
         mCache = new ProviderCache();
@@ -404,14 +407,28 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
         if (added) {
             try {
+                // Register this class as callback
                 provider.getBinder().registerCallback(this);
 
+                // Add all rosetta prefixes and map it to this provider
+                List<String> rosettaPrefixes = provider.getBinder().getSupportedRosettaPrefix();
+
+                if (rosettaPrefixes != null) {
+                    for (String prefix : rosettaPrefixes) {
+                        mRosettaStoneMap.put(prefix, provider.getIdentifier());
+                        if (!mRosettaStonePrefix.contains(prefix)) {
+                            mRosettaStonePrefix.add(prefix);
+                        }
+                    }
+                }
+
+                // Notify subclasses of the new provider
                 for (ILocalCallback cb : mUpdateCallbacks) {
                     cb.onProviderConnected(provider.getBinder());
                 }
             } catch (RemoteException e) {
                 // Maybe the service died already?
-                Log.e(TAG, "Unable to register as a callback");
+                Log.e(TAG, "Unable to register as a callback", e);
             }
         }
     }
@@ -499,6 +516,14 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             mPostedUpdatePlaylists.add(p);
         }
         mHandler.postDelayed(mPostPlaylistsRunnable, PROPAGATION_DELAY);
+    }
+
+    public List<String> getRosettaStonePrefix() {
+        return mRosettaStonePrefix;
+    }
+
+    public ProviderIdentifier getRosettaStoneIdentifier(final String identifier) {
+        return mRosettaStoneMap.get(identifier);
     }
 
     /**
@@ -691,7 +716,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
         if (cached == null) {
             mCache.putArtist(provider, a);
-        } else {
+        } else if (!cached.getName().equals(a.getName()) || cached.isLoaded() != a.isLoaded()) {
             cached.setName(a.getName());
             cached.setIsLoaded(a.isLoaded());
         }

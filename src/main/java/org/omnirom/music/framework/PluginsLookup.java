@@ -174,6 +174,11 @@ public class PluginsLookup {
     }
 
     public ProviderConnection getProvider(ProviderIdentifier id) {
+        if (id == null) {
+            Log.e(TAG, "getProvider called with null identifier");
+            return null;
+        }
+
         for (ProviderConnection connection : mConnections) {
             if (connection.getIdentifier().equals(id)) {
                 return connection;
