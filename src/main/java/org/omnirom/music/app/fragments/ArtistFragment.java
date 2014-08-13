@@ -891,10 +891,15 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mArtistInfo.setText(bio.getText() + "\n\nSource:\n" + bio.getSite()
-                                    + " (" + bio.getURL() + ")\n" + bio.getLicenseType() + " - "
-                                    + bio.getLicenseAttribution());
                             mLoadingSpinner.setVisibility(View.GONE);
+
+                            if (bio != null) {
+                                mArtistInfo.setText(getString(R.string.biography_format,
+                                        bio.getText(), bio.getSite(), bio.getURL(),
+                                        bio.getLicenseType(), bio.getLicenseAttribution()));
+                            } else {
+                                mArtistInfo.setText(getString(R.string.no_bio_available));
+                            }
                         }
                     });
                 }
@@ -909,6 +914,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             View rootView = inflater.inflate(R.layout.fragment_artist_info, container, false);
             mArtistInfo = (TextView) rootView.findViewById(R.id.tvArtistInfo);
             mLoadingSpinner = (ProgressBar) rootView.findViewById(R.id.pbArtistInfo);
+
+            EchoNest echoNest = new EchoNest();
+            if (echoNest.hasArtistInCache(mArtist.getName())) {
+                try {
+                    com.echonest.api.v4.Artist artist = echoNest.searchArtistByName(mArtist.getName());
+                    if (echoNest.hasArtistBiographyCached(artist)) {
+                        loadBiographySync();
+                    }
+                } catch (EchoNestException e) {
+                    // should not happen as we take from cache
+                }
+            }
+
             return rootView;
         }
     }

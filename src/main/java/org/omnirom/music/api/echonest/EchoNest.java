@@ -33,9 +33,9 @@ public class EchoNest {
     private static final String TAG = "EchoNest";
 
     private EchoNestAPI mEchoNest;
-    private static Map<String, Artist> sArtistSearchCache = new HashMap<String, Artist>();
-    private static Map<Artist, Biography> sArtistBiographyCache = new HashMap<Artist, Biography>();
-    private static Map<Artist, Map<String, String>> sArtistUrlsCache = new HashMap<Artist, Map<String, String>>();
+    private static final Map<String, Artist> sArtistSearchCache = new HashMap<String, Artist>();
+    private static final Map<Artist, Biography> sArtistBiographyCache = new HashMap<Artist, Biography>();
+    private static final Map<Artist, Map<String, String>> sArtistUrlsCache = new HashMap<Artist, Map<String, String>>();
 
     public EchoNest() {
         // Read API Key from file for now... ;)
@@ -105,31 +105,61 @@ public class EchoNest {
         }
     }
 
+    public boolean hasArtistInCache(String name) {
+        synchronized (sArtistSearchCache) {
+            return sArtistSearchCache.containsKey(name);
+        }
+    }
+
     public Artist searchArtistByName(String name) throws EchoNestException {
         Params p = new Params();
         p.add("name", name);
         p.add("results", 1);
 
-        Artist result = sArtistSearchCache.get(name);
+        Artist result;
+        synchronized (sArtistSearchCache) {
+            result = sArtistSearchCache.get(name);
+        }
 
         if (result == null) {
             List<Artist> results = mEchoNest.searchArtists(p);
             if (results.size() > 0) {
                 result = results.get(0);
-                sArtistSearchCache.put(name, result);
+
+                synchronized (sArtistSearchCache) {
+                    sArtistSearchCache.put(name, result);
+                }
             }
         }
 
         return result;
     }
 
+    public boolean hasArtistBiographyCached(Artist artist) {
+        synchronized (sArtistBiographyCache) {
+            return sArtistBiographyCache.containsKey(artist);
+        }
+    }
+
     public Biography getArtistBiography(Artist artist) throws EchoNestException {
-        Biography result = sArtistBiographyCache.get(artist);
+        Biography result;
+        synchronized (sArtistBiographyCache) {
+            result = sArtistBiographyCache.get(artist);
+        }
 
         if (result == null) {
-            List<Biography> results = artist.getBiographies(0, 1);
-            if (results.size() > 0) {
-                result = results.get(0);
+            List<Biography> results = artist.getBiographies(0, 10);
+            // We prefer wikipedia, and otherwise the longest one
+            for (Biography bio : results) {
+                if (bio.getSite().equals("wikipedia")) {
+                    result = bio;
+                    break;
+                } else if (result == null || result.getText().length() < bio.getText().length()) {
+                    result = bio;
+                }
+            }
+
+            synchronized (sArtistBiographyCache) {
                 sArtistBiographyCache.put(artist, result);
             }
         }
@@ -138,7 +168,10 @@ public class EchoNest {
     }
 
     public Map<String, String> getArtistUrls(Artist artist) throws EchoNestException {
-        Map<String, String> result = sArtistUrlsCache.get(artist);
+        Map<String, String> result;
+        synchronized (sArtistUrlsCache) {
+            result = sArtistUrlsCache.get(artist);
+        }
 
         if (result == null) {
             result = artist.getUrls();
