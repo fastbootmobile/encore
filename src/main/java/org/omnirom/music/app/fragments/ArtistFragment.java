@@ -103,6 +103,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
             mArtistTracksFragment.loadRecommendation();
             mArtistTracksFragment.loadAlbums(false);
+            mArtistSimilarFragment.notifyArtistUpdate(null);
         }
     };
 
@@ -974,6 +975,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private ArtistsAdapter mAdapter;
         private Handler mHandler;
         private List<Artist> mSimilarArtists;
+        private ProgressBar mArtistsSpinner;
 
         public ArtistSimilarFragment() {
             mAdapter = new ArtistsAdapter();
@@ -998,11 +1000,15 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         public void notifyArtistUpdate(List<Artist> artists) {
             boolean contains = false;
-            for (Artist artist : artists) {
-                if (mSimilarArtists.contains(artist)) {
-                    contains = true;
-                    break;
+            if (artists != null) {
+                for (Artist artist : artists) {
+                    if (mSimilarArtists.contains(artist)) {
+                        contains = true;
+                        break;
+                    }
                 }
+            } else {
+                contains = true;
             }
 
             if (contains) {
@@ -1043,6 +1049,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                         @Override
                         public void run() {
                             mArtistsGrid.setAdapter(mAdapter);
+                            mArtistsSpinner.setVisibility(View.GONE);
                         }
                     });
                 }
@@ -1056,6 +1063,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_artist_similar, container, false);
+            mArtistsSpinner = (ProgressBar) rootView.findViewById(R.id.pbSimilarArtists);
             mArtistsGrid = (ExpandableHeightGridView) rootView.findViewById(R.id.gvSimilarArtists);
             mArtistsGrid.setExpanded(true);
             mArtistsGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
