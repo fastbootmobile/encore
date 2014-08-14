@@ -1,31 +1,43 @@
 package org.omnirom.music.api.echonest;
 
+import android.content.SharedPreferences;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.echonest.api.v4.Artist;
 import com.echonest.api.v4.Biography;
 import com.echonest.api.v4.Blog;
+import com.echonest.api.v4.CatalogUpdater;
+import com.echonest.api.v4.DynamicPlaylistSession;
 import com.echonest.api.v4.EchoNestAPI;
 import com.echonest.api.v4.EchoNestException;
+import com.echonest.api.v4.GeneralCatalog;
 import com.echonest.api.v4.Image;
 import com.echonest.api.v4.News;
 import com.echonest.api.v4.Params;
 import com.echonest.api.v4.Review;
+import com.echonest.api.v4.SongCatalogItem;
 import com.echonest.api.v4.Video;
-import com.echonest.api.v4.examples.ArtistExamples;
 
+import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderCache;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collections;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * EchoNest Glue class between jEN and the data we use in OmniMusic
@@ -41,6 +53,9 @@ public class EchoNest {
     private static final Map<Artist, List<Artist>> sArtistSimilarCache = new HashMap<Artist, List<Artist>>();
     private static final Map<Artist, Map<String, String>> sArtistForeignIDs = new HashMap<Artist, Map<String, String>>();
 
+    /**
+     * Initializes an EchoNest API client with the EchoNest API key
+     */
     public EchoNest() {
         // Read API Key from file for now... ;)
         try {
@@ -57,58 +72,12 @@ public class EchoNest {
         }
     }
 
-    public EchoNestAPI getApi() {
-        return mEchoNest;
-    }
-
-    public void dumpArtist(Artist artist) throws EchoNestException {
-        System.out.printf("%s\n", artist.getName());
-        System.out.printf("   hottt %.3f\n", artist.getHotttnesss());
-        System.out.printf("   fam   %.3f\n", artist.getFamiliarity());
-
-        System.out.println(" =========  urls ======== ");
-        for (String key : artist.getUrls().keySet()) {
-            System.out.printf("   %10s %s\n", key, artist.getUrls().get(key));
-        }
-
-
-        System.out.println(" =========  bios ======== ");
-        List<Biography> bios = artist.getBiographies();
-        for (Biography bio : bios) {
-            bio.dump();
-        }
-
-        System.out.println(" =========  blogs ======== ");
-        List<Blog> blogs = artist.getBlogs();
-        for (Blog blog : blogs) {
-            blog.dump();
-        }
-
-        System.out.println(" =========  images ======== ");
-        List<Image> images = artist.getImages();
-        for (Image image : images) {
-            image.dump();
-        }
-
-        System.out.println(" =========  news ======== ");
-        List<News> newsList = artist.getNews();
-        for (News news : newsList) {
-            news.dump();
-        }
-
-        System.out.println(" =========  reviews ======== ");
-        List<Review> reviews = artist.getReviews();
-        for (Review review : reviews) {
-            review.dump();
-        }
-
-        System.out.println(" =========  videos ======== ");
-        List<Video> videos = artist.getVideos();
-        for (Video video : videos) {
-            video.dump();
-        }
-    }
-
+    /**
+     * Returns whether or not the provided artist name is in cache for searchArtistByName
+     * @param name The artist name
+     * @return True if the artist is in cache and searchArtistByName won't do any network
+     * query, false otherwise
+     */
     public boolean hasArtistInCache(String name) {
         synchronized (sArtistSearchCache) {
             return sArtistSearchCache.containsKey(name);
@@ -238,4 +207,110 @@ public class EchoNest {
         }
         return null;
     }
+
+
+    public DynamicPlaylistSession createDynamicPlaylist(SharedPreferences sp) throws EchoNestException {
+        Params p = new Params();
+        DynamicPlaylistSession session = mEchoNest.createDynamicPlaylist(p);
+        try {
+            Field sessionIdField = DynamicPlaylistSession.class.getField("sessionID");
+            String sessionId = (String) sessionIdField.get(session);
+            Log.e(TAG, "Session ID: " + sessionId);
+        } catch (NoSuchFieldException e) {
+            Log.e(TAG, "Unable to find sessionID field!", e);
+        } catch (IllegalAccessException e) {
+            Log.e(TAG, "Illegal Access", e);
+        }
+        return session;
+    }
+
+    public List<DynamicPlaylistSession> getDynamicPlaylists() {
+        return null;
+    }
+
+    /**
+     * Creates a temporary taste profile.
+     *
+     * The EchoNest API is limited to 1,000 profiles for a non-commercial API key, so we create a
+     * temporary profile, upload locally tracked data, do what we want with it, then remove it.
+     * Our limitation then is that less than 1,000 people are creating a temporary bucket.
+     *
+     * Note that this method isn't limited to rosetta-enabled providers, as EchoNest supports
+     * adding tracks from name instead of rosetta IDs or ENID. Tracks information will be added
+     * by name and exclusive match against the local library will be done if no cloud provider is
+     * available for playback.
+     *
+     * @return The temporary profile name
+     */
+    public GeneralCatalog createTemporaryTasteProfile() throws EchoNestException {
+        // Generate some random name for the profile
+        String profileName = Long.toString(SystemClock.uptimeMillis()) + new Random().nextLong()
+                + System.currentTimeMillis();
+        GeneralCatalog profile = mEchoNest.createGeneralCatalog(profileName);
+
+        // Upload all playlists tracks
+        CatalogUpdater updater = new CatalogUpdater();
+
+        List<Playlist> playlists = ProviderAggregator.getDefault().getAllPlaylists();
+        ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+        // For each playlist
+        int tracksCount = 0;
+        List<String> knownTracks = new ArrayList<String>();
+        for (Playlist p : playlists) {
+            // For each song of each playlist
+            Iterator<String> songIt = p.songs();
+            while (songIt.hasNext()) {
+                String songRef = songIt.next();
+
+                if (knownTracks.contains(songRef)) {
+                    continue;
+                } else {
+                    knownTracks.add(songRef);
+                }
+
+                // TODO: Add a way to know if references are rosetta IDs to avoid lookups from EN
+                Song song = cache.getSong(songRef);
+                if (song != null) {
+                    // We have the song info, add it to our profile
+                    SongCatalogItem item = new SongCatalogItem(songRef);
+
+                    // If we have artist info, add it
+                    org.omnirom.music.model.Artist artist = cache.getArtist(song.getArtist());
+                    if (artist != null) {
+                        item.setArtistName(artist.getName());
+                    }
+
+                    // If we have album info, add it
+                    Album album = cache.getAlbum(song.getAlbum());
+                    if (album != null) {
+                        item.setRelease(album.getName());
+                    }
+
+                    //item.setSongID(songRef);
+
+                    // Add other regular info
+                    item.setSongName(song.getTitle());
+                    // item.setUrl(songRef);
+
+                    updater.update(item);
+                    // TODO: play count, favorite, rating
+                    tracksCount++;
+                }
+            }
+        }
+
+        // Push the data to EchoNest
+        Log.e(TAG, "Pushing " + tracksCount + " tracks data to EchoNest Profile");
+        long startTime = SystemClock.uptimeMillis();
+        String ticket = profile.update(updater);
+        if (profile.waitForUpdates(ticket, 180000)) {
+            Log.e(TAG, "Profile update completed in " + (SystemClock.uptimeMillis() - startTime) + " ms");
+        } else {
+            Log.e(TAG, "Profile update not done after 30 seconds!");
+        }
+
+        return profile;
+    }
+
 }

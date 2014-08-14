@@ -1,8 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="org.omnirom.music.app.AutomixActivity" >
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+    <item android:id="@+id/menu_create"
+        android:title="Create"
+        android:icon="@drawable/ic_action_check"
         android:orderInCategory="100"
-        android:showAsAction="never" />
+        android:showAsAction="ifRoom" />
 </menu>

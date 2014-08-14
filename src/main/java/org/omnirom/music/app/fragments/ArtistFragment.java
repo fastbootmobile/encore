@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -296,7 +298,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                                 // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
                                 // back.setColor(color.getRgb());
                             } else {
-                                GradientDrawable shape = (GradientDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
+                                StateListDrawable rootShape = (StateListDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
+                                GradientDrawable shape = (GradientDrawable) rootShape.getCurrent();
                                 shape.setColor(color.getRgb());
                             }
                         }

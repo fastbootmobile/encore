@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mood strings from EchoNest. Can (and should!) be translated -->
+    <!-- Obtained automatically using this wonderful PHP script:
+$json_input = file_get_contents("http://developer.echonest.com/api/v4/artist/list_terms?api_key=FILDTEOIK2HBORODV&format=json&type=mood");
+$json = json_decode($json_input, TRUE);
+$terms = $json["response"]["terms"];
+
+foreach ($terms as $term) {
+    echo "<string name=\"echonest_mood_" . str_replace(array(" ", "-"), array("_", "_"), htmlentities($term["name"])) . "\">" . $term["name"] . "</string>\n";
+}
+    -->
+    <string name="echonest_mood_aggressive">Aggressive</string>
+    <string name="echonest_mood_ambient">Ambient</string>
+    <string name="echonest_mood_angry">Angry</string>
+    <string name="echonest_mood_angst_ridden">Angst-Ridden</string>
+    <string name="echonest_mood_bouncy">Bouncy</string>
+    <string name="echonest_mood_calming">Calming</string>
+    <string name="echonest_mood_carefree">Carefree</string>
+    <string name="echonest_mood_cheerful">Cheerful</string>
+    <string name="echonest_mood_cold">Cold</string>
+    <string name="echonest_mood_complex">Complex</string>
+    <string name="echonest_mood_cool">Cool</string>
+    <string name="echonest_mood_dark">Dark</string>
+    <string name="echonest_mood_disturbing">Disturbing</string>
+    <string name="echonest_mood_dramatic">Dramatic</string>
+    <string name="echonest_mood_dreamy">Dreamy</string>
+    <string name="echonest_mood_eerie">Eerie</string>
+    <string name="echonest_mood_elegant">Elegant</string>
+    <string name="echonest_mood_energetic">Energetic</string>
+    <string name="echonest_mood_enthusiastic">Enthusiastic</string>
+    <string name="echonest_mood_epic">Epic</string>
+    <string name="echonest_mood_fun">Fun</string>
+    <string name="echonest_mood_funky">Funky</string>
+    <string name="echonest_mood_futuristic">Futuristic</string>
+    <string name="echonest_mood_gentle">Gentle</string>
+    <string name="echonest_mood_gleeful">Gleeful</string>
+    <string name="echonest_mood_gloomy">Gloomy</string>
+    <string name="echonest_mood_groovy">Groovy</string>
+    <string name="echonest_mood_happy">Happy</string>
+    <string name="echonest_mood_harsh">Harsh</string>
+    <string name="echonest_mood_haunting">Haunting</string>
+    <string name="echonest_mood_humorous">Humorous</string>
+    <string name="echonest_mood_hypnotic">Hypnotic</string>
+    <string name="echonest_mood_industrial">Industrial</string>
+    <string name="echonest_mood_intense">Intense</string>
+    <string name="echonest_mood_intimate">Intimate</string>
+    <string name="echonest_mood_joyous">Joyous</string>
+    <string name="echonest_mood_laid_back">Laid-back</string>
+    <string name="echonest_mood_light">Light</string>
+    <string name="echonest_mood_lively">Lively</string>
+    <string name="echonest_mood_manic">Manic</string>
+    <string name="echonest_mood_meditation">Meditation</string>
+    <string name="echonest_mood_melancholia">Melancholia</string>
+    <string name="echonest_mood_mellow">Mellow</string>
+    <string name="echonest_mood_mystical">Mystical</string>
+    <string name="echonest_mood_ominous">Ominous</string>
+    <string name="echonest_mood_party_music">Party Music</string>
+    <string name="echonest_mood_passionate">Passionate</string>
+    <string name="echonest_mood_pastoral">Pastoral</string>
+    <string name="echonest_mood_peaceful">Peaceful</string>
+    <string name="echonest_mood_playful">Playful</string>
+    <string name="echonest_mood_poignant">Poignant</string>
+    <string name="echonest_mood_quiet">Quiet</string>
+    <string name="echonest_mood_rebellious">Rebellious</string>
+    <string name="echonest_mood_reflective">Reflective</string>
+    <string name="echonest_mood_relax">Relax</string>
+    <string name="echonest_mood_romantic">Romantic</string>
+    <string name="echonest_mood_rowdy">Rowdy</string>
+    <string name="echonest_mood_sad">Sad</string>
+    <string name="echonest_mood_sentimental">Sentimental</string>
+    <string name="echonest_mood_sexy">Sexy</string>
+    <string name="echonest_mood_smooth">Smooth</string>
+    <string name="echonest_mood_soothing">Soothing</string>
+    <string name="echonest_mood_sophisticated">Sophisticated</string>
+    <string name="echonest_mood_spacey">Spacey</string>
+    <string name="echonest_mood_spiritual">Spiritual</string>
+    <string name="echonest_mood_strange">Strange</string>
+    <string name="echonest_mood_sweet">Sweet</string>
+    <string name="echonest_mood_theater">Theater</string>
+    <string name="echonest_mood_trippy">Trippy</string>
+    <string name="echonest_mood_warm">Warm</string>
+    <string name="echonest_mood_whimsical">Whimsical</string>
+
+    <!-- Song types -->
+    <string name="echonest_song_type_acoustic">Acoustic</string>
+    <string name="echonest_song_type_electric">Electric</string>
+    <string name="echonest_song_type_studio">Studio</string>
+    <string name="echonest_song_type_live">Live</string>
+    <string name="echonest_song_type_christmas">Christmas</string>
+</resources>

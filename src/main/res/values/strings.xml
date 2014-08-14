@@ -68,5 +68,27 @@
     <string name="unable_fetch_artist_info">Unable to get artist information</string>
     <string name="biography_format">%1$s\n\nSource:\n%2$s (%3$s)\n%4$s - %5$s</string>
     <string name="no_bio_available">No biography available</string>
+    <string name="plugins">Plug-ins</string>
+    <string name="automix">Automix</string>
+    <string name="general">General</string>
+    <string name="other">Other</string>
+    <string name="settings_provider_config_summary">Enable, disable, and configure the installed music providers plug-ins</string>
+    <string name="settings_provider_config_title">Music providers</string>
+    <string name="settings_dsp_config_summary">Enable, disable, and configure the installed sound processing plug-ins to use in your effects chain</string>
+    <string name="settings_dsp_config_title">Sound processing plugins</string>
+    <string name="settings_taste_learning_summary">Send anonymous information to help better determine songs I\'m likely to like</string>
+    <string name="settings_taste_learning_title">Learn my taste</string>
+    <string name="settings_album_art_summary">Beautify the navigation by download appropriate album art</string>
+    <string name="settings_album_art_title">Download album art</string>
+    <string name="settings_wifi_stream_only_summary">Automatically enable offline mode when leaving Wi-Fi network</string>
+    <string name="settings_wifi_stream_only_title">Wi-Fi streaming only</string>
+    <string name="settings_licenses_summary">Open Source and Third-Party Licenses</string>
+    <string name="settings_licenses_title">Licenses</string>
+    <string name="settings_list_entry_ignored">Ignored (any)</string>
+    <string name="settings_list_entry_low_default">Low (default)</string>
+    <string name="settings_list_entry_low">Low</string>
+    <string name="settings_list_entry_medium">Medium</string>
+    <string name="settings_list_entry_high">High</string>
+    <string name="title_activity_automix_create">Create bucket</string>
 
 </resources>

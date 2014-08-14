@@ -1,48 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="Plug-ins">
+    <PreferenceCategory android:title="@string/plugins">
 
         <Preference
             android:key="list_providers_config"
-            android:summary="Enable, disable, and configure the installed music providers plug-ins"
-            android:title="Music providers" />
+            android:summary="@string/settings_provider_config_summary"
+            android:title="@string/settings_provider_config_title" />
 
         <Preference
             android:key="list_dsp_config"
-            android:summary="Enable, disable, and configure the installed sound processing plug-ins to use in your effects chain"
-            android:title="Sound processing plugins" />
+            android:summary="@string/settings_dsp_config_summary"
+            android:title="@string/settings_dsp_config_title" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Automix">
+    <PreferenceCategory android:title="@string/automix">
 
         <CheckBoxPreference
             android:key="cb_auto_send_like"
-            android:summary="Send anonymous information to help better determine songs I'm likely to like"
-            android:title="Learn my taste" />
+            android:summary="@string/settings_taste_learning_summary"
+            android:title="@string/settings_taste_learning_title" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="General">
+    <PreferenceCategory android:title="@string/general">
         <CheckBoxPreference
             android:key="cb_download_album_art"
             android:checked="true"
-            android:summary="Beautify the navigation by download appropriate album art"
-            android:title="Download album art" />
+            android:summary="@string/settings_album_art_summary"
+            android:title="@string/settings_album_art_title" />
 
         <CheckBoxPreference
             android:key="cb_wifi_streaming_only"
             android:checked="true"
-            android:summary="Automatically enable offline mode when leaving Wi-Fi network"
-            android:title="Wi-Fi streaming only" />
+            android:summary="@string/settings_wifi_stream_only_summary"
+            android:title="@string/settings_wifi_stream_only_title" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Other">
+    <PreferenceCategory android:title="@string/other">
 
         <PreferenceScreen
-            android:summary="Open Source and Third-Party Licenses"
-            android:title="Licenses">
+            android:summary="@string/settings_licenses_summary"
+            android:title="@string/settings_licenses_title">
 
             <intent
                 android:action="android.intent.action.VIEW"

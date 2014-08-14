@@ -1,0 +1,1512 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!-- We keep a local copy of moods to translate them and avoid querying the API
+The beautiful PHP script that generated this list:
+
+$json_input = file_get_contents("http://developer.echonest.com/api/v4/artist/list_terms?api_key=FILDTEOIK2HBORODV&format=json&type=mood");
+$json = json_decode($json_input, TRUE);
+$terms = $json["response"]["terms"];
+
+foreach ($terms as $term) {
+    echo "<item>@string/echonest_mood_" . str_replace(array("'", " ", "-"), array("\\'", "_", "_"), htmlentities($term["name"])) . "</item>\n";
+}
+-->
+    <!-- Mood entries (translatable strings, shown to user) -->
+    <string-array name="echonest_mood_entries" translatable="false">
+        <item>@string/echonest_mood_aggressive</item>
+        <item>@string/echonest_mood_ambient</item>
+        <item>@string/echonest_mood_angry</item>
+        <item>@string/echonest_mood_angst_ridden</item>
+        <item>@string/echonest_mood_bouncy</item>
+        <item>@string/echonest_mood_calming</item>
+        <item>@string/echonest_mood_carefree</item>
+        <item>@string/echonest_mood_cheerful</item>
+        <item>@string/echonest_mood_cold</item>
+        <item>@string/echonest_mood_complex</item>
+        <item>@string/echonest_mood_cool</item>
+        <item>@string/echonest_mood_dark</item>
+        <item>@string/echonest_mood_disturbing</item>
+        <item>@string/echonest_mood_dramatic</item>
+        <item>@string/echonest_mood_dreamy</item>
+        <item>@string/echonest_mood_eerie</item>
+        <item>@string/echonest_mood_elegant</item>
+        <item>@string/echonest_mood_energetic</item>
+        <item>@string/echonest_mood_enthusiastic</item>
+        <item>@string/echonest_mood_epic</item>
+        <item>@string/echonest_mood_fun</item>
+        <item>@string/echonest_mood_funky</item>
+        <item>@string/echonest_mood_futuristic</item>
+        <item>@string/echonest_mood_gentle</item>
+        <item>@string/echonest_mood_gleeful</item>
+        <item>@string/echonest_mood_gloomy</item>
+        <item>@string/echonest_mood_groovy</item>
+        <item>@string/echonest_mood_happy</item>
+        <item>@string/echonest_mood_harsh</item>
+        <item>@string/echonest_mood_haunting</item>
+        <item>@string/echonest_mood_humorous</item>
+        <item>@string/echonest_mood_hypnotic</item>
+        <item>@string/echonest_mood_industrial</item>
+        <item>@string/echonest_mood_intense</item>
+        <item>@string/echonest_mood_intimate</item>
+        <item>@string/echonest_mood_joyous</item>
+        <item>@string/echonest_mood_laid_back</item>
+        <item>@string/echonest_mood_light</item>
+        <item>@string/echonest_mood_lively</item>
+        <item>@string/echonest_mood_manic</item>
+        <item>@string/echonest_mood_meditation</item>
+        <item>@string/echonest_mood_melancholia</item>
+        <item>@string/echonest_mood_mellow</item>
+        <item>@string/echonest_mood_mystical</item>
+        <item>@string/echonest_mood_ominous</item>
+        <item>@string/echonest_mood_party_music</item>
+        <item>@string/echonest_mood_passionate</item>
+        <item>@string/echonest_mood_pastoral</item>
+        <item>@string/echonest_mood_peaceful</item>
+        <item>@string/echonest_mood_playful</item>
+        <item>@string/echonest_mood_poignant</item>
+        <item>@string/echonest_mood_quiet</item>
+        <item>@string/echonest_mood_rebellious</item>
+        <item>@string/echonest_mood_reflective</item>
+        <item>@string/echonest_mood_relax</item>
+        <item>@string/echonest_mood_romantic</item>
+        <item>@string/echonest_mood_rowdy</item>
+        <item>@string/echonest_mood_sad</item>
+        <item>@string/echonest_mood_sentimental</item>
+        <item>@string/echonest_mood_sexy</item>
+        <item>@string/echonest_mood_smooth</item>
+        <item>@string/echonest_mood_soothing</item>
+        <item>@string/echonest_mood_sophisticated</item>
+        <item>@string/echonest_mood_spacey</item>
+        <item>@string/echonest_mood_spiritual</item>
+        <item>@string/echonest_mood_strange</item>
+        <item>@string/echonest_mood_sweet</item>
+        <item>@string/echonest_mood_theater</item>
+        <item>@string/echonest_mood_trippy</item>
+        <item>@string/echonest_mood_warm</item>
+        <item>@string/echonest_mood_whimsical</item>
+    </string-array>
+
+    <!-- Values for above entries array. DO NOT TRANSLATE -->
+    <string-array name="echonest_mood_values" translatable="false">
+        <item>aggressive</item>
+        <item>ambient</item>
+        <item>angry</item>
+        <item>angst-ridden</item>
+        <item>bouncy</item>
+        <item>calming</item>
+        <item>carefree</item>
+        <item>cheerful</item>
+        <item>cold</item>
+        <item>complex</item>
+        <item>cool</item>
+        <item>dark</item>
+        <item>disturbing</item>
+        <item>dramatic</item>
+        <item>dreamy</item>
+        <item>eerie</item>
+        <item>elegant</item>
+        <item>energetic</item>
+        <item>enthusiastic</item>
+        <item>epic</item>
+        <item>fun</item>
+        <item>funky</item>
+        <item>futuristic</item>
+        <item>gentle</item>
+        <item>gleeful</item>
+        <item>gloomy</item>
+        <item>groovy</item>
+        <item>happy</item>
+        <item>harsh</item>
+        <item>haunting</item>
+        <item>humorous</item>
+        <item>hypnotic</item>
+        <item>industrial</item>
+        <item>intense</item>
+        <item>intimate</item>
+        <item>joyous</item>
+        <item>laid-back</item>
+        <item>light</item>
+        <item>lively</item>
+        <item>manic</item>
+        <item>meditation</item>
+        <item>melancholia</item>
+        <item>mellow</item>
+        <item>mystical</item>
+        <item>ominous</item>
+        <item>party music</item>
+        <item>passionate</item>
+        <item>pastoral</item>
+        <item>peaceful</item>
+        <item>playful</item>
+        <item>poignant</item>
+        <item>quiet</item>
+        <item>rebellious</item>
+        <item>reflective</item>
+        <item>relax</item>
+        <item>romantic</item>
+        <item>rowdy</item>
+        <item>sad</item>
+        <item>sentimental</item>
+        <item>sexy</item>
+        <item>smooth</item>
+        <item>soothing</item>
+        <item>sophisticated</item>
+        <item>spacey</item>
+        <item>spiritual</item>
+        <item>strange</item>
+        <item>sweet</item>
+        <item>theater</item>
+        <item>trippy</item>
+        <item>warm</item>
+        <item>whimsical</item>
+    </string-array>
+
+    <!-- We keep a local copy of echonest styles to avoid querying the API. Here's a PHP
+ script that is so awesome to generate items entries using public docs API key:
+
+$json_input = file_get_contents("http://developer.echonest.com/api/v4/artist/list_terms?api_key=FILDTEOIK2HBORODV&format=json&type=style");
+$json = json_decode($json_input, TRUE);
+$terms = $json["response"]["terms"];
+
+foreach ($terms as $term) {
+echo "<item>" . str_replace("'", "\\'", htmlentities($term["name"])) . "</item>\n";
+}
+-->
+    <!-- EchoNest Music styles. DO NOT TRANSLATE -->
+    <string-array name="echonest_style" translatable="false">
+        <item>00s</item>
+        <item>18th century</item>
+        <item>19th century</item>
+        <item>20th century classical</item>
+        <item>30s</item>
+        <item>40s</item>
+        <item>50s</item>
+        <item>60s</item>
+        <item>60s garage</item>
+        <item>60s pop</item>
+        <item>60s rock</item>
+        <item>70s</item>
+        <item>70s rock</item>
+        <item>8-bit</item>
+        <item>80s</item>
+        <item>80s hair metal</item>
+        <item>80s metal</item>
+        <item>80s pop</item>
+        <item>80s rock</item>
+        <item>90s</item>
+        <item>90s emo</item>
+        <item>90s rock</item>
+        <item>abstract hip hop</item>
+        <item>acappella</item>
+        <item>acid folk</item>
+        <item>acid house</item>
+        <item>acid jazz</item>
+        <item>acid rock</item>
+        <item>acid techno</item>
+        <item>acoustic blues</item>
+        <item>acoustic pop</item>
+        <item>acoustic punk</item>
+        <item>acoustic rock</item>
+        <item>adult alternative</item>
+        <item>adult contemporary</item>
+        <item>african blues</item>
+        <item>african folk</item>
+        <item>african reggae</item>
+        <item>afro-cuban jazz</item>
+        <item>afrobeat</item>
+        <item>afropop</item>
+        <item>aggrotech</item>
+        <item>album rock</item>
+        <item>alternative</item>
+        <item>alternative country</item>
+        <item>alternative dance</item>
+        <item>alternative folk</item>
+        <item>alternative hip hop</item>
+        <item>alternative metal</item>
+        <item>alternative pop</item>
+        <item>alternative pop rock</item>
+        <item>alternative rap</item>
+        <item>alternative rock</item>
+        <item>ambient</item>
+        <item>ambient black metal</item>
+        <item>ambient breakbeat</item>
+        <item>ambient dub</item>
+        <item>ambient house</item>
+        <item>ambient pop</item>
+        <item>ambient rock</item>
+        <item>ambient techno</item>
+        <item>american black metal</item>
+        <item>american blues</item>
+        <item>american death metal</item>
+        <item>american hard rock</item>
+        <item>american hardcore</item>
+        <item>american metal</item>
+        <item>american psychobilly</item>
+        <item>american punk</item>
+        <item>american rock</item>
+        <item>american ska</item>
+        <item>american thrash metal</item>
+        <item>americana</item>
+        <item>anarcho-punk</item>
+        <item>anatolian rock</item>
+        <item>andean music</item>
+        <item>angura kei</item>
+        <item>anti-folk</item>
+        <item>apocalyptic folk</item>
+        <item>aquacrunk</item>
+        <item>arabic music</item>
+        <item>arabic pop</item>
+        <item>arena rock</item>
+        <item>argentine rock</item>
+        <item>argentine tango</item>
+        <item>argentinian rock</item>
+        <item>art punk</item>
+        <item>art rock</item>
+        <item>austrian music</item>
+        <item>austropop</item>
+        <item>avant-garde</item>
+        <item>avant-garde jazz</item>
+        <item>avantgarde metal</item>
+        <item>bachata</item>
+        <item>baile funk</item>
+        <item>balearic trance</item>
+        <item>balkan beat</item>
+        <item>balkan brass</item>
+        <item>ballad</item>
+        <item>banda</item>
+        <item>baroque</item>
+        <item>baroque music</item>
+        <item>baroque pop</item>
+        <item>basque rock</item>
+        <item>bass music</item>
+        <item>bastard pop</item>
+        <item>battle metal</item>
+        <item>bay area rap</item>
+        <item>bay area thrash</item>
+        <item>bay area thrash metal</item>
+        <item>bebop</item>
+        <item>belgian music</item>
+        <item>belgian rock</item>
+        <item>big band</item>
+        <item>big beat</item>
+        <item>birmingham techno</item>
+        <item>black doom</item>
+        <item>black gospel</item>
+        <item>black metal</item>
+        <item>blackened death metal</item>
+        <item>blackened doom metal</item>
+        <item>blackened thrash metal</item>
+        <item>blue-eyed soul</item>
+        <item>bluegrass</item>
+        <item>blues</item>
+        <item>blues guitar</item>
+        <item>blues revival</item>
+        <item>blues rock</item>
+        <item>blues rock</item>
+        <item>blues-rock</item>
+        <item>bolero</item>
+        <item>boogie rock</item>
+        <item>boogie-woogie</item>
+        <item>bop</item>
+        <item>bossa nova</item>
+        <item>boston hardcore</item>
+        <item>boston punk</item>
+        <item>bounce</item>
+        <item>boy band</item>
+        <item>brazilian christian</item>
+        <item>brazilian country</item>
+        <item>brazilian emo</item>
+        <item>brazilian folk</item>
+        <item>brazilian indie</item>
+        <item>brazilian jazz</item>
+        <item>brazilian metal</item>
+        <item>brazilian music</item>
+        <item>brazilian pop music</item>
+        <item>brazilian power metal</item>
+        <item>brazilian punk</item>
+        <item>brazilian rap</item>
+        <item>brazilian reggae</item>
+        <item>brazilian rock</item>
+        <item>brazilian thrash metal</item>
+        <item>break</item>
+        <item>breakbeat</item>
+        <item>breakbeat hardcore</item>
+        <item>breakcore</item>
+        <item>brill building pop</item>
+        <item>british blues</item>
+        <item>british folk</item>
+        <item>british folk rock</item>
+        <item>british heavy metal</item>
+        <item>british hip hop</item>
+        <item>british invasion</item>
+        <item>british metal</item>
+        <item>british pop</item>
+        <item>british psychedelia</item>
+        <item>british punk rock</item>
+        <item>british rap</item>
+        <item>british rock</item>
+        <item>british ska</item>
+        <item>british trad rock</item>
+        <item>britpop</item>
+        <item>broken beat</item>
+        <item>brutal death metal</item>
+        <item>brutal deathcore</item>
+        <item>brutal technical death metal</item>
+        <item>brutal thrash metal</item>
+        <item>bubblegum dance</item>
+        <item>bubblegum pop</item>
+        <item>bubblegum punk</item>
+        <item>cabaret</item>
+        <item>california hardcore</item>
+        <item>calypso</item>
+        <item>canadian country</item>
+        <item>canadian folk</item>
+        <item>canadian hip hop</item>
+        <item>canadian indie</item>
+        <item>canadian pop</item>
+        <item>canadian rap</item>
+        <item>canadian rock</item>
+        <item>catalan music</item>
+        <item>ccm</item>
+        <item>cello rock</item>
+        <item>celtic</item>
+        <item>celtic folk</item>
+        <item>celtic fusion</item>
+        <item>celtic metal</item>
+        <item>celtic music</item>
+        <item>celtic new age</item>
+        <item>celtic punk</item>
+        <item>celtic rock</item>
+        <item>chamber jazz</item>
+        <item>chamber music</item>
+        <item>chamber pop</item>
+        <item>chanson</item>
+        <item>chanson francaise</item>
+        <item>chicago blues</item>
+        <item>chicago house</item>
+        <item>chicago punk</item>
+        <item>chicago soul</item>
+        <item>chicano rap</item>
+        <item>children music</item>
+        <item>chilean folk</item>
+        <item>chilean pop</item>
+        <item>chilean rock</item>
+        <item>chimurenga</item>
+        <item>chinese music</item>
+        <item>chiptune</item>
+        <item>choral music</item>
+        <item>christian</item>
+        <item>christian alternative rock</item>
+        <item>christian black metal</item>
+        <item>christian contemporary</item>
+        <item>christian death metal</item>
+        <item>christian hard rock</item>
+        <item>christian hardcore</item>
+        <item>christian heavy metal</item>
+        <item>christian hip hop</item>
+        <item>christian metal</item>
+        <item>christian metalcore</item>
+        <item>christian music</item>
+        <item>christian pop</item>
+        <item>christian pop punk</item>
+        <item>christian punk</item>
+        <item>christian rap</item>
+        <item>christian rock</item>
+        <item>classic blues</item>
+        <item>classic country</item>
+        <item>classic hip hop</item>
+        <item>classic jazz</item>
+        <item>classic metal</item>
+        <item>classic motown</item>
+        <item>classic punk</item>
+        <item>classic r&amp;b</item>
+        <item>classic rock</item>
+        <item>classic russian rock</item>
+        <item>classic thrash</item>
+        <item>classical</item>
+        <item>classical pop</item>
+        <item>club</item>
+        <item>coldwave</item>
+        <item>college rock</item>
+        <item>comedy</item>
+        <item>comedy rock</item>
+        <item>conscious reggae</item>
+        <item>contemporary bluegrass</item>
+        <item>contemporary blues</item>
+        <item>contemporary celtic</item>
+        <item>contemporary christian</item>
+        <item>contemporary classical music</item>
+        <item>contemporary country</item>
+        <item>contemporary flamenco</item>
+        <item>contemporary folk</item>
+        <item>contemporary gospel</item>
+        <item>contemporary jazz</item>
+        <item>contemporary r&amp;b</item>
+        <item>contemporary reggae</item>
+        <item>contemporary worship</item>
+        <item>continental jazz</item>
+        <item>cool jazz</item>
+        <item>cosmic american music</item>
+        <item>cosmic disco</item>
+        <item>country</item>
+        <item>country blues</item>
+        <item>country folk</item>
+        <item>country gospel</item>
+        <item>country music</item>
+        <item>country pop</item>
+        <item>country rock</item>
+        <item>cowpunk</item>
+        <item>crack rock</item>
+        <item>croatian rock</item>
+        <item>crossover classical</item>
+        <item>crossover jazz</item>
+        <item>crossover thrash</item>
+        <item>crunk</item>
+        <item>crunkcore</item>
+        <item>crust</item>
+        <item>crust punk</item>
+        <item>crustcore</item>
+        <item>cuban folk</item>
+        <item>cuban jazz</item>
+        <item>cumbia</item>
+        <item>cyber metal</item>
+        <item>cyberpunk</item>
+        <item>czech pop</item>
+        <item>czech rock</item>
+        <item>dance</item>
+        <item>dance music</item>
+        <item>dance pop</item>
+        <item>dance rock</item>
+        <item>dance-punk</item>
+        <item>dancehall</item>
+        <item>dancehall reggae</item>
+        <item>danish folk</item>
+        <item>danish hip-hop</item>
+        <item>danish metal</item>
+        <item>danish music</item>
+        <item>danish pop</item>
+        <item>danish rap</item>
+        <item>danish rock</item>
+        <item>dark ambient</item>
+        <item>dark cabaret</item>
+        <item>dark electro</item>
+        <item>dark folk</item>
+        <item>dark metal</item>
+        <item>dark psytrance</item>
+        <item>dark rock</item>
+        <item>dark wave</item>
+        <item>darkcore</item>
+        <item>darkstep</item>
+        <item>dc hardcore</item>
+        <item>death \'n\' roll</item>
+        <item>death black metal</item>
+        <item>death core</item>
+        <item>death metal</item>
+        <item>death rap</item>
+        <item>death/doom metal</item>
+        <item>deathgrind</item>
+        <item>deathrock</item>
+        <item>deep funk</item>
+        <item>deep funk revival</item>
+        <item>deep house</item>
+        <item>deep techno</item>
+        <item>delta blues</item>
+        <item>depressive black metal</item>
+        <item>depressive rock</item>
+        <item>depressive suicidal black metal</item>
+        <item>desert blues</item>
+        <item>desert rock</item>
+        <item>detroit rap</item>
+        <item>detroit rock</item>
+        <item>detroit techno</item>
+        <item>digital hardcore</item>
+        <item>dirty disco</item>
+        <item>dirty rap</item>
+        <item>dirty south rap</item>
+        <item>disco</item>
+        <item>disco house</item>
+        <item>dixieland</item>
+        <item>doo-wop</item>
+        <item>doom metal</item>
+        <item>doom rock</item>
+        <item>doomcore</item>
+        <item>downbeat</item>
+        <item>downtempo</item>
+        <item>dream pop</item>
+        <item>drill\'n\'bass</item>
+        <item>drone</item>
+        <item>drone doom metal</item>
+        <item>drone metal</item>
+        <item>drone rock</item>
+        <item>drum and bass</item>
+        <item>drumfunk</item>
+        <item>dub</item>
+        <item>dub reggae</item>
+        <item>dub techno</item>
+        <item>dubstep</item>
+        <item>duranguense</item>
+        <item>dutch death metal</item>
+        <item>dutch hardcore</item>
+        <item>dutch hip hop</item>
+        <item>dutch rap</item>
+        <item>east coast hip hop</item>
+        <item>east coast rap</item>
+        <item>easy listening</item>
+        <item>ebm</item>
+        <item>edm</item>
+        <item>egyptian pop</item>
+        <item>electric blues</item>
+        <item>electric folk</item>
+        <item>electro</item>
+        <item>electro hip hop</item>
+        <item>electro house</item>
+        <item>electro rock</item>
+        <item>electro trance</item>
+        <item>electro-funk</item>
+        <item>electro-industrial</item>
+        <item>electro-jazz</item>
+        <item>electroclash</item>
+        <item>electrocore</item>
+        <item>electronic</item>
+        <item>electronica</item>
+        <item>electropop</item>
+        <item>emo</item>
+        <item>emo pop</item>
+        <item>emo punk</item>
+        <item>emo violence</item>
+        <item>emocore</item>
+        <item>emotional electronic</item>
+        <item>english folk</item>
+        <item>epic black metal</item>
+        <item>epic doom metal</item>
+        <item>epic metal</item>
+        <item>epic power metal</item>
+        <item>epic trance</item>
+        <item>ethnic fusion</item>
+        <item>euro disco</item>
+        <item>euro-house</item>
+        <item>euro-trance</item>
+        <item>eurobeat</item>
+        <item>eurodance</item>
+        <item>europop</item>
+        <item>experimental</item>
+        <item>experimental ambient</item>
+        <item>experimental black metal</item>
+        <item>experimental dub</item>
+        <item>experimental electronic</item>
+        <item>experimental hip hop</item>
+        <item>experimental metal</item>
+        <item>experimental pop</item>
+        <item>experimental rap</item>
+        <item>experimental rock</item>
+        <item>experimental techno</item>
+        <item>extreme doom</item>
+        <item>extreme metal</item>
+        <item>fado</item>
+        <item>fantasy metal</item>
+        <item>fastcore</item>
+        <item>female fronted hardcore</item>
+        <item>female fronted metal</item>
+        <item>female rap</item>
+        <item>female volcalists</item>
+        <item>fidget house</item>
+        <item>filipino rock</item>
+        <item>finnish black metal</item>
+        <item>finnish death metal</item>
+        <item>finnish heavy metal</item>
+        <item>finnish hip hop</item>
+        <item>finnish indie</item>
+        <item>finnish industrial metal</item>
+        <item>finnish music</item>
+        <item>finnish pop</item>
+        <item>finnish rap</item>
+        <item>finnish reggae</item>
+        <item>finnish rock</item>
+        <item>flamenco</item>
+        <item>flamenco fusion</item>
+        <item>flamenco pop</item>
+        <item>flamenco rock</item>
+        <item>florida death metal</item>
+        <item>folk</item>
+        <item>folk metal</item>
+        <item>folk noir</item>
+        <item>folk pop</item>
+        <item>folk punk</item>
+        <item>folk revival</item>
+        <item>folk rock</item>
+        <item>folk-pop</item>
+        <item>folktronica</item>
+        <item>frat rock</item>
+        <item>freak folk</item>
+        <item>freakbeat</item>
+        <item>free jazz</item>
+        <item>french baroque</item>
+        <item>french black metal</item>
+        <item>french death metal</item>
+        <item>french electro</item>
+        <item>french hardcore</item>
+        <item>french hip hop</item>
+        <item>french house</item>
+        <item>french indie</item>
+        <item>french metal</item>
+        <item>french music</item>
+        <item>french pop</item>
+        <item>french rap</item>
+        <item>french reggae</item>
+        <item>french rock</item>
+        <item>frenchcore</item>
+        <item>funeral doom</item>
+        <item>funeral doom metal</item>
+        <item>funk</item>
+        <item>funk jazz</item>
+        <item>funk metal</item>
+        <item>funk rock</item>
+        <item>funky house</item>
+        <item>fusion</item>
+        <item>fusion jazz</item>
+        <item>future fusion metal</item>
+        <item>futurepop</item>
+        <item>gabba</item>
+        <item>gabber hardcore</item>
+        <item>galician folk</item>
+        <item>gamelan</item>
+        <item>gangster rap</item>
+        <item>garage blues</item>
+        <item>garage house</item>
+        <item>garage pop</item>
+        <item>garage punk</item>
+        <item>garage rock</item>
+        <item>garage rock revival</item>
+        <item>geek rock</item>
+        <item>german black metal</item>
+        <item>german dancehall</item>
+        <item>german death metal</item>
+        <item>german heavy metal</item>
+        <item>german hip hop</item>
+        <item>german indie</item>
+        <item>german metal</item>
+        <item>german metalcore</item>
+        <item>german music</item>
+        <item>german pop</item>
+        <item>german progressive rock</item>
+        <item>german punk</item>
+        <item>german rap</item>
+        <item>german rock</item>
+        <item>german schlager</item>
+        <item>german thrash</item>
+        <item>german thrash metal</item>
+        <item>ghetto tech</item>
+        <item>glam metal</item>
+        <item>glam punk</item>
+        <item>glam rock</item>
+        <item>glitch</item>
+        <item>glitch hop</item>
+        <item>glitterhouse</item>
+        <item>goa trance</item>
+        <item>gore metal</item>
+        <item>goregrind</item>
+        <item>gospel</item>
+        <item>gospel blues</item>
+        <item>gospel choir</item>
+        <item>gospel soul</item>
+        <item>gothabilly</item>
+        <item>gothic</item>
+        <item>gothic americana</item>
+        <item>gothic country</item>
+        <item>gothic doom</item>
+        <item>gothic doom metal</item>
+        <item>gothic metal</item>
+        <item>gothic rock</item>
+        <item>greek music</item>
+        <item>greek pop</item>
+        <item>grime</item>
+        <item>grindcore</item>
+        <item>groove metal</item>
+        <item>grunge</item>
+        <item>guitar rock</item>
+        <item>gypsy jazz</item>
+        <item>gypsy music</item>
+        <item>gypsy punk</item>
+        <item>hair metal</item>
+        <item>happy hardcore</item>
+        <item>hard bop</item>
+        <item>hard dance</item>
+        <item>hard house</item>
+        <item>hard rock</item>
+        <item>hard trance</item>
+        <item>hardcore</item>
+        <item>hardcore hip hop</item>
+        <item>hardcore metal</item>
+        <item>hardcore punk</item>
+        <item>hardcore rap</item>
+        <item>hardcore techno</item>
+        <item>hardstep</item>
+        <item>hardstyle</item>
+        <item>hardtechno</item>
+        <item>harmonica blues</item>
+        <item>harsh ebm</item>
+        <item>harsh electro</item>
+        <item>heartland rock</item>
+        <item>heavy blues</item>
+        <item>heavy metal</item>
+        <item>heavy rock</item>
+        <item>hip hop</item>
+        <item>hip hop soul</item>
+        <item>hip house</item>
+        <item>hipster rap</item>
+        <item>honky tonk</item>
+        <item>horror punk</item>
+        <item>horror rock</item>
+        <item>horrorcore</item>
+        <item>horrorcore rap</item>
+        <item>house</item>
+        <item>house progressive</item>
+        <item>houston rap</item>
+        <item>hungarian metal</item>
+        <item>hungarian rock</item>
+        <item>hyperdub</item>
+        <item>independent hip hop</item>
+        <item>indian classical</item>
+        <item>indian folk</item>
+        <item>indian fusion</item>
+        <item>indian music</item>
+        <item>indian pop</item>
+        <item>indian rock</item>
+        <item>indie</item>
+        <item>indie dance</item>
+        <item>indie electro</item>
+        <item>indie folk</item>
+        <item>indie hip hop</item>
+        <item>indie pop</item>
+        <item>indie punk</item>
+        <item>indie rap</item>
+        <item>indie rock</item>
+        <item>indietronica</item>
+        <item>indonesian indie</item>
+        <item>indonesian pop</item>
+        <item>indonesian rock</item>
+        <item>industrial</item>
+        <item>industrial black metal</item>
+        <item>industrial dance</item>
+        <item>industrial metal</item>
+        <item>industrial noise</item>
+        <item>industrial rock</item>
+        <item>instrumental</item>
+        <item>instrumental hip hop</item>
+        <item>instrumental metal</item>
+        <item>instrumental pop</item>
+        <item>instrumental progressive metal</item>
+        <item>instrumental rock</item>
+        <item>intelligent dance music</item>
+        <item>iranian folk</item>
+        <item>iranian pop</item>
+        <item>irish folk</item>
+        <item>irish indie</item>
+        <item>irish punk</item>
+        <item>irish rock</item>
+        <item>irish trad folk</item>
+        <item>island music</item>
+        <item>italian alternative</item>
+        <item>italian alternative rock</item>
+        <item>italian dance</item>
+        <item>italian disco</item>
+        <item>italian folk</item>
+        <item>italian hardstyle</item>
+        <item>italian hip hop</item>
+        <item>italian indie</item>
+        <item>italian metal</item>
+        <item>italian new wave</item>
+        <item>italian opera</item>
+        <item>italian pop</item>
+        <item>italian punk</item>
+        <item>italian rap</item>
+        <item>italian reggae</item>
+        <item>italian rock</item>
+        <item>italian ska</item>
+        <item>j pop</item>
+        <item>j-pop</item>
+        <item>j-rock</item>
+        <item>jam band</item>
+        <item>jamaican music</item>
+        <item>jamaican ska</item>
+        <item>jangle pop</item>
+        <item>japanese alternative rock</item>
+        <item>japanese electronic</item>
+        <item>japanese folk</item>
+        <item>japanese heavy metal</item>
+        <item>japanese hip hop</item>
+        <item>japanese indie</item>
+        <item>japanese indie rock</item>
+        <item>japanese metal</item>
+        <item>japanese music</item>
+        <item>jazz</item>
+        <item>jazz blues</item>
+        <item>jazz funk</item>
+        <item>jazz fusion</item>
+        <item>jazz hip hop</item>
+        <item>jazz latino</item>
+        <item>jazz piano</item>
+        <item>jazz pop</item>
+        <item>jazz rap</item>
+        <item>jazz rock</item>
+        <item>jazz vocal</item>
+        <item>jazzcore</item>
+        <item>jewish folk</item>
+        <item>jrock</item>
+        <item>judaica</item>
+        <item>juke joint blues</item>
+        <item>jump blues</item>
+        <item>jungle music</item>
+        <item>k-pop</item>
+        <item>kayokyoku</item>
+        <item>klezmer</item>
+        <item>kompa</item>
+        <item>korean hip-hop</item>
+        <item>korean indie</item>
+        <item>korean music</item>
+        <item>korean pop</item>
+        <item>kpop</item>
+        <item>kraut rock</item>
+        <item>kuduro</item>
+        <item>kwaito</item>
+        <item>late baroque</item>
+        <item>latin</item>
+        <item>latin alternative</item>
+        <item>latin folk</item>
+        <item>latin freestyle</item>
+        <item>latin hip hop</item>
+        <item>latin jazz</item>
+        <item>latin music</item>
+        <item>latin pop</item>
+        <item>latin rap</item>
+        <item>latin reggae</item>
+        <item>latin rock</item>
+        <item>latin ska</item>
+        <item>latin soul</item>
+        <item>leftfield</item>
+        <item>liquid funk</item>
+        <item>lo-fi</item>
+        <item>louisiana blues</item>
+        <item>lounge</item>
+        <item>lounge music</item>
+        <item>madchester</item>
+        <item>mainstream jazz</item>
+        <item>male vocalist</item>
+        <item>mambo</item>
+        <item>mariachi</item>
+        <item>martial industrial</item>
+        <item>mashcore</item>
+        <item>math metal</item>
+        <item>math rock</item>
+        <item>math-core</item>
+        <item>mediaeval</item>
+        <item>medieval</item>
+        <item>medieval folk</item>
+        <item>medieval metal</item>
+        <item>medieval rock</item>
+        <item>melancholic black metal</item>
+        <item>melodic black metal</item>
+        <item>melodic death metal</item>
+        <item>melodic deathcore</item>
+        <item>melodic hard rock</item>
+        <item>melodic hardcore</item>
+        <item>melodic heavy metal</item>
+        <item>melodic metalcore</item>
+        <item>melodic power metal</item>
+        <item>melodic punk</item>
+        <item>melodic rock</item>
+        <item>melodic speed metal</item>
+        <item>melodic trance</item>
+        <item>memphis blues</item>
+        <item>memphis rap</item>
+        <item>memphis soul</item>
+        <item>merengue</item>
+        <item>merseybeat</item>
+        <item>metal</item>
+        <item>metal argentino</item>
+        <item>metalcore</item>
+        <item>metalgaze</item>
+        <item>mexican indie</item>
+        <item>mexican music</item>
+        <item>mexican pop</item>
+        <item>mexican rap</item>
+        <item>mexican rock</item>
+        <item>mexican ska</item>
+        <item>microhouse</item>
+        <item>middle eastern pop</item>
+        <item>midwest emo</item>
+        <item>midwest rap</item>
+        <item>minimal dub</item>
+        <item>minimal house</item>
+        <item>minimal techno</item>
+        <item>minimal wave</item>
+        <item>minimal</item>
+        <item>mittelalter</item>
+        <item>mittelalter rock</item>
+        <item>mod revival</item>
+        <item>modern blues</item>
+        <item>modern classical</item>
+        <item>modern country</item>
+        <item>modern electric blues</item>
+        <item>modern folk</item>
+        <item>modern hardcore</item>
+        <item>modern jazz</item>
+        <item>modern melodic death metal</item>
+        <item>modern metal</item>
+        <item>modern rock</item>
+        <item>modern thrash metal</item>
+        <item>modern worship</item>
+        <item>motown</item>
+        <item>musica portuguesa</item>
+        <item>musical</item>
+        <item>musique concrete</item>
+        <item>nagoya kei</item>
+        <item>nashville sound</item>
+        <item>national socialist black metal</item>
+        <item>nederhop</item>
+        <item>nederpop</item>
+        <item>neo classical metal</item>
+        <item>neo rockabilly</item>
+        <item>neo soul</item>
+        <item>neo-progressive</item>
+        <item>neoclassical</item>
+        <item>neofolk</item>
+        <item>neometal</item>
+        <item>neoswing</item>
+        <item>neotrance</item>
+        <item>nerdcore</item>
+        <item>nerdcore hip hop</item>
+        <item>nerdcore rap</item>
+        <item>neue deutsche welle</item>
+        <item>neurofunk</item>
+        <item>new age</item>
+        <item>new age music</item>
+        <item>new beat</item>
+        <item>new country</item>
+        <item>new funk</item>
+        <item>new jack swing</item>
+        <item>new metal</item>
+        <item>new orleans blues</item>
+        <item>new orleans funk</item>
+        <item>new orleans jazz</item>
+        <item>new prog</item>
+        <item>new rave</item>
+        <item>new traditionalist country</item>
+        <item>new wave</item>
+        <item>new weird america</item>
+        <item>new york death metal</item>
+        <item>new york hardcore</item>
+        <item>new york punk</item>
+        <item>new york rap</item>
+        <item>new york salsa</item>
+        <item>new zealand music</item>
+        <item>new zealand rock</item>
+        <item>newgrass</item>
+        <item>ninja tune</item>
+        <item>nintendocore</item>
+        <item>no wave</item>
+        <item>noise</item>
+        <item>noise grind</item>
+        <item>noise pop</item>
+        <item>noise punk</item>
+        <item>noise rock</item>
+        <item>nordic folk</item>
+        <item>norteno</item>
+        <item>northern soul</item>
+        <item>norwegian black metal</item>
+        <item>norwegian hip-hop</item>
+        <item>norwegian metal</item>
+        <item>norwegian rap</item>
+        <item>norwegian rock</item>
+        <item>nu breaks</item>
+        <item>nu disco</item>
+        <item>nu jazz</item>
+        <item>nu metal</item>
+        <item>nu skool breaks</item>
+        <item>nu-soul</item>
+        <item>nueva cancion</item>
+        <item>nueva cancion chilena</item>
+        <item>nwobhm</item>
+        <item>oi</item>
+        <item>old school</item>
+        <item>old school black metal</item>
+        <item>old school death metal</item>
+        <item>old school hardcore</item>
+        <item>old school hip hop</item>
+        <item>old school metal</item>
+        <item>old school punk</item>
+        <item>old school rap</item>
+        <item>old school soul</item>
+        <item>opera</item>
+        <item>operatic pop</item>
+        <item>orchestral pop</item>
+        <item>oriental metal</item>
+        <item>orthodox black metal</item>
+        <item>oshare kei</item>
+        <item>outlaw country</item>
+        <item>pagan folk</item>
+        <item>pagan folk metal</item>
+        <item>pagan metal</item>
+        <item>pagan rock</item>
+        <item>pakistani pop</item>
+        <item>pakistani rock</item>
+        <item>party rap</item>
+        <item>peace punk</item>
+        <item>persian pop</item>
+        <item>philly soul</item>
+        <item>piano blues</item>
+        <item>piano jazz</item>
+        <item>piano rock</item>
+        <item>piedmont blues</item>
+        <item>pinoy rock</item>
+        <item>pirate metal</item>
+        <item>polish alternative</item>
+        <item>polish alternative rock</item>
+        <item>polish black metal</item>
+        <item>polish death metal</item>
+        <item>polish hip hop</item>
+        <item>polish jazz</item>
+        <item>polish metal</item>
+        <item>polish music</item>
+        <item>polish pop</item>
+        <item>polish punk</item>
+        <item>polish rap</item>
+        <item>polish reggae</item>
+        <item>polish rock</item>
+        <item>polish thrash metal</item>
+        <item>political folk</item>
+        <item>political punk</item>
+        <item>political rap</item>
+        <item>polka</item>
+        <item>pop</item>
+        <item>pop country</item>
+        <item>pop espanol</item>
+        <item>pop folk</item>
+        <item>pop hardcore</item>
+        <item>pop latino</item>
+        <item>pop metal</item>
+        <item>pop opera</item>
+        <item>pop punk</item>
+        <item>pop rap</item>
+        <item>pop rock</item>
+        <item>pop underground</item>
+        <item>pornogrind</item>
+        <item>portuguese hip hop</item>
+        <item>portuguese music</item>
+        <item>posi hardcore</item>
+        <item>posicore</item>
+        <item>post rock</item>
+        <item>post-black metal</item>
+        <item>post-bop</item>
+        <item>post-grunge</item>
+        <item>post-hardcore</item>
+        <item>post-industrial</item>
+        <item>post-punk</item>
+        <item>post-rock</item>
+        <item>postcore</item>
+        <item>power metal</item>
+        <item>power noise</item>
+        <item>power pop</item>
+        <item>praise &amp; worship</item>
+        <item>prog folk</item>
+        <item>progressive black metal</item>
+        <item>progressive bluegrass</item>
+        <item>progressive country</item>
+        <item>progressive death metal</item>
+        <item>progressive deathcore</item>
+        <item>progressive electronic</item>
+        <item>progressive hardcore</item>
+        <item>progressive house</item>
+        <item>progressive jazz</item>
+        <item>progressive metal</item>
+        <item>progressive metalcore</item>
+        <item>progressive power metal</item>
+        <item>progressive psychedelic trance</item>
+        <item>progressive rock</item>
+        <item>progressive thrash metal</item>
+        <item>progressive trance</item>
+        <item>protest folk</item>
+        <item>protopunk</item>
+        <item>psychedelia</item>
+        <item>psychedelic</item>
+        <item>psychedelic ambient</item>
+        <item>psychedelic chill</item>
+        <item>psychedelic downtempo</item>
+        <item>psychedelic dub</item>
+        <item>psychedelic folk</item>
+        <item>psychedelic pop</item>
+        <item>psychedelic rock</item>
+        <item>psychedelic soul</item>
+        <item>psychedelic stoner rock</item>
+        <item>psychedelic trance</item>
+        <item>psycho rap</item>
+        <item>psychobilly</item>
+        <item>pub rock</item>
+        <item>punk</item>
+        <item>punk blues</item>
+        <item>punk cabaret</item>
+        <item>punk folk</item>
+        <item>punk hardcore</item>
+        <item>punk jazz</item>
+        <item>punk metal</item>
+        <item>punk pop</item>
+        <item>punk revival</item>
+        <item>punk ska</item>
+        <item>pure black metal</item>
+        <item>queercore</item>
+        <item>r&amp;b</item>
+        <item>ragga</item>
+        <item>ragga jungle</item>
+        <item>raggacore</item>
+        <item>ragtime</item>
+        <item>ranchera</item>
+        <item>rap</item>
+        <item>rap francais</item>
+        <item>rap metal</item>
+        <item>rap rock</item>
+        <item>rap underground</item>
+        <item>rapcore</item>
+        <item>raw black metal</item>
+        <item>reggae</item>
+        <item>reggae dancehall</item>
+        <item>reggae dub</item>
+        <item>reggae punk</item>
+        <item>reggae rock</item>
+        <item>reggae roots</item>
+        <item>reggaeton</item>
+        <item>religious music</item>
+        <item>remix</item>
+        <item>renaissance</item>
+        <item>retro prog</item>
+        <item>retro swing</item>
+        <item>retro thrash</item>
+        <item>revival rockabilly</item>
+        <item>riot grrrl</item>
+        <item>rock</item>
+        <item>rock \'n roll</item>
+        <item>rock andaluz</item>
+        <item>rock argentina</item>
+        <item>rock chileno</item>
+        <item>rock en espanol</item>
+        <item>rock francais</item>
+        <item>rock gaucho</item>
+        <item>rock italiano</item>
+        <item>rock mexicano</item>
+        <item>rock radical vasco</item>
+        <item>rock steady</item>
+        <item>rockabilly</item>
+        <item>romanian hip hop</item>
+        <item>romanian music</item>
+        <item>romanian pop</item>
+        <item>romantic</item>
+        <item>roots</item>
+        <item>roots reggae</item>
+        <item>roots rock</item>
+        <item>roots rock reggae</item>
+        <item>rumba</item>
+        <item>russian alternative</item>
+        <item>russian chanson</item>
+        <item>russian folk</item>
+        <item>russian hip hop</item>
+        <item>russian metal</item>
+        <item>russian music</item>
+        <item>russian pop</item>
+        <item>russian punk</item>
+        <item>russian rock</item>
+        <item>russian trance</item>
+        <item>sadcore</item>
+        <item>salsa</item>
+        <item>salsa romantica</item>
+        <item>samba</item>
+        <item>samba rock</item>
+        <item>satanic black metal</item>
+        <item>scandinavian folk</item>
+        <item>scandinavian metal</item>
+        <item>scottish folk</item>
+        <item>scratch</item>
+        <item>screamo</item>
+        <item>sea shanties</item>
+        <item>serbian alternative</item>
+        <item>serbian rock</item>
+        <item>shibuya-kei</item>
+        <item>shock rock</item>
+        <item>shoegaze</item>
+        <item>singer-songwriter</item>
+        <item>ska</item>
+        <item>ska jazz</item>
+        <item>ska punk</item>
+        <item>ska revival</item>
+        <item>ska rocksteady</item>
+        <item>skacore</item>
+        <item>skate punk</item>
+        <item>skiffle</item>
+        <item>slam death metal</item>
+        <item>slavonic pagan metal</item>
+        <item>sleaze rock</item>
+        <item>slide guitar blues</item>
+        <item>slovak punk</item>
+        <item>slovenian rock</item>
+        <item>slow core</item>
+        <item>sludge</item>
+        <item>sludge doom</item>
+        <item>sludge metal</item>
+        <item>smooth jazz</item>
+        <item>smooth soul</item>
+        <item>soca</item>
+        <item>soft rock</item>
+        <item>son cubano</item>
+        <item>soukous</item>
+        <item>soul</item>
+        <item>soul blues</item>
+        <item>soul jazz</item>
+        <item>soul music</item>
+        <item>soulful house</item>
+        <item>soundtrack</item>
+        <item>south african music</item>
+        <item>southern gospel</item>
+        <item>southern gothic</item>
+        <item>southern hip hop</item>
+        <item>southern metal</item>
+        <item>southern rap</item>
+        <item>southern rock</item>
+        <item>southern soul</item>
+        <item>space disco</item>
+        <item>space music</item>
+        <item>space rock</item>
+        <item>spanish alternative</item>
+        <item>spanish folk</item>
+        <item>spanish hard rock</item>
+        <item>spanish indie</item>
+        <item>spanish indie pop</item>
+        <item>spanish indie rock</item>
+        <item>spanish metal</item>
+        <item>spanish music</item>
+        <item>spanish pop</item>
+        <item>spanish pop rock</item>
+        <item>spanish power metal</item>
+        <item>spanish punk</item>
+        <item>spanish rap</item>
+        <item>spanish rock</item>
+        <item>spanish ska</item>
+        <item>spanish thrash metal</item>
+        <item>speed garage</item>
+        <item>speed metal</item>
+        <item>spiritual</item>
+        <item>stand-up comedy</item>
+        <item>stoner doom metal</item>
+        <item>stoner metal</item>
+        <item>stoner rock</item>
+        <item>stoner sludge</item>
+        <item>straight edge hardcore</item>
+        <item>street punk</item>
+        <item>string band</item>
+        <item>style</item>
+        <item>suicidal black metal</item>
+        <item>sunshine pop</item>
+        <item>surf</item>
+        <item>surf music</item>
+        <item>surf revival</item>
+        <item>swamp blues</item>
+        <item>swamp rock</item>
+        <item>swedish black metal</item>
+        <item>swedish death metal</item>
+        <item>swedish folkmusic</item>
+        <item>swedish hardcore</item>
+        <item>swedish hip hop</item>
+        <item>swedish house</item>
+        <item>swedish indie</item>
+        <item>swedish melodic death metal</item>
+        <item>swedish metal</item>
+        <item>swedish music</item>
+        <item>swedish pop</item>
+        <item>swedish prog</item>
+        <item>swedish progressive</item>
+        <item>swedish progressive rock</item>
+        <item>swedish punk</item>
+        <item>swedish rap</item>
+        <item>swedish rock</item>
+        <item>swing</item>
+        <item>swing revival</item>
+        <item>swiss black metal</item>
+        <item>swiss pop</item>
+        <item>sympho black metal</item>
+        <item>symphonic</item>
+        <item>symphonic death metal</item>
+        <item>symphonic gothic metal</item>
+        <item>symphonic metal</item>
+        <item>symphonic power metal</item>
+        <item>symphonic prog</item>
+        <item>symphonic rock</item>
+        <item>symphony</item>
+        <item>synth punk</item>
+        <item>synth rock</item>
+        <item>synthpop</item>
+        <item>tango</item>
+        <item>tango fusion</item>
+        <item>tech house</item>
+        <item>tech metal</item>
+        <item>tech trance</item>
+        <item>technical brutal death metal</item>
+        <item>technical death metal</item>
+        <item>technical thrash</item>
+        <item>technical thrash metal</item>
+        <item>techno</item>
+        <item>techno hardcore</item>
+        <item>techno industrial</item>
+        <item>technopop</item>
+        <item>techstep</item>
+        <item>teen pop</item>
+        <item>tejano</item>
+        <item>terror ebm</item>
+        <item>texas blues</item>
+        <item>texas country</item>
+        <item>texas music</item>
+        <item>texas rap</item>
+        <item>thai pop</item>
+        <item>thai rock</item>
+        <item>third wave ska</item>
+        <item>third wave ska revival</item>
+        <item>thrash core</item>
+        <item>thrash metal</item>
+        <item>thrash revival</item>
+        <item>thrash-death metal</item>
+        <item>traditional bluegrass</item>
+        <item>traditional blues</item>
+        <item>traditional country</item>
+        <item>traditional doom</item>
+        <item>traditional doom metal</item>
+        <item>traditional folk</item>
+        <item>traditional gospel</item>
+        <item>traditional heavy metal</item>
+        <item>traditional japanese music</item>
+        <item>traditional jazz</item>
+        <item>traditional metal</item>
+        <item>traditional pop</item>
+        <item>traditional ska</item>
+        <item>trance</item>
+        <item>trance music</item>
+        <item>trancecore</item>
+        <item>trancestep</item>
+        <item>trash metal</item>
+        <item>trip hop</item>
+        <item>trip rock</item>
+        <item>trova</item>
+        <item>true black metal</item>
+        <item>true doom metal</item>
+        <item>true metal</item>
+        <item>turkish folk</item>
+        <item>turkish jazz</item>
+        <item>turkish music</item>
+        <item>turkish pop</item>
+        <item>turkish rock</item>
+        <item>turntablism</item>
+        <item>twee pop</item>
+        <item>two-step</item>
+        <item>uk garage</item>
+        <item>uk grime</item>
+        <item>uk hardcore</item>
+        <item>uk hip hop</item>
+        <item>uk punk</item>
+        <item>uk rap</item>
+        <item>ukrainian black metal</item>
+        <item>ukrainian rock</item>
+        <item>underground black metal</item>
+        <item>underground hip hop</item>
+        <item>underground rap</item>
+        <item>uplifting trance</item>
+        <item>urban contemporary gospel</item>
+        <item>urban folk</item>
+        <item>urban gospel</item>
+        <item>urban jazz</item>
+        <item>uruguayan rock</item>
+        <item>us metal</item>
+        <item>us punk</item>
+        <item>viking metal</item>
+        <item>visual kei</item>
+        <item>vocal house</item>
+        <item>vocal jazz</item>
+        <item>vocal pop</item>
+        <item>vocal trance</item>
+        <item>west coast hip hop</item>
+        <item>west coast jazz</item>
+        <item>west coast rap</item>
+        <item>western swing</item>
+        <item>world</item>
+        <item>world beat</item>
+        <item>world fusion</item>
+        <item>world music</item>
+        <item>worship music</item>
+        <item>zouk</item>
+        <item>zydeco</item>
+    </string-array>
+
+    <string-array name="echonest_song_type_entries" translatable="false">
+        <item>@string/echonest_song_type_acoustic</item>
+        <item>@string/echonest_song_type_electric</item>
+        <item>@string/echonest_song_type_studio</item>
+        <item>@string/echonest_song_type_live</item>
+        <item>@string/echonest_song_type_christmas</item>
+    </string-array>
+
+    <string-array name="echonest_song_type_values" translatable="false">
+        <item>acoustic</item>
+        <item>electric</item>
+        <item>studio</item>
+        <item>live</item>
+        <item>christmas</item>
+    </string-array>
+
+    <string-array name="echonest_adventurous_level_entries" translatable="false">
+        <item>@string/settings_list_entry_low_default</item>
+        <item>@string/settings_list_entry_medium</item>
+        <item>@string/settings_list_entry_high</item>
+    </string-array>
+
+    <string-array name="echonest_adventurous_level_values" translatable="false">
+        <item>0.2</item>
+        <item>0.5</item>
+        <item>0.8</item>
+    </string-array>
+
+    <string-array name="echonest_speechiness_level_entries" translatable="false">
+        <item>@string/settings_list_entry_ignored</item>
+        <item>@string/settings_list_entry_low</item>
+        <item>@string/settings_list_entry_medium</item>
+        <item>@string/settings_list_entry_high</item>
+    </string-array>
+
+    <string-array name="echonest_speechiness_level_values" translatable="false">
+        <item>-1</item>
+        <item>0.2</item>
+        <item>0.5</item>
+        <item>0.9</item>
+    </string-array>
+
+    <string-array name="echonest_energy_level_entries" translatable="false">
+        <item>@string/settings_list_entry_ignored</item>
+        <item>@string/settings_list_entry_low</item>
+        <item>@string/settings_list_entry_medium</item>
+        <item>@string/settings_list_entry_high</item>
+    </string-array>
+
+    <string-array name="echonest_energy_level_values" translatable="false">
+        <item>-1</item>
+        <item>0.2</item>
+        <item>0.5</item>
+        <item>0.8</item>
+    </string-array>
+
+    <string-array name="echonest_familiarity_level_entries" translatable="false">
+        <item>@string/settings_list_entry_ignored</item>
+        <item>@string/settings_list_entry_low</item>
+        <item>@string/settings_list_entry_medium</item>
+        <item>@string/settings_list_entry_high</item>
+    </string-array>
+
+    <string-array name="echonest_familiarity_level_values" translatable="false">
+        <item>-1</item>
+        <item>0.2</item>
+        <item>0.5</item>
+        <item>0.8</item>
+    </string-array>
+</resources>

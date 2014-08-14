@@ -23,10 +23,17 @@ public class OmniMusic extends Application {
         PluginsLookup.getDefault().initialize(getApplicationContext());
 
         // Setup network cache
+        /**
+         * Note about the cache and EchoNest: The HTTP cache would sometimes cache request
+         * we didn't want (such as status query for Taste Profile update). We're using
+         * a hacked jEN library that doesn't cache these requests.
+         */
         try {
-            File httpCacheDir = new File(getCacheDir(), "http");
-            long httpCacheSize = 100 * 1024 * 1024; // 100 MiB
-            HttpResponseCache.install(httpCacheDir, httpCacheSize);
+            final File httpCacheDir = new File(getCacheDir(), "http");
+            final long httpCacheSize = 100 * 1024 * 1024; // 100 MiB
+            final HttpResponseCache cache = HttpResponseCache.install(httpCacheDir, httpCacheSize);
+
+            Log.i(TAG, "HTTP Cache size: " + cache.size() / 1024 / 1024 + "MB");
         } catch (IOException e) {
             Log.w(TAG, "HTTP response cache installation failed", e);
         }

@@ -75,6 +75,10 @@
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_settings" >
         </activity>
+        <activity
+            android:name=".AutomixCreateActivity"
+            android:label="@string/title_activity_automix_create" >
+        </activity>
     </application>
 
 </manifest>

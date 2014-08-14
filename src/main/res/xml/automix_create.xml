@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Genre">
+
+        <MultiSelectListPreference
+            android:key="automix_styles"
+            android:summary="Select the styles to include in this bucket (select none to include all)"
+            android:title="Style"
+            android:entries="@array/echonest_style"
+            android:entryValues="@array/echonest_style" />
+
+        <MultiSelectListPreference
+            android:key="automix_moods"
+            android:summary="Select the moods to include in this bucket (select none to include all)"
+            android:title="Mood"
+            android:entries="@array/echonest_mood_entries"
+            android:entryValues="@array/echonest_mood_values" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Knobs">
+
+        <CheckBoxPreference
+            android:key="automix_use_taste"
+            android:summary="Use your learned taste to bias the tracks generation to your liking"
+            android:title="Use my taste profile" />
+
+        <ListPreference
+            android:key="automix_adventurous"
+            android:dependency="automix_use_taste"
+            android:summary="A low level means only known and preferred music will be played. A high level means mostly unknown music will be played."
+            android:title="Adventurousness level"
+            android:entries="@array/echonest_adventurous_level_entries"
+            android:entryValues="@array/echonest_adventurous_level_values"
+            android:defaultValue="0.2" />
+
+        <MultiSelectListPreference
+            android:key="automix_song_types"
+            android:summary="Types of song (select none to use default)"
+            android:title="Song types"
+            android:entries="@array/echonest_song_type_entries"
+            android:entryValues="@array/echonest_song_type_values" />
+
+        <ListPreference
+            android:key="automix_target_speechiness"
+            android:summary="Target amount of speech"
+            android:title="Speechiness"
+            android:entries="@array/echonest_speechiness_level_entries"
+            android:entryValues="@array/echonest_speechiness_level_values"
+            android:defaultValue="-1" />
+
+        <ListPreference
+            android:key="automix_target_energy"
+            android:summary="Target level of energy"
+            android:title="Energy"
+            android:entries="@array/echonest_energy_level_entries"
+            android:entryValues="@array/echonest_energy_level_values"
+            android:defaultValue="-1" />
+
+        <ListPreference
+            android:key="automix_target_familiarity"
+            android:summary="Target level of tracks familiarity"
+            android:title="Familiarity"
+            android:entries="@array/echonest_familiarity_level_entries"
+            android:entryValues="@array/echonest_familiarity_level_values"
+            android:defaultValue="-1" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
