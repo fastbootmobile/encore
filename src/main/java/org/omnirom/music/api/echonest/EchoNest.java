@@ -9,6 +9,7 @@ import com.echonest.api.v4.Artist;
 import com.echonest.api.v4.Biography;
 import com.echonest.api.v4.Blog;
 import com.echonest.api.v4.CatalogUpdater;
+import com.echonest.api.v4.DynamicPlaylistParams;
 import com.echonest.api.v4.DynamicPlaylistSession;
 import com.echonest.api.v4.EchoNestAPI;
 import com.echonest.api.v4.EchoNestException;
@@ -27,6 +28,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,6 +47,7 @@ import java.util.Random;
  */
 public class EchoNest {
     private static final String TAG = "EchoNest";
+    private static final boolean DEBUG = true;
 
     private EchoNestAPI mEchoNest;
     private static final Map<String, Artist> sArtistSearchCache = new HashMap<String, Artist>();
@@ -57,19 +60,32 @@ public class EchoNest {
      * Initializes an EchoNest API client with the EchoNest API key
      */
     public EchoNest() {
-        // Read API Key from file for now... ;)
+        // Read API Key from file (for now), or fallback to the public docs API key
         try {
-            FileInputStream fileInputStream = new FileInputStream(Environment.getExternalStorageDirectory().getPath() + "/echonest.txt");
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
-            String apiKey = bufferedReader.readLine();
+            String apiKey;
+            File keyFile = new File(Environment.getExternalStorageDirectory().getPath(),
+                    "echonest.txt");
+            if (keyFile.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(keyFile);
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
+                apiKey = bufferedReader.readLine();
+            } else {
+                // Fallback to docs api key
+                apiKey = "FILDTEOIK2HBORODV";
+            }
+
             mEchoNest = new EchoNestAPI(apiKey);
-            mEchoNest.setTraceRecvs(true);
-            mEchoNest.setTraceSends(true);
+            mEchoNest.setTraceRecvs(DEBUG);
+            mEchoNest.setTraceSends(DEBUG);
         } catch (FileNotFoundException e) {
             Log.e(TAG, "Cannot open API Key file", e);
         } catch (IOException e) {
             Log.e(TAG, "Error reading API key file", e);
         }
+    }
+
+    public EchoNestAPI getApi() {
+        return mEchoNest;
     }
 
     /**
@@ -198,6 +214,14 @@ public class EchoNest {
         return result;
     }
 
+    /**
+     * Returns the Rosetta ID for the provided artist and the provided rosetta prefix. This only
+     * works for artists retrieved in getArtistSimilar.
+     *
+     * @param artist The artist for which get the foreign ID
+     * @param prefix The rosetta prefix (e.g. "spotify")
+     * @return The rosetta ID of the artist
+     */
     public String getArtistForeignID(Artist artist, String prefix) {
         synchronized (sArtistForeignIDs) {
             Map<String, String> rosettaMap = sArtistForeignIDs.get(artist);
@@ -209,23 +233,66 @@ public class EchoNest {
     }
 
 
-    public DynamicPlaylistSession createDynamicPlaylist(SharedPreferences sp) throws EchoNestException {
-        Params p = new Params();
-        DynamicPlaylistSession session = mEchoNest.createDynamicPlaylist(p);
-        try {
-            Field sessionIdField = DynamicPlaylistSession.class.getField("sessionID");
-            String sessionId = (String) sessionIdField.get(session);
-            Log.e(TAG, "Session ID: " + sessionId);
-        } catch (NoSuchFieldException e) {
-            Log.e(TAG, "Unable to find sessionID field!", e);
-        } catch (IllegalAccessException e) {
-            Log.e(TAG, "Illegal Access", e);
+    /**
+     * Creates a dynamic playlist based on user preferences. All parameters may be used, however
+     * depending on the type parameter, at least one parameter has to be set:
+     *  - If type is set to "artist-description", either mood, style or both must be set. Catalog
+     *    might be used to further personalize the generated bucket.
+     *  - If type is set to "catalog-radio", seedCatalog must be set. Mood and style might be
+     *    used to further personalize the generated bucket.
+     *
+     * @param type One of: artist-description, catalog-radio
+     * @param seedCatalog The ID of the catalog (taste profile) to use. May be null if type is
+     *                    set to artist-description
+     * @param mood An array of moods. May be null if type is set to catalog-radio
+     * @param style An array of styles. May be null if type is set to catalog-radio
+     * @return The created playlist session
+     * @throws EchoNestException
+     */
+    public DynamicPlaylistSession createDynamicPlaylist(String type, String seedCatalog,
+                                                        String[] mood, String[] style)
+            throws EchoNestException {
+        // Some checks
+        if (!"artist-description".equals(type) && !"catalog-radio".equals(type)) {
+            throw new EchoNestException(-1, "Only 'artist-description' and 'catalog-radio' type " +
+                    "are supported");
         }
-        return session;
-    }
 
-    public List<DynamicPlaylistSession> getDynamicPlaylists() {
-        return null;
+        if ((seedCatalog == null && mood == null && style == null)
+                || ("artist-description".equals(type) && mood == null && style == null)
+                || ("catalog-radio".equals(type) && seedCatalog == null)) {
+            throw new EchoNestException(-1, "seedCatalog, mood or style must be filled depending " +
+                    "on the type");
+        }
+
+        // Everything looks plausible, let's craft the query
+        DynamicPlaylistParams p = new DynamicPlaylistParams();
+        p.add("type", type);
+        if (seedCatalog != null) {
+            p.addSeedCatalog(seedCatalog);
+        }
+        if (mood != null) {
+            for (String m : mood) {
+                p.addMood(m);
+            }
+        }
+        if (style != null) {
+            for (String s : style) {
+                p.addStyle(s);
+            }
+        }
+
+        List<String> prefixes = ProviderAggregator.getDefault().getRosettaStonePrefix();
+        if (prefixes != null && prefixes.size() > 0) {
+            p.addIDSpace(prefixes.get(0));
+            p.includeTracks();
+        }
+
+        // Send the query and get the session ID
+        DynamicPlaylistSession session = mEchoNest.createDynamicPlaylist(p);
+        Log.e(TAG, "Session ID: " + session.getSessionID());
+
+        return session;
     }
 
     /**
@@ -287,11 +354,9 @@ public class EchoNest {
                         item.setRelease(album.getName());
                     }
 
-                    //item.setSongID(songRef);
-
                     // Add other regular info
                     item.setSongName(song.getTitle());
-                    // item.setUrl(songRef);
+                    item.setUrl(songRef);
 
                     updater.update(item);
                     // TODO: play count, favorite, rating
@@ -301,13 +366,18 @@ public class EchoNest {
         }
 
         // Push the data to EchoNest
-        Log.e(TAG, "Pushing " + tracksCount + " tracks data to EchoNest Profile");
+        if (DEBUG) {
+            Log.d(TAG, "Pushing " + tracksCount + " tracks data to EchoNest Profile");
+        }
+
         long startTime = SystemClock.uptimeMillis();
         String ticket = profile.update(updater);
-        if (profile.waitForUpdates(ticket, 180000)) {
-            Log.e(TAG, "Profile update completed in " + (SystemClock.uptimeMillis() - startTime) + " ms");
+        if (profile.waitForUpdates(ticket, 10000)) {
+            Log.i(TAG, "Profile update completed in " + (SystemClock.uptimeMillis() - startTime)
+                    + " ms");
         } else {
-            Log.e(TAG, "Profile update not done after 30 seconds!");
+            Log.w(TAG, "Profile update not done after 10 seconds! Bucket data might be wrong " +
+                    "until it fully completes!");
         }
 
         return profile;

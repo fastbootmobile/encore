@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <EditTextPreference
+        android:key="automix_bucket_name"
+        android:title="Bucket name" />
+
     <PreferenceCategory android:title="Genre">
 
         <MultiSelectListPreference

@@ -5,5 +5,5 @@
         android:title="Create"
         android:icon="@drawable/ic_action_check"
         android:orderInCategory="100"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom|withText" />
 </menu>

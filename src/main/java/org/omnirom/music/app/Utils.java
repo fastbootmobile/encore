@@ -420,4 +420,37 @@ public class Utils {
             }
         });
     }
+
+    /**
+     * Serializes a string array with the specified separator
+     *
+     * @param elements The elements to serialize
+     * @param separator The separator to use between the elements
+     * @return The elements in a single string, separated with the specified separator, an empty
+     *         string if elements is empty, or null if elements is null.
+     */
+    public static String implode(String[] elements, String separator) {
+        if (elements == null) {
+            return null;
+        }
+
+        if (elements.length == 0) {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(elements[0]);
+
+        boolean skippedFirst = false;
+        for (String s : elements) {
+            if (skippedFirst) {
+                builder.append(separator);
+                builder.append(s);
+            } else {
+                skippedFirst = true;
+            }
+        }
+
+        return builder.toString();
+    }
 }
