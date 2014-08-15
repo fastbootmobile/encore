@@ -90,5 +90,6 @@
     <string name="settings_list_entry_medium">Medium</string>
     <string name="settings_list_entry_high">High</string>
     <string name="title_activity_automix_create">Create bucket</string>
+    <string name="bucket_track_failure">Unable to find a suitable track for this bucket</string>
 
 </resources>

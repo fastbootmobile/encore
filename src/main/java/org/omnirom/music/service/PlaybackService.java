@@ -88,6 +88,14 @@ public class PlaybackService extends Service
     private long mPauseLastTick;
     private boolean mIsPlaying;
     private boolean mIsPaused;
+    private boolean mCurrentTrackWaitLoading;
+
+    private Runnable mStartPlaybackRunnable = new Runnable() {
+        @Override
+        public void run() {
+            startPlayingQueue();
+        }
+    };
 
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
@@ -269,30 +277,38 @@ public class PlaybackService extends Service
 
             if (providerIdentifier != null) {
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder();
-
-                try {
-                    provider.playSong(first.getRef());
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to play song", e);
-                } catch (NullPointerException e)  {
-                    Log.e(TAG,"No provider attached",e);
-                }
-
                 mCurrentTrack = first;
 
-                Artist artist = ProviderAggregator.getDefault().getCache().getArtist(mCurrentTrack.getArtist());
-                mNotificationBuilder.setContentTitle(mCurrentTrack.getTitle());
-                if (artist != null) {
-                    // TODO: If artist is not available, we should delay playback until the track
-                    // info is here
-                    mNotificationBuilder.setContentText(artist.getName());
+                if (!mCurrentTrack.isLoaded()) {
+                    // Track not loaded yet, delay until track info arrived
+                    mCurrentTrackWaitLoading = true;
+                    Log.e(TAG, "Track not yet loaded: " + mCurrentTrack.getRef() + ", delaying");
+                } else {
+                    mCurrentTrackWaitLoading = false;
+                    Log.e(TAG, "Track is loaded!");
+
+                    try {
+                        provider.playSong(first.getRef());
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to play song", e);
+                    } catch (NullPointerException e) {
+                        Log.e(TAG, "No provider attached", e);
+                    }
+
+                    Artist artist = ProviderAggregator.getDefault().getCache().getArtist(mCurrentTrack.getArtist());
+                    mNotificationBuilder.setContentTitle(mCurrentTrack.getTitle());
+                    if (artist != null) {
+                        // TODO: If artist is not available, we should delay playback until the track
+                        // info is here
+                        mNotificationBuilder.setContentText(artist.getName());
+                    }
+
+                    // TODO: Album art
+                    Bitmap albumArt = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
+                    mNotificationBuilder.setLargeIcon(albumArt);
+
+                    mNotification = mNotificationBuilder.build();
                 }
-
-                // TODO: Album art
-                Bitmap albumArt = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
-                mNotificationBuilder.setLargeIcon(albumArt);
-
-                mNotification = mNotificationBuilder.build();
             } else {
                 Log.e(TAG, "Cannot play the first song of the queue because the Song's " +
                         "ProviderIdentifier is null!");
@@ -327,7 +343,7 @@ public class PlaybackService extends Service
         public void playSong(Song s) throws RemoteException {
             Log.e(TAG, "Play song: " + s.getRef());
             mPlaybackQueue.clear();
-            mPlaybackQueue.addSong(s, true);
+            queueSong(s, true);
             startPlayingQueue();
         }
 
@@ -336,7 +352,6 @@ public class PlaybackService extends Service
             Log.e(TAG, "Play album: " + a.getRef());
             mPlaybackQueue.clear();
             queueAlbum(a, false);
-
             startPlayingQueue();
         }
 
@@ -353,7 +368,8 @@ public class PlaybackService extends Service
 
         @Override
         public void queueSong(Song s, boolean top) throws RemoteException {
-            mPlaybackQueue.addSong(s, top);
+            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            mPlaybackQueue.addSong(cache.getSong(s.getRef()), top);
         }
 
         @Override
@@ -462,7 +478,11 @@ public class PlaybackService extends Service
 
     @Override
     public void onSongUpdate(List<Song> s) {
-        // ignore
+        if (mCurrentTrackWaitLoading) {
+            if (s.contains(mCurrentTrack) && mCurrentTrack.isLoaded()) {
+                mHandler.post(mStartPlaybackRunnable);
+            }
+        }
     }
 
     @Override

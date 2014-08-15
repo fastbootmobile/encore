@@ -635,10 +635,28 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onSongUpdate(ProviderIdentifier provider, final Song s) throws RemoteException {
         Song cached = mCache.getSong(s.getRef());
+        boolean wasLoaded = false;
+        boolean changed = false;
 
-        if (cached == null || !cached.isLoaded()) {
+        if (cached == null) {
             mCache.putSong(provider, s);
+            changed = true;
+            cached = s;
+        } else {
+            wasLoaded = cached.isLoaded();
+            if (s.isLoaded() && !cached.isIdentical(s)) {
+                cached.setAlbum(s.getAlbum());
+                cached.setArtist(s.getArtist());
+                cached.setSourceLogo(s.getLogo());
+                cached.setDuration(s.getDuration());
+                cached.setTitle(s.getTitle());
+                cached.setYear(s.getYear());
+                cached.setIsLoaded(s.isLoaded());
+                changed = true;
+            }
+        }
 
+        if (!wasLoaded && cached.isLoaded()) {
             // Match the album with the artist
             Artist artist = mCache.getArtist(s.getArtist());
             if (artist != null) {
@@ -647,8 +665,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     artist.addAlbum(album.getRef());
                 }
             }
+        }
 
-            postSongForUpdate(s);
+        if (changed) {
+            postSongForUpdate(cached);
         }
     }
 

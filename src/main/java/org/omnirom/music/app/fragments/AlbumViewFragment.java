@@ -1,6 +1,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.graphics.drawable.StateListDrawable;
 import android.support.v4.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -265,7 +266,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                                 // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
                                 // back.setColor(color.getRgb());
                             } else {
-                                GradientDrawable shape = (GradientDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
+                                StateListDrawable drawable = (StateListDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
+                                GradientDrawable shape = (GradientDrawable) drawable.getCurrent();
                                 shape.setColor(color.getRgb());
                             }
                         }

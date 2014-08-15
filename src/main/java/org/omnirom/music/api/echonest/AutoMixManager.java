@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.echonest.api.v4.EchoNestException;
 
+import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
@@ -121,23 +122,34 @@ public class AutoMixManager {
     public void startPlay(AutoMixBucket bucket) {
         IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
         try {
-            String trackRef = bucket.getNextTrack();
-            Song s = ProviderAggregator.getDefault().getCache().getSong(trackRef);
-            if (s == null) {
-                String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
-                if (prefix != null) {
-                    ProviderIdentifier id = ProviderAggregator.getDefault().getRosettaStoneIdentifier(prefix);
-                    s = ProviderAggregator.getDefault().retrieveSong(trackRef, id);
-                }
+            String trackRef = null;
+            int tryCount = 0;
+            while (trackRef == null && tryCount < 5) {
+                trackRef = bucket.getNextTrack();
+                tryCount++;
             }
 
-            if (s != null) {
-                try {
-                    playback.playSong(s);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Cannot start playing bucket", e);
-                } finally {
-                    mCurrentPlayingBucket = bucket;
+            if (trackRef == null) {
+                Log.e(TAG, "Track Reference is still null after 5 attempts");
+                Utils.shortToast(mContext, R.string.bucket_track_failure);
+            } else {
+                Song s = ProviderAggregator.getDefault().getCache().getSong(trackRef);
+                if (s == null) {
+                    String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
+                    if (prefix != null) {
+                        ProviderIdentifier id = ProviderAggregator.getDefault().getRosettaStoneIdentifier(prefix);
+                        s = ProviderAggregator.getDefault().retrieveSong(trackRef, id);
+                    }
+                }
+
+                if (s != null) {
+                    try {
+                        playback.playSong(s);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot start playing bucket", e);
+                    } finally {
+                        mCurrentPlayingBucket = bucket;
+                    }
                 }
             }
         } catch (EchoNestException e) {
