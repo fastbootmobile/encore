@@ -91,5 +91,8 @@
     <string name="settings_list_entry_high">High</string>
     <string name="title_activity_automix_create">Create bucket</string>
     <string name="bucket_track_failure">Unable to find a suitable track for this bucket</string>
+    <string name="bucket_settings_invalid">These settings couldn\'t generate a valid bucket, or a network error occured.</string>
+    <string name="automix_minimal_settings_error">Choose at least a style or mood, or enable taste profile.</string>
+    <string name="bucket_creating_dialog">Creating bucket (this may take a few seconds)...</string>
 
 </resources>

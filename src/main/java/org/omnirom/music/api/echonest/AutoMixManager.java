@@ -26,6 +26,10 @@ import java.util.TreeSet;
 public class AutoMixManager {
     private static final String TAG = "AutoMixManager";
 
+    public interface AutoMixListener {
+        public void onBucketUpdate(AutoMixBucket bucket);
+    }
+
     private static final String SHARED_PREFS = "automix_buckets";
     private static final String PREF_BUCKETS_IDS = "buckets_ids";
     private static final String PREF_PREFIX_NAME = "bucket_name_";
@@ -77,21 +81,25 @@ public class AutoMixManager {
     }
 
     private void saveBucket(AutoMixBucket bucket) {
-        SharedPreferences prefs = getPrefs();
-        SharedPreferences.Editor editor = prefs.edit();
-        final String id = bucket.getSessionId();
+        if (!bucket.isPlaylistSessionError()) {
+            SharedPreferences prefs = getPrefs();
+            SharedPreferences.Editor editor = prefs.edit();
+            final String id = bucket.getSessionId();
 
-        editor.putString(PREF_PREFIX_NAME       + id, bucket.mName);
-        editor.putFloat(PREF_PREFIX_ADVENTUROUS + id, bucket.mAdventurousness);
-        editor.putFloat(PREF_PREFIX_ENERGY      + id, bucket.mEnergy);
-        editor.putFloat(PREF_PREFIX_FAMILIAR    + id, bucket.mFamiliar);
-        editor.putString(PREF_PREFIX_MOODS      + id, Utils.implode(bucket.mMoods, ","));
-        editor.putString(PREF_PREFIX_SONG_TYPES + id, Utils.implode(bucket.mSongTypes, ","));
-        editor.putFloat(PREF_PREFIX_SPEECHINESS + id, bucket.mSpeechiness);
-        editor.putString(PREF_PREFIX_STYLES     + id, Utils.implode(bucket.mStyles, ","));
-        editor.putBoolean(PREF_PREFIX_TASTE     + id, bucket.mUseTaste);
+            editor.putString(PREF_PREFIX_NAME + id, bucket.mName);
+            editor.putFloat(PREF_PREFIX_ADVENTUROUS + id, bucket.mAdventurousness);
+            editor.putFloat(PREF_PREFIX_ENERGY + id, bucket.mEnergy);
+            editor.putFloat(PREF_PREFIX_FAMILIAR + id, bucket.mFamiliar);
+            editor.putString(PREF_PREFIX_MOODS + id, Utils.implode(bucket.mMoods, ","));
+            editor.putString(PREF_PREFIX_SONG_TYPES + id, Utils.implode(bucket.mSongTypes, ","));
+            editor.putFloat(PREF_PREFIX_SPEECHINESS + id, bucket.mSpeechiness);
+            editor.putString(PREF_PREFIX_STYLES + id, Utils.implode(bucket.mStyles, ","));
+            editor.putBoolean(PREF_PREFIX_TASTE + id, bucket.mUseTaste);
 
-        editor.apply();
+            editor.apply();
+        } else {
+            Log.e(TAG, "Cannot save bucket: playlist session is in error state");
+        }
     }
 
     public AutoMixBucket restoreBucketFromId(final String id) {

@@ -158,7 +158,20 @@ public class AutoMixBucket {
     public String getNextTrack() throws EchoNestException {
         String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
         if (prefix != null) {
-            Playlist nextTracks = mPlaylistSession.next();
+            Playlist nextTracks = null;
+            int tries = 0;
+            while (nextTracks == null) {
+                try {
+                    nextTracks = mPlaylistSession.next();
+                } catch (EchoNestException e) {
+                    if (e.getCode() == -1 && e.getMessage().contains("timed out") && tries < 5) {
+                        tries++;
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+
             List<Song> songs = nextTracks.getSongs();
 
             if (songs.size() > 0) {

@@ -3,12 +3,14 @@
     android:persistent="false">
 
     <EditTextPreference
+        android:persistent="false"
         android:key="automix_bucket_name"
         android:title="Bucket name" />
 
     <PreferenceCategory android:title="Genre">
 
         <MultiSelectListPreference
+            android:persistent="false"
             android:key="automix_styles"
             android:summary="Select the styles to include in this bucket (select none to include all)"
             android:title="Style"
@@ -16,6 +18,7 @@
             android:entryValues="@array/echonest_style" />
 
         <MultiSelectListPreference
+            android:persistent="false"
             android:key="automix_moods"
             android:summary="Select the moods to include in this bucket (select none to include all)"
             android:title="Mood"
@@ -27,11 +30,13 @@
     <PreferenceCategory android:title="Knobs">
 
         <CheckBoxPreference
+            android:persistent="false"
             android:key="automix_use_taste"
             android:summary="Use your learned taste to bias the tracks generation to your liking"
             android:title="Use my taste profile" />
 
         <ListPreference
+            android:persistent="false"
             android:key="automix_adventurous"
             android:dependency="automix_use_taste"
             android:summary="A low level means only known and preferred music will be played. A high level means mostly unknown music will be played."
@@ -41,6 +46,7 @@
             android:defaultValue="0.2" />
 
         <MultiSelectListPreference
+            android:persistent="false"
             android:key="automix_song_types"
             android:summary="Types of song (select none to use default)"
             android:title="Song types"
@@ -48,6 +54,7 @@
             android:entryValues="@array/echonest_song_type_values" />
 
         <ListPreference
+            android:persistent="false"
             android:key="automix_target_speechiness"
             android:summary="Target amount of speech"
             android:title="Speechiness"
@@ -56,6 +63,7 @@
             android:defaultValue="-1" />
 
         <ListPreference
+            android:persistent="false"
             android:key="automix_target_energy"
             android:summary="Target level of energy"
             android:title="Energy"
@@ -64,6 +72,7 @@
             android:defaultValue="-1" />
 
         <ListPreference
+            android:persistent="false"
             android:key="automix_target_familiarity"
             android:summary="Target level of tracks familiarity"
             android:title="Familiarity"

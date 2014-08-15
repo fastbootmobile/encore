@@ -2,6 +2,7 @@ package org.omnirom.music.app;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -70,6 +71,13 @@ public class AutomixCreateActivity extends PreferenceActivity {
     }
 
     private void createBucket() {
+        // TODO: Remove the progress dialog and show progress and status in the main Automix
+        // fragment to avoid locking the user out of the app for multiple seconds
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage(getString(R.string.bucket_creating_dialog));
+        progressDialog.show();
+
         new Thread() {
             public void run() {
                 AutoMixManager manager = new AutoMixManager(AutomixCreateActivity.this);
@@ -84,12 +92,41 @@ public class AutomixCreateActivity extends PreferenceActivity {
                 float energy = getPrefFloat(KEY_ENERGY);
                 float familiar = getPrefFloat(KEY_FAMILIAR);
 
-                Log.e(TAG, "Creating bucket...");
-                AutoMixBucket bucket = manager.createBucket(name, styles, moods, taste, advent,
-                        songtype, speech, energy, familiar);
-                Log.e(TAG, "Bucket created!");
+                if (styles.length == 0 && moods.length == 0 && !taste) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            Utils.shortToast(AutomixCreateActivity.this,
+                                    R.string.automix_minimal_settings_error);
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "Creating bucket...");
+                    AutoMixBucket bucket = manager.createBucket(name, styles, moods, taste, advent,
+                            songtype, speech, energy, familiar);
+                    if (bucket.isPlaylistSessionError()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.dismiss();
+                                Utils.shortToast(AutomixCreateActivity.this,
+                                        R.string.bucket_settings_invalid);
+                            }
+                        });
+                    } else {
+                        Log.e(TAG, "Bucket created!");
+                        manager.startPlay(bucket);
 
-                manager.startPlay(bucket);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.dismiss();
+                                finish();
+                            }
+                        });
+                    }
+                }
             }
         }.start();
     }

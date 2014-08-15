@@ -259,8 +259,8 @@ public class EchoNest {
         }
 
         if ((seedCatalog == null && mood == null && style == null)
-                || ("artist-description".equals(type) && mood == null && style == null)
-                || ("catalog-radio".equals(type) && seedCatalog == null)) {
+                || ("artist-description".equals(type) && (mood == null || mood.length <= 0) && (style == null || style.length <= 0))
+                || ("catalog-radio".equals(type) && (seedCatalog == null || seedCatalog.isEmpty()))) {
             throw new EchoNestException(-1, "seedCatalog, mood or style must be filled depending " +
                     "on the type");
         }
