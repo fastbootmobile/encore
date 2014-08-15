@@ -4,22 +4,31 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
+import android.widget.ListView;
 
+import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.api.echonest.EchoNest;
 import org.omnirom.music.app.AutomixCreateActivity;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.adapters.BucketAdapter;
 
 /**
  * Created by Guigui on 11/08/2014.
  */
 public class AutomixFragment extends Fragment {
 
-    private EchoNest mEchoNest;
+    private static final String TAG = "AutomixFragment";
+
+    private ListView mListView;
+    private BucketAdapter mAdapter;
+    private AutoMixManager mAutoMixManager = AutoMixManager.getDefault();
 
     public AutomixFragment() {
 
@@ -33,13 +42,27 @@ public class AutomixFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_automix, container, false);
-        mEchoNest = new EchoNest();
 
         ImageButton fabCreate = (ImageButton) rootView.findViewById(R.id.fabCreate);
         fabCreate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getActivity(), AutomixCreateActivity.class));
+            }
+        });
+
+        mListView = (ListView) rootView.findViewById(R.id.lvBuckets);
+        mAdapter = new BucketAdapter();
+        mListView.setAdapter(mAdapter);
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+                new Thread() {
+                    public void run() {
+                        mAutoMixManager.startPlay(mAdapter.getItem(i));
+                    }
+                }.start();
             }
         });
 
@@ -50,5 +73,17 @@ public class AutomixFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         ((MainActivity) activity).onSectionAttached(MainActivity.SECTION_AUTOMIX);
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateBuckets();
+    }
+
+    private void updateBuckets() {
+        mAdapter.setBuckets(mAutoMixManager.getBuckets());
+        mAdapter.notifyDataSetChanged();
     }
 }

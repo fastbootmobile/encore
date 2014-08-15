@@ -1,27 +1,22 @@
 package org.omnirom.music.service;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.app.BuildConfig;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.AudioSocketHost;
-import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -39,7 +34,6 @@ import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
-import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -151,6 +145,9 @@ public class PlaybackService extends Service
                 Log.e(TAG, "Cannot register callback", e);
             }
         }
+
+        // Register AutoMix manager
+        mCallbacks.add(AutoMixManager.getDefault());
     }
 
     /**

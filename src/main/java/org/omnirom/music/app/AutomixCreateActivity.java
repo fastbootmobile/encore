@@ -1,7 +1,5 @@
 package org.omnirom.music.app;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -14,12 +12,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.echonest.api.v4.EchoNestException;
-import com.echonest.api.v4.GeneralCatalog;
-
 import org.omnirom.music.api.echonest.AutoMixBucket;
 import org.omnirom.music.api.echonest.AutoMixManager;
-import org.omnirom.music.api.echonest.EchoNest;
 
 import java.util.Set;
 
@@ -37,6 +31,8 @@ public class AutomixCreateActivity extends PreferenceActivity {
     private static final String KEY_SPEECHINESS = "automix_target_speechiness";
     private static final String KEY_ENERGY = "automix_target_energy";
     private static final String KEY_FAMILIAR = "automix_target_familiarity";
+
+    private AutoMixManager mAutoMixManager = AutoMixManager.getDefault();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +76,6 @@ public class AutomixCreateActivity extends PreferenceActivity {
 
         new Thread() {
             public void run() {
-                AutoMixManager manager = new AutoMixManager(AutomixCreateActivity.this);
-
                 String name = getPrefStringValue(KEY_NAME);
                 String[] styles = getPrefStringArray(KEY_STYLES);
                 String[] moods = getPrefStringArray(KEY_MOODS);
@@ -92,7 +86,16 @@ public class AutomixCreateActivity extends PreferenceActivity {
                 float energy = getPrefFloat(KEY_ENERGY);
                 float familiar = getPrefFloat(KEY_FAMILIAR);
 
-                if (styles.length == 0 && moods.length == 0 && !taste) {
+                if (name == null || name.trim().isEmpty()) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            Utils.shortToast(AutomixCreateActivity.this,
+                                    R.string.automix_bucket_name_error);
+                        }
+                    });
+                } else if (styles.length == 0 && moods.length == 0 && !taste) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -103,7 +106,7 @@ public class AutomixCreateActivity extends PreferenceActivity {
                     });
                 } else {
                     Log.e(TAG, "Creating bucket...");
-                    AutoMixBucket bucket = manager.createBucket(name, styles, moods, taste, advent,
+                    AutoMixBucket bucket = mAutoMixManager.createBucket(name, styles, moods, taste, advent,
                             songtype, speech, energy, familiar);
                     if (bucket.isPlaylistSessionError()) {
                         runOnUiThread(new Runnable() {
@@ -116,7 +119,6 @@ public class AutomixCreateActivity extends PreferenceActivity {
                         });
                     } else {
                         Log.e(TAG, "Bucket created!");
-                        manager.startPlay(bucket);
 
                         runOnUiThread(new Runnable() {
                             @Override

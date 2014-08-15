@@ -4,6 +4,7 @@ import android.app.Application;
 import android.net.http.HttpResponseCache;
 import android.util.Log;
 
+import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PlaybackCallbackImpl;
@@ -41,6 +42,9 @@ public class OmniMusic extends Application {
         // Setup image cache
         AlbumArtCache.getDefault().initialize(getApplicationContext());
         ImageCache.getDefault().initialize(getApplicationContext());
+
+        // Setup Automix system
+        AutoMixManager.getDefault().initialize(getApplicationContext());
     }
 
 }

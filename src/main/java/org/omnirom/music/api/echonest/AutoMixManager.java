@@ -2,6 +2,8 @@ package org.omnirom.music.api.echonest;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -13,7 +15,9 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
+import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +27,7 @@ import java.util.TreeSet;
 /**
  * Created by Guigui on 14/08/2014.
  */
-public class AutoMixManager {
+public class AutoMixManager implements IPlaybackCallback {
     private static final String TAG = "AutoMixManager";
 
     public interface AutoMixListener {
@@ -45,8 +49,18 @@ public class AutoMixManager {
     private Context mContext;
     private List<AutoMixBucket> mBuckets;
     private AutoMixBucket mCurrentPlayingBucket;
+    private String mExpectedSong;
 
-    public AutoMixManager(Context ctx) {
+    private static final AutoMixManager INSTANCE = new AutoMixManager();
+
+    private AutoMixManager() {
+    }
+
+    public static AutoMixManager getDefault() {
+        return INSTANCE;
+    }
+
+    public void initialize(Context ctx) {
         mContext = ctx;
         mBuckets = new ArrayList<AutoMixBucket>();
         readBucketsFromPrefs();
@@ -96,7 +110,12 @@ public class AutoMixManager {
             editor.putString(PREF_PREFIX_STYLES + id, Utils.implode(bucket.mStyles, ","));
             editor.putBoolean(PREF_PREFIX_TASTE + id, bucket.mUseTaste);
 
+            Set<String> set = prefs.getStringSet(PREF_BUCKETS_IDS, new TreeSet<String>());
+            set.add(id);
+            editor.putStringSet(PREF_BUCKETS_IDS, set);
+
             editor.apply();
+
         } else {
             Log.e(TAG, "Cannot save bucket: playlist session is in error state");
         }
@@ -141,16 +160,10 @@ public class AutoMixManager {
                 Log.e(TAG, "Track Reference is still null after 5 attempts");
                 Utils.shortToast(mContext, R.string.bucket_track_failure);
             } else {
-                Song s = ProviderAggregator.getDefault().getCache().getSong(trackRef);
-                if (s == null) {
-                    String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
-                    if (prefix != null) {
-                        ProviderIdentifier id = ProviderAggregator.getDefault().getRosettaStoneIdentifier(prefix);
-                        s = ProviderAggregator.getDefault().retrieveSong(trackRef, id);
-                    }
-                }
+                Song s = getSongFromRef(trackRef);
 
                 if (s != null) {
+                    mExpectedSong = s.getRef();
                     try {
                         playback.playSong(s);
                     } catch (RemoteException e) {
@@ -158,6 +171,8 @@ public class AutoMixManager {
                     } finally {
                         mCurrentPlayingBucket = bucket;
                     }
+                } else {
+                    Log.e(TAG, "Song is null! Cannot find it back");
                 }
             }
         } catch (EchoNestException e) {
@@ -165,5 +180,66 @@ public class AutoMixManager {
         }
     }
 
+    private Song getSongFromRef(String ref) {
+        ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
+        Song s = aggregator.getCache().getSong(ref);
+        if (s == null) {
+            String prefix = aggregator.getPreferredRosettaStonePrefix();
+            if (prefix != null) {
+                ProviderIdentifier id = aggregator.getRosettaStoneIdentifier(prefix);
+                s = aggregator.retrieveSong(ref, id);
+            }
+        }
+
+        return s;
+    }
+
+
+    @Override
+    public void onSongStarted(Song s) throws RemoteException {
+        if (!s.getRef().equals(mExpectedSong)) {
+            Log.i(TAG, "Song started is not from bucket, cancel automix playback");
+            mCurrentPlayingBucket = null;
+        } else if (mCurrentPlayingBucket != null) {
+            Log.d(TAG, "Bucket song expected started, grabbing next track");
+            new Thread() {
+                public void run() {
+                    try {
+                        String nextTrackRef = mCurrentPlayingBucket.getNextTrack();
+                        IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+
+                        Song nextTrack = getSongFromRef(nextTrackRef);
+                        pbService.queueSong(nextTrack, false);
+                    } catch (EchoNestException e) {
+                        Log.e(TAG, "Unable to get next track", e);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to queue next track", e);
+                    }
+                }
+            }.start();
+
+        }
+    }
+
+    @Override
+    public void onSongScrobble(int timeMs) throws RemoteException {
+
+    }
+
+    @Override
+    public void onPlaybackPause() throws RemoteException {
+
+    }
+
+    @Override
+    public void onPlaybackResume() throws RemoteException {
+
+    }
+
+    @Override
+    public IBinder asBinder() {
+        return null;
+    }
 
 }

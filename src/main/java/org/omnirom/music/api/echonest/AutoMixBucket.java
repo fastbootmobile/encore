@@ -83,7 +83,12 @@ public class AutoMixBucket {
                 Log.e(TAG, "Unable to create the taste profile", e);
                 mSessionError = true;
             } finally {
-                type = "catalog-radio";
+                if ((mMoods == null || mMoods.length == 0)
+                        && (mStyles == null || mStyles.length == 0)) {
+                    type = "catalog-radio";
+                } else {
+                    type = "artist-description";
+                }
                 if (DEBUG) Log.d(TAG, "Taste profile generation succeeded.");
             }
         } else {
@@ -140,6 +145,7 @@ public class AutoMixBucket {
             }
         }
 
+        mSessionReady = true;
         return mPlaylistSession;
     }
 
@@ -189,5 +195,9 @@ public class AutoMixBucket {
         }
 
         return null;
+    }
+
+    public String getName() {
+        return mName;
     }
 }
