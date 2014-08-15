@@ -275,6 +275,7 @@ public class PlaybackService extends Service
             if (providerIdentifier != null) {
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder();
                 mCurrentTrack = first;
+                mIsPaused = false;
 
                 if (!mCurrentTrack.isLoaded()) {
                     // Track not loaded yet, delay until track info arrived
@@ -549,13 +550,19 @@ public class PlaybackService extends Service
 
         @Override
         public void onSongPlaying(ProviderIdentifier provider) throws RemoteException {
-            mCurrentTrackStartTime = System.currentTimeMillis();
+            boolean wasPaused = mIsPaused;
+            if (!mIsPaused) {
+                mCurrentTrackStartTime = System.currentTimeMillis();
+            }
+
             mIsPlaying = true;
             mIsPaused = false;
 
             for (IPlaybackCallback cb : mCallbacks) {
                 try {
-                    cb.onSongStarted(mCurrentTrack);
+                    if (!wasPaused) {
+                        cb.onSongStarted(mCurrentTrack);
+                    }
                     cb.onPlaybackResume();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Cannot call playback callback for song start event", e);
@@ -565,15 +572,17 @@ public class PlaybackService extends Service
 
         @Override
         public void onSongPaused(ProviderIdentifier provider) throws RemoteException {
-            mIsPaused = true;
-            mPauseLastTick = System.currentTimeMillis();
+            if (mCurrentTrack.getProvider().equals(provider)) {
+                mIsPaused = true;
+                mPauseLastTick = System.currentTimeMillis();
 
-            Log.e(TAG, "onSongPaused");
-            for (IPlaybackCallback cb : mCallbacks) {
-                try {
-                    cb.onPlaybackPause();
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                Log.e(TAG, "onSongPaused");
+                for (IPlaybackCallback cb : mCallbacks) {
+                    try {
+                        cb.onPlaybackPause();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                    }
                 }
             }
         }

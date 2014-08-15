@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -36,6 +38,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
+import org.omnirom.music.service.PlaybackService;
 
 import java.security.Provider;
 import java.util.ArrayList;
@@ -61,14 +64,13 @@ public class PlayingBarView extends RelativeLayout {
             if (playbackService != null) {
                 try {
                     if (playbackService.isPlaying()) {
-                        /*mScrobble.setMax(playbackService.getCurrentTrackLength())
-                        mScrobble.setProgress(playbackService.getCurrentTrackPosition());*/
+                        mProgressDrawable.setValue(playbackService.getCurrentTrackPosition());
 
                         // Restart ourselves
                         mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
                     } else {
-                        /*mScrobble.setMax(1);
-                        mScrobble.setProgress(1);*/
+                        mProgressDrawable.setMax(1);
+                        mProgressDrawable.setValue(1);
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to update seek bar", e);
@@ -87,20 +89,13 @@ public class PlayingBarView extends RelativeLayout {
                 @Override
                 public void run() {
                     updatePlayingQueue();
-/*
-                    // Fill the album art
-                    mExecutor.execute(mAlbumArtRunnable);
+                    IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+                    try {
+                        mProgressDrawable.setMax(playbackService.getCurrentTrackLength());
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot get track length", e);
+                    }
 
-                    // Fill the views
-                    mTitleView.setText(s.getTitle());
-
-                    Artist artist = ProviderAggregator.getDefault().getCache().getArtist(s.getArtist());
-                    if(artist != null)
-                        mArtistView.setText(artist.getName());
-                    else
-                        mArtistView.setText("...");
-                    //mScrobble.setMax(s.getDuration());
-*/
                     // Set the visibility and button state
                     setPlayButtonState(false);
                     mIsPlaying = true;
@@ -145,6 +140,7 @@ public class PlayingBarView extends RelativeLayout {
     private LinearLayout mTracksLayout;
     private ImageButton mPlayFab;
     private PlayPauseDrawable mPlayFabDrawable;
+    private CircularProgressDrawable mProgressDrawable;
     private List<Song> mLastQueue;
     private Handler mHandler = new Handler();
     private final int mAnimationDuration;
@@ -192,9 +188,14 @@ public class PlayingBarView extends RelativeLayout {
         mPlayFab = (ImageButton) findViewById(R.id.fabPlayBarButton);
         Utils.setSmallFabOutline(new View[]{mPlayFab});
 
+        mProgressDrawable = new CircularProgressDrawable();
+        mProgressDrawable.setColor(getResources().getColor(R.color.primary_light));
         mPlayFabDrawable = new PlayPauseDrawable(getResources());
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        mPlayFab.setImageDrawable(mPlayFabDrawable);
+        LayerDrawable drawable = new LayerDrawable(new Drawable[]{
+                mProgressDrawable,mPlayFabDrawable
+        });
+        mPlayFab.setImageDrawable(mProgressDrawable);
         mPlayFab.setVisibility(View.INVISIBLE);
 
         mPlayFab.setOnClickListener(new OnClickListener() {
