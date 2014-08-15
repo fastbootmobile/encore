@@ -211,9 +211,13 @@ public class AlbumArtImageView extends SquareImageView {
     private void initialize() {
         // Set the placeholder art first-hand
         mHandler = new Handler();
-        mDrawable = new MaterialTransitionDrawable(getContext(),
-                (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
-        setImageDrawable(mDrawable);
+        if (isInEditMode()) {
+            setImageDrawable(getResources().getDrawable(R.drawable.album_placeholder));
+        } else {
+            mDrawable = new MaterialTransitionDrawable(getContext(),
+                    (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
+            setImageDrawable(mDrawable);
+        }
     }
 
     private void forceDrawableReload() {

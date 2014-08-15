@@ -89,6 +89,7 @@ public class ProviderConnection extends AbstractProviderConnection {
         // Release the binder
         mBinder = null;
         super.onServiceDisconnected(name);
+        Log.e(TAG, "Service disconnected: " + name);
     }
 
     @Override

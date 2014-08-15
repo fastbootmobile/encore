@@ -198,6 +198,8 @@ public class AutoMixManager implements IPlaybackCallback {
 
     @Override
     public void onSongStarted(Song s) throws RemoteException {
+        Log.e(TAG, "ON SONG STARTED");
+
         if (!s.getRef().equals(mExpectedSong)) {
             Log.i(TAG, "Song started is not from bucket, cancel automix playback");
             mCurrentPlayingBucket = null;
@@ -211,6 +213,8 @@ public class AutoMixManager implements IPlaybackCallback {
 
                         Song nextTrack = getSongFromRef(nextTrackRef);
                         pbService.queueSong(nextTrack, false);
+
+                        mExpectedSong = nextTrackRef;
                     } catch (EchoNestException e) {
                         Log.e(TAG, "Unable to get next track", e);
                     } catch (RemoteException e) {

@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
@@ -90,7 +91,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
         private View.OnClickListener mArtClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Bitmap hero = ((BitmapDrawable) ((ImageView) view).getDrawable()).getBitmap();
+                Bitmap hero = ((MaterialTransitionDrawable) ((ImageView) view).getDrawable()).getFinalDrawable().getBitmap();
                 Palette palette = Palette.generate(hero);
 
                 PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
