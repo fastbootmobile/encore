@@ -2,8 +2,17 @@ package org.omnirom.music.api.echonest;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.RemoteException;
+import android.util.Log;
+
+import com.echonest.api.v4.EchoNestException;
 
 import org.omnirom.music.app.Utils;
+import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +23,7 @@ import java.util.TreeSet;
  * Created by Guigui on 14/08/2014.
  */
 public class AutoMixManager {
+    private static final String TAG = "AutoMixManager";
 
     private static final String SHARED_PREFS = "automix_buckets";
     private static final String PREF_BUCKETS_IDS = "buckets_ids";
@@ -29,6 +39,7 @@ public class AutoMixManager {
 
     private Context mContext;
     private List<AutoMixBucket> mBuckets;
+    private AutoMixBucket mCurrentPlayingBucket;
 
     public AutoMixManager(Context ctx) {
         mContext = ctx;
@@ -39,6 +50,8 @@ public class AutoMixManager {
     public void readBucketsFromPrefs() {
         SharedPreferences prefs = mContext.getSharedPreferences(SHARED_PREFS, 0);
         Set<String> buckets = prefs.getStringSet(PREF_BUCKETS_IDS, new TreeSet<String>());
+
+        mBuckets.clear();
 
         for (String bucketId : buckets) {
             AutoMixBucket bucket = restoreBucketFromId(bucketId);
@@ -75,7 +88,7 @@ public class AutoMixManager {
         editor.putString(PREF_PREFIX_SONG_TYPES + id, Utils.implode(bucket.mSongTypes, ","));
         editor.putFloat(PREF_PREFIX_SPEECHINESS + id, bucket.mSpeechiness);
         editor.putString(PREF_PREFIX_STYLES     + id, Utils.implode(bucket.mStyles, ","));
-        editor.putBoolean(PREF_PREFIX_TASTE + id, bucket.mUseTaste);
+        editor.putBoolean(PREF_PREFIX_TASTE     + id, bucket.mUseTaste);
 
         editor.apply();
     }
@@ -100,5 +113,37 @@ public class AutoMixManager {
     public List<AutoMixBucket> getBuckets() {
         return mBuckets;
     }
+
+    public AutoMixBucket getCurrentPlayingBucket() {
+        return mCurrentPlayingBucket;
+    }
+
+    public void startPlay(AutoMixBucket bucket) {
+        IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
+        try {
+            String trackRef = bucket.getNextTrack();
+            Song s = ProviderAggregator.getDefault().getCache().getSong(trackRef);
+            if (s == null) {
+                String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
+                if (prefix != null) {
+                    ProviderIdentifier id = ProviderAggregator.getDefault().getRosettaStoneIdentifier(prefix);
+                    s = ProviderAggregator.getDefault().retrieveSong(trackRef, id);
+                }
+            }
+
+            if (s != null) {
+                try {
+                    playback.playSong(s);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot start playing bucket", e);
+                } finally {
+                    mCurrentPlayingBucket = bucket;
+                }
+            }
+        } catch (EchoNestException e) {
+            Log.e(TAG, "Unable to get next track from bucket", e);
+        }
+    }
+
 
 }

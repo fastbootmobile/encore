@@ -1026,11 +1026,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 if (enArtist != null) {
                     List<com.echonest.api.v4.Artist> similars = echoNest.getArtistSimilar(enArtist);
 
-                    List<String> rosettas = ProviderAggregator.getDefault().getRosettaStonePrefix();
-                    String rosettaPreferred = null;
+                    String rosettaPreferred = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
                     ProviderIdentifier rosettaProvider = null;
-                    if (rosettas != null && rosettas.size() > 0) {
-                        rosettaPreferred = rosettas.get(0);
+                    if (rosettaPreferred != null) {
                         rosettaProvider = ProviderAggregator.getDefault().getRosettaStoneIdentifier(rosettaPreferred);
                     }
 

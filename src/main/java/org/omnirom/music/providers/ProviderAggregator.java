@@ -522,9 +522,20 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         return mRosettaStonePrefix;
     }
 
+    public String getPreferredRosettaStonePrefix() {
+        if (mRosettaStonePrefix != null && mRosettaStonePrefix.size() > 0) {
+            // TODO: Let user choose
+            return mRosettaStonePrefix.get(0);
+        } else {
+            return null;
+        }
+    }
+
     public ProviderIdentifier getRosettaStoneIdentifier(final String identifier) {
         return mRosettaStoneMap.get(identifier);
     }
+
+
 
     /**
      * Called by the providers when a feedback is available about a login request

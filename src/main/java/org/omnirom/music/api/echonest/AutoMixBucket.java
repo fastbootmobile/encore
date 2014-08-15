@@ -6,7 +6,6 @@ import com.echonest.api.v4.DynamicPlaylistSession;
 import com.echonest.api.v4.DynamicPlaylistSteerParams;
 import com.echonest.api.v4.EchoNestException;
 import com.echonest.api.v4.GeneralCatalog;
-import com.echonest.api.v4.Params;
 import com.echonest.api.v4.Playlist;
 import com.echonest.api.v4.Song;
 import com.echonest.api.v4.Track;
@@ -157,13 +156,10 @@ public class AutoMixBucket {
     }
 
     public String getNextTrack() throws EchoNestException {
-        List<String> prefixes = ProviderAggregator.getDefault().getRosettaStonePrefix();
-        if (prefixes != null && prefixes.size() > 0) {
-            String prefix = prefixes.get(0);
-
+        String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
+        if (prefix != null) {
             Playlist nextTracks = mPlaylistSession.next();
             List<Song> songs = nextTracks.getSongs();
-            Log.e(TAG, "Next tracks: " + songs.size());
 
             if (songs.size() > 0) {
                 Song firstSong = songs.get(0);
@@ -174,6 +170,8 @@ public class AutoMixBucket {
                     Log.e(TAG, "Null track!");
                     return null;
                 }
+            } else {
+                Log.e(TAG, "No new track for this bucket!");
             }
         }
 

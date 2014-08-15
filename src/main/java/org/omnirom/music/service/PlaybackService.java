@@ -282,7 +282,11 @@ public class PlaybackService extends Service
 
                 Artist artist = ProviderAggregator.getDefault().getCache().getArtist(mCurrentTrack.getArtist());
                 mNotificationBuilder.setContentTitle(mCurrentTrack.getTitle());
-                mNotificationBuilder.setContentText(artist.getName());
+                if (artist != null) {
+                    // TODO: If artist is not available, we should delay playback until the track
+                    // info is here
+                    mNotificationBuilder.setContentText(artist.getName());
+                }
 
                 // TODO: Album art
                 Bitmap albumArt = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();

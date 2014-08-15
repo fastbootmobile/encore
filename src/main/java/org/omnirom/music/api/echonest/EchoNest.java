@@ -282,9 +282,9 @@ public class EchoNest {
             }
         }
 
-        List<String> prefixes = ProviderAggregator.getDefault().getRosettaStonePrefix();
-        if (prefixes != null && prefixes.size() > 0) {
-            p.addIDSpace(prefixes.get(0));
+        String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
+        if (prefix != null) {
+            p.addIDSpace(prefix);
             p.includeTracks();
         }
 

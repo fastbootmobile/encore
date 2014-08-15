@@ -89,13 +89,7 @@ public class AutomixCreateActivity extends PreferenceActivity {
                         songtype, speech, energy, familiar);
                 Log.e(TAG, "Bucket created!");
 
-                for (int i = 0; i < 5; i++) {
-                    try {
-                        Log.e(TAG, " Next track : " + bucket.getNextTrack());
-                    } catch (EchoNestException e) {
-                        Log.e(TAG, "Echo nest error", e);
-                    }
-                }
+                manager.startPlay(bucket);
             }
         }.start();
     }
