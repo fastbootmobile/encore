@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.graphics.Palette;
@@ -20,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.omnirom.music.app.ui.AlbumArtImageView;
@@ -30,6 +33,7 @@ import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
@@ -91,7 +95,8 @@ public class PlaybackQueueActivity extends FragmentActivity {
         private View.OnClickListener mArtClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Bitmap hero = ((MaterialTransitionDrawable) ((ImageView) view).getDrawable()).getFinalDrawable().getBitmap();
+                Bitmap hero = ((MaterialTransitionDrawable) ((ImageView) view).getDrawable())
+                        .getFinalDrawable().getBitmap();
                 Palette palette = Palette.generate(hero);
 
                 PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
@@ -123,7 +128,52 @@ public class PlaybackQueueActivity extends FragmentActivity {
             }
         };
 
+        private Runnable mUpdateSeekBarRunnable = new Runnable() {
+            @Override
+            public void run() {
+                IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+                try {
+                    if (playbackService.isPlaying() && !playbackService.isPaused()) {
+                        if (!mSeekBar.isPressed()) {
+                            mSeekBar.setMax(playbackService.getCurrentTrackLength());
+                            mSeekBar.setProgress(playbackService.getCurrentTrackPosition());
+                        }
+                        mHandler.postDelayed(this, SEEK_UPDATE_DELAY);
+                    }
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        private IPlaybackCallback mPlaybackListener = new IPlaybackCallback.Stub() {
+            @Override
+            public void onSongStarted(Song s) throws RemoteException {
+                mHandler.post(mUpdateSeekBarRunnable);
+            }
+
+            @Override
+            public void onSongScrobble(int timeMs) throws RemoteException {
+
+            }
+
+            @Override
+            public void onPlaybackPause() throws RemoteException {
+
+            }
+
+            @Override
+            public void onPlaybackResume() throws RemoteException {
+                mHandler.post(mUpdateSeekBarRunnable);
+            }
+        };
+
+        private static final int SEEK_UPDATE_DELAY = 1000/30;
+        private SeekBar mSeekBar;
+        private Handler mHandler;
+
         public SimpleFragment() {
+            mHandler = new Handler();
         }
 
         @Override
@@ -131,6 +181,35 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_playback_queue, container, false);
             ViewGroup tracksContainer = (ViewGroup) rootView.findViewById(R.id.playingTracksLayout);
+
+            mSeekBar = (SeekBar) rootView.findViewById(R.id.sbSeek);
+            mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
+                    if (fromUser) {
+                        new Thread() {
+                            public void run() {
+                                IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
+                                try {
+                                    playback.seek(progress);
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot seek", e);
+                                }
+                            }
+                        }.start();
+                    }
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
 
             // Set play pause drawable
             ImageView ivPlayPause = (ImageView) rootView.findViewById(R.id.ivPlayPause);
@@ -193,7 +272,9 @@ public class PlaybackQueueActivity extends FragmentActivity {
                     Artist artist = cache.getArtist(song.getArtist());
 
                     tvTitle.setText(song.getTitle());
-                    tvArtist.setText(artist.getName());
+                    if (artist != null) {
+                        tvArtist.setText(artist.getName());
+                    }
                     ivCover.loadArtForSong(song);
 
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
@@ -209,6 +290,32 @@ public class PlaybackQueueActivity extends FragmentActivity {
             }
 
             return rootView;
+        }
+
+        @Override
+        public void onAttach(Activity activity) {
+            super.onAttach(activity);
+            // Attach this fragment as Playback Listener
+            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+            try {
+                Log.e(TAG, "ATTACHED AS PLAYBACK LISTENER");
+                service.addCallback(mPlaybackListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot add playback queue activity as listener", e);
+            }
+            mHandler.post(mUpdateSeekBarRunnable);
+        }
+
+        @Override
+        public void onDetach() {
+            super.onDetach();
+            // Detach this fragment as Playback Listener
+            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+            try {
+                service.removeCallback(mPlaybackListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot add playback queue activity as listener", e);
+            }
         }
     }
 }

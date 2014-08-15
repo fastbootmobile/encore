@@ -193,9 +193,9 @@ public class PlayingBarView extends RelativeLayout {
         mPlayFabDrawable = new PlayPauseDrawable(getResources());
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         LayerDrawable drawable = new LayerDrawable(new Drawable[]{
-                mProgressDrawable,mPlayFabDrawable
+                mProgressDrawable, mPlayFabDrawable
         });
-        mPlayFab.setImageDrawable(mProgressDrawable);
+        mPlayFab.setImageDrawable(drawable);
         mPlayFab.setVisibility(View.INVISIBLE);
 
         mPlayFab.setOnClickListener(new OnClickListener() {

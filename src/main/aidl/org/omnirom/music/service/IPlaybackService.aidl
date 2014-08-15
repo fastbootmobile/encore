@@ -110,4 +110,8 @@ interface IPlaybackService {
      */
     void setDSPChain(in List<ProviderIdentifier> chain);
 
+    /**
+     * Seek the current track to the specified position
+     */
+    void seek(long timeMs);
 }

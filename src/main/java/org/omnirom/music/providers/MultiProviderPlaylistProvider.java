@@ -192,6 +192,9 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     @Override
+    public void seek(long timeMs) { Log.e(TAG, "NOT IMPLEMENTED"); }
+
+    @Override
     public boolean onUserSwapPlaylistItem(int oldPosition, int newPosition, String playlistRef) throws RemoteException {
            return mMultiProviderDatabaseHelper.swapPlaylistItem(oldPosition,newPosition,playlistRef);
     }

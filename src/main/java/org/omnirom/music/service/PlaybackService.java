@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -471,6 +472,16 @@ public class PlaybackService extends Service
         @Override
         public void setDSPChain(List<ProviderIdentifier> chain) throws RemoteException {
             mDSPProcessor.setActiveChain(chain);
+        }
+
+        @Override
+        public void seek(long timeMs) throws RemoteException {
+            if (mCurrentTrack != null) {
+                ProviderIdentifier id = mCurrentTrack.getProvider();
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(id).getBinder();
+                provider.seek(timeMs);
+                mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
+            }
         }
     };
 
