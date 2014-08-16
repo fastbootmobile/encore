@@ -46,9 +46,16 @@ public class CircularProgressDrawable extends Drawable {
         invalidateSelf();
     }
 
+    public float getValue() {
+        return mValue;
+    }
+
+    public float getMax() {
+        return mMax;
+    }
+
     @Override
     protected void onBoundsChange(Rect bounds) {
-        Log.e("XPLOD", "BOUNDS CHANGE");
         super.onBoundsChange(bounds);
         mRect.set(bounds);
     }

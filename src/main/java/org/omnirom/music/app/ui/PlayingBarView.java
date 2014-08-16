@@ -19,6 +19,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
@@ -64,7 +65,9 @@ public class PlayingBarView extends RelativeLayout {
             if (playbackService != null) {
                 try {
                     if (playbackService.isPlaying()) {
-                        mProgressDrawable.setValue(playbackService.getCurrentTrackPosition());
+                        if (!mPlayInSeekMode) {
+                            mProgressDrawable.setValue(playbackService.getCurrentTrackPosition());
+                        }
 
                         // Restart ourselves
                         mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
@@ -145,6 +148,8 @@ public class PlayingBarView extends RelativeLayout {
     private Handler mHandler = new Handler();
     private final int mAnimationDuration;
     private boolean mWrapped;
+    private boolean mPlayInSeekMode;
+    private boolean mSkipFabAction;
 
     public PlayingBarView(Context context) {
         super(context);
@@ -189,7 +194,8 @@ public class PlayingBarView extends RelativeLayout {
         Utils.setSmallFabOutline(new View[]{mPlayFab});
 
         mProgressDrawable = new CircularProgressDrawable();
-        mProgressDrawable.setColor(getResources().getColor(R.color.primary_light));
+        mProgressDrawable.setColor(getResources().getColor(R.color.white));
+        mProgressDrawable.setAlpha(100);
         mPlayFabDrawable = new PlayPauseDrawable(getResources());
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         LayerDrawable drawable = new LayerDrawable(new Drawable[]{
@@ -198,21 +204,75 @@ public class PlayingBarView extends RelativeLayout {
         mPlayFab.setImageDrawable(drawable);
         mPlayFab.setVisibility(View.INVISIBLE);
 
+        mPlayFab.setOnTouchListener(new OnTouchListener() {
+            private boolean mIsDragging = false;
+            private float mStartY;
+            private float mLastY;
+            private float mSeekValue;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    mIsDragging = true;
+                    mStartY = mLastY = motionEvent.getY();
+                    return false;
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE && mIsDragging) {
+                    float deltaStart = motionEvent.getY() - mStartY;
+                    float deltaLast = motionEvent.getY() - mLastY;
+                    if (Math.abs(deltaStart) > view.getMeasuredHeight() / 2.0f) {
+                        // We're dragging the play button, start seek mode
+                        mPlayInSeekMode = true;
+                        mSeekValue = Math.max(0,
+                                Math.min(-deltaStart * 1000.0f, mProgressDrawable.getMax()));
+                        mProgressDrawable.setValue(mSeekValue);
+                    }
+                    return true;
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    if (mPlayInSeekMode) {
+                        mPlayInSeekMode = false;
+                        new Thread() {
+                            public void run() {
+                                IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+                                try {
+                                    playbackService.seek((long) mSeekValue);
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot seek", e);
+                                }
+                            }
+                        }.start();
+
+                        // If we consume the up action, we cannot "unselect"/"unfocus" the FAB
+                        // and it remains in a "selected" state after we lift our finger. We
+                        // work around this issue by skipping the FAB action once
+                        mSkipFabAction = true;
+                        return false;
+                    }
+                    return false;
+                }
+
+                return false;
+            }
+        });
+
         mPlayFab.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-                if (mIsPlaying) {
-                    try {
-                        playbackService.pause();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to pause playback", e);
-                    }
+                if (mSkipFabAction) {
+                    mSkipFabAction = false;
                 } else {
-                    try {
-                        playbackService.play();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to resume playback", e);
+                    IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+                    if (mIsPlaying) {
+                        try {
+                            playbackService.pause();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Unable to pause playback", e);
+                        }
+                    } else {
+                        try {
+                            playbackService.play();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Unable to resume playback", e);
+                        }
                     }
                 }
             }
