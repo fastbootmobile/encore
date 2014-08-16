@@ -95,5 +95,7 @@
     <string name="automix_minimal_settings_error">Choose at least a style or mood, or enable taste profile.</string>
     <string name="bucket_creating_dialog">Creating bucket (this may take a few seconds)...</string>
     <string name="automix_bucket_name_error">Please enter a name for this bucket</string>
+    <string name="bucket_history">History</string>
+    <string name="bucket_edit">Edit</string>
 
 </resources>

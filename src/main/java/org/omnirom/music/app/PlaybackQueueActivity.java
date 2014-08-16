@@ -218,7 +218,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
             playDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
             ivPlayPause.setImageDrawable(playDrawable);
 
-            final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+            IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
             final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
             try {
@@ -289,6 +289,20 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 }
             }
 
+            // Set the click listeners on the first card UI
+            ImageView ivForward = (ImageView) rootView.findViewById(R.id.ivForward);
+            ivForward.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+                    try {
+                        playbackService.next();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot move to next track", e);
+                    }
+                }
+            });
+
             return rootView;
         }
 
@@ -298,7 +312,6 @@ public class PlaybackQueueActivity extends FragmentActivity {
             // Attach this fragment as Playback Listener
             IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
             try {
-                Log.e(TAG, "ATTACHED AS PLAYBACK LISTENER");
                 service.addCallback(mPlaybackListener);
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot add playback queue activity as listener", e);

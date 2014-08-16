@@ -483,6 +483,14 @@ public class PlaybackService extends Service
                 mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
             }
         }
+
+        @Override
+        public void next() throws RemoteException {
+            if (mPlaybackQueue.size() > 1) {
+                mPlaybackQueue.remove(0);
+                startPlayingQueue();
+            }
+        }
     };
 
     @Override

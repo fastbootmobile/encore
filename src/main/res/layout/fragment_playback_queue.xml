@@ -72,6 +72,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:id="@+id/ivForward"
+                    android:clickable="true"
                     android:layout_alignParentBottom="true"
                     android:layout_toLeftOf="@+id/ivPlayPause"
                     android:layout_toStartOf="@+id/ivPlayPause"

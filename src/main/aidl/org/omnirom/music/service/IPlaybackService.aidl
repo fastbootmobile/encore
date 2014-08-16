@@ -114,4 +114,9 @@ interface IPlaybackService {
      * Seek the current track to the specified position
      */
     void seek(long timeMs);
+
+    /**
+     * Fast-forward to the next track of the queue
+     */
+    void next();
 }
