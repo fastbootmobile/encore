@@ -19,6 +19,7 @@ import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -452,5 +453,25 @@ public class Utils {
         }
 
         return builder.toString();
+    }
+
+    public static void animateScale(View v, boolean animate, boolean visible) {
+        if (visible) {
+            if (animate) {
+                v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(400)
+                        .setInterpolator(new DecelerateInterpolator()).start();
+            } else {
+                v.setScaleX(1.0f);
+                v.setScaleY(1.0f);
+            }
+        } else {
+            if (animate) {
+                v.animate().scaleX(0.0f).scaleY(0.0f).setDuration(400)
+                        .setInterpolator(new DecelerateInterpolator()).start();
+            } else {
+                v.setScaleX(0.0f);
+                v.setScaleY(0.0f);
+            }
+        }
     }
 }

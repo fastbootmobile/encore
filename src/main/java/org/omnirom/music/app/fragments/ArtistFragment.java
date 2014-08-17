@@ -26,6 +26,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
@@ -83,6 +85,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private static final int FRAGMENT_ID_BIOGRAPHY = 2;
     private static final int FRAGMENT_COUNT = 3;
 
+    private static final int ANIMATION_DURATION = 500;
+    private static DecelerateInterpolator mInterpolator = new DecelerateInterpolator();
+
     private Bitmap mHeroImage;
     private int mBackgroundColor;
     private Artist mArtist;
@@ -93,6 +98,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private ArtistTracksFragment mArtistTracksFragment;
     private ArtistInfoFragment mArtistInfoFragment;
     private ArtistSimilarFragment mArtistSimilarFragment;
+    private ImageButton mFabPlay;
 
     private Runnable mUpdateAlbumsRunnable = new Runnable() {
         @Override
@@ -240,8 +246,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 mItemHost.startAnimation(Utils.animateExpand(mItemHost, false));
                 mOpen = false;
 
-                mLastItemDivider.animate().alpha(0.0f).setDuration(500).start();
-                mHeaderDivider.animate().alpha(0.0f).setDuration(500).start();
+                mLastItemDivider.animate().alpha(0.0f).setDuration(ANIMATION_DURATION)
+                        .setInterpolator(mInterpolator).start();
+                mHeaderDivider.animate().alpha(0.0f).setDuration(ANIMATION_DURATION)
+                        .setInterpolator(mInterpolator).start();
             } else {
                 if (mItemHost == null) {
                     mItemHost = new LinearLayout(mContext);
@@ -259,7 +267,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     mItemHost.addView(mLastItemDivider);
                 }
                 mItemHost.startAnimation(Utils.animateExpand(mItemHost, true));
-                mHeaderDivider.animate().alpha(1.0f).setDuration(500).start();
+                mHeaderDivider.animate().alpha(1.0f).setDuration(ANIMATION_DURATION)
+                        .setInterpolator(mInterpolator).start();
 
                 mOpen = true;
             }
@@ -386,8 +395,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(mArtist));
 
         // Outline is required for the FAB shadow to be actually oval
-        ImageButton fabPlay = (ImageButton) mRootView.findViewById(R.id.fabPlay);
-        setOutlines(fabPlay);
+        mFabPlay = (ImageButton) mRootView.findViewById(R.id.fabPlay);
+        setOutlines(mFabPlay);
+        showFab(false, false);
 
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources());
@@ -408,8 +418,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
 
         mFabDrawable.setPaddingDp(48);
-        fabPlay.setImageDrawable(mFabDrawable);
-        fabPlay.setOnClickListener(new View.OnClickListener() {
+        mFabPlay.setImageDrawable(mFabDrawable);
+        mFabPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mFabDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
@@ -452,6 +462,15 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     public void onDetach() {
         super.onDetach();
         mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+    }
+
+    private void showFab(final boolean animate, final boolean visible) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Utils.animateScale(mFabPlay, animate, visible);
+            }
+        });
     }
 
     private void setOutlines(View v) {
@@ -575,12 +594,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 if (cvRec.getVisibility() == View.GONE) {
                     cvRec.setVisibility(View.VISIBLE);
                     cvRec.setAlpha(0.0f);
-                    cvRec.animate().alpha(1.0f).setDuration(500).start();
+                    cvRec.animate().alpha(1.0f).setDuration(ANIMATION_DURATION)
+                            .setInterpolator(mInterpolator).start();
 
                     View suggestionTitle = mRootView.findViewById(R.id.tvArtistSuggestionNote);
                     suggestionTitle.setVisibility(View.VISIBLE);
                     suggestionTitle.setAlpha(0.0f);
-                    suggestionTitle.animate().alpha(1.0f).setDuration(500).start();
+                    suggestionTitle.animate().alpha(1.0f).setDuration(ANIMATION_DURATION)
+                            .setInterpolator(mInterpolator).start();
                 }
 
                 btnPlayNow.setOnClickListener(new View.OnClickListener() {
@@ -618,17 +639,20 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                             try {
                                 boolean hasMore = provider.fetchArtistAlbums(mParent.getArtist().getRef());
                                 showLoadingSpinner(hasMore);
+                                mParent.showFab(true, !hasMore);
                             } catch (RemoteException e) {
                                 Log.e(TAG, "Unable to fetch artist albums", e);
                                 postToast(R.string.plugin_error);
                             }
                         } else {
                             showLoadingSpinner(false);
+                            mParent.showFab(true, true);
                             Log.e(TAG, "Provider is null, cannot fetch albums");
                             postToast(R.string.plugin_error);
                         }
                     } else {
                         showLoadingSpinner(false);
+                        mParent.showFab(true, true);
                         Log.e(TAG, "ProviderConnection is null, cannot fetch albums");
                         postToast(R.string.plugin_error);
                     }
@@ -774,6 +798,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
 
             showLoadingSpinner(false);
+            mParent.showFab(true, true);
         }
 
         private void showAlbumTracks(Album album, LinearLayout container) {

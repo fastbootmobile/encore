@@ -63,6 +63,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private PlayPauseDrawable mFabDrawable;
     private int mBackgroundColor;
     private ImageView ivHero;
+    private ImageButton mPlayFab;
     private boolean mFabShouldResume = false;
     private FadingActionBarHelper mFadingHelper;
 
@@ -92,6 +93,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 View loadingBar = findViewById(R.id.pbAlbumLoading);
                 if (loadingBar.getVisibility() == View.VISIBLE && !hasMore) {
                     loadingBar.setVisibility(View.GONE);
+                    showFab(true, true);
                 }
 
                 Iterator<String> songs = mAlbum.songs();
@@ -129,7 +131,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 mRootView.invalidate();
             } else {
                 findViewById(R.id.pbAlbumLoading).setVisibility(View.VISIBLE);
-
+                showFab(false, false);
             }
         }
     };
@@ -148,8 +150,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         tvAlbumName.setBackgroundColor(mBackgroundColor);
         tvAlbumName.setText(mAlbum.getName());
 
-        ImageButton fabPlay = (ImageButton) headerView.findViewById(R.id.fabPlay);
-        Utils.setLargeFabOutline(new View[]{fabPlay});
+        mPlayFab = (ImageButton) headerView.findViewById(R.id.fabPlay);
+        Utils.setLargeFabOutline(new View[]{mPlayFab});
 
         // Set source logo
         ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
@@ -159,8 +161,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mFabDrawable = new PlayPauseDrawable(getResources());
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         mFabDrawable.setPaddingDp(48);
-        fabPlay.setImageDrawable(mFabDrawable);
-        fabPlay.setOnClickListener(new View.OnClickListener() {
+        mPlayFab.setImageDrawable(mFabDrawable);
+        mPlayFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mFabDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
@@ -273,6 +275,16 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                         }
                     }
                 });
+            }
+        });
+    }
+
+
+    private void showFab(final boolean animate, final boolean visible) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Utils.animateScale(mPlayFab, animate, visible);
             }
         });
     }
