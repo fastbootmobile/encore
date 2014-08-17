@@ -143,71 +143,72 @@ public class AlbumsAdapter extends BaseAdapter {
         final Album album = getItem(position);
         final ViewHolder tag = (ViewHolder) root.getTag();
 
-        tag.ivCover.setDefaultArt();
-        tag.position = position;
-        tag.vRoot = root;
-        tag.album = album;
+        if (tag.album == null || !tag.album.equals(album)) {
+            tag.position = position;
+            tag.vRoot = root;
+            tag.album = album;
 
-        final int defaultColor = res.getColor(R.color.default_album_art_background);
-        tag.vRoot.setBackgroundColor(defaultColor);
-        tag.itemColor = defaultColor;
+            final int defaultColor = res.getColor(R.color.default_album_art_background);
+            tag.vRoot.setBackgroundColor(defaultColor);
+            tag.itemColor = defaultColor;
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            // tag.ivCover.setViewName("list:albums:cover:" + album.getRef());
-            // tag.tvTitle.setViewName("list:albums:title:" + album.getRef());
-        }
-
-        if (album.getName() != null && !album.getName().isEmpty()) {
-            tag.tvTitle.setText(album.getName());
-
-            if (album.getSongsCount() > 0) {
-                tag.tvSubTitle.setText(album.getSongsCount() + " songs");
-                tag.tvSubTitle.setVisibility(View.VISIBLE);
-            } else {
-                tag.tvSubTitle.setVisibility(View.INVISIBLE);
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                // tag.ivCover.setViewName("list:albums:cover:" + album.getRef());
+                // tag.tvTitle.setViewName("list:albums:title:" + album.getRef());
             }
 
-            tag.ivCover.loadArtForAlbum(album);
-            tag.ivCover.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
-                @Override
-                public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
-                    Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
-                        @Override
-                        public void onGenerated(final Palette palette) {
-                            mHandler.post(new Runnable() {
-                                public void run() {
-                                    PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
-                                    PaletteItem darkMutedColor = palette.getDarkMutedColor();
+            if (album.getName() != null && !album.getName().isEmpty()) {
+                tag.tvTitle.setText(album.getName());
 
-                                    int targetColor = defaultColor;
-
-                                    if (darkVibrantColor != null) {
-                                        targetColor = darkVibrantColor.getRgb();
-                                    } else if (darkMutedColor != null) {
-                                        targetColor = darkMutedColor.getRgb();
-                                    }
-
-                                    if (targetColor != defaultColor) {
-                                        ColorDrawable drawable1 = new ColorDrawable(defaultColor);
-                                        ColorDrawable drawable2 = new ColorDrawable(targetColor);
-                                        TransitionDrawable transitionDrawable
-                                                = new TransitionDrawable(new Drawable[]{drawable1, drawable2});
-                                        Utils.setViewBackground(tag.vRoot, transitionDrawable);
-                                        transitionDrawable.startTransition(1000);
-                                        tag.itemColor = targetColor;
-                                    } else {
-                                        tag.vRoot.setBackgroundColor(targetColor);
-                                    }
-
-                                }
-                            });
-                        }
-                    });
+                if (album.getSongsCount() > 0) {
+                    tag.tvSubTitle.setText(album.getSongsCount() + " songs");
+                    tag.tvSubTitle.setVisibility(View.VISIBLE);
+                } else {
+                    tag.tvSubTitle.setVisibility(View.INVISIBLE);
                 }
-            });
-        } else {
-            tag.tvTitle.setText(res.getString(R.string.loading));
-            tag.tvSubTitle.setText("");
+
+                tag.ivCover.loadArtForAlbum(album);
+                tag.ivCover.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
+                    @Override
+                    public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
+                        Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+                            @Override
+                            public void onGenerated(final Palette palette) {
+                                mHandler.post(new Runnable() {
+                                    public void run() {
+                                        PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
+                                        PaletteItem darkMutedColor = palette.getDarkMutedColor();
+
+                                        int targetColor = defaultColor;
+
+                                        if (darkVibrantColor != null) {
+                                            targetColor = darkVibrantColor.getRgb();
+                                        } else if (darkMutedColor != null) {
+                                            targetColor = darkMutedColor.getRgb();
+                                        }
+
+                                        if (targetColor != defaultColor) {
+                                            ColorDrawable drawable1 = new ColorDrawable(defaultColor);
+                                            ColorDrawable drawable2 = new ColorDrawable(targetColor);
+                                            TransitionDrawable transitionDrawable
+                                                    = new TransitionDrawable(new Drawable[]{drawable1, drawable2});
+                                            Utils.setViewBackground(tag.vRoot, transitionDrawable);
+                                            transitionDrawable.startTransition(1000);
+                                            tag.itemColor = targetColor;
+                                        } else {
+                                            tag.vRoot.setBackgroundColor(targetColor);
+                                        }
+
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                tag.tvTitle.setText(res.getString(R.string.loading));
+                tag.tvSubTitle.setText("");
+            }
         }
 
         return root;

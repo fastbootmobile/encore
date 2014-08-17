@@ -62,7 +62,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private Bitmap mHeroImage;
     private PlayPauseDrawable mFabDrawable;
     private int mBackgroundColor;
-    private ImageView ivHero;
     private ImageButton mPlayFab;
     private boolean mFabShouldResume = false;
     private FadingActionBarHelper mFadingHelper;
@@ -103,21 +102,12 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     String songRef = songs.next();
                     Song song = cache.getSong(songRef);
 
-                    // If the song isn't loaded, try to get it from the provider, it might be loaded there
-                    // but not cached for various reasons. For instance, Spotify loads the albums tracks
-                    // info, but we're not tracking them in metadata_callback, so they're not actually
-                    // pushed to the app's cache
+                    // If the song isn't loaded, try to get it from the provider, it might be loaded
+                    // there but not cached for various reasons. For instance, Spotify loads the
+                    // albums tracks info, but we're not tracking them in metadata_callback, so
+                    // they're not actually pushed to the app's cache
                     if (song == null) {
-                        ProviderConnection prov = PluginsLookup.getDefault().getProvider(mAlbum.getProvider());
-                        try {
-                            IMusicProvider binder = prov.getBinder();
-                            if (binder != null) {
-                                song = prov.getBinder().getSong(songRef);
-                            }
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Remote exception while trying to get track info", e);
-                            continue;
-                        }
+                        song = ProviderAggregator.getDefault().retrieveSong(songRef, mAlbum.getProvider());
 
                         if (song == null) {
                             // Song is still unknown, we skip!
@@ -145,7 +135,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mRootView = inflater.inflate(R.layout.fragment_album_view, container, false);
         assert mRootView != null;
         View headerView = inflater.inflate(R.layout.album_view_header, null);
-        ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
+        ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
         TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
         tvAlbumName.setBackgroundColor(mBackgroundColor);
         tvAlbumName.setText(mAlbum.getName());

@@ -238,6 +238,14 @@ public class AlbumArtImageView extends SquareImageView {
         mOnArtLoadedListener = listener;
     }
 
+    /**
+     * Returns the last requested entity
+     * @return A BoundEntity (a song, album, artist) that was previously requested
+     */
+    public BoundEntity getRequestedEntity() {
+        return mRequestedEntity;
+    }
+
     public void loadArtForSong(final Song song) {
         loadArtImpl(song);
     }
@@ -251,6 +259,13 @@ public class AlbumArtImageView extends SquareImageView {
     }
 
     private void loadArtImpl(final BoundEntity ent) {
+        if (ent.equals(mRequestedEntity)) {
+            // Nothing to do, we are displaying the proper thing already
+            return;
+        } else {
+            setDefaultArt();
+        }
+
         if (mTask != null) {
             mTask.cancel(true);
         }
