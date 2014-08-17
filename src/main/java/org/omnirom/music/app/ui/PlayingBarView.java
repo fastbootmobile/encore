@@ -207,26 +207,25 @@ public class PlayingBarView extends RelativeLayout {
         mPlayFab.setOnTouchListener(new OnTouchListener() {
             private boolean mIsDragging = false;
             private float mStartY;
-            private float mLastY;
             private float mSeekValue;
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
+                boolean result = false;
+
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     mIsDragging = true;
-                    mStartY = mLastY = motionEvent.getY();
-                    return false;
+                    mStartY = motionEvent.getY();
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE && mIsDragging) {
                     float deltaStart = motionEvent.getY() - mStartY;
-                    float deltaLast = motionEvent.getY() - mLastY;
                     if (Math.abs(deltaStart) > view.getMeasuredHeight() / 2.0f) {
                         // We're dragging the play button, start seek mode
                         mPlayInSeekMode = true;
                         mSeekValue = Math.max(0,
-                                Math.min(-deltaStart * 1000.0f, mProgressDrawable.getMax()));
+                                Math.min(-deltaStart * 500.0f, mProgressDrawable.getMax()));
                         mProgressDrawable.setValue(mSeekValue);
                     }
-                    return true;
+                    result = true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     if (mPlayInSeekMode) {
                         mPlayInSeekMode = false;
@@ -245,12 +244,10 @@ public class PlayingBarView extends RelativeLayout {
                         // and it remains in a "selected" state after we lift our finger. We
                         // work around this issue by skipping the FAB action once
                         mSkipFabAction = true;
-                        return false;
                     }
-                    return false;
                 }
 
-                return false;
+                return result;
             }
         });
 
