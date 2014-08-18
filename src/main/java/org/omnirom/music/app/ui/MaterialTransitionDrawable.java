@@ -62,6 +62,8 @@ public class MaterialTransitionDrawable extends Drawable {
         mHandler = new Handler();
 
         synchronized (mGrayscalerSync) {
+            // We use a shared Grayscale script to avoid allocating multiple time the RenderScript
+            // context.
             if (mGrayscaler == null) {
                 RenderScript renderScript = RenderScript.create(ctx);
                 mGrayscaler = new GrayscaleRS(renderScript);
@@ -100,6 +102,9 @@ public class MaterialTransitionDrawable extends Drawable {
         if (drawable != mTargetDrawable) {
             mTargetDrawable = drawable;
             mTargetGrayDrawable = null;
+
+            // The gray drawable will be generated in a separate thread to avoid hogging the UI
+            // thread when calling transitionTo from it
             new Thread() {
                 public void run() {
                     BitmapDrawable grayDrawable = new BitmapDrawable(res, grayscaleBitmap(drawable.getBitmap()));
@@ -120,10 +125,8 @@ public class MaterialTransitionDrawable extends Drawable {
 
             mTargetDrawable.setBounds(getBounds());
 
-
             mStartTime = -1;
             mAnimating = true;
-            invalidateSelf();
         }
     }
 
@@ -183,11 +186,17 @@ public class MaterialTransitionDrawable extends Drawable {
                 mAnimating = false;
 
                 mBaseDrawable = mTargetDrawable;
+
+                // Release the grayscale bitmap, we don't need it anymore from now on
+                mTargetGrayDrawable.getBitmap().recycle();
                 mTargetGrayDrawable = null;
             } else {
                 invalidateSelf();
             }
         } else if (mAnimating && mBaseDrawable != null) {
+            // While grayscale is generating, we might already get the new dimensions for the
+            // target (non grayscale) drawable. In that case, we draw the base drawable in the
+            // transformed canvas
             drawTranslatedBase(canvas);
         } else if (mBaseDrawable != null) {
             mBaseDrawable.draw(canvas);

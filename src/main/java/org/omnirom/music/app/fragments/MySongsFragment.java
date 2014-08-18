@@ -39,7 +39,7 @@ public class MySongsFragment extends Fragment {
         mySongsAdapter = new MySongsAdapter(getResources(), getChildFragmentManager());
         mViewPager = (ViewPager) root.findViewById(R.id.pager);
 
-        mViewPager.setOffscreenPageLimit(2);
+        mViewPager.setOffscreenPageLimit(1);
         PagerTabStrip pagerTitleStrip = (PagerTabStrip) root.findViewById(R.id.pager_title_strip);
         pagerTitleStrip.setTabIndicatorColorResource(R.color.primary_light);
 
