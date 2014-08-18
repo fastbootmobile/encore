@@ -175,7 +175,7 @@ public class AlbumArtImageView extends SquareImageView {
     private BoundEntity mRequestedEntity;
     private MaterialTransitionDrawable mDrawable;
 
-    private static final int DELAY_BEFORE_START = 500;
+    private static final int DELAY_BEFORE_START = 300;
     private static final int DELAY_BEFORE_RETRY = 60;
     private static final int CORE_POOL_SIZE = 4;
     private static final int MAXIMUM_POOL_SIZE = 256;
