@@ -40,6 +40,7 @@ public class MaterialTransitionDrawable extends Drawable {
     private long mStartTime;
     private boolean mAnimating;
     private long mDuration = DEFAULT_DURATION;
+    private Handler mHandler;
 
     private static final Object mGrayscalerSync = new Object();
     private static GrayscaleRS mGrayscaler;
@@ -58,6 +59,7 @@ public class MaterialTransitionDrawable extends Drawable {
     public MaterialTransitionDrawable(Context ctx) {
         mInterpolator = new AccelerateDecelerateInterpolator();
         mAnimating = false;
+        mHandler = new Handler();
 
         synchronized (mGrayscalerSync) {
             if (mGrayscaler == null) {
@@ -94,13 +96,30 @@ public class MaterialTransitionDrawable extends Drawable {
         transitionTo(res, new BitmapDrawable(res, bitmap));
     }
 
-    public void transitionTo(Resources res, BitmapDrawable drawable) {
+    public void transitionTo(final Resources res, final BitmapDrawable drawable) {
         if (drawable != mTargetDrawable) {
             mTargetDrawable = drawable;
-            mTargetGrayDrawable = new BitmapDrawable(res, grayscaleBitmap(drawable.getBitmap()));
+            mTargetGrayDrawable = null;
+            new Thread() {
+                public void run() {
+                    BitmapDrawable grayDrawable = new BitmapDrawable(res, grayscaleBitmap(drawable.getBitmap()));
+                    synchronized (MaterialTransitionDrawable.this) {
+                        mTargetGrayDrawable = grayDrawable;
+                        mTargetGrayDrawable.setBounds(getBounds());
+
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                invalidateSelf();
+                            }
+                        });
+                    }
+                }
+            }.start();
+
 
             mTargetDrawable.setBounds(getBounds());
-            mTargetGrayDrawable.setBounds(getBounds());
+
 
             mStartTime = -1;
             mAnimating = true;
@@ -130,7 +149,7 @@ public class MaterialTransitionDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        if (mAnimating) {
+        if (mAnimating && mTargetGrayDrawable != null) {
             if (mStartTime < 0) {
                 mStartTime = SystemClock.uptimeMillis();
             }
@@ -151,26 +170,7 @@ public class MaterialTransitionDrawable extends Drawable {
             final float progressSaturation = mInterpolator.getInterpolation(rawProgress);
 
             if (mBaseDrawable != null) {
-                // Pad the base drawable to be at the center of the target size
-                final float targetWidth = mTargetDrawable.getIntrinsicWidth();
-                final float targetHeight = mTargetDrawable.getIntrinsicHeight();
-                Rect baseBounds = mBaseDrawable.getBounds();
-                final float baseWidth = baseBounds.width();
-                final float baseHeight = baseBounds.height();
-
-                canvas.save();
-
-                float scaling = Math.min(targetWidth / baseWidth, targetHeight / baseHeight);
-
-                final float scaledBaseWidth = scaling * baseWidth;
-                final float scaledBaseHeight = scaling * baseHeight;
-
-                canvas.translate((targetWidth - scaledBaseWidth) * 0.5f,
-                        (targetHeight - scaledBaseHeight) * 0.5f);
-                canvas.scale(scaling, scaling);
-
-                mBaseDrawable.draw(canvas);
-                canvas.restore();
+                drawTranslatedBase(canvas);
             }
 
             mTargetGrayDrawable.setAlpha((int) (255 * progressOpacity));
@@ -187,9 +187,34 @@ public class MaterialTransitionDrawable extends Drawable {
             } else {
                 invalidateSelf();
             }
+        } else if (mAnimating && mBaseDrawable != null) {
+            drawTranslatedBase(canvas);
         } else if (mBaseDrawable != null) {
             mBaseDrawable.draw(canvas);
         }
+    }
+
+    private void drawTranslatedBase(Canvas canvas) {
+        // Pad the base drawable to be at the center of the target size
+        final float targetWidth = mTargetDrawable.getIntrinsicWidth();
+        final float targetHeight = mTargetDrawable.getIntrinsicHeight();
+        Rect baseBounds = mBaseDrawable.getBounds();
+        final float baseWidth = baseBounds.width();
+        final float baseHeight = baseBounds.height();
+
+        canvas.save();
+
+        float scaling = Math.min(targetWidth / baseWidth, targetHeight / baseHeight);
+
+        final float scaledBaseWidth = scaling * baseWidth;
+        final float scaledBaseHeight = scaling * baseHeight;
+
+        canvas.translate((targetWidth - scaledBaseWidth) * 0.5f,
+                (targetHeight - scaledBaseHeight) * 0.5f);
+        canvas.scale(scaling, scaling);
+
+        mBaseDrawable.draw(canvas);
+        canvas.restore();
     }
 
     @Override

@@ -193,6 +193,7 @@ public class SongsListAdapter extends BaseAdapter {
                 }
             } else {
                 artKey = mSong.getRef().replace(":", "");
+
                 Bitmap thumb = ThumbnailUtils.extractThumbnail(bmp, mItemWidth, mItemHeight);
                 if (v.position != this.mPosition) {
                     // Cancel, we moved
