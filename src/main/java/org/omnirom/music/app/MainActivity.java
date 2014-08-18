@@ -29,6 +29,9 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 
+import com.balysv.material.drawable.menu.MaterialMenuDrawable;
+import com.balysv.material.drawable.menu.MaterialMenuView;
+
 import org.omnirom.music.app.fragments.AbstractRootFragment;
 import org.omnirom.music.app.fragments.AutomixFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
@@ -204,14 +207,8 @@ public class MainActivity extends FragmentActivity
         ActionBar actionBar = getActionBar();
 
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setTitle(mTitle);
+            //actionBar.setTitle(mTitle);
         }
-
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
-
     }
 
 

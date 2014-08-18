@@ -36,4 +36,10 @@
         <attr name="circular_parallax" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="MaterialMenuView">
+        <attr name="color" format="color"/>
+        <attr name="scale" format="integer"/>
+        <attr name="transformDuration" format="integer"/>
+        <attr name="pressedDuration" format="integer"/>
+    </declare-styleable>
 </resources>
