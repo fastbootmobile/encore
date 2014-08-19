@@ -79,6 +79,10 @@ public class ProviderConnection extends AbstractProviderConnection {
                     ProviderAggregator.getDefault().getAllPlaylists();
                 }
             }
+
+            if (mAudioSocket != null) {
+                mBinder.setAudioSocketName(mAudioSocket.getName());
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception occurred on the set providers", e);
         }

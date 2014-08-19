@@ -123,6 +123,8 @@ public class PlaybackService extends Service
         for (ProviderConnection conn : connections) {
             if (conn.getBinder() != null) {
                 assignProviderAudioSocket(conn);
+            } else {
+                Log.w(TAG, "Cannot assign audio socket to " + conn.getIdentifier() + ", binder is null");
             }
         }
 
@@ -216,6 +218,7 @@ public class PlaybackService extends Service
      */
     @Override
     public void onServiceConnected(AbstractProviderConnection connection) {
+        Log.i(TAG, "Service connected: " + connection.getIdentifier());
         assignProviderAudioSocket(connection);
     }
 
@@ -416,6 +419,9 @@ public class PlaybackService extends Service
 
                 startForeground(FOREGROUND_ID, mNotification);
 
+                return true;
+            } else if (mPlaybackQueue.size() > 0) {
+                startPlayingQueue();
                 return true;
             } else {
                 return false;
