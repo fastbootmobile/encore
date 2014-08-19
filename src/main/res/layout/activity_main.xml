@@ -21,6 +21,12 @@
                 android:layout_height="match_parent"
                 android:id="@+id/container"/>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:id="@+id/action_bar_shadow"
+                android:background="@drawable/shadow" />
+
             <include
                 layout="@layout/fragment_playing_bar"
                 android:layout_width="match_parent"

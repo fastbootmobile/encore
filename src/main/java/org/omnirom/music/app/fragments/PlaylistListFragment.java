@@ -132,7 +132,9 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         if (mIsStandalone) {
-            ((MainActivity) activity).onSectionAttached(MainActivity.SECTION_PLAYLISTS);
+            MainActivity mainActivity = (MainActivity) activity;
+            mainActivity.onSectionAttached(MainActivity.SECTION_PLAYLISTS);
+            mainActivity.setContentShadowTop(0);
         }
     }
 

@@ -1,5 +1,6 @@
 package org.omnirom.music.app;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.support.v4.app.FragmentManager;
 import android.os.Build;
@@ -7,6 +8,10 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+
+import com.balysv.material.drawable.menu.MaterialMenuDrawable;
+import com.balysv.material.drawable.menu.MaterialMenuView;
 
 import org.omnirom.music.app.fragments.SettingsFragment;
 
@@ -32,35 +37,26 @@ public class SettingsActivity extends FragmentActivity {
                     .commit();
         }
 
-        // Remove the activity title as we don't want it here
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        // getMenuInflater().inflate(R.menu.settings, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == android.R.id.home) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                //finishAfterTransition();
-            } else {
-                finish();
+        // Setup L-style action bar
+        ActionBar actionBar = getActionBar();
+        assert actionBar != null;
+        actionBar.setHomeButtonEnabled(false);
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(false);
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setCustomView(R.layout.action_bar);
+        MaterialMenuView toggle = (MaterialMenuView) actionBar.getCustomView().findViewById(R.id.action_bar_menu);
+        toggle.setState(MaterialMenuDrawable.IconState.CHECK);
+        toggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    //finishAfterTransition();
+                } else {
+                    finish();
+                }
             }
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        });
     }
-
 }

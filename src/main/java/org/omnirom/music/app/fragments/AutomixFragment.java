@@ -72,8 +72,9 @@ public class AutomixFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ((MainActivity) activity).onSectionAttached(MainActivity.SECTION_AUTOMIX);
-
+        MainActivity mainActivity = (MainActivity) activity;
+        mainActivity.onSectionAttached(MainActivity.SECTION_AUTOMIX);
+        mainActivity.setContentShadowTop(0);
     }
 
     @Override

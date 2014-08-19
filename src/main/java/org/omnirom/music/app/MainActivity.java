@@ -28,11 +28,6 @@ import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
-
-import com.balysv.material.drawable.menu.MaterialMenuDrawable;
-import com.balysv.material.drawable.menu.MaterialMenuView;
-
-import org.omnirom.music.app.fragments.AbstractRootFragment;
 import org.omnirom.music.app.fragments.AutomixFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
@@ -203,11 +198,15 @@ public class MainActivity extends FragmentActivity
         }
     }
 
+    public void setContentShadowTop(int pxTop) {
+        findViewById(R.id.action_bar_shadow).setTranslationY(pxTop);
+    }
+
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
 
         if (actionBar != null) {
-            //actionBar.setTitle(mTitle);
+            ((TextView) actionBar.getCustomView().findViewById(android.R.id.title)).setText(mTitle);
         }
     }
 
