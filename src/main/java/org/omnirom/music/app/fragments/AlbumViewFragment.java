@@ -44,6 +44,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.util.Iterator;
 import java.util.List;
@@ -194,14 +195,29 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                // We substract the header view
+                position = position - 1;
+
                 // Play the song
-                Song song = mAdapter.getItem(i);
+                Song song = mAdapter.getItem(position);
 
                 if (song != null) {
                     try {
-                        PluginsLookup.getDefault().getPlaybackService().playSong(song);
-                        // TODO: Add everything else from the album to the queue
+                        IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                        pbService.playSong(song);
+
+                        // Add the remaining songs of the album to the playback queue
+                        Iterator<String> it = mAlbum.songs();
+                        ProviderCache cache = ProviderAggregator.getDefault().getCache();
+                        for (int i = 0; i < position + 1; i++) {
+                            it.next();
+                        }
+                        while (it.hasNext()) {
+                            pbService.queueSong(cache.getSong(it.next()), false);
+                        }
+
+                        pbService.play();
                         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                         mFabShouldResume = true;
                     } catch (RemoteException e) {
