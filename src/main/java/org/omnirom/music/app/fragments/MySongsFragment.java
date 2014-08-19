@@ -41,7 +41,7 @@ public class MySongsFragment extends Fragment {
         mViewPager.setAdapter(mSongsAdapter);
 
         mTabStrip = (PagerTabStrip) root.findViewById(R.id.pager_title_strip);
-        mTabStrip.setTabIndicatorColorResource(R.color.primary_light);
+        mTabStrip.setTabIndicatorColorResource(R.color.accent);
 
         return root;
     }

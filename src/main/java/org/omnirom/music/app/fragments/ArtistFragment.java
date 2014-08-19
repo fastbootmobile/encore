@@ -176,9 +176,11 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     private static class AlbumArtLoadListener implements AlbumArtImageView.OnArtLoadedListener {
         private View mRootView;
+        private Handler mHandler;
 
         public AlbumArtLoadListener(View rootView) {
             mRootView = rootView;
+            mHandler = new Handler();
         }
 
         @Override
@@ -187,27 +189,34 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 return;
             }
 
-            Palette palette = Palette.generate(drawable.getBitmap());
-            PaletteItem vibrant = palette.getVibrantColor();
+            Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+                @Override
+                public void onGenerated(Palette palette) {
+                    PaletteItem vibrant = palette.getVibrantColor();
 
-            if (vibrant != null && mRootView != null) {
-                mRootView.setBackgroundColor(vibrant.getRgb());
+                    if (vibrant != null && mRootView != null) {
+                        mRootView.setBackgroundColor(vibrant.getRgb());
 
-                float luminance = vibrant.getHsl()[2];
+                        float luminance = vibrant.getHsl()[2];
 
-                TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
-                TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
-                Button btnPlay = (Button) mRootView.findViewById(R.id.btnArtistSuggestionPlay);
+                        final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionArtist);
+                        final TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
+                        final Button btnPlay = (Button) mRootView.findViewById(R.id.btnArtistSuggestionPlay);
 
-                int color = 0xFF333333;
-                if (luminance < 0.6f) {
-                    color = 0xFFFFFFFF;
+                        final int color = luminance < 0.6f ? 0xFFFFFFFF : 0xFF333333;
+
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                tvArtist.setTextColor(color);
+                                tvTitle.setTextColor(color);
+                                btnPlay.setTextColor(color);
+                            }
+                        });
+                    }
                 }
+            });
 
-                tvArtist.setTextColor(color);
-                tvTitle.setTextColor(color);
-                btnPlay.setTextColor(color);
-            }
         }
     }
 
@@ -775,23 +784,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 }
 
                 // Load the album art
-                ivCover.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
-                    @Override
-                    public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
-                        if (drawable == null) {
-                            return;
-                        }
-                        Palette palette = Palette.generate(drawable.getBitmap());
-                        PaletteItem mutedBgColor = palette.getMutedColor();
-                        if (mutedBgColor != null) {
-                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                            /* RippleDrawable bg = (RippleDrawable) viewRoot.getBackground();
-                            bg.setColor(ColorStateList.valueOf(mutedBgColor.getRgb()));
-                            viewRoot.setBackground(bg); */
-                            }
-                        }
-                    }
-                });
                 ivCover.loadArtForAlbum(album);
 
                 mAlbumToViewMap.put(album.getRef(), viewRoot);

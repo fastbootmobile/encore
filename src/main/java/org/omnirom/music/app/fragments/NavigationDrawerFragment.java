@@ -180,9 +180,11 @@ public class NavigationDrawerFragment extends Fragment {
             public void onClick(View view) {
                 if (isDrawerOpen()) {
                     mDrawerLayout.closeDrawer(mFragmentContainerView);
+                    mDrawerToggle.setState(MaterialMenuDrawable.IconState.ARROW);
                     mDrawerToggle.animatePressedState(MaterialMenuDrawable.IconState.BURGER);
                 } else {
                     mDrawerLayout.openDrawer(mFragmentContainerView);
+                    mDrawerToggle.setState(MaterialMenuDrawable.IconState.BURGER);
                     mDrawerToggle.animatePressedState(MaterialMenuDrawable.IconState.ARROW);
                 }
             }
@@ -193,7 +195,6 @@ public class NavigationDrawerFragment extends Fragment {
         DrawerLayout.DrawerListener drawerListener = new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View view, float v) {
-
             }
 
             @Override
@@ -229,7 +230,6 @@ public class NavigationDrawerFragment extends Fragment {
 
             @Override
             public void onDrawerStateChanged(int i) {
-
             }
         };
 

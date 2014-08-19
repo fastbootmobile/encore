@@ -30,6 +30,8 @@
     <dimen name="tile_dual_text_height">68dp</dimen>
     <dimen name="header_size">0dp</dimen>
 
+    <dimen name="shadow_height">2dp</dimen>
+
 
     <!-- Preference fragment padding, bottom -->
     <dimen name="preference_fragment_padding_bottom">0dp</dimen>

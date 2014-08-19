@@ -92,6 +92,10 @@ public class MainActivity extends FragmentActivity
         mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
     }
 
+    public boolean isPlayBarVisible() {
+        return mPlayingBarLayout.isVisible();
+    }
+
     @Override
     public void onBackPressed() {
         if (!mPlayingBarLayout.isWrapped()) {

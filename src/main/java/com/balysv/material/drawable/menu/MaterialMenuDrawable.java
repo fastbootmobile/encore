@@ -494,7 +494,7 @@ public class MaterialMenuDrawable extends Drawable implements Animatable {
     }
 
     public synchronized void setIconState(IconState iconState) {
-        if (currentIconState == iconState) return;
+        //if (currentIconState == iconState) return;
 
         switch (iconState) {
             case BURGER:

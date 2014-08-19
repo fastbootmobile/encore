@@ -7,11 +7,11 @@
     <!-- Red 700 -->
     <color name="primary_dark">#d01716</color>
 
-    <!-- Red 900 -->
-    <color name="accent">#b0120a</color>
+    <!-- Deep Orange A200 -->
+    <color name="accent">#ff6e40</color>
 
-    <!-- Red 300 -->
-    <color name="primary_light">#f36c60</color>
+    <!-- Red 100 -->
+    <color name="primary_light">#f9bdbb</color>
 
     <!-- Standard colors -->
     <color name="apptheme_color">@color/primary</color>

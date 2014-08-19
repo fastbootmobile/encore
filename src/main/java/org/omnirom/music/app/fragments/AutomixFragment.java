@@ -28,6 +28,7 @@ public class AutomixFragment extends Fragment {
 
     private ListView mListView;
     private BucketAdapter mAdapter;
+    private ImageButton mFabCreate;
     private AutoMixManager mAutoMixManager = AutoMixManager.getDefault();
 
     public AutomixFragment() {
@@ -43,8 +44,8 @@ public class AutomixFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_automix, container, false);
 
-        ImageButton fabCreate = (ImageButton) rootView.findViewById(R.id.fabCreate);
-        fabCreate.setOnClickListener(new View.OnClickListener() {
+        mFabCreate = (ImageButton) rootView.findViewById(R.id.fabCreate);
+        mFabCreate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getActivity(), AutomixCreateActivity.class));
@@ -86,5 +87,16 @@ public class AutomixFragment extends Fragment {
     private void updateBuckets() {
         mAdapter.setBuckets(mAutoMixManager.getBuckets());
         mAdapter.notifyDataSetChanged();
+
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity.isPlayBarVisible()) {
+            mFabCreate.animate()
+                    .translationY(-getResources().getDimensionPixelSize(R.dimen.playing_bar_height))
+                    .start();
+        } else {
+            mFabCreate.animate()
+                    .translationY(0)
+                    .start();
+        }
     }
 }

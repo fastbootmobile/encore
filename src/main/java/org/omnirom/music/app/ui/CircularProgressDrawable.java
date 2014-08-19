@@ -18,11 +18,13 @@ public class CircularProgressDrawable extends Drawable {
     private Paint mPaint;
     private RectF mRect;
     private int mOpacity;
+    private float mPadding;
 
     public CircularProgressDrawable() {
         mValue = 50;
         mMax = 100;
         mOpacity = 255;
+        mPadding = 0;
         mRect = new RectF();
         mPaint = new Paint();
         mPaint.setColor(0xFFFFFFFF);
@@ -54,6 +56,10 @@ public class CircularProgressDrawable extends Drawable {
         return mMax;
     }
 
+    public void setPadding(float pad) {
+        mPadding = pad;
+    }
+
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
@@ -63,10 +69,11 @@ public class CircularProgressDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
         mRect.set(getBounds());
-        mRect.left += mPaint.getStrokeWidth() / 2.0f;
-        mRect.right -= mPaint.getStrokeWidth() / 2.0f;
-        mRect.top += mPaint.getStrokeWidth() / 2.0f;
-        mRect.bottom -= mPaint.getStrokeWidth() / 2.0f;
+        final float paddedStrokeWidth = mPaint.getStrokeWidth() + mPadding * 2.0f;
+        mRect.left += paddedStrokeWidth / 2.0f;
+        mRect.right -= paddedStrokeWidth / 2.0f;
+        mRect.top += paddedStrokeWidth / 2.0f;
+        mRect.bottom -= paddedStrokeWidth / 2.0f;
 
         float sweepAngle = mValue * 360.0f / mMax;
         canvas.drawArc(mRect, -90.0f, sweepAngle, false, mPaint);
