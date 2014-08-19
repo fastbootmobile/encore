@@ -312,8 +312,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     public void run() {
                         PaletteItem color = palette.getDarkMutedColor();
                         if (color != null && mRootView != null) {
-                            Utils.colorFloatingButton(mRootView.findViewById(R.id.fabPlay),
-                                    color.getRgb());
+                            Utils.colorFloatingButton(mFabPlay, color.getRgb(), true);
                         }
                     }
                 });
@@ -400,6 +399,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         // Outline is required for the FAB shadow to be actually oval
         mFabPlay = (ImageButton) mRootView.findViewById(R.id.fabPlay);
         setOutlines(mFabPlay);
+        Utils.setupBigFabShadow(mFabPlay);
         showFab(false, false);
 
         // Set the FAB animated drawable

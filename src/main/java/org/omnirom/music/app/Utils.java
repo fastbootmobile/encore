@@ -3,7 +3,9 @@ package org.omnirom.music.app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -478,7 +480,7 @@ public class Utils {
         }
     }
 
-    public static void colorFloatingButton(View fab, int color) {
+    public static void colorFloatingButton(View fab, int color, boolean bigFab) {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
             // RippleDrawable ripple = (RippleDrawable) fab.getBackground();
             // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
@@ -488,6 +490,16 @@ public class Utils {
             LayerDrawable layer = (LayerDrawable) rootShape.getCurrent();
             GradientDrawable shape = (GradientDrawable) layer.getDrawable(1);
             shape.setColor(color);
+        }
+    }
+
+    public static void setupBigFabShadow(View fab) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            StateListDrawable rootShape = (StateListDrawable) fab.getBackground();
+            LayerDrawable layer = (LayerDrawable) rootShape.getCurrent();
+            GradientDrawable shadow = (GradientDrawable) layer.getDrawable(0);
+            shadow.setColors(new int[]{0x80000000, 0x0});
+            shadow.setGradientRadius(180);
         }
     }
 }
