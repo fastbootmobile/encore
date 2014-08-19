@@ -174,6 +174,7 @@ public class AlbumArtImageView extends SquareImageView {
     private BackgroundTask mTask;
     private BoundEntity mRequestedEntity;
     private MaterialTransitionDrawable mDrawable;
+    private boolean mCrossfade;
 
     private static final int DELAY_BEFORE_START = 300;
     private static final int DELAY_BEFORE_RETRY = 60;
@@ -239,6 +240,16 @@ public class AlbumArtImageView extends SquareImageView {
     }
 
     /**
+     * When the AlbumArtImageView is in crossfade mode, the album art won't go through the default
+     * placeholder state before moving into the next album art, but will crossfade to the next
+     * art directly
+     * @param crossfade true to enable crossfade mode
+     */
+    public void setCrossfade(boolean crossfade) {
+        mCrossfade = crossfade;
+    }
+
+    /**
      * Returns the last requested entity
      * @return A BoundEntity (a song, album, artist) that was previously requested
      */
@@ -262,7 +273,7 @@ public class AlbumArtImageView extends SquareImageView {
         if (ent.equals(mRequestedEntity)) {
             // Nothing to do, we are displaying the proper thing already
             return;
-        } else {
+        } else if (!mCrossfade) {
             setDefaultArt();
         }
 
@@ -272,9 +283,11 @@ public class AlbumArtImageView extends SquareImageView {
 
         // We delay the loading slightly to make sure we don't uselessly load an image that is
         // being quickly flinged through (the requested entity will change in-between as the
-        // view is recycled).
+        // view is recycled). We don't wait however in crossfade mode as we expect to see the
+        // image as soon as possible.
         mRequestedEntity = ent;
-        mHandler.postDelayed(new Runnable() {
+
+        Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 if (mRequestedEntity == ent) {
@@ -290,6 +303,12 @@ public class AlbumArtImageView extends SquareImageView {
                     }
                 }
             }
-        }, DELAY_BEFORE_START);
+        };
+
+        if (mCrossfade) {
+            mHandler.post(runnable);
+        } else {
+            mHandler.postDelayed(runnable, DELAY_BEFORE_START);
+        }
     }
 }

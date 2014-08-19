@@ -354,6 +354,7 @@ public class PlayingBarView extends RelativeLayout {
                 TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
                 TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
                 AlbumArtImageView ivAlbumArt = (AlbumArtImageView) itemRoot.findViewById(R.id.ivAlbumArt);
+                ivAlbumArt.setCrossfade(true);
 
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                     //tvArtist.setViewName("playbackqueue:preview:" + shownCount + ":artist");
