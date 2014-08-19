@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- If you change anything here, make sure to update Utils.colorFloatingButton! -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:centerColor="#AA777777"
+                android:endColor="#00777777"
+                android:gradientRadius="80"
+                android:startColor="#AA777777"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/accent" />
+        </shape>
+
+    </item>
+</layer-list>

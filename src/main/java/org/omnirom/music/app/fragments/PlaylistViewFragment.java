@@ -1,11 +1,9 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
-import android.support.v4.app.Fragment;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +11,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
+import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.ui.PlaylistListView;
-import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -37,18 +35,14 @@ import java.util.List;
  * create an instance of this fragment.
  *
  */
-public class PlaylistViewFragment extends Fragment
-        implements ILocalCallback, PlaybackState.Listener {
+public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "PlaylistViewFragment";
     public static final String KEY_PLAYLIST = "playlist";
 
     private PlaylistAdapter mAdapter;
-    private Handler mHandler;
     private Playlist mPlaylist;
-    private PlaybackState mPlaybackState;
 
-    private BitmapDrawable mCell;
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -64,7 +58,6 @@ public class PlaylistViewFragment extends Fragment
     }
 
     public PlaylistViewFragment() {
-        mHandler = new Handler();
     }
 
     @Override
@@ -72,7 +65,6 @@ public class PlaylistViewFragment extends Fragment
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if (args == null) {
-
             throw new IllegalArgumentException("This fragment must have a valid playlist");
         }
 
@@ -115,7 +107,7 @@ public class PlaylistViewFragment extends Fragment
                     try {
                         PluginsLookup.getDefault().getPlaybackService().playSong(song);
                     } catch (RemoteException e) {
-                        Log.e("TEST", "Unable to play song", e);
+                        Log.e(TAG, "Unable to play song", e);
                     }
                 } else {
                     Log.e(TAG, "Trying to play null song!");
@@ -138,10 +130,8 @@ public class PlaylistViewFragment extends Fragment
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-/*        MainActivity main = (MainActivity) activity;
-        main.onSectionAttached(MainActivity.SECTION_PLAYLISTS);*/
-        mPlaybackState = new PlaybackState();
-        mPlaybackState.addListener(this);
+        MainActivity main = (MainActivity) activity;
+        main.setContentShadowTop(0);
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
     }
@@ -150,7 +140,6 @@ public class PlaylistViewFragment extends Fragment
     public void onDetach() {
         super.onDetach();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
-        mPlaybackState.removeListener(this);
     }
 
     @Override
@@ -203,28 +192,6 @@ public class PlaylistViewFragment extends Fragment
 
     @Override
     public void onSearchResult(SearchResult searchResult) {
-
-    }
-
-    @Override
-    public void onCurrentSongChanged(PlaybackState state, final Song song) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mAdapter.setCurrentSong(song);
-                mAdapter.notifyDataSetChanged();
-            }
-        });
-
-    }
-
-    @Override
-    public void onPlaybackPositionChanged(PlaybackState state, int posMs) {
-
-    }
-
-    @Override
-    public void onPlaybackStateChanged(PlaybackState state, int newState) {
 
     }
 }

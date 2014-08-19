@@ -60,4 +60,16 @@ public class MySongsFragment extends Fragment {
             }
         });
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final MainActivity mainActivity = (MainActivity) getActivity();
+                mainActivity.setContentShadowTop(mTabStrip.getMeasuredHeight());
+            }
+        });
+    }
 }

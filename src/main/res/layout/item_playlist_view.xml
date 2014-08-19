@@ -62,7 +62,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:clickable="true"
-        android:background="@drawable/transparent_action_background"
+        android:background="?android:attr/selectableItemBackground"
         android:id="@+id/ivOverflow"
         android:layout_gravity="center_vertical"
         android:src="@drawable/ic_more_vert_dark"

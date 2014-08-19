@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+    <!-- If you change anything here, make sure to update Utils.colorFloatingButton! -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true">
-        <shape android:shape="oval">
-            <solid android:color="@color/primary_light" />
-        </shape>
-    </item>
-
-    <item>
-        <shape android:shape="oval">
-            <solid android:color="@color/accent" />
-        </shape>
-    </item>
+    <item android:state_pressed="true" android:drawable="@drawable/fab_oval_shadowed_accent"/>
+    <item android:drawable="@drawable/fab_oval_shadowed"/>
 </selector>

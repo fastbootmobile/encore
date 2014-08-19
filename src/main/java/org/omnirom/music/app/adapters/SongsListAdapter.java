@@ -267,6 +267,14 @@ public class SongsListAdapter extends BaseAdapter {
             holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
             holder.vRoot = root;
 
+            if (mBlurBackground) {
+                // Fixup some style stuff
+                holder.tvTitle.setTextColor(0xFFFFFFFF);
+                holder.tvDuration.setTextColor(0xFFFFFFFF);
+                holder.tvArtist.setTextColor(0xFFFFFFFF);
+                holder.ivOverflow.setImageResource(R.drawable.ic_more_vert_light);
+            }
+
             root.setTag(holder);
         }
         final Song song = getItem(position);

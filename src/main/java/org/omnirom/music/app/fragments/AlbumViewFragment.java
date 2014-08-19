@@ -253,15 +253,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     public void run() {
                         PaletteItem color = palette.getDarkMutedColor();
                         if (color != null && mRootView != null) {
-                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                                // RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
-                                // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
-                                // back.setColor(color.getRgb());
-                            } else {
-                                StateListDrawable drawable = (StateListDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
-                                GradientDrawable shape = (GradientDrawable) drawable.getCurrent();
-                                shape.setColor(color.getRgb());
-                            }
+                            Utils.colorFloatingButton(mRootView.findViewById(R.id.fabPlay),
+                                    color.getRgb());
                         }
                     }
                 });

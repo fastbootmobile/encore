@@ -339,7 +339,7 @@ public class NavigationDrawerFragment extends Fragment {
      */
     private void showGlobalContextActionBar() {
         ActionBar actionBar = getActionBar();
-        actionBar.setTitle(R.string.app_name);
+        ((TextView)actionBar.getCustomView().findViewById(android.R.id.title)).setText(R.string.app_name);
     }
 
     private ActionBar getActionBar() {

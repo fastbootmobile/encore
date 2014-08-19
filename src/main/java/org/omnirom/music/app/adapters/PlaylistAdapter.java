@@ -20,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -274,6 +276,7 @@ public class PlaylistAdapter extends BaseAdapter {
         public TextView tvTitle;
         public TextView tvArtist;
         public TextView tvDuration;
+        public ImageView ivOverflow;
         public View vRoot;
         public int position;
         public Song song;
@@ -343,7 +346,13 @@ public class PlaylistAdapter extends BaseAdapter {
             holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
             holder.tvArtist = (TextView) root.findViewById(R.id.tvArtist);
             holder.tvDuration = (TextView) root.findViewById(R.id.tvDuration);
+            holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
             holder.vRoot = root;
+
+            holder.tvArtist.setTextColor(0xFFFFFFFF);
+            holder.tvTitle.setTextColor(0xFFFFFFFF);
+            holder.tvDuration.setTextColor(0xFFFFFFFF);
+            holder.ivOverflow.setImageResource(R.drawable.ic_more_vert_light);
 
             root.setTag(holder);
         }

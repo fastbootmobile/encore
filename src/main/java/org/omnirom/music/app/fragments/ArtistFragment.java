@@ -7,6 +7,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -311,15 +312,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     public void run() {
                         PaletteItem color = palette.getDarkMutedColor();
                         if (color != null && mRootView != null) {
-                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                                // RippleDrawable ripple = (RippleDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
-                                // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
-                                // back.setColor(color.getRgb());
-                            } else {
-                                StateListDrawable rootShape = (StateListDrawable) mRootView.findViewById(R.id.fabPlay).getBackground();
-                                GradientDrawable shape = (GradientDrawable) rootShape.getCurrent();
-                                shape.setColor(color.getRgb());
-                            }
+                            Utils.colorFloatingButton(mRootView.findViewById(R.id.fabPlay),
+                                    color.getRgb());
                         }
                     }
                 });

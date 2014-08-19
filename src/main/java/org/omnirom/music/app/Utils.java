@@ -6,6 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -472,6 +475,19 @@ public class Utils {
                 v.setScaleX(0.0f);
                 v.setScaleY(0.0f);
             }
+        }
+    }
+
+    public static void colorFloatingButton(View fab, int color) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            // RippleDrawable ripple = (RippleDrawable) fab.getBackground();
+            // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
+            // back.setColor(color);
+        } else {
+            StateListDrawable rootShape = (StateListDrawable) fab.getBackground();
+            LayerDrawable layer = (LayerDrawable) rootShape.getCurrent();
+            GradientDrawable shape = (GradientDrawable) layer.getDrawable(1);
+            shape.setColor(color);
         }
     }
 }

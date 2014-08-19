@@ -32,6 +32,6 @@
         android:layout_marginRight="16dp"
         android:layout_marginEnd="16dp"
 
-        android:background="@drawable/fab_playbar"
+        android:background="@drawable/fab_background"
         android:contentDescription="@string/play_now" />
 </org.omnirom.music.app.ui.PlayingBarView>
