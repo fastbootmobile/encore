@@ -20,6 +20,7 @@
     <color name="separator">#dddddd</color>
     <color name="navdrawer_separator">#eaeaea</color>
     <color name="default_fragment_background">#eaeaea</color>
+    <color name="selected_item_background">#DDDDDD</color>
 
     <!-- Playbar -->
     <color name="play_bar_background">#bbffffff</color>
@@ -27,5 +28,6 @@
 
     <!-- Default lists/grids colors -->
     <color name="default_album_art_background">#333333</color>
+
 
 </resources>

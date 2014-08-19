@@ -333,8 +333,6 @@ public class SongsListAdapter extends BaseAdapter {
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
             }
-        } else {
-            root.setBackgroundColor(0xFFFFFFFF);
         }
 
         return root;

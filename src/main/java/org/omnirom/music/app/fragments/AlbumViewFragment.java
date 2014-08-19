@@ -249,15 +249,15 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
             @Override
             public void onGenerated(final Palette palette) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        PaletteItem color = palette.getDarkMutedColor();
-                        if (color != null && mRootView != null) {
+                final PaletteItem color = palette.getDarkMutedColor();
+                if (color != null && mRootView != null) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
                             Utils.colorFloatingButton(mPlayFab, color.getRgb(), true);
                         }
-                    }
-                });
+                    });
+                }
             }
         });
     }

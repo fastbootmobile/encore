@@ -7,7 +7,7 @@
     android:clickable="false"
     android:descendantFocusability="blocksDescendants"
     android:weightSum="2"
-    android:background="@color/default_fragment_background">
+    android:background="@drawable/item_selectable_background">
 
     <org.omnirom.music.app.ui.VuMeterView
         android:layout_width="8dp"
