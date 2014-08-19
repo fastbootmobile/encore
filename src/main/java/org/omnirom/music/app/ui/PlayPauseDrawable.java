@@ -40,7 +40,6 @@ public class PlayPauseDrawable extends Drawable {
     private long mLastTransitionTick;
 
     private Resources mResources;
-    private Handler mHandler;
 
 
     public PlayPauseDrawable(Resources res) {
@@ -49,7 +48,6 @@ public class PlayPauseDrawable extends Drawable {
         mCurrentShape = mRequestShape = -1;
         mPath = new Path();
         mPaint = new Paint();
-        mHandler = new Handler();
 
         mPaint.setColor(0xCCFFFFFF);
         mPaint.setStyle(Paint.Style.FILL);
@@ -96,32 +94,18 @@ public class PlayPauseDrawable extends Drawable {
         mInitialDrawDone = true;
 
         mPath.reset();
-        final int width = getBounds().width();
-        final int height = getBounds().height();
 
         switch (mRequestShape) {
             case SHAPE_PAUSE:
-                mPath.addRect(mHalfPadding + width * 0.5f * PAUSE_TRIM_RATIO,
-                        mHalfPadding,
-                        width * 0.5f - width * 0.5f * 0.07f,
-                        height - mHalfPadding,
-                        Path.Direction.CW);
-
-                mPath.addRect(width * 0.5f + width * 0.5f * PAUSE_TRIM_RATIO,
-                        mHalfPadding,
-                        width - mHalfPadding - width * 0.5f * PAUSE_TRIM_RATIO,
-                        height - mHalfPadding,
-                        Path.Direction.CW);
+                transitionStopToPause(1.0f);
                 break;
 
             case SHAPE_PLAY:
-                mPath.moveTo(mHalfPadding, mHalfPadding);
-                mPath.lineTo(width - mHalfPadding, height / 2);
-                mPath.lineTo(mHalfPadding, height - mHalfPadding);
+                transitionStopToPlay(1.0f);
                 break;
 
             case SHAPE_STOP:
-                mPath.addRect(mHalfPadding, mHalfPadding, width - mHalfPadding, height - mHalfPadding, Path.Direction.CW);
+                transitionStopToPause(0.0f);
                 break;
         }
 
@@ -262,12 +246,7 @@ public class PlayPauseDrawable extends Drawable {
 
         if (mCurrentShape != mRequestShape) {
             // Invalidate ourselves to redraw the next animation frame
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    invalidateSelf();
-                }
-            });
+            invalidateSelf();
         }
     }
 
