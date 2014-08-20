@@ -47,6 +47,8 @@ public class SearchActivity extends FragmentActivity {
                     .commit();
         }
         handleIntent(getIntent());
+
+        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override

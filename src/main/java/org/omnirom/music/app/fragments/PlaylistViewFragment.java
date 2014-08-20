@@ -9,12 +9,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
+import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.app.ui.PlaylistListView;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
@@ -45,6 +48,9 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     private PlaylistAdapter mAdapter;
     private Playlist mPlaylist;
+    private ImageButton mPlayFab;
+    private PlayPauseDrawable mFabDrawable;
+    private boolean mFabShouldResume;
 
     /**
      * Use this factory method to create a new instance of
@@ -86,12 +92,62 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         mAdapter = new PlaylistAdapter(root.getContext());
         lvPlaylistContents.setAdapter(mAdapter);
 
+        // Setup the parallaxed header
         View headerView = inflater.inflate(R.layout.songs_list_view_header, null);
+        lvPlaylistContents.addParallaxedHeaderView(headerView);
+
+        headerView.findViewById(R.id.pbAlbumLoading).setVisibility(View.GONE);
+
         ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
         TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
-        //tvAlbumName.setBackgroundColor(mBackgroundColor);
+
         tvAlbumName.setText(mPlaylist.getName());
-        lvPlaylistContents.addParallaxedHeaderView(headerView);
+        ivHero.setImageResource(R.drawable.album_placeholder);
+
+        mPlayFab = (ImageButton) headerView.findViewById(R.id.fabPlay);
+        Utils.setLargeFabOutline(new View[]{mPlayFab});
+        Utils.setupBigFabShadow(mPlayFab);
+
+        // Set source logo
+        ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
+        ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(mPlaylist));
+
+        // Set the FAB animated drawable
+        mFabDrawable = new PlayPauseDrawable(getResources());
+        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+        mFabDrawable.setPaddingDp(48);
+        mPlayFab.setImageDrawable(mFabDrawable);
+        mPlayFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mFabDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
+                    if (mFabShouldResume) {
+                        try {
+                            PluginsLookup.getDefault().getPlaybackService().play();
+                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot resume playback", e);
+                        }
+                    } else {
+                        try {
+                            PluginsLookup.getDefault().getPlaybackService().playPlaylist(mPlaylist);
+                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot start playing playlist " + mPlaylist.getRef(), e);
+                        }
+                    }
+                } else {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabShouldResume = true;
+                    try {
+                        PluginsLookup.getDefault().getPlaybackService().pause();
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot pause playback", e);
+                    }
+                }
+            }
+        });
 
         // Fill the playlist
         Iterator<String> songIt = mPlaylist.songs();
@@ -105,11 +161,11 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         }
         mAdapter.notifyDataSetChanged();
         mAdapter.setPlaylist(mPlaylist);
+
         // Set the list listener
         lvPlaylistContents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
                 // Play the song
                 Song song = mAdapter.getItem(i);
 

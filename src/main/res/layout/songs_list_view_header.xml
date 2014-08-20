@@ -48,8 +48,8 @@
         android:layout_alignParentRight="true"
 
         android:layout_marginBottom="-24dp"
-        android:layout_marginEnd="48dp"
-        android:layout_marginRight="48dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
 
         android:background="@drawable/fab_background"
         android:contentDescription="@string/play_now" />
@@ -65,8 +65,8 @@
         android:indeterminate="true" />
 
     <ImageView
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:id="@+id/ivSourceLogo"
         android:layout_alignTop="@+id/tvAlbumName"
         android:layout_alignParentEnd="true"
