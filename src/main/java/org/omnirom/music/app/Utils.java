@@ -498,8 +498,9 @@ public class Utils {
             StateListDrawable rootShape = (StateListDrawable) fab.getBackground();
             LayerDrawable layer = (LayerDrawable) rootShape.getCurrent();
             GradientDrawable shadow = (GradientDrawable) layer.getDrawable(0);
-            shadow.setColors(new int[]{0x80000000, 0x0});
-            shadow.setGradientRadius(180);
+            shadow.setColors(new int[]{0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000,
+                    0x80000000, 0x0});
+            shadow.setGradientRadius(110);
         }
     }
 }

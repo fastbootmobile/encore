@@ -133,7 +133,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
             public void run() {
                 IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
                 try {
-                    if (playbackService.isPlaying() && !playbackService.isPaused()) {
+                    if (playbackService.isPlaying() || playbackService.isPaused()) {
                         if (!mSeekBar.isPressed()) {
                             mSeekBar.setMax(playbackService.getCurrentTrackLength());
                             mSeekBar.setProgress(playbackService.getCurrentTrackPosition());
