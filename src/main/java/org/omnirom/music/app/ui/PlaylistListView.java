@@ -25,6 +25,7 @@ import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import org.omnirom.music.app.adapters.PlaylistAdapter;
@@ -51,7 +52,7 @@ import org.omnirom.music.app.adapters.PlaylistAdapter;
  * When the hover cell is either above or below the bounds of the listview, this
  * listview also scrolls on its own so as to reveal additional content.
  */
-public class PlaylistListView extends ListView {
+public class PlaylistListView extends ParallaxScrollListView {
 
     private final int SMOOTH_SCROLL_AMOUNT_AT_EDGE = 15;
     private final int MOVE_DURATION = 150;
@@ -84,11 +85,6 @@ public class PlaylistListView extends ListView {
 
     private boolean mIsWaitingForScrollFinish = false;
     private int mScrollState = OnScrollListener.SCROLL_STATE_IDLE;
-
-    public PlaylistListView(Context context) {
-        super(context);
-        init(context);
-    }
 
     public PlaylistListView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -206,7 +202,7 @@ public class PlaylistListView extends ListView {
      */
     public View getViewForID(long itemID) {
         int firstVisiblePosition = getFirstVisiblePosition();
-        PlaylistAdapter adapter = ((PlaylistAdapter) getAdapter());
+        ListAdapter adapter = getAdapter();
         for (int i = 0; i < getChildCount(); i++) {
             View v = getChildAt(i);
             int position = firstVisiblePosition + i;
@@ -215,6 +211,7 @@ public class PlaylistListView extends ListView {
                 return v;
             }
         }
+
         return null;
     }
 

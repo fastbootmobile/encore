@@ -28,7 +28,7 @@ public class PlaylistActivity extends FragmentActivity {
     private Bundle mInitialIntent;
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
 
-    public static Intent craftIntent(Context context,Playlist playlist) {
+    public static Intent craftIntent(Context context, Playlist playlist) {
         Intent intent = new Intent(context, PlaylistActivity.class);
         intent.putExtra(PlaylistViewFragment.KEY_PLAYLIST, playlist);
 
@@ -36,23 +36,26 @@ public class PlaylistActivity extends FragmentActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstance){
+    protected void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         setContentView(R.layout.activity_playlist);
         FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (PlaylistViewFragment) fm.findFragmentByTag(TAG_FRAGMENT);
-        if(savedInstance == null){
+        if (savedInstance == null) {
             mInitialIntent = getIntent().getExtras();
         } else {
             mInitialIntent = savedInstance.getBundle(EXTRA_RESTORE_INTENT);
         }
 
-        if(mActiveFragment == null ){
+        if (mActiveFragment == null) {
             mActiveFragment = new PlaylistViewFragment();
             fm.beginTransaction()
                     .add(R.id.playlist_container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
         }
         mActiveFragment.setArguments(mInitialIntent);
+
+        // Remove title
+        setTitle(null);
     }
 }

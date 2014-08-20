@@ -1,5 +1,6 @@
 package org.omnirom.music.app.fragments;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -56,14 +57,20 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_search, container, false);
         assert root != null;
+
+        getActivity().setProgressBarIndeterminate(true);
+        getActivity().setProgressBarIndeterminateVisibility(true);
+
         mAdapter = new SearchAdapter();
-        ExpandableListView expandableListView = (ExpandableListView) root.findViewById(R.id.expandablelv_search);
-        expandableListView.setAdapter(mAdapter);
-        expandableListView.setGroupIndicator(null);
+
+        ExpandableListView listView = (ExpandableListView) root.findViewById(R.id.expandablelv_search);
+        listView.setAdapter(mAdapter);
+        listView.setGroupIndicator(null);
         for (int i = 0; i < 4; i++) {
-            expandableListView.expandGroup(i, false);
+            listView.expandGroup(i, false);
         }
-        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+
+        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i2, long l) {
@@ -215,13 +222,15 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
 
     @Override
     public void onSearchResult(final SearchResult searchResult) {
-        Log.d(TAG, "search result received " + searchResult + " (" + searchResult.getIdentifier() + " / " + searchResult.mIdentifier + ")");
+        Log.d(TAG, "search result received " + searchResult + " (" + searchResult.getIdentifier()
+                + " / " + searchResult.mIdentifier + ")");
 
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (getActivity() != null) {
                     getActivity().setTitle("'" + searchResult.getQuery() + "'");
+                    getActivity().setProgressBarIndeterminateVisibility(false);
                 } else {
                     mHandler.post(this);
                 }

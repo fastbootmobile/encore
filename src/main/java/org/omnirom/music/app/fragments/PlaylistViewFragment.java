@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.MainActivity;
@@ -85,6 +86,13 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         mAdapter = new PlaylistAdapter(root.getContext());
         lvPlaylistContents.setAdapter(mAdapter);
 
+        View headerView = inflater.inflate(R.layout.songs_list_view_header, null);
+        ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
+        TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
+        //tvAlbumName.setBackgroundColor(mBackgroundColor);
+        tvAlbumName.setText(mPlaylist.getName());
+        lvPlaylistContents.addParallaxedHeaderView(headerView);
+
         // Fill the playlist
         Iterator<String> songIt = mPlaylist.songs();
         while (songIt.hasNext()) {
@@ -133,14 +141,6 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 }
             }
         });
-
-
-        // Fill the playlist information
-        TextView tvPlaylistName = (TextView) root.findViewById(R.id.tvPlaylistName);
-        TextView tvNumTracks = (TextView) root.findViewById(R.id.tvNumTracks);
-
-        tvPlaylistName.setText(mPlaylist.getName());
-        tvNumTracks.setText(getString(R.string.nb_tracks, mPlaylist.getSongsCount()));
 
         return root;
     }
