@@ -11,12 +11,12 @@
     <item
         android:id="@+id/menu_add_album_to_queue"
         android:title="@string/add_album_to_queue" />
-
     <item
         android:id="@+id/menu_add_to_playlist"
         android:title="@string/add_to_playlist" />
     <item
         android:id="@+id/menu_hide_from_library"
-        android:title="@string/hide_from_library" />
+        android:title="@string/hide_from_library"
+        android:visible="false" />
 
 </menu>

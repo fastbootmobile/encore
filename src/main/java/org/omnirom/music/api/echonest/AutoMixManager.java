@@ -1,5 +1,6 @@
 package org.omnirom.music.api.echonest;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
@@ -176,7 +177,14 @@ public class AutoMixManager implements IPlaybackCallback {
                 }
             }
         } catch (EchoNestException e) {
-            Log.e(TAG, "Unable to get next track from bucket", e);
+            if (e.getCode() == 5 && e.getMessage().contains("does not exist")
+                    && !bucket.isPlaylistSessionError()) {
+                // The bucket has expired, we must recreate it and restart the play procedure
+                bucket.createPlaylistSession();
+                startPlay(bucket);
+            } else {
+                Log.e(TAG, "Unable to get next track from bucket", e);
+            }
         }
     }
 
@@ -198,8 +206,6 @@ public class AutoMixManager implements IPlaybackCallback {
 
     @Override
     public void onSongStarted(Song s) throws RemoteException {
-        Log.e(TAG, "ON SONG STARTED");
-
         if (!s.getRef().equals(mExpectedSong)) {
             Log.i(TAG, "Song started is not from bucket, cancel automix playback");
             mCurrentPlayingBucket = null;

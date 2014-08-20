@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.omnirom.music.api.echonest.AutoMixBucket;
@@ -19,8 +20,9 @@ import java.util.zip.Inflater;
  */
 public class BucketAdapter extends BaseAdapter {
 
-    private class ViewHolder {
+    public static class ViewHolder {
         public TextView tvBucketName;
+        public ProgressBar pbBucketSpinner;
     }
 
     private List<AutoMixBucket> mBuckets;
@@ -53,6 +55,7 @@ public class BucketAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.item_bucket, viewGroup, false);
             tag = new ViewHolder();
             tag.tvBucketName = (TextView) view.findViewById(R.id.tvBucketName);
+            tag.pbBucketSpinner = (ProgressBar) view.findViewById(R.id.pbBucketSpinner);
             view.setTag(tag);
         } else {
             tag = (ViewHolder) view.getTag();
