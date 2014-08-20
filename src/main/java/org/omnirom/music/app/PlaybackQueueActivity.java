@@ -1,16 +1,13 @@
 package org.omnirom.music.app;
 
-import android.app.Activity;
 import android.app.ActionBar;
-import android.app.ActivityOptions;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.graphics.Palette;
@@ -150,27 +147,56 @@ public class PlaybackQueueActivity extends FragmentActivity {
             @Override
             public void onSongStarted(Song s) throws RemoteException {
                 mHandler.post(mUpdateSeekBarRunnable);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        updateQueueLayout();
+                    }
+                });
             }
 
             @Override
             public void onSongScrobble(int timeMs) throws RemoteException {
-
             }
 
             @Override
             public void onPlaybackPause() throws RemoteException {
-
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    }
+                });
             }
 
             @Override
             public void onPlaybackResume() throws RemoteException {
                 mHandler.post(mUpdateSeekBarRunnable);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    }
+                });
+            }
+
+            @Override
+            public void onPlaybackQueueChanged() throws RemoteException {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateQueueLayout();
+                    }
+                });
             }
         };
 
         private static final int SEEK_UPDATE_DELAY = 1000/30;
         private SeekBar mSeekBar;
         private Handler mHandler;
+        private View mRootView;
+        private PlayPauseDrawable mPlayDrawable;
 
         public SimpleFragment() {
             mHandler = new Handler();
@@ -179,10 +205,11 @@ public class PlaybackQueueActivity extends FragmentActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_playback_queue, container, false);
-            ViewGroup tracksContainer = (ViewGroup) rootView.findViewById(R.id.playingTracksLayout);
+            mRootView = inflater.inflate(R.layout.fragment_playback_queue, container, false);
 
-            mSeekBar = (SeekBar) rootView.findViewById(R.id.sbSeek);
+            final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+
+            mSeekBar = (SeekBar) mRootView.findViewById(R.id.sbSeek);
             mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
@@ -201,41 +228,89 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 }
 
                 @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
+                public void onStartTrackingTouch(SeekBar seekBar) {}
 
                 @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-
-                }
+                public void onStopTrackingTouch(SeekBar seekBar) {}
             });
 
             // Set play pause drawable
-            ImageView ivPlayPause = (ImageView) rootView.findViewById(R.id.ivPlayPause);
-            PlayPauseDrawable playDrawable = new PlayPauseDrawable(getResources());
-            playDrawable.setColor(0xAA333333);
-            playDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-            ivPlayPause.setImageDrawable(playDrawable);
+            ImageView ivPlayPause = (ImageView) mRootView.findViewById(R.id.ivPlayPause);
+            mPlayDrawable = new PlayPauseDrawable(getResources());
+            mPlayDrawable.setColor(getResources().getColor(R.color.primary));
+            mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+            ivPlayPause.setImageDrawable(mPlayDrawable);
 
-            IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            ivPlayPause.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mPlayDrawable.getRequestedShape() == PlayPauseDrawable.SHAPE_PLAY) {
+                        // We're paused, play
+                        try {
+                            playbackService.play();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot play!", e);
+                        }
+                    } else {
+                        // We're playing, pause
+                        try {
+                            playbackService.pause();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot pause!", e);
+                        }
+                    }
+                }
+            });
 
             try {
                 if (playbackService.isPlaying() && !playbackService.isPaused()) {
-                    playDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                 }
             } catch (RemoteException e) {
                 // ignore
             }
 
+            updateQueueLayout();
+            return mRootView;
+        }
+
+        @Override
+        public void onAttach(Activity activity) {
+            super.onAttach(activity);
+            // Attach this fragment as Playback Listener
+            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+            try {
+                service.addCallback(mPlaybackListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot add playback queue activity as listener", e);
+            }
+            mHandler.post(mUpdateSeekBarRunnable);
+        }
+
+        @Override
+        public void onDetach() {
+            super.onDetach();
+            // Detach this fragment as Playback Listener
+            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+            try {
+                service.removeCallback(mPlaybackListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot add playback queue activity as listener", e);
+            }
+        }
+
+        public void updateQueueLayout() {
+            final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            ViewGroup tracksContainer = (ViewGroup) mRootView.findViewById(R.id.playingTracksLayout);
+
             // Load the current playing track
             try {
-                Song currentTrack = playbackService.getCurrentTrack();
+                Song currentTrack = playbackService.getCurrentPlaybackQueue().get(0);
 
-                TextView tvCurrentTitle = (TextView) rootView.findViewById(R.id.tvCurrentTitle);
-                TextView tvCurrentArtist = (TextView) rootView.findViewById(R.id.tvCurrentArtist);
-                AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) rootView.findViewById(R.id.ivCurrentPlayAlbumArt);
+                TextView tvCurrentTitle = (TextView) mRootView.findViewById(R.id.tvCurrentTitle);
+                TextView tvCurrentArtist = (TextView) mRootView.findViewById(R.id.tvCurrentArtist);
+                AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) mRootView.findViewById(R.id.ivCurrentPlayAlbumArt);
 
                 tvCurrentTitle.setText(currentTrack.getTitle());
                 tvCurrentArtist.setText(cache.getArtist(currentTrack.getArtist()).getName());
@@ -245,6 +320,8 @@ public class PlaybackQueueActivity extends FragmentActivity {
             }
 
 
+            tracksContainer.removeAllViews();
+
             // Load and inflate the playback queue
             List<Song> songs;
             try {
@@ -252,7 +329,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 songs = new ArrayList<Song>(playbackService.getCurrentPlaybackQueue());
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to get current playback queue", e);
-                return rootView;
+                return;
             }
 
             // We remove the first song as it's the currently playing song we displayed above
@@ -260,6 +337,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 songs.remove(0);
 
                 int i = 1;
+                LayoutInflater inflater = getActivity().getLayoutInflater();
                 for (Song song : songs) {
                     View itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
@@ -290,7 +368,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
             }
 
             // Set the click listeners on the first card UI
-            ImageView ivForward = (ImageView) rootView.findViewById(R.id.ivForward);
+            ImageView ivForward = (ImageView) mRootView.findViewById(R.id.ivForward);
             ivForward.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -302,33 +380,6 @@ public class PlaybackQueueActivity extends FragmentActivity {
                     }
                 }
             });
-
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            // Attach this fragment as Playback Listener
-            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-            try {
-                service.addCallback(mPlaybackListener);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot add playback queue activity as listener", e);
-            }
-            mHandler.post(mUpdateSeekBarRunnable);
-        }
-
-        @Override
-        public void onDetach() {
-            super.onDetach();
-            // Detach this fragment as Playback Listener
-            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-            try {
-                service.removeCallback(mPlaybackListener);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot add playback queue activity as listener", e);
-            }
         }
     }
 }

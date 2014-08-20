@@ -51,7 +51,6 @@ public class PluginsLookup {
     private List<DSPConnection> mDSPConnections;
     private List<ConnectionListener> mConnectionListeners;
     private IPlaybackService mPlaybackService;
-    private PlaybackCallbackImpl mPlaybackCallback;
     private MultiProviderPlaylistProvider mMultiProviderPlaylistProvider;
     private ProviderConnection mMultiProviderConnection;
     private ServiceConnection mPlaybackConnection = new ServiceConnection() {
@@ -59,12 +58,6 @@ public class PluginsLookup {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mPlaybackService = (IPlaybackService) iBinder;
             Log.i(TAG, "Connected to Playback Service");
-
-            try {
-                mPlaybackService.addCallback(mPlaybackCallback);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
         }
 
         @Override
@@ -138,12 +131,10 @@ public class PluginsLookup {
         mConnectionListeners.remove(listener);
     }
 
-    public void connectPlayback(PlaybackCallbackImpl callback) {
+    public void connectPlayback() {
         Intent i = new Intent(mContext, PlaybackService.class);
         mContext.startService(i);
         mContext.bindService(i, mPlaybackConnection, Context.BIND_AUTO_CREATE);
-
-        mPlaybackCallback = callback;
     }
 
     public void updatePlugins() {
@@ -154,12 +145,6 @@ public class PluginsLookup {
     public void tearDown() {
         Log.i(TAG, "tearDown()");
         if (mPlaybackService != null) {
-            try {
-                mPlaybackService.removeCallback(mPlaybackCallback);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Unable to remove Plugins playback callback", e);
-            }
-
             mContext.unbindService(mPlaybackConnection);
             mPlaybackService = null;
         }

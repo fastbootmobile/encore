@@ -13,7 +13,7 @@ interface IPlaybackCallback {
     void onSongStarted(in Song s);
 
     /**
-     * Notifies the playback position (scrobbling)
+     * Notifies the playback position manually changed (scrobbling/seeking)
      */
     void onSongScrobble(int timeMs);
 
@@ -26,5 +26,12 @@ interface IPlaybackCallback {
      * Notifies the playback resumed
      */
     void onPlaybackResume();
+
+    /**
+     * Notifies the playback queue changed. Note that we don't call this when the first item of
+     * the queue is removed because of playback moving on to the next track of the queue, but only
+     * when a manual/non-logical operation is done.
+     */
+    void onPlaybackQueueChanged();
 
 }

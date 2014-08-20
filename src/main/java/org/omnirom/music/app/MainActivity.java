@@ -33,7 +33,6 @@ import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
-import org.omnirom.music.framework.PlaybackCallbackImpl;
 import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
 
@@ -108,7 +107,7 @@ public class MainActivity extends FragmentActivity
     @Override
     protected void onResume() {
         super.onResume();
-        PluginsLookup.getDefault().connectPlayback(new PlaybackCallbackImpl(mPlaybackState));
+        PluginsLookup.getDefault().connectPlayback();
     }
 
     @Override

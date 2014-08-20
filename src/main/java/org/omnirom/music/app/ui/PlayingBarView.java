@@ -134,6 +134,16 @@ public class PlayingBarView extends RelativeLayout {
                 }
             });
         }
+
+        @Override
+        public void onPlaybackQueueChanged() throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updatePlayingQueue();
+                }
+            });
+        }
     };
 
     private static final int MAX_PEEK_QUEUE_SIZE = 4;
@@ -194,6 +204,7 @@ public class PlayingBarView extends RelativeLayout {
         Utils.setSmallFabOutline(new View[]{mPlayFab});
 
         mProgressDrawable = new CircularProgressDrawable();
+        mProgressDrawable.setValue(0);
         mProgressDrawable.setColor(getResources().getColor(R.color.white));
         mProgressDrawable.setAlpha(100);
         mProgressDrawable.setPadding(Utils.dpToPx(getResources(), 2));

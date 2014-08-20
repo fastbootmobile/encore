@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -67,6 +68,19 @@ public class PlaybackService extends Service
                 stopForeground(true);
             } else {
                 resetShutdownTimeout();
+            }
+        }
+    };
+
+    private Runnable mNotifyQueueChangedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            for (IPlaybackCallback cb : mCallbacks) {
+                try {
+                    cb.onPlaybackQueueChanged();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot notify playback queue changed", e);
+                }
             }
         }
     };
@@ -322,6 +336,16 @@ public class PlaybackService extends Service
     }
 
     /**
+     * Notifies the listeners that the playback queue contents changed. Note that we don't call
+     * this when the first item of the queue is removed because of playback moving on to the next
+     * track of the queue, but only when a manual/non-logical operation is done.
+     */
+    private void notifyQueueChanged() {
+        mHandler.removeCallbacks(mNotifyQueueChangedRunnable);
+        mHandler.post(mNotifyQueueChangedRunnable);
+    }
+
+    /**
      * The binder implementation of the remote methods
      */
     IPlaybackService.Stub mBinder = new IPlaybackService.Stub() {
@@ -366,12 +390,15 @@ public class PlaybackService extends Service
                 String ref = songsIt.next();
                 mPlaybackQueue.addSong(cache.getSong(ref), top);
             }
+
+            notifyQueueChanged();
         }
 
         @Override
         public void queueSong(Song s, boolean top) throws RemoteException {
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
             mPlaybackQueue.addSong(cache.getSong(s.getRef()), top);
+            notifyQueueChanged();
         }
 
         @Override
@@ -383,6 +410,8 @@ public class PlaybackService extends Service
                 String ref = songsIt.next();
                 mPlaybackQueue.addSong(cache.getSong(ref), top);
             }
+
+            notifyQueueChanged();
         }
 
         @Override
@@ -481,13 +510,26 @@ public class PlaybackService extends Service
         }
 
         @Override
-        public void seek(long timeMs) throws RemoteException {
+        public void seek(final long timeMs) throws RemoteException {
             if (mCurrentTrack != null) {
                 ProviderIdentifier id = mCurrentTrack.getProvider();
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(id).getBinder();
                 provider.seek(timeMs);
                 mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
             }
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    for (IPlaybackCallback cb : mCallbacks) {
+                        try {
+                            cb.onSongScrobble((int) timeMs);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot notify scrobbling", e);
+                        }
+                    }
+                }
+            });
         }
 
         @Override

@@ -248,6 +248,11 @@ public class AutoMixManager implements IPlaybackCallback {
     }
 
     @Override
+    public void onPlaybackQueueChanged() throws RemoteException {
+
+    }
+
+    @Override
     public IBinder asBinder() {
         return null;
     }

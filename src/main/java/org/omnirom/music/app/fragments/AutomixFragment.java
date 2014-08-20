@@ -52,19 +52,16 @@ public class AutomixFragment extends Fragment {
         }
 
         @Override
-        public void onSongScrobble(int timeMs) throws RemoteException {
-
-        }
+        public void onSongScrobble(int timeMs) throws RemoteException {}
 
         @Override
-        public void onPlaybackPause() throws RemoteException {
-
-        }
+        public void onPlaybackPause() throws RemoteException {}
 
         @Override
-        public void onPlaybackResume() throws RemoteException {
+        public void onPlaybackResume() throws RemoteException {}
 
-        }
+        @Override
+        public void onPlaybackQueueChanged() throws RemoteException {}
     };
 
     public AutomixFragment() {

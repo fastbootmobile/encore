@@ -7,7 +7,6 @@ import android.util.Log;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
-import org.omnirom.music.framework.PlaybackCallbackImpl;
 import org.omnirom.music.framework.PluginsLookup;
 
 import java.io.File;

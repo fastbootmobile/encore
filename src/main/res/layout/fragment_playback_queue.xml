@@ -68,7 +68,8 @@
                     android:layout_toEndOf="@+id/ivCurrentPlayAlbumArt"
                     android:layout_alignRight="@+id/ivPlayPause"
                     android:layout_alignEnd="@+id/ivPlayPause"
-                    android:progress="50" />
+                    android:progress="0"
+                    android:max="0" />
 
                 <ImageView
                     android:layout_width="48dp"
