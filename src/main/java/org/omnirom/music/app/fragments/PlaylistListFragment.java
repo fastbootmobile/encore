@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.GridView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.PlaylistActivity;
@@ -35,7 +37,7 @@ import java.util.List;
  * create an instance of this fragment.
  *
  */
-public class PlaylistListFragment extends AbstractRootFragment implements ILocalCallback {
+public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
     private PlaylistListAdapter mAdapter;
     private Handler mHandler;
@@ -89,16 +91,13 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_playlist, container, false);
-        ExpandableHeightGridView playlistLayout =
-                (ExpandableHeightGridView) root.findViewById(R.id.gvPlaylists);
+        GridView playlistLayout = (GridView) root.findViewById(R.id.gvPlaylists);
         playlistLayout.setAdapter(mAdapter);
-        playlistLayout.setExpanded(true);
 
         // If we're not standalone, remove the huge padding
         if (!mIsStandalone) {
-            FrameLayout frameLayout = (FrameLayout) root.findViewById(R.id.flPlaylistsRoot);
             int fourDp = Utils.dpToPx(getResources(), 4);
-            frameLayout.setPadding(fourDp, fourDp, fourDp, fourDp);
+            root.setPadding(fourDp, fourDp, fourDp, fourDp);
         }
 
         // Set the initial playlists
@@ -113,9 +112,6 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
                 });
             }
         }.start();
-
-        // Setup the search box
-        setupSearchBox(root);
 
         // Setup the click listener
         playlistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
