@@ -24,6 +24,8 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.util.Iterator;
 import java.util.List;
@@ -104,8 +106,25 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 Song song = mAdapter.getItem(i);
 
                 if (song != null) {
+                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                    ProviderCache cache = ProviderAggregator.getDefault().getCache();
                     try {
-                        PluginsLookup.getDefault().getPlaybackService().playSong(song);
+                        pbService.playSong(song);
+
+                        // queue remaining songs
+                        Iterator<String> songsIt = mPlaylist.songs();
+                        int itIndex = 0;
+                        while (songsIt.hasNext()) {
+                            String songRef = songsIt.next();
+                            if (itIndex <= i) {
+                                itIndex++;
+                                continue;
+                            } else {
+                                itIndex++;
+                            }
+
+                            pbService.queueSong(cache.getSong(songRef), false);
+                        }
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to play song", e);
                     }
@@ -130,8 +149,6 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        MainActivity main = (MainActivity) activity;
-        main.setContentShadowTop(0);
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
     }

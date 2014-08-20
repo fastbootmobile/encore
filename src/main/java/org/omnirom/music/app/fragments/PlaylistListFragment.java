@@ -1,6 +1,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 
 import org.omnirom.music.app.MainActivity;
+import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
@@ -119,9 +121,8 @@ public class PlaylistListFragment extends AbstractRootFragment implements ILocal
         playlistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 MainActivity act = (MainActivity) getActivity();
-                act.showFragment(PlaylistViewFragment.newInstance(mAdapter.getItem(position)), true);
+                act.startActivity(PlaylistActivity.craftIntent(act, mAdapter.getItem(position)));
             }
         });
 

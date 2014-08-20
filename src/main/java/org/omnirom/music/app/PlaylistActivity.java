@@ -25,13 +25,11 @@ public class PlaylistActivity extends FragmentActivity {
     private String TAG = "PlaylistActivity";
     private String TAG_FRAGMENT = "fragment_inner";
     private PlaylistViewFragment mActiveFragment;
-    //private SearchFragment mActiveFragment;
     private Bundle mInitialIntent;
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
 
     public static Intent craftIntent(Context context,Playlist playlist) {
         Intent intent = new Intent(context, PlaylistActivity.class);
-
         intent.putExtra(PlaylistViewFragment.KEY_PLAYLIST, playlist);
 
         return intent;
@@ -48,7 +46,7 @@ public class PlaylistActivity extends FragmentActivity {
         } else {
             mInitialIntent = savedInstance.getBundle(EXTRA_RESTORE_INTENT);
         }
-        Log.d(TAG, "retrieved intent");
+
         if(mActiveFragment == null ){
             mActiveFragment = new PlaylistViewFragment();
             fm.beginTransaction()
@@ -57,16 +55,4 @@ public class PlaylistActivity extends FragmentActivity {
         }
         mActiveFragment.setArguments(mInitialIntent);
     }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
-                .getActionView();
-        searchView.setSearchableInfo(searchManager
-                .getSearchableInfo(getComponentName()));
-
-        return true;
-    }
-
 }

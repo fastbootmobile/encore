@@ -1,12 +1,8 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
-import android.graphics.drawable.StateListDrawable;
 import android.support.v4.app.Fragment;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -16,11 +12,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
@@ -29,7 +23,6 @@ import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.SongsListAdapter;
-import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.ParallaxScrollListView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PluginsLookup;
@@ -42,7 +35,6 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
-import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackService;
 
@@ -135,7 +127,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_album_view, container, false);
         assert mRootView != null;
-        View headerView = inflater.inflate(R.layout.album_view_header, null);
+        View headerView = inflater.inflate(R.layout.songs_list_view_header, null);
         ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
         TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
         tvAlbumName.setBackgroundColor(mBackgroundColor);
