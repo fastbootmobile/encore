@@ -12,6 +12,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
+import android.os.RemoteException;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -31,10 +32,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -413,7 +416,38 @@ public class Utils {
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
+                final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+
+                final String TAG = "Utils-SongOverflow";
+
                 switch (menuItem.getItemId()) {
+                    case R.id.menu_play_now:
+                        try {
+                            pbService.playSong(song);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Unable to play song", e);
+                        }
+                        break;
+
+                    case R.id.menu_add_to_queue:
+                        try {
+                            pbService.queueSong(song, false);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Unable to queue song", e);
+                        }
+                        break;
+
+                    case R.id.menu_add_album_to_queue:
+                        try {
+                            pbService.queueAlbum(cache.getAlbum(song.getAlbum()), false);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Unable to queue album", e);
+                        }
+                        break;
+
+
+
                     case R.id.menu_add_to_playlist:
                         PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
                         fragment.show(context.getSupportFragmentManager(), song.getRef());
