@@ -818,25 +818,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     ivOverflow.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            PopupMenu popupMenu = new PopupMenu(getActivity(), ivOverflow);
-                            popupMenu.inflate(R.menu.track_overflow);
-                            popupMenu.show();
-
-                            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                @Override
-                                public boolean onMenuItemClick(MenuItem menuItem) {
-                                    switch (menuItem.getItemId()) {
-                                        case R.id.menu_add_to_playlist:
-                                            PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
-                                            fragment.show(getActivity().getSupportFragmentManager(), song.getRef());
-                                            break;
-
-                                        default:
-                                            return false;
-                                    }
-                                    return true;
-                                }
-                            });
+                            Utils.showSongOverflow(getActivity(), ivOverflow, song);
                         }
                     });
 
