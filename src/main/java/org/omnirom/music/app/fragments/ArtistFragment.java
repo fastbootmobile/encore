@@ -186,7 +186,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         @Override
         public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
-            if (drawable == null) {
+            if (drawable == null || drawable.getBitmap() == null) {
                 return;
             }
 
