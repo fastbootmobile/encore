@@ -72,7 +72,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
 
     public AlbumsFragment() {
         mAdapter = new AlbumsAdapter();
-        mHandler = new Handler();
+
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
     }
@@ -80,6 +80,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mHandler = new Handler();
     }
 
     @Override
@@ -87,8 +88,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_albums, container, false);
-        GridView albumLayout =
-                (GridView) root.findViewById(R.id.gvAlbums);
+        GridView albumLayout = (GridView) root.findViewById(R.id.gvAlbums);
         albumLayout.setAdapter(mAdapter);
 
         List<Album> allAlbums = ProviderAggregator.getDefault().getCache().getAllAlbums();

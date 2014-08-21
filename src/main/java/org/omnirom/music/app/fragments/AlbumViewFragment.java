@@ -285,7 +285,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     }
 
     private void loadSongs() {
-        mLoadSongsRunnable.run();
+        mHandler.post(mLoadSongsRunnable);
     }
 
     public String getArtist() {
