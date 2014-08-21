@@ -66,9 +66,8 @@
     </style>
 
     <style name="NavDrawerItem" parent="RobotoLightLarge">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/text_regular</item>
-        <item name="android:background">@drawable/navdrawer_item_background</item>
     </style>
 
     <style name="NavDrawerItem.Selected">

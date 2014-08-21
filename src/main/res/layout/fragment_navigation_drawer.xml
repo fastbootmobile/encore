@@ -1,19 +1,8 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/nav_drawer_list"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#ffe1e1e1"
-    android:orientation="vertical"
-    android:textAlignment="viewEnd"
-    android:gravity="end">
-
-    <ListView
-        android:id="@+id/nav_drawer_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:choiceMode="singleChoice"
-        android:divider="@color/navdrawer_separator"
-        android:dividerHeight="1dp"
-        tools:context="org.omnirom.music.app.fragments.NavigationDrawerFragment" />
-
-</LinearLayout>
+    android:layout_height="fill_parent"
+    android:choiceMode="singleChoice"
+    android:background="@color/white"
+    android:divider="@null"
+    android:dividerHeight="0dp" />

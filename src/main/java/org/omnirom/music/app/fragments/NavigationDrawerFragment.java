@@ -36,6 +36,7 @@ import com.balysv.material.drawable.menu.MaterialMenuView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
+import org.omnirom.music.app.adapters.NavDrawerAdapter;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -114,27 +115,15 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        LinearLayout rootView = (LinearLayout) inflater.inflate(
+        mDrawerListView = (ListView) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
-
-        mDrawerListView = (ListView) rootView.findViewById(R.id.nav_drawer_list);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectItem(position);
             }
         });
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                R.layout.nav_drawer_list_item_activated,
-                android.R.id.text1,
-                new String[]{
-                        getString(R.string.title_section_listen_now),
-                        getString(R.string.title_section_my_songs),
-                        getString(R.string.title_section_playlists),
-                        getString(R.string.title_section_automix),
-                }
-        ));
+        mDrawerListView.setAdapter(new NavDrawerAdapter());
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         mDrawerListView.post(new Runnable() {
             @Override
@@ -143,7 +132,7 @@ public class NavigationDrawerFragment extends Fragment {
             }
         });
 
-        return rootView;
+        return mDrawerListView;
     }
 
     public boolean isDrawerOpen() {
@@ -187,6 +176,13 @@ public class NavigationDrawerFragment extends Fragment {
                     mDrawerToggle.setState(MaterialMenuDrawable.IconState.BURGER);
                     mDrawerToggle.animatePressedState(MaterialMenuDrawable.IconState.ARROW);
                 }
+            }
+        });
+
+        actionBar.getCustomView().findViewById(android.R.id.title).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDrawerToggle.performClick();
             }
         });
 
@@ -270,7 +266,7 @@ public class NavigationDrawerFragment extends Fragment {
 
                 View view = mDrawerListView.getChildAt(mCurrentSelectedPosition);
                 if (view != null) {
-                    TextView tv = (TextView) view;
+                    TextView tv = (TextView) view.findViewById(android.R.id.text1);
                     tv.setTypeface(mSelectedTypeface);
                     mPreviousItem = tv;
                 }

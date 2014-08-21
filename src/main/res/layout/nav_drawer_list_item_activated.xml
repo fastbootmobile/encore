@@ -1,12 +1,25 @@
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/text1"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    style="@style/NavDrawerItem"
-    android:gravity="center_vertical"
-    android:paddingStart="8dp"
-    android:paddingLeft="8dp"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingRight="16dp"
-    android:minHeight="?android:attr/listPreferredItemHeight"
-    />
+    android:layout_height="@dimen/list_item_height"
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingLeft="16dp"
+    android:paddingEnd="56dp"
+    android:paddingRight="56dp">
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
+        android:id="@android:id/icon"
+        android:adjustViewBounds="true" />
+
+    <TextView
+        android:id="@android:id/text1"
+        style="@style/NavDrawerItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical" />
+</LinearLayout>
