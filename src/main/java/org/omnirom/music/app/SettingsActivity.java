@@ -14,6 +14,8 @@ import com.balysv.material.drawable.menu.MaterialMenuDrawable;
 import com.balysv.material.drawable.menu.MaterialMenuView;
 
 import org.omnirom.music.app.fragments.SettingsFragment;
+import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.providers.ProviderAggregator;
 
 public class SettingsActivity extends FragmentActivity {
 
