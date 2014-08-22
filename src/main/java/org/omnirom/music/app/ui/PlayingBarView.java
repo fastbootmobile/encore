@@ -202,6 +202,7 @@ public class PlayingBarView extends RelativeLayout {
         // Set FAB info
         mPlayFab = (ImageButton) findViewById(R.id.fabPlayBarButton);
         Utils.setSmallFabOutline(new View[]{mPlayFab});
+        Utils.setupSmallFabShadow(mPlayFab);
 
         mProgressDrawable = new CircularProgressDrawable();
         mProgressDrawable.setValue(0);
