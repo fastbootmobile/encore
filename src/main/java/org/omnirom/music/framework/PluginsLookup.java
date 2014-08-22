@@ -161,6 +161,10 @@ public class PluginsLookup {
     public ProviderConnection getProvider(ProviderIdentifier id) {
         if (id == null) {
             Log.e(TAG, "getProvider called with null identifier");
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            for (StackTraceElement element : stack) {
+                Log.e(TAG, element.toString());
+            }
             return null;
         }
 

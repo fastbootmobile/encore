@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -21,6 +22,7 @@ public class ProviderConnection extends AbstractProviderConnection {
     private static final String TAG = "ProviderConnection";
 
     private IMusicProvider mBinder;
+    private Handler mHandler;
 
     /**
      * Constructor
@@ -54,18 +56,17 @@ public class ProviderConnection extends AbstractProviderConnection {
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
 
+        mHandler = new Handler();
         mBinder = IMusicProvider.Stub.asInterface(service);
-        ProviderAggregator.getDefault().registerProvider(this);
-        mIsBound = true;
-        if (DEBUG) Log.d(TAG, "Connected to providers " + name);
-
-        if (mListener != null) {
-            mListener.onServiceConnected(this);
-        }
 
         try {
             // Tell the provider its identifier
             mBinder.setIdentifier(mIdentifier);
+
+            // Register the provider
+            ProviderAggregator.getDefault().registerProvider(this);
+            mIsBound = true;
+            if (DEBUG) Log.d(TAG, "Connected to providers " + name);
 
             // Automatically try to login the providers once bound
             if (mBinder.isSetup()) {
@@ -86,6 +87,14 @@ public class ProviderConnection extends AbstractProviderConnection {
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception occurred on the set providers", e);
         }
+
+        mHandler.post(new Runnable() {
+            public void run() {
+                if (mListener != null) {
+                    mListener.onServiceConnected(ProviderConnection.this);
+                }
+            }
+        });
     }
 
     @Override

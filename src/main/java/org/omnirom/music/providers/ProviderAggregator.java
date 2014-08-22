@@ -114,7 +114,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         unregisterProvider(conn);
                     }
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to get playlists from a providers", e);
+                    Log.e(TAG, "Unable to get playlists from " + conn.getProviderName(), e);
                     unregisterProvider(conn);
                 }
             }
