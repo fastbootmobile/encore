@@ -1,6 +1,13 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.os.Handler;
+import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +18,7 @@ import android.widget.TextView;
 
 import org.lucasr.twowayview.widget.StaggeredGridLayoutManager;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -43,6 +51,9 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
             tvTitle = (TextView) itemView.findViewById(R.id.tvTitle);
             tvSubTitle = (TextView) itemView.findViewById(R.id.tvSubTitle);
             ivCover = (AlbumArtImageView) itemView.findViewById(R.id.ivCover);
+
+            // Attach the viewholder to the cover album art for the album art callback
+            ivCover.setTag(this);
         }
     }
 
@@ -69,10 +80,53 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         }
     }
 
+    private AlbumArtImageView.OnArtLoadedListener mAlbumArtListener
+            = new AlbumArtImageView.OnArtLoadedListener() {
+        @Override
+        public void onArtLoaded(final AlbumArtImageView view, BitmapDrawable drawable) {
+            final Resources res = view.getResources();
+
+            if (drawable != null && drawable.getBitmap() != null) {
+                Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+                    @Override
+                    public void onGenerated(Palette palette) {
+                        PaletteItem item = palette.getDarkVibrantColor();
+                        if (item == null) {
+                            return;
+                        }
+
+                        final TransitionDrawable transition = new TransitionDrawable(new Drawable[]{
+                                new ColorDrawable(res.getColor(R.color.default_album_art_background)),
+                                new ColorDrawable(item.getRgb())
+                        });
+
+                        // Set the backgroud in the UI thread
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                final ViewHolder holder = (ViewHolder) view.getTag();
+                                Utils.setViewBackground(holder.llRoot, transition);
+                                transition.startTransition(1000);
+                            }
+                        });
+                    }
+                });
+
+            }
+
+        }
+    };
+
     /**
      * The list of entries to show
      */
     private List<ListenNowEntry> mEntries = new ArrayList<ListenNowEntry>();
+
+    private Handler mHandler;
+
+    public ListenNowAdapter() {
+        mHandler = new Handler();
+    }
 
     /**
      * Remove all entries
@@ -84,6 +138,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
 
     /**
      * Add an entry to the list
+     *
      * @param entry
      */
     public void addEntry(ListenNowEntry entry) {
@@ -95,7 +150,12 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         final LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
         final View view = inflater.inflate(R.layout.listen_now_entry, viewGroup, false);
-        return new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view);
+
+        // Setup album art listener
+        holder.ivCover.setOnArtLoadedListener(mAlbumArtListener);
+
+        return holder;
     }
 
     @Override
@@ -124,6 +184,9 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
 
         final Resources res = holder.llRoot.getResources();
 
+        // Reset root color
+        holder.llRoot.setBackgroundColor(res.getColor(R.color.default_album_art_background));
+
         // Update entry contents
         if (entry.entity instanceof Playlist) {
             Playlist playlist = (Playlist) entry.entity;
@@ -136,15 +199,17 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
             int count = artist.getAlbums().size();
             holder.tvTitle.setText(artist.getName());
             holder.tvSubTitle.setText(res.getQuantityString(R.plurals.albums_count, count, count));
+            holder.ivCover.loadArtForArtist(artist);
         } else if (entry.entity instanceof Album) {
             Album album = (Album) entry.entity;
-            int count = album.getSongsCount();
             holder.tvTitle.setText(album.getName());
-            holder.tvSubTitle.setText(res.getQuantityString(R.plurals.songs_count, count, count));
+            holder.tvSubTitle.setText(Utils.getMainArtist(album));
+            holder.ivCover.loadArtForAlbum(album);
         } else if (entry.entity instanceof Song) {
             Song song = (Song) entry.entity;
             holder.tvTitle.setText(song.getTitle());
             holder.tvSubTitle.setText(song.getArtist());
+            holder.ivCover.loadArtForSong(song);
         } else {
             Log.e(TAG, "Unsupported entity type: " + entry.entity);
         }
