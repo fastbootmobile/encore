@@ -15,10 +15,12 @@
         android:orientation="horizontal"
         android:weightSum="2">
 
-        <org.omnirom.music.app.ui.VuMeterView
-            android:id="@+id/vuMeter"
-            android:layout_width="8dp"
-            android:layout_height="match_parent" />
+        <View
+            android:id="@+id/currentSongIndicator"
+            android:layout_width="4dp"
+            android:layout_height="match_parent"
+            android:background="@color/primary"
+            android:visibility="invisible" />
 
         <TextView
             android:id="@+id/tvTitle"

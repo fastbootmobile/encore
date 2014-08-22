@@ -9,6 +9,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
+import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Display;
@@ -35,6 +36,7 @@ import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +60,17 @@ public class SongsListAdapter extends BaseAdapter {
         public View vRoot;
         public int position;
         public Song song;
+        public View vCurrentIndicator;
     }
+
+    private View.OnClickListener mOverflowClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final ViewHolder tag = (ViewHolder) v.getTag();
+            final Context context = tag.vRoot.getContext();
+            Utils.showSongOverflow((FragmentActivity) context, tag.ivOverflow, tag.song);
+        }
+    };
 
     public SongsListAdapter(Context ctx, boolean blurBackground) {
         final Resources res = ctx.getResources();
@@ -265,6 +277,7 @@ public class SongsListAdapter extends BaseAdapter {
             holder.tvArtist = (TextView) root.findViewById(R.id.tvArtist);
             holder.tvDuration = (TextView) root.findViewById(R.id.tvDuration);
             holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
+            holder.vCurrentIndicator = root.findViewById(R.id.currentSongIndicator);
             holder.vRoot = root;
 
             if (mBlurBackground) {
@@ -274,6 +287,9 @@ public class SongsListAdapter extends BaseAdapter {
                 holder.tvArtist.setTextColor(0xFFFFFFFF);
                 holder.ivOverflow.setImageResource(R.drawable.ic_more_vert_light);
             }
+
+            holder.ivOverflow.setOnClickListener(mOverflowClickListener);
+            holder.ivOverflow.setTag(holder);
 
             root.setTag(holder);
         }
@@ -285,13 +301,6 @@ public class SongsListAdapter extends BaseAdapter {
         tag.position = position;
         tag.song = song;
         root.setTag(tag);
-        tag.ivOverflow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Context context = tag.vRoot.getContext();
-                Utils.showSongOverflow((FragmentActivity) context, tag.ivOverflow, song);
-            }
-        });
 
         // Fill fields
         if (song != null && song.isLoaded()) {
@@ -308,6 +317,19 @@ public class SongsListAdapter extends BaseAdapter {
             tag.tvTitle.setText("...");
             tag.tvDuration.setText("...");
             tag.tvArtist.setText("...");
+        }
+
+        // Set current song indicator
+        tag.vCurrentIndicator.setVisibility(View.INVISIBLE);
+
+        final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+        try {
+            List<Song> playbackQueue = pbService.getCurrentPlaybackQueue();
+            if (playbackQueue.size() > 0 && playbackQueue.get(0).equals(tag.song)) {
+                tag.vCurrentIndicator.setVisibility(View.VISIBLE);
+            }
+        } catch (RemoteException e) {
+            // ignore
         }
 
         if (mBlurBackground) {

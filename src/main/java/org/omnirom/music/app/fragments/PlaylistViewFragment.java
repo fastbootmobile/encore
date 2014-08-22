@@ -29,6 +29,8 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.service.BasePlaybackCallback;
+import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.util.Iterator;
@@ -51,6 +53,13 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     private ImageButton mPlayFab;
     private PlayPauseDrawable mFabDrawable;
     private boolean mFabShouldResume;
+
+    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
+        @Override
+        public void onSongStarted(Song s) throws RemoteException {
+            mAdapter.notifyDataSetChanged();
+        }
+    };
 
     /**
      * Use this factory method to create a new instance of
@@ -207,12 +216,23 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         super.onAttach(activity);
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
+        try {
+            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
+        } catch (RemoteException e) {
+            // ignore
+        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+
         ProviderAggregator.getDefault().removeUpdateCallback(this);
+        try {
+            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
+        } catch (RemoteException e) {
+            // ignore
+        }
     }
 
     @Override

@@ -3,15 +3,11 @@ package org.omnirom.music.app.adapters;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
@@ -20,35 +16,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import org.omnirom.music.api.common.HttpGet;
-import org.omnirom.music.api.common.RateLimitException;
-import org.omnirom.music.api.musicbrainz.AlbumInfo;
-import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
+import android.support.v4.app.FragmentActivity;
+
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
-import org.omnirom.music.app.ui.VuMeterView;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.BlurCache;
-import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
-import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackService;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  *
@@ -60,45 +47,16 @@ public class PlaylistAdapter extends BaseAdapter {
     private List<Song> mSongs;
     private List<Integer> mVisible;
     private List<Integer> mIds;
-    private Handler mHandler;
     private int mItemWidth;
     private int mItemHeight;
-    private Song mCurrentSong;
-    private VuMeterView mActiveVuMeter;
-    private float mCurrentRms;
     private Playlist mPlaylist;
-    private Runnable mUpdateRMS = new Runnable() {
-        @Override
-        public void run() {
-            if (mActiveVuMeter != null) {
-                mActiveVuMeter.setAmplitude(mCurrentRms);
-            }
-        }
-    };
-    private final Thread mUpdateRMSThread = new Thread() {
-        public void run() {
-            while (!isInterrupted()) {
-                IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                if (pbService != null) {
-                    try {
-                        float rms = pbService.getCurrentRms() / 16384.0f;
-                        rms = -(1.0f - rms) * 48.0f;
 
-                        if (mCurrentRms != rms) {
-                            mCurrentRms = rms;
-                            mHandler.removeCallbacks(mUpdateRMS);
-                            mHandler.postAtFrontOfQueue(mUpdateRMS);
-                        }
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-                try {
-                    Thread.sleep(16);
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
+    private View.OnClickListener mOverflowClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final ViewHolder tag = (ViewHolder) v.getTag();
+            final Context context = tag.vRoot.getContext();
+            Utils.showSongOverflow((FragmentActivity) context, tag.ivOverflow, tag.song);
         }
     };
 
@@ -277,15 +235,16 @@ public class PlaylistAdapter extends BaseAdapter {
         public TextView tvArtist;
         public TextView tvDuration;
         public ImageView ivOverflow;
+        public View vCurrentIndicator;
         public View vRoot;
         public int position;
         public Song song;
+        public boolean songWasLoaded;
     }
 
     public PlaylistAdapter(Context ctx) {
         mSongs = new ArrayList<Song>();
         mVisible = new ArrayList<Integer>();
-        mHandler = new Handler();
         mIds = new ArrayList<Integer>();
         final Resources res = ctx.getResources();
         assert res != null;
@@ -301,10 +260,6 @@ public class PlaylistAdapter extends BaseAdapter {
 
         mItemWidth = size.x;
         mItemHeight = res.getDimensionPixelSize(R.dimen.playlist_view_item_height);
-    }
-
-    public void setCurrentSong(Song p) {
-        mCurrentSong = p;
     }
 
     public void addItem(Song p) {
@@ -331,50 +286,72 @@ public class PlaylistAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, final ViewGroup parent) {
         Context ctx = parent.getContext();
         assert ctx != null;
+
+        final Song song = getItem(position);
 
         View root = convertView;
         if (convertView == null) {
             // Recycle the existing view
             LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.item_playlist_view, null);
+            root = inflater.inflate(R.layout.item_playlist_view, parent, false);
             assert root != null;
 
-            ViewHolder holder = new ViewHolder();
+            final ViewHolder holder = new ViewHolder();
             holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
             holder.tvArtist = (TextView) root.findViewById(R.id.tvArtist);
             holder.tvDuration = (TextView) root.findViewById(R.id.tvDuration);
             holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
+            holder.vCurrentIndicator = root.findViewById(R.id.currentSongIndicator);
             holder.vRoot = root;
+            holder.songWasLoaded = false;
 
             holder.tvArtist.setTextColor(0xFFFFFFFF);
             holder.tvTitle.setTextColor(0xFFFFFFFF);
             holder.tvDuration.setTextColor(0xFFFFFFFF);
             holder.ivOverflow.setImageResource(R.drawable.ic_more_vert_light);
 
+            holder.ivOverflow.setOnClickListener(mOverflowClickListener);
+            holder.ivOverflow.setTag(holder);
+
             root.setTag(holder);
         }
 
-        final Song song = getItem(position);
         final ViewHolder tag = (ViewHolder) root.getTag();
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
+        boolean change = false;
+
         // Update tag
         tag.position = position;
-        tag.song = song;
+        if (tag.song == null || !tag.song.equals(song)) {
+            tag.song = song;
+            tag.songWasLoaded = false;
+            change = true;
+        }
         root.setTag(tag);
 
         // Fill fields
-        if (song != null && song.isLoaded()) {
-            tag.tvTitle.setText(song.getTitle());
-            tag.tvDuration.setText(Utils.formatTrackLength(song.getDuration()));
+        if (song != null) {
+            if (song.isLoaded() && !tag.songWasLoaded) {
+                tag.tvTitle.setText(song.getTitle());
+                tag.tvDuration.setText(Utils.formatTrackLength(song.getDuration()));
 
-            Artist artist = cache.getArtist(song.getArtist());
-            if (artist != null) {
-                tag.tvArtist.setText(artist.getName());
-            } else {
+                Artist artist = cache.getArtist(song.getArtist());
+                if (artist != null) {
+                    tag.tvArtist.setText(artist.getName());
+                } else {
+                    tag.tvArtist.setText("...");
+                }
+
+                tag.songWasLoaded = true;
+                change = true;
+            } else if (!song.isLoaded()) {
+                tag.songWasLoaded = song.isLoaded();
+                tag.tvTitle.setText("...");
+                tag.tvDuration.setText("...");
                 tag.tvArtist.setText("...");
             }
         } else {
@@ -383,40 +360,44 @@ public class PlaylistAdapter extends BaseAdapter {
             tag.tvArtist.setText("...");
         }
 
+        // Set current song indicator
+        tag.vCurrentIndicator.setVisibility(View.INVISIBLE);
+
+        final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+        try {
+            List<Song> playbackQueue = pbService.getCurrentPlaybackQueue();
+            if (playbackQueue.size() > 0 && playbackQueue.get(0).equals(tag.song)) {
+                tag.vCurrentIndicator.setVisibility(View.VISIBLE);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Cannot retrieve playback queue");
+        }
+
         // Fetch background art
-        final String artKey = ProviderAggregator.getDefault().getCache().getSongArtKey(song);
+        if (change) {
+            final String artKey = ProviderAggregator.getDefault().getCache().getSongArtKey(song);
 
-        final Resources res = root.getResources();
-        assert res != null;
+            final Resources res = root.getResources();
+            assert res != null;
 
-        if (artKey != null) {
-            // We already know the album art for this song (keyed in artKey)
-            Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
+            if (artKey != null) {
+                // We already know the album art for this song (keyed in artKey)
+                Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
 
-            if (cachedBlur != null) {
-                Utils.setViewBackground(root, new BitmapDrawable(root.getResources(), cachedBlur));
+                if (cachedBlur != null) {
+                    Utils.setViewBackground(root, new BitmapDrawable(root.getResources(), cachedBlur));
+                } else {
+                    Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
+                    BackgroundAsyncTask task = new BackgroundAsyncTask(position);
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+                    //task.execute(tag);
+                }
             } else {
                 Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
                 BackgroundAsyncTask task = new BackgroundAsyncTask(position);
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
                 //task.execute(tag);
             }
-        } else {
-            Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
-            BackgroundAsyncTask task = new BackgroundAsyncTask(position);
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
-            //task.execute(tag);
-        }
-
-        final VuMeterView vuMeter = (VuMeterView) root.findViewById(R.id.vuMeter);
-        if (mCurrentSong != null && mCurrentSong.equals(song)) {
-            mActiveVuMeter = vuMeter;
-            if (!mUpdateRMSThread.isAlive()) {
-                mUpdateRMSThread.start();
-            }
-            vuMeter.setVisibility(View.VISIBLE);
-        } else {
-            vuMeter.setVisibility(View.GONE);
         }
 
         root.setVisibility(mVisible.get(position));

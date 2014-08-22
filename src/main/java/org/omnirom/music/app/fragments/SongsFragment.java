@@ -1,8 +1,10 @@
 package org.omnirom.music.app.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,59 +24,69 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
+import org.omnirom.music.service.BasePlaybackCallback;
 
 import java.util.List;
 
 /**
  * Created by h4o on 19/06/2014.
  */
-public class SongsFragment extends AbstractRootFragment implements ILocalCallback {
+public class SongsFragment extends Fragment {
     private SongsListAdapter mSongsListAdapter;
-    private Handler mHandler;
     private String TAG = "SongsFragment";
+
+    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
+        @Override
+        public void onSongStarted(Song s) throws RemoteException {
+            mSongsListAdapter.notifyDataSetChanged();
+        }
+    };
+
+    private AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            // Play the song
+            Song song = mSongsListAdapter.getItem(i);
+
+            if (song != null) {
+                try {
+                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to play song", e);
+                }
+            } else {
+                Log.e(TAG, "Trying to play null song!");
+            }
+        }
+    };
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mHandler = new Handler();
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_songs, container, false);
         assert root != null;
-        ListView songsList = (ListView)root.findViewById(R.id.songsList);
-        mSongsListAdapter = new SongsListAdapter(root.getContext(), true);
+        ListView songsList = (ListView) root.findViewById(R.id.songsList);
+
+        mSongsListAdapter = new SongsListAdapter(getActivity(), true);
         songsList.setAdapter(mSongsListAdapter);
 
-                for(ProviderConnection providerConnection : PluginsLookup.getDefault().getAvailableProviders()){
-                    try {
-                        List<Song> Songs = providerConnection.getBinder().getSongs();
-                        for(Song song : Songs){
-                            mSongsListAdapter.put(song);
-                        }
-                    } catch (Exception e){
-                        Log.d(TAG, e.toString());
-                    }
+        List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+        for (ProviderConnection providerConnection : providers) {
+            try {
+                List<Song> Songs = providerConnection.getBinder().getSongs();
+                for (Song song : Songs) {
+                    mSongsListAdapter.put(song);
                 }
-
-                mSongsListAdapter.sortAll();
-
-        mSongsListAdapter.notifyDataSetChanged();
-        songsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                // Play the song
-                Song song = mSongsListAdapter.getItem(i);
-
-                if (song != null) {
-                    try {
-                        PluginsLookup.getDefault().getPlaybackService().playSong(song);
-                    } catch (RemoteException e) {
-                        Log.e("TEST", "Unable to play song", e);
-                    }
-                } else {
-                    Log.e(TAG, "Trying to play null song!");
-                }
+            } catch (Exception e) {
+                Log.w(TAG, "Cannot get songs from a provider", e);
             }
-        });
-        setupSearchBox(root);
+        }
+
+        mSongsListAdapter.sortAll();
+        mSongsListAdapter.notifyDataSetChanged();
+
+        songsList.setOnItemClickListener(mItemClickListener);
         return root;
     }
 
@@ -82,39 +94,25 @@ public class SongsFragment extends AbstractRootFragment implements ILocalCallbac
         SongsFragment fragment = new SongsFragment();
         return fragment;
     }
-    @Override
-    public void onSongUpdate(List<Song> s) {
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
+        } catch (RemoteException e) {
+            // ignore
+        }
     }
 
     @Override
-    public void onAlbumUpdate(List<Album> a) {
-
-    }
-
-    @Override
-    public void onPlaylistUpdate(final List<Playlist> p) {
-
-    }
-
-    @Override
-    public void onArtistUpdate(List<Artist> a) {
-
-    }
-
-    @Override
-    public void onProviderConnected(IMusicProvider provider) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                //mSongsListAdapter.addAllUnique(ProviderAggregator.getDefault().);
-            }
-        });
-    }
-
-    @Override
-    public void onSearchResult(SearchResult searchResult) {
-
+    public void onDetach() {
+        super.onDetach();
+        try {
+            PluginsLookup.getDefault().getPlaybackService().removeCallback(mPlaybackCallback);
+        } catch (RemoteException e) {
+            // ignore
+        }
     }
 
 }
