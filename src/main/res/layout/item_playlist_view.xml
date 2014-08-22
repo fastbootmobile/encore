@@ -1,71 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="@dimen/playlist_view_item_height"
-    android:minHeight="@dimen/playlist_view_item_height"
-    android:clickable="false"
-    android:descendantFocusability="blocksDescendants"
-    android:weightSum="2"
-    android:background="@drawable/item_selectable_background">
-
-    <org.omnirom.music.app.ui.VuMeterView
-        android:layout_width="8dp"
-        android:layout_height="match_parent"
-        android:id="@+id/vuMeter" />
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/tvTitle"
-        style="@style/FontBody1"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="0.85"
-        android:textColor="@drawable/playlist_item_text"
-        android:maxLines="2"
-        android:layout_marginStart="12dp"
-        android:layout_marginLeft="12dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp" />
+    android:background="@drawable/item_selectable_background"
+    android:clickable="false">
 
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1.15"
-        android:layout_marginEnd="12dp"
-        android:layout_marginRight="12dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvArtist"
-            android:layout_gravity="center_vertical"
-            style="@style/FontBody2"
-            android:textColor="@drawable/playlist_item_text"
-            android:singleLine="true" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@drawable/playlist_item_text"
-            android:id="@+id/tvDuration"
-            style="@style/FontCaption"
-            android:layout_gravity="center_vertical" />
-
-    </LinearLayout>
-
-    <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true"
-        android:background="?android:attr/selectableItemBackground"
-        android:id="@+id/ivOverflow"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_more_vert_dark"
-        android:contentDescription="@string/options" />
+        android:background="@drawable/transparent_action_background"
+        android:descendantFocusability="blocksDescendants"
+        android:minHeight="@dimen/playlist_view_item_height"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <org.omnirom.music.app.ui.VuMeterView
+            android:id="@+id/vuMeter"
+            android:layout_width="8dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            style="@style/FontBody1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="12dp"
+            android:layout_weight="0.85"
+            android:maxLines="2"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@drawable/playlist_item_text" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_weight="1.15"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvArtist"
+                style="@style/FontBody2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:singleLine="true"
+                android:textColor="@drawable/playlist_item_text" />
+
+            <TextView
+                android:id="@+id/tvDuration"
+                style="@style/FontCaption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@drawable/playlist_item_text" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivOverflow"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:contentDescription="@string/options"
+            android:src="@drawable/ic_more_vert_dark" />
+    </LinearLayout>
 
 </LinearLayout>

@@ -3,6 +3,7 @@
 
     <!-- Red 500 -->
     <color name="primary">#e51c23</color>
+    <color name="primary_translucent">#80e51c23</color>
 
     <!-- Red 700 -->
     <color name="primary_dark">#d01716</color>
