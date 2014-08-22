@@ -167,7 +167,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 // Play the song
-                Song song = mAdapter.getItem(i);
+                Song song = mAdapter.getItem(i-1);
 
                 if (song != null) {
                     IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
