@@ -40,6 +40,10 @@ public class MusicBrainzClient {
             return mAlbumInfoCache.get(Pair.create(artist, album));
         }
 
+        if (artist == null && album == null) {
+            return null;
+        }
+
         try {
             String query = "";
             if (artist != null) {
