@@ -1,34 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="FlowLayout">
-        <attr name="horizontalSpacing" format="dimension"/>
-        <attr name="verticalSpacing" format="dimension"/>
-        <attr name="orientation" format="enum">
-            <enum name="horizontal" value="0"/>
-            <enum name="vertical" value="1"/>
-        </attr>
-        <attr name="debugDraw" format="boolean" />
-    </declare-styleable>
-    <declare-styleable name="FlowLayout_LayoutParams">
-        <attr name="layout_newLine" format="boolean"/>
-        <attr name="layout_horizontalSpacing" format="dimension"/>
-        <attr name="layout_verticalSpacing" format="dimension"/>
-    </declare-styleable>
-    <declare-styleable name="ExpandableGridView">
-        <attr name="gv_horizontalSpacing" format="dimension" />
-        <attr name="gv_verticalSpacing" format="dimension" />
-        <attr name="stretchMode">
-            <enum name="none" value="0"/>
-            <enum name="spacingWidth" value="1" />
-            <enum name="columnWidth" value="2" />
-            <enum name="spacingWidthUniform" value="3" />
-        </attr>
-        <attr name="columnWidth" format="dimension" />
-        <attr name="numColumns" format="integer" min="0">
-            <enum name="auto_fit" value="-1" />
-        </attr>
-    </declare-styleable>
-
+    <!-- Parallax Scroll View -->
     <declare-styleable name="ParallaxScroll">
         <attr name="parallax_factor" format="float" />
         <attr name="inner_parallax_factor" format="float" />
@@ -36,10 +8,43 @@
         <attr name="circular_parallax" format="boolean" />
     </declare-styleable>
 
+    <!-- Material Menu View -->
     <declare-styleable name="MaterialMenuView">
         <attr name="color" format="color"/>
         <attr name="scale" format="integer"/>
         <attr name="transformDuration" format="integer"/>
         <attr name="pressedDuration" format="integer"/>
+    </declare-styleable>
+
+    <!-- Two Way View -->
+    <declare-styleable name="TwoWayView">
+        <attr name="layoutManager" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="TwoWayLayoutManager">
+        <attr name="android:orientation"/>
+    </declare-styleable>
+
+    <declare-styleable name="GridLayoutManager">
+        <attr name="numColumns" format="integer"/>
+        <attr name="numRows" format="integer"/>
+    </declare-styleable>
+
+    <declare-styleable name="SpacingItemDecoration">
+        <attr name="android:verticalSpacing"/>
+        <attr name="android:horizontalSpacing"/>
+    </declare-styleable>
+
+    <declare-styleable name="DividerItemDecoration">
+        <attr name="android:divider"/>
+    </declare-styleable>
+
+    <declare-styleable name="StaggeredGridViewChild">
+        <attr name="span" format="integer"/>
+    </declare-styleable>
+
+    <declare-styleable name="SpannableGridViewChild">
+        <attr name="colSpan" format="integer"/>
+        <attr name="rowSpan" format="integer"/>
     </declare-styleable>
 </resources>
