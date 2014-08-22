@@ -40,7 +40,7 @@
                 <org.omnirom.music.app.ui.AlbumArtImageView
                     android:id="@+id/ivArtistSuggestionCover"
                     android:layout_width="64dp"
-                    android:layout_height="148dp"
+                    android:layout_height="match_parent"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"

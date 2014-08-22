@@ -25,6 +25,7 @@ import org.omnirom.music.providers.ProviderCache;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +35,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by Guigui on 16/07/2014.
  */
 public class AlbumArtImageView extends SquareImageView {
+
+    private static final String TAG = "AlbumArtImageView";
 
     public interface OnArtLoadedListener {
         public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable);
@@ -164,7 +167,11 @@ public class AlbumArtImageView extends SquareImageView {
                     @Override
                     public void run() {
                         mTask = new BackgroundTask();
-                        mTask.executeOnExecutor(ART_POOL_EXECUTOR, result.request);
+                        try {
+                            mTask.executeOnExecutor(ART_POOL_EXECUTOR, result.request);
+                        } catch (RejectedExecutionException e) {
+                            Log.w(TAG, "Request restart has been denied", e);
+                        }
                     }
                 }, DELAY_BEFORE_RETRY);
             }

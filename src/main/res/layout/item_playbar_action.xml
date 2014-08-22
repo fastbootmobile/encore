@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/playing_bar_height"
+    android:background="@drawable/playing_bar_action_background"
+    android:clickable="true">
+
+
+    <ImageView
+        android:id="@+id/ivActionIcon"
+        android:layout_width="@dimen/playing_bar_height"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/playing_bar_action_background"
+        android:padding="4dp"
+        android:adjustViewBounds="true"
+        android:clickable="true" />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="@color/separator"
+        android:layout_toRightOf="@+id/ivActionIcon" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/playing_bar_height"
+        android:layout_toEndOf="@+id/ivActionIcon"
+        android:layout_toRightOf="@+id/ivActionIcon"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_alignParentTop="true">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            style="@style/FontButton" />
+
+        <TextView
+            android:id="@+id/tvArtist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+
+    </LinearLayout>
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:id="@+id/imageView"
+        android:src="@drawable/shadow" />
+
+</RelativeLayout>

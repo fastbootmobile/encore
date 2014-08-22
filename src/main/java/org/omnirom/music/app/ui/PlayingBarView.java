@@ -438,19 +438,19 @@ public class PlayingBarView extends RelativeLayout {
             }
 
             // Add the "View full queue" item entry, using the album art as "wrap" button
-            final View itemRoot = inflater.inflate(R.layout.item_playbar, mTracksLayout, false);
+            final View itemRoot = inflater.inflate(R.layout.item_playbar_action, mTracksLayout, false);
             mTracksLayout.addView(itemRoot);
 
             TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
             TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
-            ImageView ivAlbumArt = (ImageView) itemRoot.findViewById(R.id.ivAlbumArt);
+            ImageView ivActionIcon = (ImageView) itemRoot.findViewById(R.id.ivActionIcon);
 
             tvArtist.setVisibility(View.GONE);
             tvTitle.setText(getContext().getString(R.string.view_full_queue));
-            ivAlbumArt.setImageResource(R.drawable.ic_reduce);
-            ivAlbumArt.setScaleType(ImageView.ScaleType.CENTER);
+            ivActionIcon.setImageResource(R.drawable.ic_reduce);
+            ivActionIcon.setScaleType(ImageView.ScaleType.CENTER);
 
-            ivAlbumArt.setOnClickListener(new OnClickListener() {
+            ivActionIcon.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     setWrapped(true);
