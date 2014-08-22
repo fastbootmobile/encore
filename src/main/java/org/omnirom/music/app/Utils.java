@@ -34,6 +34,7 @@ import android.widget.Toast;
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
@@ -401,6 +402,47 @@ public class Utils {
         // there's no major artist in the album and return null.
         if (maxEntry != null &&
                 ((a.getSongsCount() > 5 && maxEntry.getValue() > 1) || a.getSongsCount() < 5)) {
+            return maxEntry.getKey();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Figures out the main artist of a playlist based on its songs
+     * @param p The playlist
+     * @return A reference to the main artist, or null if none
+     */
+    public static String getMainArtist(Playlist p) {
+        HashMap<String, Integer> occurrences = new HashMap<String, Integer>();
+        Iterator<String> it = p.songs();
+
+        ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        while (it.hasNext()) {
+            String songRef = it.next();
+            Song song = cache.getSong(songRef);
+
+            String artistRef = song.getArtist();
+            Integer count = occurrences.get(artistRef);
+            if (count == null) {
+                count = 0;
+            }
+            count++;
+            occurrences.put(artistRef, count);
+        }
+
+        // Figure the max
+        Map.Entry<String,Integer> maxEntry = null;
+        for (Map.Entry<String,Integer> entry : occurrences.entrySet()) {
+            if (maxEntry == null || entry.getValue() > maxEntry.getValue()) {
+                maxEntry = entry;
+            }
+        }
+
+        // If there's more than 5 tracks in the album and the most occurrences is one, consider
+        // there's no major artist in the album and return null.
+        if (maxEntry != null &&
+                ((p.getSongsCount() > 5 && maxEntry.getValue() > 1) || p.getSongsCount() < 5)) {
             return maxEntry.getKey();
         } else {
             return null;

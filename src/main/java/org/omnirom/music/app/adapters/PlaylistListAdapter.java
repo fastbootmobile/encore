@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.model.Playlist;
 
 import java.util.ArrayList;
@@ -28,9 +29,10 @@ public class PlaylistListAdapter extends BaseAdapter {
     private Handler mHandler;
 
     private static class ViewHolder {
-        public ImageView ivCover;
+        public AlbumArtImageView ivCover;
         public TextView tvTitle;
         public TextView tvSubTitle;
+        public Playlist playlist;
     }
 
     public PlaylistListAdapter() {
@@ -119,7 +121,7 @@ public class PlaylistListAdapter extends BaseAdapter {
             assert root != null;
 
             ViewHolder holder = new ViewHolder();
-            holder.ivCover = (ImageView) root.findViewById(R.id.ivCover);
+            holder.ivCover = (AlbumArtImageView) root.findViewById(R.id.ivCover);
             holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
             holder.tvSubTitle = (TextView) root.findViewById(R.id.tvSubTitle);
 
@@ -130,14 +132,16 @@ public class PlaylistListAdapter extends BaseAdapter {
         final Playlist playlist = getItem(position);
         final ViewHolder tag = (ViewHolder) root.getTag();
 
-        tag.ivCover.setImageResource(R.drawable.album_placeholder);
+        tag.playlist = playlist;
 
         if (playlist.isLoaded()) {
             tag.tvTitle.setText(playlist.getName());
             tag.tvSubTitle.setText("" + playlist.getSongsCount() + " songs");
+            tag.ivCover.loadArtForPlaylist(playlist);
         } else {
             tag.tvTitle.setText("Loading");
             tag.tvSubTitle.setText("Loading");
+            tag.ivCover.setDefaultArt();
         }
 
         return root;

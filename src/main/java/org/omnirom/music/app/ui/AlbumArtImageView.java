@@ -11,11 +11,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
+import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
@@ -269,6 +271,15 @@ public class AlbumArtImageView extends SquareImageView {
         loadArtImpl(artist);
     }
 
+    public void loadArtForPlaylist(final Playlist playlist) {
+        String mainArtistRef = Utils.getMainArtist(playlist);
+        if (mainArtistRef != null) {
+            loadArtImpl(ProviderAggregator.getDefault().getCache().getArtist(mainArtistRef));
+        } else {
+            setDefaultArt();
+        }
+    }
+
     private void loadArtImpl(final BoundEntity ent) {
         if (ent.equals(mRequestedEntity)) {
             // Nothing to do, we are displaying the proper thing already
@@ -305,6 +316,7 @@ public class AlbumArtImageView extends SquareImageView {
             }
         };
 
+        // When we're crossfading, we're assuming we want the image directly
         if (mCrossfade) {
             mHandler.post(runnable);
         } else {
