@@ -1,0 +1,18 @@
+<org.omnirom.music.app.ui.FlowLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:flow="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="org.omnirom.music.app.fragments.ListenNowFragment"
+    flow:horizontalSpacing="8dp"
+    flow:verticalSpacing="8dp">
+
+    <android.support.v7.widget.CardView
+        android:layout_height="160dp"
+        android:layout_width="match_parent"
+        card_view:cardCornerRadius="2dp">
+
+    </android.support.v7.widget.CardView>
+
+</org.omnirom.music.app.ui.FlowLayout>

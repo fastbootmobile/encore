@@ -20,6 +20,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.fragments.AutomixFragment;
+import org.omnirom.music.app.fragments.ListenNowFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
@@ -129,6 +130,9 @@ public class MainActivity extends FragmentActivity
         try {
             Fragment newFrag = null;
             switch (position+1) {
+                case SECTION_LISTEN_NOW:
+                    newFrag = ListenNowFragment.newInstance();
+                    break;
                 case SECTION_PLAYLISTS:
                     newFrag = PlaylistListFragment.newInstance(true);
                     break;
@@ -168,7 +172,10 @@ public class MainActivity extends FragmentActivity
 
         FragmentTransaction ft = fragmentManager.beginTransaction();
         if (addToStack) {
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             ft.addToBackStack(f.toString());
+        } else {
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         }
         ft.replace(R.id.container, f);
         ft.commit();
