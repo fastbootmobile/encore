@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="2dp"
+    android:background="@color/default_album_art_background"
+    android:measureWithLargestChild="false"
+    android:orientation="horizontal">
+
+    <!-- android:viewName="cover" -->
+    <org.omnirom.music.app.ui.AlbumArtImageView
+        android:id="@+id/ivCover"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/app_name"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            style="@style/FontCardLine1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/tile_text_padding"
+            android:layout_marginRight="@dimen/tile_text_padding"
+            android:singleLine="true"
+            android:gravity="start|bottom"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/tvSubTitle"
+            style="@style/FontCardLine2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/tile_text_padding"
+            android:layout_marginRight="@dimen/tile_text_padding"
+            android:gravity="start|top"
+            android:textColor="@color/white"
+            android:paddingTop="4dp" />
+    </LinearLayout>
+</LinearLayout>

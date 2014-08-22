@@ -1,41 +1,23 @@
 package org.omnirom.music.app.fragments;
 
-import android.app.Activity;
-import android.app.ActivityOptions;
-import android.graphics.drawable.TransitionDrawable;
-import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.util.Log;
-import android.util.Pair;
-import android.view.Gravity;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ExpandableListView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.AlbumActivity;
-import org.omnirom.music.app.ArtistActivity;
-import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.AlbumsAdapter;
-import org.omnirom.music.app.adapters.ArtistsAdapter;
-import org.omnirom.music.app.ui.ExpandableGridView;
-import org.omnirom.music.app.ui.ExpandableHeightGridView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -44,10 +26,7 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderConnection;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

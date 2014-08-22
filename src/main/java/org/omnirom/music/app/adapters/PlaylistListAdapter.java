@@ -117,7 +117,7 @@ public class PlaylistListAdapter extends BaseAdapter {
         if (convertView == null) {
             // Recycle the existing view
             LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.medium_card_two_lines, null);
+            root = inflater.inflate(R.layout.medium_card_two_lines, parent, false);
             assert root != null;
 
             ViewHolder holder = new ViewHolder();
@@ -136,11 +136,11 @@ public class PlaylistListAdapter extends BaseAdapter {
 
         if (playlist.isLoaded()) {
             tag.tvTitle.setText(playlist.getName());
-            tag.tvSubTitle.setText("" + playlist.getSongsCount() + " songs");
+            tag.tvSubTitle.setText(ctx.getResources().getQuantityString(R.plurals.songs_count, playlist.getSongsCount(), playlist.getSongsCount()));
             tag.ivCover.loadArtForPlaylist(playlist);
         } else {
-            tag.tvTitle.setText("Loading");
-            tag.tvSubTitle.setText("Loading");
+            tag.tvTitle.setText(R.string.loading);
+            tag.tvSubTitle.setText(R.string.loading);
             tag.ivCover.setDefaultArt();
         }
 

@@ -417,18 +417,25 @@ public class Utils {
         HashMap<String, Integer> occurrences = new HashMap<String, Integer>();
         Iterator<String> it = p.songs();
 
-        ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        final ProviderCache cache = aggregator.getCache();
+
         while (it.hasNext()) {
             String songRef = it.next();
             Song song = cache.getSong(songRef);
-
-            String artistRef = song.getArtist();
-            Integer count = occurrences.get(artistRef);
-            if (count == null) {
-                count = 0;
+            if (song == null) {
+                song = aggregator.retrieveSong(songRef, p.getProvider());
             }
-            count++;
-            occurrences.put(artistRef, count);
+
+            if (song != null) {
+                String artistRef = song.getArtist();
+                Integer count = occurrences.get(artistRef);
+                if (count == null) {
+                    count = 0;
+                }
+                count++;
+                occurrences.put(artistRef, count);
+            }
         }
 
         // Figure the max

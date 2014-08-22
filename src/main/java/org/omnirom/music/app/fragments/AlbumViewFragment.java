@@ -17,8 +17,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
-
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
@@ -57,7 +55,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private int mBackgroundColor;
     private ImageButton mPlayFab;
     private boolean mFabShouldResume = false;
-    private FadingActionBarHelper mFadingHelper;
 
     private Runnable mLoadSongsRunnable = new Runnable() {
         @Override

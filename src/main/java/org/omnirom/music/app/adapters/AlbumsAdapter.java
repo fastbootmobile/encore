@@ -161,7 +161,7 @@ public class AlbumsAdapter extends BaseAdapter {
                 tag.tvTitle.setText(album.getName());
 
                 if (album.getSongsCount() > 0) {
-                    tag.tvSubTitle.setText(album.getSongsCount() + " songs");
+                    tag.tvSubTitle.setText(res.getQuantityString(R.plurals.songs_count, album.getSongsCount(), album.getSongsCount()));
                     tag.tvSubTitle.setVisibility(View.VISIBLE);
                 } else {
                     tag.tvSubTitle.setVisibility(View.INVISIBLE);

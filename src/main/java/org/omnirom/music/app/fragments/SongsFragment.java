@@ -74,8 +74,8 @@ public class SongsFragment extends Fragment {
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
         for (ProviderConnection providerConnection : providers) {
             try {
-                List<Song> Songs = providerConnection.getBinder().getSongs();
-                for (Song song : Songs) {
+                List<Song> songs = providerConnection.getBinder().getSongs();
+                for (Song song : songs) {
                     mSongsListAdapter.put(song);
                 }
             } catch (Exception e) {

@@ -99,4 +99,16 @@
     <string name="bucket_edit">Edit</string>
     <string name="empty_playback_queue">Nothing is currently playing</string>
 
+    <plurals name="songs_count">
+        <item quantity="zero">No songs</item>
+        <item quantity="one">One song</item>
+        <item quantity="other">%d songs</item>
+    </plurals>
+
+    <plurals name="albums_count">
+        <item quantity="zero">No albums</item>
+        <item quantity="one">One album</item>
+        <item quantity="other">%d albums</item>
+    </plurals>
+
 </resources>
