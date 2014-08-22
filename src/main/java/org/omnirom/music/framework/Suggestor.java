@@ -17,6 +17,8 @@ import java.util.Iterator;
  */
 public class Suggestor {
 
+    private static final String TAG = "Suggestor";
+
     private static final Suggestor INSTANCE = new Suggestor();
 
     public static Suggestor getInstance() {
@@ -35,19 +37,26 @@ public class Suggestor {
             Album album = cache.getAlbum(albums.next());
 
             if (album.isLoaded() && album.getSongsCount() > 0) {
-                String songRef = album.songs().next();
-                Song song = cache.getSong(songRef);
+                Iterator<String> songs = album.songs();
+                while (songs.hasNext()) {
+                    String songRef = songs.next();
+                    Song song = cache.getSong(songRef);
 
-                if (song == null) {
-                    ProviderConnection pc = PluginsLookup.getDefault().getProvider(artist.getProvider());
-                    try {
-                        song = pc.getBinder().getSong(songRef);
-                    } catch (RemoteException e) {
-                        Log.e("SUGGESTOR", "Errror!", e);
+                    if (song == null) {
+                        ProviderConnection pc = PluginsLookup.getDefault().getProvider(artist.getProvider());
+                        try {
+                            song = pc.getBinder().getSong(songRef);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error while getting album track!!", e);
+                        }
+                    }
+
+                    if (song != null) {
+                        if (song.getArtist().equals(artist.getRef())) {
+                            return song;
+                        }
                     }
                 }
-
-                return song;
             }
         }
 

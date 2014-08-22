@@ -110,7 +110,7 @@ public class SongsFragment extends Fragment {
         super.onDetach();
         try {
             PluginsLookup.getDefault().getPlaybackService().removeCallback(mPlaybackCallback);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             // ignore
         }
     }
