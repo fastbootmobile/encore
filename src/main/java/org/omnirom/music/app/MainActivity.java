@@ -48,6 +48,7 @@ public class MainActivity extends FragmentActivity
     public static final int SECTION_MY_SONGS   = 2;
     public static final int SECTION_PLAYLISTS  = 3;
     public static final int SECTION_AUTOMIX    = 4;
+    public static final int SECTION_NOW_PLAYING= 5;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -136,10 +137,11 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
+    public boolean onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
+        boolean result = true;
         try {
-            Fragment newFrag;
+            Fragment newFrag = null;
             switch (position+1) {
                 case SECTION_PLAYLISTS:
                     newFrag = PlaylistListFragment.newInstance(true);
@@ -150,15 +152,22 @@ public class MainActivity extends FragmentActivity
                 case SECTION_AUTOMIX:
                     newFrag = AutomixFragment.newInstance();
                     break;
-                default:
-                    newFrag = PlaceholderFragment.newInstance(position + 1);
+                case SECTION_NOW_PLAYING:
+                    startActivity(new Intent(this, PlaybackQueueActivity.class));
                     break;
             }
 
-            showFragment(newFrag, false);
+            if (newFrag != null) {
+                showFragment(newFrag, false);
+                result = true;
+            } else {
+                result = false;
+            }
         } catch (IllegalStateException e) {
             // The app is pausing
         }
+
+        return result;
     }
 
     public void showFragment(Fragment f, boolean addToStack) {

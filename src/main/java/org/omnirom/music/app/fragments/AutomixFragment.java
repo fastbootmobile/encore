@@ -19,6 +19,7 @@ import org.omnirom.music.api.echonest.EchoNest;
 import org.omnirom.music.app.AutomixCreateActivity;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.BucketAdapter;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
@@ -84,6 +85,8 @@ public class AutomixFragment extends Fragment {
                 startActivity(new Intent(getActivity(), AutomixCreateActivity.class));
             }
         });
+        Utils.setLargeFabOutline(new View[]{mFabCreate});
+        Utils.setupBigFabShadow(mFabCreate);
 
         mListView = (ListView) rootView.findViewById(R.id.lvBuckets);
         mAdapter = new BucketAdapter();

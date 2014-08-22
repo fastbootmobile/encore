@@ -259,17 +259,6 @@ public class NavigationDrawerFragment extends Fragment {
         if (switchToFragment) {
             if (mDrawerListView != null) {
                 mDrawerListView.setItemChecked(position, true);
-
-                if (mPreviousItem != null) {
-                    mPreviousItem.setTypeface(mUnselectedTypeface);
-                }
-
-                View view = mDrawerListView.getChildAt(mCurrentSelectedPosition);
-                if (view != null) {
-                    TextView tv = (TextView) view.findViewById(android.R.id.text1);
-                    tv.setTypeface(mSelectedTypeface);
-                    mPreviousItem = tv;
-                }
             }
             if (mDrawerLayout != null) {
                 mDrawerLayout.closeDrawer(mFragmentContainerView);
@@ -278,7 +267,18 @@ public class NavigationDrawerFragment extends Fragment {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mCallbacks.onNavigationDrawerItemSelected(position);
+                        if (mCallbacks.onNavigationDrawerItemSelected(position)) {
+                            if (mPreviousItem != null) {
+                                mPreviousItem.setTypeface(mUnselectedTypeface);
+                            }
+
+                            View view = mDrawerListView.getChildAt(mCurrentSelectedPosition);
+                            if (view != null) {
+                                TextView tv = (TextView) view.findViewById(android.R.id.text1);
+                                tv.setTypeface(mSelectedTypeface);
+                                mPreviousItem = tv;
+                            }
+                        }
                     }
                 });
 
@@ -349,6 +349,6 @@ public class NavigationDrawerFragment extends Fragment {
         /**
          * Called when an item in the navigation drawer is selected.
          */
-        void onNavigationDrawerItemSelected(int position);
+        boolean onNavigationDrawerItemSelected(int position);
     }
 }

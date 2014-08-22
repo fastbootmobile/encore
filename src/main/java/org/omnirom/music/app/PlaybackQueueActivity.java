@@ -306,15 +306,24 @@ public class PlaybackQueueActivity extends FragmentActivity {
 
             // Load the current playing track
             try {
-                Song currentTrack = playbackService.getCurrentPlaybackQueue().get(0);
+                List<Song> playbackQueue = playbackService.getCurrentPlaybackQueue();
+                if (playbackQueue.size() > 0) {
+                    Song currentTrack = playbackQueue.get(0);
 
-                TextView tvCurrentTitle = (TextView) mRootView.findViewById(R.id.tvCurrentTitle);
-                TextView tvCurrentArtist = (TextView) mRootView.findViewById(R.id.tvCurrentArtist);
-                AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) mRootView.findViewById(R.id.ivCurrentPlayAlbumArt);
+                    mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.GONE);
+                    mRootView.findViewById(R.id.llRoot).setVisibility(View.VISIBLE);
 
-                tvCurrentTitle.setText(currentTrack.getTitle());
-                tvCurrentArtist.setText(cache.getArtist(currentTrack.getArtist()).getName());
-                ivCurrentPlayAlbumArt.loadArtForSong(currentTrack);
+                    TextView tvCurrentTitle = (TextView) mRootView.findViewById(R.id.tvCurrentTitle);
+                    TextView tvCurrentArtist = (TextView) mRootView.findViewById(R.id.tvCurrentArtist);
+                    AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) mRootView.findViewById(R.id.ivCurrentPlayAlbumArt);
+
+                    tvCurrentTitle.setText(currentTrack.getTitle());
+                    tvCurrentArtist.setText(cache.getArtist(currentTrack.getArtist()).getName());
+                    ivCurrentPlayAlbumArt.loadArtForSong(currentTrack);
+                } else {
+                    mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.VISIBLE);
+                    mRootView.findViewById(R.id.llRoot).setVisibility(View.GONE);
+                }
             } catch (RemoteException e) {
                 // ignore, if the playback service is disconnected we're not playing anything
             }

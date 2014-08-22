@@ -23,7 +23,7 @@ public class NavDrawerAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return 4;
+        return 5;
     }
 
     @Override
@@ -52,11 +52,10 @@ public class NavDrawerAdapter extends BaseAdapter {
             tag = (ViewHolder) view.getTag();
         }
 
-        final Resources res = view.getResources();
         switch (i) {
             case 0:
                 tag.tvText.setText(R.string.title_section_listen_now);
-                tag.ivLogo.setImageResource(R.drawable.ic_play_circle_outline);
+                tag.ivLogo.setImageResource(R.drawable.ic_listen_now);
                 break;
 
             case 1:
@@ -73,6 +72,10 @@ public class NavDrawerAdapter extends BaseAdapter {
                 tag.tvText.setText(R.string.title_section_automix);
                 tag.ivLogo.setImageResource(R.drawable.ic_nav_automix);
                 break;
+
+            case 4:
+                tag.tvText.setText(R.string.title_activity_playback_queue);
+                tag.ivLogo.setImageResource(R.drawable.ic_play_circle_outline);
         }
 
         return view;
