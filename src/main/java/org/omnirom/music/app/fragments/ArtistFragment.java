@@ -1049,7 +1049,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 }
             } catch (EchoNestException e) {
                 Log.e(TAG, "Cannot get similar artist", e);
-                Utils.shortToast(getActivity(), R.string.unable_fetch_artist_info);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.shortToast(getActivity(), R.string.unable_fetch_artist_info);
+                    }
+                });
+
             }
         }
 
