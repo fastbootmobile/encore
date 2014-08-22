@@ -1,7 +1,6 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +54,7 @@ public class NavDrawerAdapter extends BaseAdapter {
         switch (i) {
             case 0:
                 tag.tvText.setText(R.string.title_section_listen_now);
-                tag.ivLogo.setImageResource(R.drawable.ic_listen_now);
+                tag.ivLogo.setImageResource(R.drawable.ic_nav_listen_now);
                 break;
 
             case 1:
@@ -75,7 +74,7 @@ public class NavDrawerAdapter extends BaseAdapter {
 
             case 4:
                 tag.tvText.setText(R.string.title_activity_playback_queue);
-                tag.ivLogo.setImageResource(R.drawable.ic_play_circle_outline);
+                tag.ivLogo.setImageResource(R.drawable.ic_nav_nowplaying);
         }
 
         return view;

@@ -1,29 +1,20 @@
 package org.omnirom.music.app;
 
 import android.app.ActionBar;
-import android.app.Activity;
-import android.os.Build;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.content.Intent;
-
 import android.app.SearchManager;
 import android.content.Context;
-
+import android.content.Intent;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -33,9 +24,7 @@ import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
-import org.omnirom.music.framework.PlaybackState;
 import org.omnirom.music.framework.PluginsLookup;
-
 import org.omnirom.music.service.IPlaybackService;
 
 
@@ -60,17 +49,14 @@ public class MainActivity extends FragmentActivity
      */
     private CharSequence mTitle;
 
-    private PlaybackState mPlaybackState;
-
     private PlayingBarView mPlayingBarLayout;
 
     private boolean mRestoreBarOnBack;
 
     private SearchView mSearchView;
 
-
     public MainActivity() {
-        mPlaybackState = new PlaybackState();
+
     }
 
     @Override
@@ -182,12 +168,7 @@ public class MainActivity extends FragmentActivity
 
         FragmentTransaction ft = fragmentManager.beginTransaction();
         if (addToStack) {
-            // No animations for you, 4.1 users!
-            // ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
             ft.addToBackStack(f.toString());
-        } else {
-            // No animations for you, 4.1 users!
-            // ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
         }
         ft.replace(R.id.container, f);
         ft.commit();
@@ -260,50 +241,6 @@ public class MainActivity extends FragmentActivity
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public PlaybackState getPlaybackState() {
-        return mPlaybackState;
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
-        }
     }
 
 }

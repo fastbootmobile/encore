@@ -210,7 +210,7 @@ public class DspProvidersFragment extends ListFragment {
                     dialogInterface.dismiss();
                 }
             });
-            builder.setIcon(R.drawable.ic_btn_play_red);
+            builder.setIcon(R.drawable.ic_nav_listen_now);
 
             builder.setCancelable(true);
             builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {

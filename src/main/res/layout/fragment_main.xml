@@ -1,7 +1,0 @@
-<org.omnirom.music.app.ui.ObservableScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="fill_parent"
-    tools:ignore="HardcodedText">
-
-</org.omnirom.music.app.ui.ObservableScrollView>
