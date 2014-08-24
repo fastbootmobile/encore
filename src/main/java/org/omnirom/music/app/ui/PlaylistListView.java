@@ -25,6 +25,7 @@ import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -119,7 +120,8 @@ public class PlaylistListView extends ParallaxScrollListView {
                     mMobileItemId = getAdapter().getItemId(position);
                     mHoverCell = getAndAddHoverView(selectedView);
                     Log.d(TAG, "position:" + position);
-                    ((PlaylistAdapter) getAdapter()).setVisibility(position, View.INVISIBLE);
+                    ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter())
+                            .setVisibility(position, View.INVISIBLE);
                     selectedView.setVisibility(INVISIBLE);
 
                     mCellIsMobile = true;
@@ -192,7 +194,7 @@ public class PlaylistListView extends ParallaxScrollListView {
      */
     private void updateNeighborViewsForID(long itemID) {
         int position = getPositionForID(itemID);
-        PlaylistAdapter adapter = ((PlaylistAdapter) getAdapter());
+        PlaylistAdapter adapter = (PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter();
         mAboveItemId = adapter.getItemId(position - 1);
         mBelowItemId = adapter.getItemId(position + 1);
     }
@@ -342,7 +344,7 @@ public class PlaylistListView extends ParallaxScrollListView {
             }
             mLastItemId = switchItemID;
 
-            PlaylistAdapter adapter = (PlaylistAdapter) getAdapter();
+            PlaylistAdapter adapter = (PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter();
             //swapElements(adapter.getData(),originalItem, getPositionForView(switchView));
             adapter.swap(originalItem, getPositionForView(switchView));
             adapter.notifyDataSetChanged();
@@ -391,10 +393,10 @@ public class PlaylistListView extends ParallaxScrollListView {
      * the hover cell back to its correct location.
      */
     private void touchEventsEnded() {
-
         final View mobileView = getViewForID(mMobileItemId);
+        final PlaylistAdapter adapter = (PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter();
+
         if (mCellIsMobile && mDeleted) {
-            final PlaylistAdapter adapter = (PlaylistAdapter) getAdapter();
             Log.d(TAG, "We delete " + mMobileItemId);
             adapter.delete((int) mMobileItemId);
             adapter.notifyDataSetChanged();
@@ -423,7 +425,6 @@ public class PlaylistListView extends ParallaxScrollListView {
                 }
             });
         } else if (mCellIsMobile) {
-            PlaylistAdapter adapter = (PlaylistAdapter) getAdapter();
             Log.d(TAG, "We swap " + mMobileItemId + " and " + mLastItemId);
             if (mLastItemId != INVALID_ID)
                 adapter.updatePlaylist((int) mMobileItemId, (int) mLastItemId);
@@ -464,7 +465,7 @@ public class PlaylistListView extends ParallaxScrollListView {
 
                     mBelowItemId = INVALID_ID;
                     mobileView.setVisibility(VISIBLE);
-                    ((PlaylistAdapter) getAdapter()).setVisibility(getPositionForID(mMobileItemId), VISIBLE);
+                    ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter()).setVisibility(getPositionForID(mMobileItemId), VISIBLE);
                     mMobileItemId = INVALID_ID;
                     mHoverCell = null;
                     setEnabled(true);
@@ -485,7 +486,7 @@ public class PlaylistListView extends ParallaxScrollListView {
         if (mCellIsMobile) {
             mAboveItemId = INVALID_ID;
             mBelowItemId = INVALID_ID;
-            ((PlaylistAdapter) getAdapter()).setVisibility(getPositionForID(mMobileItemId), VISIBLE);
+            ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter()).setVisibility(getPositionForID(mMobileItemId), VISIBLE);
             mMobileItemId = INVALID_ID;
             mHoverCell = null;
             invalidate();

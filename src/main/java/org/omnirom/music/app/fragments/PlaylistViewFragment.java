@@ -164,7 +164,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             if (song == null) {
                 song = ProviderAggregator.getDefault().retrieveSong(songRef, mPlaylist.getProvider());
             }
-            mAdapter.addItem(song);
+            mAdapter.put(song);
         }
         mAdapter.notifyDataSetChanged();
         mAdapter.setPlaylist(mPlaylist);
