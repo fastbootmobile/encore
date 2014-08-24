@@ -644,7 +644,6 @@ public class PlaybackService extends Service
                 mIsPaused = true;
                 mPauseLastTick = System.currentTimeMillis();
 
-                Log.e(TAG, "onSongPaused");
                 for (IPlaybackCallback cb : mCallbacks) {
                     try {
                         cb.onPlaybackPause();

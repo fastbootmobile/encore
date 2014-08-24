@@ -106,7 +106,6 @@ public class NotifActionService extends IntentService {
     private void handleActionTogglePause() {
         try {
             IPlaybackService service = getPlaybackService();
-            Log.e(TAG, "isPaused? " + service.isPaused());
             if (service.isPaused()) {
                 service.play();
             } else {
