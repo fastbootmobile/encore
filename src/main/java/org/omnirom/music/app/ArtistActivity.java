@@ -1,6 +1,8 @@
 package org.omnirom.music.app;
 
 import android.app.ActionBar;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,8 +10,11 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
+import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.fragments.ArtistFragment;
+import org.omnirom.music.app.ui.AlbumArtImageView;
 
 public class ArtistActivity extends FragmentActivity {
 
@@ -24,6 +29,17 @@ public class ArtistActivity extends FragmentActivity {
     private ArtistFragment mActiveFragment;
     private Bundle mInitialIntent;
     private Bitmap mHero;
+
+    public static Intent craftIntent(Context ctx, Bitmap hero, String artistRef, int color) {
+        Intent intent = new Intent(ctx, ArtistActivity.class);
+
+        intent.putExtra(ArtistActivity.EXTRA_ARTIST, artistRef);
+        intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR, color);
+
+        Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, hero);
+
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

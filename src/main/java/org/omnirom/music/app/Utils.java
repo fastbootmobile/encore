@@ -576,25 +576,22 @@ public class Utils {
         }
     }
 
-    public static void setupBigFabShadow(View fab) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-            StateListDrawable rootShape = (StateListDrawable) fab.getBackground();
-            LayerDrawable layer = (LayerDrawable) rootShape.getCurrent();
-            GradientDrawable shadow = (GradientDrawable) layer.getDrawable(0);
-            shadow.setColors(new int[]{0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000,
-                    0x80000000, 0x0});
-            shadow.setGradientRadius(110);
-        }
+    public static void setupLargeFabShadow(View fab) {
+        setupFabShadow(fab, 110);
     }
 
     public static void setupSmallFabShadow(View fab) {
+        setupFabShadow(fab, 68);
+    }
+
+    private static void setupFabShadow(View fab, int radius) {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
             StateListDrawable rootShape = (StateListDrawable) fab.getBackground();
             LayerDrawable layer = (LayerDrawable) rootShape.getCurrent();
             GradientDrawable shadow = (GradientDrawable) layer.getDrawable(0);
             shadow.setColors(new int[]{0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000,
                     0x80000000, 0x0});
-            shadow.setGradientRadius(68);
+            shadow.setGradientRadius(radius);
         }
     }
 }

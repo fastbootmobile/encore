@@ -5,10 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,18 +20,14 @@ import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -399,7 +391,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         // Outline is required for the FAB shadow to be actually oval
         mFabPlay = (ImageButton) mRootView.findViewById(R.id.fabPlay);
         setOutlines(mFabPlay);
-        Utils.setupBigFabShadow(mFabPlay);
+        Utils.setupLargeFabShadow(mFabPlay);
         showFab(false, false);
 
         // Set the FAB animated drawable
@@ -1069,25 +1061,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mArtistsGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Intent intent = new Intent(getActivity(), ArtistActivity.class);
-
-                    ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
-                    AlbumArtImageView ivCover = tag.ivCover;
-                    TextView tvTitle = tag.tvTitle;
-
-                    intent.putExtra(ArtistActivity.EXTRA_ARTIST,
-                            mAdapter.getItem(position).getRef());
-
-                    intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR, tag.itemColor);
-
-                    Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, tag.srcBitmap);
+                    final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
+                    String artistRef = mAdapter.getItem(position).getRef();
+                    Intent intent = ArtistActivity.craftIntent(getActivity(), tag.srcBitmap,
+                            artistRef, tag.itemColor);
 
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                        AlbumArtImageView ivCover = tag.ivCover;
+                        TextView tvTitle = tag.tvTitle;
+                        /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                             new Pair<View, String>(ivCover, "itemImage"),
                             new Pair<View, String>(tvTitle, "artistName"));
 
-                    startActivity(intent, opt.toBundle()); */
+                        startActivity(intent, opt.toBundle()); */
                     } else {
                         startActivity(intent);
                     }

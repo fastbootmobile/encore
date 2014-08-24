@@ -1,11 +1,15 @@
 package org.omnirom.music.app.adapters;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.RecyclerView;
@@ -17,14 +21,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.lucasr.twowayview.widget.StaggeredGridLayoutManager;
+import org.omnirom.music.app.AlbumActivity;
+import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.app.ui.MaterialTransitionDrawable;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +53,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         public final TextView tvTitle;
         public final TextView tvSubTitle;
         public final AlbumArtImageView ivCover;
+        public int backColor;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -52,8 +62,10 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
             tvSubTitle = (TextView) itemView.findViewById(R.id.tvSubTitle);
             ivCover = (AlbumArtImageView) itemView.findViewById(R.id.ivCover);
 
-            // Attach the viewholder to the cover album art for the album art callback
+            // Attach the viewholder to the cover album art for the album art callback, and to
+            // the root view for click listening
             ivCover.setTag(this);
+            llRoot.setTag(this);
         }
     }
 
@@ -83,14 +95,14 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
     private AlbumArtImageView.OnArtLoadedListener mAlbumArtListener
             = new AlbumArtImageView.OnArtLoadedListener() {
         @Override
-        public void onArtLoaded(final AlbumArtImageView view, BitmapDrawable drawable) {
+        public void onArtLoaded(final AlbumArtImageView view, final BitmapDrawable drawable) {
             final Resources res = view.getResources();
 
             if (drawable != null && drawable.getBitmap() != null) {
                 Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
-                        PaletteItem item = palette.getDarkVibrantColor();
+                        final PaletteItem item = palette.getDarkVibrantColor();
                         if (item == null) {
                             return;
                         }
@@ -105,6 +117,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                             @Override
                             public void run() {
                                 final ViewHolder holder = (ViewHolder) view.getTag();
+                                holder.backColor = item.getRgb();
                                 Utils.setViewBackground(holder.llRoot, transition);
                                 transition.startTransition(1000);
                             }
@@ -113,7 +126,38 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                 });
 
             }
+        }
+    };
 
+    private View.OnClickListener mItemClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            ViewHolder holder = (ViewHolder) view.getTag();
+            final int pos = holder.getPosition();
+            final ListenNowEntry entry = mEntries.get(pos);
+
+            // Get hero image and background color
+            final Context ctx = holder.llRoot.getContext();
+            MaterialTransitionDrawable draw = (MaterialTransitionDrawable) holder.ivCover.getDrawable();
+            final Bitmap hero = draw.getFinalDrawable().getBitmap();
+            final int backColor = holder.backColor;
+
+            Intent intent = null;
+
+            if (entry.entity instanceof Album) {
+                Album album = (Album) entry.entity;
+                intent = AlbumActivity.craftIntent(ctx, hero, album, backColor);
+            } else if (entry.entity instanceof Artist) {
+                Artist artist = (Artist) entry.entity;
+                intent = ArtistActivity.craftIntent(ctx, hero, artist.getRef(), backColor);
+            } else if (entry.entity instanceof Song) {
+                Song song = (Song) entry.entity;
+                playSong(song);
+            }
+
+            if (intent != null) {
+                ctx.startActivity(intent);
+            }
         }
     };
 
@@ -146,6 +190,15 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         notifyItemInserted(mEntries.size() - 1);
     }
 
+    private void playSong(Song s) {
+        IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+        try {
+            pbService.playSong(s);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Cannot play song", e);
+        }
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         final LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
@@ -154,6 +207,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
 
         // Setup album art listener
         holder.ivCover.setOnArtLoadedListener(mAlbumArtListener);
+        holder.llRoot.setOnClickListener(mItemClickListener);
 
         return holder;
     }
@@ -185,7 +239,9 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         final Resources res = holder.llRoot.getResources();
 
         // Reset root color
-        holder.llRoot.setBackgroundColor(res.getColor(R.color.default_album_art_background));
+        final int defaultColor = res.getColor(R.color.default_album_art_background);
+        holder.llRoot.setBackgroundColor(defaultColor);
+        holder.backColor = defaultColor;
 
         // Update entry contents
         if (entry.entity instanceof Playlist) {

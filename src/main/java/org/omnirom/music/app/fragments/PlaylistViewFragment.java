@@ -13,7 +13,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
@@ -30,7 +29,6 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.BasePlaybackCallback;
-import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.util.Iterator;
@@ -115,7 +113,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         mPlayFab = (ImageButton) headerView.findViewById(R.id.fabPlay);
         Utils.setLargeFabOutline(new View[]{mPlayFab});
-        Utils.setupBigFabShadow(mPlayFab);
+        Utils.setupLargeFabShadow(mPlayFab);
 
         // Set source logo
         ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);

@@ -132,7 +132,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         mPlayFab = (ImageButton) headerView.findViewById(R.id.fabPlay);
         Utils.setLargeFabOutline(new View[]{mPlayFab});
-        Utils.setupBigFabShadow(mPlayFab);
+        Utils.setupLargeFabShadow(mPlayFab);
 
         // Set source logo
         ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);

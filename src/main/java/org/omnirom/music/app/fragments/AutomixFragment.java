@@ -15,7 +15,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import org.omnirom.music.api.echonest.AutoMixManager;
-import org.omnirom.music.api.echonest.EchoNest;
 import org.omnirom.music.app.AutomixCreateActivity;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
@@ -86,7 +85,7 @@ public class AutomixFragment extends Fragment {
             }
         });
         Utils.setLargeFabOutline(new View[]{mFabCreate});
-        Utils.setupBigFabShadow(mFabCreate);
+        Utils.setupLargeFabShadow(mFabCreate);
 
         mListView = (ListView) rootView.findViewById(R.id.lvBuckets);
         mAdapter = new BucketAdapter();
