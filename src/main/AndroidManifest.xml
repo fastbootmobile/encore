@@ -79,6 +79,11 @@
             android:name=".AutomixCreateActivity"
             android:label="@string/title_activity_automix_create" >
         </activity>
+
+        <service
+            android:name="org.omnirom.music.service.NotifActionService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

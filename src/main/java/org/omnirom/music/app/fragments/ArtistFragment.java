@@ -296,20 +296,22 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
 
         // Prepare the palette to colorize the FAB
-        Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
-            @Override
-            public void onGenerated(final Palette palette) {
-                final PaletteItem color = palette.getDarkMutedColor();
-                if (color != null && mRootView != null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.colorFloatingButton(mFabPlay, color.getRgb(), true);
-                        }
-                    });
+        if (hero != null) {
+            Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
+                @Override
+                public void onGenerated(final Palette palette) {
+                    final PaletteItem color = palette.getDarkMutedColor();
+                    if (color != null && mRootView != null) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.colorFloatingButton(mFabPlay, color.getRgb(), true);
+                            }
+                        });
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override

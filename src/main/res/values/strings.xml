@@ -98,6 +98,10 @@
     <string name="bucket_history">History</string>
     <string name="bucket_edit">Edit</string>
     <string name="empty_playback_queue">Nothing is currently playing</string>
+    <string name="pause">Pause</string>
+    <string name="stop">Stop</string>
+    <string name="play">Play</string>
+    <string name="next">Next</string>
 
     <plurals name="songs_count">
         <item quantity="zero">No songs</item>

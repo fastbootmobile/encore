@@ -119,4 +119,9 @@ interface IPlaybackService {
      * Fast-forward to the next track of the queue
      */
     void next();
+
+    /**
+     * Stops the playback and remove the notification
+     */
+    void stop();
 }

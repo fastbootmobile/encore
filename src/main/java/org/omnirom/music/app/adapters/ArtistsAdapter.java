@@ -155,6 +155,7 @@ public class ArtistsAdapter extends BaseAdapter {
                 holder.ivCover = (AlbumArtImageView) root.findViewById(R.id.ivCover);
                 holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
                 holder.llRoot = (LinearLayout) root.findViewById(R.id.llRoot);
+                holder.srcBitmap = ((BitmapDrawable) ctx.getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
 
                 root.setTag(holder);
             }

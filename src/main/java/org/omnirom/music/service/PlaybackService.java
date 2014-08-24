@@ -1,23 +1,14 @@
 package org.omnirom.music.service;
 
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.app.BuildConfig;
-import org.omnirom.music.app.MainActivity;
-import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AudioSocketHost;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
@@ -48,7 +39,6 @@ public class PlaybackService extends Service
 
     private static final String TAG = "PlaybackService";
     private static final boolean DEBUG = BuildConfig.DEBUG;
-    private static final int FOREGROUND_ID = 1;
 
     /**
      * Time after which the service will shutdown if nothing happens
@@ -64,8 +54,8 @@ public class PlaybackService extends Service
         public void run() {
             if ((!mIsPlaying || mIsPaused)) {
                 Log.w(TAG, "Shutting down because of timeout and nothing bound");
-                stopSelf();
                 stopForeground(true);
+                stopSelf();
             } else {
                 resetShutdownTimeout();
             }
@@ -75,6 +65,8 @@ public class PlaybackService extends Service
     private Runnable mNotifyQueueChangedRunnable = new Runnable() {
         @Override
         public void run() {
+            mNotification.setHasNext(mPlaybackQueue.size() > 1);
+
             for (IPlaybackCallback cb : mCallbacks) {
                 try {
                     cb.onPlaybackQueueChanged();
@@ -90,13 +82,13 @@ public class PlaybackService extends Service
     private DSPProcessor mDSPProcessor;
     private PlaybackQueue mPlaybackQueue;
     private List<IPlaybackCallback> mCallbacks;
-    private Notification mNotification;
-    private NotificationCompat.Builder mNotificationBuilder;
+    private ServiceNotification mNotification;
     private Song mCurrentTrack;
     private long mCurrentTrackStartTime;
     private long mPauseLastTick;
     private boolean mIsPlaying;
     private boolean mIsPaused;
+    private boolean mIsStopping;
     private boolean mCurrentTrackWaitLoading;
 
     private Runnable mStartPlaybackRunnable = new Runnable() {
@@ -143,13 +135,7 @@ public class PlaybackService extends Service
         }
 
         // Setup
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        mNotificationBuilder = new NotificationCompat.Builder(this);
-        mNotificationBuilder.setSmallIcon(R.drawable.ic_launcher_white);
-        mNotificationBuilder.setContentIntent(pendingIntent);
-        mNotification = mNotificationBuilder.build();
-
+        mIsStopping = false;
 
         // Bind to all provider
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
@@ -165,6 +151,15 @@ public class PlaybackService extends Service
 
         // Register AutoMix manager
         mCallbacks.add(AutoMixManager.getDefault());
+
+        // Setup notification system
+        mNotification = new ServiceNotification(this);
+        mNotification.setOnNotificationChangedListener(new ServiceNotification.NotificationChangedListener() {
+            @Override
+            public void onNotificationChanged(ServiceNotification notification) {
+                notification.notify(PlaybackService.this);
+            }
+        });
     }
 
     /**
@@ -192,6 +187,7 @@ public class PlaybackService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service starting");
+        mIsStopping = false;
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -311,28 +307,14 @@ public class PlaybackService extends Service
                         Log.e(TAG, "No provider attached", e);
                     }
 
-                    Artist artist = ProviderAggregator.getDefault().getCache().getArtist(mCurrentTrack.getArtist());
-                    mNotificationBuilder.setContentTitle(mCurrentTrack.getTitle());
-                    if (artist != null) {
-                        // TODO: If artist is not available, we should delay playback until the track
-                        // info is here
-                        mNotificationBuilder.setContentText(artist.getName());
-                    }
-
-                    // TODO: Album art
-                    Bitmap albumArt = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
-                    mNotificationBuilder.setLargeIcon(albumArt);
-
-                    mNotification = mNotificationBuilder.build();
+                    // The notification system takes care of calling startForeground
+                    mNotification.setCurrentSong(mCurrentTrack);
                 }
             } else {
                 Log.e(TAG, "Cannot play the first song of the queue because the Song's " +
                         "ProviderIdentifier is null!");
             }
         }
-
-        // We're playing something, so make sure we stay on front
-        startForeground(FOREGROUND_ID, mNotification);
     }
 
     /**
@@ -359,7 +341,7 @@ public class PlaybackService extends Service
 
         @Override
         public void playPlaylist(Playlist p) throws RemoteException {
-            Log.e(TAG, "Play playlist: " + p.getRef());
+            Log.i(TAG, "Play playlist: " + p.getRef());
             mPlaybackQueue.clear();
             queuePlaylist(p, false);
             startPlayingQueue();
@@ -367,7 +349,7 @@ public class PlaybackService extends Service
 
         @Override
         public void playSong(Song s) throws RemoteException {
-            Log.e(TAG, "Play song: " + s.getRef());
+            Log.i(TAG, "Play song: " + s.getRef());
             mPlaybackQueue.clear();
             queueSong(s, true);
             startPlayingQueue();
@@ -375,7 +357,7 @@ public class PlaybackService extends Service
 
         @Override
         public void playAlbum(Album a) throws RemoteException {
-            Log.e(TAG, "Play album: " + a.getRef());
+            Log.i(TAG, "Play album: " + a.getRef());
             mPlaybackQueue.clear();
             queueAlbum(a, false);
             startPlayingQueue();
@@ -445,8 +427,7 @@ public class PlaybackService extends Service
                         Log.e(TAG, "Cannot call playback callback for playback resume event", e);
                     }
                 }
-
-                startForeground(FOREGROUND_ID, mNotification);
+                mNotification.setPlayPauseAction(false);
 
                 return true;
             } else if (mPlaybackQueue.size() > 0) {
@@ -537,7 +518,25 @@ public class PlaybackService extends Service
             if (mPlaybackQueue.size() > 1) {
                 mPlaybackQueue.remove(0);
                 startPlayingQueue();
+
+                mNotification.setHasNext(mPlaybackQueue.size() > 1);
             }
+        }
+
+        @Override
+        public void stop() throws RemoteException {
+            pause();
+
+            for (IPlaybackCallback cb : mCallbacks) {
+                try {
+                    cb.onPlaybackPause();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                }
+            }
+
+            mIsStopping = true;
+            stopForeground(true);
         }
     };
 
@@ -635,11 +634,13 @@ public class PlaybackService extends Service
                     Log.e(TAG, "Cannot call playback callback for song start event", e);
                 }
             }
+
+            mNotification.setPlayPauseAction(false);
         }
 
         @Override
         public void onSongPaused(ProviderIdentifier provider) throws RemoteException {
-            if (mCurrentTrack.getProvider().equals(provider)) {
+            if (mCurrentTrack.getProvider().equals(provider) && !mIsStopping) {
                 mIsPaused = true;
                 mPauseLastTick = System.currentTimeMillis();
 
@@ -651,6 +652,8 @@ public class PlaybackService extends Service
                         Log.e(TAG, "Cannot call playback callback for playback pause event", e);
                     }
                 }
+
+                mNotification.setPlayPauseAction(true);
             }
         }
 
