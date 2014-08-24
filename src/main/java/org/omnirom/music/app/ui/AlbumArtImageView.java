@@ -13,6 +13,7 @@ import android.util.Log;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
+import org.omnirom.music.framework.AlbumArtHelper;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -34,174 +35,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Guigui on 16/07/2014.
  */
-public class AlbumArtImageView extends SquareImageView {
+public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper.AlbumArtListener {
 
     private static final String TAG = "AlbumArtImageView";
-
-    public interface OnArtLoadedListener {
-        public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable);
-    }
-
-    private class BackgroundResult {
-        public BoundEntity request;
-        public BitmapDrawable drawable;
-        public boolean retry;
-    }
-
-    private class BackgroundTask extends AsyncTask<BoundEntity, Void, BackgroundResult> {
-        private BoundEntity mEntity;
-
-        @Override
-        protected BackgroundResult doInBackground(BoundEntity... params) {
-            BackgroundResult output = new BackgroundResult();
-            mEntity = params[0];
-            output.request = mEntity;
-
-            if (mEntity == null) {
-                return null;
-            }
-
-            final Resources res = getResources();
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
-
-            // Prepare the placeholder/default
-            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_placeholder);
-            Bitmap bmp = drawable.getBitmap();
-
-            Bitmap cachedImage = null;
-            String artKey;
-
-            // Load the art key based on what we need
-            if (mEntity instanceof Album) {
-                artKey = cache.getAlbumArtKey((Album) mEntity);
-            } else if (mEntity instanceof Song) {
-                artKey = cache.getSongArtKey((Song) mEntity);
-            } else if (mEntity instanceof  Artist) {
-                artKey = cache.getArtistArtKey((Artist) mEntity);
-            } else {
-                throw new RuntimeException("Album art entity should be a song or an album");
-            }
-
-            // If we have the key in cache already, try to see if we have it loaded in cache
-            if (artKey != null) {
-                cachedImage = ImageCache.getDefault().get(artKey);
-            }
-
-            // If we have it in cache, set it as the bitmap to display, otherwise load it from the
-            // web provider
-            final AlbumArtCache artCache = AlbumArtCache.getDefault();
-            if (cachedImage != null) {
-                bmp = cachedImage;
-            } else {
-                String artUrl = null;
-
-                // Don't allow other views to run the same query
-                if (artCache.isQueryRunning(mEntity)) {
-                    // A query is already running for this entity, we'll revisit it later
-                    output.retry = true;
-                    return output;
-                } else {
-                    artCache.notifyQueryRunning(mEntity);
-                }
-
-                // The image isn't loaded, if we don't have the artKey either, load both
-                if (artKey == null) {
-                    StringBuffer urlBuffer = new StringBuffer();
-                    if (mEntity instanceof Album) {
-                        artKey = AlbumArtCache.getDefault().getArtKey((Album) mEntity, urlBuffer);
-                    } else if (mEntity instanceof Song) {
-                        artKey = AlbumArtCache.getDefault().getArtKey((Song) mEntity, urlBuffer);
-                    } else if (mEntity instanceof Artist) {
-                        artKey = AlbumArtCache.getDefault().getArtKey((Artist) mEntity,urlBuffer);
-                    }
-
-                    artUrl = urlBuffer.toString();
-                }
-
-                // We now have the art key, download the actual image if it's not the default art
-                if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
-                }
-            }
-
-            // We now have a bitmap to display, so let's put it!
-            output.drawable = new BitmapDrawable(res, bmp);
-            output.retry = false;
-
-            // Cache the image
-            if (mEntity instanceof Album) {
-                cache.putAlbumArtKey((Album) mEntity, artKey);
-            } else if (mEntity instanceof Song) {
-                cache.putSongArtKey((Song) mEntity, artKey);
-            } else if (mEntity instanceof  Artist) {
-                cache.putArtistArtKey((Artist) mEntity, artKey);
-            }
-
-            // In all cases, we tell that this entity is loaded
-            artCache.notifyQueryStopped(mEntity);
-
-            return output;
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            final AlbumArtCache artCache = AlbumArtCache.getDefault();
-            artCache.notifyQueryStopped(mEntity);
-        }
-
-        @Override
-        protected void onPostExecute(final BackgroundResult result) {
-            super.onPostExecute(result);
-
-            // If we have an actual result, display it!
-            if (result != null && result.drawable != null && !result.retry) {
-                mDrawable.transitionTo(getResources(), result.drawable);
-                forceDrawableReload();
-
-                if (mOnArtLoadedListener != null) {
-                    mOnArtLoadedListener.onArtLoaded(AlbumArtImageView.this, result.drawable);
-                }
-            } else if (result != null && result.retry) {
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mTask = new BackgroundTask();
-                        try {
-                            mTask.executeOnExecutor(ART_POOL_EXECUTOR, result.request);
-                        } catch (RejectedExecutionException e) {
-                            Log.w(TAG, "Request restart has been denied", e);
-                        }
-                    }
-                }, DELAY_BEFORE_RETRY);
-            }
-        }
-    }
+    private static final int DELAY_BEFORE_START = 300;
 
     private Handler mHandler;
     private OnArtLoadedListener mOnArtLoadedListener;
-    private BackgroundTask mTask;
+    private AlbumArtHelper.AlbumArtTask mTask;
     private BoundEntity mRequestedEntity;
     private MaterialTransitionDrawable mDrawable;
     private boolean mCrossfade;
 
-    private static final int DELAY_BEFORE_START = 300;
-    private static final int DELAY_BEFORE_RETRY = 60;
-    private static final int CORE_POOL_SIZE = 4;
-    private static final int MAXIMUM_POOL_SIZE = 256;
-    private static final int KEEP_ALIVE = 5;
-    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
-        private final AtomicInteger mCount = new AtomicInteger(1);
-
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "Art AsyncTask #" + mCount.getAndIncrement());
-        }
-    };
-    private static final BlockingQueue<Runnable> sPoolWorkQueue =
-            new LinkedBlockingQueue<Runnable>(10);
-    private static final Executor ART_POOL_EXECUTOR
-            = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
-            TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
 
     public AlbumArtImageView(Context context) {
         super(context);
@@ -308,17 +153,9 @@ public class AlbumArtImageView extends SquareImageView {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if (mRequestedEntity == ent) {
-                    mTask = new BackgroundTask();
-
-                    // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the
-                    // predefined pool, as the custom one causes the app to just crash without any
-                    // kind of error message for no reason (at least in the emulator).
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        mTask.executeOnExecutor(ART_POOL_EXECUTOR, ent);
-                    } else {
-                        mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ent);
-                    }
+                if (mRequestedEntity.equals(ent)) {
+                    mTask = AlbumArtHelper.retrieveAlbumArt(getContext(),
+                            AlbumArtImageView.this, ent);
                 }
             }
         };
@@ -330,4 +167,24 @@ public class AlbumArtImageView extends SquareImageView {
             mHandler.postDelayed(runnable, DELAY_BEFORE_START);
         }
     }
+
+
+    @Override
+    public void onArtLoaded(Bitmap output, BoundEntity request) {
+        // If we have an actual result, display it!
+        if (output != null) {
+            BitmapDrawable drawable = new BitmapDrawable(getResources(), output);
+            mDrawable.transitionTo(getResources(), drawable);
+            forceDrawableReload();
+
+            if (mOnArtLoadedListener != null) {
+                mOnArtLoadedListener.onArtLoaded(this, drawable);
+            }
+        }
+    }
+
+    public interface OnArtLoadedListener {
+        public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable);
+    }
+
 }
