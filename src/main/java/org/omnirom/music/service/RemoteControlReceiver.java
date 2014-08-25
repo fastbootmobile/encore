@@ -1,6 +1,7 @@
 package org.omnirom.music.service;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
@@ -16,6 +17,12 @@ import org.omnirom.music.framework.PluginsLookup;
 public class RemoteControlReceiver extends BroadcastReceiver {
 
     private static final String TAG = "RemoteControlReceiver";
+
+
+    public static ComponentName getComponentName(Context ctx) {
+        return new ComponentName(ctx.getPackageName(),
+                "org.omnirom.music.service.RemoteControlReceiver");
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {

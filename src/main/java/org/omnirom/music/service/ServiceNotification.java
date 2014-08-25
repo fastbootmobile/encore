@@ -185,8 +185,13 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         mListener = listener;
     }
 
+    public Bitmap getAlbumArt() {
+        return mCurrentArt;
+    }
+
     private void updateAlbumArt() {
         if (mCurrentSong != null) {
+            mCurrentArt = mDefaultArt;
             AlbumArtHelper.retrieveAlbumArt(mContext, this, mCurrentSong);
         }
     }

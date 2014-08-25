@@ -1,10 +1,13 @@
 package org.omnirom.music.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
+import android.media.RemoteControlClient;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -86,6 +89,7 @@ public class PlaybackService extends Service
     private PlaybackQueue mPlaybackQueue;
     private List<IPlaybackCallback> mCallbacks;
     private ServiceNotification mNotification;
+    private RemoteControlClient mRemoteControlClient;
     private Song mCurrentTrack;
     private long mCurrentTrackStartTime;
     private long mPauseLastTick;
@@ -161,8 +165,14 @@ public class PlaybackService extends Service
             @Override
             public void onNotificationChanged(ServiceNotification notification) {
                 notification.notify(PlaybackService.this);
+                mRemoteControlClient.editMetadata(false)
+                        .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
+                                notification.getAlbumArt().copy(notification.getAlbumArt().getConfig(), false)).apply();
             }
         });
+
+        // Setup lockscreen remote controls
+        setupRemoteControl();
     }
 
     /**
@@ -252,6 +262,39 @@ public class PlaybackService extends Service
         connection.bindService();
     }
 
+    private void setupRemoteControl() {
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent.setComponent(RemoteControlReceiver.getComponentName(this));
+
+        PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
+                0, mediaButtonIntent, 0);
+        mRemoteControlClient = new RemoteControlClient(mediaPendingIntent);
+        int flags = RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS
+                | RemoteControlClient.FLAG_KEY_MEDIA_NEXT
+                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY
+                | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
+                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE
+                | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
+        mRemoteControlClient.setTransportControlFlags(flags);
+    }
+
+    private void updateRemoteMetadata() {
+        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        Artist artist = cache.getArtist(mCurrentTrack.getArtist());
+        Album album = cache.getAlbum(mCurrentTrack.getAlbum());
+
+        RemoteControlClient.MetadataEditor edit = mRemoteControlClient.editMetadata(true);
+        if (artist != null) {
+            edit.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, artist.getName());
+        }
+        if (album != null) {
+            edit.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, album.getName());
+        }
+        edit.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, mCurrentTrack.getTitle());
+        edit.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, mCurrentTrack.getDuration());
+        edit.apply();
+    }
+
     /**
      * Assigns the provided provider an audio client socket
      *
@@ -278,6 +321,9 @@ public class PlaybackService extends Service
         return socket;
     }
 
+    /**
+     * Request the audio focus and registers the remote media controller
+     */
     private void requestAudioFocus() {
         Log.e(TAG, "Request audio focus...");
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -291,12 +337,20 @@ public class PlaybackService extends Service
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             Log.e(TAG, "Request granted");
-            am.registerMediaButtonEventReceiver(new ComponentName("org.omnirom.music.service", "RemoteControlReceiver"));
+            am.registerMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
+
+            // create and register the remote control client
+            am.registerRemoteControlClient(mRemoteControlClient);
+            mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
         } else {
             Log.e(TAG, "Request denied: " + result);
         }
+
     }
 
+    /**
+     * Release the audio focus and unregisters the media controls
+     */
     private void abandonAudioFocus() {
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.abandonAudioFocus(this);
@@ -343,6 +397,9 @@ public class PlaybackService extends Service
 
                     // The notification system takes care of calling startForeground
                     mNotification.setCurrentSong(mCurrentTrack);
+
+                    updateRemoteMetadata();
+                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_BUFFERING);
                 }
             } else {
                 Log.e(TAG, "Cannot play the first song of the queue because the Song's " +
@@ -619,42 +676,7 @@ public class PlaybackService extends Service
 
     }
 
-    private IProviderCallback.Stub mProviderCallback = new IProviderCallback.Stub() {
-        @Override
-        public void onLoggedIn(ProviderIdentifier provider, boolean success) throws RemoteException {
-
-        }
-
-        @Override
-        public void onLoggedOut(ProviderIdentifier provider) throws RemoteException {
-
-        }
-
-        @Override
-        public void onPlaylistAddedOrUpdated(ProviderIdentifier provider, Playlist p) throws RemoteException {
-
-        }
-
-        @Override
-        public void onSongUpdate(ProviderIdentifier provider, Song s) throws RemoteException {
-
-        }
-
-        @Override
-        public void onAlbumUpdate(ProviderIdentifier provider, Album a) throws RemoteException {
-
-        }
-
-        @Override
-        public void onArtistUpdate(ProviderIdentifier provider, Artist a) throws RemoteException {
-
-        }
-
-        @Override
-        public void onGenreUpdate(ProviderIdentifier provider, Genre g) throws RemoteException {
-
-        }
-
+    private IProviderCallback.Stub mProviderCallback = new BaseProviderCallback() {
         @Override
         public void onSongPlaying(ProviderIdentifier provider) throws RemoteException {
             boolean wasPaused = mIsPaused;
@@ -677,6 +699,7 @@ public class PlaybackService extends Service
             }
 
             mNotification.setPlayPauseAction(false);
+            mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
         }
 
         @Override
@@ -694,6 +717,7 @@ public class PlaybackService extends Service
                 }
 
                 mNotification.setPlayPauseAction(true);
+                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED);
             }
         }
 
@@ -714,11 +738,6 @@ public class PlaybackService extends Service
                     }
                 });
             }
-        }
-
-        @Override
-        public void onSearchResult(SearchResult searchResult) throws RemoteException {
-
         }
     };
 
@@ -746,7 +765,7 @@ public class PlaybackService extends Service
             }
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
             AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            am.unregisterMediaButtonEventReceiver(new ComponentName("org.omnirom.music.service", "RemoteControlReceiver"));
+            am.unregisterMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
             am.abandonAudioFocus(this);
             if (mCurrentTrack != null) {
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
@@ -758,4 +777,5 @@ public class PlaybackService extends Service
             }
         }
     }
+
 }
