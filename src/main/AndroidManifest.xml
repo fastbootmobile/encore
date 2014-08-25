@@ -44,8 +44,13 @@
         <service
             android:name="org.omnirom.music.service.PlaybackService"
             android:enabled="true"
-            android:exported="false" >
-        </service>
+            android:exported="false" />
+
+        <receiver android:name="org.omnirom.music.service.RemoteControlReceiver">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".ArtistActivity"

@@ -1,7 +1,9 @@
 package org.omnirom.music.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,7 +37,7 @@ import java.util.List;
  * Service handling the playback of the audio and the play notification
  */
 public class PlaybackService extends Service
-        implements PluginsLookup.ConnectionListener, ILocalCallback {
+        implements PluginsLookup.ConnectionListener, ILocalCallback, AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = "PlaybackService";
     private static final boolean DEBUG = BuildConfig.DEBUG;
@@ -267,6 +269,21 @@ public class PlaybackService extends Service
         }
 
         return socket;
+    }
+
+    private void requestAudioFocus() {
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+        // Request audio focus for playback
+        int result = am.requestAudioFocus(this,
+                // Use the music stream.
+                AudioManager.STREAM_MUSIC,
+                // Request permanent focus.
+                AudioManager.AUDIOFOCUS_GAIN);
+
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            // am.registerMediaButtonEventReceiver(this);
+        }
     }
 
     /**
@@ -680,4 +697,8 @@ public class PlaybackService extends Service
         }
     };
 
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+
+    }
 }
