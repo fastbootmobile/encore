@@ -60,9 +60,6 @@ public class RemoteControlReceiver extends BroadcastReceiver {
             } catch (RemoteException e) {
                 Log.e(TAG, "Error handling action", e);
             }
-
-            // Prevent broadcast propagation
-            abortBroadcast();
         }
     }
 }

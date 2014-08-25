@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -273,8 +274,8 @@ public class PlaybackService extends Service
                 | RemoteControlClient.FLAG_KEY_MEDIA_NEXT
                 | RemoteControlClient.FLAG_KEY_MEDIA_PLAY
                 | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
-                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE
-                | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
+                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE;
+                // | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
         mRemoteControlClient.setTransportControlFlags(flags);
     }
 
@@ -341,7 +342,12 @@ public class PlaybackService extends Service
 
             // create and register the remote control client
             am.registerRemoteControlClient(mRemoteControlClient);
-            mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING,
+                        (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
+            } else {
+                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+            }
         } else {
             Log.e(TAG, "Request denied: " + result);
         }
@@ -717,7 +723,12 @@ public class PlaybackService extends Service
                 }
 
                 mNotification.setPlayPauseAction(true);
-                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED,
+                            (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
+                } else {
+                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED);
+                }
             }
         }
 
