@@ -1,6 +1,7 @@
 package org.omnirom.music.service;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -181,8 +182,9 @@ public class PlaybackService extends Service
 
     /**
      * Called when the main app is calling startService on this service.
-     * @param intent The intent attached, not used
-     * @param flags The flags, not used
+     *
+     * @param intent  The intent attached, not used
+     * @param flags   The flags, not used
      * @param startId The start id, not used
      * @return a status integer
      */
@@ -195,6 +197,7 @@ public class PlaybackService extends Service
 
     /**
      * Called when the main app binds on this service
+     *
      * @param intent The intent attached, not used
      * @return The binder, in our case an IPlaybackService
      */
@@ -208,6 +211,7 @@ public class PlaybackService extends Service
 
     /**
      * Called when an app unbind from this service
+     *
      * @param intent The intent attached, not used
      * @return true
      */
@@ -226,6 +230,7 @@ public class PlaybackService extends Service
 
     /**
      * ProviderConnection listener: Called when a provider is bound
+     *
      * @param connection The provider connection
      */
     @Override
@@ -236,6 +241,7 @@ public class PlaybackService extends Service
 
     /**
      * ProviderConnection listener: Called when a provider has disconnected
+     *
      * @param connection The provider connected
      */
     @Override
@@ -248,6 +254,7 @@ public class PlaybackService extends Service
 
     /**
      * Assigns the provided provider an audio client socket
+     *
      * @param connection The provider
      */
     public AudioSocketHost assignProviderAudioSocket(AbstractProviderConnection connection) {
@@ -272,6 +279,7 @@ public class PlaybackService extends Service
     }
 
     private void requestAudioFocus() {
+        Log.e(TAG, "Request audio focus...");
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         // Request audio focus for playback
@@ -282,8 +290,16 @@ public class PlaybackService extends Service
                 AudioManager.AUDIOFOCUS_GAIN);
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            // am.registerMediaButtonEventReceiver(this);
+            Log.e(TAG, "Request granted");
+            am.registerMediaButtonEventReceiver(new ComponentName("org.omnirom.music.service", "RemoteControlReceiver"));
+        } else {
+            Log.e(TAG, "Request denied: " + result);
         }
+    }
+
+    private void abandonAudioFocus() {
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        am.abandonAudioFocus(this);
     }
 
     /**
@@ -314,6 +330,8 @@ public class PlaybackService extends Service
                     Log.w(TAG, "Track not yet loaded: " + mCurrentTrack.getRef() + ", delaying");
                 } else {
                     mCurrentTrackWaitLoading = false;
+
+                    requestAudioFocus();
 
                     try {
                         provider.playSong(first.getRef());
@@ -353,7 +371,9 @@ public class PlaybackService extends Service
         }
 
         @Override
-        public void removeCallback(IPlaybackCallback cb) { mCallbacks.remove(cb); }
+        public void removeCallback(IPlaybackCallback cb) {
+            mCallbacks.remove(cb);
+        }
 
         @Override
         public void playPlaylist(Playlist p) throws RemoteException {
@@ -416,6 +436,7 @@ public class PlaybackService extends Service
         public void pause() throws RemoteException {
             if (mCurrentTrack != null) {
                 // TODO: Refactor that with a threaded Handler that handles messages
+                abandonAudioFocus();
                 new Thread() {
                     public void run() {
                         IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
@@ -435,6 +456,8 @@ public class PlaybackService extends Service
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
                 provider.resume();
                 mIsPaused = false;
+
+                requestAudioFocus();
 
                 for (IPlaybackCallback cb : mCallbacks) {
                     try {
@@ -460,7 +483,9 @@ public class PlaybackService extends Service
         }
 
         @Override
-        public boolean isPaused() { return mIsPaused; }
+        public boolean isPaused() {
+            return mIsPaused;
+        }
 
         @Override
         public int getCurrentTrackLength() throws RemoteException {
@@ -699,6 +724,38 @@ public class PlaybackService extends Service
 
     @Override
     public void onAudioFocusChange(int focusChange) {
-
+        if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+            // Pause playback
+            if (mCurrentTrack != null) {
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+                try {
+                    provider.pause();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to pause current track for audio focus change");
+                }
+            }
+        } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+            // Resume playback
+            if (mCurrentTrack != null) {
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+                try {
+                    provider.resume();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to pause current track for audio focus change");
+                }
+            }
+        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            am.unregisterMediaButtonEventReceiver(new ComponentName("org.omnirom.music.service", "RemoteControlReceiver"));
+            am.abandonAudioFocus(this);
+            if (mCurrentTrack != null) {
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+                try {
+                    provider.pause();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to pause current track for audio focus change");
+                }
+            }
+        }
     }
 }
