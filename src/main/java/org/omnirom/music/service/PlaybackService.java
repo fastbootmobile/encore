@@ -294,10 +294,9 @@ public class PlaybackService extends Service
                 if (!mCurrentTrack.isLoaded()) {
                     // Track not loaded yet, delay until track info arrived
                     mCurrentTrackWaitLoading = true;
-                    Log.e(TAG, "Track not yet loaded: " + mCurrentTrack.getRef() + ", delaying");
+                    Log.w(TAG, "Track not yet loaded: " + mCurrentTrack.getRef() + ", delaying");
                 } else {
                     mCurrentTrackWaitLoading = false;
-                    Log.e(TAG, "Track is loaded!");
 
                     try {
                         provider.playSong(first.getRef());

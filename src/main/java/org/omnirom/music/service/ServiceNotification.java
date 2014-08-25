@@ -13,7 +13,9 @@ import android.support.v4.app.NotificationManagerCompat;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.framework.AlbumArtHelper;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
@@ -21,14 +23,14 @@ import org.omnirom.music.providers.ProviderCache;
 /**
  * Created by Guigui on 24/08/2014.
  */
-public class ServiceNotification {
+public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
     private Context mContext;
     private Resources mResources;
-    private Bitmap mDefaultArt;
+    private final Bitmap mDefaultArt;
+    private Bitmap mCurrentArt;
     private NotificationChangedListener mListener;
     private Song mCurrentSong;
-    private boolean mHasNext;
 
     private Notification mNotification;
     private NotificationCompat.Action.Builder mStopActionBuilder;
@@ -44,6 +46,7 @@ public class ServiceNotification {
         // Get the default album art
         BitmapDrawable def = (BitmapDrawable) mResources.getDrawable(R.drawable.album_placeholder);
         mDefaultArt = def.getBitmap();
+        mCurrentArt = mDefaultArt;
 
         // Build the static notification actions
         mStopActionBuilder = new NotificationCompat.Action.Builder(R.drawable.ic_notif_stop,
@@ -70,7 +73,8 @@ public class ServiceNotification {
         // Build the core notification
         builder.setSmallIcon(R.drawable.ic_launcher_white)
                 .setContentIntent(pendingIntent)
-                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(mDefaultArt))
+                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(mCurrentArt)
+                        .bigLargeIcon(mCurrentArt))
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
@@ -84,9 +88,6 @@ public class ServiceNotification {
                 builder.setContentText(artist.getName());
             }
         }
-
-        // TODO: Update album art
-
 
         // Add the notification actions
         builder.addAction(mStopActionBuilder.build());
@@ -158,6 +159,7 @@ public class ServiceNotification {
      */
     public void setCurrentSong(Song s) {
         mCurrentSong = s;
+        updateAlbumArt();
         buildNotification();
     }
 
@@ -165,7 +167,6 @@ public class ServiceNotification {
      * Sets whether or not the "Next" action should be enabled or not
      */
     public void setHasNext(boolean hasNext) {
-        mHasNext = hasNext;
         mNextActionBuilder = new NotificationCompat.Action.Builder(R.drawable.ic_notif_next,
                 getString(R.string.next),
                 hasNext ?
@@ -182,6 +183,20 @@ public class ServiceNotification {
      */
     public void setOnNotificationChangedListener(NotificationChangedListener listener) {
         mListener = listener;
+    }
+
+    private void updateAlbumArt() {
+        if (mCurrentSong != null) {
+            AlbumArtHelper.retrieveAlbumArt(mContext, this, mCurrentSong);
+        }
+    }
+
+    @Override
+    public void onArtLoaded(Bitmap output, BoundEntity request) {
+        if (request.equals(mCurrentSong)) {
+            mCurrentArt = output;
+            buildNotification();
+        }
     }
 
 
