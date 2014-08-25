@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -77,6 +78,8 @@ public class MainActivity extends FragmentActivity
 
         // Setup the playing bar click listener
         mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     public boolean isPlayBarVisible() {
