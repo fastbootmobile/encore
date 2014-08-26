@@ -1,6 +1,7 @@
 package org.omnirom.music.app;
 
 import android.app.Activity;
+import android.media.AudioManager;
 import android.support.v4.app.FragmentManager;
 import android.app.SearchManager;
 import android.content.Context;
@@ -59,6 +60,8 @@ public class PlaylistActivity extends FragmentActivity {
         // Remove title
         setTitle(null);
         getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     @Override

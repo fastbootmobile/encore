@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -45,6 +46,8 @@ public class ArtistActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (ArtistFragment) fm.findFragmentByTag(TAG_FRAGMENT);

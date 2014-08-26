@@ -52,6 +52,7 @@ public class ListenNowFragment extends Fragment {
 
             if (playlists.size() <= 0) {
                 mHandler.postDelayed(this, 1000);
+                return;
             }
 
             // We use a random algorithm (picking random tracks and albums and artists from

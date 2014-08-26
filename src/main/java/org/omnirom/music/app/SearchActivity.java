@@ -1,6 +1,7 @@
 package org.omnirom.music.app;
 
 import android.app.Activity;
+import android.media.AudioManager;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -49,6 +50,7 @@ public class SearchActivity extends FragmentActivity {
         handleIntent(getIntent());
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     @Override
