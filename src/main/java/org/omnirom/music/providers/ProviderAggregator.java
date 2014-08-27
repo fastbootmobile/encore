@@ -1,9 +1,13 @@
 package org.omnirom.music.providers;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
+import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -36,6 +40,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private List<String> mRosettaStonePrefix = new ArrayList<String>();
     private Map<String, ProviderIdentifier> mRosettaStoneMap = new HashMap<String, ProviderIdentifier>();
     private ThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(4);
+    private Context mContext;
 
     private Runnable mPostSongsRunnable = new Runnable() {
         @Override
@@ -136,6 +141,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         mProviders = new ArrayList<ProviderConnection>();
         mCache = new ProviderCache();
         mHandler = new Handler();
+    }
+
+    public void setContext(Context ctx) {
+        mContext = ctx;
     }
 
     /**
@@ -460,17 +469,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
-     * Perform a search query for the provided terms on all providers. The results are pushed
-     * progressively as they are given by the providers to the callback.
-     *
-     * @param query    The search terms
-     * @param callback The callback to call with results
-     */
-    public void search(final String query, final ISearchCallback callback) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    /**
      * Returns the list of all cached playlists. At the same time, providers will be called for
      * updates and/or fetching playlists, and LocalCallbacks will be called when providers notify
      * this class of eventual new entries.
@@ -549,7 +547,13 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         if (success) {
             postOnce(mUpdatePlaylistsRunnable);
         } else {
-            // TODO: Show a message
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(mContext, mContext.getString(R.string.cannot_login, provider.mName),
+                            Toast.LENGTH_LONG).show();
+                }
+            });
         }
     }
 

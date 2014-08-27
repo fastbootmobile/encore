@@ -8,6 +8,7 @@ import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.providers.ProviderAggregator;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,7 @@ public class OmniMusic extends Application {
         super.onCreate();
 
         // Setup the plugins system
+        ProviderAggregator.getDefault().setContext(getApplicationContext());
         PluginsLookup.getDefault().initialize(getApplicationContext());
 
         // Setup network cache

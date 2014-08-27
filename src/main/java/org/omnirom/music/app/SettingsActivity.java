@@ -2,6 +2,7 @@ package org.omnirom.music.app;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.media.AudioManager;
 import android.support.v4.app.FragmentManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -60,5 +61,7 @@ public class SettingsActivity extends FragmentActivity {
                 }
             }
         });
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 }

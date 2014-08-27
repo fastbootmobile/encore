@@ -2,6 +2,7 @@ package org.omnirom.music.app;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -84,6 +85,7 @@ public class AlbumActivity extends FragmentActivity {
         getActionBar().setTitle("");
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     @Override

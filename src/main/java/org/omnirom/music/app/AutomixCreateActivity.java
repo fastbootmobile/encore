@@ -1,6 +1,7 @@
 package org.omnirom.music.app;
 
 import android.app.ProgressDialog;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -39,6 +40,7 @@ public class AutomixCreateActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.automix_create);
         getActionBar().setDisplayHomeAsUpEnabled(true);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
 
