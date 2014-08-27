@@ -5,42 +5,42 @@
     <EditTextPreference
         android:persistent="false"
         android:key="automix_bucket_name"
-        android:title="Bucket name" />
+        android:title="@string/automix_bucket_name" />
 
-    <PreferenceCategory android:title="Genre">
+    <PreferenceCategory android:title="@string/automix_category_genre">
 
         <MultiSelectListPreference
             android:persistent="false"
             android:key="automix_styles"
-            android:summary="Select the styles to include in this bucket (select none to include all)"
-            android:title="Style"
+            android:summary="@string/automix_styles_summary"
+            android:title="@string/automix_styles_title"
             android:entries="@array/echonest_style"
             android:entryValues="@array/echonest_style" />
 
         <MultiSelectListPreference
             android:persistent="false"
             android:key="automix_moods"
-            android:summary="Select the moods to include in this bucket (select none to include all)"
-            android:title="Mood"
+            android:summary="@string/automix_moods_summary"
+            android:title="@string/automix_moods_title"
             android:entries="@array/echonest_mood_entries"
             android:entryValues="@array/echonest_mood_values" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Knobs">
+    <PreferenceCategory android:title="@string/automix_category_knobs">
 
         <CheckBoxPreference
             android:persistent="false"
             android:key="automix_use_taste"
-            android:summary="Use your learned taste to bias the tracks generation to your liking"
-            android:title="Use my taste profile" />
+            android:summary="@string/automix_use_taste_summary"
+            android:title="@string/automix_use_taste_title" />
 
         <ListPreference
             android:persistent="false"
             android:key="automix_adventurous"
             android:dependency="automix_use_taste"
-            android:summary="A low level means only known and preferred music will be played. A high level means mostly unknown music will be played."
-            android:title="Adventurousness level"
+            android:summary="@string/automix_adventure_summary"
+            android:title="@string/automix_adventure_title"
             android:entries="@array/echonest_adventurous_level_entries"
             android:entryValues="@array/echonest_adventurous_level_values"
             android:defaultValue="0.2" />
@@ -48,16 +48,16 @@
         <MultiSelectListPreference
             android:persistent="false"
             android:key="automix_song_types"
-            android:summary="Types of song (select none to use default)"
-            android:title="Song types"
+            android:summary="@string/automix_song_types_summary"
+            android:title="@string/automix_song_types_title"
             android:entries="@array/echonest_song_type_entries"
             android:entryValues="@array/echonest_song_type_values" />
 
         <ListPreference
             android:persistent="false"
             android:key="automix_target_speechiness"
-            android:summary="Target amount of speech"
-            android:title="Speechiness"
+            android:summary="@string/automix_speechiness_summary"
+            android:title="@string/automix_speechiness_title"
             android:entries="@array/echonest_speechiness_level_entries"
             android:entryValues="@array/echonest_speechiness_level_values"
             android:defaultValue="-1" />
@@ -65,8 +65,8 @@
         <ListPreference
             android:persistent="false"
             android:key="automix_target_energy"
-            android:summary="Target level of energy"
-            android:title="Energy"
+            android:summary="@string/automix_energy_summary"
+            android:title="@string/automix_energy_title"
             android:entries="@array/echonest_energy_level_entries"
             android:entryValues="@array/echonest_energy_level_values"
             android:defaultValue="-1" />
@@ -74,8 +74,8 @@
         <ListPreference
             android:persistent="false"
             android:key="automix_target_familiarity"
-            android:summary="Target level of tracks familiarity"
-            android:title="Familiarity"
+            android:summary="@string/automix_familiarity_summary"
+            android:title="@string/automix_familiarity_title"
             android:entries="@array/echonest_familiarity_level_entries"
             android:entryValues="@array/echonest_familiarity_level_values"
             android:defaultValue="-1" />

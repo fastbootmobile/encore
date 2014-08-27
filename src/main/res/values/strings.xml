@@ -102,6 +102,25 @@
     <string name="stop">Stop</string>
     <string name="play">Play</string>
     <string name="next">Next</string>
+    <string name="automix_styles_summary">Select the styles to include in this bucket (select none to include all)</string>
+    <string name="automix_styles_title">Styles</string>
+    <string name="automix_moods_summary">Select the moods to include in this bucket (select none to include all)</string>
+    <string name="automix_moods_title">Moods</string>
+    <string name="automix_use_taste_summary">Use your learned taste to bias the tracks generation to your liking</string>
+    <string name="automix_use_taste_title">Use my taste profile</string>
+    <string name="automix_adventure_summary">A low level means only known and preferred music will be played. A high level means mostly unknown music will be played.</string>
+    <string name="automix_adventure_title">Adventurousness level</string>
+    <string name="automix_song_types_summary">Types of song (select none to use default)</string>
+    <string name="automix_song_types_title">Song types</string>
+    <string name="automix_speechiness_summary">Target amount of speech</string>
+    <string name="automix_speechiness_title">Speechiness</string>
+    <string name="automix_energy_summary">Target level of energy</string>
+    <string name="automix_energy_title">Energy</string>
+    <string name="automix_familiarity_summary">Target level of tracks familiarity</string>
+    <string name="automix_familiarity_title">Familiarity</string>
+    <string name="automix_category_knobs">Knobs</string>
+    <string name="automix_category_genre">Genre</string>
+    <string name="automix_bucket_name">Bucket name</string>
 
     <plurals name="songs_count">
         <item quantity="zero">No songs</item>
