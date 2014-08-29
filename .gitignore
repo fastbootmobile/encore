@@ -1,1 +1,6 @@
 /build
+/src/main/libs/armeabi
+/src/main/libs/armeabi-v7a
+/src/main/libs/mips
+/src/main/libs/x86
+/src/main/obj
