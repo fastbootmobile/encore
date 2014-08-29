@@ -585,7 +585,8 @@ public class Utils {
     }
 
     private static void setupFabShadow(View fab, int radius) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
+                && Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             StateListDrawable rootShape = (StateListDrawable) fab.getBackground();
             LayerDrawable layer = (LayerDrawable) rootShape.getCurrent();
             GradientDrawable shadow = (GradientDrawable) layer.getDrawable(0);

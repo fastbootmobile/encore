@@ -50,7 +50,7 @@ public class AudioSocketHost {
                     mInputStream = client.getInputStream();
                     mOutputStream = client.getOutputStream();
 
-                    Log.e(TAG, "NOT STOP: " + mOutputStream);
+                    Log.i(TAG, "Plugin connected to socket (" + mSocketName + ")");
 
                     // We keep on reading data as long as the providers socket is connected.
                     // We assume here that InputStream is blocking and that all packets
