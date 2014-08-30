@@ -84,7 +84,7 @@ jint om_NativePlayer_enqueue(JNIEnv* env, jobject thiz, jbyteArray samples, jint
 jint om_NativePlayer_enqueueShort(JNIEnv* env, jobject thiz, jshortArray samples, jint length) {
     NativePlayer* player = get_layer_from_object(env, thiz);
     if (length) {
-        short* samples_bytes = env->GetShortArrayElements(samples, 0);
+        int16_t* samples_bytes = env->GetShortArrayElements(samples, 0);
 
         jint written = player->enqueue(samples_bytes, length * 2);
 

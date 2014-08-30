@@ -16,6 +16,7 @@
 #include "NativePlayer.h"
 #include "Log.h"
 #include <string>
+#include <utility>
 
 #define LOG_TAG "OM-NativePlayer"
 
@@ -244,8 +245,8 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
     uint32_t buffers_available = BUFFER_MAX_COUNT - m_AudioBuffers.size();
 
     // Start playing when we have at least 3 buffers
-    // TODO: Buffers can have a variable size. Maybe it would be better to measure total buffer
-    // length ?
+    // TODO(xplodwild): Buffers can have a variable size. Maybe it would be better to measure total
+    // buffer length ?
     SLuint32 playerState;
     (*m_pPlayer)->GetPlayState(m_pPlayer, &playerState);
 
