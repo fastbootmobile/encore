@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 19
     buildToolsVersion '20.0.0'
-
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 19
@@ -17,6 +16,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    sourceSets.main {
+        jniLibs.srcDir 'src/main/libs'
+        jni.srcDirs = []
+    }
+    packagingOptions {
+        // provided by providerlib already
+        exclude 'lib/armeabi-v7a/libc++_shared.so'
+    }
+
 }
 
 dependencies {

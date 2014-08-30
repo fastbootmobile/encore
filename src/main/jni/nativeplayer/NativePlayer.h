@@ -15,6 +15,15 @@
 #ifndef SRC_MAIN_JNI_NATIVEPLAYER_NATIVEPLAYER_H_
 #define SRC_MAIN_JNI_NATIVEPLAYER_NATIVEPLAYER_H_
 
+#include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
+#include <cstdint>
+#include <thread>
+#include <list>
+#include <utility>
+
+#define BUFFER_MAX_COUNT 8
+
 class NativePlayer {
  public:
     // ctor
@@ -22,6 +31,41 @@ class NativePlayer {
 
     // dtor
     ~NativePlayer();
-}
+
+    // Creates and initializes the OpenSL engine
+    bool createEngine();
+
+    // Changes the active sample rate and channels count
+    bool setAudioFormat(uint32_t sample_rate, uint32_t sample_format, uint32_t channels);
+
+    // Enqueue buffer data if possible to the player
+    // @returns The number of samples written (0 means the buffer is full)
+    uint32_t enqueue(const void* data, uint32_t len);
+
+
+ private:
+    bool createAudioPlayer();
+    void setPlayState(SLuint32 state);
+
+    static void bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* context);
+
+ private:
+    SLObjectItf m_pEngineObj;
+    SLEngineItf m_pEngine;
+    SLObjectItf m_pOutputMixObj;
+
+    SLObjectItf m_pPlayerObj;
+    SLPlayItf m_pPlayer;
+    SLVolumeItf m_pPlayerVol;
+    SLAndroidSimpleBufferQueueItf m_pBufferQueue;
+
+    std::atomic<uint32_t> m_iSampleRate;
+    std::atomic<uint32_t> m_iSampleFormat;
+    std::atomic<uint32_t> m_iChannels;
+
+    std::list<std::pair<void*, uint32_t>> m_AudioBuffers;
+    std::mutex m_QueueMutex;
+    void* m_pPreviousBuffer;
+};
 
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_NATIVEPLAYER_H_

@@ -126,7 +126,7 @@ public class PlaybackService extends Service
     public void onCreate() {
         super.onCreate();
         mDSPProcessor = new DSPProcessor(this);
-        mDSPProcessor.setSink(new DeviceAudioSink());
+        mDSPProcessor.setSink(new NativeAudioSink());
 
         PluginsLookup.getDefault().initialize(getApplicationContext());
         PluginsLookup.getDefault().registerProviderListener(this);
