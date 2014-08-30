@@ -88,8 +88,6 @@ jint om_NativePlayer_enqueueShort(JNIEnv* env, jobject thiz, jshortArray samples
 
         jint written = player->enqueue(samples_bytes, length * 2);
 
-        // ALOGE("Wrote %d bytes to player buffer", length * 2);
-
         env->ReleaseShortArrayElements(samples, samples_bytes, 0);
 
         return written;
