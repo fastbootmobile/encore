@@ -2,7 +2,6 @@ package org.omnirom.music.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -16,15 +15,14 @@ import android.util.Log;
 
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.app.BuildConfig;
-import org.omnirom.music.framework.AudioSocketHost;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
-import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.AbstractProviderConnection;
+import org.omnirom.music.providers.AudioHostSocket;
 import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
@@ -301,8 +299,8 @@ public class PlaybackService extends Service
      *
      * @param connection The provider
      */
-    public AudioSocketHost assignProviderAudioSocket(AbstractProviderConnection connection) {
-        AudioSocketHost socket = connection.getAudioSocket();
+    public AudioHostSocket assignProviderAudioSocket(AbstractProviderConnection connection) {
+        AudioHostSocket socket = connection.getAudioSocket();
 
         if (socket == null) {
             // Assign the providers an audio socket

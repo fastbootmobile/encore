@@ -2,20 +2,21 @@ package org.omnirom.music.service;
 
 import android.os.SystemClock;
 import android.util.Log;
-import android.widget.Toast;
+
+import com.google.protobuf.ByteString;
 
 import org.omnirom.music.app.Utils;
-import org.omnirom.music.framework.AudioSocketHost;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.providers.AudioHostSocket;
 import org.omnirom.music.providers.AudioSocket;
 import org.omnirom.music.providers.DSPConnection;
-import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import omnimusic.Plugin;
 
 /**
  * Class responsible for grabbing the audio from a provider, pushing it through the DSP chain,
@@ -36,32 +37,64 @@ public class DSPProcessor {
     private PlaybackService mPlaybackService;
     private List<ProviderIdentifier> mDSPChain;
 
-    private AudioSocketHost.AudioSocketCallback mProviderCallback = new AudioSocketHost.AudioSocketCallback() {
+    private AudioSocket.ISocketCallback mProviderCallback = new AudioSocket.ISocketCallback() {
         @Override
-        public void onAudioInput(AudioSocketHost socket, short[] frames, int numFrames) {
+        public void onAudioData(AudioSocket socket, Plugin.AudioData message) {
             // If we have plugins setup in our DSP chain, process through them, otherwise just
             // consume the audio on the sink directly
+            ByteString bytes = message.getSamples();
             if (mDSPChain.size() > 0) {
-                inputProviderAudio(frames, numFrames);
+                inputProviderAudio(bytes.toByteArray(), bytes.size());
             } else {
-                inputDSPAudio(socket, frames, numFrames);
+                inputDSPAudio(socket, bytes.toByteArray(), bytes.size());
             }
         }
 
         @Override
-        public void onFormatInput(AudioSocketHost socket, int channels, int sampleRate) {
-            setupSink(sampleRate, channels);
+        public void onAudioResponse(AudioSocket socket, Plugin.AudioResponse message) {
+
+        }
+
+        @Override
+        public void onRequest(AudioSocket socket, Plugin.Request message) {
+
+        }
+
+        @Override
+        public void onFormatInfo(AudioSocket socket, Plugin.FormatInfo message) {
+            setupSink(message.getSamplingRate(), message.getChannels());
+        }
+
+        @Override
+        public void onBufferInfo(AudioSocket socket, Plugin.BufferInfo message) {
+
         }
     };
 
-    private AudioSocketHost.AudioSocketCallback mDSPCallback = new AudioSocketHost.AudioSocketCallback() {
+    private AudioSocket.ISocketCallback mDSPCallback = new AudioSocket.ISocketCallback() {
         @Override
-        public void onAudioInput(AudioSocketHost socket, short[] frames, int numFrames) {
-            inputDSPAudio(socket, frames, numFrames);
+        public void onAudioData(AudioSocket socket, Plugin.AudioData message) {
+            ByteString bytes = message.getSamples();
+            inputDSPAudio(socket, bytes.toByteArray(), bytes.size());
         }
 
         @Override
-        public void onFormatInput(AudioSocketHost socket, int channels, int sampleRate) {
+        public void onAudioResponse(AudioSocket socket, Plugin.AudioResponse message) {
+
+        }
+
+        @Override
+        public void onRequest(AudioSocket socket, Plugin.Request message) {
+
+        }
+
+        @Override
+        public void onFormatInfo(AudioSocket socket, Plugin.FormatInfo message) {
+
+        }
+
+        @Override
+        public void onBufferInfo(AudioSocket socket, Plugin.BufferInfo message) {
 
         }
     };
@@ -74,11 +107,11 @@ public class DSPProcessor {
         mDSPChain = new ArrayList<ProviderIdentifier>();
     }
 
-    public AudioSocketHost.AudioSocketCallback getProviderCallback() {
+    public AudioSocket.ISocketCallback getProviderCallback() {
         return mProviderCallback;
     }
 
-    public AudioSocketHost.AudioSocketCallback getDSPCallback() {
+    public AudioSocket.ISocketCallback getDSPCallback() {
         return mDSPCallback;
     }
 
@@ -128,18 +161,18 @@ public class DSPProcessor {
      * @param frames Incoming frames, as short samples (only INT16 is supported)
      * @param numframes The number of frames to read from the array
      */
-    public void inputProviderAudio(short[] frames, int numframes) {
+    public void inputProviderAudio(byte[] frames, int numframes) {
         // Feed the audio to the first element in the DSP chain
         feedPlugin(mDSPChain.get(0), frames, numframes);
     }
 
-    public void inputDSPAudio(AudioSocketHost socket, short[] frames, int numframes) {
+    public void inputDSPAudio(AudioSocket socket, byte[] frames, int numframes) {
         // Check if we have more plugins to go through
         PluginsLookup plugins = PluginsLookup.getDefault();
         int currentPlugin = 0;
         for (ProviderIdentifier pi : mDSPChain) {
             DSPConnection dsp = plugins.getDSP(pi);
-            if (dsp.getAudioSocket().getName().equals(socket.getName())) {
+            if (dsp.getAudioSocket().getSocketName().equals(socket.getSocketName())) {
                 break;
             }
             currentPlugin++;
@@ -159,22 +192,23 @@ public class DSPProcessor {
         mPlaybackService.resetShutdownTimeout();
     }
 
-    private void feedPlugin(ProviderIdentifier id, short[] frames, int numFrames) {
+    private void feedPlugin(ProviderIdentifier id, byte[] frames, int numFrames) {
         DSPConnection conn = PluginsLookup.getDefault().getDSP(id);
-        AudioSocketHost host = conn.getAudioSocket();
+        AudioHostSocket host = conn.getAudioSocket();
         if (host == null) {
             // DSP effects don't signal their connectivity state, so they're not set-up at the
             // same time as the providers
             host = mPlaybackService.assignProviderAudioSocket(conn);
         }
+
         try {
-            host.writeAudioData(frames, numFrames);
+            host.writeAudioData(frames, 0, numFrames);
         } catch (IOException e) {
             // Plugin died, try to reconnect the socket and try again
             mPlaybackService.assignProviderAudioSocket(conn);
 
             try {
-                host.writeAudioData(frames, numFrames);
+                host.writeAudioData(frames, 0, numFrames);
             } catch (IOException e1) {
                 // Failed again, fallback to output
                 if (mSink != null){

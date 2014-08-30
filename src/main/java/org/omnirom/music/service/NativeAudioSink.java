@@ -23,7 +23,7 @@ public class NativeAudioSink implements AudioSink {
     }
 
     @Override
-    public int write(short[] frames, int numframes) {
+    public int write(byte[] frames, int numframes) {
         return mPlayer.enqueue(frames, numframes);
     }
 

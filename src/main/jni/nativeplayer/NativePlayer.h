@@ -21,10 +21,11 @@
 #include <thread>
 #include <list>
 #include <utility>
+#include "INativeSink.h"
 
 #define BUFFER_MAX_COUNT 8
 
-class NativePlayer {
+class NativePlayer : public INativeSink {
  public:
     // ctor
     NativePlayer();
@@ -40,7 +41,7 @@ class NativePlayer {
 
     // Enqueue buffer data if possible to the player
     // @returns The number of samples written (0 means the buffer is full)
-    uint32_t enqueue(const void* data, uint32_t len);
+    virtual uint32_t enqueue(const void* data, uint32_t len);
 
 
  private:

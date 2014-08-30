@@ -6,8 +6,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import org.omnirom.music.framework.AudioSocketHost;
-
 /**
  * Created by Guigui on 23/07/2014.
  */
@@ -16,7 +14,7 @@ public class DSPConnection extends AbstractProviderConnection {
     private static final String TAG = "DSPConnection";
 
     private IDSPProvider mBinder;
-    private AudioSocketHost mSocket;
+    private AudioHostSocket mSocket;
 
     /**
      * Constructor
@@ -63,7 +61,7 @@ public class DSPConnection extends AbstractProviderConnection {
 
         if (mSocket != null) {
             try {
-                mBinder.setAudioSocketName(mSocket.getName());
+                mBinder.setAudioSocketName(mSocket.getSocketName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot restore audio socket to DSP effect", e);
             }
@@ -78,7 +76,7 @@ public class DSPConnection extends AbstractProviderConnection {
     }
 
     @Override
-    public AudioSocketHost createAudioSocket(final String socketName) {
+    public AudioHostSocket createAudioSocket(final String socketName) {
         mSocket = super.createAudioSocket(socketName);
 
         if (mBinder != null) {

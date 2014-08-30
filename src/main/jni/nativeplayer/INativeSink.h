@@ -12,26 +12,15 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, see <http://www.gnu.org/licenses>.
  */
-#ifndef SRC_MAIN_JNI_NATIVEPLAYER_NATIVEHUB_H_
-#define SRC_MAIN_JNI_NATIVEPLAYER_NATIVEHUB_H_
+#ifndef SRC_MAIN_JNI_NATIVEPLAYER_INATIVESINK_H_
+#define SRC_MAIN_JNI_NATIVEPLAYER_INATIVESINK_H_
 
-#include <list>
-#include <string>
-
-class INativeSink;
-
-class NativeHub {
+class INativeSink {
  public:
-    NativeHub();
-    ~NativeHub();
-
-    // Sets the active audio sink
-    void setSink(INativeSink* sink);
-
- private:
-    std::list<std::string> m_DSPChain;
-    INativeSink* m_pSink;
+    // Enqueue buffer data if possible to the player
+    // @returns The number of samples written (0 means the buffer is full)
+    virtual uint32_t enqueue(const void* data, uint32_t len) = 0;
 };
 
 
-#endif  // SRC_MAIN_JNI_NATIVEPLAYER_NATIVEHUB_H_
+#endif  // SRC_MAIN_JNI_NATIVEPLAYER_INATIVESINK_H_

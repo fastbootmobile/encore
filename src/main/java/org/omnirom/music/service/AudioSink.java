@@ -25,7 +25,7 @@ public interface AudioSink {
      * @param numframes Number of frames
      * @return The number of bytes actually written
      */
-    public int write(short[] frames, int numframes);
+    public int write(byte[] frames, int numframes);
 
     /**
      * Returns the number of samples written since the last call to flushSamples() has been made

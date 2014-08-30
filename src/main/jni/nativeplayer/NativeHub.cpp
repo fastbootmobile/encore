@@ -12,26 +12,13 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, see <http://www.gnu.org/licenses>.
  */
-#ifndef SRC_MAIN_JNI_NATIVEPLAYER_NATIVEHUB_H_
-#define SRC_MAIN_JNI_NATIVEPLAYER_NATIVEHUB_H_
 
-#include <list>
-#include <string>
+#include "NativeHub.h"
 
-class INativeSink;
-
-class NativeHub {
- public:
-    NativeHub();
-    ~NativeHub();
-
-    // Sets the active audio sink
-    void setSink(INativeSink* sink);
-
- private:
-    std::list<std::string> m_DSPChain;
-    INativeSink* m_pSink;
-};
-
-
-#endif  // SRC_MAIN_JNI_NATIVEPLAYER_NATIVEHUB_H_
+// -------------------------------------------------------------------------------------
+NativeHub::NativeHub() {
+}
+// -------------------------------------------------------------------------------------
+NativeHub::~NativeHub() {
+}
+// -------------------------------------------------------------------------------------

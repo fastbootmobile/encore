@@ -5,11 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
-import org.omnirom.music.framework.AudioSocketHost;
 import org.omnirom.music.framework.PluginsLookup;
 
 /**
@@ -26,7 +24,7 @@ public class AbstractProviderConnection implements ServiceConnection {
     private String mConfigurationActivity;
     private Context mContext;
     protected boolean mIsBound;
-    protected AudioSocketHost mAudioSocket;
+    protected AudioHostSocket mAudioSocket;
     protected ProviderIdentifier mIdentifier;
     protected PluginsLookup.ConnectionListener mListener;
 
@@ -175,17 +173,17 @@ public class AbstractProviderConnection implements ServiceConnection {
      * @param socketName The name of the local socket
      * @return The AudioSocketHost that has been created
      */
-    public AudioSocketHost createAudioSocket(final String socketName) {
+    public AudioHostSocket createAudioSocket(final String socketName) {
         // Remove the previous socket, if any
-        if (mAudioSocket != null) {
-            mAudioSocket.release();
-            mAudioSocket = null;
+        if (mAudioSocket == null) {
+            mAudioSocket = new AudioHostSocket();
+        } else {
+            mAudioSocket.disconnectSocket();
         }
 
         // Assign the provider an audio socket
         try {
-            mAudioSocket = new AudioSocketHost(socketName);
-            mAudioSocket.startListening();
+            mAudioSocket.connect(socketName);
         } catch (Exception e) {
             Log.e(TAG, "Unable to setup the audio socket for the providers " + mProviderName, e);
         }
@@ -196,7 +194,7 @@ public class AbstractProviderConnection implements ServiceConnection {
     /**
      * @return The active audio socket for this provider
      */
-    public AudioSocketHost getAudioSocket() {
+    public AudioHostSocket getAudioSocket() {
         return mAudioSocket;
     }
 }

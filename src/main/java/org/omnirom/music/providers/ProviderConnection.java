@@ -2,18 +2,10 @@ package org.omnirom.music.providers;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
-
-import org.omnirom.music.app.BuildConfig;
-import org.omnirom.music.framework.AudioSocketHost;
-import org.omnirom.music.framework.PluginsLookup;
-
-import java.security.Provider;
 
 /**
  * Represents a connection to an audio provider (music source or DSP) service
@@ -82,7 +74,7 @@ public class ProviderConnection extends AbstractProviderConnection {
             }
 
             if (mAudioSocket != null) {
-                mBinder.setAudioSocketName(mAudioSocket.getName());
+                mBinder.setAudioSocketName(mAudioSocket.getSocketName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception occurred on the set providers", e);
@@ -106,8 +98,8 @@ public class ProviderConnection extends AbstractProviderConnection {
     }
 
     @Override
-    public AudioSocketHost createAudioSocket(final String socketName) {
-        AudioSocketHost host = super.createAudioSocket(socketName);
+    public AudioHostSocket createAudioSocket(final String socketName) {
+        AudioHostSocket host = super.createAudioSocket(socketName);
 
         try {
             if (mBinder != null) {
