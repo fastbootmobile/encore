@@ -43,10 +43,13 @@ public class DSPProcessor {
             // If we have plugins setup in our DSP chain, process through them, otherwise just
             // consume the audio on the sink directly
             ByteString bytes = message.getSamples();
+            byte[] data = bytes.toByteArray();
+            int length = bytes.size();
+
             if (mDSPChain.size() > 0) {
-                inputProviderAudio(bytes.toByteArray(), bytes.size());
+                inputProviderAudio(data, length);
             } else {
-                inputDSPAudio(socket, bytes.toByteArray(), bytes.size());
+                inputDSPAudio(socket, data, length);
             }
         }
 

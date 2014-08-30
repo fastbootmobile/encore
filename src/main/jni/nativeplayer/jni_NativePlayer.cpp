@@ -72,9 +72,9 @@ jboolean om_NativePlayer_setAudioFormat(JNIEnv* env, jobject thiz, jint sample_r
 // -------------------------------------------------------------------------------------
 jint om_NativePlayer_enqueue(JNIEnv* env, jobject thiz, jbyteArray samples, jint length) {
     NativePlayer* player = get_layer_from_object(env, thiz);
-    jbyte* samples_bytes = reinterpret_cast<jbyte*>(env->GetByteArrayElements(samples, 0));
+    jbyte* samples_bytes = env->GetByteArrayElements(samples, 0);
 
-    jint written = player->enqueue(reinterpret_cast<uint8_t*>(samples_bytes), length);
+    jint written = player->enqueue(samples_bytes, length);
 
     env->ReleaseByteArrayElements(samples, samples_bytes, 0);
 
