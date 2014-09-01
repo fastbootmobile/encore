@@ -133,7 +133,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     }
 
     private void loadArtImpl(final BoundEntity ent) {
-        if (ent.equals(mRequestedEntity)) {
+        if (ent == null || ent.equals(mRequestedEntity)) {
             // Nothing to do, we are displaying the proper thing already
             return;
         } else if (!mCrossfade) {

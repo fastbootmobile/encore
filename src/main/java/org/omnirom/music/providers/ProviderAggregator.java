@@ -545,7 +545,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         // Request playlists if we logged in
         Log.d(TAG, "onLoggedIn(" + success + ")");
         if (success) {
-            postOnce(mUpdatePlaylistsRunnable);
+            new Thread(mUpdatePlaylistsRunnable).start();
         } else {
             mHandler.post(new Runnable() {
                 @Override
@@ -638,6 +638,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     @Override
     public void onSongUpdate(ProviderIdentifier provider, final Song s) throws RemoteException {
+        if (s == null) {
+            return;
+        }
+
         Song cached = mCache.getSong(s.getRef());
         boolean wasLoaded = false;
         boolean changed = false;
@@ -686,6 +690,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     @Override
     public void onAlbumUpdate(ProviderIdentifier provider, final Album a) throws RemoteException {
+        if (a == null) {
+            return;
+        }
+
         Album cached = mCache.getAlbum(a.getRef());
         boolean modified = false;
 
@@ -747,6 +755,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     @Override
     public void onArtistUpdate(ProviderIdentifier provider, Artist a) throws RemoteException {
+        if (a == null) {
+            return;
+        }
+
         Artist cached = mCache.getArtist(a.getRef());
 
         if (cached == null) {
