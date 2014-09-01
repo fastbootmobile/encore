@@ -6,9 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.DeadObjectException;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -60,7 +62,8 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     private SQLiteDatabase db;
     private LocalCallback mCallback;
     private SearchResult mSearchResult;
-
+    private ProviderIdentifier mProviderIdentifier;
+    private boolean mFetched;
     public interface LocalCallback {
         public void playlistUpdated(final Playlist playlist);
         public void searchFinished(final SearchResult searchResult);
@@ -73,9 +76,28 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         mPlaylists = new HashMap<String, Playlist>();
         mPlayListRefID = new HashMap<String, Long>();
         mRefProviderId = new HashMap<String, ProviderIdentifier>();
+        mFetched = false;
         getWritableDatabase();
     }
-
+    public void setIdentifier(ProviderIdentifier providerIdentifier){
+        mProviderIdentifier = providerIdentifier;
+        if(!mFetched){
+            fetchPlaylists(db);
+            mFetched = true;
+        }
+    }
+    public boolean isSetup(){
+        return mFetched;
+    }
+    public Song getSong(String ref ) throws RemoteException {
+        ProviderIdentifier providerId = mRefProviderId.get(ref);
+        if(providerId != null){
+            IMusicProvider binder = PluginsLookup.getDefault().getProvider(providerId).getBinder();
+            if(binder != null)
+                return binder.getSong(ref);
+        }
+        return null;
+    }
     @Override
     public void onCreate(SQLiteDatabase db){
         Log.d(TAG,"creating sql db");
@@ -96,7 +118,8 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
                 Playlist pl = new Playlist("omni:playlist:"+playlist_id);
                 pl.setIsLoaded(true);
                 pl.setName(c.getString(playlist_name));
-                fetchSongs(pl,playlist_id,database);
+                pl.setProvider(mProviderIdentifier);
+                fetchSongs(pl, playlist_id, database);
                 mCallback.playlistUpdated(pl);
                 mPlaylists.put(pl.getRef(),pl);
                 mPlayListRefID.put(pl.getRef(),playlist_id);
@@ -125,8 +148,12 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onOpen(SQLiteDatabase db){
+        this.db = db;
         Log.d(TAG,"database has been opened");
-        fetchPlaylists(db);
+        if(mProviderIdentifier != null) {
+            fetchPlaylists(db);
+            mFetched = true;
+        }
     }
     @Override
     public void onUpgrade(SQLiteDatabase db,int oldVersion,int newVersion){
@@ -152,6 +179,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         Playlist pl = new Playlist("omni:playlist:"+playlist_id);
         pl.setName(playlist_name);
         pl.setIsLoaded(true);
+        pl.setProvider(mProviderIdentifier);
         mPlaylists.put(pl.getRef(),pl);
         mPlayListRefID.put(pl.getRef(),playlist_id);
         mCallback.playlistUpdated(pl);
@@ -177,6 +205,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
             Log.d(TAG, "playlist contains now " + p.getSongsCount());
             mSongRefID.put(playlistref+":"+songref,song_id);
             mCallback.playlistUpdated(p);
+            mRefProviderId.put(songref,providerIdentifier);
             return true;
         }else
             return false;

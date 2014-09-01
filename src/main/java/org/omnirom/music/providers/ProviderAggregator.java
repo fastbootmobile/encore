@@ -252,7 +252,11 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     Log.e(TAG, "Unable to retrieve the song", e);
                     return null;
                 }
+            } else {
+                Log.e(TAG,"binder null");
             }
+        } else {
+            Log.e(TAG,"providerConnection not found");
         }
 
         return null;
