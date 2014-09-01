@@ -667,8 +667,16 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         if (!wasLoaded && cached.isLoaded()) {
             // Match the album with the artist
             Artist artist = mCache.getArtist(s.getArtist());
+            if (artist == null) {
+                artist = retrieveArtist(s.getArtist(), provider);
+            }
+
             if (artist != null) {
                 Album album = mCache.getAlbum(s.getAlbum());
+                if (album == null) {
+                    album = retrieveAlbum(s.getAlbum(), provider);
+                }
+
                 if (album != null) {
                     artist.addAlbum(album.getRef());
                 }

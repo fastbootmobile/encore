@@ -177,6 +177,10 @@ public class SongsListAdapter extends BaseAdapter {
             tag.tvDuration.setText(Utils.formatTrackLength(song.getDuration()));
 
             Artist artist = cache.getArtist(song.getArtist());
+            if (artist == null) {
+                artist = ProviderAggregator.getDefault().retrieveArtist(song.getArtist(),
+                        song.getProvider());
+            }
             if (artist != null) {
                 tag.tvArtist.setText(artist.getName());
             } else {

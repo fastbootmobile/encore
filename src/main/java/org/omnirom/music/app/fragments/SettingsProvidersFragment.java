@@ -77,7 +77,7 @@ public class SettingsProvidersFragment extends ListFragment {
         if (mSettingsConnection != null) {
             IMusicProvider provider = mSettingsConnection.getBinder();
             try {
-                if (provider.isSetup() && !provider.isAuthenticated()) {
+                if (provider != null && provider.isSetup() && !provider.isAuthenticated()) {
                     mSettingsConnection.getBinder().login();
                 }
             } catch (RemoteException e) {
