@@ -54,7 +54,13 @@ public class AlbumsAdapter extends BaseAdapter {
         Collections.sort(mAlbums, new Comparator<Album>() {
             @Override
             public int compare(Album album, Album album2) {
-                return album.getName().compareTo(album2.getName());
+                if (album.getName() != null && album2.getName() != null) {
+                    return album.getName().compareTo(album2.getName());
+                } else if (album.getName() == null) {
+                    return -1;
+                } else {
+                    return 1;
+                }
             }
         });
     }
