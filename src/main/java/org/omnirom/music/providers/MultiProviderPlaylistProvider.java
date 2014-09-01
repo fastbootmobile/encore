@@ -72,6 +72,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     @Override
     public void setIdentifier(ProviderIdentifier identifier) throws RemoteException {
         mProviderIdentifier = identifier;
+        mMultiProviderDatabaseHelper.setIdentifier(identifier);
     }
 
     @Override
@@ -90,7 +91,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
 
     @Override
     public boolean isSetup() throws RemoteException {
-        return true;
+        return mMultiProviderDatabaseHelper.isSetup();
     }
 
     @Override
@@ -130,9 +131,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
 
     @Override
     public Song getSong(String ref) throws RemoteException {
-        // TODO: This is broken! mSongsProvider isn't even created
-        ProviderIdentifier providerId = mSongsProviders.get(ref);
-        return getBinder(providerId).getSong(ref);
+        return mMultiProviderDatabaseHelper.getSong(ref);
     }
 
     @Override
