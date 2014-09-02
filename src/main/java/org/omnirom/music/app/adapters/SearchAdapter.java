@@ -216,13 +216,10 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
     private void updateSongTag(int i, ViewHolder tag) {
         String songRef = mSearchResult.getSongsList().get(i);
-        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
-        Song song = cache.getSong(songRef);
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        final ProviderCache cache = aggregator.getCache();
 
-        if (song == null) {
-            song = ProviderAggregator.getDefault().retrieveSong(songRef, mSearchSource);
-        }
-
+        Song song = aggregator.retrieveSong(songRef, mSearchSource);
         if (song != null && song.isLoaded()) {
             tag.tvTitle.setText(song.getTitle());
             Artist artist = cache.getArtist(song.getArtist());

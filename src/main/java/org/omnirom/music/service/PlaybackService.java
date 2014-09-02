@@ -464,10 +464,10 @@ public class PlaybackService extends Service
         public void queuePlaylist(Playlist p, boolean top) throws RemoteException {
             Iterator<String> songsIt = p.songs();
 
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             while (songsIt.hasNext()) {
                 String ref = songsIt.next();
-                mPlaybackQueue.addSong(cache.getSong(ref), top);
+                mPlaybackQueue.addSong(aggregator.retrieveSong(ref, p.getProvider()), top);
             }
 
             notifyQueueChanged();
@@ -475,8 +475,8 @@ public class PlaybackService extends Service
 
         @Override
         public void queueSong(Song s, boolean top) throws RemoteException {
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            mPlaybackQueue.addSong(cache.getSong(s.getRef()), top);
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+            mPlaybackQueue.addSong(aggregator.retrieveSong(s.getRef(), null), top);
             notifyQueueChanged();
         }
 
@@ -484,10 +484,10 @@ public class PlaybackService extends Service
         public void queueAlbum(Album p, boolean top) throws RemoteException {
             Iterator<String> songsIt = p.songs();
 
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             while (songsIt.hasNext()) {
                 String ref = songsIt.next();
-                mPlaybackQueue.addSong(cache.getSong(ref), top);
+                mPlaybackQueue.addSong(aggregator.retrieveSong(ref, p.getProvider()), top);
             }
 
             notifyQueueChanged();

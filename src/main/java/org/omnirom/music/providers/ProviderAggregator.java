@@ -237,7 +237,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * Retrieves a song from the provider, and put it in the cache
      *
      * @param ref      The reference to the song
-     * @param provider The provider from which retrieve the song
+     * @param provider The provider from which retrieve the song (may be null to query cache only)
      * @return The song, or null if the provider says so
      */
     public Song retrieveSong(final String ref, final ProviderIdentifier provider) {
@@ -247,30 +247,36 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return null;
         }
 
-        ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
-        if (pc != null) {
-            IMusicProvider binder = pc.getBinder();
+        // Try from cache
+        Song output = mCache.getSong(ref);
 
-            if (binder != null) {
-                try {
-                    Song song = binder.getSong(ref);
-                    onSongUpdate(provider, song);
-                    return song;
-                } catch (DeadObjectException e) {
-                    Log.e(TAG, "Provider died while retrieving song");
-                    return null;
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to retrieve the song", e);
-                    return null;
+        if (output == null && provider != null) {
+            // Get from provider then
+            ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
+            if (pc != null) {
+                IMusicProvider binder = pc.getBinder();
+
+                if (binder != null) {
+                    try {
+                        Song song = binder.getSong(ref);
+                        onSongUpdate(provider, song);
+                        return song;
+                    } catch (DeadObjectException e) {
+                        Log.e(TAG, "Provider died while retrieving song");
+                        return null;
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to retrieve the song", e);
+                        return null;
+                    }
+                } else {
+                    Log.e(TAG, "Binder null: provider not yet connected?");
                 }
             } else {
-                Log.e(TAG,"binder null");
+                Log.e(TAG, "Unknown provider identifier: " + provider);
             }
-        } else {
-            Log.e(TAG,"providerConnection not found");
         }
 
-        return null;
+        return output;
     }
 
     /**

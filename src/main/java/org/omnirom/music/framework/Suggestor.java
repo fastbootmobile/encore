@@ -33,30 +33,22 @@ public class Suggestor {
         // TODO: Do a real algorithm
         Iterator<String> albums = artist.albums();
         while (albums.hasNext()) {
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+            final ProviderCache cache = aggregator.getCache();
             String albumRef = albums.next();
             Album album = cache.getAlbum(albumRef);
             if (album == null) {
-                album = ProviderAggregator.getDefault().retrieveAlbum(albumRef, artist.getProvider());
+                album = aggregator.retrieveAlbum(albumRef, artist.getProvider());
             }
 
             if (album.isLoaded() && album.getSongsCount() > 0) {
                 Iterator<String> songs = album.songs();
                 while (songs.hasNext()) {
                     String songRef = songs.next();
-                    Song song = cache.getSong(songRef);
-
-                    if (song == null) {
-                        ProviderConnection pc = PluginsLookup.getDefault().getProvider(artist.getProvider());
-                        try {
-                            song = pc.getBinder().getSong(songRef);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Error while getting album track!!", e);
-                        }
-                    }
+                    Song song = aggregator.retrieveSong(songRef, artist.getProvider());
 
                     if (song != null) {
-                        if (song.getArtist().equals(artist.getRef())) {
+                        if (artist.getRef().equals(song.getArtist())) {
                             return song;
                         }
                     }

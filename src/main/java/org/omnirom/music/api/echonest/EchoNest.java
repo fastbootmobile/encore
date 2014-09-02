@@ -318,8 +318,9 @@ public class EchoNest {
         // Upload all playlists tracks
         CatalogUpdater updater = new CatalogUpdater();
 
-        List<Playlist> playlists = ProviderAggregator.getDefault().getAllPlaylists();
-        ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        List<Playlist> playlists = aggregator.getAllPlaylists();
+        ProviderCache cache = aggregator.getCache();
 
         // For each playlist
         int tracksCount = 0;
@@ -337,7 +338,7 @@ public class EchoNest {
                 }
 
                 // TODO: Add a way to know if references are rosetta IDs to avoid lookups from EN
-                Song song = cache.getSong(songRef);
+                Song song = aggregator.retrieveSong(songRef, p.getProvider());
                 if (song != null) {
                     // We have the song info, add it to our profile
                     SongCatalogItem item = new SongCatalogItem(songRef);

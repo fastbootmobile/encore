@@ -94,7 +94,7 @@ public class ProviderCache {
         mRefProvider.put(song.getRef(), provider);
     }
 
-    public Song getSong(final String ref) {
+    Song getSong(final String ref) {
         return mSongs.get(ref);
     }
 

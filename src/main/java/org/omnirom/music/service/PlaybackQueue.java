@@ -37,12 +37,12 @@ public class PlaybackQueue extends ArrayList<Song> {
      */
     public void addPlaylist(Playlist p, boolean top) {
         Iterator<String> songs = p.songs();
-        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
         int index = 0;
         while (songs.hasNext()) {
             String songRef = songs.next();
-            Song song = cache.getSong(songRef);
+            Song song = aggregator.retrieveSong(songRef, p.getProvider());
             if (song != null) {
                 if (top) {
                     this.add(index, song);

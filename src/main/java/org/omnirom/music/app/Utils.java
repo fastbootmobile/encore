@@ -377,19 +377,16 @@ public class Utils {
         HashMap<String, Integer> occurrences = new HashMap<String, Integer>();
         Iterator<String> it = a.songs();
 
-        ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
         while (it.hasNext()) {
             String songRef = it.next();
             if (songRef == null) {
                 Log.e(TAG, "Album '" + a.getName() + "' contains null songs!");
                 continue;
             }
-            Song song = cache.getSong(songRef);
 
-            if (song == null) {
-                song = ProviderAggregator.getDefault().retrieveSong(songRef, a.getProvider());
-            }
-
+            Song song = aggregator.retrieveSong(songRef, a.getProvider());
             if (song != null) {
                 String artistRef = song.getArtist();
                 Integer count = occurrences.get(artistRef);
@@ -429,14 +426,10 @@ public class Utils {
         Iterator<String> it = p.songs();
 
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        final ProviderCache cache = aggregator.getCache();
 
         while (it.hasNext()) {
             String songRef = it.next();
-            Song song = cache.getSong(songRef);
-            if (song == null) {
-                song = aggregator.retrieveSong(songRef, p.getProvider());
-            }
+            Song song = aggregator.retrieveSong(songRef, p.getProvider());
 
             if (song != null) {
                 String artistRef = song.getArtist();

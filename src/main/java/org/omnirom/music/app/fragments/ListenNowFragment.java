@@ -76,19 +76,18 @@ public class ListenNowFragment extends Fragment {
 
                 int trackId = random.nextInt(playlist.getSongsCount());
                 final ProviderIdentifier provider = playlist.getProvider();
-                if(provider == null){
-                    Log.e(TAG,"playlist has no identifier");
+                if (provider == null) {
+                    Log.e(TAG, "Playlist has no identifier!");
+                    continue;
                 }
+
                 String trackRef = playlist.songsList().get(trackId);
-                Song track = cache.getSong(trackRef);
-                if (track == null) {
-                    track = aggregator.retrieveSong(trackRef, provider);
-                }
+                Song track = aggregator.retrieveSong(trackRef, provider);
 
                 if (track == null) {
                     // The track is not loaded...?
                     Log.e(TAG, "Track is not loaded, skipping one entry for now. TODO: Load!");
-                } else if(provider != null){
+                } else {
                     // Now that we have the entity, let's figure if it's a big or small entry
                     boolean isLarge = ((i % 7) == 0);
 

@@ -191,7 +191,7 @@ public class AutoMixManager implements IPlaybackCallback {
     private Song getSongFromRef(String ref) {
         ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
-        Song s = aggregator.getCache().getSong(ref);
+        Song s = aggregator.retrieveSong(ref, null);
         if (s == null) {
             String prefix = aggregator.getPreferredRosettaStonePrefix();
             if (prefix != null) {

@@ -1,5 +1,6 @@
 package org.omnirom.music.app.fragments;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -7,6 +8,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -378,10 +380,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mRootView.setOnScrollListener(new ObservableScrollView.ScrollViewListener() {
             @Override
             public void onScroll(ObservableScrollView scrollView, int x, int y, int oldx, int oldy) {
-                if (y >= tvArtist.getTop()) {
-                    getActivity().getActionBar().hide();
-                } else {
-                    getActivity().getActionBar().show();
+                final ActionBar ab = getActivity().getActionBar();
+                if (ab != null) {
+                    if (y >= tvArtist.getTop()) {
+                        ab.hide();
+                    } else {
+                        ab.show();
+                    }
                 }
             }
         });
@@ -751,6 +756,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     ivPlayAlbum.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
+                            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
                             if (drawable.getRequestedShape() == PlayPauseDrawable.SHAPE_STOP) {
                                 drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                                 mParent.setFabShape(PlayPauseDrawable.SHAPE_PLAY);
@@ -768,16 +774,18 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                                 mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
                                 try {
                                     pbService.playAlbum(album);
+                                } catch (DeadObjectException e) {
+                                    Log.e(TAG, "Provider died while trying to play album");
                                 } catch (RemoteException e) {
-                                    e.printStackTrace();
+                                    Log.e(TAG, "Unable to play album", e);
                                 }
 
                                 // Bold the corresponding track
                                 Iterator<String> songs = album.songs();
                                 if (songs.hasNext()) {
                                     String songRef = songs.next();
-                                    Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
-                                    boldPlayingTrack(song);
+                                    Song s = aggregator.retrieveSong(songRef, album.getProvider());
+                                    boldPlayingTrack(s);
                                 }
                             }
                         }
@@ -801,11 +809,11 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private void showAlbumTracks(Album album, LinearLayout container) {
             Iterator<String> songsIt = album.songs();
 
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            final LayoutInflater inflater = getActivity().getLayoutInflater();
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             while (songsIt.hasNext()) {
-                final Song song = cache.getSong(songsIt.next());
+                final Song song = aggregator.retrieveSong(songsIt.next(), album.getProvider());
 
                 View itemRoot = inflater.inflate(R.layout.expanded_albums_item, container, false);
                 container.addView(itemRoot);
@@ -1091,9 +1099,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                             artistRef, tag.itemColor);
 
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                        AlbumArtImageView ivCover = tag.ivCover;
+                        /*AlbumArtImageView ivCover = tag.ivCover;
                         TextView tvTitle = tag.tvTitle;
-                        /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                             new Pair<View, String>(ivCover, "itemImage"),
                             new Pair<View, String>(tvTitle, "artistName"));
 

@@ -117,7 +117,8 @@ public class AlbumArtCache {
      * @return The art key
      */
     public String getArtKey(final Album album, StringBuffer artUrl) {
-        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        final ProviderCache cache = aggregator.getCache();
 
         String artKey = DEFAULT_ART;
         if (album == null || album.getName() == null) {
@@ -136,11 +137,13 @@ public class AlbumArtCache {
         Artist artist = null;
         String artistName = null;
         if (album.getSongsCount() > 0 && album.songs().hasNext()) {
-            Song song = cache.getSong(album.songs().next());
-            artist = cache.getArtist(song.getAlbum());
+            Song song = aggregator.retrieveSong(album.songs().next(), album.getProvider());
+            if (song != null) {
+                artist = cache.getArtist(song.getAlbum());
 
-            if (artist != null) {
-                artistName = artist.getName();
+                if (artist != null) {
+                    artistName = artist.getName();
+                }
             }
         }
 

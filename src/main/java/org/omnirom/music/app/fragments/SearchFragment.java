@@ -106,11 +106,13 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
     }
 
     private void onSongClick(int i) {
-        List<String> list = mSearchResult.getSongsList();
+        final List<String> list = mSearchResult.getSongsList();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
         if (i == Math.max(10, list.size() + 1)) {
             // More
         } else {
-            Song song = ProviderAggregator.getDefault().getCache().getSong(list.get(i));
+            Song song = aggregator.retrieveSong(list.get(i), mSearchResult.getIdentifier());
             if (song != null) {
                 try {
                     PluginsLookup.getDefault().getPlaybackService().playSong(song);
@@ -124,8 +126,6 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
 
     private void onAlbumClick(int i, View v) {
         SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
-        ImageView ivCover = holder.albumArtImageView;
-        TextView tvTitle = holder.divider;
         Bitmap hero = ((MaterialTransitionDrawable) holder.albumArtImageView.getDrawable()).getFinalDrawable().getBitmap();
         int color = 0xffffff;
         if (hero != null) {
@@ -145,7 +145,10 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
         Intent intent = AlbumActivity.craftIntent(getActivity(), hero, album, color);
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            /*ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+            /*
+            ImageView ivCover = holder.albumArtImageView;
+            TextView tvTitle = holder.divider;
+            ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                     new Pair<View, String>(ivCover, "itemImage"),
                     new Pair<View, String>(tvTitle, "albumName"));
             startActivity(intent, opt.toBundle());*/

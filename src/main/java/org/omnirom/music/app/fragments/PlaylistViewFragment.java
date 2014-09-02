@@ -95,6 +95,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         View root = inflater.inflate(R.layout.fragment_playlist_view, container, false);
         assert root != null;
 
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
         PlaylistListView lvPlaylistContents = (PlaylistListView) root.findViewById(R.id.lvPlaylistContents);
         mAdapter = new PlaylistAdapter(root.getContext());
         lvPlaylistContents.setAdapter(mAdapter);
@@ -160,11 +162,10 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         Iterator<String> songIt = mPlaylist.songs();
         while (songIt.hasNext()) {
             String songRef = songIt.next();
-            Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
-            if (song == null) {
-                song = ProviderAggregator.getDefault().retrieveSong(songRef, mPlaylist.getProvider());
+            Song song = aggregator.retrieveSong(songRef, mPlaylist.getProvider());
+            if (song != null) {
+                mAdapter.put(song);
             }
-            mAdapter.put(song);
         }
         mAdapter.notifyDataSetChanged();
         mAdapter.setPlaylist(mPlaylist);
@@ -178,7 +179,6 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
                 if (song != null) {
                     IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                    ProviderCache cache = ProviderAggregator.getDefault().getCache();
                     try {
                         pbService.playSong(song);
 
@@ -194,7 +194,10 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                                 itIndex++;
                             }
 
-                            pbService.queueSong(cache.getSong(songRef), false);
+                            song = aggregator.retrieveSong(songRef, mPlaylist.getProvider());
+                            if (song != null) {
+                                pbService.queueSong(song, false);
+                            }
                         }
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to play song", e);

@@ -1,11 +1,11 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
-import android.support.v4.app.Fragment;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.support.v4.app.Fragment;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
 import android.util.Log;
@@ -32,7 +32,6 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackService;
 
@@ -46,7 +45,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "AlbumViewFragment";
     private SongsListAdapter mAdapter;
-    private ParallaxScrollListView listView;
     private View mRootView;
     private Album mAlbum;
     private Handler mHandler;
@@ -59,7 +57,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private Runnable mLoadSongsRunnable = new Runnable() {
         @Override
         public void run() {
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             ProviderIdentifier pi = mAlbum.getProvider();
             if (pi == null) {
@@ -90,22 +88,11 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
                 while (songs.hasNext()) {
                     String songRef = songs.next();
-                    Song song = cache.getSong(songRef);
+                    Song song = aggregator.retrieveSong(songRef, mAlbum.getProvider());
 
-                    // If the song isn't loaded, try to get it from the provider, it might be loaded
-                    // there but not cached for various reasons. For instance, Spotify loads the
-                    // albums tracks info, but we're not tracking them in metadata_callback, so
-                    // they're not actually pushed to the app's cache
-                    if (song == null) {
-                        song = ProviderAggregator.getDefault().retrieveSong(songRef, mAlbum.getProvider());
-
-                        if (song == null) {
-                            // Song is still unknown, we skip!
-                            continue;
-                        }
+                    if (song != null) {
+                        mAdapter.put(song);
                     }
-
-                    mAdapter.put(song);
                 }
                 mAdapter.notifyDataSetChanged();
                 mRootView.invalidate();
@@ -177,7 +164,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         ivHero.setImageBitmap(mHeroImage);
 
-        listView =  (ParallaxScrollListView) mRootView.findViewById(R.id.lvAlbumContents);
+        ParallaxScrollListView listView =
+                (ParallaxScrollListView) mRootView.findViewById(R.id.lvAlbumContents);
         mAdapter = new SongsListAdapter(getActivity(), false);
         listView.addParallaxedHeaderView(headerView);
         listView.setAdapter(mAdapter);
@@ -185,6 +173,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
                 // We substract the header view
                 position = position - 1;
 
@@ -198,12 +187,12 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
                         // Add the remaining songs of the album to the playback queue
                         Iterator<String> it = mAlbum.songs();
-                        ProviderCache cache = ProviderAggregator.getDefault().getCache();
                         for (int i = 0; i < position + 1; i++) {
                             it.next();
                         }
                         while (it.hasNext()) {
-                            pbService.queueSong(cache.getSong(it.next()), false);
+                            song = aggregator.retrieveSong(it.next(), mAlbum.getProvider());
+                            pbService.queueSong(song, false);
                         }
 
                         pbService.play();
