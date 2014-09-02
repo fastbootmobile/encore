@@ -281,6 +281,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @return The artist, or null if the provider says so
      */
     public Artist retrieveArtist(final String ref, final ProviderIdentifier provider) {
+        if (ref == null) {
+            Log.e(TAG, "Requesting NULL Ref artist! Check stacktrace to find the cause");
+            Log.e(TAG, Arrays.toString(Thread.currentThread().getStackTrace()));
+            return null;
+        }
+
         ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
         if (pc != null) {
             IMusicProvider binder = pc.getBinder();
@@ -311,6 +317,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @return The album, or null if the provider says so
      */
     public Album retrieveAlbum(final String ref, final ProviderIdentifier provider) {
+        if (ref == null) {
+            Log.e(TAG, "Requesting NULL Ref album! Check stacktrace to find the cause");
+            Log.e(TAG, Arrays.toString(Thread.currentThread().getStackTrace()));
+            return null;
+        }
+
         ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
         if (pc != null) {
             IMusicProvider binder = pc.getBinder();
@@ -341,6 +353,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @return The album, or null if the provider says so
      */
     public Playlist retrievePlaylist(final String ref, final ProviderIdentifier provider) {
+        if (ref == null) {
+            Log.e(TAG, "Requesting NULL Ref playlist! Check stacktrace to find the cause");
+            Log.e(TAG, Arrays.toString(Thread.currentThread().getStackTrace()));
+            return null;
+        }
+
         ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
         if (pc != null) {
             IMusicProvider binder = pc.getBinder();

@@ -6,17 +6,13 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Handler;
+import android.os.Process;
 import android.os.SystemClock;
 import android.renderscript.RenderScript;
-import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import org.omnirom.music.app.renderscript.GrayscaleRS;
@@ -107,6 +103,7 @@ public class MaterialTransitionDrawable extends Drawable {
             // thread when calling transitionTo from it
             new Thread() {
                 public void run() {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     BitmapDrawable grayDrawable = new BitmapDrawable(res, grayscaleBitmap(drawable.getBitmap()));
                     synchronized (MaterialTransitionDrawable.this) {
                         mTargetGrayDrawable = grayDrawable;

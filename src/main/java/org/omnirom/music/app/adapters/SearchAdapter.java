@@ -19,6 +19,7 @@ import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.List;
@@ -215,7 +216,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
     private void updateSongTag(int i, ViewHolder tag) {
         String songRef = mSearchResult.getSongsList().get(i);
-        Song song = ProviderAggregator.getDefault().getCache().getSong(songRef);
+        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        Song song = cache.getSong(songRef);
 
         if (song == null) {
             song = ProviderAggregator.getDefault().retrieveSong(songRef, mSearchSource);
@@ -223,7 +225,13 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
         if (song != null && song.isLoaded()) {
             tag.tvTitle.setText(song.getTitle());
-            tag.tvSubtitle.setText(ProviderAggregator.getDefault().getCache().getArtist(song.getArtist()).getName());
+            Artist artist = cache.getArtist(song.getArtist());
+            if (artist == null) {
+                artist = ProviderAggregator.getDefault().retrieveArtist(song.getArtist(), mSearchSource);
+            }
+            if (artist != null) {
+                tag.tvSubtitle.setText(artist.getName());
+            }
             tag.albumArtImageView.loadArtForSong(song);
             tag.content = song;
         }

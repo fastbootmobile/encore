@@ -4,9 +4,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Handler;
+import android.os.*;
+import android.os.Process;
 import android.util.Log;
 
 import org.omnirom.music.app.R;
@@ -74,6 +73,8 @@ public class AlbumArtHelper {
 
         @Override
         protected BackgroundResult doInBackground(BoundEntity... params) {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
             BackgroundResult output = new BackgroundResult();
             mEntity = params[0];
             output.request = mEntity;
