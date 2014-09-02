@@ -33,6 +33,7 @@ import org.omnirom.music.app.PlaybackQueueActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -408,6 +409,10 @@ public class PlayingBarView extends RelativeLayout {
                         }
 
                         ProviderCache cache = ProviderAggregator.getDefault().getCache();
+                        Album album = cache.getAlbum(song.getAlbum());
+                        if (album == null) {
+                            album = ProviderAggregator.getDefault().retrieveAlbum(song.getAlbum(), song.getProvider());
+                        }
 
                         Intent intent = AlbumActivity.craftIntent(getContext(), hero,
                                 cache.getAlbum(song.getAlbum()), color);

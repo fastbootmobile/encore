@@ -697,8 +697,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 public int compare(Album album, Album album2) {
                     if (album.getYear() != album2.getYear()) {
                         return album.getYear() < album2.getYear() ? 1 : -1;
-                    } else {
+                    } else if (album.getName() != null && album2.getName() != null) {
                         return album.getName().compareTo(album2.getName());
+                    } else {
+                        return 0;
                     }
                 }
             });
