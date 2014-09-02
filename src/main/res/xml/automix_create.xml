@@ -29,22 +29,6 @@
 
     <PreferenceCategory android:title="@string/automix_category_knobs">
 
-        <CheckBoxPreference
-            android:persistent="false"
-            android:key="automix_use_taste"
-            android:summary="@string/automix_use_taste_summary"
-            android:title="@string/automix_use_taste_title" />
-
-        <ListPreference
-            android:persistent="false"
-            android:key="automix_adventurous"
-            android:dependency="automix_use_taste"
-            android:summary="@string/automix_adventure_summary"
-            android:title="@string/automix_adventure_title"
-            android:entries="@array/echonest_adventurous_level_entries"
-            android:entryValues="@array/echonest_adventurous_level_values"
-            android:defaultValue="0.2" />
-
         <MultiSelectListPreference
             android:persistent="false"
             android:key="automix_song_types"
@@ -79,6 +63,23 @@
             android:entries="@array/echonest_familiarity_level_entries"
             android:entryValues="@array/echonest_familiarity_level_values"
             android:defaultValue="-1" />
+
+
+        <CheckBoxPreference
+            android:persistent="false"
+            android:key="automix_use_taste"
+            android:summary="@string/automix_use_taste_summary"
+            android:title="@string/automix_use_taste_title" />
+
+        <ListPreference
+            android:persistent="false"
+            android:key="automix_adventurous"
+            android:dependency="automix_use_taste"
+            android:summary="@string/automix_adventure_summary"
+            android:title="@string/automix_adventure_title"
+            android:entries="@array/echonest_adventurous_level_entries"
+            android:entryValues="@array/echonest_adventurous_level_values"
+            android:defaultValue="0.2" />
 
     </PreferenceCategory>
 
