@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,13 +33,19 @@ import java.util.List;
  * Created by h4o on 19/06/2014.
  */
 public class SongsFragment extends Fragment {
+    private static final String TAG = "SongsFragment";
+
     private SongsListAdapter mSongsListAdapter;
-    private String TAG = "SongsFragment";
+    private Handler mHandler;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
         public void onSongStarted(Song s) throws RemoteException {
-            mSongsListAdapter.notifyDataSetChanged();
+            mHandler.post(new Runnable() {
+                public void run() {
+                    mSongsListAdapter.notifyDataSetChanged();
+                }
+            });
         }
     };
 
@@ -50,7 +57,9 @@ public class SongsFragment extends Fragment {
 
             if (song != null) {
                 try {
+                    long clock = SystemClock.uptimeMillis();
                     PluginsLookup.getDefault().getPlaybackService().playSong(song);
+                    Log.e(TAG, "playSong call took " + (SystemClock.uptimeMillis()-clock) + "ms");
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to play song", e);
                 }
@@ -63,6 +72,8 @@ public class SongsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mHandler = new Handler();
+
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_songs, container, false);
         assert root != null;

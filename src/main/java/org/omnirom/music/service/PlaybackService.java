@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
 import org.omnirom.music.api.echonest.AutoMixManager;
@@ -97,10 +98,17 @@ public class PlaybackService extends Service
     private boolean mIsStopping;
     private boolean mCurrentTrackWaitLoading;
 
-    private Runnable mStartPlaybackRunnable = new Runnable() {
+    private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
         public void run() {
             startPlayingQueue();
+        }
+    };
+
+    private Runnable mStartPlaybackRunnable = new Runnable() {
+        @Override
+        public void run() {
+            new Thread(mStartPlaybackImplRunnable).start();
         }
     };
 
@@ -400,7 +408,12 @@ public class PlaybackService extends Service
                     }
 
                     // The notification system takes care of calling startForeground
-                    mNotification.setCurrentSong(mCurrentTrack);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mNotification.setCurrentSong(mCurrentTrack);
+                        }
+                    });
 
                     updateRemoteMetadata();
                     mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_BUFFERING);
@@ -441,7 +454,8 @@ public class PlaybackService extends Service
             Log.i(TAG, "Play playlist: " + p.getRef());
             mPlaybackQueue.clear();
             queuePlaylist(p, false);
-            startPlayingQueue();
+            mHandler.removeCallbacks(mStartPlaybackRunnable);
+            mHandler.post(mStartPlaybackRunnable);
         }
 
         @Override
@@ -449,7 +463,8 @@ public class PlaybackService extends Service
             Log.i(TAG, "Play song: " + s.getRef());
             mPlaybackQueue.clear();
             queueSong(s, true);
-            startPlayingQueue();
+            mHandler.removeCallbacks(mStartPlaybackRunnable);
+            mHandler.post(mStartPlaybackRunnable);
         }
 
         @Override
@@ -457,7 +472,8 @@ public class PlaybackService extends Service
             Log.i(TAG, "Play album: " + a.getRef());
             mPlaybackQueue.clear();
             queueAlbum(a, false);
-            startPlayingQueue();
+            mHandler.removeCallbacks(mStartPlaybackRunnable);
+            mHandler.post(mStartPlaybackRunnable);
         }
 
         @Override
@@ -531,7 +547,8 @@ public class PlaybackService extends Service
 
                 return true;
             } else if (mPlaybackQueue.size() > 0) {
-                startPlayingQueue();
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
+                mHandler.post(mStartPlaybackRunnable);
                 return true;
             } else {
                 return false;
@@ -619,7 +636,8 @@ public class PlaybackService extends Service
         public void next() throws RemoteException {
             if (mPlaybackQueue.size() > 1) {
                 mPlaybackQueue.remove(0);
-                startPlayingQueue();
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
+                mHandler.post(mStartPlaybackRunnable);
 
                 mNotification.setHasNext(mPlaybackQueue.size() > 1);
             }
@@ -646,6 +664,7 @@ public class PlaybackService extends Service
     public void onSongUpdate(List<Song> s) {
         if (mCurrentTrackWaitLoading) {
             if (s.contains(mCurrentTrack) && mCurrentTrack.isLoaded()) {
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
             }
         }
@@ -740,12 +759,8 @@ public class PlaybackService extends Service
                 // endOfTrack callback locks the main API thread, leading to a dead lock if we
                 // try to play a track here while still being in the callstack of the endOfTrack
                 // callback.
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        startPlayingQueue();
-                    }
-                });
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
+                mHandler.post(mStartPlaybackRunnable);
             }
         }
     };
