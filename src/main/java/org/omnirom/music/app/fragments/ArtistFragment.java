@@ -1117,14 +1117,44 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onSongUpdate(List<Song> s) {
-        mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-        mHandler.post(mUpdateAlbumsRunnable);
+        boolean hasThisArtist = false;
+        for (Song song : s) {
+            if (mArtist.getRef().equals(song.getArtist())) {
+                hasThisArtist = true;
+                break;
+            }
+        }
+
+        if (hasThisArtist) {
+            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+            mHandler.post(mUpdateAlbumsRunnable);
+        }
     }
 
     @Override
     public void onAlbumUpdate(List<Album> a) {
-        mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-        mHandler.post(mUpdateAlbumsRunnable);
+        boolean hasThisArtist = false;
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        for (Album album : a) {
+            Iterator<String> songs = album.songs();
+            while (songs.hasNext()) {
+                String songRef = songs.next();
+                Song song = aggregator.retrieveSong(songRef, album.getProvider());
+                if (song != null && mArtist.getRef().equals(song.getArtist())) {
+                    hasThisArtist = true;
+                    break;
+                }
+            }
+
+            if (hasThisArtist) {
+                break;
+            }
+        }
+
+        if (hasThisArtist) {
+            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+            mHandler.post(mUpdateAlbumsRunnable);
+        }
     }
 
     @Override
@@ -1134,14 +1164,16 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onArtistUpdate(final List<Artist> a) {
-        mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-        mHandler.post(mUpdateAlbumsRunnable);
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mArtistSimilarFragment.notifyArtistUpdate(a);
-            }
-        });
+        if (a.contains(mArtist)) {
+            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+            mHandler.post(mUpdateAlbumsRunnable);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mArtistSimilarFragment.notifyArtistUpdate(a);
+                }
+            });
+        }
     }
 
     @Override
