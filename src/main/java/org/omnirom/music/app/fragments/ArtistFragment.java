@@ -664,6 +664,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
 
             final LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
+            // TODO: Recycle!
             llAlbums.removeAllViews();
 
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
@@ -672,8 +673,22 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             List<Album> albums = new ArrayList<Album>();
 
             while (albumIt.hasNext()) {
-                Album album = cache.getAlbum(albumIt.next());
-                albums.add(album);
+                String albumRef = albumIt.next();
+                Album album = cache.getAlbum(albumRef);
+                if (album == null) {
+                    album = ProviderAggregator.getDefault().retrieveAlbum(albumRef,
+                            mParent.getArtist().getProvider());
+                }
+
+                if (album != null) {
+                    IMusicProvider provider = PluginsLookup.getDefault().getProvider(mParent.getArtist().getProvider()).getBinder();
+                    try {
+                        provider.fetchAlbumTracks(albumRef);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    albums.add(album);
+                }
             }
 
             // Sort it from album names
@@ -932,7 +947,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 }
             } catch (EchoNestException e) {
                 Log.e(TAG, "Unable to get artist information", e);
-                Utils.shortToast(getActivity(), R.string.unable_fetch_artist_info);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.shortToast(getActivity(), R.string.unable_fetch_artist_info);
+                    }
+                });
             }
         }
 
@@ -1104,6 +1124,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onArtistUpdate(final List<Artist> a) {
+        mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+        mHandler.post(mUpdateAlbumsRunnable);
         mHandler.post(new Runnable() {
             @Override
             public void run() {

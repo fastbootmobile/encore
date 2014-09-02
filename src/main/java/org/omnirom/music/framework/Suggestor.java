@@ -34,7 +34,11 @@ public class Suggestor {
         Iterator<String> albums = artist.albums();
         while (albums.hasNext()) {
             ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            Album album = cache.getAlbum(albums.next());
+            String albumRef = albums.next();
+            Album album = cache.getAlbum(albumRef);
+            if (album == null) {
+                album = ProviderAggregator.getDefault().retrieveAlbum(albumRef, artist.getProvider());
+            }
 
             if (album.isLoaded() && album.getSongsCount() > 0) {
                 Iterator<String> songs = album.songs();
