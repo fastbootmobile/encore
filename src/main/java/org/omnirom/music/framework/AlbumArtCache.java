@@ -120,8 +120,8 @@ public class AlbumArtCache {
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         String artKey = DEFAULT_ART;
-        if (album == null) {
-            Log.e(TAG, "Album is null");
+        if (album == null || album.getName() == null) {
+            Log.e(TAG, "Album or album name is null");
             return artKey;
         }
 

@@ -54,6 +54,7 @@ import java.util.concurrent.TimeUnit;
  * Utilities
  */
 public class Utils {
+    private static final String TAG = "Utils";
 
     private static final Map<String, Bitmap> mBitmapQueue = new HashMap<String, Bitmap>();
 
@@ -379,15 +380,25 @@ public class Utils {
         ProviderCache cache = ProviderAggregator.getDefault().getCache();
         while (it.hasNext()) {
             String songRef = it.next();
+            if (songRef == null) {
+                Log.e(TAG, "Album '" + a.getName() + "' contains null songs!");
+                continue;
+            }
             Song song = cache.getSong(songRef);
 
-            String artistRef = song.getArtist();
-            Integer count = occurrences.get(artistRef);
-            if (count == null) {
-                count = 0;
+            if (song == null) {
+                song = ProviderAggregator.getDefault().retrieveSong(songRef, a.getProvider());
             }
-            count++;
-            occurrences.put(artistRef, count);
+
+            if (song != null) {
+                String artistRef = song.getArtist();
+                Integer count = occurrences.get(artistRef);
+                if (count == null) {
+                    count = 0;
+                }
+                count++;
+                occurrences.put(artistRef, count);
+            }
         }
 
         // Figure the max

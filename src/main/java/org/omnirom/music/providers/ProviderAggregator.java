@@ -1,6 +1,7 @@
 package org.omnirom.music.providers;
 
 import android.content.Context;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -17,6 +18,7 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -239,6 +241,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @return The song, or null if the provider says so
      */
     public Song retrieveSong(final String ref, final ProviderIdentifier provider) {
+        if (ref == null) {
+            Log.e(TAG, "Requesting NULL Ref song! Check stacktrace to find the cause");
+            Log.e(TAG, Arrays.toString(Thread.currentThread().getStackTrace()));
+            return null;
+        }
+
         ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
         if (pc != null) {
             IMusicProvider binder = pc.getBinder();
@@ -248,6 +256,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     Song song = binder.getSong(ref);
                     onSongUpdate(provider, song);
                     return song;
+                } catch (DeadObjectException e) {
+                    Log.e(TAG, "Provider died while retrieving song");
+                    return null;
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to retrieve the song", e);
                     return null;
@@ -279,6 +290,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     Artist artist = binder.getArtist(ref);
                     onArtistUpdate(provider, artist);
                     return artist;
+                } catch (DeadObjectException e) {
+                    Log.e(TAG, "Provider died while retrieving artist");
+                    return null;
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to retrieve the artist", e);
                     return null;
@@ -306,6 +320,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     Album album = binder.getAlbum(ref);
                     onAlbumUpdate(provider, album);
                     return album;
+                } catch (DeadObjectException e) {
+                    Log.e(TAG, "Provider died while retrieving album");
+                    return null;
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to retrieve the album", e);
                     return null;
@@ -743,10 +760,16 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             while (songs.hasNext()) {
                 String songRef = songs.next();
                 Song song = mCache.getSong(songRef);
+                if (song == null) {
+                    song = retrieveSong(songRef, a.getProvider());
+                }
 
                 if (song != null) {
                     String artistRef = song.getArtist();
                     Artist artist = mCache.getArtist(artistRef);
+                    if (artist == null) {
+                        artist = retrieveArtist(artistRef, song.getProvider());
+                    }
 
                     if (artist != null) {
                         artist.addAlbum(a.getRef());
