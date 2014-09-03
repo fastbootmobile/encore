@@ -269,7 +269,6 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onAlbumUpdate(List<Album> a) {
-
     }
 
     @Override
@@ -287,16 +286,41 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onArtistUpdate(List<Artist> a) {
+        // We check if the artists belongs to this playlist
+        boolean hasPlaylist = false;
+        Iterator<String> songsRef = mPlaylist.songs();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        while (songsRef.hasNext()) {
+            String ref = songsRef.next();
+            Song song = aggregator.retrieveSong(ref, mPlaylist.getProvider());
+            for (Artist artist : a) {
+                if (artist.getRef().equals(song.getArtist())) {
+                    hasPlaylist = true;
+                    break;
+                }
+            }
 
+            if (hasPlaylist) {
+                break;
+            }
+        }
+
+        // It does, update the list then
+        if (hasPlaylist) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.notifyDataSetChanged();
+                }
+            });
+        }
     }
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
-
     }
 
     @Override
     public void onSearchResult(SearchResult searchResult) {
-
     }
 }
