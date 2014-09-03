@@ -407,7 +407,8 @@ public class PlaylistListView extends ParallaxScrollListView {
             observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
                     observer.removeOnPreDrawListener(this);
-                    for (int i = (int) mMobileItemId; i < adapter.getSize(); i++) {
+                    final int playlistCount = adapter.getCount();
+                    for (int i = (int) mMobileItemId; i < playlistCount; i++) {
                         View switchView = getViewForID(i);
                         if (switchView != null) {
 

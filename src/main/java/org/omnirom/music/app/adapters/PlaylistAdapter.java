@@ -35,6 +35,7 @@ import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -48,14 +49,25 @@ public class PlaylistAdapter extends SongsListAdapter {
     private List<Integer> mIds;
     private Playlist mPlaylist;
 
+    @Override
+    public void notifyDataSetChanged() {
+        mSongs.clear();
+        Iterator<String> it = mPlaylist.songs();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        while (it.hasNext()) {
+            put(aggregator.retrieveSong(it.next(), mPlaylist.getProvider()));
+        }
+        super.notifyDataSetChanged();
+    }
 
     public void setPlaylist(Playlist playlist) {
         mPlaylist = playlist;
+        notifyDataSetChanged();
     }
 
     //Calls the proper handler to update the playlist order
     public void updatePlaylist(int oldPosition, int newPosition) {
-        ProviderIdentifier providerIdentifier = ProviderAggregator.getDefault().getCache().getRefProvider(mPlaylist.getRef());
+        ProviderIdentifier providerIdentifier = mPlaylist.getProvider();
         try {
             PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().onUserSwapPlaylistItem(oldPosition, newPosition, mPlaylist.getRef());
             Log.d(TAG, "swaping " + oldPosition + " and " + newPosition);
@@ -65,12 +77,8 @@ public class PlaylistAdapter extends SongsListAdapter {
         }
     }
 
-    public int getSize() {
-        return mSongs.size();
-    }
-
     public void delete(int id) {
-        ProviderIdentifier providerIdentifier = ProviderAggregator.getDefault().getCache().getRefProvider(mPlaylist.getRef());
+        ProviderIdentifier providerIdentifier = mPlaylist.getProvider();
         try {
             PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().deleteSongFromPlaylist(id, mPlaylist.getRef());
             mSongs.remove(id);

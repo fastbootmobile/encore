@@ -2,6 +2,7 @@ package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -51,6 +52,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     private ImageButton mPlayFab;
     private PlayPauseDrawable mFabDrawable;
     private boolean mFabShouldResume;
+    private Handler mHandler;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -79,13 +81,18 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mHandler = new Handler();
+
         Bundle args = getArguments();
         if (args == null) {
             throw new IllegalArgumentException("This fragment must have a valid playlist");
         }
 
-        // Get the playlist from the arguments, from the instantiation
+        // Get the playlist from the arguments, from the instantiation, and from the cache
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        final ProviderCache cache = aggregator.getCache();
         mPlaylist = args.getParcelable(KEY_PLAYLIST);
+        mPlaylist = cache.getPlaylist(mPlaylist.getRef());
     }
 
     @Override
@@ -159,15 +166,6 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         });
 
         // Fill the playlist
-        Iterator<String> songIt = mPlaylist.songs();
-        while (songIt.hasNext()) {
-            String songRef = songIt.next();
-            Song song = aggregator.retrieveSong(songRef, mPlaylist.getProvider());
-            if (song != null) {
-                mAdapter.put(song);
-            }
-        }
-        mAdapter.notifyDataSetChanged();
         mAdapter.setPlaylist(mPlaylist);
 
         // Set the list listener
@@ -229,10 +227,13 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         super.onDetach();
 
         ProviderAggregator.getDefault().removeUpdateCallback(this);
-        try {
-            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
-        } catch (RemoteException e) {
-            // ignore
+        IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+        if (service != null) {
+            try {
+                service.addCallback(mPlaybackCallback);
+            } catch (RemoteException e) {
+                // ignore
+            }
         }
     }
 
@@ -257,7 +258,12 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         // It does, update the list then
         if (hasPlaylist) {
-            mAdapter.notifyDataSetChanged();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.notifyDataSetChanged();
+                }
+            });
         }
     }
 
@@ -269,8 +275,13 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     @Override
     public void onPlaylistUpdate(final List<Playlist> p) {
         // If the currently watched playlist is updated, update me
-        if (p.equals(mPlaylist)) {
-            mAdapter.notifyDataSetChanged();
+        if (p.contains(mPlaylist)) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.notifyDataSetChanged();
+                }
+            });
         }
     }
 

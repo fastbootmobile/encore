@@ -625,6 +625,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         boolean notify;
         if (cached == null) {
             mCache.putPlaylist(provider, p);
+            cached = p;
             notify = true;
         } else {
             notify = !cached.isIdentical(p);
@@ -647,32 +648,22 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             }
         }
 
+        final Playlist finalCachedPlaylist = cached;
         // If something has actually changed
         if (notify) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    final IMusicProvider binder = PluginsLookup.getDefault().getProvider(provider).getBinder();
-
                     // First, we try to check if we need information for some of the songs
-                    Iterator<String> it = p.songs();
+                    // TODO(xplodwild): Is this really needed in a properly designed provider?
+                    Iterator<String> it = finalCachedPlaylist.songs();
                     while (it.hasNext()) {
                         String ref = it.next();
-                        Song cachedSong = mCache.getSong(ref);
-                        if (cachedSong == null || !cachedSong.isLoaded()) {
-                            try {
-                                Song providerSong = binder.getSong(ref);
-                                if (providerSong != null) {
-                                    mCache.putSong(provider, providerSong);
-                                }
-                            } catch (RemoteException e) {
-                                // ignored
-                            }
-                        }
+                        retrieveSong(ref, provider);
                     }
 
                     // Then we notify the callbacks
-                    postPlaylistForUpdate(p);
+                    postPlaylistForUpdate(finalCachedPlaylist);
                 }
             });
         }
