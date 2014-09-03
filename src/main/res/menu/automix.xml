@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="org.omnirom.music.app.AutomixActivity" >
     <item android:id="@+id/menu_create"
-        android:title="Create"
+        android:title="@string/automix_create"
         android:icon="@drawable/ic_action_check"
         android:orderInCategory="100"
         android:showAsAction="ifRoom|withText" />

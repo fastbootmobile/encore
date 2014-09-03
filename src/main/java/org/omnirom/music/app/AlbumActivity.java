@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
@@ -14,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.transition.Transition;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,9 +27,15 @@ import android.widget.TextView;
 import org.omnirom.music.app.adapters.AlbumsAdapter;
 import org.omnirom.music.app.fragments.AlbumViewFragment;
 import org.omnirom.music.app.fragments.ArtistFragment;
+import org.omnirom.music.app.fragments.PlaylistChooserFragment;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Artist;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.service.IPlaybackService;
+
+import omnimusic.Plugin;
 
 public class AlbumActivity extends FragmentActivity {
 
@@ -129,8 +137,23 @@ public class AlbumActivity extends FragmentActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.menu_add_to_queue) {
+            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+            try {
+                service.queueAlbum(mActiveFragment.getAlbum(), false);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot queue album", e);
+            }
             return true;
+        } else if (id == R.id.menu_add_to_playlist) {
+            Album album = mActiveFragment.getAlbum();
+            PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(album);
+            fragment.show(getSupportFragmentManager(), album.getRef());
+        } else if (id == R.id.menu_more_from_artist) {
+            String artistRef = mActiveFragment.getArtist();
+            Intent intent = ArtistActivity.craftIntent(this, null, artistRef,
+                    getResources().getColor(R.color.default_album_art_background));
+            startActivity(intent);
         } else if (id == android.R.id.home) {
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                 // finishAfterTransition();

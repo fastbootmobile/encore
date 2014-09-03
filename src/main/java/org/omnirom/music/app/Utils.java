@@ -499,8 +499,6 @@ public class Utils {
                         }
                         break;
 
-
-
                     case R.id.menu_add_to_playlist:
                         PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
                         fragment.show(context.getSupportFragmentManager(), song.getRef());

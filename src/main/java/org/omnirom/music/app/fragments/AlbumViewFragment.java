@@ -256,6 +256,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         });
     }
 
+    public Album getAlbum() {
+        return mAlbum;
+    }
 
     private void showFab(final boolean animate, final boolean visible) {
         getActivity().runOnUiThread(new Runnable() {

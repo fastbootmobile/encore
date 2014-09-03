@@ -14,13 +14,16 @@ import android.widget.TextView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -28,14 +31,24 @@ import java.util.List;
  */
 public class NewPlaylistFragment extends DialogFragment {
     private String TAG = "NewPlaylistFragment";
-    private static final String KEY_PROVIDER_IDENTIFIER = "provider_identifier";
     private static final String KEY_SONG = "song";
+    private static final String KEY_ALBUM = "album";
+
     private Song mSong;
+    private Album mAlbum;
 
     public static NewPlaylistFragment newInstance(Song song) {
         NewPlaylistFragment fragment = new NewPlaylistFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(KEY_SONG, song);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    public static NewPlaylistFragment newInstance(Album album) {
+        NewPlaylistFragment fragment = new NewPlaylistFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(KEY_ALBUM, album);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -47,7 +60,12 @@ public class NewPlaylistFragment extends DialogFragment {
         if (args == null) {
             throw new IllegalArgumentException("This fragment requires a song");
         }
-        mSong = args.getParcelable(KEY_SONG);
+
+        if (args.containsKey(KEY_SONG)) {
+            mSong = args.getParcelable(KEY_SONG);
+        } else if (args.containsKey(KEY_ALBUM)) {
+            mAlbum = args.getParcelable(KEY_ALBUM);
+        }
 
     }
 
@@ -74,10 +92,18 @@ public class NewPlaylistFragment extends DialogFragment {
                                     connection = PluginsLookup.getDefault().getProvider(mSong.getProvider());
                                 }
 
-                                String playlistRef = connection.getBinder().addPlaylist(playlistName.getText().toString());
+                                IMusicProvider binder = connection.getBinder();
+                                String playlistRef = binder.addPlaylist(playlistName.getText().toString());
 
                                 if (playlistRef != null) {
-                                    connection.getBinder().addSongToPlaylist(mSong.getRef(), playlistRef, mSong.getProvider());
+                                    if (mSong != null) {
+                                        binder.addSongToPlaylist(mSong.getRef(), playlistRef, mSong.getProvider());
+                                    } else {
+                                        Iterator<String> songs = mAlbum.songs();
+                                        while (songs.hasNext()) {
+                                            binder.addSongToPlaylist(songs.next(), playlistRef, mAlbum.getProvider());
+                                        }
+                                    }
                                 }
                             } catch (Exception e) {
                                 Log.e(TAG, "Unable to add playlist", e);
