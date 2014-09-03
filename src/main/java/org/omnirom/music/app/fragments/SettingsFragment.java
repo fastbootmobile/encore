@@ -64,7 +64,7 @@ public class SettingsFragment extends PreferenceFragment {
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 Fragment f = new SettingsProvidersFragment();
                 FragmentTransaction ft = fragmentManager.beginTransaction();
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
                 ft.addToBackStack(f.toString());
                 ft.replace(R.id.container, f);
                 ft.commit();
@@ -79,7 +79,7 @@ public class SettingsFragment extends PreferenceFragment {
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 Fragment f = new DspProvidersFragment();
                 FragmentTransaction ft = fragmentManager.beginTransaction();
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
                 ft.addToBackStack(f.toString());
                 ft.replace(R.id.container, f);
                 ft.commit();

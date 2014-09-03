@@ -21,6 +21,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.fragments.AutomixFragment;
+import org.omnirom.music.app.fragments.DspProvidersFragment;
 import org.omnirom.music.app.fragments.ListenNowFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
@@ -40,6 +41,8 @@ public class MainActivity extends FragmentActivity
     public static final int SECTION_PLAYLISTS  = 3;
     public static final int SECTION_AUTOMIX    = 4;
     public static final int SECTION_NOW_PLAYING= 5;
+
+    public static final int SECTION_DSP_EFFECTS= -1;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -177,7 +180,7 @@ public class MainActivity extends FragmentActivity
 
         FragmentTransaction ft = fragmentManager.beginTransaction();
         if (addToStack) {
-            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
             ft.addToBackStack(f.toString());
         } else {
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
@@ -199,6 +202,9 @@ public class MainActivity extends FragmentActivity
                 break;
             case SECTION_AUTOMIX:
                 mTitle = getString(R.string.title_section_automix);
+                break;
+            case SECTION_DSP_EFFECTS:
+                mTitle = getString(R.string.settings_dsp_config_title);
                 break;
         }
     }
@@ -250,6 +256,10 @@ public class MainActivity extends FragmentActivity
         switch (item.getItemId()) {
             case R.id.action_settings:
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                break;
+
+            case R.id.action_sound_effects:
+                showFragment(new DspProvidersFragment(), true);
                 break;
         }
         return super.onOptionsItemSelected(item);
