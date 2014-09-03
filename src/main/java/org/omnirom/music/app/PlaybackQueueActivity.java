@@ -358,12 +358,12 @@ public class PlaybackQueueActivity extends FragmentActivity {
             if (songs.size() > 0) {
                 songs.remove(0);
 
-                int i = 1;
+                int itemIndex = 1;
                 LayoutInflater inflater = getActivity().getLayoutInflater();
-                for (Song song : songs) {
+                for (final Song song : songs) {
                     View itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                        // itemView.setViewName("playbackqueue:" + i);
+                        // itemView.setViewName("playbackqueue:" + itemIndex);
                     }
                     TextView tvTitle = (TextView) itemView.findViewById(R.id.tvTitle),
                             tvArtist = (TextView) itemView.findViewById(R.id.tvArtist);
@@ -378,14 +378,35 @@ public class PlaybackQueueActivity extends FragmentActivity {
                     ivCover.loadArtForSong(song);
 
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                        // ivCover.setViewName("playbackqueue:" + i + ":cover:" + song.getRef());
+                        // ivCover.setViewName("playbackqueue:" + itemIndex + ":cover:" + song.getRef());
                     }
 
                     ivCover.setTag(song);
                     ivCover.setOnClickListener(mArtClickListener);
 
+                    final int itemIndexFinal = itemIndex;
+                    itemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            // Play that song now
+                            IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
+                            try {
+                                if (playback.getCurrentTrack().equals(song)) {
+                                    // We're already playing that song, play it again
+                                    playback.seek(0);
+                                } else {
+                                    for (int i = 0; i < itemIndexFinal; i++) {
+                                        playback.next();
+                                    }
+                                }
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Error while switching tracks", e);
+                            }
+                        }
+                    });
+
                     tracksContainer.addView(itemView);
-                    i++;
+                    itemIndex++;
                 }
             }
 
