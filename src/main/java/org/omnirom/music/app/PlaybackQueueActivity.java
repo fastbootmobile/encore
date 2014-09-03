@@ -321,7 +321,17 @@ public class PlaybackQueueActivity extends FragmentActivity {
                     AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) mRootView.findViewById(R.id.ivCurrentPlayAlbumArt);
 
                     tvCurrentTitle.setText(currentTrack.getTitle());
-                    tvCurrentArtist.setText(cache.getArtist(currentTrack.getArtist()).getName());
+
+                    final String artistRef = currentTrack.getArtist();
+                    Artist artist = cache.getArtist(artistRef);
+                    if (artist == null) {
+                        artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, currentTrack.getProvider());
+                    }
+                    if (artist != null) {
+                        tvCurrentArtist.setText(artist.getName());
+                    } else {
+                        tvCurrentArtist.setText(getString(R.string.loading));
+                    }
                     ivCurrentPlayAlbumArt.loadArtForSong(currentTrack);
                 } else {
                     mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.VISIBLE);

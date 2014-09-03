@@ -357,6 +357,7 @@ public class PlayingBarView extends RelativeLayout {
                     break;
                 }
 
+                final int itemIndex = shownCount;
                 View itemRoot = inflater.inflate(R.layout.item_playbar, mTracksLayout, false);
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                     // itemRoot.setViewName("playbackqueue:preview:" + shownCount);
@@ -387,6 +388,28 @@ public class PlayingBarView extends RelativeLayout {
                     // ivAlbumArt.setViewName(song.getRef() + shownCount);
                 }
 
+                // Set root view click listener
+                itemRoot.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Play that song now
+                        IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
+                        try {
+                            if (playback.getCurrentTrack().equals(song)) {
+                                // We're already playing that song, play it again
+                                playback.seek(0);
+                            } else {
+                                for (int i = 0; i < itemIndex; i++) {
+                                    playback.next();
+                                }
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error while switching tracks", e);
+                        }
+                    }
+                });
+
+                // Set album art click listener
                 ivAlbumArt.setOnClickListener(new View.OnClickListener() {
                     Palette mPalette;
 
