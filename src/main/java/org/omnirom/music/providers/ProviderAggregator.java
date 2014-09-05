@@ -618,54 +618,67 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onPlaylistAddedOrUpdated(final ProviderIdentifier provider, final Playlist p)
             throws RemoteException {
-        // We compare the provided copy with the one we have in cache. We only notify the callbacks
-        // if it indeed changed.
-        Playlist cached = mCache.getPlaylist(p.getRef());
-
-        boolean notify;
-        if (cached == null) {
-            mCache.putPlaylist(provider, p);
-            cached = p;
-            notify = true;
-        } else {
-            notify = !cached.isIdentical(p);
-
-            // If the playlist isn't identical, update it
-            if (notify) {
-                // Update the name
-                cached.setName(p.getName());
-
-                // Empty the playlist
-                while (cached.getSongsCount() > 0) {
-                    cached.removeSong(0);
-                }
-
-                // Re-add the songs to it
-                Iterator<String> songIt = p.songs();
-                while (songIt.hasNext()) {
-                    cached.addSong(songIt.next());
-                }
-            }
+        if (p == null || p.getRef() == null) {
+            Log.w(TAG, "Provider returned a null playlist or a null-ref playlist");
+            return;
         }
 
-        final Playlist finalCachedPlaylist = cached;
-        // If something has actually changed
-        if (notify) {
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    // First, we try to check if we need information for some of the songs
-                    // TODO(xplodwild): Is this really needed in a properly designed provider?
-                    Iterator<String> it = finalCachedPlaylist.songs();
-                    while (it.hasNext()) {
-                        String ref = it.next();
-                        retrieveSong(ref, provider);
+        try {
+            // We compare the provided copy with the one we have in cache. We only notify the callbacks
+            // if it indeed changed.
+            Playlist cached = mCache.getPlaylist(p.getRef());
+
+            boolean notify;
+            if (cached == null) {
+                mCache.putPlaylist(provider, p);
+                cached = p;
+                notify = true;
+            } else {
+                notify = !cached.isIdentical(p);
+
+                // If the playlist isn't identical, update it
+                if (notify) {
+                    // Update the name
+                    cached.setName(p.getName());
+
+                    // Empty the playlist
+                    while (cached.getSongsCount() > 0) {
+                        cached.removeSong(0);
                     }
 
-                    // Then we notify the callbacks
-                    postPlaylistForUpdate(finalCachedPlaylist);
+                    // Re-add the songs to it
+                    Iterator<String> songIt = p.songs();
+                    while (songIt.hasNext()) {
+                        cached.addSong(songIt.next());
+                    }
+
+                    // Set offline information
+                    cached.setOfflineCapable(p.isOfflineCapable());
+                    cached.setOfflineStatus(p.getOfflineStatus());
                 }
-            });
+            }
+
+            final Playlist finalCachedPlaylist = cached;
+            // If something has actually changed
+            if (notify) {
+                mExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        // First, we try to check if we need information for some of the songs
+                        // TODO(xplodwild): Is this really needed in a properly designed provider?
+                        Iterator<String> it = finalCachedPlaylist.songs();
+                        while (it.hasNext()) {
+                            String ref = it.next();
+                            retrieveSong(ref, provider);
+                        }
+
+                        // Then we notify the callbacks
+                        postPlaylistForUpdate(finalCachedPlaylist);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "FUUUU" ,e);
         }
     }
 
@@ -675,6 +688,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onSongUpdate(ProviderIdentifier provider, final Song s) throws RemoteException {
         if (s == null) {
+            Log.w(TAG, "Provider returned a null song");
             return;
         }
 
@@ -695,6 +709,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 cached.setDuration(s.getDuration());
                 cached.setTitle(s.getTitle());
                 cached.setYear(s.getYear());
+                cached.setOfflineStatus(s.getOfflineStatus());
                 cached.setIsLoaded(s.isLoaded());
                 changed = true;
             }
@@ -735,6 +750,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onAlbumUpdate(ProviderIdentifier provider, final Album a) throws RemoteException {
         if (a == null) {
+            Log.w(TAG, "Provider returned a null album");
             return;
         }
 
@@ -806,6 +822,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onArtistUpdate(ProviderIdentifier provider, Artist a) throws RemoteException {
         if (a == null) {
+            Log.w(TAG, "Provider returned a null artist");
             return;
         }
 

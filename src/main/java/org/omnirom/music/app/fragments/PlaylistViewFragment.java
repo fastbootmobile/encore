@@ -14,6 +14,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.dd.CircularProgressButton;
+
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
@@ -22,6 +24,7 @@ import org.omnirom.music.app.ui.PlaylistListView;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
@@ -29,18 +32,20 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.util.Iterator;
 import java.util.List;
 
+import omnimusic.Plugin;
+
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass.
  * Use the {@link org.omnirom.music.app.fragments.PlaylistViewFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
  */
 public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
@@ -53,6 +58,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     private PlayPauseDrawable mFabDrawable;
     private boolean mFabShouldResume;
     private Handler mHandler;
+    private CircularProgressButton mOfflineBtn;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -117,6 +123,30 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
         TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
 
+        // Download button
+        mOfflineBtn = (CircularProgressButton) headerView.findViewById(R.id.cpbOffline);
+        mOfflineBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ProviderIdentifier pi = mPlaylist.getProvider();
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(pi).getBinder();
+                try {
+                    if (mPlaylist.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_NO) {
+                        provider.setPlaylistOfflineMode(mPlaylist.getRef(), true);
+                        mOfflineBtn.setIndeterminateProgressMode(true);
+                        mOfflineBtn.setProgress(1);
+                    } else {
+                        provider.setPlaylistOfflineMode(mPlaylist.getRef(), false);
+                        mOfflineBtn.setProgress(0);
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot set this playlist to offline mode", e);
+                    mOfflineBtn.setProgress(-1);
+                }
+            }
+        });
+        updateOfflineStatus();
+
         tvAlbumName.setText(mPlaylist.getName());
         ivHero.setImageResource(R.drawable.album_placeholder);
 
@@ -173,7 +203,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 // Play the song
-                Song song = mAdapter.getItem(i-1);
+                Song song = mAdapter.getItem(i - 1);
 
                 if (song != null) {
                     IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
@@ -237,6 +267,55 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    private void updateOfflineStatus() {
+        final int offlineStatus = mPlaylist.getOfflineStatus();
+        Log.e(TAG, "Offline Status: " + offlineStatus);
+        switch (offlineStatus) {
+            case BoundEntity.OFFLINE_STATUS_NO:
+                mOfflineBtn.setProgress(0);
+                break;
+
+            case BoundEntity.OFFLINE_STATUS_READY:
+                mOfflineBtn.setProgress(100);
+                break;
+
+            case BoundEntity.OFFLINE_STATUS_ERROR:
+                mOfflineBtn.setProgress(-1);
+                break;
+
+            case BoundEntity.OFFLINE_STATUS_PENDING:
+                mOfflineBtn.setProgress(50);
+                mOfflineBtn.setIndeterminateProgressMode(true);
+                break;
+
+            case BoundEntity.OFFLINE_STATUS_DOWNLOADING:
+                mOfflineBtn.setIndeterminateProgressMode(false);
+                float numSyncTracks = getNumSyncTracks();
+                mOfflineBtn.setProgress(numSyncTracks * 100.0f / ((float) mPlaylist.getSongsCount()) + 0.1f);
+                break;
+        }
+
+        mOfflineBtn.setVisibility((mPlaylist.isLoaded() && mPlaylist.isOfflineCapable()) ? View.VISIBLE : View.GONE);
+    }
+
+    private int getNumSyncTracks() {
+        final Iterator<String> it = mPlaylist.songs();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
+        int numSync = 0;
+        while (it.hasNext()) {
+            final String songRef = it.next();
+            Song song = aggregator.retrieveSong(songRef, mPlaylist.getProvider());
+            if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY) {
+                numSync++;
+            }
+        }
+
+        Log.d(TAG, "Num sync tracks: " + numSync);
+
+        return numSync;
+    }
+
     @Override
     public void onSongUpdate(List<Song> s) {
         // We check if the song belongs to this playlist
@@ -278,6 +357,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    updateOfflineStatus();
                     mAdapter.notifyDataSetChanged();
                 }
             });

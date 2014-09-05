@@ -117,6 +117,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         tvAlbumName.setBackgroundColor(mBackgroundColor);
         tvAlbumName.setText(mAlbum.getName());
 
+        // Hide download button
+        headerView.findViewById(R.id.cpbOffline).setVisibility(View.GONE);
+
         mPlayFab = (ImageButton) headerView.findViewById(R.id.fabPlay);
         Utils.setLargeFabOutline(new View[]{mPlayFab});
         Utils.setupLargeFabShadow(mPlayFab);

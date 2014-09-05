@@ -30,5 +30,20 @@
     <!-- Default lists/grids colors -->
     <color name="default_album_art_background">#333333</color>
 
+    <!-- Buttons -->
+    <!-- Grey 600 -->
+    <color name="grey">#757575</color>
+    <!-- Green 500 -->
+    <color name="green">#259b24</color>
+    <!-- Green 900 -->
+    <color name="green_dark">#0d5302</color>
+    <!-- Red 500 -->
+    <color name="red">#e51c23</color>
+    <!-- Red 900 -->
+    <color name="red_dark">#b0120a</color>
+    <!-- Blue Grey 500 -->
+    <color name="blue">#607d8b</color>
+    <!-- Blue Grey 900 -->
+    <color name="blue_dark">#263238</color>
 
 </resources>

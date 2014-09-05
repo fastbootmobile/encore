@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,7 @@ import java.util.List;
  *
  */
 public class PlaylistListFragment extends Fragment implements ILocalCallback {
+    private static final String TAG = "PlaylistListFragment";
 
     private PlaylistListAdapter mAdapter;
     private Handler mHandler;
@@ -55,6 +57,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
                 mPlaylistsUpdated.clear();
             }
             mAdapter.notifyDataSetChanged();
+            Log.e(TAG, "Added playlists runned");
         }
     };
 
@@ -72,9 +75,6 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     }
     public PlaylistListFragment() {
         mAdapter = new PlaylistListAdapter();
-        mHandler = new Handler();
-
-        ProviderAggregator.getDefault().addUpdateCallback(this);
     }
 
     public void setIsStandalone(boolean isStandalone) {
@@ -84,6 +84,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mHandler = new Handler();
     }
 
     @Override
@@ -155,6 +156,8 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onPlaylistUpdate(final List<Playlist> p) {
+        Log.e(TAG, "onPlaylistUpdate");
+
         synchronized (mPlaylistsUpdated) {
             mPlaylistsUpdated.addAll(p);
         }

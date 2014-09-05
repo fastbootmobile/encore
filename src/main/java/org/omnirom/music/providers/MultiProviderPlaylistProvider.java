@@ -295,4 +295,14 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
         return null;
     }
 
+    @Override
+    public void setPlaylistOfflineMode(String ref, boolean offline) throws RemoteException {
+        Log.e(TAG, "Unimplemented");
+    }
+
+    @Override
+    public void setOfflineMode(boolean offline) throws RemoteException {
+        Log.e(TAG, "Unimplemented");
+    }
+
 }

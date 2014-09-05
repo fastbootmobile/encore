@@ -84,7 +84,7 @@ public class ListenNowFragment extends Fragment {
                 String trackRef = playlist.songsList().get(trackId);
                 Song track = aggregator.retrieveSong(trackRef, provider);
 
-                if (track == null) {
+                if (track == null || !track.isLoaded()) {
                     // The track is not loaded...?
                     Log.e(TAG, "Track is not loaded, skipping one entry for now. TODO: Load!");
                 } else {
