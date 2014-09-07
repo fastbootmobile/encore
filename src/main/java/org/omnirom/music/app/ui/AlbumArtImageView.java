@@ -174,6 +174,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         // If we have an actual result, display it!
         if (output != null) {
             BitmapDrawable drawable = new BitmapDrawable(getResources(), output);
+            if (drawable.getBitmap() != null)
             mDrawable.transitionTo(getResources(), drawable);
             forceDrawableReload();
 

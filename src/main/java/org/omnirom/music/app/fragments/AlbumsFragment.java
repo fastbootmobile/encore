@@ -1,5 +1,6 @@
 package org.omnirom.music.app.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -37,7 +38,6 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
     private static final String TAG = "AlbumsFragment";
 
     private AlbumsAdapter mAdapter;
-    private Handler mHandler;
 
     /**
      * Use this factory method to create a new instance of
@@ -51,15 +51,11 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
 
     public AlbumsFragment() {
         mAdapter = new AlbumsAdapter();
-
-
-        ProviderAggregator.getDefault().addUpdateCallback(this);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mHandler = new Handler();
     }
 
     @Override
@@ -82,7 +78,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
                 ImageView ivCover = tag.ivCover;
                 TextView tvTitle = tag.tvTitle;
 
-                Bitmap hero = ((MaterialTransitionDrawable) tag.ivCover.getDrawable()).getFinalDrawable().getBitmap();
+                Bitmap hero = ((MaterialTransitionDrawable) ivCover.getDrawable()).getFinalDrawable().getBitmap();
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
                         mAdapter.getItem(position), tag.itemColor);
 
@@ -102,21 +98,28 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ProviderAggregator.getDefault().addUpdateCallback(this);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
+    }
+
+    @Override
     public void onSongUpdate(List<Song> s) {
 
     }
 
     @Override
     public void onAlbumUpdate(final List<Album> a) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mAdapter.addAllUnique(a)) {
-                    mAdapter.notifyDataSetChanged();
-                }
-            }
-        });
-
+        // AddAllUnique only adds loaded entities
+        if (mAdapter.addAllUnique(a)) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

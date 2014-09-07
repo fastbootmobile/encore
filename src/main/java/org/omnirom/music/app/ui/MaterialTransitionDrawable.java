@@ -104,17 +104,19 @@ public class MaterialTransitionDrawable extends Drawable {
             new Thread() {
                 public void run() {
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                    BitmapDrawable grayDrawable = new BitmapDrawable(res, grayscaleBitmap(drawable.getBitmap()));
-                    synchronized (MaterialTransitionDrawable.this) {
-                        mTargetGrayDrawable = grayDrawable;
-                        mTargetGrayDrawable.setBounds(getBounds());
+                    if (drawable.getBitmap() != null) {
+                        BitmapDrawable grayDrawable = new BitmapDrawable(res, grayscaleBitmap(drawable.getBitmap()));
+                        synchronized (MaterialTransitionDrawable.this) {
+                            mTargetGrayDrawable = grayDrawable;
+                            mTargetGrayDrawable.setBounds(getBounds());
 
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                invalidateSelf();
-                            }
-                        });
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    invalidateSelf();
+                                }
+                            });
+                        }
                     }
                 }
             }.start();

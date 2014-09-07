@@ -1,36 +1,26 @@
 package org.omnirom.music.app.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
-import org.omnirom.music.app.fragments.PlaylistChooserFragment;
-import org.omnirom.music.app.fragments.PlaylistViewFragment;
-import org.omnirom.music.app.ui.VuMeterView;
-import org.omnirom.music.framework.AlbumArtCache;
+import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.framework.AlbumArtHelper;
 import org.omnirom.music.framework.BlurCache;
 import org.omnirom.music.framework.PluginsLookup;
@@ -53,7 +43,7 @@ public class SongsListAdapter extends BaseAdapter {
     protected List<Song> mSongs;
     private int mItemWidth;
     private int mItemHeight;
-    private boolean mBlurBackground;
+    private boolean mShowAlbumArt;
     private Handler mHandler;
 
     public static class ViewHolder {
@@ -61,6 +51,7 @@ public class SongsListAdapter extends BaseAdapter {
         public TextView tvArtist;
         public TextView tvDuration;
         public ImageView ivOverflow;
+        public AlbumArtImageView ivAlbumArt;
         public View vRoot;
         public int position;
         public Song song;
@@ -76,11 +67,11 @@ public class SongsListAdapter extends BaseAdapter {
         }
     };
 
-    public SongsListAdapter(Context ctx, boolean blurBackground) {
+    public SongsListAdapter(Context ctx, boolean showAlbumArt) {
         final Resources res = ctx.getResources();
         assert res != null;
         mSongs = new ArrayList<Song>();
-        mBlurBackground = blurBackground;
+        mShowAlbumArt = showAlbumArt;
         mHandler = new Handler();
 
         // Theoretically, we'd need the width and height of the root view. However, this thread
@@ -146,15 +137,15 @@ public class SongsListAdapter extends BaseAdapter {
             holder.tvArtist = (TextView) root.findViewById(R.id.tvArtist);
             holder.tvDuration = (TextView) root.findViewById(R.id.tvDuration);
             holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
+            holder.ivAlbumArt = (AlbumArtImageView) root.findViewById(R.id.ivAlbumArt);
             holder.vCurrentIndicator = root.findViewById(R.id.currentSongIndicator);
             holder.vRoot = root;
 
-            if (mBlurBackground) {
+            if (mShowAlbumArt) {
                 // Fixup some style stuff
-                holder.tvTitle.setTextColor(0xFFFFFFFF);
-                holder.tvDuration.setTextColor(0xFFFFFFFF);
-                holder.tvArtist.setTextColor(0xFFFFFFFF);
-                holder.ivOverflow.setImageResource(R.drawable.ic_more_vert_light);
+                holder.ivAlbumArt.setVisibility(View.VISIBLE);
+            } else {
+                holder.ivAlbumArt.setVisibility(View.GONE);
             }
 
             holder.ivOverflow.setOnClickListener(mOverflowClickListener);
@@ -176,6 +167,10 @@ public class SongsListAdapter extends BaseAdapter {
             tag.tvTitle.setText(song.getTitle());
             tag.tvDuration.setText(Utils.formatTrackLength(song.getDuration()));
 
+            if (mShowAlbumArt) {
+                tag.ivAlbumArt.loadArtForSong(song);
+            }
+
             Artist artist = cache.getArtist(song.getArtist());
             if (artist == null) {
                 artist = ProviderAggregator.getDefault().retrieveArtist(song.getArtist(),
@@ -190,6 +185,10 @@ public class SongsListAdapter extends BaseAdapter {
             tag.tvTitle.setText("...");
             tag.tvDuration.setText("...");
             tag.tvArtist.setText("...");
+
+            if (mShowAlbumArt) {
+                tag.ivAlbumArt.setDefaultArt();
+            }
         }
 
         // Set current song indicator
@@ -203,54 +202,6 @@ public class SongsListAdapter extends BaseAdapter {
             }
         } catch (RemoteException e) {
             // ignore
-        }
-
-        if (mBlurBackground) {
-            // Fetch background art
-            final String artKey = ProviderAggregator.getDefault().getCache().getSongArtKey(song);
-
-            final Resources res = root.getResources();
-            assert res != null;
-
-            final View finalRoot = root;
-            AlbumArtHelper.AlbumArtListener listener = new AlbumArtHelper.AlbumArtListener() {
-                @Override
-                public void onArtLoaded(final Bitmap output, final BoundEntity request) {
-                    if (output != null && mSongs.size() > position
-                            && mSongs.get(position).equals(request)) {
-                        Thread t = new Thread() {
-                            public void run() {
-                                Bitmap thumb = ThumbnailUtils.extractThumbnail(output, mItemWidth, mItemHeight);
-                                final Bitmap blurred = Utils.blurAndDim(ctx, thumb, 25);
-                                thumb.recycle();
-                                BlurCache.getDefault().put(ProviderAggregator.getDefault().getCache().getSongArtKey(song), blurred, true);
-                                mHandler.post(new Runnable() {
-                                    public void run() {
-                                        Utils.setViewBackground(finalRoot, new BitmapDrawable(res, blurred));
-                                    }
-                                });
-                            }
-                        };
-                        t.start();
-
-                    }
-                }
-            };
-
-            if (artKey != null) {
-                // We already know the album art for this song (keyed in artKey)
-                Bitmap cachedBlur = BlurCache.getDefault().get(artKey);
-
-                if (cachedBlur != null) {
-                    Utils.setViewBackground(root, new BitmapDrawable(res, cachedBlur));
-                } else {
-                    Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
-                    AlbumArtHelper.retrieveAlbumArt(ctx, listener, song);
-                }
-            } else {
-                Utils.setViewBackground(root, res.getDrawable(R.drawable.album_list_default_bg));
-                AlbumArtHelper.retrieveAlbumArt(ctx, listener, song);
-            }
         }
 
         return root;

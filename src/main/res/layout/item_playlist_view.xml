@@ -22,6 +22,15 @@
             android:background="@color/primary"
             android:visibility="invisible" />
 
+        <org.omnirom.music.app.ui.AlbumArtImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:id="@+id/ivAlbumArt"
+            android:src="@drawable/album_placeholder"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="4dp"
+            android:layout_marginStart="4dp" />
+
         <TextView
             android:id="@+id/tvTitle"
             style="@style/FontBody1"
