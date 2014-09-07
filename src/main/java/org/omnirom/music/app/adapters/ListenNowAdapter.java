@@ -125,7 +125,6 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                         });
                     }
                 });
-
             }
         }
     };

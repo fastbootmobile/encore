@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import org.lucasr.twowayview.TwoWayView;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
@@ -35,24 +36,6 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
 
     private ArtistsAdapter mAdapter;
     private Handler mHandler;
-
-    private final List<Artist> mDelayedUpdateList = new ArrayList<Artist>();
-    private Runnable mDelayedUpdateRunnable = new Runnable() {
-        @Override
-        public void run() {
-            int initialCount = mAdapter.getCount();
-
-            synchronized (mDelayedUpdateList) {
-                mAdapter.addAllUnique(mDelayedUpdateList);
-                mDelayedUpdateList.clear();
-            }
-
-            // Only notify and reload the gridview content if we actually have new elements
-            if (initialCount != mAdapter.getCount()) {
-                mAdapter.notifyDataSetChanged();
-            }
-        }
-    };
 
     /**
      * Use this factory method to create a new instance of
@@ -81,8 +64,7 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_artists, container, false);
-        GridView artistLayout =
-                (GridView) root.findViewById(R.id.gvArtists);
+        TwoWayView artistLayout = (TwoWayView) root.findViewById(R.id.twvArtists);
         artistLayout.setAdapter(mAdapter);
 
         new Thread() {
@@ -98,35 +80,6 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
             }
         }.start();
 
-        // Setup the click listener
-        artistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), ArtistActivity.class);
-
-                ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
-                AlbumArtImageView ivCover = tag.ivCover;
-                TextView tvTitle = tag.tvTitle;
-
-                intent.putExtra(ArtistActivity.EXTRA_ARTIST,
-                        mAdapter.getItem(position).getRef());
-
-                intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR, tag.itemColor);
-
-                Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, tag.srcBitmap);
-
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                            new Pair<View, String>(ivCover, "itemImage"),
-                            new Pair<View, String>(tvTitle, "artistName"));
-
-                    startActivity(intent, opt.toBundle()); */
-                } else {
-                    startActivity(intent);
-                }
-            }
-        });
-
         return root;
     }
 
@@ -136,56 +89,33 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
         ProviderAggregator.getDefault().removeUpdateCallback(this);
     }
 
-    private void postListUpdate() {
-        mHandler.removeCallbacks(mDelayedUpdateRunnable);
-        mHandler.post(mDelayedUpdateRunnable);
-    }
-
     @Override
     public void onSongUpdate(List<Song> s) {
-        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        for (Song song : s) {
-            String artistRef = song.getArtist();
-            Artist artist = aggregator.retrieveArtist(artistRef, song.getProvider());
-
-            if (artist != null) {
-                synchronized (mDelayedUpdateList) {
-                    if (!mDelayedUpdateList.contains(artist)) {
-                        mDelayedUpdateList.add(artist);
-                        postListUpdate();
-                    }
-                }
-            }
-        }
     }
 
     @Override
     public void onAlbumUpdate(List<Album> a) {
-
     }
 
     @Override
     public void onPlaylistUpdate(final List<Playlist> p) {
-
     }
 
     @Override
-    public void onArtistUpdate(List<Artist> a) {
-        synchronized (mDelayedUpdateList) {
-            if (!mDelayedUpdateList.containsAll(a)) {
-                mDelayedUpdateList.addAll(a);
-                postListUpdate();
+    public void onArtistUpdate(List<Artist> artists) {
+        for (Artist a : artists) {
+            int index = mAdapter.indexOf(a);
+            if (index >= 0) {
+                mAdapter.notifyItemChanged(index);
             }
         }
     }
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
-
     }
 
     @Override
     public void onSearchResult(SearchResult searchResult) {
-
     }
 }
