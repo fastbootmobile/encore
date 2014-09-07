@@ -119,7 +119,6 @@ public class AlbumArtCache {
     public String getArtKey(final Album album, StringBuffer artUrl) {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final ProviderCache cache = aggregator.getCache();
-
         String artKey = DEFAULT_ART;
         if (album == null || album.getName() == null) {
             Log.e(TAG, "Album or album name is null");
@@ -134,12 +133,12 @@ public class AlbumArtCache {
         // Escape the query
         queryStr = queryStr.replace('"', ' ');
 
-        Artist artist = null;
+        Artist artist;
         String artistName = null;
         if (album.getSongsCount() > 0 && album.songs().hasNext()) {
             Song song = aggregator.retrieveSong(album.songs().next(), album.getProvider());
             if (song != null) {
-                artist = cache.getArtist(song.getAlbum());
+                artist = aggregator.retrieveArtist(song.getArtist(), album.getProvider());
 
                 if (artist != null) {
                     artistName = artist.getName();
@@ -272,6 +271,7 @@ public class AlbumArtCache {
      * @return The cache key for the album art
      */
     public String getArtKey(final Song song, StringBuffer artUrl) {
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         String artKey = DEFAULT_ART;
@@ -280,7 +280,7 @@ public class AlbumArtCache {
             return artKey;
         }
 
-        final Artist artist = cache.getArtist(song.getArtist());
+        final Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
         if (artist != null) {
             // If we have album information about this song, use the album name to fetch the cover.
             // Otherwise, use the title. However, if the upstream API doesn't have the cover for
@@ -292,7 +292,7 @@ public class AlbumArtCache {
             boolean triedTitle = false;
             boolean triedArtist = false;
 
-            final Album album = cache.getAlbum(song.getAlbum());
+            final Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
             if (album != null && album.getName() != null && !album.getName().isEmpty()) {
                 queryStr = album.getName();
             } else {

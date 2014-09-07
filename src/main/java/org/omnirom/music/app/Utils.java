@@ -470,7 +470,7 @@ public class Utils {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
                 final String TAG = "Utils-SongOverflow";
 
@@ -493,7 +493,8 @@ public class Utils {
 
                     case R.id.menu_add_album_to_queue:
                         try {
-                            pbService.queueAlbum(cache.getAlbum(song.getAlbum()), false);
+                            pbService.queueAlbum(aggregator.retrieveAlbum(song.getAlbum(),
+                                    song.getProvider()), false);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Unable to queue album", e);
                         }

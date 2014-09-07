@@ -111,11 +111,11 @@ public class PlaybackQueueActivity extends FragmentActivity {
                     color = getResources().getColor(R.color.default_album_art_background);
                 }
 
-                ProviderCache cache = ProviderAggregator.getDefault().getCache();
+                ProviderAggregator aggregator = ProviderAggregator.getDefault();
                 Song song = (Song) view.getTag();
 
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
-                        cache.getAlbum(song.getAlbum()), color);
+                        aggregator.retrieveAlbum(song.getAlbum(), song.getProvider()), color);
 
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                     /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
@@ -304,7 +304,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
 
         public void updateQueueLayout() {
             final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             ViewGroup tracksContainer = (ViewGroup) mRootView.findViewById(R.id.playingTracksLayout);
 
             // Load the current playing track
@@ -323,7 +323,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                     tvCurrentTitle.setText(currentTrack.getTitle());
 
                     final String artistRef = currentTrack.getArtist();
-                    Artist artist = cache.getArtist(artistRef);
+                    Artist artist = aggregator.retrieveArtist(artistRef, currentTrack.getProvider());
                     if (artist == null) {
                         artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, currentTrack.getProvider());
                     }
@@ -369,7 +369,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                             tvArtist = (TextView) itemView.findViewById(R.id.tvArtist);
                     AlbumArtImageView ivCover = (AlbumArtImageView) itemView.findViewById(R.id.ivAlbumArt);
 
-                    Artist artist = cache.getArtist(song.getArtist());
+                    Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
 
                     tvTitle.setText(song.getTitle());
                     if (artist != null) {

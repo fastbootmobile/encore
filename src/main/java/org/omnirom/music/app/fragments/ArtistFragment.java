@@ -101,8 +101,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             // FIXME: Artist object isn't getting updated with the new albums
             // Reason: Artist object is copied when serialized in the bundle. When retrieved
             // in the intent here, it's a copy with the existing attributes at that time
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
-            mArtist = cache.getArtist(mArtist.getRef());
+            ProviderAggregator aggregator = ProviderAggregator.getDefault();
+            mArtist = aggregator.retrieveArtist(mArtist.getRef(), mArtist.getProvider());
 
             mArtistTracksFragment.loadRecommendation();
             mArtistTracksFragment.loadAlbums(false);
@@ -291,7 +291,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mHeroImage = hero;
         mBackgroundColor = extras.getInt(ArtistActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
         String artistRef = extras.getString(ArtistActivity.EXTRA_ARTIST);
-        mArtist = ProviderAggregator.getDefault().getCache().getArtist(artistRef);
+        mArtist = ProviderAggregator.getDefault().retrieveArtist(artistRef, null);
 
         if (mArtist == null) {
             Log.e(TAG, "No artist found in cache for " + artistRef + "!");
@@ -557,8 +557,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     updatePlayingAlbum(mRecommendedSong.getAlbum());
 
                     // TODO: Figure out a better algorithm to find things to play from an artist
-                    ProviderCache cache = ProviderAggregator.getDefault().getCache();
-                    pbService.queueAlbum(cache.getAlbum(mRecommendedSong.getAlbum()), false);
+                    final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+                    pbService.queueAlbum(aggregator.retrieveAlbum(mRecommendedSong.getAlbum(), mRecommendedSong.getProvider()), false);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to play recommended song", e);
                 }
@@ -570,10 +570,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 return;
             }
 
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
             Song recommended = Suggestor.getInstance().suggestBestForArtist(mParent.getArtist());
             if (recommended != null) {
                 mRecommendedSong = recommended;
-                Album album = ProviderAggregator.getDefault().getCache().getAlbum(recommended.getAlbum());
+                Album album = aggregator.retrieveAlbum(recommended.getAlbum(), recommended.getProvider());
 
                 CardView cvRec = (CardView) mRootView.findViewById(R.id.cardArtistSuggestion);
                 TextView tvTitle = (TextView) mRootView.findViewById(R.id.tvArtistSuggestionTitle);
@@ -587,10 +589,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     tvArtist.setText("");
                 }
 
-                ProviderCache cache = ProviderAggregator.getDefault().getCache();
                 AlbumArtImageView ivCov = (AlbumArtImageView) mRootView.findViewById(R.id.ivArtistSuggestionCover);
                 ivCov.setOnArtLoadedListener(new AlbumArtLoadListener(cvRec));
-                ivCov.loadArtForAlbum(cache.getAlbum(recommended.getAlbum()));
+                ivCov.loadArtForAlbum(aggregator.retrieveAlbum(recommended.getAlbum(), recommended.getProvider()));
 
                 // If we were gone, animate in
                 if (cvRec.getVisibility() == View.GONE) {
@@ -672,25 +673,21 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             // TODO: Recycle!
             llAlbums.removeAllViews();
 
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
-
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             Iterator<String> albumIt = mParent.getArtist().albums();
             List<Album> albums = new ArrayList<Album>();
 
             while (albumIt.hasNext()) {
                 String albumRef = albumIt.next();
-                Album album = cache.getAlbum(albumRef);
-                if (album == null) {
-                    album = ProviderAggregator.getDefault().retrieveAlbum(albumRef,
+                Album album = ProviderAggregator.getDefault().retrieveAlbum(albumRef,
                             mParent.getArtist().getProvider());
-                }
 
                 if (album != null) {
-                    IMusicProvider provider = PluginsLookup.getDefault().getProvider(mParent.getArtist().getProvider()).getBinder();
+                    IMusicProvider provider = PluginsLookup.getDefault().getProvider(album.getProvider()).getBinder();
                     try {
                         provider.fetchAlbumTracks(albumRef);
                     } catch (RemoteException e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "Remote exception while trying to fetch album tracks", e);
                     }
                     albums.add(album);
                 }

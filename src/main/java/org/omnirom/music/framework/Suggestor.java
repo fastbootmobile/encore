@@ -1,14 +1,9 @@
 package org.omnirom.music.framework;
 
-import android.os.RemoteException;
-import android.util.Log;
-
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
-import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.Iterator;
 
@@ -34,9 +29,8 @@ public class Suggestor {
         Iterator<String> albums = artist.albums();
         while (albums.hasNext()) {
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-            final ProviderCache cache = aggregator.getCache();
             String albumRef = albums.next();
-            Album album = cache.getAlbum(albumRef);
+            Album album = aggregator.retrieveAlbum(albumRef, artist.getProvider());
             if (album == null) {
                 album = aggregator.retrieveAlbum(albumRef, artist.getProvider());
             }

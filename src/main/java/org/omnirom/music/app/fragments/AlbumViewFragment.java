@@ -240,7 +240,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         // Use cache item instead of parceled item (otherwise updates pushed to the cache won't
         // propagate here)
-        mAlbum = ProviderAggregator.getDefault().getCache().getAlbum(mAlbum.getRef());
+        mAlbum = ProviderAggregator.getDefault().retrieveAlbum(mAlbum.getRef(), mAlbum.getProvider());
 
         // Prepare the palette to colorize the FAB
         Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {

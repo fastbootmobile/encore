@@ -286,9 +286,9 @@ public class PlaybackService extends Service
     }
 
     private void updateRemoteMetadata() {
-        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
-        Artist artist = cache.getArtist(mCurrentTrack.getArtist());
-        Album album = cache.getAlbum(mCurrentTrack.getAlbum());
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        Artist artist = aggregator.retrieveArtist(mCurrentTrack.getArtist(), mCurrentTrack.getProvider());
+        Album album = aggregator.retrieveAlbum(mCurrentTrack.getAlbum(), mCurrentTrack.getProvider());
 
         RemoteControlClient.MetadataEditor edit = mRemoteControlClient.editMetadata(true);
         if (artist != null) {

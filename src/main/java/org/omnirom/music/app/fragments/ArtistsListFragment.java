@@ -143,9 +143,10 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
 
     @Override
     public void onSongUpdate(List<Song> s) {
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         for (Song song : s) {
             String artistRef = song.getArtist();
-            Artist artist = ProviderAggregator.getDefault().getCache().getArtist(artistRef);
+            Artist artist = aggregator.retrieveArtist(artistRef, song.getProvider());
 
             if (artist != null) {
                 synchronized (mDelayedUpdateList) {

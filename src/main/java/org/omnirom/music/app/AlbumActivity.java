@@ -109,7 +109,7 @@ public class AlbumActivity extends FragmentActivity {
         getMenuInflater().inflate(R.menu.album, menu);
 
         // Keep in tune with the XML!
-        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final Runnable updateMenuArtist = new Runnable() {
             @Override
             public void run() {
@@ -117,8 +117,11 @@ public class AlbumActivity extends FragmentActivity {
                 MenuItem item = menu.getItem(2);
 
                 if (artistRef != null) {
-                    item.setTitle(getString(R.string.more_from, cache.getArtist(artistRef).getName()));
-                    item.setVisible(true);
+                    final Artist artist = aggregator.retrieveArtist(artistRef, mActiveFragment.getAlbum().getProvider());
+                    if (artist != null) {
+                        item.setTitle(getString(R.string.more_from, artist.getName()));
+                        item.setVisible(true);
+                    }
                 } else {
                     // We don't have the tracks for that album yet, try again.
                     mHandler.postDelayed(this, 1000);

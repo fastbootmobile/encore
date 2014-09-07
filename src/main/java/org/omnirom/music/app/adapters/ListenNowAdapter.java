@@ -281,7 +281,11 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                 Artist artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, album.getProvider());
                 if (artist != null) {
                     holder.tvSubTitle.setText(artist.getName());
+                } else {
+                    holder.tvSubTitle.setText(null);
                 }
+            } else {
+                holder.tvSubTitle.setText(null);
             }
             holder.ivCover.loadArtForAlbum(album);
         } else if (entry.entity instanceof Song) {

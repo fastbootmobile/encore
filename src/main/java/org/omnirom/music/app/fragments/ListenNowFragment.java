@@ -54,7 +54,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         @Override
         public void run() {
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-            final ProviderCache cache = aggregator.getCache();
 
             final List<Playlist> playlists = aggregator.getAllPlaylists();
             final List<String> chosenSongs = new ArrayList<String>();
@@ -125,18 +124,12 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 switch (type) {
                     case 0: // Artist
                         String artistRef = track.getArtist();
-                        entity = cache.getArtist(artistRef);
-                        if (entity == null) {
-                            entity = aggregator.retrieveArtist(artistRef, provider);
-                        }
+                        entity = aggregator.retrieveArtist(artistRef, track.getProvider());
                         break;
 
                     case 1: // Album
                         String albumRef = track.getAlbum();
-                        entity = cache.getAlbum(albumRef);
-                        if (entity == null) {
-                            entity = aggregator.retrieveAlbum(albumRef, provider);
-                        }
+                        entity = aggregator.retrieveAlbum(albumRef, track.getProvider());
                         IMusicProvider binder = PluginsLookup.getDefault()
                                 .getProvider(provider).getBinder();
                         try {

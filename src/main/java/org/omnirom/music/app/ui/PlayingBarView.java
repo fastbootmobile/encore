@@ -351,7 +351,7 @@ public class PlayingBarView extends RelativeLayout {
             int shownCount = 0;
             View itemViews[] = new View[MAX_PEEK_QUEUE_SIZE];
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             for (final Song song : queue) {
                 if (shownCount == MAX_PEEK_QUEUE_SIZE) {
                     break;
@@ -375,7 +375,7 @@ public class PlayingBarView extends RelativeLayout {
                     //tvTitle.setViewName("playbackqueue:preview:" + shownCount + ":title");
                     //ivAlbumArt.setViewName("playbackqueue:preview:" + shownCount + ":art");
                 }
-                Artist artist = cache.getArtist(song.getArtist());
+                Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
                 if (artist != null) {
                     tvArtist.setText(artist.getName());
                 } else {
@@ -431,14 +431,8 @@ public class PlayingBarView extends RelativeLayout {
                             color = getResources().getColor(R.color.default_album_art_background);
                         }
 
-                        ProviderCache cache = ProviderAggregator.getDefault().getCache();
-                        Album album = cache.getAlbum(song.getAlbum());
-                        if (album == null) {
-                            album = ProviderAggregator.getDefault().retrieveAlbum(song.getAlbum(), song.getProvider());
-                        }
-
-                        Intent intent = AlbumActivity.craftIntent(getContext(), hero,
-                                cache.getAlbum(song.getAlbum()), color);
+                        Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
+                        Intent intent = AlbumActivity.craftIntent(getContext(), hero, album, color);
 
                         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                             /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),

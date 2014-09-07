@@ -2,7 +2,6 @@ package org.omnirom.music.app.adapters;
 
 import android.content.Context;
 import android.os.Build;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,14 +11,12 @@ import android.widget.TextView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.AlbumArtImageView;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.List;
@@ -217,15 +214,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     private void updateSongTag(int i, ViewHolder tag) {
         String songRef = mSearchResult.getSongsList().get(i);
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        final ProviderCache cache = aggregator.getCache();
 
         Song song = aggregator.retrieveSong(songRef, mSearchSource);
         if (song != null && song.isLoaded()) {
             tag.tvTitle.setText(song.getTitle());
-            Artist artist = cache.getArtist(song.getArtist());
-            if (artist == null) {
-                artist = ProviderAggregator.getDefault().retrieveArtist(song.getArtist(), mSearchSource);
-            }
+            Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
             if (artist != null) {
                 tag.tvSubtitle.setText(artist.getName());
             }
@@ -235,12 +228,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     }
 
     private void updateArtistTag(int i, ViewHolder tag) {
-        String artistRef = mSearchResult.getArtistList().get(i);
-        Artist artist = ProviderAggregator.getDefault().getCache().getArtist(artistRef);
-
-        if (artist == null) {
-            artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, mSearchSource);
-        }
+        final String artistRef = mSearchResult.getArtistList().get(i);
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        Artist artist = aggregator.retrieveArtist(artistRef, mSearchSource);
 
         if (artist != null && artist.isLoaded()) {
             tag.tvTitle.setText(artist.getName());
@@ -260,11 +250,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
     private void updateAlbumTag(int i, ViewHolder tag) {
         String albumRef = mSearchResult.getAlbumsList().get(i);
-        Album album = ProviderAggregator.getDefault().getCache().getAlbum(albumRef);
-
-        if (album == null) {
-            album = ProviderAggregator.getDefault().retrieveAlbum(albumRef, mSearchSource);
-        }
+        ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        Album album = aggregator.retrieveAlbum(albumRef, mSearchSource);
 
         if (album != null) {
             tag.tvTitle.setText(album.getName());
@@ -289,11 +276,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
     private void updatePlaylistTag(int i, ViewHolder tag) {
         String playlistRef = mSearchResult.getPlaylistList().get(i);
-        Playlist playlist = ProviderAggregator.getDefault().getCache().getPlaylist(playlistRef);
-
-        if (playlist == null) {
-            playlist = ProviderAggregator.getDefault().retrievePlaylist(playlistRef, mSearchSource);
-        }
+        Playlist playlist = ProviderAggregator.getDefault().retrievePlaylist(playlistRef, mSearchSource);
 
         if (playlist != null && playlist.isLoaded()) {
             tag.tvTitle.setText(playlist.getName());

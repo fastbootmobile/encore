@@ -125,6 +125,7 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
     }
 
     private void onAlbumClick(int i, View v) {
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
         Bitmap hero = ((MaterialTransitionDrawable) holder.albumArtImageView.getDrawable()).getFinalDrawable().getBitmap();
         int color = 0xffffff;
@@ -141,7 +142,8 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
                 color = getResources().getColor(R.color.default_album_art_background);
             }
         }
-        Album album = ProviderAggregator.getDefault().getCache().getAlbum((String) mAdapter.getChild(SearchAdapter.ALBUM, i));
+        Album album = aggregator.retrieveAlbum((String) mAdapter.getChild(SearchAdapter.ALBUM, i),
+                mSearchResult.getIdentifier());
         Intent intent = AlbumActivity.craftIntent(getActivity(), hero, album, color);
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
@@ -193,7 +195,9 @@ public class SearchFragment extends AbstractRootFragment implements ILocalCallba
     }
 
     private void onPlaylistClick(int i, View v) {
-        Playlist playlist = ProviderAggregator.getDefault().getCache().getPlaylist((String) mAdapter.getChild(SearchAdapter.PLAYLIST, i));
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        Playlist playlist = aggregator.retrievePlaylist((String) mAdapter.getChild(SearchAdapter.PLAYLIST, i),
+                mSearchResult.getIdentifier());
         Intent intent = PlaylistActivity.craftIntent(getActivity(), playlist);
         startActivity(intent);
     }

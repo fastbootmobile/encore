@@ -319,8 +319,7 @@ public class EchoNest {
         CatalogUpdater updater = new CatalogUpdater();
 
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        List<Playlist> playlists = aggregator.getAllPlaylists();
-        ProviderCache cache = aggregator.getCache();
+        final List<Playlist> playlists = aggregator.getAllPlaylists();
 
         // For each playlist
         int tracksCount = 0;
@@ -344,14 +343,14 @@ public class EchoNest {
                     SongCatalogItem item = new SongCatalogItem(songRef);
 
                     // If we have artist info, add it
-                    org.omnirom.music.model.Artist artist = cache.getArtist(song.getArtist());
-                    if (artist != null) {
+                    org.omnirom.music.model.Artist artist = aggregator.retrieveArtist(song.getArtist(), p.getProvider());
+                    if (artist != null && artist.isLoaded()) {
                         item.setArtistName(artist.getName());
                     }
 
                     // If we have album info, add it
-                    Album album = cache.getAlbum(song.getAlbum());
-                    if (album != null) {
+                    Album album = aggregator.retrieveAlbum(song.getAlbum(), p.getProvider());
+                    if (album != null && album.isLoaded()) {
                         item.setRelease(album.getName());
                     }
 

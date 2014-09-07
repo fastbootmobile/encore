@@ -155,7 +155,6 @@ public class SongsListAdapter extends BaseAdapter {
         }
         final Song song = getItem(position);
         final ViewHolder tag = (ViewHolder) root.getTag();
-        final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
         // Update tag
         tag.position = position;
@@ -171,11 +170,8 @@ public class SongsListAdapter extends BaseAdapter {
                 tag.ivAlbumArt.loadArtForSong(song);
             }
 
-            Artist artist = cache.getArtist(song.getArtist());
-            if (artist == null) {
-                artist = ProviderAggregator.getDefault().retrieveArtist(song.getArtist(),
+            Artist artist = ProviderAggregator.getDefault().retrieveArtist(song.getArtist(),
                         song.getProvider());
-            }
             if (artist != null) {
                 tag.tvArtist.setText(artist.getName());
             } else {

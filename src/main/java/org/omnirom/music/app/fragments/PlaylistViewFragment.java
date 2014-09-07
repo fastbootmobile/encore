@@ -31,15 +31,12 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.util.Iterator;
 import java.util.List;
-
-import omnimusic.Plugin;
 
 
 /**
@@ -96,9 +93,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         // Get the playlist from the arguments, from the instantiation, and from the cache
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        final ProviderCache cache = aggregator.getCache();
         mPlaylist = args.getParcelable(KEY_PLAYLIST);
-        mPlaylist = cache.getPlaylist(mPlaylist.getRef());
+        mPlaylist = aggregator.retrievePlaylist(mPlaylist.getRef(), mPlaylist.getProvider());
     }
 
     @Override

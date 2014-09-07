@@ -258,9 +258,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
                 if (binder != null) {
                     try {
-                        Song song = binder.getSong(ref);
-                        onSongUpdate(provider, song);
-                        return song;
+                        output = binder.getSong(ref);
+                        onSongUpdate(provider, output);
                     } catch (DeadObjectException e) {
                         Log.e(TAG, "Provider died while retrieving song");
                         return null;
@@ -293,26 +292,29 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return null;
         }
 
-        ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
-        if (pc != null) {
-            IMusicProvider binder = pc.getBinder();
+        // Try from cache
+        Artist output = mCache.getArtist(ref);
+        if (output == null && provider != null) {
+            ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
+            if (pc != null) {
+                IMusicProvider binder = pc.getBinder();
 
-            if (binder != null) {
-                try {
-                    Artist artist = binder.getArtist(ref);
-                    onArtistUpdate(provider, artist);
-                    return artist;
-                } catch (DeadObjectException e) {
-                    Log.e(TAG, "Provider died while retrieving artist");
-                    return null;
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to retrieve the artist", e);
-                    return null;
+                if (binder != null) {
+                    try {
+                        output = binder.getArtist(ref);
+                        onArtistUpdate(provider, output);
+                    } catch (DeadObjectException e) {
+                        Log.e(TAG, "Provider died while retrieving artist");
+                        return null;
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to retrieve the artist", e);
+                        return null;
+                    }
                 }
             }
         }
 
-        return null;
+        return output;
     }
 
     /**
@@ -329,26 +331,28 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return null;
         }
 
-        ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
-        if (pc != null) {
-            IMusicProvider binder = pc.getBinder();
+        // Try from cache
+        Album output = mCache.getAlbum(ref);
 
-            if (binder != null) {
-                try {
-                    Album album = binder.getAlbum(ref);
-                    onAlbumUpdate(provider, album);
-                    return album;
-                } catch (DeadObjectException e) {
-                    Log.e(TAG, "Provider died while retrieving album");
-                    return null;
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to retrieve the album", e);
-                    return null;
+        if (output == null && provider != null) {
+            ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
+            if (pc != null) {
+                IMusicProvider binder = pc.getBinder();
+
+                if (binder != null) {
+                    try {
+                        output = binder.getAlbum(ref);
+                        onAlbumUpdate(provider, output);
+                    } catch (DeadObjectException e) {
+                        Log.e(TAG, "Provider died while retrieving album");
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to retrieve the album", e);
+                    }
                 }
             }
         }
 
-        return null;
+        return output;
     }
 
     /**
@@ -365,23 +369,26 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return null;
         }
 
-        ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
-        if (pc != null) {
-            IMusicProvider binder = pc.getBinder();
+        // Try from cache
+        Playlist output = mCache.getPlaylist(ref);
 
-            if (binder != null) {
-                try {
-                    Playlist playlist = binder.getPlaylist(ref);
-                    onPlaylistAddedOrUpdated(provider, playlist);
-                    return playlist;
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to retrieve the playlist", e);
-                    return null;
+        if (output == null && provider != null) {
+            ProviderConnection pc = PluginsLookup.getDefault().getProvider(provider);
+            if (pc != null) {
+                IMusicProvider binder = pc.getBinder();
+
+                if (binder != null) {
+                    try {
+                        output = binder.getPlaylist(ref);
+                        onPlaylistAddedOrUpdated(provider, output);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to retrieve the playlist", e);
+                    }
                 }
             }
         }
 
-        return null;
+        return output;
     }
 
     /**

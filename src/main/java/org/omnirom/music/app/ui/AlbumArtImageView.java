@@ -126,7 +126,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     public void loadArtForPlaylist(final Playlist playlist) {
         String mainArtistRef = Utils.getMainArtist(playlist);
         if (mainArtistRef != null) {
-            loadArtImpl(ProviderAggregator.getDefault().getCache().getArtist(mainArtistRef));
+            Artist artist = ProviderAggregator.getDefault().retrieveArtist(mainArtistRef,
+                    playlist.getProvider());
+            loadArtImpl(artist);
         } else {
             setDefaultArt();
         }

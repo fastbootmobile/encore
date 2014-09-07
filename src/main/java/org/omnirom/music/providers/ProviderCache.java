@@ -61,7 +61,7 @@ public class ProviderCache {
         mMultiProviderPlaylists.addAll(playlists);
     }
 
-    public Playlist getPlaylist(final String ref) {
+    Playlist getPlaylist(final String ref) {
         return mPlaylists.get(ref);
     }
 
@@ -105,7 +105,7 @@ public class ProviderCache {
         }
     }
 
-    public Album getAlbum(final String ref) {
+    Album getAlbum(final String ref) {
         synchronized (mAlbums) {
             return mAlbums.get(ref);
         }
@@ -118,7 +118,7 @@ public class ProviderCache {
         }
     }
 
-    public Artist getArtist(final String ref) {
+    Artist getArtist(final String ref) {
         synchronized (mArtists) {
             return mArtists.get(ref);
         }
