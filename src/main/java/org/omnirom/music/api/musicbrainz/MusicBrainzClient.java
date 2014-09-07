@@ -91,8 +91,9 @@ public class MusicBrainzClient {
             Log.e(TAG, "Unable to get album info (rate limit?)", e);
             throw new RateLimitException();
         } catch (JSONException e) {
+            // May happen due to an API error, e.g. error 502
             Log.e(TAG, "JSON error while parsing album info", e);
-            return null;
+            throw new RateLimitException();
         }
     }
 

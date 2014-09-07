@@ -49,7 +49,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         public void run() {
             synchronized (mPostedUpdateSongs) {
                 for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onSongUpdate(mPostedUpdateSongs);
+                    cb.onSongUpdate(new ArrayList<Song>(mPostedUpdateSongs));
                 }
                 mPostedUpdateSongs.clear();
             }
@@ -61,7 +61,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         public void run() {
             synchronized (mPostedUpdateAlbums) {
                 for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onAlbumUpdate(mPostedUpdateAlbums);
+                    cb.onAlbumUpdate(new ArrayList<Album>(mPostedUpdateAlbums));
                 }
                 mPostedUpdateAlbums.clear();
             }
@@ -73,7 +73,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         public void run() {
             synchronized (mPostedUpdateArtists) {
                 for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onArtistUpdate(mPostedUpdateArtists);
+                    cb.onArtistUpdate(new ArrayList<Artist>(mPostedUpdateArtists));
                 }
                 mPostedUpdateArtists.clear();
             }
@@ -85,7 +85,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         public void run() {
             synchronized (mPostedUpdatePlaylists) {
                 for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onPlaylistUpdate(mPostedUpdatePlaylists);
+                    cb.onPlaylistUpdate(new ArrayList<Playlist>(mPostedUpdatePlaylists));
                 }
                 mPostedUpdatePlaylists.clear();
             }

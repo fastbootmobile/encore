@@ -3,6 +3,7 @@ package org.omnirom.music.app.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,13 +15,20 @@ import org.lucasr.twowayview.TwoWayView;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.ListenNowAdapter;
+import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderIdentifier;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -30,7 +38,7 @@ import java.util.Random;
  * create an instance of this fragment.
  *
  */
-public class ListenNowFragment extends Fragment {
+public class ListenNowFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "ListenNowFragment";
 
@@ -48,11 +56,18 @@ public class ListenNowFragment extends Fragment {
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             final ProviderCache cache = aggregator.getCache();
 
-            List<Playlist> playlists = aggregator.getAllPlaylists();
+            final List<Playlist> playlists = aggregator.getAllPlaylists();
+            final List<String> chosenSongs = new ArrayList<String>();
+
+            int totalSongsCount = 0;
 
             if (playlists.size() <= 0) {
                 mHandler.postDelayed(this, 1000);
                 return;
+            }
+
+            for (Playlist p : playlists) {
+                totalSongsCount += p.getSongsCount();
             }
 
             // We use a random algorithm (picking random tracks and albums and artists from
@@ -63,6 +78,11 @@ public class ListenNowFragment extends Fragment {
 
             Random random = new Random(SystemClock.uptimeMillis());
             for (int i = 0; i < 21; i++) {
+                // Make sure we haven't reached all our accessible data
+                if (chosenSongs.size() >= totalSongsCount) {
+                    break;
+                }
+
                 // First, we determine the entity we want to show
                 int type = random.nextInt(2);
                 int playlistId = random.nextInt(playlists.size());
@@ -82,50 +102,65 @@ public class ListenNowFragment extends Fragment {
                 }
 
                 String trackRef = playlist.songsList().get(trackId);
+                if (chosenSongs.contains(trackRef)) {
+                    // We already picked that song
+                    i--;
+                    continue;
+                } else {
+                    chosenSongs.add(trackRef);
+
+                    // Remove the playlist from our selection if we picked all the songs from it
+                    if (chosenSongs.containsAll(playlist.songsList())) {
+                        playlists.remove(playlist);
+                    }
+                }
+
                 Song track = aggregator.retrieveSong(trackRef, provider);
 
-                if (track == null || !track.isLoaded()) {
-                    // The track is not loaded...?
-                    Log.e(TAG, "Track is not loaded, skipping one entry for now. TODO: Load!");
-                } else {
-                    // Now that we have the entity, let's figure if it's a big or small entry
-                    boolean isLarge = ((i % 7) == 0);
+                // Now that we have the entity, let's figure if it's a big or small entry
+                boolean isLarge = ((i % 7) == 0);
 
-                    // And we make the entry!
-                    BoundEntity entity;
-                    switch (type) {
-                        case 0: // Artist
-                            String artistRef = track.getArtist();
-                            entity = cache.getArtist(artistRef);
-                            if (entity == null) {
-                                entity = aggregator.retrieveArtist(artistRef, provider);
-                            }
-                            break;
+                // And we make the entry!
+                BoundEntity entity;
+                switch (type) {
+                    case 0: // Artist
+                        String artistRef = track.getArtist();
+                        entity = cache.getArtist(artistRef);
+                        if (entity == null) {
+                            entity = aggregator.retrieveArtist(artistRef, provider);
+                        }
+                        break;
 
-                        case 1: // Album
-                            String albumRef = track.getAlbum();
-                            entity = cache.getAlbum(albumRef);
-                            if (entity == null) {
-                                entity = aggregator.retrieveAlbum(albumRef, provider);
-                            }
-                            break;
+                    case 1: // Album
+                        String albumRef = track.getAlbum();
+                        entity = cache.getAlbum(albumRef);
+                        if (entity == null) {
+                            entity = aggregator.retrieveAlbum(albumRef, provider);
+                        }
+                        IMusicProvider binder = PluginsLookup.getDefault()
+                                .getProvider(provider).getBinder();
+                        try {
+                            binder.fetchAlbumTracks(albumRef);
+                        } catch (RemoteException e) {
+                            // ignore
+                        }
+                        break;
 
-                        case 2: // Song
-                            entity = track;
-                            break;
+                    case 2: // Song
+                        entity = track;
+                        break;
 
-                        default:
-                            Log.e(TAG, "Unexpected entry type " + type);
-                            entity = null;
-                            break;
-                    }
-
-                    ListenNowAdapter.ListenNowEntry entry = new ListenNowAdapter.ListenNowEntry(
-                            isLarge ? ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_LARGE
-                                    : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
-                            entity);
-                    mAdapter.addEntry(entry);
+                    default:
+                        Log.e(TAG, "Unexpected entry type " + type);
+                        entity = null;
+                        break;
                 }
+
+                ListenNowAdapter.ListenNowEntry entry = new ListenNowAdapter.ListenNowEntry(
+                        isLarge ? ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_LARGE
+                                : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
+                        entity);
+                mAdapter.addEntry(entry);
             }
             mAdapter.notifyDataSetChanged();
         }
@@ -174,10 +209,75 @@ public class ListenNowFragment extends Fragment {
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_LISTEN_NOW);
         mainActivity.setContentShadowTop(0);
+        ProviderAggregator.getDefault().addUpdateCallback(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
+    }
+
+    @Override
+    public void onSongUpdate(final List<Song> s) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                int hasThisSong;
+                for (Song song : s) {
+                    hasThisSong = mAdapter.contains(song);
+                    if (hasThisSong >= 0) {
+                        mAdapter.notifyItemChanged(hasThisSong);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onAlbumUpdate(final List<Album> a) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                int hasThisAlbum;
+                for (Album album : a) {
+                    hasThisAlbum = mAdapter.contains(album);
+                    if (hasThisAlbum >= 0) {
+                        mAdapter.notifyItemChanged(hasThisAlbum);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onPlaylistUpdate(List<Playlist> p) {
+
+    }
+
+    @Override
+    public void onArtistUpdate(final List<Artist> a) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                int hasThisArtist;
+                for (Artist artist : a) {
+                    hasThisArtist = mAdapter.contains(artist);
+                    if (hasThisArtist >= 0) {
+                        mAdapter.notifyItemChanged(hasThisArtist);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onProviderConnected(IMusicProvider provider) {
+
+    }
+
+    @Override
+    public void onSearchResult(SearchResult searchResult) {
+
     }
 }

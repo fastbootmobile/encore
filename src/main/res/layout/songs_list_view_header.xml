@@ -80,7 +80,7 @@
 
     <com.dd.CircularProgressButton
         android:id="@+id/cpbOffline"
-        android:layout_width="64dp"
+        android:layout_width="128dp"
         android:layout_height="48dp"
         android:textColor="@color/white"
         android:textSize="18sp"
@@ -88,7 +88,7 @@
         app:cpb_cornerRadius="48dp"
         app:cpb_iconComplete="@drawable/ic_file_download"
         app:cpb_iconError="@drawable/ic_error"
-        app:cpb_iconIdle="@drawable/ic_file_download"
+        app:cpb_textIdle="Offline"
         app:cpb_colorIndicatorBackground="@color/grey"
         app:cpb_colorIndicator="@color/green"
         android:layout_above="@+id/tvAlbumName"

@@ -33,6 +33,7 @@ import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
@@ -190,6 +191,23 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         notifyItemInserted(mEntries.size() - 1);
     }
 
+    /**
+     * Returns whether or not the adapter contains the provided entity
+     * @param entity The entity to check
+     * @return The position of the item containing the provided entity, or -1 if not found
+     */
+    public int contains(BoundEntity entity) {
+        int i = 0;
+        for (ListenNowEntry entry : mEntries) {
+            if (entry.entity.equals(entity)) {
+                return i;
+            }
+            ++i;
+        }
+
+        return -1;
+    }
+
     private void playSong(Song s) {
         IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
         try {
@@ -252,14 +270,19 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
             holder.ivCover.loadArtForPlaylist(playlist);
         } else if (entry.entity instanceof Artist) {
             Artist artist = (Artist) entry.entity;
-            int count = artist.getAlbums().size();
             holder.tvTitle.setText(artist.getName());
-            holder.tvSubTitle.setText(res.getQuantityString(R.plurals.albums_count, count, count));
+            holder.tvSubTitle.setText(null);
             holder.ivCover.loadArtForArtist(artist);
         } else if (entry.entity instanceof Album) {
             Album album = (Album) entry.entity;
             holder.tvTitle.setText(album.getName());
-            holder.tvSubTitle.setText(Utils.getMainArtist(album));
+            String artistRef = Utils.getMainArtist(album);
+            if (artistRef != null) {
+                Artist artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, album.getProvider());
+                if (artist != null) {
+                    holder.tvSubTitle.setText(artist.getName());
+                }
+            }
             holder.ivCover.loadArtForAlbum(album);
         } else if (entry.entity instanceof Song) {
             Song song = (Song) entry.entity;
