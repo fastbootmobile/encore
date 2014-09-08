@@ -797,17 +797,11 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
             while (songs.hasNext()) {
                 String songRef = songs.next();
-                Song song = mCache.getSong(songRef);
-                if (song == null) {
-                    song = retrieveSong(songRef, a.getProvider());
-                }
+                Song song =  retrieveSong(songRef, a.getProvider());
 
-                if (song != null) {
+                if (song != null && song.isLoaded()) {
                     String artistRef = song.getArtist();
-                    Artist artist = mCache.getArtist(artistRef);
-                    if (artist == null) {
-                        artist = retrieveArtist(artistRef, song.getProvider());
-                    }
+                    Artist artist = retrieveArtist(artistRef, song.getProvider());
 
                     if (artist != null) {
                         artist.addAlbum(a.getRef());

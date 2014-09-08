@@ -505,6 +505,20 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private View mPreviousAlbumGroup;
         private Handler mHandler;
 
+        private class AlbumViewHolder {
+            TextView tvAlbumName;
+            TextView tvAlbumYear;
+            AlbumArtImageView ivCover;
+            ImageView ivPlayAlbum;
+
+            AlbumViewHolder(View viewRoot) {
+                tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
+                tvAlbumYear = (TextView) viewRoot.findViewById(R.id.tvAlbumYear);
+                ivCover = (AlbumArtImageView) viewRoot.findViewById(R.id.ivCover);
+                ivPlayAlbum = (ImageView) viewRoot.findViewById(R.id.ivPlayAlbum);
+            }
+        }
+
         private View.OnClickListener mSongClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -682,8 +696,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
             while (albumIt.hasNext()) {
                 String albumRef = albumIt.next();
-                Album album = ProviderAggregator.getDefault().retrieveAlbum(albumRef,
-                            mParent.getArtist().getProvider());
+                Album album = aggregator.retrieveAlbum(albumRef, mParent.getArtist().getProvider());
 
                 if (album != null) {
                     IMusicProvider provider = PluginsLookup.getDefault().getProvider(album.getProvider()).getBinder();
@@ -711,49 +724,32 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             });
 
             // Then inflate views
-            LayoutInflater inflater = getActivity().getLayoutInflater();
+            final LayoutInflater inflater = getActivity().getLayoutInflater();
+            final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
             for (final Album album : albums) {
-                final View viewRoot = inflater.inflate(R.layout.expanded_albums_group, llAlbums, false);
-                llAlbums.addView(viewRoot);
+                AlbumViewHolder holder;
+                View viewRoot;
+                if (mAlbumToViewMap.containsKey(album.getRef())) {
+                    viewRoot = mAlbumToViewMap.get(album.getRef());
+                    holder = (AlbumViewHolder) viewRoot.getTag();
+                    llAlbums.addView(viewRoot);
+                } else {
+                    viewRoot = inflater.inflate(R.layout.expanded_albums_group, llAlbums, false);
+                    llAlbums.addView(viewRoot);
 
-                TextView tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
-                TextView tvAlbumYear = (TextView) viewRoot.findViewById(R.id.tvAlbumYear);
-                AlbumArtImageView ivCover = (AlbumArtImageView) viewRoot.findViewById(R.id.ivCover);
-                ImageView ivPlayAlbum = (ImageView) viewRoot.findViewById(R.id.ivPlayAlbum);
-
-                if (album.isLoaded()) {
-                    tvAlbumName.setText(album.getName());
-                    if (album.getYear() > 0) {
-                        tvAlbumYear.setVisibility(View.VISIBLE);
-                        tvAlbumYear.setText(Integer.toString(album.getYear()));
-                    } else {
-                        tvAlbumYear.setVisibility(View.GONE);
-                    }
+                    holder = new AlbumViewHolder(viewRoot);
+                    viewRoot.setTag(holder);
 
                     AlbumGroupClickListener listener =
                             new AlbumGroupClickListener(album, llAlbums, viewRoot, this);
                     viewRoot.setOnClickListener(listener);
 
-                    ivPlayAlbum.setVisibility(View.VISIBLE);
                     final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources());
                     drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                     drawable.setColor(0xCC333333);
+                    holder.ivPlayAlbum.setImageDrawable(drawable);
 
-                    // Set play or pause based on if this album is playing
-                    final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                    try {
-                        if (pbService.isPlaying()) {
-                            Song currentSong = pbService.getCurrentTrack();
-                            if (currentSong != null && album.getRef().equals(currentSong.getAlbum())) {
-                                updatePlayingAlbum(currentSong.getAlbum());
-                            }
-                        }
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-
-                    ivPlayAlbum.setImageDrawable(drawable);
-                    ivPlayAlbum.setOnClickListener(new View.OnClickListener() {
+                    holder.ivPlayAlbum.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
@@ -790,14 +786,40 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                             }
                         }
                     });
+                }
+
+                if (album.isLoaded()) {
+                    holder.tvAlbumName.setText(album.getName());
+                    if (album.getYear() > 0) {
+                        holder.tvAlbumYear.setVisibility(View.VISIBLE);
+                        holder.tvAlbumYear.setText(Integer.toString(album.getYear()));
+                    } else {
+                        holder.tvAlbumYear.setVisibility(View.GONE);
+                    }
+
+                    holder.ivPlayAlbum.setVisibility(View.VISIBLE);
+
+                    // Set play or pause based on if this album is playing
+                    try {
+                        if (pbService.isPlaying()) {
+                            Song currentSong = pbService.getCurrentTrack();
+                            if (currentSong != null && album.getRef().equals(currentSong.getAlbum())) {
+                                updatePlayingAlbum(currentSong.getAlbum());
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
+
                 } else {
-                    tvAlbumName.setText(getString(R.string.loading));
-                    tvAlbumYear.setVisibility(View.GONE);
-                    ivPlayAlbum.setVisibility(View.GONE);
+                    holder.tvAlbumName.setText(getString(R.string.loading));
+                    holder.tvAlbumYear.setVisibility(View.GONE);
+                    holder.ivPlayAlbum.setVisibility(View.GONE);
                 }
 
                 // Load the album art
-                ivCover.loadArtForAlbum(album);
+                holder.ivCover.loadArtForAlbum(album);
 
                 mAlbumToViewMap.put(album.getRef(), viewRoot);
             }
