@@ -1,17 +1,20 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import org.lucasr.twowayview.TwoWayView;
+import org.lucasr.twowayview.widget.DividerItemDecoration;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.ListenNowAdapter;
@@ -154,8 +157,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                                 : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
                         entity);
                 mAdapter.addEntry(entry);
+                mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
             }
-            mAdapter.notifyDataSetChanged();
         }
     };
 
@@ -193,6 +196,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         // Inflate the layout for this fragment
         mRoot = (TwoWayView) inflater.inflate(R.layout.fragment_listen_now, container, false);
         mRoot.setAdapter(mAdapter);
+        final Drawable divider = getResources().getDrawable(R.drawable.divider);
+        mRoot.addItemDecoration(new DividerItemDecoration(divider));
+        mRoot.setItemAnimator(new DefaultItemAnimator());
         return mRoot;
     }
 

@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
 import android.util.Log;
@@ -40,7 +41,7 @@ import java.util.List;
 /**
  * Created by h4o on 22/07/2014.
  */
-public class SearchFragment extends AbstractRootFragment implements ILocalCallback {
+public class SearchFragment extends Fragment implements ILocalCallback {
     private SearchAdapter mAdapter;
     private SearchResult mSearchResult;
     private Handler mHandler;

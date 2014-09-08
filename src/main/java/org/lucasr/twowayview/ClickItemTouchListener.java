@@ -2,83 +2,39 @@ package org.lucasr.twowayview;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnItemTouchListener;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class ClickItemTouchListener implements OnItemTouchListener {
+abstract class ClickItemTouchListener implements OnItemTouchListener {
     private static final String LOGTAG = "ClickItemTouchListener";
 
-    /**
-     * Interface definition for a callback to be invoked when an item in the
-     * host RecyclerView has been clicked.
-     */
-    public interface OnItemClickListener {
-        /**
-         * Callback method to be invoked when an item in the host RecyclerView
-         * has been clicked.
-         *
-         * @param parent The RecyclerView where the click happened.
-         * @param view The view within the RecyclerView that was clicked
-         * @param position The position of the view in the adapter.
-         * @param id The row id of the item that was clicked.
-         */
-        void onItemClick(RecyclerView parent, View view, int position, long id);
+    private final GestureDetectorCompat mGestureDetector;
+
+    ClickItemTouchListener(RecyclerView hostView) {
+        mGestureDetector = new ItemClickGestureDetector(hostView.getContext(),
+                new ItemClickGestureListener(hostView));
     }
 
-    /**
-     * Interface definition for a callback to be invoked when an item in the
-     * host RecyclerView has been clicked and held.
-     */
-    public interface OnItemLongClickListener {
-        /**
-         * Callback method to be invoked when an item in the host RecyclerView
-         * has been clicked and held.
-         *
-         * @param parent The RecyclerView where the click happened
-         * @param view The view within the RecyclerView that was clicked
-         * @param position The position of the view in the list
-         * @param id The row id of the item that was clicked
-         *
-         * @return true if the callback consumed the long click, false otherwise
-         */
-        boolean onItemLongClick(RecyclerView parent, View view, int position, long id);
-    }
-
-
-    private final RecyclerView mHostView;
-    private final GestureDetector mGestureDetector;
-
-    private OnItemClickListener mItemClickListener;
-    private OnItemLongClickListener mItemLongClickListener;
-
-    private ClickItemTouchListener(RecyclerView hostView) {
-        mHostView = hostView;
-
-        final Context context = mHostView.getContext();
-        mGestureDetector = new ItemClickGestureDetector(context, new ItemClickGestureListener());
-    }
-
-    private boolean isAttachedToWindow() {
+    private boolean isAttachedToWindow(RecyclerView hostView) {
         if (Build.VERSION.SDK_INT >= 19) {
-            return mHostView.isAttachedToWindow();
+            return hostView.isAttachedToWindow();
         } else {
-            return (mHostView.getHandler() != null);
+            return (hostView.getHandler() != null);
         }
     }
 
-    private boolean hasAdapter() {
-        return (mHostView.getAdapter() != null);
+    private boolean hasAdapter(RecyclerView hostView) {
+        return (hostView.getAdapter() != null);
     }
 
     @Override
     public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent event) {
-        if (!isAttachedToWindow() || !hasAdapter()) {
+        if (!isAttachedToWindow(recyclerView) || !hasAdapter(recyclerView)) {
             return false;
         }
 
@@ -92,37 +48,10 @@ public class ClickItemTouchListener implements OnItemTouchListener {
         // intercepting touch events in the host RecyclerView.
     }
 
-    /**
-     * Register a callback to be invoked when an item in the host
-     * RecyclerView has been clicked.
-     *
-     * @param listener The callback that will be invoked.
-     */
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        mItemClickListener = listener;
-    }
+    abstract boolean performItemClick(RecyclerView parent, View view, int position, long id);
+    abstract boolean performItemLongClick(RecyclerView parent, View view, int position, long id);
 
-    /**
-     * Register a callback to be invoked when an item in the host
-     * RecyclerView has been clicked and held.
-     *
-     * @param listener The callback that will be invoked.
-     */
-    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
-        if (!mHostView.isLongClickable()) {
-            mHostView.setLongClickable(true);
-        }
-
-        mItemLongClickListener = listener;
-    }
-
-    public static ClickItemTouchListener addTo(RecyclerView recyclerView) {
-        ClickItemTouchListener listener = new ClickItemTouchListener(recyclerView);
-        recyclerView.addOnItemTouchListener(listener);
-        return listener;
-    }
-
-    private class ItemClickGestureDetector extends GestureDetector {
+    private class ItemClickGestureDetector extends GestureDetectorCompat {
         private final ItemClickGestureListener mGestureListener;
 
         public ItemClickGestureDetector(Context context, ItemClickGestureListener listener) {
@@ -144,7 +73,12 @@ public class ClickItemTouchListener implements OnItemTouchListener {
     }
 
     private class ItemClickGestureListener extends SimpleOnGestureListener {
+        private final RecyclerView mHostView;
         private View mTargetChild;
+
+        public ItemClickGestureListener(RecyclerView hostView) {
+            mHostView = hostView;
+        }
 
         public void dispatchSingleTapUpIfNeeded(MotionEvent event) {
             // When the long press hook is called but the long press listener
@@ -179,12 +113,9 @@ public class ClickItemTouchListener implements OnItemTouchListener {
             if (mTargetChild != null) {
                 mTargetChild.setPressed(false);
 
-                if (mItemClickListener != null) {
-                    final int position = mHostView.getChildPosition(mTargetChild);
-                    final long id = mHostView.getAdapter().getItemId(position);
-                    mItemClickListener.onItemClick(mHostView, mTargetChild, position, id);
-                    handled = true;
-                }
+                final int position = mHostView.getChildPosition(mTargetChild);
+                final long id = mHostView.getAdapter().getItemId(position);
+                handled = performItemClick(mHostView, mTargetChild, position, id);
 
                 mTargetChild = null;
             }
@@ -206,18 +137,17 @@ public class ClickItemTouchListener implements OnItemTouchListener {
 
         @Override
         public void onLongPress(MotionEvent event) {
-            if (mTargetChild != null) {
-                if (mItemLongClickListener != null) {
-                    final int position = mHostView.getChildPosition(mTargetChild);
-                    final long id = mHostView.getAdapter().getItemId(position);
-                    final boolean handled = mItemLongClickListener.onItemLongClick(mHostView,
-                            mTargetChild, position, id);
+            if (mTargetChild == null) {
+                return;
+            }
 
-                    if (handled) {
-                        mTargetChild.setPressed(false);
-                        mTargetChild = null;
-                    }
-                }
+            final int position = mHostView.getChildPosition(mTargetChild);
+            final long id = mHostView.getAdapter().getItemId(position);
+            final boolean handled = performItemLongClick(mHostView, mTargetChild, position, id);
+
+            if (handled) {
+                mTargetChild.setPressed(false);
+                mTargetChild = null;
             }
         }
     }

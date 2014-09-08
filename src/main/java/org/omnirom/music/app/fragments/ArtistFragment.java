@@ -20,6 +20,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +37,8 @@ import android.widget.TextView;
 import com.echonest.api.v4.Biography;
 import com.echonest.api.v4.EchoNestException;
 
+import org.lucasr.twowayview.ItemClickSupport;
+import org.lucasr.twowayview.TwoWayLayoutManager;
 import org.lucasr.twowayview.TwoWayView;
 import org.omnirom.music.api.echonest.EchoNest;
 import org.omnirom.music.app.ArtistActivity;
@@ -495,7 +498,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private Song mRecommendedSong;
         private boolean mRecommendationLoaded = false;
         private View mRootView;
-        private ArtistFragment mParent;
+        private static ArtistFragment mParent;
         private HashMap<Song, View> mSongToViewMap = new HashMap<Song, View>();
         private HashMap<String, View> mAlbumToViewMap = new HashMap<String, View>();
         private View mPreviousSongGroup;
@@ -905,7 +908,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     }
 
     public static class ArtistInfoFragment extends Fragment {
-        private Artist mArtist;
+        private static Artist mArtist;
         private Handler mHandler;
         private TextView mArtistInfo;
         private boolean mInfoLoaded;
@@ -993,6 +996,27 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private Handler mHandler;
         private List<Artist> mSimilarArtists;
         private ProgressBar mArtistsSpinner;
+        private final ItemClickSupport.OnItemClickListener mItemClickListener = new ItemClickSupport.OnItemClickListener() {
+            @Override
+            public void onItemClick(RecyclerView parent, View view, int position, long id) {
+                final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
+                final Context ctx = view.getContext();
+                String artistRef = mAdapter.getItem(tag.position).getRef();
+                Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artistRef, tag.itemColor);
+
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                        /*AlbumArtImageView ivCover = tag.ivCover;
+                        TextView tvTitle = tag.tvTitle;
+                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                            new Pair<View, String>(ivCover, "itemImage"),
+                            new Pair<View, String>(tvTitle, "artistName"));
+
+                        ctx.startActivity(intent, opt.toBundle()); */
+                } else {
+                    ctx.startActivity(intent);
+                }
+            }
+        };
 
         public ArtistSimilarFragment() {
             mAdapter = new ArtistsAdapter();
@@ -1077,6 +1101,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             View rootView = inflater.inflate(R.layout.fragment_artist_similar, container, false);
             mArtistsSpinner = (ProgressBar) rootView.findViewById(R.id.pbSimilarArtists);
             mArtistsGrid = (TwoWayView) rootView.findViewById(R.id.twvSimilarArtists);
+            final ItemClickSupport itemClick = ItemClickSupport.addTo(mArtistsGrid);
+            itemClick.setOnItemClickListener(mItemClickListener);
             return rootView;
         }
     }

@@ -20,11 +20,12 @@
 
     <org.lucasr.twowayview.TwoWayView
         android:id="@+id/twvSimilarArtists"
+        android:layout_margin="2dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layoutManager="StaggeredGridLayoutManager"
+        android:layout_height="720dp"
+        app:layoutManager="GridLayoutManager"
         app:numColumns="@integer/main_grids_column_count"
-        app:numRows="300"
+        app:numRows="4"
         android:orientation="vertical"
         android:scrollbars="vertical" />
 </LinearLayout>

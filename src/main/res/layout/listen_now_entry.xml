@@ -4,7 +4,6 @@
     android:id="@+id/llRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="2dp"
     android:background="@color/default_album_art_background"
     android:measureWithLargestChild="false"
     android:orientation="horizontal">

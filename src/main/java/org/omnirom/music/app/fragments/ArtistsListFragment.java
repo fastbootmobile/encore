@@ -1,22 +1,23 @@
 package org.omnirom.music.app.fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.TextView;
 
+import org.lucasr.twowayview.ItemClickSupport;
 import org.lucasr.twowayview.TwoWayView;
+import org.lucasr.twowayview.widget.DividerItemDecoration;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
-import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -26,16 +27,37 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by h4o on 20/06/2014.
  */
-public class ArtistsListFragment extends AbstractRootFragment implements ILocalCallback {
+public class ArtistsListFragment extends Fragment implements ILocalCallback {
 
     private ArtistsAdapter mAdapter;
     private Handler mHandler;
+
+    private final ItemClickSupport.OnItemClickListener mItemClickListener = new ItemClickSupport.OnItemClickListener() {
+        @Override
+        public void onItemClick(RecyclerView parent, View view, int position, long id) {
+            final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
+            final Context ctx = view.getContext();
+            String artistRef = mAdapter.getItem(tag.position).getRef();
+            Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artistRef, tag.itemColor);
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                        /*AlbumArtImageView ivCover = tag.ivCover;
+                        TextView tvTitle = tag.tvTitle;
+                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                            new Pair<View, String>(ivCover, "itemImage"),
+                            new Pair<View, String>(tvTitle, "artistName"));
+
+                        ctx.startActivity(intent, opt.toBundle()); */
+            } else {
+                ctx.startActivity(intent);
+            }
+        }
+    };
 
     /**
      * Use this factory method to create a new instance of
@@ -44,8 +66,7 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
      * @return A new instance of fragment PlaylistListFragment.
      */
     public static ArtistsListFragment newInstance() {
-        ArtistsListFragment fragment = new ArtistsListFragment();
-        return fragment;
+        return new ArtistsListFragment();
     }
     public ArtistsListFragment() {
         mAdapter = new ArtistsAdapter();
@@ -66,6 +87,12 @@ public class ArtistsListFragment extends AbstractRootFragment implements ILocalC
         View root = inflater.inflate(R.layout.fragment_artists, container, false);
         TwoWayView artistLayout = (TwoWayView) root.findViewById(R.id.twvArtists);
         artistLayout.setAdapter(mAdapter);
+
+        final Drawable divider = getResources().getDrawable(R.drawable.divider);
+        artistLayout.addItemDecoration(new DividerItemDecoration(divider));
+
+        final ItemClickSupport itemClick = ItemClickSupport.addTo(artistLayout);
+        itemClick.setOnItemClickListener(mItemClickListener);
 
         new Thread() {
             public void run() {

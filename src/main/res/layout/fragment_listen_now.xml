@@ -4,6 +4,7 @@
     android:id="@+id/twvRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="2dp"
     app:layoutManager="StaggeredGridLayoutManager"
     app:numColumns="2"
     app:numRows="300"

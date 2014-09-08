@@ -1,7 +1,5 @@
 package org.omnirom.music.app.adapters;
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -19,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
@@ -104,28 +101,6 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         }
     };
 
-    private final View.OnClickListener mItemClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
-            final Context ctx = view.getContext();
-            String artistRef = getItem(tag.position).getRef();
-            Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artistRef, tag.itemColor);
-
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                        /*AlbumArtImageView ivCover = tag.ivCover;
-                        TextView tvTitle = tag.tvTitle;
-                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                            new Pair<View, String>(ivCover, "itemImage"),
-                            new Pair<View, String>(tvTitle, "artistName"));
-
-                        ctx.startActivity(intent, opt.toBundle()); */
-            } else {
-                ctx.startActivity(intent);
-            }
-        }
-    };
-
     private final List<Artist> mArtists;
     private final Handler mHandler;
     private final Comparator<Artist> mComparator;
@@ -136,7 +111,11 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         mComparator = new Comparator<Artist>() {
             @Override
             public int compare(Artist artist, Artist artist2) {
-                return artist.getName().compareTo(artist2.getName());
+                if (artist.isLoaded() && artist2.isLoaded()) {
+                    return artist.getName().compareTo(artist2.getName());
+                } else {
+                    return 0;
+                }
             }
         };
     }
@@ -204,7 +183,6 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
 
         // Setup album art listener
         holder.ivCover.setOnArtLoadedListener(mAlbumArtListener);
-        holder.llRoot.setOnClickListener(mItemClickListener);
 
         return holder;
     }
@@ -215,29 +193,27 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         final Artist artist = getItem(position);
 
         // If we're not already displaying the right stuff, reset it and show it
-        if (tag.artist == null || !tag.artist.isIdentical(artist)) {
-            tag.artist = artist;
-            tag.position = position;
+        tag.artist = artist;
+        tag.position = position;
 
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                // tag.ivCover.setViewName("grid:image:" + artist.getRef());
-                // tag.tvTitle.setViewName("grid:title:" + artist.getRef());
-            }
-
-            if (artist.isLoaded()) {
-                tag.tvTitle.setText(artist.getName());
-            } else {
-                tag.tvTitle.setText("...");
-            }
-
-            // Load the artist art
-            final Resources res = tag.llRoot.getResources();
-            final int defaultColor = res.getColor(R.color.default_album_art_background);
-
-            tag.llRoot.setBackgroundColor(defaultColor);
-            tag.itemColor = defaultColor;
-            tag.ivCover.loadArtForArtist(artist);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            // tag.ivCover.setViewName("grid:image:" + artist.getRef());
+            // tag.tvTitle.setViewName("grid:title:" + artist.getRef());
         }
+
+        if (artist.isLoaded()) {
+            tag.tvTitle.setText(artist.getName());
+        } else {
+            tag.tvTitle.setText("...");
+        }
+
+        // Load the artist art
+        final Resources res = tag.llRoot.getResources();
+        final int defaultColor = res.getColor(R.color.default_album_art_background);
+
+        tag.llRoot.setBackgroundColor(defaultColor);
+        tag.itemColor = defaultColor;
+        tag.ivCover.loadArtForArtist(artist);
     }
 
     @Override

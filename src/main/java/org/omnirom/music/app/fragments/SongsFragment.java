@@ -16,16 +16,10 @@ import android.widget.ListView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.SongsListAdapter;
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.model.Album;
-import org.omnirom.music.model.Artist;
-import org.omnirom.music.model.Playlist;
-import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
-import org.omnirom.music.providers.ILocalCallback;
-import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.BasePlaybackCallback;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.util.List;
 
@@ -110,7 +104,10 @@ public class SongsFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
+            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+            if (service != null) {
+                service.addCallback(mPlaybackCallback);
+            }
         } catch (RemoteException e) {
             // ignore
         }
