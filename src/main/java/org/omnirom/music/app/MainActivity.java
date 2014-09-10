@@ -6,13 +6,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.net.http.HttpResponseCache;
-import android.os.*;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.Process;
+import android.os.RemoteException;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.MediaRouteActionProvider;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,11 +31,14 @@ import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
+import org.omnirom.music.framework.CastModule;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.WSStreamer;
 import org.omnirom.music.service.IPlaybackService;
 
+import java.net.UnknownHostException;
 
-public class MainActivity extends FragmentActivity
+public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     private static final String TAG = "MainActivity";
@@ -58,7 +65,9 @@ public class MainActivity extends FragmentActivity
 
     private boolean mRestoreBarOnBack;
 
-    private SearchView mSearchView;
+    private CastModule mCastModule;
+
+
 
     public MainActivity() {
 
@@ -84,7 +93,11 @@ public class MainActivity extends FragmentActivity
         // Setup the playing bar click listener
         mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
 
+        // Control MUSIC volume with the volume buttons by default now
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        // Setup Cast button
+        mCastModule = new CastModule(this);
     }
 
     public boolean isPlayBarVisible() {
@@ -109,6 +122,18 @@ public class MainActivity extends FragmentActivity
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    protected void onStart() {
+        mCastModule.onStart();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        mCastModule.onStop();
+        super.onStop();
     }
 
     @Override
@@ -231,19 +256,32 @@ public class MainActivity extends FragmentActivity
             getMenuInflater().inflate(R.menu.main, menu);
             SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
-            mSearchView = (SearchView) menu.findItem(R.id.action_search)
-                   .getActionView();
-            mSearchView.setSearchableInfo(searchManager
+            SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+                    .getActionView();
+            searchView.setSearchableInfo(searchManager
                     .getSearchableInfo(getComponentName()));
 
-            int searchTextViewId = mSearchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-            TextView searchTextView = (TextView) mSearchView.findViewById(searchTextViewId);
+            int searchTextViewId = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            TextView searchTextView = (TextView) searchView.findViewById(searchTextViewId);
             searchTextView.setHintTextColor(getResources().getColor(R.color.white));
 
             // Google, why is searchView using a Gingerbread-era enforced icon?
             int searchImgId = getResources().getIdentifier("android:id/search_button", null, null);
-            ImageView v = (ImageView) mSearchView.findViewById(searchImgId);
+            ImageView v = (ImageView) searchView.findViewById(searchImgId);
             v.setImageResource(R.drawable.ic_action_search);
+
+            // Setup cast button on 4.2+
+            MenuItem castMenu = menu.findItem(R.id.action_cast);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                Log.d(TAG, "Showing cast action");
+                MediaRouteActionProvider mediaRouteActionProvider =
+                        (MediaRouteActionProvider) MenuItemCompat.getActionProvider(castMenu);
+                mediaRouteActionProvider.setRouteSelector(mCastModule.getSelector());
+                castMenu.setVisible(true);
+            } else {
+                Log.w(TAG, "Api too low to show cast action");
+                castMenu.setVisible(false);
+            }
 
             restoreActionBar();
             return true;

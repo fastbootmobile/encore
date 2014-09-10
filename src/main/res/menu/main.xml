@@ -1,40 +1,42 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="org.omnirom.music.app.MainActivity">
 
     <item
         android:id="@+id/action_cast"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
+        app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
         android:title="@string/cast"
         android:icon="@drawable/ic_media_route_off_holo_dark" />
 
     <item
         android:id="@+id/action_search"
-        android:showAsAction="ifRoom|collapseActionView"
+        app:showAsAction="ifRoom|collapseActionView"
         android:title="@string/search"
         android:icon="@drawable/ic_action_search"
-        android:actionViewClass="android.widget.SearchView"/>
+        app:actionViewClass="android.widget.SearchView"/>
 
 
     <item
         android:id="@+id/action_sound_effects"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="Sound effects" />
 
     <item
         android:id="@+id/action_offline_mode"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:checkable="true"
         android:title="Offline mode" />
 
     <item
         android:id="@+id/action_feedback"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="Feedback" />
 
     <item
         android:id="@+id/action_settings"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/settings" />
 
 </menu>

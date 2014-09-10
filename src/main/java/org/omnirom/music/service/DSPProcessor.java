@@ -7,12 +7,14 @@ import com.google.protobuf.ByteString;
 
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.WSStreamer;
 import org.omnirom.music.providers.AudioHostSocket;
 import org.omnirom.music.providers.AudioSocket;
 import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,7 @@ public class DSPProcessor {
     private int mChannels = DEFAULT_CHANNELS;
     private long mLastRmsPoll = 0;
     private int mLastRms = 0;
+    private WSStreamer mStreamer;
     private PlaybackService mPlaybackService;
     private List<ProviderIdentifier> mDSPChain;
 
@@ -108,6 +111,12 @@ public class DSPProcessor {
     public DSPProcessor(PlaybackService pbs) {
         mPlaybackService = pbs;
         mDSPChain = new ArrayList<ProviderIdentifier>();
+        try {
+            mStreamer = new WSStreamer(8887);
+            mStreamer.start();
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "Error port 8887", e);
+        }
     }
 
     public AudioSocket.ISocketCallback getProviderCallback() {
@@ -185,6 +194,9 @@ public class DSPProcessor {
             // We're at the end of the DSP chain, so push that out to the current audio sink
             if (mSink != null) {
                 mSink.write(frames, numframes);
+            }
+            if (mStreamer != null) {
+                mStreamer.write(frames, numframes);
             }
         } else {
             // More plugins, feed them
