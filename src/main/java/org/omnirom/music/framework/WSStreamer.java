@@ -3,21 +3,18 @@ package org.omnirom.music.framework;
 import android.util.Log;
 
 import org.java_websocket.WebSocket;
-import org.java_websocket.framing.Framedata;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
+import java.util.Collection;
 
 /**
  * Created by Guigui on 10/09/2014.
  */
 public class WSStreamer extends WebSocketServer {
     private static final String TAG = "WSStreamer";
-
-    private WebSocket mClient;
 
     public WSStreamer(int port) throws UnknownHostException {
         super(new InetSocketAddress(port));
@@ -29,21 +26,13 @@ public class WSStreamer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake clientHandshake) {
-        Log.e(TAG, "Client connected: " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
-        if (mClient != null) {
-            Log.e(TAG, "Client kicked as we already have one");
-            conn.closeConnection(0, "Only one client is allowed");
-        } else {
-            mClient = conn;
-        }
+        Log.d(TAG, "Streaming client connected: "
+                + conn.getRemoteSocketAddress().getAddress().getHostAddress());
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String s, boolean b) {
-        Log.e(TAG, "Client disconnected");
-        if (conn == mClient) {
-            mClient = null;
-        }
+        Log.d(TAG, "Streaming client disconnected: " + s);
     }
 
     @Override
@@ -57,11 +46,10 @@ public class WSStreamer extends WebSocketServer {
     }
 
     public void write(byte[] frames, int numframes) {
-        if (mClient != null) {
-            if (mClient.isOpen()) {
-                mClient.send(frames);
-            } else {
-                mClient = null;
+        Collection<WebSocket> clients = connections();
+        for (WebSocket client : clients) {
+            if (client.isOpen()) {
+                client.send(frames);
             }
         }
     }
