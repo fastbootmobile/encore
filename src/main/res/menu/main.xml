@@ -7,8 +7,7 @@
         android:id="@+id/action_cast"
         app:showAsAction="ifRoom"
         app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-        android:title="@string/cast"
-        android:icon="@drawable/ic_media_route_off_holo_dark" />
+        android:title="@string/cast" />
 
     <item
         android:id="@+id/action_search"
@@ -21,18 +20,18 @@
     <item
         android:id="@+id/action_sound_effects"
         app:showAsAction="never"
-        android:title="Sound effects" />
+        android:title="@string/sound_effects" />
 
     <item
         android:id="@+id/action_offline_mode"
         app:showAsAction="never"
         android:checkable="true"
-        android:title="Offline mode" />
+        android:title="@string/offline_mode" />
 
     <item
         android:id="@+id/action_feedback"
         app:showAsAction="never"
-        android:title="Feedback" />
+        android:title="@string/feedback" />
 
     <item
         android:id="@+id/action_settings"

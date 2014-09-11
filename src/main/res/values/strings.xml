@@ -123,6 +123,9 @@
     <string name="automix_bucket_name">Bucket name</string>
     <string name="cannot_login">Cannot login to %s, check credentials</string>
     <string name="automix_create">Create</string>
+    <string name="sound_effects">Sound effects</string>
+    <string name="offline_mode">Offline mode</string>
+    <string name="feedback">Feedback</string>
 
     <plurals name="songs_count">
         <item quantity="zero">No songs</item>
