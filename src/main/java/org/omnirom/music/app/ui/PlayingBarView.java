@@ -212,6 +212,24 @@ public class PlayingBarView extends RelativeLayout {
         mProgressDrawable.setPadding(Utils.dpToPx(getResources(), 2));
         mPlayFabDrawable = new PlayPauseDrawable(getResources());
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+
+        // Set the original state
+        IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+        try {
+            if (pbService != null && pbService.isPlaying()) {
+                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                mIsPlaying = true;
+                mProgressDrawable.setMax(pbService.getCurrentTrackLength());
+                mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
+            } else {
+                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                mIsPlaying = false;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error while retrieving playback status", e);
+            mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+        }
+
         LayerDrawable drawable = new LayerDrawable(new Drawable[]{
                 mProgressDrawable, mPlayFabDrawable
         });
@@ -575,7 +593,6 @@ public class PlayingBarView extends RelativeLayout {
         if (wrapped && mLastQueue != null) {
             final int itemHeight = getResources().getDimensionPixelSize(R.dimen.playing_bar_height);
             final int translationY = itemHeight * Math.min(mLastQueue.size(), MAX_PEEK_QUEUE_SIZE);
-            Log.e(TAG, "Translation Y: " + translationY);
             if (animation) {
                 animate().translationY(translationY)
                         .setDuration(mAnimationDuration)
@@ -584,7 +601,6 @@ public class PlayingBarView extends RelativeLayout {
                 setTranslationY(translationY);
             }
         } else {
-            Log.e(TAG, "Translation Y: 0");
             if (animation) {
                 animate().translationY(0).setDuration(mAnimationDuration).start();
             } else {
