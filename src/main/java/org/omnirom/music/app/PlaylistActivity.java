@@ -54,8 +54,8 @@ public class PlaylistActivity extends FragmentActivity {
             fm.beginTransaction()
                     .add(R.id.playlist_container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
+            mActiveFragment.setArguments(mInitialIntent);
         }
-        mActiveFragment.setArguments(mInitialIntent);
 
         // Remove title
         setTitle(null);

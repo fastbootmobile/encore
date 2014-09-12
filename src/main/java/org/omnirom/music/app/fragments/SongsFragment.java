@@ -84,8 +84,10 @@ public class SongsFragment extends Fragment {
                 IMusicProvider provider = providerConnection.getBinder();
                 if (provider != null) {
                     List<Song> songs = provider.getSongs();
-                    for (Song song : songs) {
-                        mSongsListAdapter.put(song);
+                    if (songs != null) {
+                        for (Song song : songs) {
+                            mSongsListAdapter.put(song);
+                        }
                     }
                 }
             } catch (DeadObjectException e) {
