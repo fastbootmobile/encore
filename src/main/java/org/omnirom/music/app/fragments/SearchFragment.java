@@ -1,9 +1,7 @@
 package org.omnirom.music.app.fragments;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,7 +41,7 @@ import java.util.List;
  */
 public class SearchFragment extends Fragment implements ILocalCallback {
     private SearchAdapter mAdapter;
-    private SearchResult mSearchResult;
+    private static SearchResult sSearchResult;
     private Handler mHandler;
     private static final String KEY_PLAYLIST = "playlist";
     private String TAG = "SearchFragment";
@@ -75,7 +73,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i2, long l) {
-                if (mSearchResult != null) {
+                if (sSearchResult != null) {
                     switch (i) {
                         case SearchAdapter.ARTIST:
                             onArtistClick(i2, view);
@@ -103,17 +101,23 @@ public class SearchFragment extends Fragment implements ILocalCallback {
                     return false;
             }
         });
+
+        if (sSearchResult != null) {
+            mAdapter.updateSearchResults(sSearchResult, sSearchResult.getIdentifier());
+            mAdapter.notifyDataSetChanged();
+        }
+
         return root;
     }
 
     private void onSongClick(int i) {
-        final List<String> list = mSearchResult.getSongsList();
+        final List<String> list = sSearchResult.getSongsList();
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
         if (i == Math.max(10, list.size() + 1)) {
             // More
         } else {
-            Song song = aggregator.retrieveSong(list.get(i), mSearchResult.getIdentifier());
+            Song song = aggregator.retrieveSong(list.get(i), sSearchResult.getIdentifier());
             if (song != null) {
                 try {
                     PluginsLookup.getDefault().getPlaybackService().playSong(song);
@@ -144,7 +148,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
             }
         }
         Album album = aggregator.retrieveAlbum((String) mAdapter.getChild(SearchAdapter.ALBUM, i),
-                mSearchResult.getIdentifier());
+                sSearchResult.getIdentifier());
         Intent intent = AlbumActivity.craftIntent(getActivity(), hero, album, color);
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
@@ -198,7 +202,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     private void onPlaylistClick(int i, View v) {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         Playlist playlist = aggregator.retrievePlaylist((String) mAdapter.getChild(SearchAdapter.PLAYLIST, i),
-                mSearchResult.getIdentifier());
+                sSearchResult.getIdentifier());
         Intent intent = PlaylistActivity.craftIntent(getActivity(), playlist);
         startActivity(intent);
     }
@@ -245,23 +249,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
             }
         });
 
-        if (false) {
-            Log.e(TAG, "============================");
-            Log.e(TAG, "= Result contents: ");
-            Log.e(TAG, "= Albums: " + searchResult.getAlbumsList().size());
-            for (String ref : searchResult.getAlbumsList()) {
-                Log.e(TAG, "=== " + ref);
-            }
-            Log.e(TAG, "= Artist: " + searchResult.getArtistList().size());
-            for (String ref : searchResult.getArtistList()) {
-                Log.e(TAG, "=== " + ref);
-            }
-            Log.e(TAG, "= Playlist: " + searchResult.getPlaylistList().size());
-            Log.e(TAG, "= Songs: " + searchResult.getSongsList().size());
-            Log.e(TAG, "============================");
-        }
-
-        mSearchResult = searchResult;
+        sSearchResult = searchResult;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
