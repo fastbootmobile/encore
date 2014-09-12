@@ -524,13 +524,35 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             public void onClick(View view) {
                 Song song = (Song) view.getTag();
 
+                IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
                 try {
-                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
+                    pbService.playSong(song);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to play song", e);
                     return;
                 }
 
+                // Queue remaining album tracks
+                try {
+                    final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+                    Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
+
+                    Iterator<String> songs = album.songs();
+                    boolean foundCurrent = false;
+                    while (songs.hasNext()) {
+                        String songRef = songs.next();
+
+                        if (foundCurrent) {
+                            pbService.queueSong(aggregator.retrieveSong(songRef, song.getProvider()), false);
+                        } else if (songRef.equals(song.getRef())) {
+                            foundCurrent = true;
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to queue album tracks", e);
+                }
+
+                // Update UI
                 boldPlayingTrack(song);
                 updatePlayingAlbum(song.getAlbum());
             }
