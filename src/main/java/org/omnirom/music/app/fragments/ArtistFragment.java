@@ -970,14 +970,16 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mLoadingSpinner.setVisibility(View.GONE);
+                            if (mLoadingSpinner != null && mArtistInfo != null) {
+                                mLoadingSpinner.setVisibility(View.GONE);
 
-                            if (bio != null) {
-                                mArtistInfo.setText(getString(R.string.biography_format,
-                                        bio.getText(), bio.getSite(), bio.getURL(),
-                                        bio.getLicenseType(), bio.getLicenseAttribution()));
-                            } else {
-                                mArtistInfo.setText(getString(R.string.no_bio_available));
+                                if (bio != null) {
+                                    mArtistInfo.setText(getString(R.string.biography_format,
+                                            bio.getText(), bio.getSite(), bio.getURL(),
+                                            bio.getLicenseType(), bio.getLicenseAttribution()));
+                                } else {
+                                    mArtistInfo.setText(getString(R.string.no_bio_available));
+                                }
                             }
                         }
                     });
