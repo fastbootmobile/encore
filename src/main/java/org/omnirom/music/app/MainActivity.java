@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
@@ -67,6 +68,8 @@ public class MainActivity extends FragmentActivity
     private CastModule mCastModule;
 
     private Handler mHandler;
+
+    private int mCurrentFragmentIndex;
 
 
     public MainActivity() {
@@ -157,11 +160,20 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Reload the current fragment for layout changes
+        onNavigationDrawerItemSelected(mCurrentFragmentIndex);
+    }
+
+    @Override
     public boolean onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         boolean result = true;
         try {
             Fragment newFrag = null;
+            mCurrentFragmentIndex = position;
             switch (position+1) {
                 case SECTION_LISTEN_NOW:
                     newFrag = ListenNowFragment.newInstance();

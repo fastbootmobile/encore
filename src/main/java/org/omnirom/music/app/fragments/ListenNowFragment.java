@@ -1,6 +1,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -214,6 +215,11 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     public void onDetach() {
         super.onDetach();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override
