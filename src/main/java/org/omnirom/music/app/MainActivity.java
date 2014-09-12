@@ -95,6 +95,7 @@ public class MainActivity extends FragmentActivity
 
         // Setup the playing bar click listener
         mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
+        mPlayingBarLayout.setWrapped(true, false);
 
         // Control MUSIC volume with the volume buttons by default now
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
