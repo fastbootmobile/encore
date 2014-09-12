@@ -83,7 +83,12 @@ public class NotifActionService extends IntentService {
      */
     private void handleActionNext() {
         try {
-            getPlaybackService().next();
+            IPlaybackService service = getPlaybackService();
+            if (service != null) {
+                getPlaybackService().next();
+            } else {
+                Log.e(TAG, "Notification is up but Playback Service is dead?!");
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to skip to next song", e);
         }
@@ -94,7 +99,12 @@ public class NotifActionService extends IntentService {
      */
     private void handleActionStop() {
         try {
-            getPlaybackService().stop();
+            IPlaybackService service = getPlaybackService();
+            if (service != null) {
+                getPlaybackService().stop();
+            } else {
+                Log.e(TAG, "Notification is up but Playback Service is dead?!");
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to skip to next song", e);
         }
@@ -106,10 +116,14 @@ public class NotifActionService extends IntentService {
     private void handleActionTogglePause() {
         try {
             IPlaybackService service = getPlaybackService();
-            if (service.isPaused()) {
-                service.play();
+            if (service != null) {
+                if (service.isPaused()) {
+                    service.play();
+                } else {
+                    service.pause();
+                }
             } else {
-                service.pause();
+                Log.e(TAG, "Notification is up but Playback Service is dead?!");
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to skip to next song", e);
