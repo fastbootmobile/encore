@@ -542,8 +542,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mHandler = new Handler();
 
             // Load recommendation and albums
-            loadRecommendation();
-            loadAlbums(true);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    loadRecommendation();
+                    loadAlbums(true);
+                }
+            });
 
             return mRootView;
         }

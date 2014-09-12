@@ -2,6 +2,7 @@ package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -17,6 +18,7 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.SongsListAdapter;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
@@ -79,11 +81,16 @@ public class SongsFragment extends Fragment {
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
         for (ProviderConnection providerConnection : providers) {
             try {
-                List<Song> songs = providerConnection.getBinder().getSongs();
-                for (Song song : songs) {
-                    mSongsListAdapter.put(song);
+                IMusicProvider provider = providerConnection.getBinder();
+                if (provider != null) {
+                    List<Song> songs = provider.getSongs();
+                    for (Song song : songs) {
+                        mSongsListAdapter.put(song);
+                    }
                 }
-            } catch (Exception e) {
+            } catch (DeadObjectException e) {
+                Log.e(TAG, "Provider died while getting songs");
+            } catch (RemoteException e) {
                 Log.w(TAG, "Cannot get songs from a provider", e);
             }
         }
@@ -96,8 +103,7 @@ public class SongsFragment extends Fragment {
     }
 
     public static SongsFragment newInstance() {
-        SongsFragment fragment = new SongsFragment();
-        return fragment;
+        return new SongsFragment();
     }
 
     @Override
