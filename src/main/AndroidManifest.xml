@@ -89,6 +89,12 @@
             android:label="@string/title_activity_automix_create" >
         </activity>
 
+        <activity android:name="org.acra.CrashReportDialog"
+            android:theme="@android:style/Theme.Holo.Dialog"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true" />
+
         <service
             android:name="org.omnirom.music.service.NotifActionService"
             android:exported="false" >
