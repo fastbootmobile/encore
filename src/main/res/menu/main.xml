@@ -1,41 +1,40 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="org.omnirom.music.app.MainActivity">
 
     <item
         android:id="@+id/action_cast"
-        app:showAsAction="ifRoom"
-        app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+        android:showAsAction="ifRoom"
+        android:actionProviderClass="com.commonsware.cwac.mediarouter.MediaRouteActionProvider"
         android:title="@string/cast" />
 
     <item
         android:id="@+id/action_search"
-        app:showAsAction="ifRoom|collapseActionView"
+        android:showAsAction="ifRoom|collapseActionView"
         android:title="@string/search"
         android:icon="@drawable/ic_action_search"
-        app:actionViewClass="android.widget.SearchView"/>
+        android:actionViewClass="android.widget.SearchView"/>
 
 
     <item
         android:id="@+id/action_sound_effects"
-        app:showAsAction="never"
+        android:showAsAction="never"
         android:title="@string/sound_effects" />
 
     <item
         android:id="@+id/action_offline_mode"
-        app:showAsAction="never"
+        android:showAsAction="never"
         android:checkable="true"
         android:title="@string/offline_mode" />
 
     <item
         android:id="@+id/action_feedback"
-        app:showAsAction="never"
+        android:showAsAction="never"
         android:title="@string/feedback" />
 
     <item
         android:id="@+id/action_settings"
-        app:showAsAction="never"
+        android:showAsAction="never"
         android:title="@string/settings" />
 
 </menu>

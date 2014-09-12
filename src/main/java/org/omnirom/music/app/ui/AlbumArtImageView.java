@@ -23,6 +23,9 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -46,6 +49,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private BoundEntity mRequestedEntity;
     private MaterialTransitionDrawable mDrawable;
     private boolean mCrossfade;
+    private Bitmap mPlaylistComposite;
+    private List<Bitmap> mPlaylistSource;
 
 
     public AlbumArtImageView(Context context) {
@@ -124,14 +129,19 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     }
 
     public void loadArtForPlaylist(final Playlist playlist) {
-        String mainArtistRef = Utils.getMainArtist(playlist);
-        if (mainArtistRef != null) {
-            Artist artist = ProviderAggregator.getDefault().retrieveArtist(mainArtistRef,
-                    playlist.getProvider());
-            loadArtImpl(artist);
-        } else {
-            setDefaultArt();
+        if (playlist == null || playlist.equals(mRequestedEntity)) {
+            // Nothing to do, we are displaying this already
+            return;
         }
+
+        // Load 4 songs and composite them into one picture
+        mPlaylistComposite = Bitmap.createBitmap(1080, 1080, Bitmap.Config.ARGB_8888);
+        mPlaylistSource = new ArrayList<Bitmap>();
+
+        if (playlist.getSongsCount() >= 4) {
+            
+        }
+
     }
 
     private void loadArtImpl(final BoundEntity ent) {

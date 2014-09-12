@@ -84,19 +84,20 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="support-v13-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-21.0.0-rc1" level="project" />
+    <orderEntry type="library" exported="" name="support-v13-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="recyclerview-v7-21.0.0-rc1" level="project" />
     <orderEntry type="library" exported="" name="mediarouter-v7-20.0.0" level="project" />
-    <orderEntry type="library" exported="" name="support-v4-21.0.0-rc1" level="project" />
     <orderEntry type="library" exported="" name="java_websocket" level="project" />
-    <orderEntry type="library" exported="" name="cardview-v7-21.0.0-rc1" level="project" />
-    <orderEntry type="library" exported="" name="appcompat-v7-20.0.0" level="project" />
+    <orderEntry type="library" exported="" name="support-v4-21.0.0-rc1" level="project" />
     <orderEntry type="library" exported="" name="palette-v7-21.0.0-rc1" level="project" />
-    <orderEntry type="library" exported="" name="json_simple-1.1" level="project" />
     <orderEntry type="library" exported="" name="acra-4.5.0" level="project" />
-    <orderEntry type="library" exported="" name="google-play-services" level="project" />
     <orderEntry type="library" exported="" name="jEN" level="project" />
+    <orderEntry type="library" exported="" name="appcompat-v7-20.0.0" level="project" />
+    <orderEntry type="library" exported="" name="cardview-v7-21.0.0-rc1" level="project" />
+    <orderEntry type="library" exported="" name="json_simple-1.1" level="project" />
+    <orderEntry type="library" exported="" name="cwac-mediarouter-0.1.2" level="project" />
+    <orderEntry type="library" exported="" name="google-play-services" level="project" />
     <orderEntry type="module" module-name="providerlib" exported="" />
     <orderEntry type="module" module-name="google_play_services" exported="" />
   </component>

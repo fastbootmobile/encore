@@ -8,18 +8,20 @@ import android.media.AudioManager;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.MediaRouteActionProvider;
+import com.commonsware.cwac.mediarouter.MediaRouteActionProvider;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -33,12 +35,9 @@ import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.CastModule;
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.framework.WSStreamer;
 import org.omnirom.music.service.IPlaybackService;
 
-import java.net.UnknownHostException;
-
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     private static final String TAG = "MainActivity";
@@ -67,10 +66,11 @@ public class MainActivity extends ActionBarActivity
 
     private CastModule mCastModule;
 
+    private Handler mHandler;
 
 
     public MainActivity() {
-
+        mHandler = new Handler();
     }
 
     @Override
@@ -234,8 +234,18 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    public void setContentShadowTop(int pxTop) {
-        findViewById(R.id.action_bar_shadow).setTranslationY(pxTop);
+    public void setContentShadowTop(final int pxTop) {
+        View actionBarShadow = findViewById(R.id.action_bar_shadow);
+        if (actionBarShadow != null) {
+            actionBarShadow.setTranslationY(pxTop);
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    setContentShadowTop(pxTop);
+                }
+            });
+        }
     }
 
     public void restoreActionBar() {
@@ -275,7 +285,7 @@ public class MainActivity extends ActionBarActivity
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 Log.d(TAG, "Showing cast action");
                 MediaRouteActionProvider mediaRouteActionProvider =
-                        (MediaRouteActionProvider) MenuItemCompat.getActionProvider(castMenu);
+                        (MediaRouteActionProvider) castMenu.getActionProvider();
                 mediaRouteActionProvider.setRouteSelector(mCastModule.getSelector());
                 castMenu.setVisible(true);
             } else {
