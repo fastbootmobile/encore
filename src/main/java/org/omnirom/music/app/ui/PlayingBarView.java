@@ -147,7 +147,7 @@ public class PlayingBarView extends RelativeLayout {
         }
     };
 
-    private static final int MAX_PEEK_QUEUE_SIZE = 4;
+    private static final int MAX_PEEK_QUEUE_SIZE = 3;
 
     private Song mCurrentSong;
     private boolean mIsPlaying;
@@ -575,6 +575,7 @@ public class PlayingBarView extends RelativeLayout {
         if (wrapped && mLastQueue != null) {
             final int itemHeight = getResources().getDimensionPixelSize(R.dimen.playing_bar_height);
             final int translationY = itemHeight * Math.min(mLastQueue.size(), MAX_PEEK_QUEUE_SIZE);
+            Log.e(TAG, "Translation Y: " + translationY);
             if (animation) {
                 animate().translationY(translationY)
                         .setDuration(mAnimationDuration)
@@ -583,6 +584,7 @@ public class PlayingBarView extends RelativeLayout {
                 setTranslationY(translationY);
             }
         } else {
+            Log.e(TAG, "Translation Y: 0");
             if (animation) {
                 animate().translationY(0).setDuration(mAnimationDuration).start();
             } else {
