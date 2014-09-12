@@ -118,6 +118,11 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 }
 
                 Song track = aggregator.retrieveSong(trackRef, provider);
+                if (track == null) {
+                    // Some error while loading this track! Try another
+                    i--;
+                    continue;
+                }
 
                 // Now that we have the entity, let's figure if it's a big or small entry
                 boolean isLarge = ((i % 7) == 0);
