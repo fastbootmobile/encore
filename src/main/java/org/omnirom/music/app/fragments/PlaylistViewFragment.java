@@ -60,7 +60,12 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
         public void onSongStarted(Song s) throws RemoteException {
-            mAdapter.notifyDataSetChanged();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.notifyDataSetChanged();
+                }
+            });
         }
     };
 
@@ -223,6 +228,10 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                                 pbService.queueSong(song, false);
                             }
                         }
+
+                        // Update FAB
+                        mFabShouldResume = true;
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to play song", e);
                     }

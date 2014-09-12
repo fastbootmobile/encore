@@ -2,18 +2,11 @@ package org.omnirom.music.app.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.ThumbnailUtils;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,14 +14,10 @@ import android.widget.TextView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
-import org.omnirom.music.framework.AlbumArtHelper;
-import org.omnirom.music.framework.BlurCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
-import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
@@ -41,10 +30,7 @@ import java.util.List;
  */
 public class SongsListAdapter extends BaseAdapter {
     protected List<Song> mSongs;
-    private int mItemWidth;
-    private int mItemHeight;
     private boolean mShowAlbumArt;
-    private Handler mHandler;
 
     public static class ViewHolder {
         public TextView tvTitle;
@@ -72,19 +58,6 @@ public class SongsListAdapter extends BaseAdapter {
         assert res != null;
         mSongs = new ArrayList<Song>();
         mShowAlbumArt = showAlbumArt;
-        mHandler = new Handler();
-
-        // Theoretically, we'd need the width and height of the root view. However, this thread
-        // might (and probably will) run before the view has been layout'd by the system, thus
-        // getMeasuredXxxx() returns 0, which is invalid for the thumbnail we want. Instead,
-        // we use the defined height dimension, and the screen width.
-        WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-
-        mItemWidth = size.x;
-        mItemHeight = res.getDimensionPixelSize(R.dimen.playlist_view_item_height);
     }
 
     public void clear() {
@@ -102,7 +75,10 @@ public class SongsListAdapter extends BaseAdapter {
                 return lhs.getTitle().compareTo(rhs.getTitle());
             }
         });
+    }
 
+    public boolean contains(Song s) {
+        return mSongs.contains(s);
     }
 
     @Override
@@ -128,7 +104,7 @@ public class SongsListAdapter extends BaseAdapter {
         View root = convertView;
         if (convertView == null) {
             // Recycle the existing view
-            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = LayoutInflater.from(ctx);
             root = inflater.inflate(R.layout.item_playlist_view, parent, false);
             assert root != null;
 

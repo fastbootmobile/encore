@@ -157,12 +157,17 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         break;
                 }
 
-                ListenNowAdapter.ListenNowEntry entry = new ListenNowAdapter.ListenNowEntry(
-                        isLarge ? ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_LARGE
-                                : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
-                        entity);
-                mAdapter.addEntry(entry);
-                mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
+                if (entity != null) {
+                    ListenNowAdapter.ListenNowEntry entry = new ListenNowAdapter.ListenNowEntry(
+                            isLarge ? ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_LARGE
+                                    : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
+                            entity);
+                    mAdapter.addEntry(entry);
+                    mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
+                } else {
+                    // Something bad happened while getting this entity, try something else
+                    i--;
+                }
             }
         }
     };

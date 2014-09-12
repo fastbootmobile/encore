@@ -33,10 +33,13 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 
 import java.util.Iterator;
 import java.util.List;
+
+import omnimusic.Plugin;
 
 /**
  * Created by h4o on 26/06/2014.
@@ -53,6 +56,20 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private int mBackgroundColor;
     private ImageButton mPlayFab;
     private boolean mFabShouldResume = false;
+
+    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
+        @Override
+        public void onSongStarted(Song s) throws RemoteException {
+            if (mAdapter.contains(s)) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }
+    };
 
     private Runnable mLoadSongsRunnable = new Runnable() {
         @Override
@@ -219,18 +236,22 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         ProviderAggregator.getDefault().addUpdateCallback(this);
-       /* mFadingHelper = new FadingActionBarHelper()
-                .actionBarBackground(mBackgroundColor)
-                .headerLayout(R.layout.header_light)
-                .contentLayout(R.layout.activity_scrollview)
-                .lightActionBar(mBackgroundColor);
-        mFadingHelper.initActionBar(activity);*/
+        try {
+            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error while adding playback callback", e);
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
+        try {
+            PluginsLookup.getDefault().getPlaybackService().removeCallback(mPlaybackCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error while adding playback callback", e);
+        }
     }
 
     public void setArguments(Bitmap hero, Bundle extras) {

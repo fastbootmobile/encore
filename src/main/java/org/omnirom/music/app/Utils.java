@@ -580,11 +580,18 @@ public class Utils {
     }
 
     public static void setupLargeFabShadow(View fab) {
-        setupFabShadow(fab, 110);
+        setupFabShadow(fab, Utils.dpToPx(fab.getResources(), 48));
     }
 
     public static void setupSmallFabShadow(View fab) {
-        setupFabShadow(fab, 68);
+        int measuredWidth = fab.getMeasuredWidth();
+        if (measuredWidth <= 0) {
+            measuredWidth = fab.getWidth();
+        }
+        if (measuredWidth <= 0) {
+            measuredWidth = Utils.dpToPx(fab.getResources(), 30);
+        }
+        setupFabShadow(fab, measuredWidth - 8);
     }
 
     private static void setupFabShadow(View fab, int radius) {
