@@ -21,6 +21,10 @@ public class GrayscaleRS {
     }
 
     public synchronized Bitmap apply(Bitmap input) {
+        if (input == null) {
+            return null;
+        }
+        
         Bitmap output = Bitmap.createBitmap(input.getWidth(), input.getHeight(), input.getConfig());
 
         int allocationExtraFlags = 0;
