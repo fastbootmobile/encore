@@ -164,7 +164,12 @@ public class MainActivity extends FragmentActivity
         super.onConfigurationChanged(newConfig);
 
         // Reload the current fragment for layout changes
-        onNavigationDrawerItemSelected(mCurrentFragmentIndex);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                onNavigationDrawerItemSelected(mCurrentFragmentIndex);
+            }
+        });
     }
 
     @Override
