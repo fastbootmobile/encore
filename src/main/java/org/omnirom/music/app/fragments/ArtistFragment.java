@@ -1105,8 +1105,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mArtistsGrid.setAdapter(mAdapter);
-                            mArtistsSpinner.setVisibility(View.GONE);
+                            if (mArtistsGrid != null && mArtistsSpinner != null) {
+                                mArtistsGrid.setAdapter(mAdapter);
+                                mArtistsSpinner.setVisibility(View.GONE);
+                            }
                         }
                     });
                 }
