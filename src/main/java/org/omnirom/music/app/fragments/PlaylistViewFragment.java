@@ -38,8 +38,6 @@ import org.omnirom.music.service.IPlaybackService;
 import java.util.Iterator;
 import java.util.List;
 
-import omnimusic.Plugin;
-
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass.
@@ -163,6 +161,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources());
+        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         mFabDrawable.setPaddingDp(48);
         mPlayFab.setImageDrawable(mFabDrawable);
         mPlayFab.setOnClickListener(new View.OnClickListener() {
