@@ -114,7 +114,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
                 if (artist.isLoaded() && artist2.isLoaded()) {
                     return artist.getName().compareTo(artist2.getName());
                 } else {
-                    return 0;
+                    return artist.getRef().compareTo(artist2.getRef());
                 }
             }
         };
