@@ -535,7 +535,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     for (ProviderConnection provider : mProviders) {
                         IMusicProvider binder = provider.getBinder();
                         try {
-                            binder.setOfflineMode(isEnabled);
+                            if (binder != null) {
+                                binder.setOfflineMode(isEnabled);
+                            }
                         } catch (RemoteException e) {
                             Log.e(TAG, "Cannot change offline mode on " + provider, e);
                         }
