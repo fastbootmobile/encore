@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import org.lucasr.twowayview.TwoWayView;
 import org.lucasr.twowayview.widget.DividerItemDecoration;
@@ -45,9 +47,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "ListenNowFragment";
 
-    private TwoWayView mRoot;
     private ListenNowAdapter mAdapter;
     private Handler mHandler;
+    private TextView mTxtNoMusic;
     private static boolean sWarmUp = false;
 
     /**
@@ -64,8 +66,11 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             int totalSongsCount = 0;
 
             if (playlists.size() <= 0) {
+                mTxtNoMusic.setVisibility(View.VISIBLE);
                 mHandler.postDelayed(this, 1000);
                 return;
+            } else {
+                mTxtNoMusic.setVisibility(View.GONE);
             }
 
             for (Playlist p : playlists) {
@@ -204,12 +209,16 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mRoot = (TwoWayView) inflater.inflate(R.layout.fragment_listen_now, container, false);
-        mRoot.setAdapter(mAdapter);
+        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listen_now, container, false);
+        TwoWayView twvRoot = (TwoWayView) root.findViewById(R.id.twvRoot);
+        mTxtNoMusic = (TextView) root.findViewById(R.id.txtNoMusic);
+
+        twvRoot.setAdapter(mAdapter);
         final Drawable divider = getResources().getDrawable(R.drawable.divider);
-        mRoot.addItemDecoration(new DividerItemDecoration(divider));
-        mRoot.setItemAnimator(new DefaultItemAnimator());
-        return mRoot;
+        twvRoot.addItemDecoration(new DividerItemDecoration(divider));
+        twvRoot.setItemAnimator(new DefaultItemAnimator());
+
+        return root;
     }
 
     @Override

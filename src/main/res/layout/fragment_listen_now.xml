@@ -1,12 +1,29 @@
-<org.lucasr.twowayview.TwoWayView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/twvRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="2dp"
-    app:layoutManager="StaggeredGridLayoutManager"
-    app:numColumns="2"
-    app:numRows="300"
-    android:orientation="vertical"
-    android:scrollbars="vertical" />
+    android:layout_height="match_parent">
+
+    <org.lucasr.twowayview.TwoWayView
+        android:id="@+id/twvRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="2dp"
+        android:scrollbars="vertical"
+        app:layoutManager="StaggeredGridLayoutManager"
+        app:numColumns="2"
+        app:numRows="300" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/txtNoMusic"
+        style="@style/FontHeadline"
+        android:textStyle="italic"
+        android:text="@string/no_music_hint"
+        android:gravity="center_horizontal"
+        android:padding="24dp"
+        android:textColor="#333333" />
+
+</FrameLayout>

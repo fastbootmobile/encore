@@ -147,4 +147,5 @@
     all you have to do is click OK.</string>
     <string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
     <string name="crash_dialog_ok_toast">Thank you !</string>
+    <string name="no_music_hint">You don\'t have any music. Configure a provider in the Settings, or copy music on your device via USB!</string>
 </resources>
