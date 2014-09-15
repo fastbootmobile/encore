@@ -21,7 +21,7 @@
         android:id="@+id/txtNoMusic"
         style="@style/FontHeadline"
         android:textStyle="italic"
-        android:text="@string/no_music_hint"
+        android:text="@string/loading"
         android:gravity="center_horizontal"
         android:padding="24dp"
         android:textColor="#333333" />

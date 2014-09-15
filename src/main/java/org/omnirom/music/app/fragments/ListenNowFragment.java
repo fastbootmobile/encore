@@ -51,6 +51,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     private Handler mHandler;
     private TextView mTxtNoMusic;
     private static boolean sWarmUp = false;
+    private int mWarmUpCount = 0;
 
     /**
      * Runnable responsible of generating the entries to put in the grid
@@ -65,8 +66,18 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
             int totalSongsCount = 0;
 
+            sWarmUp = true;
+
             if (playlists.size() <= 0) {
                 mTxtNoMusic.setVisibility(View.VISIBLE);
+                if (mWarmUpCount < 2) {
+                    mTxtNoMusic.setText(R.string.loading);
+                } else {
+                    mTxtNoMusic.setText(R.string.no_music_hint);
+                }
+
+                mWarmUpCount++;
+
                 mHandler.postDelayed(this, 1000);
                 return;
             } else {
@@ -198,7 +209,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
         // Generate entries
         if (!sWarmUp) {
-            sWarmUp = true;
             mHandler.postDelayed(mGenerateEntries, 1000);
         } else {
             mHandler.post(mGenerateEntries);
@@ -296,7 +306,10 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
-
+        if (sWarmUp) {
+            mHandler.removeCallbacks(mGenerateEntries);
+            mHandler.post(mGenerateEntries);
+        }
     }
 
     @Override
