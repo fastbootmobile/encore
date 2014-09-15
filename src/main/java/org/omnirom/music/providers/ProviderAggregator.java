@@ -43,6 +43,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private Map<String, ProviderIdentifier> mRosettaStoneMap = new HashMap<String, ProviderIdentifier>();
     private ThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(4);
     private Context mContext;
+    private boolean mIsOfflineMode = false;
 
     private Runnable mPostSongsRunnable = new Runnable() {
         @Override
@@ -518,6 +519,34 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 }
             }
         });
+    }
+
+    /**
+     * Notify the providers that the offline mode has changed
+     * @param isEnabled true if offline mode is enabled, false otherwise
+     */
+    public void notifyOfflineMode(final boolean isEnabled) {
+        mIsOfflineMode = isEnabled;
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mProviders) {
+                    for (ProviderConnection provider : mProviders) {
+                        IMusicProvider binder = provider.getBinder();
+                        try {
+                            binder.setOfflineMode(isEnabled);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot change offline mode on " + provider, e);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    public boolean isOfflineMode() {
+        return mIsOfflineMode;
     }
 
     /**

@@ -24,6 +24,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
@@ -603,6 +604,13 @@ public class Utils {
             shadow.setColors(new int[]{0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000,
                     0x80000000, 0x0});
             shadow.setGradientRadius(radius);
+        }
+    }
+
+    public static void setChildrenAlpha(ViewGroup root, final float alpha) {
+        final int childCount = root.getChildCount();
+        for (int i = 0; i < childCount; ++i) {
+            root.getChildAt(i).setAlpha(alpha);
         }
     }
 }

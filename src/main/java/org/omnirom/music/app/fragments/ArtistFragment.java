@@ -55,6 +55,7 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.framework.Suggestor;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
@@ -714,7 +715,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
 
             final LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
-            // TODO: Recycle!
             llAlbums.removeAllViews();
 
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
@@ -745,7 +745,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     } else if (album.getName() != null && album2.getName() != null) {
                         return album.getName().compareTo(album2.getName());
                     } else {
-                        return 0;
+                        return album.getRef().compareTo(album2.getRef());
                     }
                 }
             });
@@ -867,6 +867,15 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 View itemRoot = inflater.inflate(R.layout.expanded_albums_item, container, false);
                 container.addView(itemRoot);
                 itemRoot.setTag(song);
+
+                // Set alpha based on offline availability and mode
+                if (aggregator.isOfflineMode() && song != null
+                        && song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY) {
+                    Utils.setChildrenAlpha((ViewGroup) itemRoot,
+                            Float.parseFloat(getString(R.string.unavailable_track_alpha)));
+                } else {
+                    Utils.setChildrenAlpha((ViewGroup) itemRoot, 1.0f);
+                }
 
                 mSongToViewMap.put(song, itemRoot);
 

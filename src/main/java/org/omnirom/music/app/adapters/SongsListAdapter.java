@@ -16,6 +16,7 @@ import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackService;
@@ -38,7 +39,7 @@ public class SongsListAdapter extends BaseAdapter {
         public TextView tvDuration;
         public ImageView ivOverflow;
         public AlbumArtImageView ivAlbumArt;
-        public View vRoot;
+        public ViewGroup vRoot;
         public int position;
         public Song song;
         public View vCurrentIndicator;
@@ -100,6 +101,7 @@ public class SongsListAdapter extends BaseAdapter {
     public View getView(final int position, final View convertView, ViewGroup parent) {
         final Context ctx = parent.getContext();
         assert ctx != null;
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
         View root = convertView;
         if (convertView == null) {
@@ -115,7 +117,7 @@ public class SongsListAdapter extends BaseAdapter {
             holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
             holder.ivAlbumArt = (AlbumArtImageView) root.findViewById(R.id.ivAlbumArt);
             holder.vCurrentIndicator = root.findViewById(R.id.currentSongIndicator);
-            holder.vRoot = root;
+            holder.vRoot = (ViewGroup) root;
 
             if (mShowAlbumArt) {
                 // Fixup some style stuff
@@ -146,8 +148,7 @@ public class SongsListAdapter extends BaseAdapter {
                 tag.ivAlbumArt.loadArtForSong(song);
             }
 
-            Artist artist = ProviderAggregator.getDefault().retrieveArtist(song.getArtist(),
-                        song.getProvider());
+            Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
             if (artist != null) {
                 tag.tvArtist.setText(artist.getName());
             } else {
@@ -174,6 +175,15 @@ public class SongsListAdapter extends BaseAdapter {
             }
         } catch (RemoteException e) {
             // ignore
+        }
+
+        // Set alpha based on offline availability and mode
+        if (aggregator.isOfflineMode() && song != null
+                && song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY) {
+            Utils.setChildrenAlpha(tag.vRoot,
+                    Float.parseFloat(ctx.getResources().getString(R.string.unavailable_track_alpha)));
+        } else {
+            Utils.setChildrenAlpha(tag.vRoot, 1.0f);
         }
 
         return root;

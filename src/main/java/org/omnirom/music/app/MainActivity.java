@@ -36,6 +36,7 @@ import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.CastModule;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackService;
 
 public class MainActivity extends FragmentActivity
@@ -70,6 +71,8 @@ public class MainActivity extends FragmentActivity
     private Handler mHandler;
 
     private int mCurrentFragmentIndex;
+
+    private MenuItem mOfflineMenuItem;
 
 
     public MainActivity() {
@@ -274,6 +277,10 @@ public class MainActivity extends FragmentActivity
         }
     }
 
+    public void toggleOfflineMode() {
+        mOfflineMenuItem.setChecked(!mOfflineMenuItem.isChecked());
+        ProviderAggregator.getDefault().notifyOfflineMode(mOfflineMenuItem.isChecked());
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -311,6 +318,10 @@ public class MainActivity extends FragmentActivity
                 castMenu.setVisible(false);
             }
 
+            // Offline mode
+            mOfflineMenuItem = menu.findItem(R.id.action_offline_mode);
+            mOfflineMenuItem.setChecked(ProviderAggregator.getDefault().isOfflineMode());
+
             restoreActionBar();
             return true;
         }
@@ -326,6 +337,10 @@ public class MainActivity extends FragmentActivity
 
             case R.id.action_sound_effects:
                 showFragment(new DspProvidersFragment(), true);
+                break;
+
+            case R.id.action_offline_mode:
+                toggleOfflineMode();
                 break;
         }
         return super.onOptionsItemSelected(item);
