@@ -81,8 +81,8 @@ public class AutomixCreateActivity extends PreferenceActivity {
                 String name = getPrefStringValue(KEY_NAME);
                 String[] styles = getPrefStringArray(KEY_STYLES);
                 String[] moods = getPrefStringArray(KEY_MOODS);
-                boolean taste = getPrefBool(KEY_TASTE);
-                float advent = getPrefFloat(KEY_ADVENTUROUS);
+                // boolean taste = getPrefBool(KEY_TASTE);
+                // float advent = getPrefFloat(KEY_ADVENTUROUS);
                 String[] songtype = getPrefStringArray(KEY_SONG_TYPES);
                 float speech = getPrefFloat(KEY_SPEECHINESS);
                 float energy = getPrefFloat(KEY_ENERGY);
@@ -97,7 +97,7 @@ public class AutomixCreateActivity extends PreferenceActivity {
                                     R.string.automix_bucket_name_error);
                         }
                     });
-                } else if (styles.length == 0 && moods.length == 0 && !taste) {
+                } else if (styles.length == 0 && moods.length == 0 && true /*!taste*/) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -108,7 +108,7 @@ public class AutomixCreateActivity extends PreferenceActivity {
                     });
                 } else {
                     Log.e(TAG, "Creating bucket...");
-                    AutoMixBucket bucket = mAutoMixManager.createBucket(name, styles, moods, taste, advent,
+                    AutoMixBucket bucket = mAutoMixManager.createBucket(name, styles, moods, false, 0.5f, // taste, advent,
                             songtype, speech, energy, familiar);
                     if (bucket.isPlaylistSessionError()) {
                         runOnUiThread(new Runnable() {
