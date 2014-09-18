@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -224,7 +225,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
         private static final int SEEK_UPDATE_DELAY = 1000/30;
         private SeekBar mSeekBar;
         private Handler mHandler;
-        private View mRootView;
+        private ScrollView mRootView;
         private PlayPauseDrawable mPlayDrawable;
 
         public SimpleFragment() {
@@ -234,7 +235,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            mRootView = inflater.inflate(R.layout.fragment_playback_queue, container, false);
+            mRootView = (ScrollView) inflater.inflate(R.layout.fragment_playback_queue, container, false);
             updateQueueLayout();
             return mRootView;
         }
@@ -292,6 +293,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 mRootView.findViewById(R.id.llRoot).setVisibility(View.VISIBLE);
 
                 int itemIndex = 0;
+                int currentPlayingTop = 0;
 
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 View itemView;
@@ -323,6 +325,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         // Set play pause drawable
                         ImageView ivPlayPause = (ImageView) itemView.findViewById(R.id.ivPlayPause);
                         mPlayDrawable = new PlayPauseDrawable(getResources());
+                        mPlayDrawable.setPaddingDp(24);
                         mPlayDrawable.setColor(getResources().getColor(R.color.primary));
                         mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                         ivPlayPause.setImageDrawable(mPlayDrawable);
@@ -355,6 +358,32 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         } catch (RemoteException e) {
                             // ignore
                         }
+
+                        ImageView ivForward = (ImageView) itemView.findViewById(R.id.ivForward);
+                        ivForward.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+                                try {
+                                    playbackService.next();
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot move to next track", e);
+                                }
+                            }
+                        });
+
+                        ImageView ivPrevious = (ImageView) itemView.findViewById(R.id.ivPrevious);
+                        ivPrevious.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+                                try {
+                                    playbackService.previous();
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot move to previous track", e);
+                                }
+                            }
+                        });
                     } else {
                         itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
                         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
@@ -390,9 +419,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                                         // We're already playing that song, play it again
                                         playback.seek(0);
                                     } else {
-                                        for (int i = 0; i < itemIndexFinal; i++) {
-                                            playback.next();
-                                        }
+                                        playback.playAtQueueIndex(itemIndexFinal);
                                     }
                                 } catch (RemoteException e) {
                                     Log.e(TAG, "Error while switching tracks", e);
@@ -402,26 +429,28 @@ public class PlaybackQueueActivity extends FragmentActivity {
                     }
 
                     tracksContainer.addView(itemView);
+                    if (currentTrackIndex == itemIndex) {
+                        currentPlayingTop =
+                                getResources().getDimensionPixelSize(R.dimen.playing_bar_height) * itemIndex
+                                - Utils.dpToPx(getResources(), 8);
+                    }
+
                     itemIndex++;
                 }
+
+                final int finalPlayingTop = currentPlayingTop;
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRootView.smoothScrollTo(0, finalPlayingTop);
+                    }
+                }, 500);
+
             } else {
                 mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.VISIBLE);
                 mRootView.findViewById(R.id.llRoot).setVisibility(View.GONE);
             }
 
-            // Set the click listeners on the first card UI
-            ImageView ivForward = (ImageView) mRootView.findViewById(R.id.ivForward);
-            ivForward.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-                    try {
-                        playbackService.next();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot move to next track", e);
-                    }
-                }
-            });
         }
     }
 }

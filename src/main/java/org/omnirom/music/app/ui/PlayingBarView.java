@@ -352,15 +352,19 @@ public class PlayingBarView extends RelativeLayout {
             return;
         }
 
-        List<Song> queue = null;
+        List<Song> queue;
+        int currentIndex;
         try {
-            queue = playbackService.getCurrentPlaybackQueue();
+            // Do a copy
+            queue = new ArrayList<Song>(playbackService.getCurrentPlaybackQueue());
+            currentIndex = playbackService.getCurrentTrackIndex();
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to retrieve the current playback queue");
+            return;
         }
 
 
-        if (queue != null && queue.size() > 0) {
+        if (queue.size() > 0) {
             mLastQueue = new ArrayList<Song>(queue);
             mTracksLayout.removeAllViews();
             mTracksLayout.setVisibility(View.VISIBLE);
@@ -370,6 +374,12 @@ public class PlayingBarView extends RelativeLayout {
             View itemViews[] = new View[MAX_PEEK_QUEUE_SIZE];
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
+            for (int i = 0; i < currentIndex; ++i) {
+                queue.remove(0);
+            }
+            final int removedCount = currentIndex;
+
             for (final Song song : queue) {
                 if (shownCount == MAX_PEEK_QUEUE_SIZE) {
                     break;
@@ -417,9 +427,7 @@ public class PlayingBarView extends RelativeLayout {
                                 // We're already playing that song, play it again
                                 playback.seek(0);
                             } else {
-                                for (int i = 0; i < itemIndex; i++) {
-                                    playback.next();
-                                }
+                                playback.playAtQueueIndex(itemIndex + removedCount);
                             }
                         } catch (RemoteException e) {
                             Log.e(TAG, "Error while switching tracks", e);

@@ -132,6 +132,11 @@ interface IPlaybackService {
     void previous();
 
     /**
+     * Plays the song at the specified index in the playback queue
+     */
+    void playAtQueueIndex(int index);
+
+    /**
      * Stops the playback and remove the notification
      */
     void stop();

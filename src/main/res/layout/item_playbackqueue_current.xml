@@ -38,46 +38,53 @@
             android:layout_alignStart="@id/tvCurrentTitle"
             android:layout_below="@id/tvCurrentTitle" />
 
-        <ImageView
-            android:id="@+id/ivPlayPause"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="8dp"
-            android:alpha="0.8"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true" />
-
         <SeekBar
             android:id="@+id/sbSeek"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignEnd="@+id/ivPlayPause"
-            android:layout_alignRight="@+id/ivPlayPause"
             android:layout_below="@+id/tvCurrentArtist"
             android:layout_toEndOf="@+id/ivCurrentPlayAlbumArt"
             android:layout_toRightOf="@+id/ivCurrentPlayAlbumArt"
             android:max="0"
-            android:progress="0" />
+            android:progress="0"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <ImageView
+            android:id="@+id/ivPlayPause"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:alpha="0.8"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:layout_toStartOf="@+id/ivForward"
+            android:layout_toLeftOf="@+id/ivForward"
+            android:layout_alignTop="@+id/ivForward"
+            android:layout_alignBottom="@+id/ivForward" />
 
         <ImageView
             android:id="@+id/ivForward"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignTop="@+id/ivPlayPause"
-            android:layout_marginBottom="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_toLeftOf="@+id/ivPlayPause"
-            android:layout_toStartOf="@+id/ivPlayPause"
             android:adjustViewBounds="true"
             android:background="?android:attr/selectableItemBackground"
             android:clickable="true"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_fast_forward" />
+            android:src="@drawable/ic_skip_next"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ivPrevious"
+            android:layout_toStartOf="@+id/ivPlayPause"
+            android:clickable="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_skip_previous"
+            android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@+id/ivPlayPause" />
 
     </RelativeLayout>
 

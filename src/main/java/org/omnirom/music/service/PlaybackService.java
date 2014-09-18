@@ -86,13 +86,14 @@ public class PlaybackService extends Service
     private List<IPlaybackCallback> mCallbacks;
     private ServiceNotification mNotification;
     private RemoteControlClient mRemoteControlClient;
-    private int mCurrentTrack;
+    private int mCurrentTrack = -1;
     private long mCurrentTrackStartTime;
     private long mPauseLastTick;
     private boolean mIsPlaying;
     private boolean mIsPaused;
     private boolean mIsStopping;
     private boolean mCurrentTrackWaitLoading;
+    private ProviderIdentifier mCurrentPlayingProvider;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -370,38 +371,39 @@ public class PlaybackService extends Service
      */
     private void startPlayingQueue() {
         if (mPlaybackQueue.size() > 0) {
-            final Song next = mPlaybackQueue.get(mCurrentTrack >= 0 ? mCurrentTrack : 0);
+            if (mCurrentTrack < 0) {
+                mCurrentTrack = 0;
+            }
+
+            final Song next = mPlaybackQueue.get(mCurrentTrack);
             final ProviderIdentifier providerId = next.getProvider();
 
-            if (mCurrentTrack >= 0
-                    && !mPlaybackQueue.get(mCurrentTrack).getProvider().equals(providerId)) {
+            if (mCurrentPlayingProvider != null && next.getProvider().equals(mCurrentPlayingProvider)) {
                 // Pause the previously playing track to avoid overlap if it's not the same provider
                 try {
                     mBinder.pause();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to pause the previously playing song");
                 }
+                mCurrentPlayingProvider = null;
             }
 
             if (providerId != null) {
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerId).getBinder();
-                if (mCurrentTrack < 0) {
-                    mCurrentTrack = 0;
-                }
                 mIsPaused = false;
-                final Song currentSong = mPlaybackQueue.get(mCurrentTrack);
 
-                if (!currentSong.isLoaded()) {
+                if (!next.isLoaded()) {
                     // Track not loaded yet, delay until track info arrived
                     mCurrentTrackWaitLoading = true;
-                    Log.w(TAG, "Track not yet loaded: " + currentSong.getRef() + ", delaying");
+                    Log.w(TAG, "Track not yet loaded: " + next.getRef() + ", delaying");
                 } else {
                     mCurrentTrackWaitLoading = false;
+                    mCurrentPlayingProvider = providerId;
 
                     requestAudioFocus();
 
                     try {
-                        provider.playSong(currentSong.getRef());
+                        provider.playSong(next.getRef());
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to play song", e);
                     } catch (NullPointerException e) {
@@ -412,7 +414,7 @@ public class PlaybackService extends Service
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mNotification.setCurrentSong(currentSong);
+                            mNotification.setCurrentSong(next);
                         }
                     });
 
@@ -685,14 +687,21 @@ public class PlaybackService extends Service
             boolean shouldRestart = (getCurrentTrackPosition() < 4000 || mCurrentTrack == 0);
             if (shouldRestart) {
                 // Restart playback
-                mHandler.removeCallbacks(mStartPlaybackRunnable);
-                mHandler.post(mStartPlaybackRunnable);
+                seek(0);
             } else {
                 // Go to the previous track
                 mCurrentTrack--;
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
             }
+        }
+
+        @Override
+        public void playAtQueueIndex(int index) {
+            Log.d(TAG, "Playing track " + index + "/" + mPlaybackQueue.size());
+            mCurrentTrack = index;
+            mHandler.removeCallbacks(mStartPlaybackRunnable);
+            mHandler.post(mStartPlaybackRunnable);
         }
 
         @Override
