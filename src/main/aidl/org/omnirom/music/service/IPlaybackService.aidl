@@ -91,6 +91,11 @@ interface IPlaybackService {
     Song getCurrentTrack();
 
     /**
+     * Returns the index of the current track in the playback queue
+     */
+    int getCurrentTrackIndex();
+
+    /**
      * Returns the current playback queue, including the currently playing track
      */
     List<Song> getCurrentPlaybackQueue();
@@ -119,6 +124,12 @@ interface IPlaybackService {
      * Fast-forward to the next track of the queue
      */
     void next();
+
+    /**
+     * Restarts the current song if the progress is less than 4 seconds. Goes to the previous track
+     * (if any) otherwise.
+     */
+    void previous();
 
     /**
      * Stops the playback and remove the notification

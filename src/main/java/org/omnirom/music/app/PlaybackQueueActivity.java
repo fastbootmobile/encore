@@ -134,9 +134,11 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
                 try {
                     if (playbackService.isPlaying() || playbackService.isPaused()) {
-                        if (!mSeekBar.isPressed()) {
-                            mSeekBar.setMax(playbackService.getCurrentTrackLength());
-                            mSeekBar.setProgress(playbackService.getCurrentTrackPosition());
+                        if (mSeekBar != null) {
+                            if (!mSeekBar.isPressed()) {
+                                mSeekBar.setMax(playbackService.getCurrentTrackLength());
+                                mSeekBar.setProgress(playbackService.getCurrentTrackPosition());
+                            }
                         }
                         mHandler.postDelayed(this, SEEK_UPDATE_DELAY);
                     }
@@ -195,6 +197,30 @@ public class PlaybackQueueActivity extends FragmentActivity {
             }
         };
 
+        private SeekBar.OnSeekBarChangeListener mSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
+                if (fromUser) {
+                    new Thread() {
+                        public void run() {
+                            IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
+                            try {
+                                playback.seek(progress);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Cannot seek", e);
+                            }
+                        }
+                    }.start();
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        };
+
         private static final int SEEK_UPDATE_DELAY = 1000/30;
         private SeekBar mSeekBar;
         private Handler mHandler;
@@ -209,70 +235,6 @@ public class PlaybackQueueActivity extends FragmentActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             mRootView = inflater.inflate(R.layout.fragment_playback_queue, container, false);
-
-            final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-
-            mSeekBar = (SeekBar) mRootView.findViewById(R.id.sbSeek);
-            mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
-                    if (fromUser) {
-                        new Thread() {
-                            public void run() {
-                                IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
-                                try {
-                                    playback.seek(progress);
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Cannot seek", e);
-                                }
-                            }
-                        }.start();
-                    }
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {}
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {}
-            });
-
-            // Set play pause drawable
-            ImageView ivPlayPause = (ImageView) mRootView.findViewById(R.id.ivPlayPause);
-            mPlayDrawable = new PlayPauseDrawable(getResources());
-            mPlayDrawable.setColor(getResources().getColor(R.color.primary));
-            mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-            ivPlayPause.setImageDrawable(mPlayDrawable);
-
-            ivPlayPause.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mPlayDrawable.getRequestedShape() == PlayPauseDrawable.SHAPE_PLAY) {
-                        // We're paused, play
-                        try {
-                            playbackService.play();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot play!", e);
-                        }
-                    } else {
-                        // We're playing, pause
-                        try {
-                            playbackService.pause();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot pause!", e);
-                        }
-                    }
-                }
-            });
-
-            try {
-                if (playbackService.isPlaying() && !playbackService.isPaused()) {
-                    mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                }
-            } catch (RemoteException e) {
-                // ignore
-            }
-
             updateQueueLayout();
             return mRootView;
         }
@@ -305,50 +267,20 @@ public class PlaybackQueueActivity extends FragmentActivity {
         public void updateQueueLayout() {
             final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-            ViewGroup tracksContainer = (ViewGroup) mRootView.findViewById(R.id.playingTracksLayout);
+            ViewGroup tracksContainer = (ViewGroup) mRootView.findViewById(R.id.llRoot);
 
-            // Load the current playing track
-            try {
-                List<Song> playbackQueue = playbackService.getCurrentPlaybackQueue();
-                if (playbackQueue.size() > 0) {
-                    Song currentTrack = playbackQueue.get(0);
-
-                    mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.GONE);
-                    mRootView.findViewById(R.id.llRoot).setVisibility(View.VISIBLE);
-
-                    TextView tvCurrentTitle = (TextView) mRootView.findViewById(R.id.tvCurrentTitle);
-                    TextView tvCurrentArtist = (TextView) mRootView.findViewById(R.id.tvCurrentArtist);
-                    AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) mRootView.findViewById(R.id.ivCurrentPlayAlbumArt);
-
-                    tvCurrentTitle.setText(currentTrack.getTitle());
-
-                    final String artistRef = currentTrack.getArtist();
-                    Artist artist = aggregator.retrieveArtist(artistRef, currentTrack.getProvider());
-                    if (artist == null) {
-                        artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, currentTrack.getProvider());
-                    }
-                    if (artist != null) {
-                        tvCurrentArtist.setText(artist.getName());
-                    } else {
-                        tvCurrentArtist.setText(getString(R.string.loading));
-                    }
-                    ivCurrentPlayAlbumArt.loadArtForSong(currentTrack);
-                } else {
-                    mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.VISIBLE);
-                    mRootView.findViewById(R.id.llRoot).setVisibility(View.GONE);
-                }
-            } catch (RemoteException e) {
-                // ignore, if the playback service is disconnected we're not playing anything
-            }
-
-
+            // TODO: Recycle
             tracksContainer.removeAllViews();
 
             // Load and inflate the playback queue
             List<Song> songs;
+            Song currentTrack;
+            int currentTrackIndex;
             try {
                 // We make a copy
                 songs = new ArrayList<Song>(playbackService.getCurrentPlaybackQueue());
+                currentTrack = playbackService.getCurrentTrack();
+                currentTrackIndex = playbackService.getCurrentTrackIndex();
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to get current playback queue", e);
                 return;
@@ -356,58 +288,125 @@ public class PlaybackQueueActivity extends FragmentActivity {
 
             // We remove the first song as it's the currently playing song we displayed above
             if (songs.size() > 0) {
-                songs.remove(0);
+                mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.GONE);
+                mRootView.findViewById(R.id.llRoot).setVisibility(View.VISIBLE);
 
-                int itemIndex = 1;
+                int itemIndex = 0;
+
                 LayoutInflater inflater = getActivity().getLayoutInflater();
+                View itemView;
                 for (final Song song : songs) {
-                    View itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                        // itemView.setViewName("playbackqueue:" + itemIndex);
-                    }
-                    TextView tvTitle = (TextView) itemView.findViewById(R.id.tvTitle),
-                            tvArtist = (TextView) itemView.findViewById(R.id.tvArtist);
-                    AlbumArtImageView ivCover = (AlbumArtImageView) itemView.findViewById(R.id.ivAlbumArt);
+                    if (currentTrackIndex == itemIndex) {
+                        itemView = inflater.inflate(R.layout.item_playbackqueue_current, tracksContainer, false);
 
-                    Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
+                        TextView tvCurrentTitle = (TextView) itemView.findViewById(R.id.tvCurrentTitle);
+                        TextView tvCurrentArtist = (TextView) itemView.findViewById(R.id.tvCurrentArtist);
+                        AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) itemView.findViewById(R.id.ivCurrentPlayAlbumArt);
 
-                    tvTitle.setText(song.getTitle());
-                    if (artist != null) {
-                        tvArtist.setText(artist.getName());
-                    }
-                    ivCover.loadArtForSong(song);
+                        tvCurrentTitle.setText(currentTrack.getTitle());
 
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                        // ivCover.setViewName("playbackqueue:" + itemIndex + ":cover:" + song.getRef());
-                    }
+                        final String artistRef = currentTrack.getArtist();
+                        Artist artist = aggregator.retrieveArtist(artistRef, currentTrack.getProvider());
+                        if (artist == null) {
+                            artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, currentTrack.getProvider());
+                        }
+                        if (artist != null) {
+                            tvCurrentArtist.setText(artist.getName());
+                        } else {
+                            tvCurrentArtist.setText(getString(R.string.loading));
+                        }
+                        ivCurrentPlayAlbumArt.loadArtForSong(currentTrack);
 
-                    ivCover.setTag(song);
-                    ivCover.setOnClickListener(mArtClickListener);
+                        mSeekBar = (SeekBar) itemView.findViewById(R.id.sbSeek);
+                        mSeekBar.setOnSeekBarChangeListener(mSeekBarListener);
 
-                    final int itemIndexFinal = itemIndex;
-                    itemView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            // Play that song now
-                            IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
-                            try {
-                                if (playback.getCurrentTrack().equals(song)) {
-                                    // We're already playing that song, play it again
-                                    playback.seek(0);
+                        // Set play pause drawable
+                        ImageView ivPlayPause = (ImageView) itemView.findViewById(R.id.ivPlayPause);
+                        mPlayDrawable = new PlayPauseDrawable(getResources());
+                        mPlayDrawable.setColor(getResources().getColor(R.color.primary));
+                        mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                        ivPlayPause.setImageDrawable(mPlayDrawable);
+
+                        ivPlayPause.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (mPlayDrawable.getRequestedShape() == PlayPauseDrawable.SHAPE_PLAY) {
+                                    // We're paused, play
+                                    try {
+                                        playbackService.play();
+                                    } catch (RemoteException e) {
+                                        Log.e(TAG, "Cannot play!", e);
+                                    }
                                 } else {
-                                    for (int i = 0; i < itemIndexFinal; i++) {
-                                        playback.next();
+                                    // We're playing, pause
+                                    try {
+                                        playbackService.pause();
+                                    } catch (RemoteException e) {
+                                        Log.e(TAG, "Cannot pause!", e);
                                     }
                                 }
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Error while switching tracks", e);
                             }
+                        });
+
+                        try {
+                            if (playbackService.isPlaying() && !playbackService.isPaused()) {
+                                mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                            }
+                        } catch (RemoteException e) {
+                            // ignore
                         }
-                    });
+                    } else {
+                        itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                            // itemView.setViewName("playbackqueue:" + itemIndex);
+                        }
+                        TextView tvTitle = (TextView) itemView.findViewById(R.id.tvTitle),
+                                tvArtist = (TextView) itemView.findViewById(R.id.tvArtist);
+                        AlbumArtImageView ivCover = (AlbumArtImageView) itemView.findViewById(R.id.ivAlbumArt);
+
+                        Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
+
+                        tvTitle.setText(song.getTitle());
+                        if (artist != null) {
+                            tvArtist.setText(artist.getName());
+                        }
+                        ivCover.loadArtForSong(song);
+
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                            // ivCover.setViewName("playbackqueue:" + itemIndex + ":cover:" + song.getRef());
+                        }
+
+                        ivCover.setTag(song);
+                        ivCover.setOnClickListener(mArtClickListener);
+
+                        final int itemIndexFinal = itemIndex;
+                        itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                // Play that song now
+                                IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
+                                try {
+                                    if (playback.getCurrentTrack().equals(song)) {
+                                        // We're already playing that song, play it again
+                                        playback.seek(0);
+                                    } else {
+                                        for (int i = 0; i < itemIndexFinal; i++) {
+                                            playback.next();
+                                        }
+                                    }
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Error while switching tracks", e);
+                                }
+                            }
+                        });
+                    }
 
                     tracksContainer.addView(itemView);
                     itemIndex++;
                 }
+            } else {
+                mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.VISIBLE);
+                mRootView.findViewById(R.id.llRoot).setVisibility(View.GONE);
             }
 
             // Set the click listeners on the first card UI

@@ -370,8 +370,8 @@ public class PlaybackService extends Service
      */
     private void startPlayingQueue() {
         if (mPlaybackQueue.size() > 0) {
-            final Song first = mPlaybackQueue.get(0);
-            final ProviderIdentifier providerId = first.getProvider();
+            final Song next = mPlaybackQueue.get(mCurrentTrack >= 0 ? mCurrentTrack : 0);
+            final ProviderIdentifier providerId = next.getProvider();
 
             if (mCurrentTrack >= 0
                     && !mPlaybackQueue.get(mCurrentTrack).getProvider().equals(providerId)) {
@@ -401,7 +401,7 @@ public class PlaybackService extends Service
                     requestAudioFocus();
 
                     try {
-                        provider.playSong(first.getRef());
+                        provider.playSong(currentSong.getRef());
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to play song", e);
                     } catch (NullPointerException e) {
@@ -621,6 +621,9 @@ public class PlaybackService extends Service
         }
 
         @Override
+        public int getCurrentTrackIndex() { return mCurrentTrack; }
+
+        @Override
         public List<Song> getCurrentPlaybackQueue() {
             return mPlaybackQueue;
         }
@@ -666,12 +669,29 @@ public class PlaybackService extends Service
 
         @Override
         public void next() throws RemoteException {
-            if (mPlaybackQueue.size() > 1) {
-                mPlaybackQueue.remove(0);
+            boolean hasNext = mCurrentTrack < mPlaybackQueue.size() - 2;
+            if (mPlaybackQueue.size() > 0 && hasNext) {
+                mCurrentTrack++;
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
 
-                mNotification.setHasNext(mPlaybackQueue.size() > 1);
+                hasNext = mCurrentTrack < mPlaybackQueue.size() - 2;
+                mNotification.setHasNext(hasNext);
+            }
+        }
+
+        @Override
+        public void previous() throws RemoteException {
+            boolean shouldRestart = (getCurrentTrackPosition() < 4000 || mCurrentTrack == 0);
+            if (shouldRestart) {
+                // Restart playback
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
+                mHandler.post(mStartPlaybackRunnable);
+            } else {
+                // Go to the previous track
+                mCurrentTrack--;
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
+                mHandler.post(mStartPlaybackRunnable);
             }
         }
 

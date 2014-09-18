@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="140dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- android:viewName="playback:firstitem:art" -->
+        <org.omnirom.music.app.ui.AlbumArtImageView
+            android:id="@+id/ivCurrentPlayAlbumArt"
+            android:layout_width="64dp"
+            android:layout_height="140dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:scaleType="centerCrop" />
+
+        <!-- android:viewName="playback:firstitem:title"  -->
+        <TextView
+            android:id="@+id/tvCurrentTitle"
+            style="@style/FontTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_toEndOf="@id/ivCurrentPlayAlbumArt"
+            android:layout_toRightOf="@id/ivCurrentPlayAlbumArt"
+            android:singleLine="true" />
+
+        <!-- android:viewName="playback:firstitem:artist" -->
+        <TextView
+            android:id="@+id/tvCurrentArtist"
+            style="@style/FontSubhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/tvCurrentTitle"
+            android:layout_alignStart="@id/tvCurrentTitle"
+            android:layout_below="@id/tvCurrentTitle" />
+
+        <ImageView
+            android:id="@+id/ivPlayPause"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="8dp"
+            android:alpha="0.8"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true" />
+
+        <SeekBar
+            android:id="@+id/sbSeek"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/ivPlayPause"
+            android:layout_alignRight="@+id/ivPlayPause"
+            android:layout_below="@+id/tvCurrentArtist"
+            android:layout_toEndOf="@+id/ivCurrentPlayAlbumArt"
+            android:layout_toRightOf="@+id/ivCurrentPlayAlbumArt"
+            android:max="0"
+            android:progress="0" />
+
+        <ImageView
+            android:id="@+id/ivForward"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignTop="@+id/ivPlayPause"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@+id/ivPlayPause"
+            android:layout_toStartOf="@+id/ivPlayPause"
+            android:adjustViewBounds="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_fast_forward" />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

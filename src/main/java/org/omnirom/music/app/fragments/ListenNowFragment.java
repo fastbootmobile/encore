@@ -31,6 +31,7 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.ArrayList;
@@ -154,12 +155,17 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     case 1: // Album
                         String albumRef = track.getAlbum();
                         entity = aggregator.retrieveAlbum(albumRef, track.getProvider());
-                        IMusicProvider binder = PluginsLookup.getDefault()
-                                .getProvider(provider).getBinder();
-                        try {
-                            binder.fetchAlbumTracks(albumRef);
-                        } catch (RemoteException e) {
-                            // ignore
+                        ProviderConnection pc = PluginsLookup.getDefault()
+                                .getProvider(provider);
+                        if (pc != null) {
+                            IMusicProvider binder = pc.getBinder();
+                            try {
+                                if (binder != null) {
+                                    binder.fetchAlbumTracks(albumRef);
+                                }
+                            } catch (RemoteException e) {
+                                // ignore
+                            }
                         }
                         break;
 
