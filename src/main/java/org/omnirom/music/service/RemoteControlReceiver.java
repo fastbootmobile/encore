@@ -51,7 +51,7 @@ public class RemoteControlReceiver extends BroadcastReceiver {
                         service.next();
                         break;
                     case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                        // TODO: Previous
+                        service.previous();
                         break;
                     case KeyEvent.KEYCODE_MEDIA_CLOSE:
                         service.stop();

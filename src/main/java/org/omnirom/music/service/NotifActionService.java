@@ -19,6 +19,7 @@ public class NotifActionService extends IntentService {
     public static final String ACTION_TOGGLE_PAUSE = "org.omnirom.music.action.TOGGLE_PAUSE";
     public static final String ACTION_STOP = "org.omnirom.music.action.STOP";
     public static final String ACTION_NEXT = "org.omnirom.music.action.NEXT";
+    public static final String ACTION_PREVIOUS = "org.omnirom.music.action.PREVIOUS";
 
     /**
      * Starts this service to perform action TOGGLE_PAUSE. If
@@ -70,6 +71,8 @@ public class NotifActionService extends IntentService {
                 handleActionTogglePause();
             } else if (ACTION_STOP.equals(action)) {
                 handleActionStop();
+            } else if (ACTION_PREVIOUS.equals(action)) {
+                handleActionPrevious();
             }
         }
     }
@@ -91,6 +94,22 @@ public class NotifActionService extends IntentService {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to skip to next song", e);
+        }
+    }
+
+    /**
+     * Handle action PREVIOUS in the provided background thread
+     */
+    private void handleActionPrevious() {
+        try {
+            IPlaybackService service = getPlaybackService();
+            if (service != null) {
+                getPlaybackService().previous();
+            } else {
+                Log.e(TAG, "Notification is up but Playback Service is dead?!");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to skip to previous song", e);
         }
     }
 
