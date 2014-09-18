@@ -11,11 +11,9 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 
 import org.omnirom.music.api.echonest.AutoMixManager;
-import org.omnirom.music.app.BuildConfig;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -29,7 +27,6 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.IProviderCallback;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
@@ -44,7 +41,6 @@ public class PlaybackService extends Service
         implements PluginsLookup.ConnectionListener, ILocalCallback, AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = "PlaybackService";
-    private static final boolean DEBUG = BuildConfig.DEBUG;
 
     /**
      * Time after which the service will shutdown if nothing happens
@@ -90,7 +86,7 @@ public class PlaybackService extends Service
     private List<IPlaybackCallback> mCallbacks;
     private ServiceNotification mNotification;
     private RemoteControlClient mRemoteControlClient;
-    private Song mCurrentTrack;
+    private int mCurrentTrack;
     private long mCurrentTrackStartTime;
     private long mPauseLastTick;
     private boolean mIsPlaying;
@@ -287,8 +283,9 @@ public class PlaybackService extends Service
 
     private void updateRemoteMetadata() {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        Artist artist = aggregator.retrieveArtist(mCurrentTrack.getArtist(), mCurrentTrack.getProvider());
-        Album album = aggregator.retrieveAlbum(mCurrentTrack.getAlbum(), mCurrentTrack.getProvider());
+        final Song currentSong = mPlaybackQueue.get(mCurrentTrack);
+        Artist artist = aggregator.retrieveArtist(currentSong.getArtist(), currentSong.getProvider());
+        Album album = aggregator.retrieveAlbum(currentSong.getAlbum(), currentSong.getProvider());
 
         RemoteControlClient.MetadataEditor edit = mRemoteControlClient.editMetadata(true);
         if (artist != null) {
@@ -297,8 +294,8 @@ public class PlaybackService extends Service
         if (album != null) {
             edit.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, album.getName());
         }
-        edit.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, mCurrentTrack.getTitle());
-        edit.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, mCurrentTrack.getDuration());
+        edit.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, currentSong.getTitle());
+        edit.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, currentSong.getDuration());
         edit.apply();
     }
 
@@ -374,9 +371,10 @@ public class PlaybackService extends Service
     private void startPlayingQueue() {
         if (mPlaybackQueue.size() > 0) {
             final Song first = mPlaybackQueue.get(0);
-            final ProviderIdentifier providerIdentifier = first.getProvider();
+            final ProviderIdentifier providerId = first.getProvider();
 
-            if (mCurrentTrack != null && !mCurrentTrack.getProvider().equals(providerIdentifier)) {
+            if (mCurrentTrack >= 0
+                    && !mPlaybackQueue.get(mCurrentTrack).getProvider().equals(providerId)) {
                 // Pause the previously playing track to avoid overlap if it's not the same provider
                 try {
                     mBinder.pause();
@@ -385,15 +383,18 @@ public class PlaybackService extends Service
                 }
             }
 
-            if (providerIdentifier != null) {
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder();
-                mCurrentTrack = first;
+            if (providerId != null) {
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerId).getBinder();
+                if (mCurrentTrack < 0) {
+                    mCurrentTrack = 0;
+                }
                 mIsPaused = false;
+                final Song currentSong = mPlaybackQueue.get(mCurrentTrack);
 
-                if (!mCurrentTrack.isLoaded()) {
+                if (!currentSong.isLoaded()) {
                     // Track not loaded yet, delay until track info arrived
                     mCurrentTrackWaitLoading = true;
-                    Log.w(TAG, "Track not yet loaded: " + mCurrentTrack.getRef() + ", delaying");
+                    Log.w(TAG, "Track not yet loaded: " + currentSong.getRef() + ", delaying");
                 } else {
                     mCurrentTrackWaitLoading = false;
 
@@ -411,7 +412,7 @@ public class PlaybackService extends Service
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mNotification.setCurrentSong(mCurrentTrack);
+                            mNotification.setCurrentSong(currentSong);
                         }
                     });
 
@@ -433,6 +434,19 @@ public class PlaybackService extends Service
     private void notifyQueueChanged() {
         mHandler.removeCallbacks(mNotifyQueueChangedRunnable);
         mHandler.post(mNotifyQueueChangedRunnable);
+    }
+
+    /**
+     * If a song is currently playing, returns the Song in the playback queue at the index
+     * corresponding to mCurrentTrack
+     * @return A Song if a song is playing, null otherwise
+     */
+    private Song getCurrentSong() {
+        if (mCurrentTrack >= 0) {
+            return mPlaybackQueue.get(mCurrentTrack);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -511,14 +525,21 @@ public class PlaybackService extends Service
 
         @Override
         public void pause() throws RemoteException {
-            if (mCurrentTrack != null) {
+            final Song currentSong = getCurrentSong();
+            if (currentSong != null) {
                 // TODO: Refactor that with a threaded Handler that handles messages
+                final ProviderIdentifier identifier = currentSong.getProvider();
                 abandonAudioFocus();
                 new Thread() {
                     public void run() {
-                        IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+                        IMusicProvider provider = PluginsLookup.getDefault().getProvider(identifier).getBinder();
                         try {
-                            provider.pause();
+                            if (provider != null) {
+                                provider.pause();
+                            } else {
+                                Log.e(TAG, "Provider is null! Has it crashed?");
+                                // TODO: Should we notify pause?
+                            }
                         } catch (RemoteException e) {
                             Log.e(TAG, "Cannot pause the track!", e);
                         }
@@ -529,21 +550,26 @@ public class PlaybackService extends Service
 
         @Override
         public boolean play() throws RemoteException {
-            if (mCurrentTrack != null) {
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
-                provider.resume();
-                mIsPaused = false;
+            final Song currentSong = getCurrentSong();
+            if (currentSong != null) {
+                IMusicProvider provider = PluginsLookup.getDefault().getProvider(currentSong.getProvider()).getBinder();
+                if (provider != null) {
+                    provider.resume();
+                    mIsPaused = false;
 
-                requestAudioFocus();
+                    requestAudioFocus();
 
-                for (IPlaybackCallback cb : mCallbacks) {
-                    try {
-                        cb.onPlaybackResume();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot call playback callback for playback resume event", e);
+                    for (IPlaybackCallback cb : mCallbacks) {
+                        try {
+                            cb.onPlaybackResume();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot call playback callback for playback resume event", e);
+                        }
                     }
+                    mNotification.setPlayPauseAction(false);
+                } else {
+                    Log.e(TAG, "Provider is null! Can't resume.");
                 }
-                mNotification.setPlayPauseAction(false);
 
                 return true;
             } else if (mPlaybackQueue.size() > 0) {
@@ -567,7 +593,12 @@ public class PlaybackService extends Service
 
         @Override
         public int getCurrentTrackLength() throws RemoteException {
-            return mCurrentTrack.getDuration();
+            final Song currentSong = getCurrentSong();
+            if (currentSong != null) {
+                return currentSong.getDuration();
+            } else {
+                return -1;
+            }
         }
 
         @Override
@@ -586,7 +617,7 @@ public class PlaybackService extends Service
 
         @Override
         public Song getCurrentTrack() throws RemoteException {
-            return mCurrentTrack;
+            return getCurrentSong();
         }
 
         @Override
@@ -611,8 +642,9 @@ public class PlaybackService extends Service
 
         @Override
         public void seek(final long timeMs) throws RemoteException {
-            if (mCurrentTrack != null) {
-                ProviderIdentifier id = mCurrentTrack.getProvider();
+            final Song currentSong = getCurrentSong();
+            if (currentSong != null) {
+                ProviderIdentifier id = currentSong.getProvider();
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(id).getBinder();
                 provider.seek(timeMs);
                 mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
@@ -663,7 +695,8 @@ public class PlaybackService extends Service
     @Override
     public void onSongUpdate(List<Song> s) {
         if (mCurrentTrackWaitLoading) {
-            if (s.contains(mCurrentTrack) && mCurrentTrack.isLoaded()) {
+            final Song currentSong = getCurrentSong();
+            if (s.contains(currentSong) && currentSong.isLoaded()) {
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
             }
@@ -709,11 +742,12 @@ public class PlaybackService extends Service
 
             mIsPlaying = true;
             mIsPaused = false;
+            final Song currentSong = getCurrentSong();
 
             for (IPlaybackCallback cb : mCallbacks) {
                 try {
                     if (!wasPaused) {
-                        cb.onSongStarted(mCurrentTrack);
+                        cb.onSongStarted(currentSong);
                     }
                     cb.onPlaybackResume();
                 } catch (RemoteException e) {
@@ -727,7 +761,8 @@ public class PlaybackService extends Service
 
         @Override
         public void onSongPaused(ProviderIdentifier provider) throws RemoteException {
-            if (mCurrentTrack.getProvider().equals(provider) && !mIsStopping) {
+            final Song currentSong = getCurrentSong();
+            if (currentSong.getProvider().equals(provider) && !mIsStopping) {
                 mIsPaused = true;
                 mPauseLastTick = System.currentTimeMillis();
 
@@ -751,9 +786,9 @@ public class PlaybackService extends Service
 
         @Override
         public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
-            if (mPlaybackQueue.size() > 0) {
+            if (mPlaybackQueue.size() > 0 && mCurrentTrack < mPlaybackQueue.size() - 1) {
                 // Move to the next track
-                mPlaybackQueue.remove(0);
+                mCurrentTrack++;
 
                 // We restart the queue in an handler. In the case of the Spotify provider, the
                 // endOfTrack callback locks the main API thread, leading to a dead lock if we
@@ -767,10 +802,13 @@ public class PlaybackService extends Service
 
     @Override
     public void onAudioFocusChange(int focusChange) {
+        final Song currentSong = getCurrentSong();
+        final PluginsLookup lookup = PluginsLookup.getDefault();
+
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
             // Pause playback
-            if (mCurrentTrack != null) {
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+            if (currentSong != null) {
+                IMusicProvider provider = lookup.getProvider(currentSong.getProvider()).getBinder();
                 try {
                     provider.pause();
                 } catch (RemoteException e) {
@@ -779,8 +817,8 @@ public class PlaybackService extends Service
             }
         } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
             // Resume playback
-            if (mCurrentTrack != null) {
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+            if (currentSong != null) {
+                IMusicProvider provider = lookup.getProvider(currentSong.getProvider()).getBinder();
                 try {
                     provider.resume();
                 } catch (RemoteException e) {
@@ -791,8 +829,8 @@ public class PlaybackService extends Service
             AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             am.unregisterMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
             am.abandonAudioFocus(this);
-            if (mCurrentTrack != null) {
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(mCurrentTrack.getProvider()).getBinder();
+            if (currentSong != null) {
+                IMusicProvider provider = lookup.getProvider(currentSong.getProvider()).getBinder();
                 try {
                     provider.pause();
                 } catch (RemoteException e) {
