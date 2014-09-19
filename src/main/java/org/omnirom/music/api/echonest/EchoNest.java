@@ -1,31 +1,25 @@
 package org.omnirom.music.api.echonest;
 
-import android.content.SharedPreferences;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 
 import com.echonest.api.v4.Artist;
 import com.echonest.api.v4.Biography;
-import com.echonest.api.v4.Blog;
 import com.echonest.api.v4.CatalogUpdater;
 import com.echonest.api.v4.DynamicPlaylistParams;
 import com.echonest.api.v4.DynamicPlaylistSession;
 import com.echonest.api.v4.EchoNestAPI;
 import com.echonest.api.v4.EchoNestException;
 import com.echonest.api.v4.GeneralCatalog;
-import com.echonest.api.v4.Image;
-import com.echonest.api.v4.News;
+import com.echonest.api.v4.IdentifySongParams;
 import com.echonest.api.v4.Params;
-import com.echonest.api.v4.Review;
 import com.echonest.api.v4.SongCatalogItem;
-import com.echonest.api.v4.Video;
 
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,7 +27,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -177,6 +170,12 @@ public class EchoNest {
         }
     }
 
+    /**
+     * Returns a list of similar artists for the provided artist
+     * @param artist The artist for which get similar results
+     * @return A list of artists similar to the artist provided
+     * @throws EchoNestException
+     */
     public List<Artist> getArtistSimilar(Artist artist) throws EchoNestException {
         List<Artist> result;
         synchronized (sArtistSimilarCache) {
@@ -381,6 +380,21 @@ public class EchoNest {
         }
 
         return profile;
+    }
+
+    /**
+     * Identifies a song via the EchoNest/EchoPrint API. You must generate an EchoPrint code first
+     * from the audio input using {@link org.omnirom.music.framework.EchoPrint} class.
+     * @param codePrint The output EchoPrint generated code
+     * @return A list of matches
+     * @throws EchoNestException
+     */
+    public List<com.echonest.api.v4.Song> identifySong(String codePrint) throws EchoNestException {
+        IdentifySongParams params = new IdentifySongParams();
+        params.setCode(codePrint);
+        params.includeAudioSummary();
+
+        return mEchoNest.identifySongs(params);
     }
 
 }

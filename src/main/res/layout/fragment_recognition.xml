@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1"
+    android:id="@+id/rootLayout">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/start_recognition"
+        android:id="@+id/btnStartRec"
+        style="@style/FontButton"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/recognition_howto"
+        android:id="@+id/textView"
+        android:textColor="#333333"
+        android:padding="8dp"
+        android:layout_below="@+id/btnStartRec"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/recognition_failed"
+        android:id="@+id/tvCannotRecognize"
+        android:layout_gravity="center_horizontal"
+        android:textColor="#555555"
+        android:textIsSelectable="false"
+        android:textStyle="italic"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        android:layout_margin="18dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/tvTrackName"
+        android:layout_below="@+id/textView"
+        android:layout_toEndOf="@+id/tvCannotRecognize"
+        android:layout_toRightOf="@+id/tvCannotRecognize"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="8dp"
+        android:layout_toStartOf="@+id/ivRecognitionArt"
+        android:layout_toLeftOf="@+id/ivRecognitionArt"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvArtistName"
+        android:layout_toEndOf="@+id/tvCannotRecognize"
+        android:layout_toRightOf="@+id/tvCannotRecognize"
+        android:layout_below="@+id/tvTrackName"
+        android:layout_alignLeft="@+id/tvTrackName"
+        android:layout_alignStart="@+id/tvTrackName"
+        android:layout_toLeftOf="@+id/ivRecognitionArt"
+        android:layout_toStartOf="@+id/ivRecognitionArt" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvAlbumName"
+        android:layout_toEndOf="@+id/tvCannotRecognize"
+        android:layout_toRightOf="@+id/tvCannotRecognize"
+        android:layout_below="@+id/tvArtistName"
+        android:layout_alignLeft="@+id/tvArtistName"
+        android:layout_alignStart="@+id/tvArtistName"
+        android:layout_toLeftOf="@+id/ivRecognitionArt"
+        android:layout_toStartOf="@+id/ivRecognitionArt" />
+
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:id="@+id/ivRecognitionArt"
+        android:contentDescription="@string/title_section_recognition"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:adjustViewBounds="true" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/pbRecognizing"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone" />
+
+</RelativeLayout>

@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 
 /**
@@ -22,7 +23,7 @@ public class NavDrawerAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return 5;
+        return 6;
     }
 
     @Override
@@ -51,28 +52,33 @@ public class NavDrawerAdapter extends BaseAdapter {
             tag = (ViewHolder) view.getTag();
         }
 
-        switch (i) {
-            case 0:
+        switch (i+1) {
+            case MainActivity.SECTION_LISTEN_NOW:
                 tag.tvText.setText(R.string.title_section_listen_now);
                 tag.ivLogo.setImageResource(R.drawable.ic_nav_listen_now);
                 break;
 
-            case 1:
+            case MainActivity.SECTION_MY_SONGS:
                 tag.tvText.setText(R.string.title_section_my_songs);
                 tag.ivLogo.setImageResource(R.drawable.ic_nav_library);
                 break;
 
-            case 2:
+            case MainActivity.SECTION_PLAYLISTS:
                 tag.tvText.setText(R.string.title_section_playlists);
                 tag.ivLogo.setImageResource(R.drawable.ic_nav_playlist);
                 break;
 
-            case 3:
+            case MainActivity.SECTION_AUTOMIX:
                 tag.tvText.setText(R.string.title_section_automix);
                 tag.ivLogo.setImageResource(R.drawable.ic_nav_automix);
                 break;
 
-            case 4:
+            case MainActivity.SECTION_RECOGNITION:
+                tag.tvText.setText(R.string.title_section_recognition);
+                tag.ivLogo.setImageResource(R.drawable.ic_mic);
+                break;
+
+            case MainActivity.SECTION_NOW_PLAYING:
                 tag.tvText.setText(R.string.title_activity_playback_queue);
                 tag.ivLogo.setImageResource(R.drawable.ic_nav_nowplaying);
         }

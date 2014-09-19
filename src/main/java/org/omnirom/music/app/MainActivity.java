@@ -33,6 +33,7 @@ import org.omnirom.music.app.fragments.ListenNowFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
+import org.omnirom.music.app.fragments.RecognitionFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.CastModule;
 import org.omnirom.music.framework.PluginsLookup;
@@ -48,7 +49,8 @@ public class MainActivity extends FragmentActivity
     public static final int SECTION_MY_SONGS   = 2;
     public static final int SECTION_PLAYLISTS  = 3;
     public static final int SECTION_AUTOMIX    = 4;
-    public static final int SECTION_NOW_PLAYING= 5;
+    public static final int SECTION_RECOGNITION= 5;
+    public static final int SECTION_NOW_PLAYING= 6;
 
     public static final int SECTION_DSP_EFFECTS= -1;
 
@@ -196,6 +198,9 @@ public class MainActivity extends FragmentActivity
                 case SECTION_AUTOMIX:
                     newFrag = AutomixFragment.newInstance();
                     break;
+                case SECTION_RECOGNITION:
+                    newFrag = RecognitionFragment.newInstance();
+                    break;
                 case SECTION_NOW_PLAYING:
                     startActivity(new Intent(this, PlaybackQueueActivity.class));
                     break;
@@ -248,6 +253,9 @@ public class MainActivity extends FragmentActivity
                 break;
             case SECTION_AUTOMIX:
                 mTitle = getString(R.string.title_section_automix);
+                break;
+            case SECTION_RECOGNITION:
+                mTitle = getString(R.string.title_section_recognition);
                 break;
             case SECTION_DSP_EFFECTS:
                 mTitle = getString(R.string.settings_dsp_config_title);

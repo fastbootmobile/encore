@@ -7,6 +7,7 @@
     <string name="title_section_my_songs">My songs</string>
     <string name="title_section_playlists">Playlists</string>
     <string name="title_section_automix">Automix</string>
+    <string name="title_section_recognition">Recognition</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
@@ -45,6 +46,8 @@
     <string name="create">Create</string>
     <string name="multi_provider_playlist">Multi-provider playlist (local only)</string>
     <string name="enter_name">Enter a name</string>
+    <string name="start_recognition">Start recognition</string>
+    <string name="stop_recognition">Stop recognition</string>
 
     <!-- Strings for possible PreferenceActivity Back/Next buttons -->
     <string name="back_button_label">Back</string>
@@ -148,4 +151,6 @@
     <string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
     <string name="crash_dialog_ok_toast">Thank you !</string>
     <string name="no_music_hint">You don\'t have any music. Configure a provider in the Settings, or copy music on your device via USB!</string>
+    <string name="recognition_howto">Point your phone at a speaker, or sing a song, and press the button above. Once you\'re done, or after a few seconds, tap it again to recognize what song that was.</string>
+    <string name="recognition_failed">Oops, we couldn\'t recognize what we heard!</string>
 </resources>
