@@ -47,8 +47,8 @@ public class PluginsLookup {
     }
 
     private Context mContext;
-    private List<ProviderConnection> mConnections;
-    private List<DSPConnection> mDSPConnections;
+    private final List<ProviderConnection> mConnections;
+    private final List<DSPConnection> mDSPConnections;
     private List<ConnectionListener> mConnectionListeners;
     private IPlaybackService mPlaybackService;
     private MultiProviderPlaylistProvider mMultiProviderPlaylistProvider;
@@ -148,10 +148,12 @@ public class PluginsLookup {
             mContext.unbindService(mPlaybackConnection);
             mPlaybackService = null;
         }
-        for (ProviderConnection connection : mConnections) {
-            connection.unbindService();
+        synchronized (mConnections) {
+            for (ProviderConnection connection : mConnections) {
+                connection.unbindService();
+            }
+            mConnections.clear();
         }
-        mConnections.clear();
     }
 
     public IPlaybackService getPlaybackService() {
@@ -168,9 +170,11 @@ public class PluginsLookup {
             return null;
         }
 
-        for (ProviderConnection connection : mConnections) {
-            if (connection.getIdentifier().equals(id)) {
-                return connection;
+        synchronized (mConnections) {
+            for (ProviderConnection connection : mConnections) {
+                if (connection.getIdentifier().equals(id)) {
+                    return connection;
+                }
             }
         }
 
@@ -178,9 +182,11 @@ public class PluginsLookup {
     }
 
     public DSPConnection getDSP(ProviderIdentifier id) {
-        for (DSPConnection connection : mDSPConnections) {
-            if (connection.getIdentifier().equals(id)) {
-                return connection;
+        synchronized (mDSPConnections) {
+            for (DSPConnection connection : mDSPConnections) {
+                if (connection.getIdentifier().equals(id)) {
+                    return connection;
+                }
             }
         }
 
@@ -194,13 +200,16 @@ public class PluginsLookup {
      * you can bind and unbind the instances as you wish.
      */
     public List<ProviderConnection> getAvailableProviders() {
-        Log.e(TAG, "Available providers: " + mConnections.size());
         // That list may be modified, so we return a copy
-        return new ArrayList<ProviderConnection>(mConnections);
+        synchronized (mConnections) {
+            return new ArrayList<ProviderConnection>(mConnections);
+        }
     }
 
     public List<DSPConnection> getAvailableDSPs() {
-        return new ArrayList<DSPConnection>(mDSPConnections);
+        synchronized (mDSPConnections) {
+            return new ArrayList<DSPConnection>(mDSPConnections);
+        }
     }
 
     /**
@@ -221,7 +230,7 @@ public class PluginsLookup {
         return fetchServicesForIntent(baseIntent, true);
     }
 
-    private List<HashMap<String, String>> fetchServicesForIntent(Intent intent, boolean isDSP) {
+    private synchronized List<HashMap<String, String>> fetchServicesForIntent(Intent intent, boolean isDSP) {
         PackageManager pm = mContext.getPackageManager();
         assert(pm != null);
 
@@ -251,22 +260,26 @@ public class PluginsLookup {
 
                 if (providerName != null) {
                     boolean found = false;
-                    for (DSPConnection conn : mDSPConnections) {
-                        if (conn.getPackage().equals(sinfo.packageName)
-                                && conn.getServiceName().equals(sinfo.name)) {
-                            found = true;
-                            conn.bindService();
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        for (ProviderConnection conn : mConnections) {
+                    synchronized (mDSPConnections) {
+                        for (DSPConnection conn : mDSPConnections) {
                             if (conn.getPackage().equals(sinfo.packageName)
                                     && conn.getServiceName().equals(sinfo.name)) {
                                 found = true;
                                 conn.bindService();
                                 break;
+                            }
+                        }
+                    }
+
+                    if (!found) {
+                        synchronized (mConnections) {
+                            for (ProviderConnection conn : mConnections) {
+                                if (conn.getPackage().equals(sinfo.packageName)
+                                        && conn.getServiceName().equals(sinfo.name)) {
+                                    found = true;
+                                    conn.bindService();
+                                    break;
+                                }
                             }
                         }
                     }
@@ -278,14 +291,18 @@ public class PluginsLookup {
                                     item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
                                     item.get(DATA_CONFIGCLASS));
                             conn.setListener(mProviderListener);
-                            mDSPConnections.add(conn);
+                            synchronized (mDSPConnections) {
+                                mDSPConnections.add(conn);
+                            }
                         } else {
                             ProviderConnection conn = new ProviderConnection(mContext, providerName,
                                     item.get(DATA_AUTHOR),
                                     item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
                                     item.get(DATA_CONFIGCLASS));
                             conn.setListener(mProviderListener);
-                            mConnections.add(conn);
+                            synchronized (mConnections) {
+                                mConnections.add(conn);
+                            }
                         }
 
                     }
