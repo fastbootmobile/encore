@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaybackQueueActivity;
@@ -458,15 +459,17 @@ public class PlayingBarView extends RelativeLayout {
                         }
 
                         Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
-                        Intent intent = AlbumActivity.craftIntent(getContext(), hero, album, color);
+                        if (album != null) {
+                            Intent intent = AlbumActivity.craftIntent(getContext(), hero, album, color);
 
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                             /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
                                     view, "itemImage");
 
                             getContext().startActivity(intent, opt.toBundle()); */
-                        } else {
-                            getContext().startActivity(intent);
+                            } else {
+                                getContext().startActivity(intent);
+                            }
                         }
                     }
                 });
