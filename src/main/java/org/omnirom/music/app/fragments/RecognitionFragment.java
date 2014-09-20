@@ -48,7 +48,9 @@ public class RecognitionFragment extends Fragment {
         @Override
         public void run() {
             mRecognitionButton.setEnabled(false);
+            mRecognitionButton.setText(R.string.recognizing);
             mProgressRecognizing.setVisibility(View.VISIBLE);
+            mTvOops.setVisibility(View.GONE);
 
             new Thread() {
                 public void run() {
