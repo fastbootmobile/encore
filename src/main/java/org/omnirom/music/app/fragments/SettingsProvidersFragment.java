@@ -21,6 +21,7 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,8 +54,15 @@ public class SettingsProvidersFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Get providers, filter out our MultiProvider playlist provider
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-        setListAdapter(new ProvidersAdapter(providers));
+        List<ProviderConnection> filteredProviders = new ArrayList<ProviderConnection>();
+        for (ProviderConnection p : providers) {
+            if (!p.getServiceName().equals("org.omnirom.music.providers.MultiProviderPlaylistProvider")) {
+                filteredProviders.add(p);
+            }
+        }
+        setListAdapter(new ProvidersAdapter(filteredProviders));
 
     }
 
