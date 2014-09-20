@@ -308,7 +308,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     @Override
     public void onSongUpdate(List<Song> s) {
         for (Song song : s) {
-            if (song.getAlbum().equals(mAlbum.getRef())) {
+            if (song.isLoaded() && song.getAlbum().equals(mAlbum.getRef())) {
                 loadSongs();
                 break;
             }
@@ -319,7 +319,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     public void onAlbumUpdate(List<Album> a) {
         for (Album album : a) {
             if (album.getRef().equals(mAlbum.getRef())) {
-                Log.e(TAG, "onAlbumUpdate");
                 loadSongs();
                 break;
             }
