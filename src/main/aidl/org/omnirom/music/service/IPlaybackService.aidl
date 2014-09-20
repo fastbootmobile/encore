@@ -66,14 +66,10 @@ interface IPlaybackService {
     boolean play();
 
     /**
-     * Returns whether or not a song is currently playing
+     * Returns the current playback state
+     * @return One of PlaybackService.STATE_*
      */
-    boolean isPlaying();
-
-    /**
-     * Returns whether or not the current song is paused
-     */
-    boolean isPaused();
+    int getState();
 
     /**
      * Returns the current song length, in milliseconds

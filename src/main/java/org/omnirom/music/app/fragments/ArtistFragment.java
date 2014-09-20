@@ -66,6 +66,7 @@ import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackService;
+import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -412,9 +413,18 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         try {
             Song currentTrack = playbackService.getCurrentTrack();
             if (currentTrack != null && currentTrack.getArtist().equals(mArtist.getRef())) {
-                if (playbackService.isPlaying()) {
+                int state = playbackService.getState();
+                if (state == PlaybackService.STATE_PLAYING) {
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                } else {
+                } else if (state == PlaybackService.STATE_PAUSED) {
+                    mFabShouldResume = true;
+                } else if (state == PlaybackService.STATE_BUFFERING) {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mFabDrawable.setBuffering(true);
+                    mFabShouldResume = true;
+                } else if (state == PlaybackService.STATE_PAUSING) {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setBuffering(true);
                     mFabShouldResume = true;
                 }
             }
@@ -828,7 +838,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
                     // Set play or pause based on if this album is playing
                     try {
-                        if (pbService.isPlaying()) {
+                        int state = pbService.getState();
+                        if (state == PlaybackService.STATE_PLAYING) {
                             Song currentSong = pbService.getCurrentTrack();
                             if (currentSong != null && album.getRef().equals(currentSong.getAlbum())) {
                                 updatePlayingAlbum(currentSong.getAlbum());
@@ -902,7 +913,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     // Bold if already playing
                     IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
                     try {
-                        if (pbService.isPlaying()) {
+                        int state = pbService.getState();
+                        if (state == PlaybackService.STATE_PLAYING) {
                             Song currentSong = pbService.getCurrentTrack();
                             if (currentSong != null && song.getRef().equals(currentSong.getRef())) {
                                 boldPlayingTrack(currentSong);

@@ -9,7 +9,7 @@ import org.omnirom.music.model.Song;
  */
 public class BasePlaybackCallback extends IPlaybackCallback.Stub {
     @Override
-    public void onSongStarted(Song s) throws RemoteException {
+    public void onSongStarted(boolean buffering, Song s) throws RemoteException {
 
     }
 

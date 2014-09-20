@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -38,7 +37,7 @@ public class RemoteControlReceiver extends BroadcastReceiver {
                 switch (event.getKeyCode()) {
                     case KeyEvent.KEYCODE_HEADSETHOOK:
                     case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                        if (service.isPaused()) {
+                        if (service.getState() == PlaybackService.STATE_PAUSED) {
                             service.play();
                         } else {
                             service.pause();

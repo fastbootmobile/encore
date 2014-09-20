@@ -59,7 +59,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
-        public void onSongStarted(Song s) throws RemoteException {
+        public void onSongStarted(boolean buffering, Song s) throws RemoteException {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {

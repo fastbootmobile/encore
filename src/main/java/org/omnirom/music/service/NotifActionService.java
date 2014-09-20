@@ -136,7 +136,8 @@ public class NotifActionService extends IntentService {
         try {
             IPlaybackService service = getPlaybackService();
             if (service != null) {
-                if (service.isPaused()) {
+                int state = service.getState();
+                if (state == PlaybackService.STATE_PAUSED) {
                     service.play();
                 } else {
                     service.pause();

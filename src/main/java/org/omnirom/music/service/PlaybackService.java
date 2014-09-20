@@ -42,6 +42,12 @@ public class PlaybackService extends Service
 
     private static final String TAG = "PlaybackService";
 
+    public static final int STATE_STOPPED   = 0;
+    public static final int STATE_PLAYING   = 1;
+    public static final int STATE_PAUSED    = 2;
+    public static final int STATE_BUFFERING = 3;
+    public static final int STATE_PAUSING   = 4;
+
     /**
      * Time after which the service will shutdown if nothing happens
      */
@@ -54,7 +60,7 @@ public class PlaybackService extends Service
     private Runnable mShutdownRunnable = new Runnable() {
         @Override
         public void run() {
-            if ((!mIsPlaying || mIsPaused)) {
+            if (mState == STATE_PAUSED || mState == STATE_STOPPED) {
                 Log.w(TAG, "Shutting down because of timeout and nothing bound");
                 stopForeground(true);
                 stopSelf();
@@ -89,8 +95,8 @@ public class PlaybackService extends Service
     private int mCurrentTrack = -1;
     private long mCurrentTrackStartTime;
     private long mPauseLastTick;
-    private boolean mIsPlaying;
-    private boolean mIsPaused;
+    private int mState = STATE_STOPPED;
+    private boolean mIsResuming;
     private boolean mIsStopping;
     private boolean mCurrentTrackWaitLoading;
     private ProviderIdentifier mCurrentPlayingProvider;
@@ -234,7 +240,7 @@ public class PlaybackService extends Service
         mNumberBound--;
         Log.i(TAG, "Client unbound service (" + mNumberBound + " left)");
 
-        if (mNumberBound == 0 && (!mIsPlaying || mIsPaused)) {
+        if (mNumberBound == 0 && (mState == STATE_STOPPED || mState == STATE_PAUSED)) {
             mHandler.removeCallbacks(mShutdownRunnable);
             mShutdownRunnable.run();
         }
@@ -390,7 +396,15 @@ public class PlaybackService extends Service
 
             if (providerId != null) {
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerId).getBinder();
-                mIsPaused = false;
+                mState = STATE_BUFFERING;
+
+                for (IPlaybackCallback cb : mCallbacks) {
+                    try {
+                        cb.onSongStarted(true, next);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot call playback callback for song start event", e);
+                    }
+                }
 
                 if (!next.isLoaded()) {
                     // Track not loaded yet, delay until track info arrived
@@ -532,6 +546,7 @@ public class PlaybackService extends Service
                 // TODO: Refactor that with a threaded Handler that handles messages
                 final ProviderIdentifier identifier = currentSong.getProvider();
                 abandonAudioFocus();
+                mState = STATE_PAUSING;
                 new Thread() {
                     public void run() {
                         IMusicProvider provider = PluginsLookup.getDefault().getProvider(identifier).getBinder();
@@ -557,17 +572,10 @@ public class PlaybackService extends Service
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(currentSong.getProvider()).getBinder();
                 if (provider != null) {
                     provider.resume();
-                    mIsPaused = false;
+                    mIsResuming = true;
+                    mState = STATE_BUFFERING;
 
                     requestAudioFocus();
-
-                    for (IPlaybackCallback cb : mCallbacks) {
-                        try {
-                            cb.onPlaybackResume();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot call playback callback for playback resume event", e);
-                        }
-                    }
                     mNotification.setPlayPauseAction(false);
                 } else {
                     Log.e(TAG, "Provider is null! Can't resume.");
@@ -584,14 +592,7 @@ public class PlaybackService extends Service
         }
 
         @Override
-        public boolean isPlaying() throws RemoteException {
-            return mIsPlaying;
-        }
-
-        @Override
-        public boolean isPaused() {
-            return mIsPaused;
-        }
+        public int getState() { return mState; }
 
         @Override
         public int getCurrentTrackLength() throws RemoteException {
@@ -605,7 +606,7 @@ public class PlaybackService extends Service
 
         @Override
         public int getCurrentTrackPosition() throws RemoteException {
-            if (mIsPaused) {
+            if (mState == STATE_PAUSED) {
                 // When we are paused, we delay the track start time for as long as we are paused
                 // so that the song position actually pauses too. This is more a hack (hey, we
                 // mimic the official Spotify app bug!), and ideally we should calculate the elapsed
@@ -764,21 +765,23 @@ public class PlaybackService extends Service
     private IProviderCallback.Stub mProviderCallback = new BaseProviderCallback() {
         @Override
         public void onSongPlaying(ProviderIdentifier provider) throws RemoteException {
-            boolean wasPaused = mIsPaused;
-            if (!mIsPaused) {
+            boolean wasPaused = mIsResuming;
+            if (!wasPaused) {
                 mCurrentTrackStartTime = System.currentTimeMillis();
+            } else {
+                mIsResuming = false;
             }
 
-            mIsPlaying = true;
-            mIsPaused = false;
+            mState = STATE_PLAYING;
             final Song currentSong = getCurrentSong();
 
             for (IPlaybackCallback cb : mCallbacks) {
                 try {
                     if (!wasPaused) {
-                        cb.onSongStarted(currentSong);
+                        cb.onSongStarted(false, currentSong);
+                    } else {
+                        cb.onPlaybackResume();
                     }
-                    cb.onPlaybackResume();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Cannot call playback callback for song start event", e);
                 }
@@ -792,7 +795,7 @@ public class PlaybackService extends Service
         public void onSongPaused(ProviderIdentifier provider) throws RemoteException {
             final Song currentSong = getCurrentSong();
             if (currentSong.getProvider().equals(provider) && !mIsStopping) {
-                mIsPaused = true;
+                mState = STATE_PAUSED;
                 mPauseLastTick = System.currentTimeMillis();
 
                 for (IPlaybackCallback cb : mCallbacks) {

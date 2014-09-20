@@ -39,7 +39,7 @@ public class AutomixFragment extends Fragment {
     private AutoMixManager mAutoMixManager = AutoMixManager.getDefault();
     private IPlaybackCallback.Stub mPlaybackCallback = new IPlaybackCallback.Stub() {
         @Override
-        public void onSongStarted(Song s) throws RemoteException {
+        public void onSongStarted(boolean buffering, Song s) throws RemoteException {
             if (mProgressToHide != null) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

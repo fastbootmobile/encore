@@ -34,6 +34,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
+import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,7 +135,10 @@ public class PlaybackQueueActivity extends FragmentActivity {
             public void run() {
                 IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
                 try {
-                    if (playbackService.isPlaying() || playbackService.isPaused()) {
+                    int state = playbackService.getState();
+                    if (state == PlaybackService.STATE_PLAYING
+                            || state == PlaybackService.STATE_PAUSING
+                            || state == PlaybackService.STATE_PAUSED) {
                         if (mSeekBar != null) {
                             if (!mSeekBar.isPressed()) {
                                 mSeekBar.setMax(playbackService.getCurrentTrackLength());
@@ -151,7 +155,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
 
         private IPlaybackCallback mPlaybackListener = new IPlaybackCallback.Stub() {
             @Override
-            public void onSongStarted(Song s) throws RemoteException {
+            public void onSongStarted(boolean buffering, Song s) throws RemoteException {
                 mHandler.post(mUpdateSeekBarRunnable);
                 mHandler.post(new Runnable() {
                     @Override
@@ -352,7 +356,8 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         });
 
                         try {
-                            if (playbackService.isPlaying() && !playbackService.isPaused()) {
+                            int state = playbackService.getState();
+                            if (state == PlaybackService.STATE_PLAYING) {
                                 mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                             }
                         } catch (RemoteException e) {

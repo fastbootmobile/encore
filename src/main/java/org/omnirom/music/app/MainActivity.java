@@ -39,6 +39,7 @@ import org.omnirom.music.framework.CastModule;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackService;
+import org.omnirom.music.service.PlaybackService;
 
 public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -155,7 +156,8 @@ public class MainActivity extends FragmentActivity
         // Release services connections if playback isn't happening
         IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
         try {
-            if (!playbackService.isPlaying()) {
+            int state = playbackService.getState();
+            if (state == PlaybackService.STATE_PAUSED || state == PlaybackService.STATE_STOPPED) {
                 PluginsLookup.getDefault().tearDown();
             }
         } catch (RemoteException e) {

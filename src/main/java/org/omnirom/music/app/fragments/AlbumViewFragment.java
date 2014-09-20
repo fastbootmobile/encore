@@ -59,7 +59,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
-        public void onSongStarted(Song s) throws RemoteException {
+        public void onSongStarted(boolean buffering, Song s) throws RemoteException {
             if (mAdapter.contains(s)) {
                 mHandler.post(new Runnable() {
                     @Override

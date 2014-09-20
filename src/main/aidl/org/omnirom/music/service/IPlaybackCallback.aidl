@@ -10,7 +10,7 @@ interface IPlaybackCallback {
     /**
      * Notifies the app that playback of a song started
      */
-    void onSongStarted(in Song s);
+    void onSongStarted(boolean buffering, in Song s);
 
     /**
      * Notifies the playback position manually changed (scrobbling/seeking)

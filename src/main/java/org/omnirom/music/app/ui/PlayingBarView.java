@@ -66,13 +66,18 @@ public class PlayingBarView extends RelativeLayout {
             IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
             if (playbackService != null) {
                 try {
-                    if (playbackService.isPlaying()) {
+                    int state = playbackService.getState();
+                    if (state == PlaybackService.STATE_PLAYING
+                            || state == PlaybackService.STATE_PAUSING
+                            || state == PlaybackService.STATE_PAUSED) {
                         if (!mPlayInSeekMode) {
                             mProgressDrawable.setValue(playbackService.getCurrentTrackPosition());
                         }
 
                         // Restart ourselves
                         mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
+                    } else if (state == PlaybackService.STATE_BUFFERING) {
+                        mProgressDrawable.setValue(0);
                     } else {
                         mProgressDrawable.setMax(1);
                         mProgressDrawable.setValue(1);
@@ -87,7 +92,7 @@ public class PlayingBarView extends RelativeLayout {
     private IPlaybackCallback.Stub mPlaybackCallback = new IPlaybackCallback.Stub() {
 
         @Override
-        public void onSongStarted(Song s) throws RemoteException {
+        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
             mCurrentSong = s;
 
             mHandler.post(new Runnable() {
@@ -102,7 +107,7 @@ public class PlayingBarView extends RelativeLayout {
                     }
 
                     // Set the visibility and button state
-                    setPlayButtonState(false);
+                    setPlayButtonState(buffering, false);
                     mIsPlaying = true;
                 }
             });
@@ -120,7 +125,7 @@ public class PlayingBarView extends RelativeLayout {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    setPlayButtonState(true);
+                    setPlayButtonState(false, true);
                     mIsPlaying = false;
                 }
             });
@@ -131,7 +136,7 @@ public class PlayingBarView extends RelativeLayout {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    setPlayButtonState(false);
+                    setPlayButtonState(false, false);
                     mIsPlaying = true;
                 }
             });
@@ -217,7 +222,7 @@ public class PlayingBarView extends RelativeLayout {
         // Set the original state
         IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
         try {
-            if (pbService != null && pbService.isPlaying()) {
+            if (pbService != null && pbService.getState() == PlaybackService.STATE_PLAYING) {
                 mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                 mIsPlaying = true;
                 mProgressDrawable.setMax(pbService.getCurrentTrackLength());
@@ -331,12 +336,14 @@ public class PlayingBarView extends RelativeLayout {
      * Defines the visual state of the play/pause button
      * @param play true will set the image to a "play" image, false will set to "pause"
      */
-    public void setPlayButtonState(boolean play) {
+    public void setPlayButtonState(boolean buffering, boolean play) {
         if (play) {
             mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         } else {
             mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
         }
+
+        mPlayFabDrawable.setBuffering(buffering);
     }
 
     public void updatePlayingQueue() {

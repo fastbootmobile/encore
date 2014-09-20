@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
@@ -38,6 +39,7 @@ public class PlayPauseDrawable extends Drawable {
     private AccelerateDecelerateInterpolator mTransitionInterpolator;
     private long mTransitionAccumulator;
     private long mLastTransitionTick;
+    private boolean mIsBuffering;
 
     private Resources mResources;
 
@@ -75,6 +77,11 @@ public class PlayPauseDrawable extends Drawable {
             mLastTransitionTick = System.currentTimeMillis();
             invalidateSelf();
         }
+    }
+
+    public void setBuffering(boolean buffering) {
+        mIsBuffering = buffering;
+        invalidateSelf();
     }
 
     public int getCurrentShape() {
@@ -244,7 +251,18 @@ public class PlayPauseDrawable extends Drawable {
 
         canvas.drawPath(mPath, mPaint);
 
-        if (mCurrentShape != mRequestShape) {
+        if (mIsBuffering) {
+            // Draw a rotating circle
+            final int width = getBounds().width();
+            final int height = getBounds().height();
+            RectF rect = new RectF(mHalfPadding, mHalfPadding, width - mHalfPadding, height - mHalfPadding);
+            float startAngle = SystemClock.uptimeMillis() / 3.0f % 360.0f;
+            float sweepAngle = (SystemClock.uptimeMillis() / 3.0f % -360.0f);
+
+            canvas.drawArc(rect, startAngle, sweepAngle, true, mPaint);
+        }
+
+        if (mCurrentShape != mRequestShape || mIsBuffering) {
             // Invalidate ourselves to redraw the next animation frame
             invalidateSelf();
         }

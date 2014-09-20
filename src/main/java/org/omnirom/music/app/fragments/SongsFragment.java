@@ -36,7 +36,7 @@ public class SongsFragment extends Fragment {
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
-        public void onSongStarted(Song s) throws RemoteException {
+        public void onSongStarted(boolean buffering, Song s) throws RemoteException {
             mHandler.post(new Runnable() {
                 public void run() {
                     mSongsListAdapter.notifyDataSetChanged();
