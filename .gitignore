@@ -4,3 +4,4 @@
 /src/main/libs/mips
 /src/main/libs/x86
 /src/main/obj
+*.iml
