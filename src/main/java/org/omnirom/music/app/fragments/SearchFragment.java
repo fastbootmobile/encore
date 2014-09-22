@@ -103,12 +103,19 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         });
 
         // Restore previous search results, in case we're rotating
+        // TODO: Persist the adapter instead
         if (sSearchResult != null) {
-            mAdapter.updateSearchResults(sSearchResult, sSearchResult.getIdentifier());
+            mAdapter.appendResults(sSearchResult);
             mAdapter.notifyDataSetChanged();
         }
 
         return root;
+    }
+
+    public void resetResults() {
+        if (mAdapter != null) {
+            mAdapter.clear();
+        }
     }
 
     private void onSongClick(int i) {
@@ -210,22 +217,42 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onSongUpdate(List<Song> s) {
-
+        for (Song song : s) {
+            if (mAdapter.contains(song)) {
+                mAdapter.notifyDataSetChanged();
+                return;
+            }
+        }
     }
 
     @Override
     public void onAlbumUpdate(List<Album> a) {
-
+        for (Album album : a) {
+            if (mAdapter.contains(album)) {
+                mAdapter.notifyDataSetChanged();
+                return;
+            }
+        }
     }
 
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
-
+        for (Playlist playlist : p) {
+            if (mAdapter.contains(playlist)) {
+                mAdapter.notifyDataSetChanged();
+                return;
+            }
+        }
     }
 
     @Override
     public void onArtistUpdate(List<Artist> a) {
-
+        for (Artist artist : a) {
+            if (mAdapter.contains(artist)) {
+                mAdapter.notifyDataSetChanged();
+                return;
+            }
+        }
     }
 
     @Override
@@ -258,7 +285,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
                     if (searchResult.getIdentifier() == null) {
                         Log.e(TAG, "Search provider identifier is null!");
                     } else {
-                        mAdapter.updateSearchResults(searchResult, searchResult.getIdentifier());
+                        mAdapter.appendResults(searchResult);
                         mAdapter.notifyDataSetChanged();
                     }
                 }

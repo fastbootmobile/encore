@@ -73,11 +73,16 @@ public class SearchActivity extends FragmentActivity {
 
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
+            String query = intent.getStringExtra(SearchManager.QUERY).trim();
+
+            if (mActiveFragment != null) {
+                mActiveFragment.resetResults();
+            }
+
             List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
             for (ProviderConnection providerConnection : providers) {
                 try {
-                    IMusicProvider binder = providerConnection.getBinder();
+                    final IMusicProvider binder = providerConnection.getBinder();
                     if (binder != null) {
                         binder.startSearch(query);
                     } else {

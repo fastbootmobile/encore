@@ -155,4 +155,5 @@
     <string name="recognition_howto">Point your phone at a speaker, or sing a song, and press the button below. Once you\'re done, or after a few seconds, tap it again to recognize what song that was.</string>
     <string name="recognition_failed">Oops, we couldn\'t recognize what we heard!</string>
     <string name="more">More</string>
+    <string name="songs">Songs</string>
 </resources>
