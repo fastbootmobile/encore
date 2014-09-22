@@ -19,6 +19,16 @@
         android:scaleType="centerCrop"
         android:src="@drawable/album_placeholder" />
 
+    <ImageView
+        android:id="@+id/ivSource"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignBottom="@id/ivCover"
+        android:layout_alignEnd="@id/ivCover"
+        android:layout_alignRight="@id/ivCover"
+        android:contentDescription="@string/settings_provider_config_title"
+        />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

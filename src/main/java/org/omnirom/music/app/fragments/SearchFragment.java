@@ -102,6 +102,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
             }
         });
 
+        // Restore previous search results, in case we're rotating
         if (sSearchResult != null) {
             mAdapter.updateSearchResults(sSearchResult, sSearchResult.getIdentifier());
             mAdapter.notifyDataSetChanged();
@@ -168,7 +169,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
         ImageView ivCover = holder.albumArtImageView;
         TextView tvTitle = holder.divider;
-        Bitmap hero = ((MaterialTransitionDrawable) holder.albumArtImageView.getDrawable()).getFinalDrawable().getBitmap();
+        Bitmap hero = ((MaterialTransitionDrawable) ivCover.getDrawable()).getFinalDrawable().getBitmap();
         int color = 0xffffff;
         if (hero != null) {
             Palette palette = Palette.generate(hero);

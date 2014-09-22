@@ -169,8 +169,8 @@ public class SongsListAdapter extends BaseAdapter {
 
         final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
         try {
-            List<Song> playbackQueue = pbService.getCurrentPlaybackQueue();
-            if (playbackQueue.size() > 0 && playbackQueue.get(0).equals(tag.song)) {
+            Song currentSong = pbService.getCurrentTrack();
+            if (currentSong != null && currentSong.equals(tag.song)) {
                 tag.vCurrentIndicator.setVisibility(View.VISIBLE);
             }
         } catch (RemoteException e) {

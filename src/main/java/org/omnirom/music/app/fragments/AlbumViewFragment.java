@@ -35,6 +35,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
+import org.omnirom.music.service.PlaybackService;
 
 import java.util.Iterator;
 import java.util.List;
@@ -59,15 +60,24 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
-        public void onSongStarted(boolean buffering, Song s) throws RemoteException {
+        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
             if (mAdapter.contains(s)) {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         mAdapter.notifyDataSetChanged();
+                        if (buffering) {
+                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                            mFabDrawable.setBuffering(true);
+                        } else {
+                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                            mFabDrawable.setBuffering(false);
+                        }
                     }
                 });
             }
+
+
         }
     };
 
@@ -122,7 +132,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState){
+                             Bundle savedInstanceState) {
         mHandler = new Handler();
 
         // Inflate the layout for this fragment
@@ -164,7 +174,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     } else {
                         try {
                             PluginsLookup.getDefault().getPlaybackService().playAlbum(mAlbum);
-                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Cannot start playing album " + mAlbum.getRef(), e);
                         }
@@ -197,32 +206,18 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 // We substract the header view
                 position = position - 1;
 
-                // Play the song
-                Song song = mAdapter.getItem(position);
+                // Play the song (ie. queue the album and play at the selected index)
+                try {
+                    IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+                    service.getCurrentPlaybackQueue().clear();
+                    service.queueAlbum(mAlbum, true);
+                    service.playAtQueueIndex(position);
 
-                if (song != null) {
-                    try {
-                        IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                        pbService.playSong(song);
-
-                        // Add the remaining songs of the album to the playback queue
-                        Iterator<String> it = mAlbum.songs();
-                        for (int i = 0; i < position + 1; i++) {
-                            it.next();
-                        }
-                        while (it.hasNext()) {
-                            song = aggregator.retrieveSong(it.next(), mAlbum.getProvider());
-                            pbService.queueSong(song, false);
-                        }
-
-                        pbService.play();
-                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                        mFabShouldResume = true;
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to play song", e);
-                    }
-                } else {
-                    Log.e(TAG, "Trying to play null song!");
+                    mFabDrawable.setBuffering(true);
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mFabShouldResume = true;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to play song", e);
                 }
             }
         });

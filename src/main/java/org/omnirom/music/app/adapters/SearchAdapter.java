@@ -7,10 +7,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -20,6 +22,8 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.List;
+
+import omnimusic.Plugin;
 
 /**
  * Created by h4o on 22/07/2014.
@@ -40,6 +44,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         public TextView tvSubtitle;
         public Object content;
         public TextView divider;
+        public ImageView ivSource;
         public View vRoot;
 
     }
@@ -162,7 +167,6 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(int i, int i2, boolean b, View root, ViewGroup parent) {
-        Log.e(TAG, "getChildView(" + i + ", " + i2 + ")");
         final Context ctx = parent.getContext();
         assert ctx != null;
         if (root == null) {
@@ -173,11 +177,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
             holder.tvSubtitle = (TextView) root.findViewById(R.id.tvSubTitle);
             holder.divider = (TextView) root.findViewById(R.id.divider);
+            holder.ivSource = (ImageView) root.findViewById(R.id.ivSource);
             holder.vRoot = root;
-           /* root.setFocusable(false);
-            holder.tvTitle.setFocusable(false);
-            holder.tvSubtitle.setFocusable(false);
-            holder.albumArtImageView.setFocusable(false);*/
             root.setTag(holder);
         }
 
@@ -186,10 +187,12 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
         if (i2 == getChildrenCount(i) - 1) {
             tag.albumArtImageView.setVisibility(View.INVISIBLE);
-            tag.tvTitle.setText("More");
-            tag.tvSubtitle.setText("");
+            tag.ivSource.setVisibility(View.GONE);
+            tag.tvTitle.setText(R.string.more);
+            tag.tvSubtitle.setText(null);
         } else {
             tag.albumArtImageView.setVisibility(View.VISIBLE);
+            tag.ivSource.setVisibility(View.VISIBLE);
 
             switch (i) {
                 case ARTIST:
@@ -203,6 +206,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                     break;
                 case PLAYLIST:
                     updatePlaylistTag(i2, tag);
+                    break;
                 default:
                     Log.e(TAG, "Unknown group " + i);
                     break;
@@ -223,7 +227,12 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                 tag.tvSubtitle.setText(artist.getName());
             }
             tag.albumArtImageView.loadArtForSong(song);
+            tag.ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(song));
             tag.content = song;
+        } else {
+            tag.tvTitle.setText(R.string.loading);
+            tag.tvSubtitle.setText(null);
+            tag.albumArtImageView.setDefaultArt();
         }
     }
 
@@ -241,9 +250,10 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             }
             tag.albumArtImageView.loadArtForArtist(artist);
             tag.content = artist;
+            tag.ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(artist));
         } else {
-            tag.tvTitle.setText(tag.tvTitle.getContext().getString(R.string.loading));
-            tag.tvSubtitle.setText("");
+            tag.tvTitle.setText(R.string.loading);
+            tag.tvSubtitle.setText(null);
             tag.albumArtImageView.setDefaultArt();
         }
     }
@@ -266,10 +276,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                 // tag.divider.setViewName("local:album:title:" + albumRef);
             }
             tag.albumArtImageView.loadArtForAlbum(album);
+            tag.ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(album));
             tag.content = album;
         } else {
-            tag.tvTitle.setText(tag.tvTitle.getContext().getString(R.string.loading));
-            tag.tvSubtitle.setText("");
+            tag.tvTitle.setText(R.string.loading);
+            tag.tvSubtitle.setText(null);
             tag.albumArtImageView.setDefaultArt();
         }
     }
@@ -282,16 +293,17 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             tag.tvTitle.setText(playlist.getName());
             tag.tvSubtitle.setText(playlist.getSongsCount() + " songs");
             tag.content = playlist;
+            tag.ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(playlist));
         } else {
-            tag.tvTitle.setText(tag.tvTitle.getContext().getString(R.string.loading));
-            tag.tvSubtitle.setText("");
+            tag.tvTitle.setText(R.string.loading);
+            tag.tvSubtitle.setText(null);
             tag.albumArtImageView.setDefaultArt();
         }
     }
 
     @Override
     public boolean isChildSelectable(int i, int i2) {
-        return mSearchResult != null && getGroup(i) != null;//i < getGroupCount() && i2 < getChildrenCount(i);
+        return mSearchResult != null && getGroup(i) != null;
 
     }
 }
