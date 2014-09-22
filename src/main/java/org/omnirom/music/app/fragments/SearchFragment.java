@@ -119,13 +119,14 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     }
 
     private void onSongClick(int i) {
-        final List<String> list = sSearchResult.getSongsList();
+        SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.SONG, i);
+        final int numSongEntries = mAdapter.getChildrenCount(SearchAdapter.SONG);
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
-        if (i == Math.max(10, list.size() + 1)) {
+        if (i == Math.max(10, numSongEntries + 1)) {
             // More
         } else {
-            Song song = aggregator.retrieveSong(list.get(i), sSearchResult.getIdentifier());
+            Song song = aggregator.retrieveSong(entry.ref, entry.identifier);
             if (song != null) {
                 try {
                     PluginsLookup.getDefault().getPlaybackService().playSong(song);
@@ -155,8 +156,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
                 color = getResources().getColor(R.color.default_album_art_background);
             }
         }
-        Album album = aggregator.retrieveAlbum((String) mAdapter.getChild(SearchAdapter.ALBUM, i),
-                sSearchResult.getIdentifier());
+        SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.ALBUM, i);
+        Album album = aggregator.retrieveAlbum(entry.ref, entry.identifier);
         Intent intent = AlbumActivity.craftIntent(getActivity(), hero, album, color);
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
@@ -192,7 +193,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
             }
         }
         Intent intent = new Intent(getActivity(), ArtistActivity.class);
-        intent.putExtra(ArtistActivity.EXTRA_ARTIST, (String) mAdapter.getChild(SearchAdapter.ARTIST, i));
+        intent.putExtra(ArtistActivity.EXTRA_ARTIST, mAdapter.getChild(SearchAdapter.ARTIST, i).ref);
         intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
                 color);
         Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, hero);
@@ -209,8 +210,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     private void onPlaylistClick(int i, View v) {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        Playlist playlist = aggregator.retrievePlaylist((String) mAdapter.getChild(SearchAdapter.PLAYLIST, i),
-                sSearchResult.getIdentifier());
+        SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.PLAYLIST, i);
+        Playlist playlist = aggregator.retrievePlaylist(entry.ref, entry.identifier);
         Intent intent = PlaylistActivity.craftIntent(getActivity(), playlist);
         startActivity(intent);
     }

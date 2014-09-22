@@ -55,14 +55,14 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         public View vRoot;
     }
 
-    private class SearchEntry {
+    public class SearchEntry {
         SearchEntry(String ref, ProviderIdentifier id) {
             this.ref = ref;
             this.identifier = id;
         }
 
-        String ref;
-        ProviderIdentifier identifier;
+        public String ref;
+        public ProviderIdentifier identifier;
 
         @Override
         public boolean equals(Object o) {
@@ -179,7 +179,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public Object getChild(int i, int i2) {
+    public SearchEntry getChild(int i, int i2) {
         return getGroup(i).get(i2);
     }
 
