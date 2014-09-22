@@ -55,7 +55,12 @@ public class PlaylistAdapter extends SongsListAdapter {
         Iterator<String> it = mPlaylist.songs();
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         while (it.hasNext()) {
-            put(aggregator.retrieveSong(it.next(), mPlaylist.getProvider()));
+            Song s = aggregator.retrieveSong(it.next(), mPlaylist.getProvider());
+            if (s == null) {
+                Log.e(TAG, "Retreived a null song!");
+            } else {
+                put(s);
+            }
         }
         super.notifyDataSetChanged();
     }

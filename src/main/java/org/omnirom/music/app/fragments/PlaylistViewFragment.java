@@ -363,6 +363,9 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 @Override
                 public void run() {
                     updateOfflineStatus();
+
+                    // Make sure we're using the new/cached entity
+                    mAdapter.setPlaylist(p.get(p.indexOf(mPlaylist)));
                     mAdapter.notifyDataSetChanged();
                 }
             });

@@ -697,6 +697,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             }
 
             final Playlist finalCachedPlaylist = cached;
+
             // If something has actually changed
             if (notify) {
                 mExecutor.execute(new Runnable() {

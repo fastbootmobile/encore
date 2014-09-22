@@ -134,7 +134,7 @@ public class PlaylistListAdapter extends BaseAdapter {
 
         tag.playlist = playlist;
 
-        if (playlist.isLoaded()) {
+        if (playlist.isLoaded() || playlist.getName() != null) {
             tag.tvTitle.setText(playlist.getName());
             tag.tvSubTitle.setText(ctx.getResources().getQuantityString(R.plurals.songs_count, playlist.getSongsCount(), playlist.getSongsCount()));
             tag.ivCover.loadArtForPlaylist(playlist);
