@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
@@ -73,7 +74,14 @@ public class SettingsProvidersFragment extends ListFragment {
             mSettingsConnection = connection;
             Intent i = new Intent();
             i.setClassName(connection.getPackage(), connection.getConfigurationActivity());
-            startActivity(i);
+            try {
+                startActivity(i);
+            } catch (SecurityException e) {
+                Log.e(TAG, "Cannot start: Is your activity not exported?");
+                Toast.makeText(getActivity(),
+                        "Cannot start: Make sure you set 'exported=true' flag on your settings activity.",
+                        Toast.LENGTH_LONG).show();
+            }
         } else {
             Utils.shortToast(getActivity(), R.string.no_settings_provider);
         }
