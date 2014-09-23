@@ -57,7 +57,6 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
                 mPlaylistsUpdated.clear();
             }
             mAdapter.notifyDataSetChanged();
-            Log.e(TAG, "Added playlists runned");
         }
     };
 
@@ -156,8 +155,6 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onPlaylistUpdate(final List<Playlist> p) {
-        Log.e(TAG, "onPlaylistUpdate");
-
         synchronized (mPlaylistsUpdated) {
             mPlaylistsUpdated.addAll(p);
         }

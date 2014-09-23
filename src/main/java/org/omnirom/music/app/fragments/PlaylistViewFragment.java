@@ -345,6 +345,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    updateOfflineStatus();
                     mAdapter.notifyDataSetChanged();
                 }
             });
