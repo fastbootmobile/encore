@@ -34,9 +34,11 @@ class CircularAnimatedDrawable extends Drawable implements Animatable {
     private float mCurrentSweepAngle;
     private float mBorderWidth;
     private boolean mRunning;
+    private boolean mUseCenter;
 
     public CircularAnimatedDrawable(int color, float borderWidth) {
         mBorderWidth = borderWidth;
+        mUseCenter = true;
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
@@ -57,7 +59,7 @@ class CircularAnimatedDrawable extends Drawable implements Animatable {
         } else {
             sweepAngle += MIN_SWEEP_ANGLE;
         }
-        canvas.drawArc(fBounds, startAngle, sweepAngle, false, mPaint);
+        canvas.drawArc(fBounds, startAngle, sweepAngle, mUseCenter, mPaint);
     }
 
     @Override

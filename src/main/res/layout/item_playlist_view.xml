@@ -23,13 +23,13 @@
             android:visibility="invisible" />
 
         <org.omnirom.music.app.ui.AlbumArtImageView
+            android:id="@+id/ivAlbumArt"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:id="@+id/ivAlbumArt"
-            android:src="@drawable/album_placeholder"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="4dp"
-            android:layout_marginStart="4dp" />
+            android:layout_marginStart="4dp"
+            android:src="@drawable/album_placeholder" />
 
         <TextView
             android:id="@+id/tvTitle"
@@ -48,12 +48,13 @@
 
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|left"
             android:layout_marginEnd="12dp"
             android:layout_marginRight="12dp"
             android:layout_weight="1.15"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tvArtist"
@@ -64,14 +65,30 @@
                 android:singleLine="true"
                 android:textColor="@drawable/playlist_item_text" />
 
-            <TextView
-                android:id="@+id/tvDuration"
-                style="@style/FontCaption"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@drawable/playlist_item_text" />
+                android:layout_height="18dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvDuration"
+                    style="@style/FontCaption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="03:58"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@drawable/playlist_item_text" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ivOffline"
+                    android:src="@drawable/ic_track_downloaded"
+                    android:layout_gravity="center_vertical"
+                    android:visibility="visible" />
+            </LinearLayout>
 
         </LinearLayout>
 

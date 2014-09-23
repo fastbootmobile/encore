@@ -39,6 +39,7 @@ public class SongsListAdapter extends BaseAdapter {
         public TextView tvDuration;
         public ImageView ivOverflow;
         public AlbumArtImageView ivAlbumArt;
+        public ImageView ivOffline;
         public ViewGroup vRoot;
         public int position;
         public Song song;
@@ -116,6 +117,7 @@ public class SongsListAdapter extends BaseAdapter {
             holder.tvDuration = (TextView) root.findViewById(R.id.tvDuration);
             holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
             holder.ivAlbumArt = (AlbumArtImageView) root.findViewById(R.id.ivAlbumArt);
+            holder.ivOffline = (ImageView) root.findViewById(R.id.ivOffline);
             holder.vCurrentIndicator = root.findViewById(R.id.currentSongIndicator);
             holder.vRoot = (ViewGroup) root;
 
@@ -177,13 +179,30 @@ public class SongsListAdapter extends BaseAdapter {
             // ignore
         }
 
-        // Set alpha based on offline availability and mode
-        if (aggregator.isOfflineMode() && song != null
-                && song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY) {
-            Utils.setChildrenAlpha(tag.vRoot,
-                    Float.parseFloat(ctx.getResources().getString(R.string.unavailable_track_alpha)));
-        } else {
-            Utils.setChildrenAlpha(tag.vRoot, 1.0f);
+
+        if (song != null) {
+            // Set alpha based on offline availability and mode
+            if (aggregator.isOfflineMode()
+                    && song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY) {
+                Utils.setChildrenAlpha(tag.vRoot,
+                        Float.parseFloat(ctx.getResources().getString(R.string.unavailable_track_alpha)));
+            } else {
+                Utils.setChildrenAlpha(tag.vRoot, 1.0f);
+            }
+
+            // Show offline indicator in any case
+            tag.ivOffline.setVisibility(View.VISIBLE);
+            if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY) {
+                tag.ivOffline.setImageResource(R.drawable.ic_track_downloaded);
+            } else if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_DOWNLOADING) {
+                tag.ivOffline.setImageResource(R.drawable.ic_sync_in_progress);
+            } else if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_ERROR) {
+                tag.ivOffline.setImageResource(R.drawable.ic_sync_problem);
+            } else if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_PENDING) {
+                tag.ivOffline.setImageResource(R.drawable.ic_track_download_pending);
+            } else {
+                tag.ivOffline.setVisibility(View.GONE);
+            }
         }
 
         return root;

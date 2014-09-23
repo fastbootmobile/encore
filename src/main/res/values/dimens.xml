@@ -42,5 +42,5 @@
 
     <integer name="preference_fragment_scrollbarStyle">0x02000000</integer> <!-- outsideOverlay -->
 
-    <dimen name="circular_progress_stroke_width">4dp</dimen>
+    <dimen name="circular_progress_stroke_width">8dp</dimen>
 </resources>
