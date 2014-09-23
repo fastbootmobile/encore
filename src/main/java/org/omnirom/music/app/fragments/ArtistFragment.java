@@ -1113,9 +1113,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         public void notifyArtistUpdate(final List<Artist> artists) {
             for (Artist artist : artists) {
-                int artistIndex = mSimilarArtists.indexOf(artist);
+                final int artistIndex = mSimilarArtists.indexOf(artist);
                 if (artistIndex >= 0) {
-                    mAdapter.notifyItemChanged(artistIndex);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.notifyItemChanged(artistIndex);
+                        }
+                    });
                 }
             }
         }
