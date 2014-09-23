@@ -1233,8 +1233,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         if (a.contains(mArtist)) {
             mHandler.removeCallbacks(mUpdateAlbumsRunnable);
             mHandler.post(mUpdateAlbumsRunnable);
-            mArtistSimilarFragment.notifyArtistUpdate(a);
         }
+        mArtistSimilarFragment.notifyArtistUpdate(a);
     }
 
     @Override
