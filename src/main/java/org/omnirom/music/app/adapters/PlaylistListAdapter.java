@@ -44,10 +44,14 @@ public class PlaylistListAdapter extends BaseAdapter {
         Collections.sort(mPlaylists, new Comparator<Playlist>() {
             @Override
             public int compare(Playlist playlist, Playlist playlist2) {
-                if (playlist != null && playlist2 != null)
+                if (playlist != null && playlist2 != null && playlist.getName() != null
+                        && playlist2.getName() != null) {
                     return playlist.getName().compareTo(playlist2.getName());
-                else
+                } else if (playlist != null && playlist2 != null) {
+                    return playlist.getRef().compareTo(playlist2.getRef());
+                } else {
                     return 0;
+                }
             }
         });
     }
