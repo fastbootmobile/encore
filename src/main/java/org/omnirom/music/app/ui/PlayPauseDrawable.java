@@ -40,13 +40,14 @@ public class PlayPauseDrawable extends Drawable {
     private long mTransitionAccumulator;
     private long mLastTransitionTick;
     private boolean mIsBuffering;
+    private int mYOffset;
 
     private Resources mResources;
 
 
     public PlayPauseDrawable(Resources res) {
         mResources = res;
-        setPaddingDp(32);
+        setPaddingDp(42);
         mCurrentShape = mRequestShape = -1;
         mPath = new Path();
         mPaint = new Paint();
@@ -68,6 +69,10 @@ public class PlayPauseDrawable extends Drawable {
 
     public void setPadding(int padding) {
         mHalfPadding = padding / 2;
+    }
+
+    public void setYOffset(int offset) {
+        mYOffset = offset;
     }
 
     public void setShape(int shape) {
@@ -206,6 +211,8 @@ public class PlayPauseDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
+        canvas.translate(0, -mYOffset);
+
         if (!mInitialDrawDone) {
             shapeInitialPath();
         }
@@ -266,6 +273,8 @@ public class PlayPauseDrawable extends Drawable {
             // Invalidate ourselves to redraw the next animation frame
             invalidateSelf();
         }
+
+        canvas.translate(0, mYOffset);
     }
 
     @Override

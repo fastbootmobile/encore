@@ -1,37 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<org.omnirom.music.app.ui.PlayingBarView xmlns:android="http://schemas.android.com/apk/res/android"
+<org.omnirom.music.app.ui.PlayingBarView
+    android:id="@+id/playingBarLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/playingBarLayout">
+    android:layout_height="wrap_content">
 
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/playBarTracksLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:id="@+id/playBarTracksLayout"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:orientation="vertical">
 
     </LinearLayout>
 
-    <!--
-    android:elevation="@dimen/small_button_elevation"
-        android:stateListAnimator="@anim/small_button_raise"
-    -->
-    <ImageButton
+    <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabPlayBarButton"
-        android:layout_width="@dimen/floating_button_small_size"
-        android:layout_height="@dimen/floating_button_small_size"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        fab:fab_colorNormal="@color/primary"
+        fab:fab_colorPressed="@color/primary_light"
+        fab:fab_size="mini"
 
         android:layout_above="@+id/tvArtist"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
 
-        android:layout_marginRight="16dp"
         android:layout_marginEnd="16dp"
-
-        android:background="@drawable/fab_background"
-        android:contentDescription="@string/play_now" />
+        android:layout_marginRight="16dp" />
 </org.omnirom.music.app.ui.PlayingBarView>

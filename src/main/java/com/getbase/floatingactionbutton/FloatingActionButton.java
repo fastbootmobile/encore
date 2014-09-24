@@ -37,8 +37,7 @@ public class FloatingActionButton extends ImageButton {
 
   int mColorNormal;
   int mColorPressed;
-  @DrawableRes
-  private int mIcon;
+  private Drawable mIcon;
   private int mSize;
 
   private float mCircleSize;
@@ -63,7 +62,7 @@ public class FloatingActionButton extends ImageButton {
   void init(Context context, AttributeSet attributeSet) {
     mColorNormal = getColor(android.R.color.holo_blue_dark);
     mColorPressed = getColor(android.R.color.holo_blue_light);
-    mIcon = 0;
+    mIcon = null;
     mSize = SIZE_NORMAL;
     if (attributeSet != null) {
       initAttributes(context, attributeSet);
@@ -92,7 +91,10 @@ public class FloatingActionButton extends ImageButton {
         mColorNormal = attr.getColor(R.styleable.FloatingActionButton_fab_colorNormal, getColor(android.R.color.holo_blue_dark));
         mColorPressed = attr.getColor(R.styleable.FloatingActionButton_fab_colorPressed, getColor(android.R.color.holo_blue_light));
         mSize = attr.getInt(R.styleable.FloatingActionButton_fab_size, SIZE_NORMAL);
-        mIcon = attr.getResourceId(R.styleable.FloatingActionButton_fab_icon, 0);
+        int iconId = attr.getResourceId(R.styleable.FloatingActionButton_fab_icon, 0);
+        if (iconId > 0) {
+          mIcon = getResources().getDrawable(iconId);
+        }
       } finally {
         attr.recycle();
       }
@@ -130,9 +132,14 @@ public class FloatingActionButton extends ImageButton {
     setBackgroundCompat(layerDrawable);
   }
 
+  public void setIcon(final Drawable icon) {
+      mIcon = icon;
+      updateBackground();
+  }
+
   Drawable getIconDrawable() {
-    if (mIcon != 0) {
-      return getResources().getDrawable(mIcon);
+    if (mIcon != null) {
+      return mIcon;
     } else {
       return new ColorDrawable(Color.TRANSPARENT);
     }

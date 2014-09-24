@@ -44,7 +44,6 @@
 
     <dimen name="circular_progress_stroke_width">8dp</dimen>
 
-    <!-- Floating action button -->
     <dimen name="fab_size_normal">56dp</dimen>
     <dimen name="fab_size_mini">40dp</dimen>
 

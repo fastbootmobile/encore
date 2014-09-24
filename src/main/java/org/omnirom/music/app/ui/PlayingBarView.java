@@ -29,6 +29,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaybackQueueActivity;
 import org.omnirom.music.app.R;
@@ -207,17 +209,17 @@ public class PlayingBarView extends RelativeLayout {
 
 
         // Set FAB info
-        mPlayFab = (ImageButton) findViewById(R.id.fabPlayBarButton);
-        Utils.setSmallFabOutline(new View[]{mPlayFab});
-        Utils.setupSmallFabShadow(mPlayFab);
+        mPlayFab = (FloatingActionButton) findViewById(R.id.fabPlayBarButton);
 
         mProgressDrawable = new CircularProgressDrawable();
         mProgressDrawable.setValue(0);
         mProgressDrawable.setColor(getResources().getColor(R.color.white));
         mProgressDrawable.setAlpha(100);
         mProgressDrawable.setPadding(Utils.dpToPx(getResources(), 2));
+
         mPlayFabDrawable = new PlayPauseDrawable(getResources());
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+        mPlayFabDrawable.setYOffset(6);
 
         // Set the original state
         IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
