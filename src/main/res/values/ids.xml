@@ -2,4 +2,6 @@
 <resources>
     <item name="item_click_support" type="id"/>
     <item name="item_selection_support" type="id"/>
+
+    <item name="fab_expand_menu_button" type="id"/>
 </resources>
