@@ -17,6 +17,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
@@ -55,7 +57,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private Bitmap mHeroImage;
     private PlayPauseDrawable mFabDrawable;
     private int mBackgroundColor;
-    private ImageButton mPlayFab;
+    private FloatingActionButton mPlayFab;
     private boolean mFabShouldResume = false;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
@@ -147,9 +149,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         // Hide download button
         headerView.findViewById(R.id.cpbOffline).setVisibility(View.GONE);
 
-        mPlayFab = (ImageButton) headerView.findViewById(R.id.fabPlay);
-        Utils.setLargeFabOutline(new View[]{mPlayFab});
-        Utils.setupLargeFabShadow(mPlayFab);
+        mPlayFab = (FloatingActionButton) headerView.findViewById(R.id.fabPlay);
 
         // Set source logo
         ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
@@ -158,7 +158,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources());
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        mFabDrawable.setPaddingDp(48);
+        mFabDrawable.setPaddingDp(52);
+        mFabDrawable.setYOffset(6);
         mPlayFab.setImageDrawable(mFabDrawable);
         mPlayFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -262,12 +263,18 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
             @Override
             public void onGenerated(final Palette palette) {
-                final PaletteItem color = palette.getDarkMutedColor();
-                if (color != null && mRootView != null) {
+                final PaletteItem normalColor = palette.getDarkMutedColor();
+                final PaletteItem pressedColor = palette.getDarkVibrantColor();
+                if (normalColor != null && mRootView != null) {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Utils.colorFloatingButton(mPlayFab, color.getRgb(), true);
+                            mPlayFab.setNormalColor(normalColor.getRgb());
+                            if (pressedColor != null) {
+                                mPlayFab.setPressedColor(pressedColor.getRgb());
+                            } else {
+                                mPlayFab.setPressedColor(normalColor.getRgb());
+                            }
                         }
                     });
                 }

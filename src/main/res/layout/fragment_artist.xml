@@ -1,5 +1,6 @@
 <org.omnirom.music.app.ui.ParallaxScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -39,23 +40,22 @@
             android:paddingTop="16dp"
             android:textColor="@color/white" />
 
-        <!-- android:elevation="@dimen/button_elevation"
-            android:stateListAnimator="@anim/button_raise" -->
-        <ImageButton
+        <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabPlay"
-            android:layout_width="@dimen/floating_button_large_size"
-            android:layout_height="@dimen/floating_button_large_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
             android:layout_above="@+id/tvArtist"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
 
+            app:fab_size="normal"
+            app:fab_colorNormal="@color/primary"
+            app:fab_colorPressed="@color/primary_light"
+
             android:layout_marginBottom="-24dp"
             android:layout_marginEnd="48dp"
-            android:layout_marginRight="48dp"
-
-            android:background="@drawable/fab_background"
-            android:contentDescription="@string/play_now" />
+            android:layout_marginRight="48dp" />
 
         <ImageView
             android:id="@+id/ivSourceLogo"

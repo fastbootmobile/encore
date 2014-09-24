@@ -32,6 +32,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;

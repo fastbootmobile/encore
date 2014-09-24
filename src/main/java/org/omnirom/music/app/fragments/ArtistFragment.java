@@ -36,6 +36,7 @@ import android.widget.TextView;
 
 import com.echonest.api.v4.Biography;
 import com.echonest.api.v4.EchoNestException;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.lucasr.twowayview.ItemClickSupport;
 import org.lucasr.twowayview.TwoWayLayoutManager;
@@ -99,7 +100,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private ArtistTracksFragment mArtistTracksFragment;
     private ArtistInfoFragment mArtistInfoFragment;
     private ArtistSimilarFragment mArtistSimilarFragment;
-    private ImageButton mFabPlay;
+    private FloatingActionButton mFabPlay;
 
     private Runnable mUpdateAlbumsRunnable = new Runnable() {
         @Override
@@ -307,12 +308,27 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(final Palette palette) {
-                    final PaletteItem color = palette.getDarkMutedColor();
-                    if (color != null && mRootView != null) {
+                    final PaletteItem normalColor = palette.getDarkMutedColor();
+                    final PaletteItem pressedColor = palette.getDarkVibrantColor();
+                    if (normalColor != null && mRootView != null) {
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                Utils.colorFloatingButton(mFabPlay, color.getRgb(), true);
+                                final PaletteItem normalColor = palette.getDarkMutedColor();
+                                final PaletteItem pressedColor = palette.getDarkVibrantColor();
+                                if (normalColor != null && mRootView != null) {
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mFabPlay.setNormalColor(normalColor.getRgb());
+                                            if (pressedColor != null) {
+                                                mFabPlay.setPressedColor(pressedColor.getRgb());
+                                            } else {
+                                                mFabPlay.setPressedColor(normalColor.getRgb());
+                                            }
+                                        }
+                                    });
+                                }
                             }
                         });
                     }
@@ -401,14 +417,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(mArtist));
 
         // Outline is required for the FAB shadow to be actually oval
-        mFabPlay = (ImageButton) mRootView.findViewById(R.id.fabPlay);
-        setOutlines(mFabPlay);
-        Utils.setupLargeFabShadow(mFabPlay);
+        mFabPlay = (FloatingActionButton) mRootView.findViewById(R.id.fabPlay);
         showFab(false, false);
 
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources());
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+        mFabDrawable.setPaddingDp(52);
+        mFabDrawable.setYOffset(6);
 
         try {
             Song currentTrack = playbackService.getCurrentTrack();
@@ -487,10 +503,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 Utils.animateScale(mFabPlay, animate, visible);
             }
         });
-    }
-
-    private void setOutlines(View v) {
-        Utils.setLargeFabOutline(new View[]{v});
     }
 
     private void setFabShape(int shape) {
@@ -784,6 +796,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources());
                     drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                     drawable.setColor(0xCC333333);
+                    drawable.setPaddingDp(32);
                     holder.ivPlayAlbum.setImageDrawable(drawable);
 
                     holder.ivPlayAlbum.setOnClickListener(new View.OnClickListener() {

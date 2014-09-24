@@ -77,7 +77,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top"
-                    android:text="03:58"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@drawable/playlist_item_text" />
 
@@ -87,7 +86,7 @@
                     android:id="@+id/ivOffline"
                     android:src="@drawable/ic_track_downloaded"
                     android:layout_gravity="center_vertical"
-                    android:visibility="visible" />
+                    android:visibility="gone" />
             </LinearLayout>
 
         </LinearLayout>

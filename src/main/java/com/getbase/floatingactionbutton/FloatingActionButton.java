@@ -76,6 +76,14 @@ public class FloatingActionButton extends ImageButton {
     updateBackground();
   }
 
+  public void setNormalColor(int color) {
+    mColorNormal = color;
+  }
+
+  public void setPressedColor(int color) {
+    mColorPressed = color;
+  }
+
   int getColor(@ColorRes int id) {
     return getResources().getColor(id);
   }

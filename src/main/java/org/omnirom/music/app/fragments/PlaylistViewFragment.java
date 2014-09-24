@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dd.CircularProgressButton;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
@@ -51,7 +52,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     private PlaylistAdapter mAdapter;
     private Playlist mPlaylist;
-    private ImageButton mPlayFab;
+    private FloatingActionButton mPlayFab;
     private PlayPauseDrawable mFabDrawable;
     private boolean mFabShouldResume;
     private Handler mHandler;
@@ -151,9 +152,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         tvAlbumName.setText(mPlaylist.getName());
         ivHero.setImageResource(R.drawable.album_placeholder);
 
-        mPlayFab = (ImageButton) headerView.findViewById(R.id.fabPlay);
-        Utils.setLargeFabOutline(new View[]{mPlayFab});
-        Utils.setupLargeFabShadow(mPlayFab);
+        mPlayFab = (FloatingActionButton) headerView.findViewById(R.id.fabPlay);
 
         // Set source logo
         ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
@@ -162,7 +161,9 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources());
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        mFabDrawable.setPaddingDp(48);
+        mFabDrawable.setPaddingDp(52);
+        mFabDrawable.setYOffset(6);
+
         mPlayFab.setImageDrawable(mFabDrawable);
         mPlayFab.setOnClickListener(new View.OnClickListener() {
             @Override

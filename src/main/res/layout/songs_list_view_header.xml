@@ -37,23 +37,21 @@
         android:contentDescription="@string/albums"
         android:scaleType="centerCrop" />
 
-    <!-- android:elevation="@dimen/button_elevation"
-        android:stateListAnimator="@anim/button_raise" -->
-    <ImageButton
+    <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabPlay"
-        android:layout_width="@dimen/floating_button_large_size"
-        android:layout_height="@dimen/floating_button_large_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
 
         android:layout_above="@+id/tvAlbumName"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
 
+        app:fab_colorNormal="@color/primary"
+        app:fab_colorPressed="@color/primary_light"
+
         android:layout_marginBottom="-24dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-
-        android:background="@drawable/fab_background"
-        android:contentDescription="@string/play_now" />
+        android:layout_marginRight="16dp" />
 
 
     <ProgressBar
