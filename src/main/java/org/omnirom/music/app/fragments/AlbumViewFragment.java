@@ -203,7 +203,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
                 // We substract the header view
                 position = position - 1;
 

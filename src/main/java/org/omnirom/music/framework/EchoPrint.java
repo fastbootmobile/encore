@@ -117,10 +117,10 @@ public class EchoPrint {
 
         if (mBufferIndex > 0) {
             try {
-                URL url = new URL("http://search.midomi.com:443/v2/?method=search&type=identify");
+                URL url = new URL("http://8.25.217.9:443/v2/?method=search&type=identify");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.addRequestProperty("User-Agent", USER_AGENT);
-                conn.addRequestProperty("Content-Type", "audio/wav");
+                conn.addRequestProperty("Content-Type", MIME_TYPE);
                 conn.setDoOutput(true);
 
                 // Write the WAVE audio header, then the PCM data
