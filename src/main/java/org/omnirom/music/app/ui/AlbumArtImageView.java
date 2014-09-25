@@ -72,6 +72,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
                 mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
                 mHandler.postDelayed(mUpdatePlaylistCompositeRunnable, 500);
             } else {
+                mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
                 mHandler.post(mUpdatePlaylistCompositeRunnable);
             }
         }
@@ -103,6 +104,15 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
                     (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
             setImageDrawable(mDrawable);
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        if (mPlaylistComposite != null) {
+            sPlaylistBitmapPool.add(mPlaylistComposite);
+        }
+
+        super.finalize();
     }
 
     private void forceDrawableReload() {
@@ -214,7 +224,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         }
 
         mRequestedEntity = playlist;
+        mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
         setDefaultArt();
+
 
         // Load 4 songs and composite them into one picture
         mPlaylistSource = new ArrayList<Bitmap>();
