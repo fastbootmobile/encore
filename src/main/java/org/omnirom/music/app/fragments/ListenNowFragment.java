@@ -215,7 +215,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
         // Generate entries
         if (!sWarmUp) {
-            mHandler.postDelayed(mGenerateEntries, 1000);
+            mHandler.postDelayed(mGenerateEntries, 500);
         } else {
             mHandler.post(mGenerateEntries);
         }
