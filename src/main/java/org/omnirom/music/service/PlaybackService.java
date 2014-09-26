@@ -2,8 +2,10 @@ package org.omnirom.music.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
@@ -13,6 +15,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.acra.ACRA;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
@@ -38,7 +41,8 @@ import java.util.List;
  * Service handling the playback of the audio and the play notification
  */
 public class PlaybackService extends Service
-        implements PluginsLookup.ConnectionListener, ILocalCallback, AudioManager.OnAudioFocusChangeListener {
+        implements PluginsLookup.ConnectionListener, ILocalCallback,
+        AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = "PlaybackService";
 
@@ -80,6 +84,20 @@ public class PlaybackService extends Service
                     cb.onPlaybackQueueChanged();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Cannot notify playback queue changed", e);
+                }
+            }
+        }
+    };
+
+    private BroadcastReceiver mAudioNoisyReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+                try {
+                    mBinder.stop();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot stop playback during AUDIO_BECOMING_NOISY", e);
+                    ACRA.getErrorReporter().handleException(e, false);
                 }
             }
         }
@@ -336,7 +354,7 @@ public class PlaybackService extends Service
      * Request the audio focus and registers the remote media controller
      */
     private void requestAudioFocus() {
-        Log.e(TAG, "Request audio focus...");
+        Log.d(TAG, "Request audio focus...");
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         // Request audio focus for playback
@@ -362,6 +380,9 @@ public class PlaybackService extends Service
             Log.e(TAG, "Request denied: " + result);
         }
 
+        // Register AUDIO_BECOMING_NOISY to stop playback when earbuds are pulled
+        registerReceiver(mAudioNoisyReceiver,
+                new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
     }
 
     /**
@@ -370,6 +391,7 @@ public class PlaybackService extends Service
     private void abandonAudioFocus() {
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.abandonAudioFocus(this);
+        unregisterReceiver(mAudioNoisyReceiver);
     }
 
     /**

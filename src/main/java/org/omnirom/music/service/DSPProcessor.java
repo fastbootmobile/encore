@@ -69,6 +69,8 @@ public class DSPProcessor {
         @Override
         public void onFormatInfo(AudioSocket socket, Plugin.FormatInfo message) {
             setupSink(message.getSamplingRate(), message.getChannels());
+
+            // TODO: Send format info to the DSP plugins too!!!
         }
 
         @Override
