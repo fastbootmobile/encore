@@ -54,7 +54,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private boolean mCrossfade;
     private Bitmap mPlaylistComposite;
     private List<Bitmap> mPlaylistSource;
-    private static List<Bitmap> sPlaylistBitmapPool = new ArrayList<Bitmap>();
+    private static final List<Bitmap> sPlaylistBitmapPool = new ArrayList<Bitmap>();
     private Paint mPlaylistPaint;
 
     private Runnable mUpdatePlaylistCompositeRunnable = new Runnable() {
@@ -111,7 +111,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     @Override
     protected void finalize() throws Throwable {
         if (mPlaylistComposite != null) {
-            sPlaylistBitmapPool.add(mPlaylistComposite);
+            synchronized (sPlaylistBitmapPool) {
+                sPlaylistBitmapPool.add(mPlaylistComposite);
+            }
         }
 
         super.finalize();
@@ -153,13 +155,15 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         return mRequestedEntity;
     }
 
-    private void makePlaylistComposite() {
+    private synchronized void makePlaylistComposite() {
         if (mPlaylistComposite == null) {
-            if (sPlaylistBitmapPool.size() > 0) {
-                mPlaylistComposite = sPlaylistBitmapPool.remove(0);
-                mPlaylistComposite.eraseColor(0x00000000);
-            } else {
-                mPlaylistComposite = Bitmap.createBitmap(1080, 1080, Bitmap.Config.ARGB_8888);
+            synchronized (sPlaylistBitmapPool) {
+                if (sPlaylistBitmapPool.size() > 0) {
+                    mPlaylistComposite = sPlaylistBitmapPool.remove(0);
+                    mPlaylistComposite.eraseColor(0x00000000);
+                } else {
+                    mPlaylistComposite = Bitmap.createBitmap(1080, 1080, Bitmap.Config.ARGB_8888);
+                }
             }
         }
 
