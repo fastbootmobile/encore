@@ -912,8 +912,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     tvTrackDuration.setText(Utils.formatTrackLength(song.getDuration()));
                     ivOverflow.setVisibility(View.VISIBLE);
 
-                    // Set song click listener
-                    itemRoot.setOnClickListener(mSongClickListener);
+                    // Set song click listener if playable
+                    if (song.isAvailable()) {
+                        itemRoot.setOnClickListener(mSongClickListener);
+                    }
 
                     // Set overflow popup
                     ivOverflow.setOnClickListener(new View.OnClickListener() {

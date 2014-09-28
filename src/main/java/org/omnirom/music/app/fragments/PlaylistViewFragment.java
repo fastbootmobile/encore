@@ -204,17 +204,19 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         lvPlaylistContents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                try {
-                    pbService.getCurrentPlaybackQueue().clear();
-                    pbService.queuePlaylist(mPlaylist, false);
-                    pbService.playAtQueueIndex(i - 1);
+                if (mAdapter.getItem(i - 1).isAvailable()) {
+                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                    try {
+                        pbService.getCurrentPlaybackQueue().clear();
+                        pbService.queuePlaylist(mPlaylist, false);
+                        pbService.playAtQueueIndex(i - 1);
 
-                    // Update FAB
-                    mFabShouldResume = true;
-                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to play song", e);
+                        // Update FAB
+                        mFabShouldResume = true;
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to play song", e);
+                    }
                 }
             }
         });

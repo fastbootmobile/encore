@@ -51,7 +51,7 @@ public class SongsFragment extends Fragment {
             // Play the song
             Song song = mSongsListAdapter.getItem(i);
 
-            if (song != null) {
+            if (song != null && song.isAvailable()) {
                 try {
                     long clock = SystemClock.uptimeMillis();
                     PluginsLookup.getDefault().getPlaybackService().playSong(song);

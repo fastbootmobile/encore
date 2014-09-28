@@ -186,7 +186,6 @@ public class SongsListAdapter extends BaseAdapter {
 
 
         if (song != null) {
-            Log.e("SongsList", "Available? " + song.isAvailable());
             // Set alpha based on offline availability and mode
             if ((aggregator.isOfflineMode()
                     && song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY)

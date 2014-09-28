@@ -67,13 +67,15 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private AlbumArtHelper.AlbumArtListener mCompositeListener = new AlbumArtHelper.AlbumArtListener() {
         @Override
         public void onArtLoaded(Bitmap output, BoundEntity request) {
-            mPlaylistSource.add(output);
-            if (mPlaylistSource.size() < 4) {
-                mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
-                mHandler.postDelayed(mUpdatePlaylistCompositeRunnable, 500);
-            } else {
-                mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
-                mHandler.post(mUpdatePlaylistCompositeRunnable);
+            if (output != null) {
+                mPlaylistSource.add(output);
+                if (mPlaylistSource.size() < 4) {
+                    mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
+                    mHandler.postDelayed(mUpdatePlaylistCompositeRunnable, 500);
+                } else {
+                    mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
+                    mHandler.post(mUpdatePlaylistCompositeRunnable);
+                }
             }
         }
     };

@@ -206,18 +206,20 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 // We substract the header view
                 position = position - 1;
 
-                // Play the song (ie. queue the album and play at the selected index)
-                try {
-                    IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-                    service.getCurrentPlaybackQueue().clear();
-                    service.queueAlbum(mAlbum, false);
-                    service.playAtQueueIndex(position);
+                if (mAdapter.getItem(position).isAvailable()) {
+                    // Play the song (ie. queue the album and play at the selected index)
+                    try {
+                        IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+                        service.getCurrentPlaybackQueue().clear();
+                        service.queueAlbum(mAlbum, false);
+                        service.playAtQueueIndex(position);
 
-                    mFabDrawable.setBuffering(true);
-                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                    mFabShouldResume = true;
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to play song", e);
+                        mFabDrawable.setBuffering(true);
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                        mFabShouldResume = true;
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to play song", e);
+                    }
                 }
             }
         });

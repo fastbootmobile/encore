@@ -83,12 +83,10 @@ public class AlbumArtHelper {
                 return null;
             }
 
-            final Resources res = mContext.getResources();
             final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
             // Prepare the placeholder/default
-            BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(R.drawable.album_placeholder);
-            Bitmap bmp = drawable.getBitmap();
+            Bitmap bmp = null;
 
             Bitmap cachedImage = null;
             String artKey;
