@@ -276,7 +276,20 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             case BoundEntity.OFFLINE_STATUS_DOWNLOADING:
                 mOfflineBtn.setIndeterminateProgressMode(false);
                 float numSyncTracks = getNumSyncTracks();
-                mOfflineBtn.setProgress(numSyncTracks * 100.0f / ((float) mPlaylist.getSongsCount()) + 0.1f);
+                float numTracksToSync = 0;
+
+                // Count the number of tracks to sync (ie. num of tracks available)
+                Iterator<String> songs = mPlaylist.songs();
+                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+                while (songs.hasNext()) {
+                    String ref = songs.next();
+                    Song s = aggregator.retrieveSong(ref, mPlaylist.getProvider());
+                    if (s != null && s.isAvailable()) {
+                        ++numTracksToSync;
+                    }
+                }
+
+                mOfflineBtn.setProgress(Math.min(100, numSyncTracks * 100.0f / numTracksToSync + 0.1f));
                 break;
         }
 
