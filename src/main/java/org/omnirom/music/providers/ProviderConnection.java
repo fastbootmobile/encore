@@ -46,8 +46,6 @@ public class ProviderConnection extends AbstractProviderConnection {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        super.onServiceConnected(name, service);
-
         mHandler = new Handler();
         mBinder = IMusicProvider.Stub.asInterface(service);
 
@@ -80,13 +78,7 @@ public class ProviderConnection extends AbstractProviderConnection {
             Log.e(TAG, "Remote exception occurred on the set providers", e);
         }
 
-        mHandler.post(new Runnable() {
-            public void run() {
-                if (mListener != null) {
-                    mListener.onServiceConnected(ProviderConnection.this);
-                }
-            }
-        });
+        super.onServiceConnected(name, service);
     }
 
     @Override

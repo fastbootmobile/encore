@@ -118,6 +118,7 @@ public class PlaybackService extends Service
     private boolean mIsStopping;
     private boolean mCurrentTrackWaitLoading;
     private ProviderIdentifier mCurrentPlayingProvider;
+    private boolean mHasAudioFocus;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -275,6 +276,12 @@ public class PlaybackService extends Service
     public void onServiceConnected(AbstractProviderConnection connection) {
         Log.i(TAG, "Service connected: " + connection.getIdentifier());
         assignProviderAudioSocket(connection);
+
+        try {
+            ((ProviderConnection) connection).getBinder().registerCallback(mProviderCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Cannot register callback on connected service");
+        }
     }
 
     /**
@@ -353,45 +360,51 @@ public class PlaybackService extends Service
     /**
      * Request the audio focus and registers the remote media controller
      */
-    private void requestAudioFocus() {
-        Log.d(TAG, "Request audio focus...");
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+    private synchronized void requestAudioFocus() {
+        if (!mHasAudioFocus) {
+            Log.d(TAG, "Request audio focus...");
+            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
-        // Request audio focus for playback
-        int result = am.requestAudioFocus(this,
-                // Use the music stream.
-                AudioManager.STREAM_MUSIC,
-                // Request permanent focus.
-                AudioManager.AUDIOFOCUS_GAIN);
+            // Request audio focus for playback
+            int result = am.requestAudioFocus(this,
+                    // Use the music stream.
+                    AudioManager.STREAM_MUSIC,
+                    // Request permanent focus.
+                    AudioManager.AUDIOFOCUS_GAIN);
 
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            Log.e(TAG, "Request granted");
-            am.registerMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
+            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                Log.e(TAG, "Request granted");
+                mHasAudioFocus = true;
+                am.registerMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
 
-            // create and register the remote control client
-            am.registerRemoteControlClient(mRemoteControlClient);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING,
-                        (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
+                // create and register the remote control client
+                am.registerRemoteControlClient(mRemoteControlClient);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING,
+                            (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
+                } else {
+                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+                }
+
+                // Register AUDIO_BECOMING_NOISY to stop playback when earbuds are pulled
+                registerReceiver(mAudioNoisyReceiver,
+                        new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
             } else {
-                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+                Log.e(TAG, "Request denied: " + result);
             }
-        } else {
-            Log.e(TAG, "Request denied: " + result);
         }
-
-        // Register AUDIO_BECOMING_NOISY to stop playback when earbuds are pulled
-        registerReceiver(mAudioNoisyReceiver,
-                new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
     }
 
     /**
      * Release the audio focus and unregisters the media controls
      */
-    private void abandonAudioFocus() {
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        am.abandonAudioFocus(this);
-        unregisterReceiver(mAudioNoisyReceiver);
+    private synchronized void abandonAudioFocus() {
+        if (mHasAudioFocus) {
+            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            am.abandonAudioFocus(this);
+            unregisterReceiver(mAudioNoisyReceiver);
+            mHasAudioFocus = false;
+        }
     }
 
     /**
@@ -428,6 +441,8 @@ public class PlaybackService extends Service
                     }
                 }
 
+                Log.d(TAG, "onSongStarted: Buffering...");
+
                 if (!next.isLoaded()) {
                     // Track not loaded yet, delay until track info arrived
                     mCurrentTrackWaitLoading = true;
@@ -439,7 +454,9 @@ public class PlaybackService extends Service
                     requestAudioFocus();
 
                     try {
-                        provider.playSong(next.getRef());
+                        if (provider != null) {
+                            provider.playSong(next.getRef());
+                        }
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to play song", e);
                     } catch (NullPointerException e) {
@@ -569,6 +586,8 @@ public class PlaybackService extends Service
                 final ProviderIdentifier identifier = currentSong.getProvider();
                 abandonAudioFocus();
                 mState = STATE_PAUSING;
+                Log.d(TAG, "onSongPaused: Pausing...");
+
                 new Thread() {
                     public void run() {
                         IMusicProvider provider = PluginsLookup.getDefault().getProvider(identifier).getBinder();
@@ -589,28 +608,41 @@ public class PlaybackService extends Service
 
         @Override
         public boolean play() throws RemoteException {
-            final Song currentSong = getCurrentSong();
-            if (currentSong != null) {
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(currentSong.getProvider()).getBinder();
-                if (provider != null) {
-                    provider.resume();
-                    mIsResuming = true;
-                    mState = STATE_BUFFERING;
+            new Thread() {
+                public void run() {
+                    final Song currentSong = getCurrentSong();
+                    if (currentSong != null) {
+                        IMusicProvider provider = PluginsLookup.getDefault().getProvider(currentSong.getProvider()).getBinder();
+                        if (provider != null) {
+                            try {
+                                provider.resume();
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Cannot resume", e);
+                            }
+                            mIsResuming = true;
+                            mState = STATE_BUFFERING;
 
-                    requestAudioFocus();
-                    mNotification.setPlayPauseAction(false);
-                } else {
-                    Log.e(TAG, "Provider is null! Can't resume.");
+                            for (IPlaybackCallback cb : mCallbacks) {
+                                try {
+                                    cb.onSongStarted(true, currentSong);
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot call playback callback for song start event", e);
+                                }
+                            }
+
+                            requestAudioFocus();
+                            mNotification.setPlayPauseAction(false);
+                        } else {
+                            Log.e(TAG, "Provider is null! Can't resume.");
+                        }
+                    } else if (mPlaybackQueue.size() > 0) {
+                        mHandler.removeCallbacks(mStartPlaybackRunnable);
+                        mHandler.post(mStartPlaybackRunnable);
+                    }
                 }
+            }.start();
 
-                return true;
-            } else if (mPlaybackQueue.size() > 0) {
-                mHandler.removeCallbacks(mStartPlaybackRunnable);
-                mHandler.post(mStartPlaybackRunnable);
-                return true;
-            } else {
-                return false;
-            }
+            return true;
         }
 
         @Override
@@ -809,6 +841,8 @@ public class PlaybackService extends Service
                 }
             }
 
+            Log.d(TAG, "onSongStarted: Playing...");
+
             mNotification.setPlayPauseAction(false);
             mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
         }
@@ -827,6 +861,8 @@ public class PlaybackService extends Service
                         Log.e(TAG, "Cannot call playback callback for playback pause event", e);
                     }
                 }
+
+                Log.d(TAG, "onSongPaused: Paused...");
 
                 mNotification.setPlayPauseAction(true);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {

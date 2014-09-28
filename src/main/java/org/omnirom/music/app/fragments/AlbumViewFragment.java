@@ -210,7 +210,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 try {
                     IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
                     service.getCurrentPlaybackQueue().clear();
-                    service.queueAlbum(mAlbum, true);
+                    service.queueAlbum(mAlbum, false);
                     service.playAtQueueIndex(position);
 
                     mFabDrawable.setBuffering(true);

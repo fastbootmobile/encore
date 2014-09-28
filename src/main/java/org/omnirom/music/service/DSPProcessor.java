@@ -70,19 +70,21 @@ public class DSPProcessor {
         public void onFormatInfo(AudioSocket socket, Plugin.FormatInfo message) {
             setupSink(message.getSamplingRate(), message.getChannels());
 
-            if (mDSPChain.size() > 0) {
+           /* if (mDSPChain.size() > 0) {
                 // Notify the DSP of the new audio format as well
                 PluginsLookup lookup = PluginsLookup.getDefault();
                 for (ProviderIdentifier id : mDSPChain) {
                     DSPConnection conn = lookup.getDSP(id);
-                    try {
-                        conn.getAudioSocket().writeFormatData(message.getChannels(),
-                                message.getSamplingRate());
-                    } catch (IOException e) {
-                        Log.e(TAG, "Cannot notify " + id + " of new format", e);
+                    if (conn.getAudioSocket() != null) {
+                        try {
+                            conn.getAudioSocket().writeFormatData(message.getChannels(),
+                                    message.getSamplingRate());
+                        } catch (IOException e) {
+                            Log.e(TAG, "Cannot notify " + id + " of new format", e);
+                        }
                     }
                 }
-            }
+            }*/
         }
 
         @Override

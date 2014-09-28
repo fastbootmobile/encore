@@ -204,40 +204,17 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         lvPlaylistContents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                // Play the song
-                Song song = mAdapter.getItem(i - 1);
+                IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                try {
+                    pbService.getCurrentPlaybackQueue().clear();
+                    pbService.queuePlaylist(mPlaylist, false);
+                    pbService.playAtQueueIndex(i - 1);
 
-                if (song != null) {
-                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                    try {
-                        pbService.playSong(song);
-
-                        // queue remaining songs
-                        Iterator<String> songsIt = mPlaylist.songs();
-                        int itIndex = 0;
-                        while (songsIt.hasNext()) {
-                            String songRef = songsIt.next();
-                            if (itIndex <= i) {
-                                itIndex++;
-                                continue;
-                            } else {
-                                itIndex++;
-                            }
-
-                            song = aggregator.retrieveSong(songRef, mPlaylist.getProvider());
-                            if (song != null) {
-                                pbService.queueSong(song, false);
-                            }
-                        }
-
-                        // Update FAB
-                        mFabShouldResume = true;
-                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to play song", e);
-                    }
-                } else {
-                    Log.e(TAG, "Trying to play null song!");
+                    // Update FAB
+                    mFabShouldResume = true;
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to play song", e);
                 }
             }
         });
