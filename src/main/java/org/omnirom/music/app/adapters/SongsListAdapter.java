@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,7 +75,11 @@ public class SongsListAdapter extends BaseAdapter {
         Collections.sort(mSongs, new Comparator<Song>() {
             @Override
             public int compare(Song lhs, Song rhs) {
-                return lhs.getTitle().compareTo(rhs.getTitle());
+                if (lhs.isLoaded() && rhs.isLoaded()) {
+                    return lhs.getTitle().compareTo(rhs.getTitle());
+                } else {
+                    return lhs.getRef().compareTo(rhs.getRef());
+                }
             }
         });
     }
@@ -181,9 +186,11 @@ public class SongsListAdapter extends BaseAdapter {
 
 
         if (song != null) {
+            Log.e("SongsList", "Available? " + song.isAvailable());
             // Set alpha based on offline availability and mode
-            if (aggregator.isOfflineMode()
-                    && song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY) {
+            if ((aggregator.isOfflineMode()
+                    && song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY)
+                    || !song.isAvailable()) {
                 Utils.setChildrenAlpha(tag.vRoot,
                         Float.parseFloat(ctx.getResources().getString(R.string.unavailable_track_alpha)));
             } else {

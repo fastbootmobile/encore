@@ -749,6 +749,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 cached.setTitle(s.getTitle());
                 cached.setYear(s.getYear());
                 cached.setOfflineStatus(s.getOfflineStatus());
+                cached.setAvailable(s.isAvailable());
                 cached.setIsLoaded(s.isLoaded());
                 changed = true;
             }

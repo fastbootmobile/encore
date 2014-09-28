@@ -277,10 +277,12 @@ public class PlaybackService extends Service
         Log.i(TAG, "Service connected: " + connection.getIdentifier());
         assignProviderAudioSocket(connection);
 
-        try {
-            ((ProviderConnection) connection).getBinder().registerCallback(mProviderCallback);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Cannot register callback on connected service");
+        if (connection instanceof ProviderConnection) {
+            try {
+                ((ProviderConnection) connection).getBinder().registerCallback(mProviderCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot register callback on connected service");
+            }
         }
     }
 

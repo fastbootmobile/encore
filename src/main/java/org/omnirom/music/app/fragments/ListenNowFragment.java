@@ -96,7 +96,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             // A total of 21 entries
 
             Random random = new Random(SystemClock.uptimeMillis());
+            long startTime = SystemClock.uptimeMillis();
             for (int i = 0; i < 21; i++) {
+                // Watchdog timer
+                if (SystemClock.uptimeMillis() - startTime > 1000) {
+                    break;
+                }
+
                 // Make sure we haven't reached all our accessible data
                 if (chosenSongs.size() >= totalSongsCount) {
                     break;

@@ -111,7 +111,8 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         mComparator = new Comparator<Artist>() {
             @Override
             public int compare(Artist artist, Artist artist2) {
-                if (artist.isLoaded() && artist2.isLoaded()) {
+                if (artist.isLoaded() && artist2.isLoaded() && artist.getName() != null
+                        && artist2.getName() != null) {
                     return artist.getName().compareTo(artist2.getName());
                 } else {
                     return artist.getRef().compareTo(artist2.getRef());

@@ -76,7 +76,7 @@ public class PlayPauseDrawable extends Drawable {
     }
 
     public void setShape(int shape) {
-        if (mCurrentShape != shape || mRequestShape != mCurrentShape) {
+        if (mRequestShape != shape) {
             mRequestShape = shape;
             mTransitionAccumulator = 0;
             mLastTransitionTick = System.currentTimeMillis();

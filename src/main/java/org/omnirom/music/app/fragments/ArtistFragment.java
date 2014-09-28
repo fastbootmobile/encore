@@ -892,8 +892,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 itemRoot.setTag(song);
 
                 // Set alpha based on offline availability and mode
-                if (aggregator.isOfflineMode() && song != null
-                        && song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY) {
+                if ((aggregator.isOfflineMode() && song != null
+                        && (song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY)
+                        || (song != null && !song.isAvailable()))) {
                     Utils.setChildrenAlpha((ViewGroup) itemRoot,
                             Float.parseFloat(getString(R.string.unavailable_track_alpha)));
                 } else {

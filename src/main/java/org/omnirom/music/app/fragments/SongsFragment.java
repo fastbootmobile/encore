@@ -86,7 +86,9 @@ public class SongsFragment extends Fragment {
                     List<Song> songs = provider.getSongs();
                     if (songs != null) {
                         for (Song song : songs) {
-                            mSongsListAdapter.put(song);
+                            if (song != null) {
+                                mSongsListAdapter.put(song);
+                            }
                         }
                     }
                 }
