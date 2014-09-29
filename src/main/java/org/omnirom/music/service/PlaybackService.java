@@ -748,7 +748,7 @@ public class PlaybackService extends Service
 
         @Override
         public void previous() throws RemoteException {
-            boolean shouldRestart = (getCurrentTrackPosition() < 4000 || mCurrentTrack == 0);
+            boolean shouldRestart = (getCurrentTrackPosition() > 4000 || mCurrentTrack == 0);
             if (shouldRestart) {
                 // Restart playback
                 seek(0);
