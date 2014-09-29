@@ -122,6 +122,7 @@ public class PlaybackService extends Service
     private boolean mCurrentTrackWaitLoading;
     private ProviderIdentifier mCurrentPlayingProvider;
     private boolean mHasAudioFocus;
+    private boolean mRepeatMode;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -140,6 +141,7 @@ public class PlaybackService extends Service
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<IPlaybackCallback>();
+        mRepeatMode = false;
     }
 
     /**
@@ -783,6 +785,16 @@ public class PlaybackService extends Service
             mIsStopping = true;
             stopForeground(true);
         }
+
+        @Override
+        public void setRepeatMode(boolean repeat) throws RemoteException {
+            mRepeatMode = repeat;
+        }
+
+        @Override
+        public boolean isRepeatMode() throws RemoteException {
+            return mRepeatMode;
+        }
     };
 
     @Override
@@ -893,6 +905,12 @@ public class PlaybackService extends Service
                 // endOfTrack callback locks the main API thread, leading to a dead lock if we
                 // try to play a track here while still being in the callstack of the endOfTrack
                 // callback.
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
+                mHandler.post(mStartPlaybackRunnable);
+            } else if (mPlaybackQueue.size() > 0 && mCurrentTrack == mPlaybackQueue.size() - 1
+                    && mRepeatMode) {
+                // We're repeating, go back to the first track and play it
+                mCurrentTrack = 0;
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
             }

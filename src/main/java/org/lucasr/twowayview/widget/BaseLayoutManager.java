@@ -243,7 +243,9 @@ public abstract class BaseLayoutManager extends TwoWayLayoutManager {
         // place items e.g. the lane is dynamically decided in
         // some of the built-in layouts. Clear state so that the
         // next layout pass doesn't run with bogus layout assumptions.
-        mItemEntries.clear();
+        if (mItemEntries != null) {
+            mItemEntries.clear();
+        }
     }
 
     private void ensureLayoutState() {

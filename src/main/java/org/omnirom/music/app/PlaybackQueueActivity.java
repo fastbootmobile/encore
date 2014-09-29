@@ -4,7 +4,10 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -359,6 +363,10 @@ public class PlaybackQueueActivity extends FragmentActivity {
                             int state = playbackService.getState();
                             if (state == PlaybackService.STATE_PLAYING) {
                                 mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                                mPlayDrawable.setBuffering(false);
+                            } else if (state == PlaybackService.STATE_BUFFERING) {
+                                mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                                mPlayDrawable.setBuffering(true);
                             }
                         } catch (RemoteException e) {
                             // ignore
@@ -386,6 +394,60 @@ public class PlaybackQueueActivity extends FragmentActivity {
                                     playbackService.previous();
                                 } catch (RemoteException e) {
                                     Log.e(TAG, "Cannot move to previous track", e);
+                                }
+                            }
+                        });
+
+                        final ImageView ivRepeat = (ImageView) itemView.findViewById(R.id.ivRepeat);
+                        try {
+                            if (playbackService.isRepeatMode()) {
+                                ivRepeat.setImageResource(R.drawable.ic_replay);
+                            } else {
+                                ivRepeat.setImageResource(R.drawable.ic_replay_gray);
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot get repeat mode status", e);
+                        }
+                        ivRepeat.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Drawable[] drawables = new Drawable[2];
+                                final Resources res = getResources();
+                                boolean enable = false;
+
+                                try {
+                                    if (playbackService.isRepeatMode()) {
+                                        // Repeating, disable
+                                        drawables[0] = res.getDrawable(R.drawable.ic_replay);
+                                        drawables[1] = res.getDrawable(R.drawable.ic_replay_gray);
+                                        enable = false;
+                                    } else {
+                                        // Not repeating, enable
+                                        drawables[0] = res.getDrawable(R.drawable.ic_replay_gray);
+                                        drawables[1] = res.getDrawable(R.drawable.ic_replay);
+                                        enable = true;
+                                    }
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot get repeat mode status", e);
+                                }
+
+                                final TransitionDrawable drawable = new TransitionDrawable(drawables);
+                                ivRepeat.setImageDrawable(drawable);
+                                final AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
+
+                                mHandler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        drawable.startTransition(500);
+                                        ivRepeat.animate().rotationBy(-360.0f).setDuration(500).setInterpolator(interpolator).start();
+                                    }
+                                }, 200);
+
+
+                                try {
+                                    playbackService.setRepeatMode(enable);
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot set repeat mode", e);
                                 }
                             }
                         });
