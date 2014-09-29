@@ -428,7 +428,7 @@ public class PlaybackService extends Service
             final Song next = mPlaybackQueue.get(mCurrentTrack);
             final ProviderIdentifier providerId = next.getProvider();
 
-            if (mCurrentPlayingProvider != null && next.getProvider().equals(mCurrentPlayingProvider)) {
+            if (mCurrentPlayingProvider != null && !next.getProvider().equals(mCurrentPlayingProvider)) {
                 // Pause the previously playing track to avoid overlap if it's not the same provider
                 try {
                     mBinder.pause();
