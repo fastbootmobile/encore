@@ -839,7 +839,7 @@ public class PlaybackService extends Service
 
     private IProviderCallback.Stub mProviderCallback = new BaseProviderCallback() {
         @Override
-        public void onSongPlaying(ProviderIdentifier provider) throws RemoteException {
+        public void onSongPlaying(ProviderIdentifier provider) {
             boolean wasPaused = mIsResuming;
             if (!wasPaused) {
                 mCurrentTrackStartTime = System.currentTimeMillis();

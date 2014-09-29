@@ -34,6 +34,10 @@ public class ProviderConnection extends AbstractProviderConnection {
     public void unbindService() {
         if (mIsBound) {
             ProviderAggregator.getDefault().unregisterProvider(this);
+            if (mAudioSocket != null) {
+                mAudioSocket.disconnectSocket();
+            }
+
             mBinder = null;
         }
 
