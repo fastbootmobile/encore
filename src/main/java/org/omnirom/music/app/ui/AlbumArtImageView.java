@@ -171,43 +171,45 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             mPlaylistPaint = new Paint();
         }
 
-        Canvas canvas = new Canvas(mPlaylistComposite);
-        final int numImages = mPlaylistSource.size();
-        final int compositeWidth = mPlaylistComposite.getWidth();
-        final int compositeHeight = mPlaylistComposite.getHeight();
+        synchronized (sPlaylistBitmapPool) {
+            Canvas canvas = new Canvas(mPlaylistComposite);
+            final int numImages = mPlaylistSource.size();
+            final int compositeWidth = mPlaylistComposite.getWidth();
+            final int compositeHeight = mPlaylistComposite.getHeight();
 
-        if (numImages == 0) {
-            setDefaultArt();
-        } else if (numImages == 1) {
-            onArtLoaded(mPlaylistSource.get(0), mRequestedEntity);
-        } else if (numImages == 2 || numImages == 3) {
-            int i = 0;
-            for (Bitmap item : mPlaylistSource) {
-                Rect src = new Rect(0, 0, item.getWidth(), item.getHeight());
-                Rect dst = new Rect(i * compositeWidth / numImages,
-                        0,
-                        i * compositeWidth / numImages + compositeWidth,
-                        compositeHeight);
+            if (numImages == 0) {
+                setDefaultArt();
+            } else if (numImages == 1) {
+                onArtLoaded(mPlaylistSource.get(0), mRequestedEntity);
+            } else if (numImages == 2 || numImages == 3) {
+                int i = 0;
+                for (Bitmap item : mPlaylistSource) {
+                    Rect src = new Rect(0, 0, item.getWidth(), item.getHeight());
+                    Rect dst = new Rect(i * compositeWidth / numImages,
+                            0,
+                            i * compositeWidth / numImages + compositeWidth,
+                            compositeHeight);
 
-                canvas.drawBitmap(item, src, dst, mPlaylistPaint);
-                ++i;
+                    canvas.drawBitmap(item, src, dst, mPlaylistPaint);
+                    ++i;
+                }
+                onArtLoaded(mPlaylistComposite, mRequestedEntity);
+            } else {
+                for (int i = 0; i < 4; ++i) {
+                    Bitmap item = mPlaylistSource.get(i);
+                    int row = (int) Math.floor(i / 2);
+                    int col = (i % 2);
+
+                    Rect src = new Rect(0, 0, item.getWidth(), item.getHeight());
+                    Rect dst = new Rect(col * compositeWidth / 2,
+                            row * compositeHeight / 2,
+                            col * compositeWidth / 2 + compositeWidth / 2,
+                            row * compositeHeight / 2 + compositeHeight / 2);
+
+                    canvas.drawBitmap(item, src, dst, mPlaylistPaint);
+                }
+                onArtLoaded(mPlaylistComposite, mRequestedEntity);
             }
-            onArtLoaded(mPlaylistComposite, mRequestedEntity);
-        } else {
-            for (int i = 0; i < 4; ++i) {
-                Bitmap item = mPlaylistSource.get(i);
-                int row = (int) Math.floor(i / 2);
-                int col = (i % 2);
-
-                Rect src = new Rect(0, 0, item.getWidth(), item.getHeight());
-                Rect dst = new Rect(col * compositeWidth / 2,
-                        row * compositeHeight / 2,
-                        col * compositeWidth / 2 + compositeWidth / 2,
-                        row * compositeHeight / 2 + compositeHeight / 2);
-
-                canvas.drawBitmap(item, src, dst, mPlaylistPaint);
-            }
-            onArtLoaded(mPlaylistComposite, mRequestedEntity);
         }
     }
 

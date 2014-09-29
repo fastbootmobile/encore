@@ -138,6 +138,10 @@ public class PlaybackQueueActivity extends FragmentActivity {
             @Override
             public void run() {
                 IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
+                if (playbackService == null) {
+                    return;
+                }
+
                 try {
                     int state = playbackService.getState();
                     if (state == PlaybackService.STATE_PLAYING
@@ -439,9 +443,10 @@ public class PlaybackQueueActivity extends FragmentActivity {
                                     @Override
                                     public void run() {
                                         drawable.startTransition(500);
+                                        ivRepeat.setRotation(0);
                                         ivRepeat.animate().rotationBy(-360.0f).setDuration(500).setInterpolator(interpolator).start();
                                     }
-                                }, 200);
+                                }, 100);
 
 
                                 try {
