@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
@@ -17,6 +19,7 @@ import android.util.Log;
 
 import org.acra.ACRA;
 import org.omnirom.music.api.echonest.AutoMixManager;
+import org.omnirom.music.app.R;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -194,9 +197,13 @@ public class PlaybackService extends Service
             @Override
             public void onNotificationChanged(ServiceNotification notification) {
                 notification.notify(PlaybackService.this);
+                Bitmap albumArt = notification.getAlbumArt();
+                if (albumArt == null) {
+                    albumArt = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
+                }
                 mRemoteControlClient.editMetadata(false)
                         .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
-                                notification.getAlbumArt().copy(notification.getAlbumArt().getConfig(), false)).apply();
+                                albumArt.copy(albumArt.getConfig(), false)).apply();
             }
         });
 
