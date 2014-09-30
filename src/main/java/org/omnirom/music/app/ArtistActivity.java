@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app;
 
 import android.app.ActionBar;
@@ -11,14 +26,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
-import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.fragments.ArtistFragment;
-import org.omnirom.music.app.ui.AlbumArtImageView;
 
+/**
+ * Activity to view an Artist tracks, similar, etc. through
+ * an {@link org.omnirom.music.app.fragments.ArtistFragment}
+ */
 public class ArtistActivity extends FragmentActivity {
-
     private static final String TAG = "ArtistActivity";
     private static final String TAG_FRAGMENT = "fragment_inner";
 
@@ -27,10 +42,17 @@ public class ArtistActivity extends FragmentActivity {
     public static final String BITMAP_ARTIST_HERO = "artist_hero";
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
 
-    private ArtistFragment mActiveFragment;
     private Bundle mInitialIntent;
     private Bitmap mHero;
 
+    /**
+     * Creates a proper intent to open this activity
+     * @param ctx The current context
+     * @param hero The hero (artist image) bitmap
+     * @param artistRef The reference of the artist
+     * @param color The back color of the header bar
+     * @return An intent that will open this activity
+     */
     public static Intent craftIntent(Context ctx, Bitmap hero, String artistRef, int color) {
         Intent intent = new Intent(ctx, ArtistActivity.class);
 
@@ -47,10 +69,8 @@ public class ArtistActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
 
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
         FragmentManager fm = getSupportFragmentManager();
-        mActiveFragment = (ArtistFragment) fm.findFragmentByTag(TAG_FRAGMENT);
+        ArtistFragment activeFragment = (ArtistFragment) fm.findFragmentByTag(TAG_FRAGMENT);
 
         if (savedInstanceState == null) {
             mHero = Utils.dequeueBitmap(BITMAP_ARTIST_HERO);
@@ -60,14 +80,14 @@ public class ArtistActivity extends FragmentActivity {
             mInitialIntent = savedInstanceState.getBundle(EXTRA_RESTORE_INTENT);
         }
 
-        if (mActiveFragment == null) {
-            mActiveFragment = new ArtistFragment();
+        if (activeFragment == null) {
+            activeFragment = new ArtistFragment();
             fm.beginTransaction()
-                    .add(R.id.container, mActiveFragment, TAG_FRAGMENT)
+                    .add(R.id.container, activeFragment, TAG_FRAGMENT)
                     .commit();
         }
 
-        mActiveFragment.setArguments(mHero, mInitialIntent);
+        activeFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
         ActionBar actionBar = getActionBar();
@@ -81,13 +101,13 @@ public class ArtistActivity extends FragmentActivity {
             getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
                 @Override
                 public void onTransitionStart(Transition transition) {
-                    View fab = mActiveFragment.findViewById(R.id.fabPlay);
+                    View fab = activeFragment.findViewById(R.id.fabPlay);
                     fab.setVisibility(View.INVISIBLE);
                 }
 
                 @Override
                 public void onTransitionEnd(Transition transition) {
-                    View fab = mActiveFragment.findViewById(R.id.fabPlay);
+                    View fab = activeFragment.findViewById(R.id.fabPlay);
                     fab.setVisibility(View.VISIBLE);
 
                     // get the center for the clipping circle
@@ -132,6 +152,8 @@ public class ArtistActivity extends FragmentActivity {
                 }
             });*/
         }
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     @Override

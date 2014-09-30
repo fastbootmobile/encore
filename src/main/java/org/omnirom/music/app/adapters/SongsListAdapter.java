@@ -1,10 +1,24 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,12 +42,12 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Created by h4o on 19/06/2014.
+ * Adapter allowing to display a list of songs in a ListView
  */
 public class SongsListAdapter extends BaseAdapter {
-    protected List<Song> mSongs;
-    private boolean mShowAlbumArt;
-
+    /**
+     * ViewHolder for the list items
+     */
     public static class ViewHolder {
         public TextView tvTitle;
         public TextView tvArtist;
@@ -47,6 +61,9 @@ public class SongsListAdapter extends BaseAdapter {
         public View vCurrentIndicator;
     }
 
+    protected List<Song> mSongs;
+    private boolean mShowAlbumArt;
+
     private View.OnClickListener mOverflowClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -56,6 +73,22 @@ public class SongsListAdapter extends BaseAdapter {
         }
     };
 
+    private Comparator<Song> mComparator = new Comparator<Song>() {
+        @Override
+        public int compare(Song lhs, Song rhs) {
+            if (lhs.isLoaded() && rhs.isLoaded()) {
+                return lhs.getTitle().compareTo(rhs.getTitle());
+            } else {
+                return lhs.getRef().compareTo(rhs.getRef());
+            }
+        }
+    };
+
+    /**
+     * Default constructor
+     * @param ctx The host activity context
+     * @param showAlbumArt Whether or not to show album art in front of each item
+     */
     public SongsListAdapter(Context ctx, boolean showAlbumArt) {
         final Resources res = ctx.getResources();
         assert res != null;
@@ -63,46 +96,64 @@ public class SongsListAdapter extends BaseAdapter {
         mShowAlbumArt = showAlbumArt;
     }
 
+    /**
+     * Clear the current displayed songs
+     */
     public void clear() {
         mSongs.clear();
     }
 
+    /**
+     * Adds a song to the adapter
+     * @param song The song to add
+     */
     public void put(Song song) {
         mSongs.add(song);
     }
 
+    /**
+     * Sorts songs alphabetically
+     */
     public void sortAll() {
-        Collections.sort(mSongs, new Comparator<Song>() {
-            @Override
-            public int compare(Song lhs, Song rhs) {
-                if (lhs.isLoaded() && rhs.isLoaded()) {
-                    return lhs.getTitle().compareTo(rhs.getTitle());
-                } else {
-                    return lhs.getRef().compareTo(rhs.getRef());
-                }
-            }
-        });
+        Collections.sort(mSongs, mComparator);
     }
 
+    /**
+     * Returns whether or not this adapter contains the provided song
+     * @param s The song to check
+     * @return true if the adapter contains the song, false otherwise
+     */
     public boolean contains(Song s) {
         return mSongs.contains(s);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getCount() {
         return mSongs.size();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Song getItem(int i) {
         return mSongs.get(i);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getItemId(int i) {
         return mSongs.get(i).getRef().hashCode();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public View getView(final int position, final View convertView, ViewGroup parent) {
         final Context ctx = parent.getContext();

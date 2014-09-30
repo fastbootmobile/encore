@@ -1,42 +1,47 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app;
 
-import android.animation.ValueAnimator;
-import android.app.Activity;
+import android.app.ActionBar;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.transition.Transition;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import org.omnirom.music.app.adapters.AlbumsAdapter;
 import org.omnirom.music.app.fragments.AlbumViewFragment;
-import org.omnirom.music.app.fragments.ArtistFragment;
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackService;
 
-import omnimusic.Plugin;
-
+/**
+ * Activity for viewing an album details through
+ * {@link org.omnirom.music.app.fragments.AlbumViewFragment}
+ */
 public class AlbumActivity extends FragmentActivity {
 
     private static final String TAG = "AlbumActivity";
@@ -52,11 +57,19 @@ public class AlbumActivity extends FragmentActivity {
     private Bitmap mHero;
     private Handler mHandler;
 
+    /**
+     * Creates a proper intent to open this activity
+     * @param context The original context
+     * @param hero The hero image bitmap
+     * @param album The album to view
+     * @param backColor The back color of the header bar
+     * @return An intent to open this activity
+     */
     public static Intent craftIntent(Context context, Bitmap hero, Album album, int backColor) {
         Intent intent = new Intent(context, AlbumActivity.class);
 
-        intent.putExtra(AlbumActivity.EXTRA_ALBUM, album);
-        intent.putExtra(AlbumActivity.EXTRA_BACKGROUND_COLOR, backColor);
+        intent.putExtra(EXTRA_ALBUM, album.getRef());
+        intent.putExtra(EXTRA_BACKGROUND_COLOR, backColor);
         Utils.queueBitmap(BITMAP_ALBUM_HERO, hero);
 
         return intent;
@@ -69,6 +82,7 @@ public class AlbumActivity extends FragmentActivity {
 
         mHandler = new Handler();
 
+        // Load or restore the fragment
         FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (AlbumViewFragment) fm.findFragmentByTag(TAG_FRAGMENT);
 
@@ -90,9 +104,13 @@ public class AlbumActivity extends FragmentActivity {
         mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
-        getActionBar().setTitle("");
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle("");
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
+        // We control the Music volume stream here too
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 

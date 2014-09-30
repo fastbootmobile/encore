@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app;
 
 import android.app.Application;
@@ -17,6 +32,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import java.io.File;
 import java.io.IOException;
 
+// Report crashes with ACRA on our temporary endpoint
 @ReportsCrashes(
         formKey = "",
         httpMethod = HttpSender.Method.PUT,
@@ -24,16 +40,11 @@ import java.io.IOException;
         formUri = "http://nuclear.ouverta.fr/om-acra/_design/acra-storage/_update/report",
         formUriBasicAuthLogin = "reporter-omnimusic-alpha",
         formUriBasicAuthPassword = "4lqh4mu51c1337"
-
-        // Dialog during DEBUG, TOAST on prod
-        /*mode = ReportingInteractionMode.TOAST,
-        resToastText = R.string.crash_toast_text, // optional, displayed as soon as the crash occurs, before collecting data which can take a few seconds
-        resDialogText = R.string.crash_dialog_text,
-        resDialogIcon = android.R.drawable.ic_dialog_info, //optional. default is a warning sign
-        resDialogTitle = R.string.crash_dialog_title, // optional. default is your application name
-        resDialogCommentPrompt = R.string.crash_dialog_comment_prompt, // optional. when defined, adds a user text field input with this text resource as a label
-        resDialogOkToast = R.string.crash_dialog_ok_toast // optional. displays a Toast message when the user accepts to send a report.*/
 )
+
+/**
+ * Application structure wrapper to handle various application-wide (activity + services) properties
+ */
 public class OmniMusic extends Application {
     private static final String TAG = "OmniMusic";
 
@@ -41,18 +52,19 @@ public class OmniMusic extends Application {
     public void onCreate() {
         super.onCreate();
 
+        // Setup ACRA bug reporting
         ACRA.init(this);
 
         // Setup the plugins system
         ProviderAggregator.getDefault().setContext(getApplicationContext());
         PluginsLookup.getDefault().initialize(getApplicationContext());
 
-        // Setup network cache
         /**
          * Note about the cache and EchoNest: The HTTP cache would sometimes cache request
          * we didn't want (such as status query for Taste Profile update). We're using
          * a hacked jEN library that doesn't cache these requests.
          */
+        // Setup network cache
         try {
             final File httpCacheDir = new File(getCacheDir(), "http");
             final long httpCacheSize = 100 * 1024 * 1024; // 100 MiB

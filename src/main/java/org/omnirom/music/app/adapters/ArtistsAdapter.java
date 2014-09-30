@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.adapters;
 
 import android.content.res.Resources;
@@ -23,16 +38,20 @@ import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.model.Artist;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 
 /**
- * Created by h4o on 20/06/2014.
+ * Adapter for TwoWayView to display artists in a grid
  */
 public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHolder> {
 
+    /**
+     * ViewHolder
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final LinearLayout llRoot;
         public final AlbumArtImageView ivCover;
@@ -54,7 +73,8 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         }
     }
 
-    private final AlbumArtImageView.OnArtLoadedListener mAlbumArtListener = new AlbumArtImageView.OnArtLoadedListener() {
+    private final AlbumArtImageView.OnArtLoadedListener mAlbumArtListener
+            = new AlbumArtImageView.OnArtLoadedListener() {
         @Override
         public void onArtLoaded(final AlbumArtImageView view, final BitmapDrawable drawable) {
             final Resources res = view.getResources();
@@ -105,6 +125,9 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
     private final Handler mHandler;
     private final Comparator<Artist> mComparator;
 
+    /**
+     * Default constructor
+     */
     public ArtistsAdapter() {
         mArtists = new ArrayList<Artist>();
         mHandler = new Handler();
@@ -121,10 +144,17 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         };
     }
 
+    /**
+     * Sorts the list in alphabetical order
+     */
     private void sortList() {
         Collections.sort(mArtists, mComparator);
     }
 
+    /**
+     * Adds an item to the adapter
+     * @param a The artist to add
+     */
     public void addItem(Artist a) {
         synchronized (mArtists) {
             mArtists.add(a);
@@ -132,6 +162,10 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         }
     }
 
+    /**
+     * Adds an item to the adapter if it's not already there
+     * @param a The artist to add
+     */
     public void addItemUnique(Artist a) {
         synchronized (mArtists) {
             if (!mArtists.contains(a)) {
@@ -141,14 +175,22 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         }
     }
 
-    public void addAll(List<Artist> ps) {
+    /**
+     * Add all the elements of the collection to the adapter
+     * @param ps The collection of Artist to add
+     */
+    public void addAll(Collection<Artist> ps) {
         synchronized (mArtists) {
             mArtists.addAll(ps);
             sortList();
         }
     }
 
-    public void addAllUnique(List<Artist> ps) {
+    /**
+     * Add all the elements of the collection to the adapter if they're not already there
+     * @param ps The collection of Artist to add
+     */
+    public void addAllUnique(Collection<Artist> ps) {
         synchronized (mArtists) {
             boolean didChange = false;
             for (Artist p : ps) {
@@ -164,18 +206,31 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         }
     }
 
+    /**
+     * Returns whether or not the adapter contains the provided artist
+     * @param p The artist to check
+     * @return true if the adapter contains the item, false otherwise
+     */
     public boolean contains(final Artist p) {
         synchronized (mArtists) {
             return mArtists.contains(p);
         }
     }
 
+    /**
+     * Returns the position of the artist in the list
+     * @param a The artist to get the position
+     * @return The index of the item, or -1 if not found
+     */
     public int indexOf(final Artist a) {
         synchronized (mArtists) {
             return mArtists.indexOf(a);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         final LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
@@ -188,6 +243,9 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         return holder;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onBindViewHolder(ArtistsAdapter.ViewHolder tag, int position) {
         // Fill in the fields
@@ -217,6 +275,9 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         tag.ivCover.loadArtForArtist(artist);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getItemCount() {
         synchronized (mArtists) {
@@ -224,6 +285,11 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         }
     }
 
+    /**
+     * Returns the item at the provided position
+     * @param position The position of the item
+     * @return The {@link org.omnirom.music.model.Artist} at the provided position
+     */
     public Artist getItem(int position) {
         synchronized (mArtists) {
             return mArtists.get(position);

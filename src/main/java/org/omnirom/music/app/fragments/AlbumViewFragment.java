@@ -267,11 +267,13 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     public void setArguments(Bitmap hero, Bundle extras) {
         mHeroImage = hero;
         mBackgroundColor = extras.getInt(AlbumActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
-        mAlbum = extras.getParcelable(AlbumActivity.EXTRA_ALBUM);
 
-        // Use cache item instead of parceled item (otherwise updates pushed to the cache won't
-        // propagate here)
-        mAlbum = ProviderAggregator.getDefault().retrieveAlbum(mAlbum.getRef(), mAlbum.getProvider());
+        String albumRef = extras.getString(AlbumActivity.EXTRA_ALBUM);
+        mAlbum = ProviderAggregator.getDefault().retrieveAlbum(albumRef, null);
+
+        if (mAlbum == null) {
+            throw new IllegalArgumentException("The album to display isn't in cache!");
+        }
 
         // Prepare the palette to colorize the FAB
         Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
