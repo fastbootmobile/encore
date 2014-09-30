@@ -224,9 +224,18 @@ public class AutoMixManager implements IPlaybackCallback {
      * @param bucket The bucket to play
      */
     public void startPlay(AutoMixBucket bucket) {
+        // Ensure bucket is ready
+        if (!bucket.isPlaylistSessionReady()) {
+            Log.e(TAG, "Cannot play bucket " + bucket.getName() + ": Session not ready");
+            return;
+        }
+
+        // Queue tracks
         IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
         try {
             String trackRef = null;
+
+            // Try to get the first track, with 5 tries (in case of bad network or temporary error)
             int tryCount = 0;
             while (trackRef == null && tryCount < 5) {
                 trackRef = bucket.getNextTrack();
