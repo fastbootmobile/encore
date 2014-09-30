@@ -56,6 +56,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private List<Bitmap> mPlaylistSource;
     private static final List<Bitmap> sPlaylistBitmapPool = new ArrayList<Bitmap>();
     private Paint mPlaylistPaint;
+    private boolean mSkipTransition;
 
     private Runnable mUpdatePlaylistCompositeRunnable = new Runnable() {
         @Override
@@ -252,9 +253,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         if (ent == null || ent.equals(mRequestedEntity)) {
             // Nothing to do, we are displaying the proper thing already
             return;
-        } else if (!mCrossfade) {
-            setDefaultArt();
         }
+
+        mSkipTransition = false;
 
         if (mTask != null) {
             mTask.cancel(true);
@@ -264,6 +265,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             // Recycle the bitmap
             sPlaylistBitmapPool.add(mPlaylistComposite);
         }
+
+        // If we have the image in cache, show it immediately.
+        String cachedKey = AlbumArtCache.getDefault().getCachedArtKey(ent);
 
         // We delay the loading slightly to make sure we don't uselessly load an image that is
         // being quickly flinged through (the requested entity will change in-between as the
@@ -282,9 +286,13 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         };
 
         // When we're crossfading, we're assuming we want the image directly
-        if (mCrossfade) {
+        if (mCrossfade || cachedKey != null) {
+            if (cachedKey != null) {
+                mSkipTransition = true;
+            }
             mHandler.post(runnable);
         } else {
+            setDefaultArt();
             mHandler.postDelayed(runnable, DELAY_BEFORE_START);
         }
     }
@@ -295,8 +303,11 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         // If we have an actual result, display it!
         if (output != null) {
             BitmapDrawable drawable = new BitmapDrawable(getResources(), output);
-            if (drawable.getBitmap() != null)
-            mDrawable.transitionTo(getResources(), drawable);
+            if (mSkipTransition) {
+                mDrawable.setImmediateTo(drawable);
+            } else {
+                mDrawable.transitionTo(getResources(), drawable);
+            }
             forceDrawableReload();
 
             if (mOnArtLoadedListener != null) {

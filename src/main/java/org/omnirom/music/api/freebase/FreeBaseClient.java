@@ -1,6 +1,19 @@
-package org.omnirom.music.api.freebase;
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
 
-import android.util.Log;
+package org.omnirom.music.api.freebase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,11 +22,10 @@ import org.omnirom.music.api.common.JsonGet;
 import org.omnirom.music.api.common.RateLimitException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 /**
- * Created by xplodwild on 7/7/14.
+ * Client for the Google FreeBase API
  */
 public class FreeBaseClient {
     private static final String TAG = "FreeBaseClient";
@@ -22,6 +34,14 @@ public class FreeBaseClient {
     private static final String TOPIC_ENDPOINT = "https://www.googleapis.com/freebase/v1/topic";
     private static final String IMAGE_ENDPOINT = "https://usercontent.googleapis.com/freebase/v1/image";
 
+    /**
+     * Fetches an Artist Image URL
+     * @param artist The name of the artist
+     * @return An URL to an image representing this artist
+     * @throws JSONException
+     * @throws RateLimitException
+     * @throws IOException
+     */
     public static String getArtistImageUrl(String artist)
             throws JSONException, RateLimitException, IOException {
         final String ecFilter = URLEncoder.encode("(all type:/music/artist)", "UTF-8");
@@ -38,7 +58,7 @@ public class FreeBaseClient {
         // While we could get an image immediately, we're not sure there's actually an image
         // for that topic. We do one more query to not end up with an ugly "NO IMAGE" result.
         // We do take the risk however by allowing the image anyway if we go above the rate limit
-        // of Google's API, as the topic endpoint is rate-limited.
+        // of Google's API, as the topic endpoint is rate-limited and we're not using any API key.
         object = JsonGet.getObject(TOPIC_ENDPOINT + metaId, "filter=/common/topic/image&limit=1", true);
 
         if (object.has("property") || object.has("error")) {

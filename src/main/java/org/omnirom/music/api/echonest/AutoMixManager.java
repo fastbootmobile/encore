@@ -1,11 +1,25 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.api.echonest;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.echonest.api.v4.EchoNestException;
@@ -18,7 +32,6 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
-import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,14 +39,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Created by Guigui on 14/08/2014.
+ * Manages the AutoMix buckets and ensures AutoMix playback
  */
 public class AutoMixManager implements IPlaybackCallback {
     private static final String TAG = "AutoMixManager";
-
-    public interface AutoMixListener {
-        public void onBucketUpdate(AutoMixBucket bucket);
-    }
 
     private static final String SHARED_PREFS = "automix_buckets";
     private static final String PREF_BUCKETS_IDS = "buckets_ids";
@@ -51,22 +60,60 @@ public class AutoMixManager implements IPlaybackCallback {
     private List<AutoMixBucket> mBuckets;
     private AutoMixBucket mCurrentPlayingBucket;
     private String mExpectedSong;
+    private Runnable mGetNextTrackRunnable;
 
     private static final AutoMixManager INSTANCE = new AutoMixManager();
 
     private AutoMixManager() {
+        mGetNextTrackRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Fetch the next track
+                    String nextTrackRef = mCurrentPlayingBucket.getNextTrack();
+                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+
+                    // Queue it
+                    Song nextTrack = getSongFromRef(nextTrackRef);
+                    if (nextTrack != null) {
+                        pbService.queueSong(nextTrack, false);
+                    }
+
+                    mExpectedSong = nextTrackRef;
+                } catch (EchoNestException e) {
+                    Log.e(TAG, "Unable to get next track", e);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to queue next track", e);
+                }
+            }
+        };
     }
 
     public static AutoMixManager getDefault() {
         return INSTANCE;
     }
 
+    /**
+     * Initializes the AutoMix manager
+     * @param ctx A valid application context
+     */
     public void initialize(Context ctx) {
         mContext = ctx;
         mBuckets = new ArrayList<AutoMixBucket>();
         readBucketsFromPrefs();
     }
 
+    /**
+     * Returns the shared preferences
+     * @return The SharedPreferences storing the buckets
+     */
+    private SharedPreferences getPrefs() {
+        return mContext.getSharedPreferences(SHARED_PREFS, 0);
+    }
+
+    /**
+     * Restore the AutoMix buckets stored in SharedPreferences
+     */
     public void readBucketsFromPrefs() {
         SharedPreferences prefs = mContext.getSharedPreferences(SHARED_PREFS, 0);
         Set<String> buckets = prefs.getStringSet(PREF_BUCKETS_IDS, new TreeSet<String>());
@@ -79,6 +126,19 @@ public class AutoMixManager implements IPlaybackCallback {
         }
     }
 
+    /**
+     * Creates a new AutoMix Bucket with the provided settings
+     * @param name The name of the bucket
+     * @param styles The EchoNest styles to include in the bucket
+     * @param moods The EchoNest moods to include in the bucket
+     * @param taste Whether or not to use the user's taste profile
+     * @param adventurous The target adventurousness level [0.0-1.0]
+     * @param songTypes The EchoNest song types to include
+     * @param speechiness The target speechiness level [0.0-1.0]
+     * @param energy The target energy level [0.0-1.0]
+     * @param familiar The target familiarity level [0.0-1.0]
+     * @return The generated {@link org.omnirom.music.api.echonest.AutoMixBucket}
+     */
     public AutoMixBucket createBucket(String name, String[] styles, String[] moods, boolean taste,
                                       float adventurous, String[] songTypes, float speechiness,
                                       float energy, float familiar) {
@@ -91,10 +151,10 @@ public class AutoMixManager implements IPlaybackCallback {
         return bucket;
     }
 
-    private SharedPreferences getPrefs() {
-        return mContext.getSharedPreferences(SHARED_PREFS, 0);
-    }
-
+    /**
+     * Saves a bucket (ie. its parameters) to the internal storage
+     * @param bucket The bucket to save
+     */
     private void saveBucket(AutoMixBucket bucket) {
         if (!bucket.isPlaylistSessionError()) {
             SharedPreferences prefs = getPrefs();
@@ -116,12 +176,17 @@ public class AutoMixManager implements IPlaybackCallback {
             editor.putStringSet(PREF_BUCKETS_IDS, set);
 
             editor.apply();
-
         } else {
             Log.e(TAG, "Cannot save bucket: playlist session is in error state");
         }
     }
 
+    /**
+     * Restores/recreate an AutoMix bucket from an existing session ID
+     * @param id The session ID to restore
+     * @return An {@link org.omnirom.music.api.echonest.AutoMixBucket} regenerated from the provided
+     *         bucket ID.
+     */
     public AutoMixBucket restoreBucketFromId(final String id) {
         SharedPreferences prefs = getPrefs();
 
@@ -139,14 +204,25 @@ public class AutoMixManager implements IPlaybackCallback {
         );
     }
 
+    /**
+     * Returns the list of existing buckets
+     * @return The list of existing buckets
+     */
     public List<AutoMixBucket> getBuckets() {
         return mBuckets;
     }
 
+    /**
+     * @return The currently playing bucket
+     */
     public AutoMixBucket getCurrentPlayingBucket() {
         return mCurrentPlayingBucket;
     }
 
+    /**
+     * Starts playing a bucket
+     * @param bucket The bucket to play
+     */
     public void startPlay(AutoMixBucket bucket) {
         IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
         try {
@@ -188,12 +264,21 @@ public class AutoMixManager implements IPlaybackCallback {
         }
     }
 
-    private Song getSongFromRef(String ref) {
+    /**
+     * Retrieves a Song from the preferred Rosetta-stone provider
+     * @param ref The reference of the song
+     * @return A Song, or null if the provider couldn't retrieve it
+     */
+    private @Nullable Song getSongFromRef(String ref) {
         ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
+        // Try to see if we have that song in our cache already
         Song s = aggregator.retrieveSong(ref, null);
+
         if (s == null) {
+            // The ref is not in cache, try to get it from the preferred rosetta stone provider
             String prefix = aggregator.getPreferredRosettaStonePrefix();
+
             if (prefix != null) {
                 ProviderIdentifier id = aggregator.getRosettaStoneIdentifier(prefix);
                 s = aggregator.retrieveSong(ref, id);
@@ -207,49 +292,28 @@ public class AutoMixManager implements IPlaybackCallback {
     @Override
     public void onSongStarted(boolean buffering, Song s) throws RemoteException {
         if (!s.getRef().equals(mExpectedSong)) {
-            Log.i(TAG, "Song started is not from bucket, cancel automix playback");
+            // Song started is not the one we expected from the bucket, cancel automix playback
             mCurrentPlayingBucket = null;
         } else if (mCurrentPlayingBucket != null) {
-            Log.d(TAG, "Bucket song expected started, grabbing next track");
-            new Thread() {
-                public void run() {
-                    try {
-                        String nextTrackRef = mCurrentPlayingBucket.getNextTrack();
-                        IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-
-                        Song nextTrack = getSongFromRef(nextTrackRef);
-                        pbService.queueSong(nextTrack, false);
-
-                        mExpectedSong = nextTrackRef;
-                    } catch (EchoNestException e) {
-                        Log.e(TAG, "Unable to get next track", e);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to queue next track", e);
-                    }
-                }
-            }.start();
-
+            // We're playing the song we expected to be played from the bucket, fetch the next one.
+            new Thread(mGetNextTrackRunnable).start();
         }
     }
 
     @Override
     public void onSongScrobble(int timeMs) throws RemoteException {
-
     }
 
     @Override
     public void onPlaybackPause() throws RemoteException {
-
     }
 
     @Override
     public void onPlaybackResume() throws RemoteException {
-
     }
 
     @Override
     public void onPlaybackQueueChanged() throws RemoteException {
-
     }
 
     @Override

@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.api.echonest;
 
 import android.util.Log;
@@ -15,7 +30,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import java.util.List;
 
 /**
- * Created by Guigui on 14/08/2014.
+ * Represents a parametrized AutoMix Bucket
  */
 public class AutoMixBucket {
     private static final String TAG = "AutoMixBucket";
@@ -35,6 +50,19 @@ public class AutoMixBucket {
     private boolean mSessionReady;
     private boolean mSessionError;
 
+    /**
+     * Creates a new Automix Bucket without an existing attached session. You should not create
+     * manually an automix bucket, but rather use {@link org.omnirom.music.api.echonest.AutoMixManager}
+     * @param name The name of the bucket
+     * @param styles The EchoNest styles to include in the bucket
+     * @param moods The EchoNest moods to include
+     * @param taste Whether or not this bucket uses the user's taste profile
+     * @param adventurous The level of adventurousness [0.0-1.0]
+     * @param songTypes The EchoNest types of songs to include
+     * @param speechiness The target level of speechiness [0.0-1.0]
+     * @param energy The target level of energy [0.0-1.0]
+     * @param familiar The target level of familiarity [0.0-1.0]
+     */
     AutoMixBucket(String name, String[] styles, String[] moods, boolean taste, float adventurous,
                   String[] songTypes, float speechiness, float energy, float familiar) {
         this(name, styles, moods, taste, adventurous, songTypes, speechiness, energy, familiar, null);
@@ -42,6 +70,20 @@ public class AutoMixBucket {
         mSessionError = false;
     }
 
+    /**
+     * Creates a new Automix Bucket with an existing session ID. You should not create manually an
+     * automix bucket, but rather use {@link org.omnirom.music.api.echonest.AutoMixManager}
+     * @param name The name of the bucket
+     * @param styles The EchoNest styles to include in the bucket
+     * @param moods The EchoNest moods to include
+     * @param taste Whether or not this bucket uses the user's taste profile
+     * @param adventurous The level of adventurousness [0.0-1.0]
+     * @param songTypes The EchoNest types of songs to include
+     * @param speechiness The target level of speechiness [0.0-1.0]
+     * @param energy The target level of energy [0.0-1.0]
+     * @param familiar The target level of familiarity [0.0-1.0]
+     * @param sessionId The existing EchoNest session ID to recover
+     */
     AutoMixBucket(String name, String[] styles, String[] moods, boolean taste, float adventurous,
                   String[] songTypes, float speechiness, float energy, float familiar,
                   String sessionId) {
@@ -65,6 +107,11 @@ public class AutoMixBucket {
         mSessionError = false;
     }
 
+    /**
+     * Creates or reset the EchoNest session for this bucket. This will reset the bucket on the
+     * EchoNest end and initialize a new session.
+     * @return The generated session
+     */
     DynamicPlaylistSession createPlaylistSession() {
         // Reset session status as we could be retrying
         mSessionReady = false;
@@ -149,18 +196,36 @@ public class AutoMixBucket {
         return mPlaylistSession;
     }
 
+    /**
+     * Returns whether or not the playlist session is ready to be played
+     * @return True if the playlist session is ready to be played, false otherwise
+     */
     public boolean isPlaylistSessionReady() {
         return mSessionReady;
     }
 
+    /**
+     * Returns whether or not the playlist session couldn't be generated
+     * @return True if an error occured during {#createPlaylistSession}
+     */
     public boolean isPlaylistSessionError() {
         return mSessionError;
     }
 
+    /**
+     * Returns the ID of the current playlist session. The session must be ready for this call
+     * to be valid.
+     * @return The ID of the current session.
+     */
     public String getSessionId() {
         return mPlaylistSession.getSessionID();
     }
 
+    /**
+     * Advance and fetches a new track from this automix bucket.
+     * @return A Rosetta-stone ID of the next track, or null if no provider supports rosetta-stone
+     * @throws EchoNestException In case of remote error.
+     */
     public String getNextTrack() throws EchoNestException {
         String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
         if (prefix != null) {
@@ -197,6 +262,10 @@ public class AutoMixBucket {
         return null;
     }
 
+    /**
+     * Returns the name of this bucket
+     * @return The name of this bucket
+     */
     public String getName() {
         return mName;
     }
