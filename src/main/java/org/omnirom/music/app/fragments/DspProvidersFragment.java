@@ -5,6 +5,7 @@ package org.omnirom.music.app.fragments;
 import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.os.Handler;
 import android.support.v4.app.ListFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,6 +41,7 @@ public class DspProvidersFragment extends ListFragment {
     private static final String TAG = "DspProvidersFragment";
 
     private DspAdapter mAdapter;
+    private Handler mHandler;
 
     private DspAdapter.ClickListener mClickListener = new DspAdapter.ClickListener() {
         @Override
@@ -105,19 +107,28 @@ public class DspProvidersFragment extends ListFragment {
 
     public void updateDspChain() {
         final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-        try {
-            List<ProviderIdentifier> chain = playbackService.getDSPChain();
+        if (playbackService != null) {
+            try {
+                List<ProviderIdentifier> chain = playbackService.getDSPChain();
 
-            if (mAdapter == null) {
-                mAdapter = new DspAdapter(chain);
-            } else {
-                mAdapter.updateChain(chain);
+                if (mAdapter == null) {
+                    mAdapter = new DspAdapter(chain);
+                } else {
+                    mAdapter.updateChain(chain);
+                }
+
+                mAdapter.setClickListener(mClickListener);
+                setListAdapter(mAdapter);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot get chain from playback service", e);
             }
-
-            mAdapter.setClickListener(mClickListener);
-            setListAdapter(mAdapter);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Cannot get chain from playback service", e);
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updateDspChain();
+                }
+            });
         }
     }
 
@@ -125,6 +136,8 @@ public class DspProvidersFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        mHandler = new Handler();
 
         updateDspChain();
     }
