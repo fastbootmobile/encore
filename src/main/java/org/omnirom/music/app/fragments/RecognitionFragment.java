@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
@@ -28,7 +43,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Created by Guigui on 19/09/2014.
+ * Fragment displaying the controls for the song fingerprinting and recognition system
  */
 public class RecognitionFragment extends Fragment {
     private static final String TAG = "RecognitionFragment";
@@ -82,6 +97,7 @@ public class RecognitionFragment extends Fragment {
                 mTvTitle.setText(mLastResult.TrackName);
                 mTvArtist.setText(mLastResult.ArtistName);
 
+                // Load the album art in a thread
                 new Thread() {
                     public void run () {
                         URL url;
@@ -89,6 +105,12 @@ public class RecognitionFragment extends Fragment {
                             url = new URL(mLastResult.AlbumImageUrl);
                         } catch (MalformedURLException e) {
                             // Too bad
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mIvArt.setImageResource(R.drawable.album_placeholder);
+                                }
+                            });
                             return;
                         }
 
@@ -111,6 +133,12 @@ public class RecognitionFragment extends Fragment {
                             });
                         } catch (IOException e) {
                             Log.e(TAG, "Error downloading album art", e);
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mIvArt.setImageResource(R.drawable.album_placeholder);
+                                }
+                            });
                         }
                     }
                 }.start();

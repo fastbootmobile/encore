@@ -1,10 +1,26 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,28 +31,30 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
-import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
-import org.omnirom.music.providers.ProviderIdentifier;
 
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 /**
- * Created by h4o on 27/06/2014.
+ * Dialog Fragment allowing creation of a new playlist
  */
 public class NewPlaylistFragment extends DialogFragment {
-    private String TAG = "NewPlaylistFragment";
+    private static final String TAG = "NewPlaylistFragment";
+
     private static final String KEY_SONG = "song";
     private static final String KEY_ALBUM = "album";
 
     private Song mSong;
     private Album mAlbum;
 
+    /**
+     * Creates a new instance of the New Playlist dialog fragment to create a new playlist and
+     * add a song to it.
+     * @param song The song to add to the playlist
+     * @return The fragment generated
+     */
     public static NewPlaylistFragment newInstance(Song song) {
         NewPlaylistFragment fragment = new NewPlaylistFragment();
         Bundle bundle = new Bundle();
@@ -45,6 +63,12 @@ public class NewPlaylistFragment extends DialogFragment {
         return fragment;
     }
 
+    /**
+     * Creates a new instance of the New Playlist dialog fragment to create a new playlist and
+     * add all tracks of an album to it.
+     * @param album The album to add to the playlist
+     * @return The fragment generated
+     */
     public static NewPlaylistFragment newInstance(Album album) {
         NewPlaylistFragment fragment = new NewPlaylistFragment();
         Bundle bundle = new Bundle();
@@ -58,7 +82,7 @@ public class NewPlaylistFragment extends DialogFragment {
         super.onCreate(savedInstance);
         Bundle args = getArguments();
         if (args == null) {
-            throw new IllegalArgumentException("This fragment requires a song");
+            throw new IllegalArgumentException("This fragment requires a song or an album");
         }
 
         if (args.containsKey(KEY_SONG)) {
@@ -69,6 +93,7 @@ public class NewPlaylistFragment extends DialogFragment {
 
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstance) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

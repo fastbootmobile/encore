@@ -1,10 +1,24 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -14,12 +28,9 @@ import org.omnirom.music.app.R;
 
 
 /**
- * A simple {@link android.support.v4.app.Fragment} subclass.
+ * A simple {@link android.support.v4.app.Fragment} subclass to display app's preferences
  */
 public class SettingsFragment extends PreferenceFragment {
-
-    private static final String TAG = "SettingsFragment";
-
     private static final String KEY_LIST_PROVIDERS_CONFIG = "list_providers_config";
     private static final String KEY_LIST_DSP_CONFIG = "list_dsp_config";
 
@@ -30,16 +41,13 @@ public class SettingsFragment extends PreferenceFragment {
      * @return A new instance of fragment SettingsFragment.
      */
     public static SettingsFragment newInstance() {
-        SettingsFragment fragment = new SettingsFragment();
-        return fragment;
+        return new SettingsFragment();
     }
+
+    /**
+     * Default constructor
+     */
     public SettingsFragment() {
-
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
     }
 
     @Override
@@ -49,7 +57,7 @@ public class SettingsFragment extends PreferenceFragment {
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.settings);
 
-        PreferenceManager pm = getPreferenceManager();
+        final PreferenceManager pm = getPreferenceManager();
         assert pm != null;
 
         // Fill in the entries and values

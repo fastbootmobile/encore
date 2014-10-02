@@ -1,6 +1,19 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
-
-
 
 import android.os.RemoteException;
 import android.support.v4.app.ListFragment;
@@ -26,10 +39,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A simple {@link Fragment} subclass.
+ * A simple {@link Fragment} subclass displaying providers.
  * Use the {@link SettingsProvidersFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
  */
 public class SettingsProvidersFragment extends ListFragment {
     private static final String TAG = "SettingsProvidersFragment";
@@ -44,9 +56,12 @@ public class SettingsProvidersFragment extends ListFragment {
      * @return A new instance of fragment SettingsProviders.
      */
     public static SettingsProvidersFragment newInstance() {
-        SettingsProvidersFragment fragment = new SettingsProvidersFragment();
-        return fragment;
+        return new SettingsProvidersFragment();
     }
+
+    /**
+     * Default constructor
+     */
     public SettingsProvidersFragment() {
         // Required empty public constructor
     }
@@ -90,8 +105,10 @@ public class SettingsProvidersFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        // If we come back from configuring a provider, let's see if it's ready now and log it in
         if (mSettingsConnection != null) {
-            IMusicProvider provider = mSettingsConnection.getBinder();
+            final IMusicProvider provider = mSettingsConnection.getBinder();
             try {
                 if (provider != null && provider.isSetup() && !provider.isAuthenticated()) {
                     mSettingsConnection.getBinder().login();

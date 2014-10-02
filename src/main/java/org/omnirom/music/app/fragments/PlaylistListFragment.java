@@ -1,16 +1,28 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
 import android.widget.GridView;
 
 import org.omnirom.music.app.MainActivity;
@@ -18,7 +30,6 @@ import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
-import org.omnirom.music.app.ui.ExpandableHeightGridView;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -31,16 +42,12 @@ import org.omnirom.music.providers.ProviderAggregator;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * A simple {@link android.support.v4.app.Fragment} subclass.
+ * A simple {@link android.support.v4.app.Fragment} subclass, showing a list of playlists.
  * Use the {@link PlaylistListFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
  */
 public class PlaylistListFragment extends Fragment implements ILocalCallback {
-    private static final String TAG = "PlaylistListFragment";
-
     private PlaylistListAdapter mAdapter;
     private Handler mHandler;
     private boolean mIsStandalone;
@@ -49,14 +56,18 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     private Runnable mUpdateListRunnable = new Runnable() {
         @Override
         public void run() {
+            boolean didChange = false;
             synchronized (mPlaylistsUpdated) {
                 for (Playlist p : mPlaylistsUpdated) {
-                    mAdapter.addItemUnique(p);
+                    didChange = mAdapter.addItemUnique(p) || didChange;
                 }
 
                 mPlaylistsUpdated.clear();
             }
-            mAdapter.notifyDataSetChanged();
+
+            if (didChange) {
+                mAdapter.notifyDataSetChanged();
+            }
         }
     };
 
@@ -72,10 +83,19 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
         fragment.setIsStandalone(isStandalone);
         return fragment;
     }
+
+    /**
+     * Default constructor. Use {@link #newInstance(boolean)} to create an instance of this fragment
+     */
     public PlaylistListFragment() {
         mAdapter = new PlaylistListAdapter();
     }
 
+    /**
+     * Sets whether or not the fragment is displayed standalone (root of an activity's contents)
+     * or within another container (e.g. a viewpager contents).
+     * @param isStandalone Whether this fragment is embedded in My Songs or is the Playlists section
+     */
     public void setIsStandalone(boolean isStandalone) {
         mIsStandalone = isStandalone;
     }
@@ -145,12 +165,10 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onSongUpdate(List<Song> s) {
-
     }
 
     @Override
     public void onAlbumUpdate(List<Album> a) {
-
     }
 
     @Override
@@ -165,7 +183,6 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onArtistUpdate(List<Artist> a) {
-
     }
 
     @Override
@@ -180,6 +197,5 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onSearchResult(SearchResult searchResult) {
-
     }
 }

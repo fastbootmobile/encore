@@ -1,10 +1,26 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 
 import org.omnirom.music.app.R;
@@ -14,25 +30,21 @@ import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.providers.MultiProviderPlaylistProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
-import java.nio.ByteBuffer;
-import java.security.Provider;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by h4o on 27/06/2014.
+ * Dialog fragment allowing the user to select a playlist to which add a song or an album
  */
 public class PlaylistChooserFragment extends DialogFragment {
-    private String TAG = "PlaylistChooserFragment";
+    private static final String TAG = "PlaylistChooserFragment";
 
     private static final String KEY_SONG = "song";
     private static final String KEY_ALBUM = "album";
@@ -40,6 +52,11 @@ public class PlaylistChooserFragment extends DialogFragment {
     private Song mSong;
     private Album mAlbum;
 
+    /**
+     * Creates the fragment in the perspective of adding a song to a playlist
+     * @param song The song to add
+     * @return The fragment generated
+     */
     public static PlaylistChooserFragment newInstance(Song song) {
         PlaylistChooserFragment fragment = new PlaylistChooserFragment();
         Bundle bundle = new Bundle();
@@ -48,6 +65,11 @@ public class PlaylistChooserFragment extends DialogFragment {
         return fragment;
     }
 
+    /**
+     * Creates the fragment in the perspective of adding an album to a playlist
+     * @param album The album of which tracks will be added
+     * @return The fragment generated
+     */
     public static PlaylistChooserFragment newInstance(Album album) {
         PlaylistChooserFragment fragment = new PlaylistChooserFragment();
         Bundle bundle = new Bundle();
@@ -78,6 +100,7 @@ public class PlaylistChooserFragment extends DialogFragment {
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstance) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

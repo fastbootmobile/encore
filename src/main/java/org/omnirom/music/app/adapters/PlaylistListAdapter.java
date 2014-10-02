@@ -88,9 +88,12 @@ public class PlaylistListAdapter extends BaseAdapter {
      * Adds the playlist to the adapter if it's not already there
      * @param p The playlist to add
      */
-    public void addItemUnique(Playlist p) {
+    public boolean addItemUnique(Playlist p) {
         if (!mPlaylists.contains(p)) {
             mPlaylists.add(p);
+            return true;
+        } else {
+            return false;
         }
     }
 

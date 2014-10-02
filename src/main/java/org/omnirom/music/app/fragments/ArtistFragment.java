@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
 
 import android.app.ActionBar;
@@ -12,6 +27,7 @@ import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -61,6 +77,7 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
@@ -73,18 +90,18 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A fragment containing a simple view.
+ * Fragment showing artist information: Tracks, similar artists, and biography
  */
 public class ArtistFragment extends Fragment implements ILocalCallback {
-
     private static final String TAG = "ArtistFragment";
+
     private static final int FRAGMENT_ID_TRACKS = 0;
     private static final int FRAGMENT_ID_SIMILAR = 1;
     private static final int FRAGMENT_ID_BIOGRAPHY = 2;
     private static final int FRAGMENT_COUNT = 3;
 
     private static final int ANIMATION_DURATION = 500;
-    private static DecelerateInterpolator mInterpolator = new DecelerateInterpolator();
+    private static final DecelerateInterpolator mInterpolator = new DecelerateInterpolator();
 
     private Bitmap mHeroImage;
     private int mBackgroundColor;
@@ -101,9 +118,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private Runnable mUpdateAlbumsRunnable = new Runnable() {
         @Override
         public void run() {
-            // FIXME: Artist object isn't getting updated with the new albums
-            // Reason: Artist object is copied when serialized in the bundle. When retrieved
-            // in the intent here, it's a copy with the existing attributes at that time
             ProviderAggregator aggregator = ProviderAggregator.getDefault();
             mArtist = aggregator.retrieveArtist(mArtist.getRef(), mArtist.getProvider());
 
@@ -113,7 +127,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     };
 
 
-    private IPlaybackCallback.Stub mPlaybackCallback = new IPlaybackCallback.Stub() {
+    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
         public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
             mHandler.post(new Runnable() {
@@ -123,10 +137,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     mFabDrawable.setBuffering(buffering);
                 }
             });
-        }
-
-        @Override
-        public void onSongScrobble(int timeMs) throws RemoteException {
         }
 
         @Override
@@ -150,42 +160,50 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 }
             });
         }
-
-        @Override
-        public void onPlaybackQueueChanged() throws RemoteException {
-        }
     };
 
+    /**
+     * Class handling the ViewPager for the tabs
+     */
     private class ViewPagerAdapter extends FragmentPagerAdapter {
-
         private boolean mHasRosetta;
 
         public ViewPagerAdapter(FragmentManager fm) {
             super(fm);
+            // Depending on whether we have a rosetta-enabled provider or not, we will
+            // show or not the Similar tab.
             mHasRosetta = ProviderAggregator.getDefault().getRosettaStonePrefix().size() > 0;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public Fragment getItem(int i) {
+            // We're deliberately not using constants in this switch because values may be two
+            // different things.
             switch (i) {
-                case 0:
+                case 0: // Tracks tab
                     return mArtistTracksFragment;
 
-                case 1:
+                case 1: // Either similar, or biography tab
                     if (mHasRosetta) {
                         return mArtistSimilarFragment;
                     } else {
                         return mArtistInfoFragment;
                     }
 
-                case 2:
+                case 2: // Biography tab in case similar is enabled
                     return mArtistInfoFragment;
             }
 
             // should never happen
-            return null;
+            throw new IllegalStateException("We should never be here, i=" + i);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public CharSequence getPageTitle(int position) {
             if (position == 0) {
@@ -203,6 +221,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             return "Error";
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public int getCount() {
             // Similar only works if we have one provider supporting Rosetta Stone
@@ -214,7 +235,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
-
+    /**
+     * Album art helper for each entry in the Tracks view
+     */
     private static class AlbumArtLoadListener implements AlbumArtImageView.OnArtLoadedListener {
         private View mRootView;
         private Handler mHandler;
@@ -224,6 +247,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mHandler = new Handler();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
             if (drawable == null || drawable.getBitmap() == null) {
@@ -261,6 +287,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * Click listener on Album group entries
+     */
     private static class AlbumGroupClickListener implements View.OnClickListener {
         private Album mAlbum;
         private LinearLayout mContainer;
@@ -286,11 +315,17 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mHeaderDivider.setAlpha(0.0f);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void onClick(View view) {
             toggle();
         }
 
+        /**
+         * Toggles an album group visibility
+         */
         public void toggle() {
             if (mOpen) {
                 mItemHost.startAnimation(Utils.animateExpand(mItemHost, false));
@@ -325,18 +360,31 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * Default constructor
+     */
     public ArtistFragment() {
         mFabShouldResume = false;
     }
 
+    /**
+     * Returns a view in the fragment
+     * @param id The layout item ID
+     * @return The view if found, null otherwise
+     */
     public View findViewById(int id) {
         return mRootView.findViewById(id);
     }
 
+    /**
+     * Sets the main arguments for the fragment
+     * @param hero The hero header image bitmap
+     * @param extras The intent bundle extras
+     */
     public void setArguments(Bitmap hero, Bundle extras) {
         mHeroImage = hero;
         mBackgroundColor = extras.getInt(ArtistActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
-        String artistRef = extras.getString(ArtistActivity.EXTRA_ARTIST);
+        final String artistRef = extras.getString(ArtistActivity.EXTRA_ARTIST);
         mArtist = ProviderAggregator.getDefault().retrieveArtist(artistRef, null);
 
         if (mArtist == null) {
@@ -353,20 +401,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                final PaletteItem normalColor = palette.getDarkMutedColor();
-                                final PaletteItem pressedColor = palette.getDarkVibrantColor();
-                                if (normalColor != null && mRootView != null) {
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mFabPlay.setNormalColor(normalColor.getRgb());
-                                            if (pressedColor != null) {
-                                                mFabPlay.setPressedColor(pressedColor.getRgb());
-                                            } else {
-                                                mFabPlay.setPressedColor(normalColor.getRgb());
-                                            }
-                                        }
-                                    });
+                                if (mRootView != null) {
+                                    final PaletteItem pressedColor = palette.getDarkVibrantColor();
+                                    mFabPlay.setNormalColor(normalColor.getRgb());
+                                    if (pressedColor != null) {
+                                        mFabPlay.setPressedColor(pressedColor.getRgb());
+                                    } else {
+                                        mFabPlay.setPressedColor(normalColor.getRgb());
+                                    }
                                 }
                             }
                         });
@@ -376,6 +418,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -411,7 +456,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
             }
 
             @Override
@@ -430,11 +474,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
             @Override
             public void onPageScrollStateChanged(int i) {
-
             }
         });
 
-        PagerTabStrip strip = (PagerTabStrip) mRootView.findViewById(R.id.pagerArtistStrip);
+        final PagerTabStrip strip = (PagerTabStrip) mRootView.findViewById(R.id.pagerArtistStrip);
         strip.setBackgroundColor(mBackgroundColor);
 
         mRootView.setOnScrollListener(new ObservableScrollView.ScrollViewListener() {
@@ -452,7 +495,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         });
 
         // Setup the source logo
-        ImageView ivSource = (ImageView) mRootView.findViewById(R.id.ivSourceLogo);
+        final ImageView ivSource = (ImageView) mRootView.findViewById(R.id.ivSourceLogo);
         ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(mArtist));
 
         // Outline is required for the FAB shadow to be actually oval
@@ -526,18 +569,29 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         return mRootView;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDetach() {
         super.onDetach();
         mHandler.removeCallbacks(mUpdateAlbumsRunnable);
     }
 
+    /**
+     * Shows or hides the play Floating Action Button
+     * @param animate Whether or not to animate the transition
+     * @param visible Whether or not to display the button
+     */
     private void showFab(final boolean animate, final boolean visible) {
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -547,18 +601,105 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         });
     }
 
+    /**
+     * Sets the play FAB drawable shape
+     * @param shape The shape to display (one of {@link org.omnirom.music.app.ui.PlayPauseDrawable}
+     *              constants
+     */
     private void setFabShape(int shape) {
         mFabDrawable.setShape(shape);
     }
 
+    /**
+     * Sets whether or not tapping the FAB in "Play" shape will start playing from scratch or resume
+     * the current playback.
+     * @param shouldResume True to resume, false to play from scratch
+     */
     private void setFabShouldResume(boolean shouldResume) {
         mFabShouldResume = shouldResume;
     }
 
+    /**
+     * @return The artist displayed by this fragment
+     */
     public Artist getArtist() {
         return mArtist;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onSongUpdate(List<Song> s) {
+        boolean hasThisArtist = false;
+        for (Song song : s) {
+            if (mArtist.getRef().equals(song.getArtist())) {
+                hasThisArtist = true;
+                break;
+            }
+        }
+
+        if (hasThisArtist) {
+            // TODO: Instead of updating everything, update only the relevant entries
+            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+            mHandler.post(mUpdateAlbumsRunnable);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAlbumUpdate(List<Album> a) {
+        boolean hasThisArtist = false;
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        for (Album album : a) {
+            Iterator<String> songs = album.songs();
+            while (songs.hasNext()) {
+                String songRef = songs.next();
+                Song song = aggregator.retrieveSong(songRef, album.getProvider());
+                if (song != null && mArtist.getRef().equals(song.getArtist())) {
+                    hasThisArtist = true;
+                    break;
+                }
+            }
+
+            if (hasThisArtist) {
+                break;
+            }
+        }
+
+        if (hasThisArtist) {
+            // TODO: Instead of updating everything, update only the relevant entries
+            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+            mHandler.post(mUpdateAlbumsRunnable);
+        }
+    }
+
+    @Override
+    public void onPlaylistUpdate(List<Playlist> p) {
+    }
+
+    @Override
+    public void onArtistUpdate(final List<Artist> a) {
+        if (a.contains(mArtist)) {
+            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+            mHandler.post(mUpdateAlbumsRunnable);
+        }
+        mArtistSimilarFragment.notifyArtistUpdate(a);
+    }
+
+    @Override
+    public void onProviderConnected(IMusicProvider provider) {
+    }
+
+    @Override
+    public void onSearchResult(SearchResult searchResult) {
+    }
+
+    /**
+     * Class representing the inner fragment displaying albums and tracks
+     */
     public static class ArtistTracksFragment extends Fragment {
         private Song mRecommendedSong;
         private boolean mRecommendationLoaded = false;
@@ -570,11 +711,75 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private View mPreviousAlbumGroup;
         private Handler mHandler;
 
+        private Comparator<Album> mComparator = new Comparator<Album>() {
+            @Override
+            public int compare(Album album, Album album2) {
+                if (album.getYear() != album2.getYear()) {
+                    return album.getYear() < album2.getYear() ? 1 : -1;
+                } else if (album.getName() != null && album2.getName() != null) {
+                    return album.getName().compareTo(album2.getName());
+                } else {
+                    return album.getRef().compareTo(album2.getRef());
+                }
+            }
+        };
+
+        private Runnable mPausePlaybackRunnable = new Runnable() {
+            @Override
+            public void run() {
+                final IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+                try {
+                    service.pause();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot pause", e);
+                }
+            }
+        };
+
+        private View.OnClickListener mPlayAlbumClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+                final IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+                final AlbumViewHolder tag = (AlbumViewHolder) view.getTag();
+                final Album album = tag.album;
+                final PlayPauseDrawable drawable = (PlayPauseDrawable) tag.ivPlayAlbum.getDrawable();
+
+                if (drawable.getRequestedShape() == PlayPauseDrawable.SHAPE_STOP) {
+                    drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mParent.setFabShape(PlayPauseDrawable.SHAPE_PLAY);
+                    new Thread(mPausePlaybackRunnable).start();
+                } else {
+                    drawable.setShape(PlayPauseDrawable.SHAPE_STOP);
+                    mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    try {
+                        service.playAlbum(album);
+                    } catch (DeadObjectException e) {
+                        Log.e(TAG, "Provider died while trying to play album");
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to play album", e);
+                    }
+
+                    // Bold the corresponding track
+                    final Iterator<String> songs = album.songs();
+                    if (songs.hasNext()) {
+                        final String songRef = songs.next();
+                        final Song s = aggregator.retrieveSong(songRef, album.getProvider());
+                        boldPlayingTrack(s);
+                    }
+                }
+            }
+        };
+
+        /**
+         * View holder for items in this class
+         */
         private class AlbumViewHolder {
             TextView tvAlbumName;
             TextView tvAlbumYear;
             AlbumArtImageView ivCover;
             ImageView ivPlayAlbum;
+            Album album;
 
             AlbumViewHolder(View viewRoot) {
                 tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
@@ -620,12 +825,15 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         };
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             mRootView = inflater.inflate(R.layout.fragment_artist_tracks, container, false);
             mHandler = new Handler();
 
-            // Load recommendation and albums
+            // Load recommendation and albums for the first
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -637,20 +845,34 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             return mRootView;
         }
 
+        /**
+         * Sets the parent fragment
+         * @param parent The parent fragment
+         */
         public void setParentFragment(ArtistFragment parent) {
             mParent = parent;
         }
 
+        /**
+         * Sets whether or not to show the loading spinner
+         * @param show True to show, false otherwise
+         */
         private void showLoadingSpinner(final boolean show) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ProgressBar pb = (ProgressBar) mRootView.findViewById(R.id.pbArtistLoading);
-                    pb.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
+            final ProgressBar pb = (ProgressBar) mRootView.findViewById(R.id.pbArtistLoading);
+            if (show && pb.getVisibility() != View.VISIBLE
+                    || !show && pb.getVisibility() != View.GONE) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        pb.setVisibility(show ? View.VISIBLE : View.GONE);
+                    }
+                });
+            }
         }
 
+        /**
+         * Play the recommended track
+         */
         private void playRecommendation() {
             if (mRecommendationLoaded && mRecommendedSong != null) {
                 try {
@@ -671,13 +893,18 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
+        /**
+         * Load the recommended track
+         */
         private void loadRecommendation() {
             if (mRecommendationLoaded) {
+                // Already loaded
                 return;
             }
 
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
+            // Load a song from the Suggestor and display it
             Song recommended = Suggestor.getInstance().suggestBestForArtist(mParent.getArtist());
             if (recommended != null) {
                 mRecommendedSong = recommended;
@@ -728,7 +955,11 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
-        private void postToast(final int string) {
+        /**
+         * Displays a toast
+         * @param string A string resource of the text to display
+         */
+        private void postToast(@StringRes final int string) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -737,6 +968,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             });
         }
 
+        /**
+         * Fetch the albums from the provider
+         */
         private void fetchAlbums() {
             new Thread() {
                 public void run() {
@@ -769,6 +1003,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }.start();
         }
 
+        /**
+         * Load and display albums
+         * @param request Whether or not to fetch albums from the provider
+         */
         private void loadAlbums(boolean request) {
             if (request) {
                 // Make sure we loaded all the albums for that artist
@@ -800,18 +1038,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
 
             // Sort it from album names
-            Collections.sort(albums, new Comparator<Album>() {
-                @Override
-                public int compare(Album album, Album album2) {
-                    if (album.getYear() != album2.getYear()) {
-                        return album.getYear() < album2.getYear() ? 1 : -1;
-                    } else if (album.getName() != null && album2.getName() != null) {
-                        return album.getName().compareTo(album2.getName());
-                    } else {
-                        return album.getRef().compareTo(album2.getRef());
-                    }
-                }
-            });
+            Collections.sort(albums, mComparator);
 
             // Then inflate views
             final LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -822,13 +1049,16 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 if (mAlbumToViewMap.containsKey(album.getRef())) {
                     viewRoot = mAlbumToViewMap.get(album.getRef());
                     holder = (AlbumViewHolder) viewRoot.getTag();
+                    holder.album = album;
                     llAlbums.addView(viewRoot);
                 } else {
                     viewRoot = inflater.inflate(R.layout.expanded_albums_group, llAlbums, false);
                     llAlbums.addView(viewRoot);
 
                     holder = new AlbumViewHolder(viewRoot);
+                    holder.album = album;
                     viewRoot.setTag(holder);
+                    holder.ivPlayAlbum.setTag(holder);
 
                     AlbumGroupClickListener listener =
                             new AlbumGroupClickListener(album, llAlbums, viewRoot, this);
@@ -839,46 +1069,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     drawable.setColor(0xCC333333);
                     drawable.setPaddingDp(32);
                     holder.ivPlayAlbum.setImageDrawable(drawable);
-
-                    holder.ivPlayAlbum.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-                            if (drawable.getRequestedShape() == PlayPauseDrawable.SHAPE_STOP) {
-                                drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                                mParent.setFabShape(PlayPauseDrawable.SHAPE_PLAY);
-                                new Thread() {
-                                    public void run() {
-                                        try {
-                                            pbService.pause();
-                                        } catch (RemoteException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }.start();
-                            } else {
-                                drawable.setShape(PlayPauseDrawable.SHAPE_STOP);
-                                mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
-                                try {
-                                    pbService.playAlbum(album);
-                                } catch (DeadObjectException e) {
-                                    Log.e(TAG, "Provider died while trying to play album");
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Unable to play album", e);
-                                }
-
-                                // Bold the corresponding track
-                                Iterator<String> songs = album.songs();
-                                if (songs.hasNext()) {
-                                    String songRef = songs.next();
-                                    Song s = aggregator.retrieveSong(songRef, album.getProvider());
-                                    boldPlayingTrack(s);
-                                }
-                            }
-                        }
-                    });
+                    holder.ivPlayAlbum.setOnClickListener(mPlayAlbumClickListener);
                 }
 
+                // If the album is loaded, show its metadata
                 if (album.isLoaded()) {
                     holder.tvAlbumName.setText(album.getName());
                     if (album.getYear() > 0) {
@@ -902,9 +1096,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
-
-
                 } else {
+                    // Album isn't loaded, show "Loading"
                     holder.tvAlbumName.setText(getString(R.string.loading));
                     holder.tvAlbumYear.setVisibility(View.GONE);
                     holder.ivPlayAlbum.setVisibility(View.GONE);
@@ -913,13 +1106,20 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 // Load the album art
                 holder.ivCover.loadArtForAlbum(album);
 
+                // Cache the view
                 mAlbumToViewMap.put(album.getRef(), viewRoot);
             }
 
+            // Hide loading spinner and show the play FAB as we now have stuff
             showLoadingSpinner(false);
             mParent.showFab(true, true);
         }
 
+        /**
+         * Shows the album tracks of the provided album
+         * @param album The album of which display tracks
+         * @param container The container in which expand views
+         */
         private void showAlbumTracks(Album album, LinearLayout container) {
             Iterator<String> songsIt = album.songs();
 
@@ -978,7 +1178,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                             }
                         }
                     } catch (RemoteException e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "Cannot get playback state", e);
                     }
                 } else {
                     tvTrackName.setText(getString(R.string.loading));
@@ -988,6 +1188,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
+        /**
+         * Updates the current playing album
+         * @param albumRef The new album being played
+         */
         private void updatePlayingAlbum(String albumRef) {
             View view = mAlbumToViewMap.get(albumRef);
             ImageView ivPlayAlbum;
@@ -1007,6 +1211,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mPreviousAlbumGroup = view;
         }
 
+        /**
+         * Finds and bolds the track that is currently playing, if we have it
+         * @param s The song that is currently playing
+         */
         private void boldPlayingTrack(Song s) {
             View view = mSongToViewMap.get(s);
 
@@ -1034,6 +1242,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * Fragment showing the Artist's biography
+     */
     public static class ArtistInfoFragment extends Fragment {
         private static Artist mArtist;
         private Handler mHandler;
@@ -1041,15 +1252,25 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private boolean mInfoLoaded;
         private ProgressBar mLoadingSpinner;
 
+        /**
+         * Default constructor
+         */
         public ArtistInfoFragment() {
             mHandler = new Handler();
             mInfoLoaded = false;
         }
 
+        /**
+         * Sets the active artist for which get the biography
+         * @param artist The artist displayed
+         */
         public void setArguments(Artist artist) {
             mArtist = artist;
         }
 
+        /**
+         * Notifies that the fragment is currently active, and that data should be populated.
+         */
         public void notifyActive() {
             if (!mInfoLoaded) {
                 mInfoLoaded = true;
@@ -1061,6 +1282,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
+        /**
+         * Loads synchronously the biography data
+         */
         private void loadBiographySync() {
             final EchoNest echoNest = new EchoNest();
             try {
@@ -1095,6 +1319,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_artist_info, container, false);
@@ -1117,6 +1344,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * Fragment showing similar artists
+     */
     public static class ArtistSimilarFragment extends Fragment {
         private TwoWayView mArtistsGrid;
         private Artist mArtist;
@@ -1147,16 +1377,26 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         };
 
+        /**
+         * Default constructor
+         */
         public ArtistSimilarFragment() {
             mAdapter = new ArtistsAdapter();
             mHandler = new Handler();
             mSimilarArtists = new ArrayList<Artist>();
         }
 
+        /**
+         * Sets the active artist to display
+         * @param artist The artist displayed
+         */
         public void setArguments(Artist artist) {
             mArtist = artist;
         }
 
+        /**
+         * Notify that the fragment is active and that data should be populated
+         */
         public void notifyActive() {
             if (!mSimilarLoaded) {
                 mSimilarLoaded = true;
@@ -1168,6 +1408,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
+        /**
+         * Called when the host fragment notifies that artists have been updated by a provider
+         * @param artists The artists who got updated
+         */
         public void notifyArtistUpdate(final List<Artist> artists) {
             for (Artist artist : artists) {
                 final int artistIndex = mSimilarArtists.indexOf(artist);
@@ -1182,6 +1426,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
+        /**
+         * Load synchronously the similar artists
+         */
         public void loadSimilarSync() {
             EchoNest echoNest = new EchoNest();
             try {
@@ -1189,12 +1436,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 if (enArtist != null) {
                     List<com.echonest.api.v4.Artist> similars = echoNest.getArtistSimilar(enArtist);
 
+                    // Retrieve the rosetta stone prefix
                     String rosettaPreferred = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
                     ProviderIdentifier rosettaProvider = null;
                     if (rosettaPreferred != null) {
                         rosettaProvider = ProviderAggregator.getDefault().getRosettaStoneIdentifier(rosettaPreferred);
                     }
 
+                    // For each similar artist, get the rosetta stone ID, and add it to the adapter
                     for (com.echonest.api.v4.Artist similar : similars) {
                         if (rosettaPreferred != null) {
                             String ref = echoNest.getArtistForeignID(similar, rosettaPreferred);
@@ -1231,6 +1480,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
@@ -1241,71 +1493,5 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             itemClick.setOnItemClickListener(mItemClickListener);
             return rootView;
         }
-    }
-
-    @Override
-    public void onSongUpdate(List<Song> s) {
-        boolean hasThisArtist = false;
-        for (Song song : s) {
-            if (mArtist.getRef().equals(song.getArtist())) {
-                hasThisArtist = true;
-                break;
-            }
-        }
-
-        if (hasThisArtist) {
-            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-            mHandler.post(mUpdateAlbumsRunnable);
-        }
-    }
-
-    @Override
-    public void onAlbumUpdate(List<Album> a) {
-        boolean hasThisArtist = false;
-        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        for (Album album : a) {
-            Iterator<String> songs = album.songs();
-            while (songs.hasNext()) {
-                String songRef = songs.next();
-                Song song = aggregator.retrieveSong(songRef, album.getProvider());
-                if (song != null && mArtist.getRef().equals(song.getArtist())) {
-                    hasThisArtist = true;
-                    break;
-                }
-            }
-
-            if (hasThisArtist) {
-                break;
-            }
-        }
-
-        if (hasThisArtist) {
-            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-            mHandler.post(mUpdateAlbumsRunnable);
-        }
-    }
-
-    @Override
-    public void onPlaylistUpdate(List<Playlist> p) {
-
-    }
-
-    @Override
-    public void onArtistUpdate(final List<Artist> a) {
-        if (a.contains(mArtist)) {
-            mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-            mHandler.post(mUpdateAlbumsRunnable);
-        }
-        mArtistSimilarFragment.notifyArtistUpdate(a);
-    }
-
-    @Override
-    public void onProviderConnected(IMusicProvider provider) {
-
-    }
-
-    @Override
-    public void onSearchResult(SearchResult searchResult) {
-
     }
 }

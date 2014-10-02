@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
 
 import android.content.Intent;
@@ -35,17 +50,20 @@ import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.List;
 
-
 /**
- * Created by h4o on 22/07/2014.
+ * Fragment displaying search results
  */
 public class SearchFragment extends Fragment implements ILocalCallback {
-    private SearchAdapter mAdapter;
-    private static SearchResult sSearchResult;
-    private Handler mHandler;
-    private static final String KEY_PLAYLIST = "playlist";
-    private String TAG = "SearchFragment";
+    private static final String TAG = "SearchFragment";
 
+    private static SearchResult sSearchResult;
+
+    private SearchAdapter mAdapter;
+    private Handler mHandler;
+
+    /**
+     * Default constructor
+     */
     public SearchFragment() {
         ProviderAggregator.getDefault().addUpdateCallback(this);
         mHandler = new Handler();
@@ -54,7 +72,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_search, container, false);
+        final View root = inflater.inflate(R.layout.fragment_search, container, false);
         assert root != null;
 
         getActivity().setProgressBarIndeterminate(true);
@@ -70,7 +88,6 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         }
 
         listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i2, long l) {
                 if (sSearchResult != null) {
@@ -97,8 +114,9 @@ public class SearchFragment extends Fragment implements ILocalCallback {
                     }
 
                     return true;
-                } else
+                } else {
                     return false;
+                }
             }
         });
 
@@ -258,7 +276,6 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onProviderConnected(IMusicProvider provider) {
-
     }
 
     @Override

@@ -1,49 +1,46 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.ui;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.AlbumArtHelper;
-import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Guigui on 16/07/2014.
+ * Square ImageView displaying album art automatically
  */
 public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper.AlbumArtListener {
-
-    private static final String TAG = "AlbumArtImageView";
     private static final int DELAY_BEFORE_START = 300;
 
     private Handler mHandler;
@@ -112,6 +109,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     @Override
     protected void finalize() throws Throwable {
         if (mPlaylistComposite != null) {
+            // Recycle the bitmap
             synchronized (sPlaylistBitmapPool) {
                 sPlaylistBitmapPool.add(mPlaylistComposite);
             }
@@ -129,11 +127,18 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         setImageDrawable(mDrawable);
     }
 
+    /**
+     * Displays the placeholder album art without transition
+     */
     public void setDefaultArt() {
         mDrawable.setImmediateTo((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
         forceDrawableReload();
     }
 
+    /**
+     * Sets the listener that will be called when the art is loaded
+     * @param listener The listener that will be called
+     */
     public void setOnArtLoadedListener(OnArtLoadedListener listener) {
         mOnArtLoadedListener = listener;
     }

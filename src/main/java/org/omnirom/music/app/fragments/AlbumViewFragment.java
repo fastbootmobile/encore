@@ -63,8 +63,8 @@ import omnimusic.Plugin;
  * Fragment for viewing an album's details
  */
 public class AlbumViewFragment extends Fragment implements ILocalCallback {
-
     private static final String TAG = "AlbumViewFragment";
+
     private SongsListAdapter mAdapter;
     private View mRootView;
     private Album mAlbum;
@@ -109,25 +109,28 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
             IMusicProvider provider = PluginsLookup.getDefault().getProvider(pi).getBinder();
 
+            // Check whether or not the album is fully loaded on the provider's end
             boolean hasMore = false;
             if (provider != null) {
                 try {
                     hasMore = provider.fetchAlbumTracks(mAlbum.getRef());
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Error while fetching album tracks", e);
                 }
             }
 
+            // If we already have some songs, show them
             if (mAlbum.getSongsCount() > 0) {
+                // If there's not more tracks, hide the loading bar, otherwise keep on displaying it
                 View loadingBar = findViewById(R.id.pbAlbumLoading);
                 if (loadingBar.getVisibility() == View.VISIBLE && !hasMore) {
                     loadingBar.setVisibility(View.GONE);
                     showFab(true, true);
                 }
 
-                Iterator<String> songs = mAlbum.songs();
+                // Load the songs into the adapter
                 mAdapter.clear();
-
+                final Iterator<String> songs = mAlbum.songs();
                 while (songs.hasNext()) {
                     String songRef = songs.next();
                     Song song = aggregator.retrieveSong(songRef, mAlbum.getProvider());
@@ -137,14 +140,17 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     }
                 }
                 mAdapter.notifyDataSetChanged();
-                mRootView.invalidate();
             } else {
+                // No song loaded, show the loading spinner and hide the play FAB
                 findViewById(R.id.pbAlbumLoading).setVisibility(View.VISIBLE);
                 showFab(false, false);
             }
         }
     };
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -153,13 +159,15 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_album_view, container, false);
         assert mRootView != null;
+
+        // Load the header
         View headerView = inflater.inflate(R.layout.songs_list_view_header, null);
         ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
         TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
         tvAlbumName.setBackgroundColor(mBackgroundColor);
         tvAlbumName.setText(mAlbum.getName());
 
-        // Hide download button
+        // Hide download button by default
         headerView.findViewById(R.id.cpbOffline).setVisibility(View.GONE);
 
         mPlayFab = (FloatingActionButton) headerView.findViewById(R.id.fabPlay);
@@ -207,6 +215,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         ivHero.setImageBitmap(mHeroImage);
 
+        // Setup the contents list view
         ParallaxScrollListView listView =
                 (ParallaxScrollListView) mRootView.findViewById(R.id.lvAlbumContents);
         mAdapter = new SongsListAdapter(getActivity(), false);
@@ -237,11 +246,15 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
             }
         });
 
+        // Start loading songs in another thread
         loadSongs();
 
         return mRootView;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -253,6 +266,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -264,6 +280,11 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * Sets the arguments for this fragment
+     * @param hero The hero header image bitmap
+     * @param extras The extras contained in the Intent that started the parent activity
+     */
     public void setArguments(Bitmap hero, Bundle extras) {
         mHeroImage = hero;
         mBackgroundColor = extras.getInt(AlbumActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
@@ -298,10 +319,27 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         });
     }
 
+    /**
+     * @return The {@link org.omnirom.music.model.Album} displayed by this fragment
+     */
     public Album getAlbum() {
         return mAlbum;
     }
 
+    /**
+     * Returns the main artist of this album, based on the tracks container. This call is not valid
+     * if the album's tracks aren't loaded.
+     * @return The main artist of this album.
+     */
+    public String getArtist() {
+        return Utils.getMainArtist(mAlbum);
+    }
+
+    /**
+     * Shows or hide the play FAB
+     * @param animate Whether or not to animate the transition
+     * @param visible Whether or not to show the button
+     */
     private void showFab(final boolean animate, final boolean visible) {
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -311,18 +349,23 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         });
     }
 
+    /**
+     * Looks up and returns a view in this framgent
+     * @param id The layout item ID to display
+     * @return The view, or null if not found
+     */
     public View findViewById(int id) {
         return mRootView.findViewById(id);
     }
 
     private void loadSongs() {
+        mHandler.removeCallbacks(mLoadSongsRunnable);
         mHandler.post(mLoadSongsRunnable);
     }
 
-    public String getArtist() {
-        return Utils.getMainArtist(mAlbum);
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onSongUpdate(List<Song> s) {
         for (Song song : s) {
@@ -333,6 +376,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onAlbumUpdate(List<Album> a) {
         for (Album album : a) {
@@ -343,23 +389,31 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
-
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onArtistUpdate(List<Artist> a) {
-
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onProviderConnected(IMusicProvider provider) {
-
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onSearchResult(SearchResult searchResult) {
-
     }
 }

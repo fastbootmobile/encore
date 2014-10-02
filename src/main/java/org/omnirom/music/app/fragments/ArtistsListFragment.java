@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
 
 import android.content.Context;
@@ -30,7 +45,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import java.util.List;
 
 /**
- * Created by h4o on 20/06/2014.
+ * Fragment displaying a list of artists
  */
 public class ArtistsListFragment extends Fragment implements ILocalCallback {
 
@@ -68,6 +83,10 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
     public static ArtistsListFragment newInstance() {
         return new ArtistsListFragment();
     }
+
+    /**
+     * Default constructor
+     */
     public ArtistsListFragment() {
         mAdapter = new ArtistsAdapter();
         mHandler = new Handler();
@@ -75,11 +94,17 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
         ProviderAggregator.getDefault().addUpdateCallback(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -110,24 +135,39 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
         return root;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDetach() {
         super.onDetach();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onSongUpdate(List<Song> s) {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onAlbumUpdate(List<Album> a) {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onPlaylistUpdate(final List<Playlist> p) {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onArtistUpdate(List<Artist> artists) {
         for (Artist a : artists) {
@@ -138,10 +178,16 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onProviderConnected(IMusicProvider provider) {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onSearchResult(SearchResult searchResult) {
     }
