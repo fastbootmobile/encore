@@ -75,6 +75,9 @@ public class CircularProgressDrawable extends Drawable {
         mRect.top += paddedStrokeWidth / 2.0f;
         mRect.bottom -= paddedStrokeWidth / 2.0f;
 
+        mRect.top -= 8.0f;
+        mRect.bottom -= 8.0f;
+
         float sweepAngle = mValue * 360.0f / mMax;
         canvas.drawArc(mRect, -90.0f, sweepAngle, false, mPaint);
     }

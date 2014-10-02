@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app;
 
 import android.app.ActionBar;
@@ -18,12 +33,12 @@ import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
 
+/**
+ * Activity showing a {@link org.omnirom.music.app.fragments.SettingsFragment} to configure the app
+ */
 public class SettingsActivity extends FragmentActivity {
-
     private static final String TAG = "SettingsActivity";
     public static final String TAG_FRAGMENT = "fragment_inner";
-
-    private SettingsFragment mActiveFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +46,12 @@ public class SettingsActivity extends FragmentActivity {
         setContentView(R.layout.activity_artist);
 
         FragmentManager fm = getSupportFragmentManager();
-        mActiveFragment = (SettingsFragment) fm.findFragmentByTag(TAG_FRAGMENT);
+        SettingsFragment activeFragment = (SettingsFragment) fm.findFragmentByTag(TAG_FRAGMENT);
 
-        if (mActiveFragment == null) {
-            mActiveFragment = new SettingsFragment();
+        if (activeFragment == null) {
+            activeFragment = new SettingsFragment();
             fm.beginTransaction()
-                    .add(R.id.container, mActiveFragment, TAG_FRAGMENT)
+                    .add(R.id.container, activeFragment, TAG_FRAGMENT)
                     .commit();
         }
 
@@ -62,6 +77,7 @@ public class SettingsActivity extends FragmentActivity {
             }
         });
 
+        // Change the music volume here as well
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 }

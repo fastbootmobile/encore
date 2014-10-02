@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
@@ -45,7 +60,7 @@ import java.util.List;
 import omnimusic.Plugin;
 
 /**
- * Created by h4o on 26/06/2014.
+ * Fragment for viewing an album's details
  */
 public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
@@ -78,8 +93,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     }
                 });
             }
-
-
         }
     };
 
@@ -254,11 +267,13 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     public void setArguments(Bitmap hero, Bundle extras) {
         mHeroImage = hero;
         mBackgroundColor = extras.getInt(AlbumActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
-        mAlbum = extras.getParcelable(AlbumActivity.EXTRA_ALBUM);
 
-        // Use cache item instead of parceled item (otherwise updates pushed to the cache won't
-        // propagate here)
-        mAlbum = ProviderAggregator.getDefault().retrieveAlbum(mAlbum.getRef(), mAlbum.getProvider());
+        String albumRef = extras.getString(AlbumActivity.EXTRA_ALBUM);
+        mAlbum = ProviderAggregator.getDefault().retrieveAlbum(albumRef, null);
+
+        if (mAlbum == null) {
+            throw new IllegalArgumentException("The album to display isn't in cache!");
+        }
 
         // Prepare the palette to colorize the FAB
         Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {

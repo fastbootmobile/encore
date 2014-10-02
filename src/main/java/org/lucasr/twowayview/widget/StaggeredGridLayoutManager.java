@@ -244,17 +244,6 @@ public class StaggeredGridLayoutManager extends GridLayoutManager {
     }
 
     @Override
-    public void onMeasure(Recycler recycler, State state, int widthSpec, int heightSpec) {
-        super.onMeasure(recycler, state, widthSpec, heightSpec);
-
-        if (mExpandWrap && getChildCount() > 0) {
-            int itemWidth = getDecoratedMeasuredWidth(getChildAt(0));
-            int itemHeight = getDecoratedMeasuredHeight(getChildAt(0));
-            setMeasuredDimension(itemWidth * getNumColumns(), itemHeight * getNumRows());
-        }
-    }
-
-    @Override
     public LayoutParams generateLayoutParams(Context c, AttributeSet attrs) {
         return new LayoutParams(c, attrs);
     }

@@ -11,6 +11,7 @@ import org.omnirom.music.api.common.RateLimitException;
 import org.omnirom.music.api.freebase.FreeBaseClient;
 import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
@@ -19,6 +20,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 
 import java.io.IOException;
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +46,19 @@ public class AlbumArtCache {
     public void initialize(Context ctx) {
         mPrefs = ctx.getSharedPreferences(TAG, 0);
         mEditor = mPrefs.edit();
+    }
+
+    /**
+     * Transforms an Album art URL into an art key
+     * @param url The input URL
+     * @return A sanitized album art key
+     */
+    private String sanitizeUrlToKey(String url) {
+        if (url == null) {
+            return null;
+        } else {
+            return url.replaceAll("\\W+", "");
+        }
     }
 
     /**
@@ -111,6 +126,25 @@ public class AlbumArtCache {
     }
 
     /**
+     * Returns the cached art key for the provided entity or null if no cached art key exists
+     */
+    public String getCachedArtKey(final BoundEntity ent) {
+        ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        if (ent instanceof Album) {
+            String artistName = Utils.getMainArtist((Album) ent);
+            String tmpUrl = getAlbumArtUrl(artistName, ((Album) ent).getName());
+            return sanitizeUrlToKey(tmpUrl);
+        } else if (ent instanceof Artist) {
+            String tmpUrl = getArtistCoverUrl(((Artist) ent).getName());
+            return sanitizeUrlToKey(tmpUrl);
+        } else if (ent instanceof Song) {
+            return aggregator.getCache().getSongArtKey((Song) ent);
+        }
+
+        return null;
+    }
+
+    /**
      * Returns an art cache key for the provided album
      * @param album The album to fetch
      * @param artUrl The URL at which the download should occur, if necessary
@@ -133,18 +167,7 @@ public class AlbumArtCache {
         // Escape the query
         queryStr = queryStr.replace('"', ' ');
 
-        Artist artist;
-        String artistName = null;
-        if (album.getSongsCount() > 0 && album.songs().hasNext()) {
-            Song song = aggregator.retrieveSong(album.songs().next(), album.getProvider());
-            if (song != null) {
-                artist = aggregator.retrieveArtist(song.getArtist(), album.getProvider());
-
-                if (artist != null) {
-                    artistName = artist.getName();
-                }
-            }
-        }
+        String artistName = Utils.getMainArtist(album);
 
         // Check if we have it in cache
         String tmpUrl = getAlbumArtUrl(artistName, queryStr);
@@ -181,7 +204,7 @@ public class AlbumArtCache {
                 artKey = DEFAULT_ART;
             }
         } else {
-            artKey = tmpUrl.replaceAll("\\W+", "");
+            artKey = sanitizeUrlToKey(artUrl.toString());
             cache.putAlbumArtKey(album, artKey);
         }
 
@@ -231,7 +254,7 @@ public class AlbumArtCache {
 
                     if (tmpUrl != null) {
                         putArtistArtUrl(artist.getName(), tmpUrl);
-                        artKey = tmpUrl.replaceAll("\\W+", "");
+                        artKey = sanitizeUrlToKey(tmpUrl);
                         cache.putArtistArtKey(artist, artKey);
 
                     }
@@ -247,7 +270,7 @@ public class AlbumArtCache {
                     return artKey;
                 }
             } else {
-                artKey = tmpUrl.replaceAll("\\W+", "");
+                artKey = sanitizeUrlToKey(tmpUrl);
                 cache.putArtistArtKey(artist, artKey);
             }
 
@@ -310,7 +333,7 @@ public class AlbumArtCache {
                 }
 
                 // Check if we have it in cache
-                String tmpUrl = AlbumArtCache.getDefault().getAlbumArtUrl(artist.getName(), queryStr);
+                String tmpUrl = getAlbumArtUrl(artist.getName(), queryStr);
                 if (tmpUrl == null) {
                     // We don't, fetch from MusicBrainz
                     try {
@@ -344,7 +367,7 @@ public class AlbumArtCache {
                         artKey = DEFAULT_ART;
                     }
                 } else {
-                    artKey = tmpUrl.replaceAll("\\W+", "");
+                    artKey = sanitizeUrlToKey(tmpUrl);
                     cache.putSongArtKey(song, artKey);
                 }
 

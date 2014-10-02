@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
@@ -17,6 +19,7 @@ import android.util.Log;
 
 import org.acra.ACRA;
 import org.omnirom.music.api.echonest.AutoMixManager;
+import org.omnirom.music.app.R;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -119,6 +122,7 @@ public class PlaybackService extends Service
     private boolean mCurrentTrackWaitLoading;
     private ProviderIdentifier mCurrentPlayingProvider;
     private boolean mHasAudioFocus;
+    private boolean mRepeatMode;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -137,6 +141,7 @@ public class PlaybackService extends Service
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<IPlaybackCallback>();
+        mRepeatMode = false;
     }
 
     /**
@@ -194,9 +199,13 @@ public class PlaybackService extends Service
             @Override
             public void onNotificationChanged(ServiceNotification notification) {
                 notification.notify(PlaybackService.this);
+                Bitmap albumArt = notification.getAlbumArt();
+                if (albumArt == null) {
+                    albumArt = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
+                }
                 mRemoteControlClient.editMetadata(false)
                         .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
-                                notification.getAlbumArt().copy(notification.getAlbumArt().getConfig(), false)).apply();
+                                albumArt.copy(albumArt.getConfig(), false)).apply();
             }
         });
 
@@ -421,7 +430,7 @@ public class PlaybackService extends Service
             final Song next = mPlaybackQueue.get(mCurrentTrack);
             final ProviderIdentifier providerId = next.getProvider();
 
-            if (mCurrentPlayingProvider != null && next.getProvider().equals(mCurrentPlayingProvider)) {
+            if (mCurrentPlayingProvider != null && !next.getProvider().equals(mCurrentPlayingProvider)) {
                 // Pause the previously playing track to avoid overlap if it's not the same provider
                 try {
                     mBinder.pause();
@@ -741,7 +750,7 @@ public class PlaybackService extends Service
 
         @Override
         public void previous() throws RemoteException {
-            boolean shouldRestart = (getCurrentTrackPosition() < 4000 || mCurrentTrack == 0);
+            boolean shouldRestart = (getCurrentTrackPosition() > 4000 || mCurrentTrack == 0);
             if (shouldRestart) {
                 // Restart playback
                 seek(0);
@@ -775,6 +784,16 @@ public class PlaybackService extends Service
 
             mIsStopping = true;
             stopForeground(true);
+        }
+
+        @Override
+        public void setRepeatMode(boolean repeat) throws RemoteException {
+            mRepeatMode = repeat;
+        }
+
+        @Override
+        public boolean isRepeatMode() throws RemoteException {
+            return mRepeatMode;
         }
     };
 
@@ -820,7 +839,7 @@ public class PlaybackService extends Service
 
     private IProviderCallback.Stub mProviderCallback = new BaseProviderCallback() {
         @Override
-        public void onSongPlaying(ProviderIdentifier provider) throws RemoteException {
+        public void onSongPlaying(ProviderIdentifier provider) {
             boolean wasPaused = mIsResuming;
             if (!wasPaused) {
                 mCurrentTrackStartTime = System.currentTimeMillis();
@@ -886,6 +905,12 @@ public class PlaybackService extends Service
                 // endOfTrack callback locks the main API thread, leading to a dead lock if we
                 // try to play a track here while still being in the callstack of the endOfTrack
                 // callback.
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
+                mHandler.post(mStartPlaybackRunnable);
+            } else if (mPlaybackQueue.size() > 0 && mCurrentTrack == mPlaybackQueue.size() - 1
+                    && mRepeatMode) {
+                // We're repeating, go back to the first track and play it
+                mCurrentTrack = 0;
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
             }

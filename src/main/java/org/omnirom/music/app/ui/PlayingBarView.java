@@ -214,8 +214,8 @@ public class PlayingBarView extends RelativeLayout {
         mProgressDrawable = new CircularProgressDrawable();
         mProgressDrawable.setValue(0);
         mProgressDrawable.setColor(getResources().getColor(R.color.white));
-        mProgressDrawable.setAlpha(100);
-        mProgressDrawable.setPadding(Utils.dpToPx(getResources(), 2));
+        mProgressDrawable.setAlpha(120);
+        mProgressDrawable.setPadding(Utils.dpToPx(getResources(), 12));
 
         mPlayFabDrawable = new PlayPauseDrawable(getResources());
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);

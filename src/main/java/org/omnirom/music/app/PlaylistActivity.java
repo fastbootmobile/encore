@@ -1,39 +1,50 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app;
 
-import android.app.Activity;
-import android.media.AudioManager;
-import android.support.v4.app.FragmentManager;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
-import android.view.Menu;
+import android.support.v4.app.FragmentManager;
 import android.view.MenuItem;
-import android.widget.SearchView;
 
 import org.omnirom.music.app.fragments.PlaylistViewFragment;
-import org.omnirom.music.app.fragments.SearchFragment;
-import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Playlist;
-import org.omnirom.music.providers.ProviderConnection;
 
 /**
- * Created by h4o on 28/07/2014.
+ * Activity allowing user to view a Playlist contents through
+ * a {@link org.omnirom.music.app.fragments.PlaylistViewFragment}
  */
 public class PlaylistActivity extends FragmentActivity {
-    private String TAG = "PlaylistActivity";
-    private String TAG_FRAGMENT = "fragment_inner";
-    private PlaylistViewFragment mActiveFragment;
-    private Bundle mInitialIntent;
+    private static final String TAG = "PlaylistActivity";
+    private static final String TAG_FRAGMENT = "fragment_inner";
+    private Bundle mInitialIntent; // TODO: Test rotation
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
 
+    /**
+     * Creates an intent starting this activity with the provided parameters
+     * @param context The active context
+     * @param playlist The playlist to watch
+     * @return An intent to start this activity
+     */
     public static Intent craftIntent(Context context, Playlist playlist) {
         Intent intent = new Intent(context, PlaylistActivity.class);
-        intent.putExtra(PlaylistViewFragment.KEY_PLAYLIST, playlist);
-
+        intent.putExtra(PlaylistViewFragment.KEY_PLAYLIST, playlist.getRef());
         return intent;
     }
 
@@ -41,8 +52,9 @@ public class PlaylistActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         setContentView(R.layout.activity_playlist);
+
         FragmentManager fm = getSupportFragmentManager();
-        mActiveFragment = (PlaylistViewFragment) fm.findFragmentByTag(TAG_FRAGMENT);
+        PlaylistViewFragment mActiveFragment = (PlaylistViewFragment) fm.findFragmentByTag(TAG_FRAGMENT);
         if (savedInstance == null) {
             mInitialIntent = getIntent().getExtras();
         } else {
@@ -59,8 +71,11 @@ public class PlaylistActivity extends FragmentActivity {
 
         // Remove title
         setTitle(null);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
+        // This activity changes music stream volume too
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 

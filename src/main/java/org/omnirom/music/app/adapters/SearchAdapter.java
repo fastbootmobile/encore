@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
@@ -25,13 +40,11 @@ import org.omnirom.music.providers.ProviderIdentifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import omnimusic.Plugin;
-
 /**
- * Created by h4o on 22/07/2014.
+ * Adapter that displays Search results in an Expandable ListView
  */
 public class SearchAdapter extends BaseExpandableListAdapter {
-    private String TAG = "SearchAdapter";
+    private static final String TAG = "SearchAdapter";
 
     public final static int ARTIST = 0;
     public final static int ALBUM = 1;
@@ -45,6 +58,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     private List<SearchEntry> mPlaylists;
     private List<SearchEntry> mAlbums;
 
+    /**
+     * ViewHolder for list items
+     */
     public static class ViewHolder {
         public AlbumArtImageView albumArtImageView;
         public TextView tvTitle;
@@ -55,6 +71,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         public View vRoot;
     }
 
+    /**
+     * Class representing search entries
+     */
     public class SearchEntry {
         SearchEntry(String ref, ProviderIdentifier id) {
             this.ref = ref;
@@ -81,6 +100,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         }
     }
 
+    /**
+     * Default constructor
+     */
     public SearchAdapter() {
         mSearchResults = new ArrayList<SearchResult>();
         mSongs = new ArrayList<SearchEntry>();
@@ -89,6 +111,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         mAlbums = new ArrayList<SearchEntry>();
     }
 
+    /**
+     * Clear all the results from the adapter
+     */
     public void clear() {
         mSearchResults.clear();
         mSongs.clear();
@@ -97,6 +122,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         mAlbums.clear();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getGroupCount() {
         if (mSearchResults.size() > 0) {
@@ -106,6 +134,10 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         }
     }
 
+    /**
+     * Add the results to the current adapter's restults
+     * @param searchResult The results to append
+     */
     public void appendResults(SearchResult searchResult) {
         mSearchResults.add(searchResult);
 
@@ -133,6 +165,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         }
     }
 
+    /**
+     * Returns whether or not the search results contains the provided entity
+     * @param ent The entity to check
+     * @return True if the search results contains the entity, false otherwise
+     */
     public boolean contains(BoundEntity ent) {
         SearchEntry compare = new SearchEntry(ent.getRef(), ent.getProvider());
 
@@ -149,6 +186,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getChildrenCount(int i) {
         List children = getGroup(i);
@@ -164,6 +204,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         return 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<SearchEntry> getGroup(int i) {
         if (mSearchResults.size() > 0) {
@@ -178,16 +221,25 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SearchEntry getChild(int i, int i2) {
         return getGroup(i).get(i2);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getGroupId(int i) {
         return i;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getChildId(int i, int i2) {
         if (i < getGroupCount() && i2 < getChildrenCount(i)) {
@@ -205,11 +257,17 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean hasStableIds() {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public View getGroupView(int i, boolean b, View view, ViewGroup parent) {
         final Context ctx = parent.getContext();
@@ -246,6 +304,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         return view;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public View getChildView(int i, int i2, boolean b, View root, ViewGroup parent) {
         final Context ctx = parent.getContext();
@@ -296,6 +357,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         return root;
     }
 
+    /**
+     * Updates the tag fields considering the entry is a song
+     * @param i The item index
+     * @param tag The tag of the view
+     */
     private void updateSongTag(int i, ViewHolder tag) {
         final SearchEntry entry = mSongs.get(i);
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
@@ -317,6 +383,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         }
     }
 
+    /**
+     * Updates the tag fields considering the entry is an artist
+     * @param i The item index
+     * @param tag The tag of the view
+     */
     private void updateArtistTag(int i, ViewHolder tag) {
         final SearchEntry entry = mArtists.get(i);
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
@@ -339,6 +410,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         }
     }
 
+    /**
+     * Updates the tag fields considering the entry is an album
+     * @param i The item index
+     * @param tag The tag of the view
+     */
     private void updateAlbumTag(int i, ViewHolder tag) {
         final SearchEntry entry = mAlbums.get(i);
         ProviderAggregator aggregator = ProviderAggregator.getDefault();
@@ -366,6 +442,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         }
     }
 
+    /**
+     * Updates the tag fields considering the entry is a playlist
+     * @param i The item index
+     * @param tag The tag of the view
+     */
     private void updatePlaylistTag(int i, ViewHolder tag) {
         final SearchEntry entry = mPlaylists.get(i);
         Playlist playlist = ProviderAggregator.getDefault().retrievePlaylist(entry.ref, entry.identifier);
@@ -382,9 +463,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isChildSelectable(int i, int i2) {
         return mSearchResults.size() > 0 && getGroup(i) != null;
-
     }
 }

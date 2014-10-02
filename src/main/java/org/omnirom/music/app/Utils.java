@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app;
 
 import android.content.Context;
@@ -54,106 +69,12 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Utilities
+ * Utilities class used throughout the app
  */
 public class Utils {
     private static final String TAG = "Utils";
 
     private static final Map<String, Bitmap> mBitmapQueue = new HashMap<String, Bitmap>();
-
-    /**
-     * Calculates and return the action bar height based on the current theme
-     *
-     * @param theme The active theme
-     * @param res   The resources context
-     * @return The height of the action bar, in pixels
-     */
-    public static int getActionBarHeight(Resources.Theme theme, Resources res) {
-        int actionBarHeight = 0;
-        TypedValue tv = new TypedValue();
-        if (theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-            actionBarHeight += TypedValue.complexToDimensionPixelSize(tv.data, res.getDisplayMetrics());
-        }
-
-        // As we are a "fullscreen" activity, the actionbar is also the statusbar
-        actionBarHeight += getStatusBarHeight(res);
-
-        return actionBarHeight;
-    }
-
-    /**
-     * @param res The resources context
-     * @return The height of the status bar, in pixels
-     */
-    public static int getStatusBarHeight(Resources res) {
-        int resourceId = res.getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            return res.getDimensionPixelSize(resourceId);
-        } else {
-            return 0;
-        }
-    }
-
-    /**
-     * Blurs and dims (darken) a provided bitmap.
-     * Note that this method recreates and reallocates RenderScript data, so it is not a good idea
-     * to use it where performance is critical.
-     *
-     * @param context The application context
-     * @param inBmp The input bitmap
-     * @param radius The blur radius, max 25
-     * @return A blurred and dimmed copy of the input bitmap
-     */
-    public static Bitmap blurAndDim(Context context, Bitmap inBmp, float radius) {
-        if (inBmp == null) {
-            throw new IllegalArgumentException("blurAndDim: The input bitmap is null!");
-        }
-
-        // RenderScript intrinsics were added in Android 4.2
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            RenderScript renderScript = RenderScript.create(context);
-            ScriptIntrinsicBlur intrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
-
-            final int scaledW = inBmp.getWidth() / 2;
-            final int scaledH = inBmp.getHeight() / 2;
-
-            Allocation input = Allocation.createFromBitmap(renderScript,
-                    Bitmap.createScaledBitmap(inBmp, scaledW, scaledH, false));
-            Allocation output = Allocation.createTyped(renderScript, input.getType());
-
-            intrinsicBlur.setInput(input);
-            intrinsicBlur.setRadius(radius);
-
-            intrinsicBlur.forEach(output);
-
-            // Dim down images with a tint color
-            input.destroy();
-            input = Allocation.createFromBitmap(renderScript,
-                    Bitmap.createScaledBitmap(Bitmap.createBitmap(new int[]{0x70000000},
-                                    1, 1, Bitmap.Config.ARGB_8888),
-                            scaledW, scaledH, false
-                    )
-            );
-
-            ScriptIntrinsicBlend intrinsicBlend = ScriptIntrinsicBlend.create(renderScript,
-                    Element.U8_4(renderScript));
-            intrinsicBlend.forEachSrcOver(input, output);
-
-            Bitmap outBmp = Bitmap.createBitmap(scaledW, scaledH, inBmp.getConfig());
-            output.copyTo(outBmp);
-
-            input.destroy();
-            output.destroy();
-            intrinsicBlur.destroy();
-            intrinsicBlend.destroy();
-            renderScript.destroy();
-
-            return outBmp;
-        } else {
-            // For Android 4.1, we simply return the original bitmap
-            return inBmp;
-        }
-    }
 
     /**
      * Format milliseconds into an human-readable track length.
@@ -279,7 +200,7 @@ public class Utils {
     }
 
     /**
-     * Animate a view expansion
+     * Animate a view expansion (unwrapping)
      * @param v The view to animate
      * @param expand True to animate expanding, false to animate closing
      * @return The animation object created
@@ -367,7 +288,7 @@ public class Utils {
     }
 
     public static int dpToPx(Resources res, int dp) {
-        DisplayMetrics displayMetrics = res.getDisplayMetrics();
+        final DisplayMetrics displayMetrics = res.getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 

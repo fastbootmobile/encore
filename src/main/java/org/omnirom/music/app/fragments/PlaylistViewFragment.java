@@ -245,7 +245,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
         if (service != null) {
             try {
-                service.addCallback(mPlaybackCallback);
+                service.removeCallback(mPlaybackCallback);
             } catch (RemoteException e) {
                 // ignore
             }

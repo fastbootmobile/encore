@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
@@ -19,22 +34,90 @@ import android.widget.TextView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.model.Album;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Created by h4o on 20/06/2014.
+ * Adapter for ListView to show a list of albums
  */
 public class AlbumsAdapter extends BaseAdapter {
+    private static final String TAG = "AlbumsAdapter";
 
-    private String TAG = "AlbumsAdapter";
-    private List<Album> mAlbums;
-    private Handler mHandler;
+    private final List<Album> mAlbums;
+    private final Handler mHandler;
+    private final int mDefaultArtColor;
 
+    private AlbumArtImageView.OnArtLoadedListener mArtListener = new AlbumArtImageView.OnArtLoadedListener() {
+        @Override
+        public void onArtLoaded(final AlbumArtImageView view, final BitmapDrawable drawable) {
+            Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+                @Override
+                public void onGenerated(final Palette palette) {
+                    final PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
+                    final PaletteItem darkMutedColor = palette.getDarkMutedColor();
+
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            int targetColor = mDefaultArtColor;
+                            ViewHolder tag = (ViewHolder) view.getTag();
+
+                            if (darkVibrantColor != null) {
+                                targetColor = darkVibrantColor.getRgb();
+                            } else if (darkMutedColor != null) {
+                                targetColor = darkMutedColor.getRgb();
+                            }
+
+                            if (targetColor != mDefaultArtColor) {
+                                Drawable bg = tag.vRoot.getBackground();
+                                TransitionDrawable background;
+                                if (bg instanceof TransitionDrawable) {
+                                    background = (TransitionDrawable) tag.vRoot.getBackground();
+                                    ColorDrawable drawable1 = (ColorDrawable) background.getDrawable(0);
+                                    ColorDrawable drawable2 = (ColorDrawable) background.getDrawable(1);
+                                    drawable1.setColor(mDefaultArtColor);
+                                    drawable2.setColor(targetColor);
+                                } else {
+                                    ColorDrawable drawable1 = new ColorDrawable(mDefaultArtColor);
+                                    ColorDrawable drawable2 = new ColorDrawable(targetColor);
+                                    background = new TransitionDrawable(new Drawable[]{drawable1, drawable2});
+                                }
+
+                                Utils.setViewBackground(tag.vRoot, background);
+                                background.startTransition((int) MaterialTransitionDrawable.DEFAULT_DURATION);
+                                tag.itemColor = targetColor;
+                            } else {
+                                tag.vRoot.setBackgroundColor(targetColor);
+                            }
+
+                        }
+                    });
+                }
+            });
+        }
+    };
+
+    private Comparator<Album> mComparator = new Comparator<Album>() {
+        @Override
+        public int compare(Album album, Album album2) {
+            if (album.getName() != null && album2.getName() != null) {
+                return album.getName().compareTo(album2.getName());
+            } else if (album.getName() == null) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+    };
+
+    /**
+     * ViewHolder class for Albums
+     */
     public static class ViewHolder {
         public Album album;
         public AlbumArtImageView ivCover;
@@ -43,33 +126,47 @@ public class AlbumsAdapter extends BaseAdapter {
         public View vRoot;
         public int position;
         public int itemColor;
+
+        public ViewHolder(View root) {
+            ivCover = (AlbumArtImageView) root.findViewById(R.id.ivCover);
+            tvTitle = (TextView) root.findViewById(R.id.tvTitle);
+            tvSubTitle = (TextView) root.findViewById(R.id.tvSubTitle);
+
+            vRoot.setTag(this);
+            ivCover.setTag(this);
+        }
     }
 
-    public AlbumsAdapter() {
+    /**
+     * Default constructor
+     */
+    public AlbumsAdapter(Resources res) {
         mAlbums = new ArrayList<Album>();
         mHandler = new Handler();
+        mDefaultArtColor = res.getColor(R.color.default_album_art_background);
     }
 
+    /**
+     * Sorts the list of albums alphabetically
+     */
     private void sortList() {
-        Collections.sort(mAlbums, new Comparator<Album>() {
-            @Override
-            public int compare(Album album, Album album2) {
-                if (album.getName() != null && album2.getName() != null) {
-                    return album.getName().compareTo(album2.getName());
-                } else if (album.getName() == null) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            }
-        });
+        Collections.sort(mAlbums, mComparator);
     }
 
+    /**
+     * Adds an album to the adapter
+     * @param a The album to add
+     */
     public void addItem(Album a) {
         mAlbums.add(a);
         sortList();
     }
 
+    /**
+     * Adds an album to the adapter if it isn't already existing
+     * @param a The album to add
+     * @return True if the item has been added, false otherwise
+     */
     public boolean addItemUnique(Album a) {
         if (!mAlbums.contains(a)) {
             mAlbums.add(a);
@@ -80,11 +177,20 @@ public class AlbumsAdapter extends BaseAdapter {
         }
     }
 
-    public void addAll(List<Album> ps) {
+    /**
+     * Add all the elements of the input collection into the adapter
+     * @param ps The elements to add
+     */
+    public void addAll(Collection<Album> ps) {
         mAlbums.addAll(ps);
         sortList();
     }
 
+    /**
+     * Add all the elements of the input collection assuming they're not already in the adapter
+     * @param ps The elements to add
+     * @return True if at least one iteam has been aded
+     */
     public boolean addAllUnique(List<Album> ps) {
         boolean didChange = false;
         for (Album p : ps) {
@@ -101,25 +207,42 @@ public class AlbumsAdapter extends BaseAdapter {
         return didChange;
     }
 
+    /**
+     * Returns whether or not the adapter contains the provided album
+     * @param p The album
+     * @return true if the adapter contains the provided album
+     */
     public boolean contains(Album p) {
         return mAlbums.contains(p);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getCount() {
         return mAlbums.size();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Album getItem(int position) {
         return mAlbums.get(position);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getItemId(int position) {
         return mAlbums.get(position).getRef().hashCode();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Context ctx = parent.getContext();
@@ -127,20 +250,13 @@ public class AlbumsAdapter extends BaseAdapter {
         final Resources res = ctx.getResources();
         assert res != null;
 
-
         View root = convertView;
         if (convertView == null) {
             // Recycle the existing view
-            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = LayoutInflater.from(ctx);
             root = inflater.inflate(R.layout.medium_card_two_lines, parent, false);
             assert root != null;
-
-            ViewHolder holder = new ViewHolder();
-            holder.ivCover = (AlbumArtImageView) root.findViewById(R.id.ivCover);
-            holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
-            holder.tvSubTitle = (TextView) root.findViewById(R.id.tvSubTitle);
-
-            root.setTag(holder);
+            root.setTag(new ViewHolder(root));
         }
 
         // Fill in the fields
@@ -152,9 +268,9 @@ public class AlbumsAdapter extends BaseAdapter {
             tag.vRoot = root;
             tag.album = album;
 
-            final int defaultColor = res.getColor(R.color.default_album_art_background);
-            tag.vRoot.setBackgroundColor(defaultColor);
-            tag.itemColor = defaultColor;
+
+            tag.vRoot.setBackgroundColor(mDefaultArtColor);
+            tag.itemColor = mDefaultArtColor;
 
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                 // tag.ivCover.setViewName("list:albums:cover:" + album.getRef());
@@ -172,46 +288,10 @@ public class AlbumsAdapter extends BaseAdapter {
                 }
 
                 tag.ivCover.loadArtForAlbum(album);
-                tag.ivCover.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
-                    @Override
-                    public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
-                        Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
-                            @Override
-                            public void onGenerated(final Palette palette) {
-                                mHandler.post(new Runnable() {
-                                    public void run() {
-                                        PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
-                                        PaletteItem darkMutedColor = palette.getDarkMutedColor();
-
-                                        int targetColor = defaultColor;
-
-                                        if (darkVibrantColor != null) {
-                                            targetColor = darkVibrantColor.getRgb();
-                                        } else if (darkMutedColor != null) {
-                                            targetColor = darkMutedColor.getRgb();
-                                        }
-
-                                        if (targetColor != defaultColor) {
-                                            ColorDrawable drawable1 = new ColorDrawable(defaultColor);
-                                            ColorDrawable drawable2 = new ColorDrawable(targetColor);
-                                            TransitionDrawable transitionDrawable
-                                                    = new TransitionDrawable(new Drawable[]{drawable1, drawable2});
-                                            Utils.setViewBackground(tag.vRoot, transitionDrawable);
-                                            transitionDrawable.startTransition(1000);
-                                            tag.itemColor = targetColor;
-                                        } else {
-                                            tag.vRoot.setBackgroundColor(targetColor);
-                                        }
-
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+                tag.ivCover.setOnArtLoadedListener(mArtListener);
             } else {
                 tag.tvTitle.setText(res.getString(R.string.loading));
-                tag.tvSubTitle.setText("");
+                tag.tvSubTitle.setText(null);
             }
         }
 

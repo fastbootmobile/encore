@@ -1,5 +1,21 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app;
 
+import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -18,7 +34,9 @@ import org.omnirom.music.api.echonest.AutoMixManager;
 
 import java.util.Set;
 
-
+/**
+ * Activity presenting the settings to create an AutoMix Bucket
+ */
 public class AutomixCreateActivity extends PreferenceActivity {
 
     private static final String TAG = "AutomixCreateActivity";
@@ -39,7 +57,10 @@ public class AutomixCreateActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.automix_create);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
@@ -107,7 +128,7 @@ public class AutomixCreateActivity extends PreferenceActivity {
                         }
                     });
                 } else {
-                    Log.e(TAG, "Creating bucket...");
+                    Log.i(TAG, "Creating bucket...");
                     AutoMixBucket bucket = mAutoMixManager.createBucket(name, styles, moods, false, 0.5f, // taste, advent,
                             songtype, speech, energy, familiar);
                     if (bucket.isPlaylistSessionError()) {
@@ -120,7 +141,7 @@ public class AutomixCreateActivity extends PreferenceActivity {
                             }
                         });
                     } else {
-                        Log.e(TAG, "Bucket created!");
+                        Log.d(TAG, "Bucket created!");
 
                         runOnUiThread(new Runnable() {
                             @Override

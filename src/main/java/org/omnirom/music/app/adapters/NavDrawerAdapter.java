@@ -1,6 +1,20 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,36 +26,46 @@ import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 
 /**
- * Created by Guigui on 21/08/2014.
+ * Adapter for the side-bar navigation drawer
  */
 public class NavDrawerAdapter extends BaseAdapter {
-
     public static class ViewHolder {
         public TextView tvText;
         public ImageView ivLogo;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getCount() {
         return 6;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getItem(int i) {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getItemId(int i) {
         return i;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder tag;
         if (view == null) {
-            LayoutInflater inflater =
-                    (LayoutInflater) viewGroup.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
             view = inflater.inflate(R.layout.nav_drawer_list_item_activated, viewGroup, false);
 
             tag = new ViewHolder();

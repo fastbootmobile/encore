@@ -214,7 +214,7 @@ public abstract class BaseLayoutManager extends TwoWayLayoutManager {
     }
 
     ItemEntry getItemEntryForPosition(int position) {
-        return mItemEntries.get(position, null);
+        return (mItemEntries != null ? mItemEntries.get(position, null) : null);
     }
 
     private boolean canUseLanes(Lanes lanes) {
@@ -530,14 +530,16 @@ public abstract class BaseLayoutManager extends TwoWayLayoutManager {
             if (laneCount > 0) {
                 lanes = new Rect[laneCount];
                 for (int i = 0; i < laneCount; i++) {
-                    lanes[i].readFromParcel(in);
+                    final Rect lane = new Rect();
+                    lane.readFromParcel(in);
+                    lanes[i] = lane;
                 }
             }
 
-            final int itemLanesCount = in.readInt();
-            if (itemLanesCount > 0) {
-                itemEntries = new SparseArray<ItemEntry>(itemLanesCount);
-                for (int i = 0; i < itemLanesCount; i++) {
+            final int itemEntriesCount = in.readInt();
+            if (itemEntriesCount > 0) {
+                itemEntries = new SparseArray<ItemEntry>(itemEntriesCount);
+                for (int i = 0; i < itemEntriesCount; i++) {
                     final int key = in.readInt();
                     final ItemEntry value = in.readParcelable(getClass().getClassLoader());
                     itemEntries.put(key, value);
@@ -559,10 +561,10 @@ public abstract class BaseLayoutManager extends TwoWayLayoutManager {
                 lanes[i].writeToParcel(out, Rect.PARCELABLE_WRITE_RETURN_VALUE);
             }
 
-            final int itemLanesCount = (itemEntries != null ? itemEntries.size() : 0);
-            out.writeInt(itemLanesCount);
+            final int itemEntriesCount = (itemEntries != null ? itemEntries.size() : 0);
+            out.writeInt(itemEntriesCount);
 
-            for (int i = 0; i < itemLanesCount; i++) {
+            for (int i = 0; i < itemEntriesCount; i++) {
                 out.writeInt(itemEntries.keyAt(i));
                 out.writeParcelable(itemEntries.valueAt(i), flags);
             }

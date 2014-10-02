@@ -26,9 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -39,7 +37,6 @@ import com.echonest.api.v4.EchoNestException;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.lucasr.twowayview.ItemClickSupport;
-import org.lucasr.twowayview.TwoWayLayoutManager;
 import org.lucasr.twowayview.TwoWayView;
 import org.omnirom.music.api.echonest.EchoNest;
 import org.omnirom.music.app.ArtistActivity;
@@ -47,7 +44,6 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.ui.AlbumArtImageView;
-import org.omnirom.music.app.ui.ExpandableHeightGridView;
 import org.omnirom.music.app.ui.ObservableScrollView;
 import org.omnirom.music.app.ui.ParallaxScrollView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
@@ -63,9 +59,9 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
 
@@ -113,6 +109,50 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
             mArtistTracksFragment.loadRecommendation();
             mArtistTracksFragment.loadAlbums(false);
+        }
+    };
+
+
+    private IPlaybackCallback.Stub mPlaybackCallback = new IPlaybackCallback.Stub() {
+        @Override
+        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setBuffering(buffering);
+                }
+            });
+        }
+
+        @Override
+        public void onSongScrobble(int timeMs) throws RemoteException {
+        }
+
+        @Override
+        public void onPlaybackPause() throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mFabDrawable.setBuffering(false);
+                }
+            });
+        }
+
+        @Override
+        public void onPlaybackResume() throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setBuffering(false);
+                }
+            });
+        }
+
+        @Override
+        public void onPlaybackQueueChanged() throws RemoteException {
         }
     };
 
@@ -309,7 +349,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 @Override
                 public void onGenerated(final Palette palette) {
                     final PaletteItem normalColor = palette.getDarkMutedColor();
-                    final PaletteItem pressedColor = palette.getDarkVibrantColor();
                     if (normalColor != null && mRootView != null) {
                         mHandler.post(new Runnable() {
                             @Override
@@ -458,7 +497,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     if (mFabShouldResume) {
                         try {
                             PluginsLookup.getDefault().getPlaybackService().play();
-                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Cannot resume playback", e);
                         }
@@ -470,7 +508,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     mFabShouldResume = true;
                     try {
                         PluginsLookup.getDefault().getPlaybackService().pause();
-                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot pause playback", e);
                     }
@@ -480,6 +517,11 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         // Register for updates
         ProviderAggregator.getDefault().addUpdateCallback(this);
+        try {
+            playbackService.addCallback(mPlaybackCallback);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
         return mRootView;
     }

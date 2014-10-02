@@ -136,4 +136,14 @@ interface IPlaybackService {
      * Stops the playback and remove the notification
      */
     void stop();
+
+    /**
+     * Sets whether or not the current playback queue should be repeated forever
+     */
+    void setRepeatMode(boolean repeat);
+
+    /**
+     * Returns whether or not the repeat mode is enabled
+     */
+    boolean isRepeatMode();
 }

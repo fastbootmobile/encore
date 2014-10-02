@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.api.echonest;
 
 import android.os.Environment;
@@ -40,7 +55,7 @@ import java.util.Random;
  */
 public class EchoNest {
     private static final String TAG = "EchoNest";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private EchoNestAPI mEchoNest;
     private static final Map<String, Artist> sArtistSearchCache = new HashMap<String, Artist>();
@@ -63,7 +78,7 @@ public class EchoNest {
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
                 apiKey = bufferedReader.readLine();
             } else {
-                // Fallback to docs api key
+                // Fallback to docs api key (which is heavily rate limited)
                 apiKey = "FILDTEOIK2HBORODV";
             }
 
@@ -77,6 +92,9 @@ public class EchoNest {
         }
     }
 
+    /**
+     * @return The {@link com.echonest.api.v4.EchoNestAPI} handle
+     */
     public EchoNestAPI getApi() {
         return mEchoNest;
     }
@@ -93,17 +111,25 @@ public class EchoNest {
         }
     }
 
+    /**
+     * Searches an EchoNest {@link com.echonest.api.v4.Artist} by name
+     * @param name The artist name
+     * @return An {@link com.echonest.api.v4.Artist} or null if none found
+     * @throws EchoNestException In case of error (not found, network error, etc).
+     */
     public Artist searchArtistByName(String name) throws EchoNestException {
-        Params p = new Params();
-        p.add("name", name);
-        p.add("results", 1);
-
+        // First look in the cache
         Artist result;
         synchronized (sArtistSearchCache) {
             result = sArtistSearchCache.get(name);
         }
 
         if (result == null) {
+            // We don't have this artist cached, so let's look it up on EchoNest
+            Params p = new Params();
+            p.add("name", name);
+            p.add("results", 1);
+
             List<Artist> results = mEchoNest.searchArtists(p);
             if (results.size() > 0) {
                 result = results.get(0);
@@ -116,20 +142,37 @@ public class EchoNest {
         return result;
     }
 
+    /**
+     * Returns whether or not the biography for the provided artist exists in the cache (ie.
+     * a call to {@link #getArtistBiography(com.echonest.api.v4.Artist)} won't do any network
+     * operation.
+     * @param artist The artist for which we want the biography
+     * @return True if the biography is cached, false otherwise
+     */
     public boolean hasArtistBiographyCached(Artist artist) {
         synchronized (sArtistBiographyCache) {
             return sArtistBiographyCache.containsKey(artist);
         }
     }
 
+    /**
+     * Fetches and return the artist biography for the provided artist. This method is doing
+     * network operations if the biography is not already cached.
+     * @param artist The artist for which we want the biography
+     * @return A {@link com.echonest.api.v4.Biography}, or null if none available
+     * @throws EchoNestException
+     */
     public Biography getArtistBiography(Artist artist) throws EchoNestException {
         Biography result;
+
+        // First, look in the cache
         synchronized (sArtistBiographyCache) {
             result = sArtistBiographyCache.get(artist);
         }
 
         if (result == null) {
             List<Biography> results = artist.getBiographies(0, 10);
+
             // We prefer wikipedia, and otherwise the longest one
             for (Biography bio : results) {
                 if (bio.getSite().equals("wikipedia")) {
@@ -140,6 +183,7 @@ public class EchoNest {
                 }
             }
 
+            // Cache it
             synchronized (sArtistBiographyCache) {
                 sArtistBiographyCache.put(artist, result);
             }
@@ -148,6 +192,12 @@ public class EchoNest {
         return result;
     }
 
+    /**
+     * Returns a map of Artist URLs (artists websites, etc). for the provided artists
+     * @param artist The artist for which we want URLs
+     * @return A map of [Site Name, Site URL]
+     * @throws EchoNestException
+     */
     public Map<String, String> getArtistUrls(Artist artist) throws EchoNestException {
         Map<String, String> result;
         synchronized (sArtistUrlsCache) {
@@ -164,6 +214,12 @@ public class EchoNest {
         return result;
     }
 
+    /**
+     * Returns whether or not the similar artists for the provided artists are in cache (ie. a call
+     * to {@link #getArtistSimilar(com.echonest.api.v4.Artist)} won't do any network operation)
+     * @param artist The artist for which get similar results
+     * @return True if in cache, false otherwise
+     */
     public boolean hasArtistSimilarCached(Artist artist) {
         synchronized (sArtistSimilarCache) {
             return sArtistSimilarCache.containsKey(artist);
