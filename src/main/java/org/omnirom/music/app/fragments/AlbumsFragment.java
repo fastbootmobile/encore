@@ -65,7 +65,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
      * use {@link #newInstance()}.
      */
     public AlbumsFragment() {
-        mAdapter = new AlbumsAdapter(getResources());
+
     }
 
     /**
@@ -74,6 +74,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAdapter = new AlbumsAdapter(getResources());
     }
 
     /**

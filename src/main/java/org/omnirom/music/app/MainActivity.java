@@ -96,7 +96,7 @@ public class MainActivity extends FragmentActivity
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout), getTheme());
+                (DrawerLayout) findViewById(R.id.drawer_layout));
 
 
         // Setup the playing bar click listener

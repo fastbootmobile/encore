@@ -275,6 +275,8 @@ public class PlaybackQueueActivity extends FragmentActivity {
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot add playback queue activity as listener", e);
             }
+
+            mHandler.removeCallbacks(mUpdateSeekBarRunnable);
         }
 
         public void updateQueueLayout() {

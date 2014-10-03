@@ -532,6 +532,7 @@ public class PlaybackService extends Service
         @Override
         public void playPlaylist(Playlist p) throws RemoteException {
             Log.i(TAG, "Play playlist: " + p.getRef());
+            mCurrentTrack = 0;
             mPlaybackQueue.clear();
             queuePlaylist(p, false);
             mHandler.removeCallbacks(mStartPlaybackRunnable);
@@ -541,6 +542,7 @@ public class PlaybackService extends Service
         @Override
         public void playSong(Song s) throws RemoteException {
             Log.i(TAG, "Play song: " + s.getRef());
+            mCurrentTrack = 0;
             mPlaybackQueue.clear();
             queueSong(s, true);
             mHandler.removeCallbacks(mStartPlaybackRunnable);
@@ -550,6 +552,7 @@ public class PlaybackService extends Service
         @Override
         public void playAlbum(Album a) throws RemoteException {
             Log.i(TAG, "Play album: " + a.getRef());
+            mCurrentTrack = 0;
             mPlaybackQueue.clear();
             queueAlbum(a, false);
             mHandler.removeCallbacks(mStartPlaybackRunnable);

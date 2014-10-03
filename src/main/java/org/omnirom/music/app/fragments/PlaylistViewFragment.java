@@ -99,8 +99,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         // Get the playlist from the arguments, from the instantiation, and from the cache
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        mPlaylist = args.getParcelable(KEY_PLAYLIST);
-        mPlaylist = aggregator.retrievePlaylist(mPlaylist.getRef(), mPlaylist.getProvider());
+        String playlistRef = args.getString(KEY_PLAYLIST);
+        mPlaylist = aggregator.retrievePlaylist(playlistRef, null);
     }
 
     @Override

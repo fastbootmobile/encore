@@ -119,15 +119,16 @@ public class AlbumsAdapter extends BaseAdapter {
      * ViewHolder class for Albums
      */
     public static class ViewHolder {
-        public Album album;
+        public View vRoot;
         public AlbumArtImageView ivCover;
         public TextView tvTitle;
         public TextView tvSubTitle;
-        public View vRoot;
+        public Album album;
         public int position;
         public int itemColor;
 
         public ViewHolder(View root) {
+            vRoot = root;
             ivCover = (AlbumArtImageView) root.findViewById(R.id.ivCover);
             tvTitle = (TextView) root.findViewById(R.id.tvTitle);
             tvSubTitle = (TextView) root.findViewById(R.id.tvSubTitle);

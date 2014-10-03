@@ -1,9 +1,13 @@
 package org.omnirom.music.service;
 
+import android.util.Log;
+
 /**
  * Created by Guigui on 26/08/2014.
  */
 public class NativePlayer {
+
+    private static final String TAG = "NativePlayer";
 
     static {
         System.loadLibrary("c++_shared");
@@ -15,6 +19,7 @@ public class NativePlayer {
     private long mHandle;
 
     public NativePlayer() {
+        Log.e(TAG, "NATIVE INITIALIZE");
         nativeInitialize();
     }
 
