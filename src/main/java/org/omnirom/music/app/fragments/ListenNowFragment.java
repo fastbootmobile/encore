@@ -84,6 +84,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
             sWarmUp = true;
 
+            // If we don't have any playlists, retry in a short time and display either No Music
+            // or Loading... depending on the number of tries, waiting for providers to start
             if (playlists.size() <= 0) {
                 mTxtNoMusic.setVisibility(View.VISIBLE);
                 if (mWarmUpCount < 2) {
@@ -110,8 +112,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             // - Six small entries
             // A total of 21 entries
 
-            Random random = new Random(SystemClock.uptimeMillis());
-            long startTime = SystemClock.uptimeMillis();
+            final Random random = new Random(SystemClock.uptimeMillis());
+            final long startTime = SystemClock.uptimeMillis();
             for (int i = 0; i < 21; i++) {
                 // Watchdog timer
                 if (SystemClock.uptimeMillis() - startTime > 1000) {
@@ -156,8 +158,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 }
 
                 Song track = aggregator.retrieveSong(trackRef, provider);
-                if (track == null) {
-                    // Some error while loading this track! Try another
+                if (track == null || !track.isLoaded()) {
+                    // Some error while loading this track, or it's not loaded yet! Try another
                     i--;
                     continue;
                 }

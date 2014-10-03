@@ -29,7 +29,10 @@ import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
+import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
+import org.omnirom.music.app.adapters.SongsListAdapter;
+import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -138,7 +141,9 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MainActivity act = (MainActivity) getActivity();
-                act.startActivity(PlaylistActivity.craftIntent(act, mAdapter.getItem(position)));
+                PlaylistListAdapter.ViewHolder tag = (PlaylistListAdapter.ViewHolder) view.getTag();
+                act.startActivity(PlaylistActivity.craftIntent(act, mAdapter.getItem(position),
+                        ((MaterialTransitionDrawable) tag.ivCover.getDrawable()).getFinalDrawable().getBitmap()));
             }
         });
 

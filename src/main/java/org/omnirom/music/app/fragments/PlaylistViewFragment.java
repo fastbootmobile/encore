@@ -1,6 +1,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import com.dd.CircularProgressButton;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
+import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
@@ -150,7 +152,9 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         updateOfflineStatus();
 
         tvAlbumName.setText(mPlaylist.getName());
-        ivHero.setImageResource(R.drawable.album_placeholder);
+
+        Bitmap hero = Utils.dequeueBitmap(PlaylistActivity.BITMAP_PLAYLIST_HERO);
+        ivHero.setImageBitmap(hero);
 
         mPlayFab = (FloatingActionButton) headerView.findViewById(R.id.fabPlay);
 

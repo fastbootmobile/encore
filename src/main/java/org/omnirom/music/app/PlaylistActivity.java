@@ -17,6 +17,7 @@ package org.omnirom.music.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -31,8 +32,8 @@ import org.omnirom.music.model.Playlist;
  * a {@link org.omnirom.music.app.fragments.PlaylistViewFragment}
  */
 public class PlaylistActivity extends FragmentActivity {
-    private static final String TAG = "PlaylistActivity";
     private static final String TAG_FRAGMENT = "fragment_inner";
+    public static final String BITMAP_PLAYLIST_HERO = "playlist_hero";
     private Bundle mInitialIntent; // TODO: Test rotation
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
 
@@ -42,9 +43,10 @@ public class PlaylistActivity extends FragmentActivity {
      * @param playlist The playlist to watch
      * @return An intent to start this activity
      */
-    public static Intent craftIntent(Context context, Playlist playlist) {
+    public static Intent craftIntent(Context context, Playlist playlist, Bitmap hero) {
         Intent intent = new Intent(context, PlaylistActivity.class);
         intent.putExtra(PlaylistViewFragment.KEY_PLAYLIST, playlist.getRef());
+        Utils.queueBitmap(BITMAP_PLAYLIST_HERO, hero);
         return intent;
     }
 

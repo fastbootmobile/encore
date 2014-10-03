@@ -39,7 +39,7 @@ public class PlaylistListAdapter extends BaseAdapter {
     /**
      * ViewHolder for items
      */
-    private static class ViewHolder {
+    public static class ViewHolder {
         public AlbumArtImageView ivCover;
         public TextView tvTitle;
         public TextView tvSubTitle;
