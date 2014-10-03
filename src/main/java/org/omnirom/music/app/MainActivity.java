@@ -265,7 +265,7 @@ public class MainActivity extends FragmentActivity
         }
     }
 
-    public void setContentShadowTop(final int pxTop) {
+    public void setContentShadowTop(final float pxTop) {
         View actionBarShadow = findViewById(R.id.action_bar_shadow);
         if (actionBarShadow != null) {
             actionBarShadow.setTranslationY(pxTop);
@@ -276,6 +276,15 @@ public class MainActivity extends FragmentActivity
                     setContentShadowTop(pxTop);
                 }
             });
+        }
+    }
+
+    public float getContentShadowTop() {
+        View actionBarShadow = findViewById(R.id.action_bar_shadow);
+        if (actionBarShadow != null) {
+            return actionBarShadow.getTranslationY();
+        } else {
+            return 0;
         }
     }
 

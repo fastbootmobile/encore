@@ -14,6 +14,8 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import com.dd.CircularAnimatedDrawable;
+
 import org.omnirom.music.app.R;
 
 /**
@@ -41,6 +43,7 @@ public class PlayPauseDrawable extends Drawable {
     private long mLastTransitionTick;
     private boolean mIsBuffering;
     private int mYOffset;
+    private CircularAnimatedDrawable mBufferingDrawable;
 
     private Resources mResources;
 
@@ -259,14 +262,17 @@ public class PlayPauseDrawable extends Drawable {
         canvas.drawPath(mPath, mPaint);
 
         if (mIsBuffering) {
-            // Draw a rotating circle
-            final int width = getBounds().width();
-            final int height = getBounds().height();
-            RectF rect = new RectF(mHalfPadding, mHalfPadding, width - mHalfPadding, height - mHalfPadding);
-            float startAngle = SystemClock.uptimeMillis() / 3.0f % 360.0f;
-            float sweepAngle = (SystemClock.uptimeMillis() / 3.0f % -360.0f);
-
-            canvas.drawArc(rect, startAngle, sweepAngle, true, mPaint);
+            if (mBufferingDrawable == null) {
+                Rect bounds = getBounds();
+                mBufferingDrawable = new CircularAnimatedDrawable(0xFFFFFFFF, 8.0f);
+                mBufferingDrawable.setBounds((bounds.left + mHalfPadding),
+                        (bounds.top + mHalfPadding),
+                        (bounds.right - mHalfPadding),
+                        (bounds.bottom - mHalfPadding));
+                mBufferingDrawable.setCallback(getCallback());
+                mBufferingDrawable.start();
+            }
+            mBufferingDrawable.draw(canvas);
         }
 
         if (mCurrentShape != mRequestShape || mIsBuffering) {
