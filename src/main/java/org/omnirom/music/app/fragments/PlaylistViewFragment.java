@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -111,8 +110,6 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_playlist_view, container, false);
         assert root != null;
-
-        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
         PlaylistListView lvPlaylistContents = (PlaylistListView) root.findViewById(R.id.lvPlaylistContents);
         mAdapter = new PlaylistAdapter(root.getContext());
@@ -228,7 +225,6 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         return root;
     }
 
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -258,7 +254,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     private void updateOfflineStatus() {
         final int offlineStatus = mPlaylist.getOfflineStatus();
-        Log.e(TAG, "Offline Status: " + offlineStatus);
+
         switch (offlineStatus) {
             case BoundEntity.OFFLINE_STATUS_NO:
                 mOfflineBtn.setProgress(0);
