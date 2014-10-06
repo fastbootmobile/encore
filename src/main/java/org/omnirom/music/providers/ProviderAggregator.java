@@ -883,7 +883,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     @Override
     public void onSongPaused(ProviderIdentifier provider) throws RemoteException {
-
     }
 
     @Override

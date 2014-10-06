@@ -883,6 +883,11 @@ public class PlaybackService extends Service
                         cb.onPlaybackPause();
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                    } catch (Exception e) {
+                        Log.e(TAG, "BIG EXCEPTION DURING REMOTE PLAYBACK PAUSE: ", e);
+                        Log.e(TAG, "Callback: " + cb);
+                        // Manually report to ACRA but keep moving
+                        ACRA.getErrorReporter().handleException(e, false);
                     }
                 }
 
