@@ -897,8 +897,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
          * Load the recommended track
          */
         private void loadRecommendation() {
-            if (mRecommendationLoaded) {
-                // Already loaded
+            if (mRecommendationLoaded || mParent == null) {
+                // Already loaded or parent not loaded yet
                 return;
             }
 
