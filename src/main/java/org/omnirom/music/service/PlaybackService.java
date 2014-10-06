@@ -935,7 +935,9 @@ public class PlaybackService extends Service
             if (currentSong != null) {
                 IMusicProvider provider = lookup.getProvider(currentSong.getProvider()).getBinder();
                 try {
-                    provider.pause();
+                    if (provider != null) {
+                        provider.pause();
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to pause current track for audio focus change");
                 }
@@ -945,7 +947,9 @@ public class PlaybackService extends Service
             if (currentSong != null) {
                 IMusicProvider provider = lookup.getProvider(currentSong.getProvider()).getBinder();
                 try {
-                    provider.resume();
+                    if (provider != null) {
+                        provider.resume();
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to pause current track for audio focus change");
                 }
@@ -957,7 +961,9 @@ public class PlaybackService extends Service
             if (currentSong != null) {
                 IMusicProvider provider = lookup.getProvider(currentSong.getProvider()).getBinder();
                 try {
-                    provider.pause();
+                    if (provider != null) {
+                        provider.pause();
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to pause current track for audio focus change");
                 }
