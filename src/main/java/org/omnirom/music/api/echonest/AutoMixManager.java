@@ -17,6 +17,7 @@ package org.omnirom.music.api.echonest;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -61,6 +62,7 @@ public class AutoMixManager implements IPlaybackCallback {
     private AutoMixBucket mCurrentPlayingBucket;
     private String mExpectedSong;
     private Runnable mGetNextTrackRunnable;
+    private Handler mHandler;
 
     private static final AutoMixManager INSTANCE = new AutoMixManager();
 
@@ -101,6 +103,7 @@ public class AutoMixManager implements IPlaybackCallback {
         mContext = ctx;
         mBuckets = new ArrayList<AutoMixBucket>();
         readBucketsFromPrefs();
+        mHandler = new Handler();
     }
 
     /**
@@ -244,7 +247,11 @@ public class AutoMixManager implements IPlaybackCallback {
 
             if (trackRef == null) {
                 Log.e(TAG, "Track Reference is still null after 5 attempts");
-                Utils.shortToast(mContext, R.string.bucket_track_failure);
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        Utils.shortToast(mContext, R.string.bucket_track_failure);
+                    }
+                });
             } else {
                 Song s = getSongFromRef(trackRef);
 
