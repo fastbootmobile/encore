@@ -115,6 +115,12 @@ public class AlbumActivity extends FragmentActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        PluginsLookup.getDefault().connectPlayback();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBundle(EXTRA_RESTORE_INTENT, mInitialIntent);

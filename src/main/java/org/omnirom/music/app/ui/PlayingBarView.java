@@ -251,12 +251,20 @@ public class PlayingBarView extends RelativeLayout {
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                boolean result = false;
+                IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
 
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                boolean result = false;
+                boolean isPlaying = false;
+                try {
+                    isPlaying = (playbackService != null && playbackService.getState() == PlaybackService.STATE_PLAYING);
+                } catch (RemoteException e) {
+                    // ignore
+                }
+
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && isPlaying) {
                     mIsDragging = true;
                     mStartY = motionEvent.getY();
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE && mIsDragging) {
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE && mIsDragging && isPlaying) {
                     float deltaStart = motionEvent.getY() - mStartY;
                     if (Math.abs(deltaStart) > view.getMeasuredHeight() / 2.0f) {
                         // We're dragging the play button, start seek mode
@@ -273,7 +281,9 @@ public class PlayingBarView extends RelativeLayout {
                             public void run() {
                                 IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
                                 try {
-                                    playbackService.seek((long) mSeekValue);
+                                    if (playbackService != null) {
+                                        playbackService.seek((long) mSeekValue);
+                                    }
                                 } catch (RemoteException e) {
                                     Log.e(TAG, "Cannot seek", e);
                                 }

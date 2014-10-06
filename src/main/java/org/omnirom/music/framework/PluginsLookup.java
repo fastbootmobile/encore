@@ -119,6 +119,8 @@ public class PluginsLookup {
         mConnections.add(mMultiProviderConnection);
         mMultiProviderConnection.onServiceConnected(new ComponentName("org.omnirom.music.providers","org.omnirom.music.providers.MultiProviderPlaylistProvider"),
                 mMultiProviderPlaylistProvider.asBinder());
+
+        connectPlayback();
     }
 
     public void registerProviderListener(ConnectionListener listener) {
