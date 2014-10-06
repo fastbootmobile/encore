@@ -31,9 +31,6 @@ public class Suggestor {
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             String albumRef = albums.next();
             Album album = aggregator.retrieveAlbum(albumRef, artist.getProvider());
-            if (album == null) {
-                album = aggregator.retrieveAlbum(albumRef, artist.getProvider());
-            }
 
             if (album != null && album.isLoaded() && album.getSongsCount() > 0) {
                 Iterator<String> songs = album.songs();
