@@ -159,6 +159,9 @@ public class PluginsLookup {
     }
 
     public IPlaybackService getPlaybackService() {
+        if (mPlaybackService == null) {
+            connectPlayback();
+        }
         return mPlaybackService;
     }
 

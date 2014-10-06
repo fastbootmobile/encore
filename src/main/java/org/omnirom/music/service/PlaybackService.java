@@ -775,7 +775,10 @@ public class PlaybackService extends Service
 
         @Override
         public void stop() throws RemoteException {
-            pause();
+            if ((mState == STATE_PLAYING || mState == STATE_BUFFERING) && mPlaybackQueue.size() > 0
+                    && mCurrentTrack >= 0) {
+                pause();
+            }
 
             for (IPlaybackCallback cb : mCallbacks) {
                 try {

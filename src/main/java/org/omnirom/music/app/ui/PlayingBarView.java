@@ -442,15 +442,17 @@ public class PlayingBarView extends RelativeLayout {
                     public void onClick(View view) {
                         // Play that song now
                         IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
-                        try {
-                            if (playback.getCurrentTrack().equals(song)) {
-                                // We're already playing that song, play it again
-                                playback.seek(0);
-                            } else {
-                                playback.playAtQueueIndex(itemIndex + removedCount);
+                        if (playback != null) {
+                            try {
+                                if (playback.getCurrentTrack().equals(song)) {
+                                    // We're already playing that song, play it again
+                                    playback.seek(0);
+                                } else {
+                                    playback.playAtQueueIndex(itemIndex + removedCount);
+                                }
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Error while switching tracks", e);
                             }
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Error while switching tracks", e);
                         }
                     }
                 });
