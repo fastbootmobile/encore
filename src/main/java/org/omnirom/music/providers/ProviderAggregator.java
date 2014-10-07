@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.providers;
 
 import android.content.Context;
@@ -26,10 +41,13 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * Class federating all the information from providers
+ */
 public class ProviderAggregator extends IProviderCallback.Stub {
-
     private static final String TAG = "ProviderAggregator";
     private static final int PROPAGATION_DELAY = 200;
+
     private SearchResult mCachedSearch;
     private List<ILocalCallback> mUpdateCallbacks;
     final private List<ProviderConnection> mProviders;
@@ -523,6 +541,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
     /**
      * Notify the providers that the offline mode has changed
+     *
      * @param isEnabled true if offline mode is enabled, false otherwise
      */
     public void notifyOfflineMode(final boolean isEnabled) {
@@ -615,7 +634,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     public ProviderIdentifier getRosettaStoneIdentifier(final String identifier) {
         return mRosettaStoneMap.get(identifier);
     }
-
 
 
     /**
@@ -717,7 +735,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 });
             }
         } catch (Exception e) {
-            Log.e(TAG, "FUUUU" ,e);
+            Log.e(TAG, "FUUUU", e);
         }
     }
 
@@ -830,7 +848,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
             while (songs.hasNext()) {
                 String songRef = songs.next();
-                Song song =  retrieveSong(songRef, a.getProvider());
+                Song song = retrieveSong(songRef, a.getProvider());
 
                 if (song != null && song.isLoaded()) {
                     String artistRef = song.getArtist();

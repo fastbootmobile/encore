@@ -15,7 +15,6 @@
 
 package org.omnirom.music.app.fragments;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
@@ -25,7 +24,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.preference.PreferenceFragment;
 
 import org.omnirom.music.app.R;
-
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass to display app's preferences

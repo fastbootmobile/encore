@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.service;
 
 import android.content.BroadcastReceiver;
@@ -11,18 +26,20 @@ import android.view.KeyEvent;
 import org.omnirom.music.framework.PluginsLookup;
 
 /**
- * Created by Guigui on 25/08/2014.
+ * Broadcast receiver handling media button events (play/pause/skip/... from either lockscreen
+ * or press on headset buttons)
  */
 public class RemoteControlReceiver extends BroadcastReceiver {
-
     private static final String TAG = "RemoteControlReceiver";
-
 
     public static ComponentName getComponentName(Context ctx) {
         return new ComponentName(ctx.getPackageName(),
                 "org.omnirom.music.service.RemoteControlReceiver");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {

@@ -1,13 +1,23 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.ui;
 
-import android.animation.ValueAnimator;
-import android.app.Activity;
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
@@ -21,13 +31,11 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
@@ -40,17 +48,12 @@ import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
 
-import java.security.Provider;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * ViewGroup for the sticky bottom playing bar
@@ -95,8 +98,6 @@ public class PlayingBarView extends RelativeLayout {
 
         @Override
         public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
-            mCurrentSong = s;
-
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -157,7 +158,6 @@ public class PlayingBarView extends RelativeLayout {
 
     private static final int MAX_PEEK_QUEUE_SIZE = 3;
 
-    private Song mCurrentSong;
     private boolean mIsPlaying;
     private LinearLayout mTracksLayout;
     private ImageButton mPlayFab;

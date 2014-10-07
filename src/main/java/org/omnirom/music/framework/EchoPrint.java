@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.framework;
 
 import android.media.AudioFormat;
@@ -20,7 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by Guigui on 19/09/2014.
+ * Class helping audio fingerprinting for recognition
  */
 public class EchoPrint {
     private static final String TAG = "EchoPrint";
@@ -31,9 +46,12 @@ public class EchoPrint {
     private static final short BIT_DEPTH = 16;
     private static final short CHANNELS = 1;
 
+    /**
+     * Helper thread class to record the data to send
+     */
     private class RecorderThread extends Thread {
         public void run() {
-            Log.e(TAG, "Started recording reading...");
+            Log.d(TAG, "Started recording reading...");
 
             while (!isInterrupted() && mBufferIndex < mBuffer.length) {
                 int read = mRecorder.read(mBuffer, mBufferIndex, mBuffer.length - mBufferIndex);
@@ -53,7 +71,10 @@ public class EchoPrint {
         }
     }
 
-    public class PrintResult {
+    /**
+     * Class storing fingerprinting results
+     */
+    public static class PrintResult {
         public String ArtistName;
         public String AlbumName;
         public String TrackName;

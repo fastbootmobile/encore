@@ -1,20 +1,33 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.providers;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * Represents a connection to an audio provider (music source or DSP) service
+ * Represents a connection to an audio provider (music source) service
  */
 public class ProviderConnection extends AbstractProviderConnection {
     private static final String TAG = "ProviderConnection";
 
     private IMusicProvider mBinder;
-    private Handler mHandler;
 
     /**
      * Constructor
@@ -30,6 +43,9 @@ public class ProviderConnection extends AbstractProviderConnection {
         super(ctx, providerName, authorName, pkg, serviceName, configActivity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void unbindService() {
         if (mIsBound) {
@@ -48,9 +64,11 @@ public class ProviderConnection extends AbstractProviderConnection {
         return mBinder;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        mHandler = new Handler();
         mBinder = IMusicProvider.Stub.asInterface(service);
 
         try {
@@ -85,6 +103,9 @@ public class ProviderConnection extends AbstractProviderConnection {
         super.onServiceConnected(name, service);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onServiceDisconnected(ComponentName name) {
         // Release the binder
@@ -93,6 +114,9 @@ public class ProviderConnection extends AbstractProviderConnection {
         Log.e(TAG, "Service disconnected: " + name);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AudioHostSocket createAudioSocket(final String socketName) {
         AudioHostSocket host = super.createAudioSocket(socketName);

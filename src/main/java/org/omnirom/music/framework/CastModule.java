@@ -41,6 +41,7 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.IPlaybackCallback;
+import org.omnirom.music.service.IPlaybackService;
 
 import java.io.IOException;
 
@@ -94,23 +95,27 @@ public class CastModule extends MediaRouter.Callback {
 
         @Override
         public void onPlaybackPause() throws RemoteException {
-            try {
-                JSONObject msg = new JSONObject();
-                msg.put(JSON_KEY_COMMAND, COMMAND_EVT_PAUSED);
-                mCastChannel.sendMessage(mApiClient, msg.toString());
-            } catch (JSONException e) {
-                Log.e(TAG, "Cannot create JSON to notify Cast of pause event", e);
+            if (mIsAppUp) {
+                try {
+                    JSONObject msg = new JSONObject();
+                    msg.put(JSON_KEY_COMMAND, COMMAND_EVT_PAUSED);
+                    mCastChannel.sendMessage(mApiClient, msg.toString());
+                } catch (JSONException e) {
+                    Log.e(TAG, "Cannot create JSON to notify Cast of pause event", e);
+                }
             }
         }
 
         @Override
         public void onPlaybackResume() throws RemoteException {
-            try {
-                JSONObject msg = new JSONObject();
-                msg.put(JSON_KEY_COMMAND, COMMAND_EVT_RESUMED);
-                mCastChannel.sendMessage(mApiClient, msg.toString());
-            } catch (JSONException e) {
-                Log.e(TAG, "Cannot create JSON to notify Cast of resume event", e);
+            if (mIsAppUp) {
+                try {
+                    JSONObject msg = new JSONObject();
+                    msg.put(JSON_KEY_COMMAND, COMMAND_EVT_RESUMED);
+                    mCastChannel.sendMessage(mApiClient, msg.toString());
+                } catch (JSONException e) {
+                    Log.e(TAG, "Cannot create JSON to notify Cast of resume event", e);
+                }
             }
         }
     };
@@ -132,11 +137,22 @@ public class CastModule extends MediaRouter.Callback {
 
         mCastListener = new CastListener();
         mCastChannel = new CastChannel();
-        try {
-            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to add callback", e);
-        }
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+                if (service != null) {
+                    try {
+                        service.addCallback(mPlaybackCallback);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to add callback", e);
+                    }
+                } else {
+                    mHandler.post(this);
+                }
+            }
+        });
     }
 
     /**

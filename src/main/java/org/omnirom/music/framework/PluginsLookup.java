@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.framework;
 
 import android.content.ComponentName;
@@ -8,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -25,11 +39,13 @@ import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Plugins Manager class
+ */
 public class PluginsLookup {
 
     private static final boolean DEBUG = BuildConfig.DEBUG;
@@ -51,7 +67,6 @@ public class PluginsLookup {
     private final List<DSPConnection> mDSPConnections;
     private List<ConnectionListener> mConnectionListeners;
     private IPlaybackService mPlaybackService;
-    private MultiProviderPlaylistProvider mMultiProviderPlaylistProvider;
     private ProviderConnection mMultiProviderConnection;
     private ServiceConnection mPlaybackConnection = new ServiceConnection() {
         @Override
@@ -96,7 +111,7 @@ public class PluginsLookup {
 
     public void initialize(Context context) {
         mContext = context;
-        mMultiProviderPlaylistProvider = new MultiProviderPlaylistProvider(mContext);
+        MultiProviderPlaylistProvider multiproviderPlaylistProvider = new MultiProviderPlaylistProvider(mContext);
         new Thread() {
             public void run() {
                 updatePlugins();
@@ -117,8 +132,8 @@ public class PluginsLookup {
 
         mMultiProviderConnection.setListener(mProviderListener);
         mConnections.add(mMultiProviderConnection);
-        mMultiProviderConnection.onServiceConnected(new ComponentName("org.omnirom.music.providers","org.omnirom.music.providers.MultiProviderPlaylistProvider"),
-                mMultiProviderPlaylistProvider.asBinder());
+        mMultiProviderConnection.onServiceConnected(new ComponentName("org.omnirom.music.providers", "org.omnirom.music.providers.MultiProviderPlaylistProvider"),
+                multiproviderPlaylistProvider.asBinder());
 
         connectPlayback();
     }
@@ -126,19 +141,27 @@ public class PluginsLookup {
     public void registerProviderListener(ConnectionListener listener) {
         mConnectionListeners.add(listener);
     }
-    public ProviderConnection getMultiProviderPlaylistProvider(){
-        return mMultiProviderConnection;
-    }
+
     public void removeProviderListener(ConnectionListener listener) {
         mConnectionListeners.remove(listener);
     }
 
+    public ProviderConnection getMultiProviderPlaylistProvider(){
+        return mMultiProviderConnection;
+    }
+
+    /**
+     * Connects the app to the playback service
+     */
     public void connectPlayback() {
         Intent i = new Intent(mContext, PlaybackService.class);
         mContext.startService(i);
         mContext.bindService(i, mPlaybackConnection, Context.BIND_AUTO_CREATE);
     }
 
+    /**
+     * Update the list of plugins
+     */
     public void updatePlugins() {
         fetchProviders();
         fetchDSPs();

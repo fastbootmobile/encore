@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.ui;
 
 import android.content.res.Resources;
@@ -9,8 +24,6 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
@@ -19,7 +32,7 @@ import com.dd.CircularAnimatedDrawable;
 import org.omnirom.music.app.R;
 
 /**
- * Created by xplodwild on 7/11/14.
+ * Animated drawable giving native Material animations between Play, Pause and Stop state
  */
 public class PlayPauseDrawable extends Drawable {
 
@@ -47,7 +60,10 @@ public class PlayPauseDrawable extends Drawable {
 
     private Resources mResources;
 
-
+    /**
+     * Default constructor
+     * @param res A valid Resources handle
+     */
     public PlayPauseDrawable(Resources res) {
         mResources = res;
         setPaddingDp(42);
@@ -62,22 +78,42 @@ public class PlayPauseDrawable extends Drawable {
         mTransitionInterpolator = new AccelerateDecelerateInterpolator();
     }
 
+    /**
+     * Sets the drawing color of the drawable
+     * @param color The color
+     */
     public void setColor(int color) {
         mPaint.setColor(color);
     }
 
+    /**
+     * Sets the drawable padding, in DP
+     * @param paddingDp The padding value, in DP
+     */
     public void setPaddingDp(int paddingDp) {
         setPadding(mResources.getDimensionPixelSize(R.dimen.one_dp) * paddingDp) ;
     }
 
+    /**
+     * Sets the drawable padding, in pixels
+     * @param padding The padding value, in pixels
+     */
     public void setPadding(int padding) {
         mHalfPadding = padding / 2;
     }
 
+    /**
+     * Sets the Y-axis offset of the drawable
+     * @param offset The offset
+     */
     public void setYOffset(int offset) {
         mYOffset = offset;
     }
 
+    /**
+     * Sets the shape that the drawable should morph into
+     * @param shape One of {@link #SHAPE_PLAY}, {@link #SHAPE_PAUSE}, {@link #SHAPE_STOP}
+     */
     public void setShape(int shape) {
         if (mRequestShape != shape) {
             mRequestShape = shape;
@@ -87,15 +123,26 @@ public class PlayPauseDrawable extends Drawable {
         }
     }
 
+    /**
+     * Sets whether or not an indeterminate progress indicator should be displayed, indicating
+     * that the playback is pending buffering.
+     * @param buffering true to display the indicator, false otherwise
+     */
     public void setBuffering(boolean buffering) {
         mIsBuffering = buffering;
         invalidateSelf();
     }
 
+    /**
+     * @return The currently visible shape
+     */
     public int getCurrentShape() {
         return mCurrentShape;
     }
 
+    /**
+     * @return The latest shape that has been requested
+     */
     public int getRequestedShape() {
         return mRequestShape;
     }

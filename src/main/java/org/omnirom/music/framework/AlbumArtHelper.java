@@ -1,14 +1,29 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.framework;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Handler;
 import android.os.Process;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
-import org.omnirom.music.app.R;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
@@ -26,15 +41,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Guigui on 24/08/2014.
+ * Helper class allowing to easily download and fetch an album art or artist art
  */
 public class AlbumArtHelper {
-
     private static final String TAG = "AlbumArtHelper";
-
-    public interface AlbumArtListener {
-        public void onArtLoaded(Bitmap output, BoundEntity request);
-    }
 
     private static final int DELAY_BEFORE_RETRY = 60;
     private static final int CORE_POOL_SIZE = 4;
@@ -43,7 +53,7 @@ public class AlbumArtHelper {
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
-        public Thread newThread(Runnable r) {
+        public Thread newThread(@NonNull Runnable r) {
             return new Thread(r, "Art AsyncTask #" + mCount.getAndIncrement());
         }
     };
@@ -53,12 +63,20 @@ public class AlbumArtHelper {
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
             TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
 
+
+    public interface AlbumArtListener {
+        public void onArtLoaded(Bitmap output, BoundEntity request);
+    }
+
     public static class BackgroundResult {
         public BoundEntity request;
         public Bitmap bitmap;
         public boolean retry;
     }
 
+    /**
+     * AsyncTask downloading the album art
+     */
     public static class AlbumArtTask extends AsyncTask<BoundEntity, Void, BackgroundResult> {
         private BoundEntity mEntity;
         private Context mContext;
@@ -140,7 +158,7 @@ public class AlbumArtHelper {
 
                 // We now have the art key, download the actual image if it's not the default art
                 if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, bmp);
+                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, null);
                 }
             }
 
