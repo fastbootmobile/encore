@@ -1,26 +1,34 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.framework;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.media.MediaControlIntent;
+import android.os.RemoteException;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.text.format.Formatter;
 import android.util.Log;
-import android.view.Display;
-import android.view.WindowManager;
 
-import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastMediaControlIntent;
-import com.google.android.gms.cast.CastStatusCodes;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -28,17 +36,26 @@ import com.google.android.gms.common.api.Status;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.omnirom.music.app.R;
+import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.service.BasePlaybackCallback;
+import org.omnirom.music.service.IPlaybackCallback;
 
 import java.io.IOException;
-import java.net.InetAddress;
 
 /**
- * Created by Guigui on 10/09/2014.
+ * Module allowing casting to Chromecast and other MediaRouter-enabled receivers
  */
 public class CastModule extends MediaRouter.Callback {
     private static final String TAG = "CastModule";
+    private static final String CAST_APP_ID = "FB626268";
 
+    private static final String JSON_KEY_COMMAND = "command";
+    private static final String COMMAND_CONNECT = "connect";
+    private static final String COMMAND_EVT_SONGSTARTED = "songstarted";
+    private static final String COMMAND_EVT_PAUSED = "paused";
+    private static final String COMMAND_EVT_RESUMED = "resumed";
 
     private Context mContext;
     private Handler mHandler;
@@ -52,7 +69,56 @@ public class CastModule extends MediaRouter.Callback {
     private ConnectionFailedListener mConnectionFailedListener;
     private boolean mShouldStart;
     private CastChannel mCastChannel;
+    private boolean mIsAppUp;
 
+    private IPlaybackCallback.Stub mPlaybackCallback = new BasePlaybackCallback() {
+        @Override
+        public void onSongStarted(boolean buffering, Song s) throws RemoteException {
+            if (mIsAppUp) {
+                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+                Artist a = aggregator.retrieveArtist(s.getArtist(), s.getProvider());
+
+                try {
+                    JSONObject msg = new JSONObject();
+                    msg.put(JSON_KEY_COMMAND, COMMAND_EVT_SONGSTARTED);
+                    msg.put("title", s.getTitle());
+                    msg.put("artist", a != null ? a.getName() : "<Not loaded>");
+                    msg.put("duration", s.getDuration());
+
+                    mCastChannel.sendMessage(mApiClient, msg.toString());
+                } catch (JSONException e) {
+                    Log.e(TAG, "Cannot create JSON to notify Cast of new song", e);
+                }
+            }
+        }
+
+        @Override
+        public void onPlaybackPause() throws RemoteException {
+            try {
+                JSONObject msg = new JSONObject();
+                msg.put(JSON_KEY_COMMAND, COMMAND_EVT_PAUSED);
+                mCastChannel.sendMessage(mApiClient, msg.toString());
+            } catch (JSONException e) {
+                Log.e(TAG, "Cannot create JSON to notify Cast of pause event", e);
+            }
+        }
+
+        @Override
+        public void onPlaybackResume() throws RemoteException {
+            try {
+                JSONObject msg = new JSONObject();
+                msg.put(JSON_KEY_COMMAND, COMMAND_EVT_RESUMED);
+                mCastChannel.sendMessage(mApiClient, msg.toString());
+            } catch (JSONException e) {
+                Log.e(TAG, "Cannot create JSON to notify Cast of resume event", e);
+            }
+        }
+    };
+
+    /**
+     * Default constructor
+     * @param ctx The host context of the module
+     */
     public CastModule(Context ctx) {
         mContext = ctx;
         mHandler = new Handler();
@@ -61,17 +127,28 @@ public class CastModule extends MediaRouter.Callback {
 
         mMediaRouter = MediaRouter.getInstance(ctx);
         mSelector = new MediaRouteSelector.Builder()
-                .addControlCategory(CastMediaControlIntent.categoryForCast("FB626268"))
+                .addControlCategory(CastMediaControlIntent.categoryForCast(CAST_APP_ID))
                 .build();
 
         mCastListener = new CastListener();
         mCastChannel = new CastChannel();
+        try {
+            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to add callback", e);
+        }
     }
 
+    /**
+     * Called when the main activity starts
+     */
     public void onStart() {
         mMediaRouter.addCallback(mSelector, this, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
     }
 
+    /**
+     * Called when the main activity stops or pauses
+     */
     public void onStop() {
         mMediaRouter.removeCallback(this);
     }
@@ -104,7 +181,7 @@ public class CastModule extends MediaRouter.Callback {
                 mApiClient.disconnect();
             }
         } else {
-            Log.d(TAG, "acquiring controller for " + mSelectedDevice);
+            Log.d(TAG, "Acquiring controller for " + mSelectedDevice);
             try {
                 Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(
                         mSelectedDevice, mCastListener)
@@ -118,7 +195,7 @@ public class CastModule extends MediaRouter.Callback {
 
                 mApiClient.connect();
             } catch (IllegalStateException e) {
-                Log.w(TAG, "error while creating a device controller", e);
+                Log.w(TAG, "Error while creating a device controller", e);
             }
         }
     }
@@ -134,13 +211,14 @@ public class CastModule extends MediaRouter.Callback {
         // Get the device's Wi-Fi IP address (Wi-Fi is obviously enabled for Chromecast)
         JSONObject object = new JSONObject();
         try {
-            object.put("command", "connect");
+            object.put(JSON_KEY_COMMAND, COMMAND_CONNECT);
             object.put("address", getWiFiIpAddress());
         } catch (JSONException e) {
             Log.e(TAG, "Cannot build JSON object!", e);
         }
 
         mCastChannel.sendMessage(mApiClient, object.toString());
+        mIsAppUp = true;
     }
 
 
@@ -194,15 +272,18 @@ public class CastModule extends MediaRouter.Callback {
             Log.d(TAG, "onApplicationStatusChanged; status=" + status);
 
             if (mShouldStart) {
-                Cast.CastApi.launchApplication(mApiClient, "FB626268", true)
+                Cast.CastApi.launchApplication(mApiClient, CAST_APP_ID, true)
                         .setResultCallback(new ApplicationConnectionResultCallback("LaunchApp"));
                 mShouldStart = false;
+            } else {
+                mIsAppUp = false;
             }
         }
 
         @Override
         public void onApplicationDisconnected(int statusCode) {
             Log.d(TAG, "onApplicationDisconnected: statusCode=" + statusCode);
+            mIsAppUp = false;
         }
     }
 
