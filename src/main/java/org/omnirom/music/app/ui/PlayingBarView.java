@@ -46,7 +46,11 @@ import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
@@ -156,6 +160,88 @@ public class PlayingBarView extends RelativeLayout {
         }
     };
 
+    private ILocalCallback mProviderCallback = new ILocalCallback() {
+        @Override
+        public void onSongUpdate(List<Song> s) {
+            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+            if (service != null) {
+                boolean contains = false;
+                try {
+                    List<Song> playbackQueue = service.getCurrentPlaybackQueue();
+                    for (Song song : s) {
+                        if (playbackQueue.contains(song)) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot get playback queue", e);
+                }
+
+                if (contains) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updatePlayingQueue();
+                        }
+                    });
+
+                }
+            }
+        }
+
+        @Override
+        public void onAlbumUpdate(List<Album> a) {
+        }
+
+        @Override
+        public void onPlaylistUpdate(List<Playlist> p) {
+        }
+
+        @Override
+        public void onArtistUpdate(List<Artist> a) {
+            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+            if (service != null) {
+                boolean contains = false;
+                try {
+                    List<Song> playbackQueue = service.getCurrentPlaybackQueue();
+                    for (Song song : playbackQueue) {
+                        for (Artist artist : a) {
+                            if (artist.getRef().equals(song.getArtist())) {
+                                contains = true;
+                                break;
+                            }
+                        }
+
+                        if (contains) {
+                            break;
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot get playback queue", e);
+                }
+
+                if (contains) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updatePlayingQueue();
+                        }
+                    });
+
+                }
+            }
+        }
+
+        @Override
+        public void onProviderConnected(IMusicProvider provider) {
+        }
+
+        @Override
+        public void onSearchResult(SearchResult searchResult) {
+        }
+    };
+
     private static final int MAX_PEEK_QUEUE_SIZE = 3;
 
     private boolean mIsPlaying;
@@ -188,6 +274,8 @@ public class PlayingBarView extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+
+        ProviderAggregator.getDefault().addUpdateCallback(mProviderCallback);
 
         // Setup the Playback service callback
         mHandler.post(new Runnable() {
@@ -342,6 +430,8 @@ public class PlayingBarView extends RelativeLayout {
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to remove the playing bar callback from the playback", e);
         }
+
+        ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
     }
 
     /**
@@ -423,11 +513,18 @@ public class PlayingBarView extends RelativeLayout {
                     //tvTitle.setViewName("playbackqueue:preview:" + shownCount + ":title");
                     //ivAlbumArt.setViewName("playbackqueue:preview:" + shownCount + ":art");
                 }
-                Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
-                if (artist != null) {
-                    tvArtist.setText(artist.getName());
+
+                if (song.isLoaded() && song.getArtist() != null) {
+                    Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
+                    if (artist != null) {
+                        tvArtist.setText(artist.getName());
+                    } else {
+                        tvArtist.setText(getContext().getString(R.string.loading));
+                    }
+                } else if (song.isLoaded()) {
+                    tvArtist.setText(null);
                 } else {
-                    tvArtist.setText(getContext().getString(R.string.loading));
+                    tvArtist.setText(R.string.loading);
                 }
 
                 tvTitle.setText(song.getTitle());

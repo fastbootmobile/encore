@@ -32,8 +32,13 @@ import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
 import org.omnirom.music.service.IPlaybackCallback;
@@ -210,6 +215,89 @@ public class PlaybackQueueActivity extends FragmentActivity {
             }
         };
 
+        private ILocalCallback mProviderCallback = new ILocalCallback() {
+            @Override
+            public void onSongUpdate(List<Song> s) {
+                IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+                if (service != null) {
+                    boolean contains = false;
+                    try {
+                        List<Song> playbackQueue = service.getCurrentPlaybackQueue();
+                        for (Song song : s) {
+                            if (playbackQueue.contains(song)) {
+                                contains = true;
+                                break;
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot get playback queue", e);
+                    }
+
+                    if (contains) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateQueueLayout();
+                            }
+                        });
+
+                    }
+                }
+            }
+
+            @Override
+            public void onAlbumUpdate(List<Album> a) {
+            }
+
+            @Override
+            public void onPlaylistUpdate(List<Playlist> p) {
+            }
+
+            @Override
+            public void onArtistUpdate(List<Artist> a) {
+                IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+                if (service != null) {
+                    boolean contains = false;
+                    try {
+                        List<Song> playbackQueue = service.getCurrentPlaybackQueue();
+                        for (Song song : playbackQueue) {
+                            for (Artist artist : a) {
+                                if (artist.getRef().equals(song.getArtist())) {
+                                    contains = true;
+                                    break;
+                                }
+                            }
+
+                            if (contains) {
+                                break;
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot get playback queue", e);
+                    }
+
+                    if (contains) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateQueueLayout();
+                            }
+                        });
+
+                    }
+                }
+            }
+
+            @Override
+            public void onProviderConnected(IMusicProvider provider) {
+            }
+
+            @Override
+            public void onSearchResult(SearchResult searchResult) {
+            }
+        };
+
+
         private SeekBar.OnSeekBarChangeListener mSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
@@ -263,6 +351,8 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 Log.e(TAG, "Cannot add playback queue activity as listener", e);
             }
             mHandler.post(mUpdateSeekBarRunnable);
+
+            ProviderAggregator.getDefault().addUpdateCallback(mProviderCallback);
         }
 
         @Override
@@ -277,6 +367,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
             }
 
             mHandler.removeCallbacks(mUpdateSeekBarRunnable);
+            ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
         }
 
         public void updateQueueLayout() {

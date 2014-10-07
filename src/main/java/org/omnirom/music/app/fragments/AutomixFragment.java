@@ -90,7 +90,6 @@ public class AutomixFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_automix, container, false);
 
         // Setup create FAB
-        // TODO: Migrate to proper FAB class
         mFabCreate = (ImageButton) rootView.findViewById(R.id.fabCreate);
         mFabCreate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,8 +97,6 @@ public class AutomixFragment extends Fragment {
                 startActivity(new Intent(getActivity(), AutomixCreateActivity.class));
             }
         });
-        Utils.setLargeFabOutline(new View[]{mFabCreate});
-        Utils.setupLargeFabShadow(mFabCreate);
 
         final ListView lvBuckets = (ListView) rootView.findViewById(R.id.lvBuckets);
         mAdapter = new BucketAdapter();

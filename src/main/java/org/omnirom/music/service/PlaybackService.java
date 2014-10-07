@@ -199,6 +199,7 @@ public class PlaybackService extends Service
         for (ProviderConnection pc : providers) {
             try {
                 if (pc.getBinder() != null) {
+                    Log.e(TAG, "RegisterCallback: Setup");
                     pc.getBinder().registerCallback(mProviderCallback);
                 }
             } catch (RemoteException e) {
@@ -304,6 +305,7 @@ public class PlaybackService extends Service
 
         if (connection instanceof ProviderConnection) {
             try {
+                Log.e(TAG, "RegisterCallback: service connected");
                 ((ProviderConnection) connection).getBinder().registerCallback(mProviderCallback);
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot register callback on connected service");
@@ -756,13 +758,13 @@ public class PlaybackService extends Service
 
         @Override
         public void next() throws RemoteException {
-            boolean hasNext = mCurrentTrack < mPlaybackQueue.size() - 2;
+            boolean hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
             if (mPlaybackQueue.size() > 0 && hasNext) {
                 mCurrentTrack++;
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
 
-                hasNext = mCurrentTrack < mPlaybackQueue.size() - 2;
+                hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
                 mNotification.setHasNext(hasNext);
             }
         }
@@ -848,6 +850,7 @@ public class PlaybackService extends Service
     @Override
     public void onProviderConnected(IMusicProvider provider) {
         try {
+            Log.e(TAG,"Register Callback: provider connected");
             provider.registerCallback(mProviderCallback);
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to register self as callback of provider " + provider + "!", e);

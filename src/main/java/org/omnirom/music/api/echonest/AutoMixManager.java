@@ -259,10 +259,9 @@ public class AutoMixManager implements IPlaybackCallback {
                     mExpectedSong = s.getRef();
                     try {
                         playback.playSong(s);
+                        mCurrentPlayingBucket = bucket;
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot start playing bucket", e);
-                    } finally {
-                        mCurrentPlayingBucket = bucket;
                     }
                 } else {
                     Log.e(TAG, "Song is null! Cannot find it back");
@@ -307,12 +306,18 @@ public class AutoMixManager implements IPlaybackCallback {
 
     @Override
     public void onSongStarted(boolean buffering, Song s) throws RemoteException {
-        if (!s.getRef().equals(mExpectedSong)) {
-            // Song started is not the one we expected from the bucket, cancel automix playback
-            mCurrentPlayingBucket = null;
-        } else if (mCurrentPlayingBucket != null) {
-            // We're playing the song we expected to be played from the bucket, fetch the next one.
-            new Thread(mGetNextTrackRunnable).start();
+        if (mCurrentPlayingBucket != null) {
+            if (buffering) {
+                if (!s.getRef().equals(mExpectedSong)) {
+                    // Song started is not the one we expected from the bucket, cancel automix playback
+                    Log.d(TAG, "Cancelling automix playback");
+                    mCurrentPlayingBucket = null;
+                } else {
+                    // We're playing the song we expected to be played from the bucket, fetch the next one.
+                    Log.d(TAG, "Fetching next automix track");
+                    new Thread(mGetNextTrackRunnable).start();
+                }
+            }
         }
     }
 
