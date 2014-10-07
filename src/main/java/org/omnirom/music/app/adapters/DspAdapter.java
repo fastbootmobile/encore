@@ -28,7 +28,6 @@ import android.widget.TextView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.DSPConnection;
-import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.ArrayList;

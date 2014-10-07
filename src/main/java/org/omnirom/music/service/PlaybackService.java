@@ -160,6 +160,7 @@ public class PlaybackService extends Service
         super.onCreate();
         mDSPProcessor = new DSPProcessor(this);
         mDSPProcessor.setSink(new NativeAudioSink());
+        mDSPProcessor.restoreChain(this);
 
         PluginsLookup.getDefault().initialize(getApplicationContext());
         PluginsLookup.getDefault().registerProviderListener(this);
@@ -711,7 +712,7 @@ public class PlaybackService extends Service
 
         @Override
         public void setDSPChain(List<ProviderIdentifier> chain) throws RemoteException {
-            mDSPProcessor.setActiveChain(chain);
+            mDSPProcessor.setActiveChain(PlaybackService.this, chain);
         }
 
         @Override

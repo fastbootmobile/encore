@@ -1,6 +1,22 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.service;
 
-import android.os.SystemClock;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
@@ -17,16 +33,20 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import omnimusic.Plugin;
 
 /**
  * Class responsible for grabbing the audio from a provider, pushing it through the DSP chain,
- * and drawable it to a sink
+ * and playing it to a sink
  */
 public class DSPProcessor {
-
     private static final String TAG = "DSPProcessor";
+
+    private static final String PREFS_DSP_CHAIN = "DSP_Chain";
+    private static final String PREF_KEY_CHAIN = "chain";
 
     private static final int DEFAULT_SAMPLE_RATE = 44100;
     private static final int DEFAULT_CHANNELS = 2;
@@ -34,7 +54,6 @@ public class DSPProcessor {
     private AudioSink mSink;
     private int mSampleRate = DEFAULT_SAMPLE_RATE;
     private int mChannels = DEFAULT_CHANNELS;
-    private long mLastRmsPoll = 0;
     private int mLastRms = 0;
     private WSStreamer mStreamer;
     private PlaybackService mPlaybackService;
@@ -176,8 +195,16 @@ public class DSPProcessor {
         mChannels = channels;
 
         if (mSink != null) {
-            return mSink.setup(mSampleRate, mChannels);
+            // We have an active sink, so set the stuff directly
+            if (!mSink.setup(mSampleRate, mChannels)) {
+                Log.e(TAG, "Sink cannot setup at " + mSampleRate + " Hz, " + channels + " channels");
+                return false;
+            } else {
+                return true;
+            }
         } else {
+            // We don't have a sink, so we assume it's set properly and it will be set when a sink
+            // is created.
             return true;
         }
     }
@@ -194,6 +221,13 @@ public class DSPProcessor {
         feedPlugin(mDSPChain.get(0), frames, numframes);
     }
 
+    /**
+     * Inputs audio from a DSP plugin (or the provider if there are no DSP plugins) to the next
+     * plugin in the chain of the active sink if there are no more plugins.
+     * @param socket The incoming socket
+     * @param frames Incoming frames, as short samples (only INT16 is supported)
+     * @param numframes The number of frames to read from the array
+     */
     public void inputDSPAudio(AudioSocket socket, byte[] frames, int numframes) {
         // Check if we have more plugins to go through
         PluginsLookup plugins = PluginsLookup.getDefault();
@@ -254,22 +288,61 @@ public class DSPProcessor {
      * @return The RMS level
      */
     public int getRms() {
-        final long currTime = SystemClock.elapsedRealtime();
-        if (/*currTime - mLastRmsPoll >= 1000/60 && */mSink != null) {
+        if (mSink != null) {
             short[] rmsFrames = mSink.getRmsSamples();
             mLastRms = Utils.calculateRMSLevel(rmsFrames, rmsFrames.length);
-            mLastRmsPoll = currTime;
         }
 
         return mLastRms;
     }
 
-    public void setActiveChain(List<ProviderIdentifier> chain) {
+    /**
+     * Sets the current active DSP plugins chain and saves it
+     * @param ctx A valid context
+     * @param chain The chain of plugins to use
+     */
+    public void setActiveChain(Context ctx, List<ProviderIdentifier> chain) {
         // We make a copy to avoid any external modification
         mDSPChain = new ArrayList<ProviderIdentifier>(chain);
+
+        // Save it
+        SharedPreferences prefs = ctx.getSharedPreferences(PREFS_DSP_CHAIN, 0);
+        Set<String> identifiers = new TreeSet<String>();
+
+        for (ProviderIdentifier identifier : chain) {
+            identifiers.add(identifier.serialize());
+        }
+
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putStringSet(PREF_KEY_CHAIN, identifiers);
+        editor.apply();
     }
 
+    /**
+     * @return The current active chain of DSP plugins
+     */
     public List<ProviderIdentifier> getActiveChain() {
         return mDSPChain;
+    }
+
+    /**
+     * Restores the saved chain
+     * @param ctx A valid context
+     */
+    public void restoreChain(Context ctx) {
+        SharedPreferences prefs = ctx.getSharedPreferences(PREFS_DSP_CHAIN, 0);
+        Set<String> identifiers = prefs.getStringSet(PREF_KEY_CHAIN, null);
+        mDSPChain = new ArrayList<ProviderIdentifier>();
+
+        if (identifiers != null) {
+            for (String id : identifiers) {
+                ProviderIdentifier identifier = ProviderIdentifier.fromSerialized(id);
+                if (identifier != null) {
+                    mDSPChain.add(identifier);
+                } else {
+                    Log.e(TAG, "Cannot restore from serialized string " + id);
+                }
+            }
+        }
     }
 }
