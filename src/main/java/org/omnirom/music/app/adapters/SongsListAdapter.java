@@ -22,6 +22,9 @@ import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -63,6 +66,7 @@ public class SongsListAdapter extends BaseAdapter {
 
     protected List<Song> mSongs;
     private boolean mShowAlbumArt;
+    private RotateAnimation mSyncRotateAnimation;
 
     private View.OnClickListener mOverflowClickListener = new View.OnClickListener() {
         @Override
@@ -186,7 +190,6 @@ public class SongsListAdapter extends BaseAdapter {
 
             holder.ivOverflow.setOnClickListener(mOverflowClickListener);
             holder.ivOverflow.setTag(holder);
-
             root.setTag(holder);
         }
         final Song song = getItem(position);
@@ -249,10 +252,25 @@ public class SongsListAdapter extends BaseAdapter {
 
             // Show offline indicator in any case
             tag.ivOffline.setVisibility(View.VISIBLE);
+            tag.ivOffline.clearAnimation();
             if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY) {
                 tag.ivOffline.setImageResource(R.drawable.ic_track_downloaded);
             } else if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_DOWNLOADING) {
                 tag.ivOffline.setImageResource(R.drawable.ic_sync_in_progress);
+
+                if (mSyncRotateAnimation == null && tag.ivOffline.getMeasuredWidth() != 0) {
+                    mSyncRotateAnimation = new RotateAnimation(0, -360,
+                            tag.ivOffline.getMeasuredWidth() / 2.0f,
+                            tag.ivOffline.getMeasuredHeight() / 2.0f);
+                    mSyncRotateAnimation.setRepeatMode(Animation.INFINITE);
+                    mSyncRotateAnimation.setRepeatCount(Animation.INFINITE);
+                    mSyncRotateAnimation.setDuration(1000);
+                    mSyncRotateAnimation.setInterpolator(new LinearInterpolator());
+                }
+
+                if (mSyncRotateAnimation != null) {
+                    tag.ivOffline.startAnimation(mSyncRotateAnimation);
+                }
             } else if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_ERROR) {
                 tag.ivOffline.setImageResource(R.drawable.ic_sync_problem);
             } else if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_PENDING) {

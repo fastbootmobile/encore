@@ -53,7 +53,9 @@ public class ProviderCache {
     }
 
     public void putPlaylist(final ProviderIdentifier provider, final Playlist pl) {
-        mPlaylists.put(pl.getRef(), pl);
+        synchronized (mPlaylists) {
+            mPlaylists.put(pl.getRef(), pl);
+        }
         mRefProvider.put(pl.getRef(), provider);
     }
 
@@ -62,11 +64,15 @@ public class ProviderCache {
     }
 
     Playlist getPlaylist(final String ref) {
-        return mPlaylists.get(ref);
+        synchronized(mPlaylists) {
+            return mPlaylists.get(ref);
+        }
     }
 
     public List<Playlist> getAllPlaylists() {
-        return new ArrayList<Playlist>(mPlaylists.values());
+        synchronized (mPlaylists) {
+            return new ArrayList<Playlist>(mPlaylists.values());
+        }
     }
 
     public List<Playlist> getAllMultiProviderPlaylists() {
