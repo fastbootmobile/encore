@@ -257,7 +257,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listen_now, container, false);
+        final FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listen_now, container, false);
         TwoWayView twvRoot = (TwoWayView) root.findViewById(R.id.twvRoot);
         mTxtNoMusic = (TextView) root.findViewById(R.id.txtNoMusic);
 
