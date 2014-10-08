@@ -84,6 +84,7 @@ public class PlaybackService extends Service
         public void run() {
             if (mState == STATE_PAUSED || mState == STATE_STOPPED) {
                 Log.w(TAG, "Shutting down because of timeout and nothing bound");
+                mCurrentTrack = -1;
                 stopForeground(true);
                 stopSelf();
             } else {
@@ -526,7 +527,7 @@ public class PlaybackService extends Service
      * @return A Song if a song is playing, null otherwise
      */
     private Song getCurrentSong() {
-        if (mCurrentTrack >= 0) {
+        if (mCurrentTrack >= 0 && mPlaybackQueue.size() > mCurrentTrack) {
             return mPlaybackQueue.get(mCurrentTrack);
         } else {
             return null;
@@ -738,11 +739,14 @@ public class PlaybackService extends Service
             boolean success = false;
             if (currentSong != null) {
                 ProviderIdentifier id = currentSong.getProvider();
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(id).getBinder();
-                if (provider != null) {
-                    provider.seek(timeMs);
-                    success = true;
-                    mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
+                ProviderConnection conn = PluginsLookup.getDefault().getProvider(id);
+                if (conn != null) {
+                    final IMusicProvider provider = conn.getBinder();
+                    if (provider != null) {
+                        provider.seek(timeMs);
+                        success = true;
+                        mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
+                    }
                 }
             }
 
