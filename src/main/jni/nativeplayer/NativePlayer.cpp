@@ -244,13 +244,11 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
 
     uint32_t buffers_available = BUFFER_MAX_COUNT - m_AudioBuffers.size();
 
-    // Start playing when we have at least 3 buffers
-    // TODO(xplodwild): Buffers can have a variable size. Maybe it would be better to measure total
-    // buffer length ?
+    // Start playing when we have at least 3072 samples (70ms) in buffer
     SLuint32 playerState;
     (*m_pPlayer)->GetPlayState(m_pPlayer, &playerState);
 
-    if (playerState != SL_PLAYSTATE_PLAYING && m_AudioBuffers.size() >= 3) {
+    if (playerState != SL_PLAYSTATE_PLAYING && m_iBufferedSamples >= 3072) {
         // set the player's state to playing
         setPlayState(SL_PLAYSTATE_PLAYING);
     }
@@ -268,12 +266,17 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
             memcpy(data_copy, data, len);
 
             m_AudioBuffers.push_back(std::make_pair(data_copy, len));
+            m_iBufferedSamples += len;
         }
         return len;
     } else {
         ALOGW("Buffer queue full");
         return 0;
     }
+}
+// -------------------------------------------------------------------------------------
+int32_t NativePlayer::getBufferedCount() const {
+    return m_iBufferedSamples;
 }
 // -------------------------------------------------------------------------------------
 void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* context) {
@@ -302,6 +305,7 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
             result = (*p->m_pBufferQueue)->Enqueue(p->m_pBufferQueue, data, size);
             if (result == SL_RESULT_SUCCESS) {
                 p->m_AudioBuffers.pop_front();
+                p->m_iBufferedSamples -= size;
 
                 // We will free the data once it's done playing
                 p->m_pPreviousBuffer = data;

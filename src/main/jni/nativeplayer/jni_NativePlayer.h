@@ -38,5 +38,7 @@ jboolean om_NativePlayer_setAudioFormat(JNIEnv* env, jobject thiz, jint sample_r
 jint om_NativePlayer_enqueue(JNIEnv* env, jobject thiz, jbyteArray samples, jint length);
 jint om_NativePlayer_enqueueShort(JNIEnv* env, jobject thiz, jshortArray samples, jint length);
 
+// NativePlayer.nativeGetBufferedCount ==> NativePlayer::getBufferedCount
+jint om_NativePlayer_getBufferedCount(JNIEnv* env, jobject thiz);
 
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_JNI_NATIVEPLAYER_H_

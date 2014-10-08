@@ -43,6 +43,8 @@ class NativePlayer : public INativeSink {
     // @returns The number of samples written (0 means the buffer is full)
     virtual uint32_t enqueue(const void* data, uint32_t len);
 
+    // Returns the number of samples in the buffer (not yet enqueued for playback)
+    int32_t getBufferedCount() const;
 
  private:
     bool createAudioPlayer();
@@ -63,6 +65,7 @@ class NativePlayer : public INativeSink {
     std::atomic<uint32_t> m_iSampleRate;
     std::atomic<uint32_t> m_iSampleFormat;
     std::atomic<uint32_t> m_iChannels;
+    std::atomic<uint32_t> m_iBufferedSamples;
 
     std::list<std::pair<void*, uint32_t>> m_AudioBuffers;
     std::mutex m_QueueMutex;

@@ -96,3 +96,8 @@ jint om_NativePlayer_enqueueShort(JNIEnv* env, jobject thiz, jshortArray samples
     }
 }
 // -------------------------------------------------------------------------------------
+jint om_NativePlayer_getBufferedCount(JNIEnv* env, jobject thiz) {
+    NativePlayer* player = get_layer_from_object(env, thiz);
+    return player->getBufferedCount();
+}
+// -------------------------------------------------------------------------------------
