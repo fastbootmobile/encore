@@ -19,12 +19,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
 /**
  * Represents a connection to an audio provider (music source) service
  */
-public class ProviderConnection extends AbstractProviderConnection {
+public class ProviderConnection extends AbstractProviderConnection implements AudioHostSocket.AudioHostSocketListener {
     private static final String TAG = "ProviderConnection";
 
     private IMusicProvider mBinder;
@@ -119,7 +120,8 @@ public class ProviderConnection extends AbstractProviderConnection {
      */
     @Override
     public AudioHostSocket createAudioSocket(final String socketName) {
-        AudioHostSocket host = super.createAudioSocket(socketName);
+        final AudioHostSocket host = super.createAudioSocket(socketName);
+        host.setListener(this);
 
         try {
             if (mBinder != null) {
@@ -130,5 +132,15 @@ public class ProviderConnection extends AbstractProviderConnection {
         }
 
         return host;
+    }
+
+    @Override
+    public void onSocketError() {
+        // Socket got killed. If we're still bound to this service, recreate a new socket and
+        // assign it.
+        if (mBinder != null) {
+            final String newSockName = mAudioSocket.getSocketName() + SystemClock.uptimeMillis();
+            createAudioSocket(newSockName);
+        }
     }
 }

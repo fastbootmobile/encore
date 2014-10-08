@@ -795,7 +795,7 @@ public class PlaybackService extends Service
 
         @Override
         public void playAtQueueIndex(int index) {
-            Log.d(TAG, "Playing track " + index + "/" + mPlaybackQueue.size());
+            Log.d(TAG, "Playing track " + (index + 1) + "/" + mPlaybackQueue.size());
             mCurrentTrack = index;
             mHandler.removeCallbacks(mStartPlaybackRunnable);
             mHandler.post(mStartPlaybackRunnable);
