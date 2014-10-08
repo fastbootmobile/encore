@@ -116,7 +116,7 @@ public class AutomixFragment extends Fragment {
 
                 new Thread() {
                     public void run() {
-                        mAutoMixManager.startPlay(mAdapter.getItem(i));
+                        AutoMixManager.getDefault().startPlay(mAdapter.getItem(i));
                     }
                 }.start();
             }

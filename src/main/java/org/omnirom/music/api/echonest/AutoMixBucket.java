@@ -227,7 +227,17 @@ public class AutoMixBucket {
      * @throws EchoNestException In case of remote error.
      */
     public String getNextTrack() throws EchoNestException {
-        String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
+        if (mPlaylistSession == null) {
+            Log.w(TAG, "getNextTrack called without a playlist session. Creating it");
+            createPlaylistSession();
+        }
+
+        if (isPlaylistSessionError()) {
+            Log.e(TAG, "Cannot get next track because playlist session got in error");
+            throw new EchoNestException(2, "Internal error");
+        }
+
+        final String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
         if (prefix != null) {
             Playlist nextTracks = null;
             int tries = 0;
@@ -243,11 +253,11 @@ public class AutoMixBucket {
                 }
             }
 
-            List<Song> songs = nextTracks.getSongs();
+            final List<Song> songs = nextTracks.getSongs();
 
             if (songs.size() > 0) {
-                Song firstSong = songs.get(0);
-                Track track = firstSong.getTrack(prefix);
+                final Song firstSong = songs.get(0);
+                final Track track = firstSong.getTrack(prefix);
                 if (track != null) {
                     return track.getForeignID();
                 } else {
