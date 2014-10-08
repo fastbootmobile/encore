@@ -735,25 +735,31 @@ public class PlaybackService extends Service
         @Override
         public void seek(final long timeMs) throws RemoteException {
             final Song currentSong = getCurrentSong();
+            boolean success = false;
             if (currentSong != null) {
                 ProviderIdentifier id = currentSong.getProvider();
                 IMusicProvider provider = PluginsLookup.getDefault().getProvider(id).getBinder();
-                provider.seek(timeMs);
-                mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
+                if (provider != null) {
+                    provider.seek(timeMs);
+                    success = true;
+                    mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
+                }
             }
 
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    for (IPlaybackCallback cb : mCallbacks) {
-                        try {
-                            cb.onSongScrobble((int) timeMs);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot notify scrobbling", e);
+            if (success) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (IPlaybackCallback cb : mCallbacks) {
+                            try {
+                                cb.onSongScrobble((int) timeMs);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Cannot notify scrobbling", e);
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
 
         @Override
