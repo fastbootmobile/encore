@@ -50,8 +50,16 @@ public class NativePlayer {
         }
     }
 
+    /**
+     * @return The number of samples in the player buffer
+     */
+    public int getBufferedCount() {
+        return nativeGetBufferedCount();
+    }
+
     private native boolean nativeInitialize();
     private native boolean nativeSetAudioFormat(int sample_rate, int channels, int depth);
     private native int nativeEnqueue(byte[] data, int length);
     private native int nativeEnqueueShort(short[] data, int length);
+    private native int nativeGetBufferedCount();
 }
