@@ -215,7 +215,11 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     @Override
     public void onArtLoaded(Bitmap output, BoundEntity request) {
         if (request.equals(mCurrentSong)) {
-            mCurrentArt = output;
+            if (output == null) {
+                mCurrentArt = ((BitmapDrawable) mResources.getDrawable(R.drawable.album_placeholder)).getBitmap();
+            } else {
+                mCurrentArt = output;
+            }
             buildNotification();
         }
     }

@@ -218,9 +218,6 @@ public class PlaybackService extends Service
             public void onNotificationChanged(ServiceNotification notification) {
                 notification.notify(PlaybackService.this);
                 Bitmap albumArt = notification.getAlbumArt();
-                if (albumArt == null) {
-                    albumArt = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
-                }
                 mRemoteControlClient.editMetadata(false)
                         .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
                                 albumArt.copy(albumArt.getConfig(), false)).apply();
