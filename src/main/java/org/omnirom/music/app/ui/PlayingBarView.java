@@ -487,6 +487,7 @@ public class PlayingBarView extends RelativeLayout {
 
             for (int i = 0; i < currentIndex; ++i) {
                 queue.remove(0);
+                mLastQueue.remove(0);
             }
             final int removedCount = currentIndex;
 
