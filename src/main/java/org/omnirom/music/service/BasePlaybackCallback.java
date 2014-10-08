@@ -20,7 +20,7 @@ import android.os.RemoteException;
 import org.omnirom.music.model.Song;
 
 /**
- * Base empty implement of {@link org.omnirom.music.service.IPlaybackCallback} interface
+ * Base empty implementation of {@link org.omnirom.music.service.IPlaybackCallback} interface
  */
 public class BasePlaybackCallback extends IPlaybackCallback.Stub {
     @Override

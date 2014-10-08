@@ -1,21 +1,34 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app;
 
-import android.app.Activity;
-import android.media.AudioManager;
-import android.os.RemoteException;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.Window;
 import android.widget.SearchView;
 
-import org.omnirom.music.app.fragments.AlbumViewFragment;
 import org.omnirom.music.app.fragments.SearchFragment;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
@@ -24,11 +37,12 @@ import org.omnirom.music.providers.ProviderConnection;
 import java.util.List;
 
 /**
- * Created by h4o on 22/07/2014.
+ * Activity allowing display of search results through
+ * a {@link org.omnirom.music.app.fragments.SearchFragment}
  */
 public class SearchActivity extends FragmentActivity {
-    private String TAG = "SearchActivity";
-    private String TAG_FRAGMENT = "fragment_inner";
+    private static final String TAG = "SearchActivity";
+    private static final String TAG_FRAGMENT = "fragment_inner";
     private SearchFragment mActiveFragment;
 
     @Override
@@ -49,7 +63,10 @@ public class SearchActivity extends FragmentActivity {
         }
         handleIntent(getIntent());
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        final ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 

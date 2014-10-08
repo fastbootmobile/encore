@@ -81,6 +81,5 @@ public class OmniMusic extends Application {
 
         // Setup Automix system
         AutoMixManager.getDefault().initialize(getApplicationContext());
-
     }
 }
