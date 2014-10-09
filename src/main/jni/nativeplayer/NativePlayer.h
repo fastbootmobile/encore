@@ -46,6 +46,16 @@ class NativePlayer : public INativeSink {
     // Returns the number of samples in the buffer (not yet enqueued for playback)
     int32_t getBufferedCount() const;
 
+    // Returns the number of stutters/dropouts (buffer underflows) since last flush (or start if
+    // none)
+    int32_t getUnderflowCount() const;
+
+    // Returns the number of samples written since the last flush operation (or start if none)
+    int64_t getTotalWrittenSamples() const;
+
+    // Flush the audio output
+    void flush();
+
  private:
     bool createAudioPlayer();
     void setPlayState(SLuint32 state);
@@ -65,7 +75,9 @@ class NativePlayer : public INativeSink {
     std::atomic<uint32_t> m_iSampleRate;
     std::atomic<uint32_t> m_iSampleFormat;
     std::atomic<uint32_t> m_iChannels;
-    std::atomic<uint32_t> m_iBufferedSamples;
+    std::atomic<int32_t> m_iBufferedSamples;
+    std::atomic<int64_t> m_iWrittenSamples;
+    std::atomic<int32_t> m_iUnderflowCount;
 
     std::list<std::pair<void*, uint32_t>> m_AudioBuffers;
     std::mutex m_QueueMutex;

@@ -58,6 +58,7 @@ public class DSPProcessor {
     private WSStreamer mStreamer;
     private PlaybackService mPlaybackService;
     private List<ProviderIdentifier> mDSPChain;
+    private AudioSocket mLastProviderSocket;
 
     private AudioSocket.ISocketCallback mProviderCallback = new AudioSocket.ISocketCallback() {
         @Override
@@ -68,21 +69,44 @@ public class DSPProcessor {
             byte[] data = bytes.toByteArray();
             int length = bytes.size();
 
-            if (mDSPChain.size() > 0) {
-                inputProviderAudio(data, length);
+            mLastProviderSocket = socket;
+
+            if (length > 0) {
+                if (mDSPChain.size() > 0) {
+                    inputProviderAudio(data, length);
+                } else {
+                    inputDSPAudio(socket, data, length);
+                }
             } else {
-                inputDSPAudio(socket, data, length);
+                if (mSink != null) {
+                    mSink.flushSamples();
+                }
             }
         }
 
         @Override
         public void onAudioResponse(AudioSocket socket, Plugin.AudioResponse message) {
-
         }
 
         @Override
         public void onRequest(AudioSocket socket, Plugin.Request message) {
+            Plugin.Request.RequestType request = message.getRequest();
 
+            try {
+                switch (request) {
+                    case BUFFER_INFO:
+                        if (mSink != null) {
+                            socket.writeBufferInfo((int) mSink.getWrittenSamples(), mSink.getDropouts());
+                        }
+                        break;
+
+                    case FORMAT_INFO:
+                        socket.writeFormatData(mChannels, mSampleRate);
+                        break;
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Cannot send response to request", e);
+            }
         }
 
         @Override
@@ -108,14 +132,13 @@ public class DSPProcessor {
 
         @Override
         public void onBufferInfo(AudioSocket socket, Plugin.BufferInfo message) {
-
         }
     };
 
     private AudioSocket.ISocketCallback mDSPCallback = new AudioSocket.ISocketCallback() {
         @Override
         public void onAudioData(AudioSocket socket, Plugin.AudioData message) {
-            ByteString bytes = message.getSamples();
+            final ByteString bytes = message.getSamples();
             inputDSPAudio(socket, bytes.toByteArray(), bytes.size());
         }
 
@@ -243,7 +266,8 @@ public class DSPProcessor {
         if (mDSPChain.size() == 0 || currentPlugin == mDSPChain.size() - 1) {
             // We're at the end of the DSP chain, so push that out to the current audio sink
             if (mSink != null) {
-                mSink.write(frames, numframes);
+                int written = mSink.write(frames, numframes);
+                writeAudioResponse(written);
             }
             if (mStreamer != null) {
                 mStreamer.write(frames, numframes);
@@ -277,7 +301,8 @@ public class DSPProcessor {
             } catch (IOException e1) {
                 // Failed again, fallback to output
                 if (mSink != null){
-                    mSink.write(frames, numFrames);
+                    int written = mSink.write(frames, numFrames);
+                    writeAudioResponse(written);
                 }
             }
         }
@@ -342,6 +367,16 @@ public class DSPProcessor {
                 } else {
                     Log.e(TAG, "Cannot restore from serialized string " + id);
                 }
+            }
+        }
+    }
+
+    private void writeAudioResponse(int written) {
+        if (mLastProviderSocket != null) {
+            try {
+                mLastProviderSocket.writeAudioResponse(written);
+            } catch (IOException e) {
+                Log.e(TAG, "Cannot write audio response", e);
             }
         }
     }

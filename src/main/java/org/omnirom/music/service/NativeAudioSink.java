@@ -43,13 +43,18 @@ public class NativeAudioSink implements AudioSink {
     }
 
     @Override
-    public int getWrittenSamples() {
-        return 0;
+    public long getWrittenSamples() {
+        return mPlayer.getTotalWrittenSamples();
+    }
+
+    @Override
+    public int getDropouts() {
+        return mPlayer.getUnderflowCount();
     }
 
     @Override
     public void flushSamples() {
-
+        mPlayer.flush();
     }
 
     @Override

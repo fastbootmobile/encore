@@ -31,6 +31,14 @@ static JNINativeMethod gMethodsNativePlayer[] = {
             reinterpret_cast<void*>(om_NativePlayer_enqueue)},
     {"nativeEnqueueShort", "([SI)I",
             reinterpret_cast<void*>(om_NativePlayer_enqueueShort)},
+    {"nativeGetBufferedCount", "()I",
+            reinterpret_cast<void*>(om_NativePlayer_getBufferedCount)},
+    {"nativeGetUnderflowCount", "()I",
+            reinterpret_cast<void*>(om_NativePlayer_getUnderflowCount)},
+    {"nativeGetTotalWrittenSamples", "()J",
+            reinterpret_cast<void*>(om_NativePlayer_getTotalWrittenSamples)},
+    {"nativeFlush", "()V",
+            reinterpret_cast<void*>(om_NativePlayer_flush)},
 };
 
 // -------------------------------------------------------------------------------------

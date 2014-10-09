@@ -101,3 +101,18 @@ jint om_NativePlayer_getBufferedCount(JNIEnv* env, jobject thiz) {
     return player->getBufferedCount();
 }
 // -------------------------------------------------------------------------------------
+jint om_NativePlayer_getUnderflowCount(JNIEnv* env, jobject thiz) {
+    NativePlayer* player = get_layer_from_object(env, thiz);
+    return player->getUnderflowCount();
+}
+// -------------------------------------------------------------------------------------
+jlong om_NativePlayer_getTotalWrittenSamples(JNIEnv* env, jobject thiz) {
+    NativePlayer* player = get_layer_from_object(env, thiz);
+    return player->getTotalWrittenSamples();
+}
+// -------------------------------------------------------------------------------------
+void om_NativePlayer_flush(JNIEnv* env, jobject thiz) {
+    NativePlayer* player = get_layer_from_object(env, thiz);
+    player->flush();
+}
+// -------------------------------------------------------------------------------------

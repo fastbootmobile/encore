@@ -41,4 +41,13 @@ jint om_NativePlayer_enqueueShort(JNIEnv* env, jobject thiz, jshortArray samples
 // NativePlayer.nativeGetBufferedCount ==> NativePlayer::getBufferedCount
 jint om_NativePlayer_getBufferedCount(JNIEnv* env, jobject thiz);
 
+// NativePlayer.nativeGetTotalWrittenSamples ==> NativePlayer::getTotalWrittenSamples
+jlong om_NativePlayer_getTotalWrittenSamples(JNIEnv* env, jobject thiz);
+
+// NativePlayer.nativeGetUnderflowCount ==> NativePlayer::getUnderflowCount
+jint om_NativePlayer_getUnderflowCount(JNIEnv* env, jobject thiz);
+
+// NativePlayer.nativeFlush ==> NativePlayer::flush
+void om_NativePlayer_flush(JNIEnv* env, jobject thiz);
+
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_JNI_NATIVEPLAYER_H_

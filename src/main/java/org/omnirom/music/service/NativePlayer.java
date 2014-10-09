@@ -57,9 +57,35 @@ public class NativePlayer {
         return nativeGetBufferedCount();
     }
 
+    /**
+     * @return The number of dropouts/stutters (buffer underflows) that occured since the last
+     * call to flush (or since the beginning of no call to flush has been done)
+     */
+    public int getUnderflowCount() {
+        return nativeGetUnderflowCount();
+    }
+
+    /**
+     * @return The number of total written samples since the last call to flush (or since the
+     * beginning if no call to flush has been done)
+     */
+    public long getTotalWrittenSamples() {
+        return nativeGetTotalWrittenSamples();
+    }
+
+    /**
+     * Flushes the output (clears all pending buffers, etc).
+     */
+    public void flush() {
+        nativeFlush();
+    }
+
     private native boolean nativeInitialize();
     private native boolean nativeSetAudioFormat(int sample_rate, int channels, int depth);
     private native int nativeEnqueue(byte[] data, int length);
     private native int nativeEnqueueShort(short[] data, int length);
     private native int nativeGetBufferedCount();
+    private native int nativeGetUnderflowCount();
+    private native long nativeGetTotalWrittenSamples();
+    private native void nativeFlush();
 }

@@ -24,7 +24,8 @@
 NativePlayer::NativePlayer() : m_pEngineObj(nullptr), m_pEngine(nullptr),
         m_pOutputMixObj(nullptr), m_pPlayerObj(nullptr), m_pPreviousBuffer(nullptr),
         m_pPlayer(nullptr), m_pPlayerVol(nullptr), m_pBufferQueue(nullptr), m_iSampleRate(44100),
-        m_iChannels(2), m_iSampleFormat(16) {
+        m_iChannels(2), m_iSampleFormat(16), m_iBufferedSamples(0), m_iWrittenSamples(0),
+        m_iUnderflowCount(0) {
 }
 // -------------------------------------------------------------------------------------
 NativePlayer::~NativePlayer() {
@@ -259,6 +260,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
         if (qstate.count == 0 && m_AudioBuffers.size() == 0) {
             // We have no buffer pending, enqueue it directly
             SLresult result = (*m_pBufferQueue)->Enqueue(m_pBufferQueue, data, len);
+            m_iWrittenSamples += len;
         } else {
             // Queue in our internal buffer queue, and enqueue to the sink in the buffer callback
             // We use std::string purely as a container
@@ -277,6 +279,22 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
 // -------------------------------------------------------------------------------------
 int32_t NativePlayer::getBufferedCount() const {
     return m_iBufferedSamples;
+}
+// -------------------------------------------------------------------------------------
+int32_t NativePlayer::getUnderflowCount() const {
+    return m_iUnderflowCount;
+}
+// -------------------------------------------------------------------------------------
+int64_t NativePlayer::getTotalWrittenSamples() const {
+    return m_iWrittenSamples;
+}
+// -------------------------------------------------------------------------------------
+void NativePlayer::flush() {
+    std::lock_guard<std::mutex> lock(m_QueueMutex);
+    (*m_pBufferQueue)->Clear(m_pBufferQueue);
+    m_iWrittenSamples = 0;
+    m_iUnderflowCount = 0;
+    m_AudioBuffers.clear();
 }
 // -------------------------------------------------------------------------------------
 void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* context) {
@@ -306,6 +324,7 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
             if (result == SL_RESULT_SUCCESS) {
                 p->m_AudioBuffers.pop_front();
                 p->m_iBufferedSamples -= size;
+                p->m_iWrittenSamples += size;
 
                 // We will free the data once it's done playing
                 p->m_pPreviousBuffer = data;
@@ -313,8 +332,9 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
                 ALOGW("Enqueue via callback failed (%d), will retry", result);
             }
         } else {
-            // No more buffers to play, we pause the playback and wait for 3 buffers in enqueue
+            // No more buffers to play, we pause the playback and wait for buffers in enqueue
             p->setPlayState(SL_PLAYSTATE_PAUSED);
+            p->m_iUnderflowCount++;
             ALOGW("Buffer underrun");
         }
     }
@@ -328,3 +348,5 @@ void NativePlayer::setPlayState(SLuint32 state) {
     }
 }
 // -------------------------------------------------------------------------------------
+
+

@@ -47,7 +47,13 @@ public interface AudioSink {
      * (or since the first written sample).
      * @return A number of short samples written
      */
-    public int getWrittenSamples();
+    public long getWrittenSamples();
+
+    /**
+     * Returns the number of dropouts/stutters (buffer underflow) that occurred since the last flush
+     * @return Number of dropouts
+     */
+    public int getDropouts();
 
     /**
      * Clears the pending audio data and reset the written samples counter
