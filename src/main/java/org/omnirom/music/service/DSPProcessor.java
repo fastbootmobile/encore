@@ -81,6 +81,7 @@ public class DSPProcessor {
                 if (mSink != null) {
                     mSink.flushSamples();
                 }
+                writeAudioResponse(0);
             }
         }
 

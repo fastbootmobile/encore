@@ -245,11 +245,11 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
 
     int32_t buffers_available = BUFFER_MAX_COUNT - m_iBufferedSamples;
 
-    // Start playing when we have at least 3072 samples (70ms) in buffer
+    // Start playing when we have at least a few samples
     SLuint32 playerState;
     (*m_pPlayer)->GetPlayState(m_pPlayer, &playerState);
 
-    if (playerState != SL_PLAYSTATE_PLAYING && m_iBufferedSamples >= 3072) {
+    if (playerState != SL_PLAYSTATE_PLAYING && m_iBufferedSamples >= 8192) {
         // set the player's state to playing
         setPlayState(SL_PLAYSTATE_PLAYING);
     }
@@ -293,6 +293,7 @@ void NativePlayer::flush() {
     (*m_pBufferQueue)->Clear(m_pBufferQueue);
     m_iWrittenSamples = 0;
     m_iUnderflowCount = 0;
+    m_iBufferedSamples = 0;
     m_AudioBuffers.clear();
     ALOGI("Flushed");
 }
