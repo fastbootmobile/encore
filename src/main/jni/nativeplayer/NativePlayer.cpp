@@ -243,7 +243,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
     SLAndroidSimpleBufferQueueState qstate;
     (*m_pBufferQueue)->GetState(m_pBufferQueue, &qstate);
 
-    uint32_t buffers_available = BUFFER_MAX_COUNT - m_AudioBuffers.size();
+    int32_t buffers_available = BUFFER_MAX_COUNT - m_iBufferedSamples;
 
     // Start playing when we have at least 3072 samples (70ms) in buffer
     SLuint32 playerState;
@@ -253,7 +253,6 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
         // set the player's state to playing
         setPlayState(SL_PLAYSTATE_PLAYING);
     }
-
 
     if (buffers_available > 0) {
         // If there's room for a buffer
@@ -272,7 +271,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
         }
         return len;
     } else {
-        ALOGW("Buffer queue full");
+        // Buffers full, retry later
         return 0;
     }
 }
@@ -295,6 +294,7 @@ void NativePlayer::flush() {
     m_iWrittenSamples = 0;
     m_iUnderflowCount = 0;
     m_AudioBuffers.clear();
+    ALOGI("Flushed");
 }
 // -------------------------------------------------------------------------------------
 void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* context) {

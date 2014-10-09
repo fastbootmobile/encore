@@ -1025,15 +1025,18 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 Album album = aggregator.retrieveAlbum(albumRef, mParent.getArtist().getProvider());
 
                 if (album != null) {
-                    IMusicProvider provider = PluginsLookup.getDefault().getProvider(album.getProvider()).getBinder();
-                    try {
-                        if (provider != null) {
-                            provider.fetchAlbumTracks(albumRef);
+                    ProviderConnection conn = PluginsLookup.getDefault().getProvider(album.getProvider());
+                    if (conn != null) {
+                        IMusicProvider provider = conn.getBinder();
+                        try {
+                            if (provider != null) {
+                                provider.fetchAlbumTracks(albumRef);
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Remote exception while trying to fetch album tracks", e);
                         }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Remote exception while trying to fetch album tracks", e);
+                        albums.add(album);
                     }
-                    albums.add(album);
                 }
             }
 

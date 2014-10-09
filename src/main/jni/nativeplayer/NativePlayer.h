@@ -23,7 +23,8 @@
 #include <utility>
 #include "INativeSink.h"
 
-#define BUFFER_MAX_COUNT 8
+// Maximum number of buffered samples (half a second at 44100Hz)
+#define BUFFER_MAX_COUNT 22050
 
 class NativePlayer : public INativeSink {
  public:
