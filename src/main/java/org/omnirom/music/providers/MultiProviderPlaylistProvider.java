@@ -165,6 +165,26 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     @Override
+    public boolean getArtistArt(Artist entity, IArtCallback callback) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public boolean getAlbumArt(Album entity, IArtCallback callback) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public boolean getPlaylistArt(Playlist entity, IArtCallback callback) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public boolean getSongArt(Song entity, IArtCallback callback) throws RemoteException {
+        return false;
+    }
+
+    @Override
     public boolean fetchArtistAlbums(String artistRef) {
         return false;
     }
@@ -231,11 +251,6 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     @Override
     public String addPlaylist(String playlistName) throws RemoteException {
          return mMultiProviderDatabaseHelper.addPlaylist(playlistName);
-    }
-
-    @Override
-    public Bitmap getSongArt(Song song) throws RemoteException {
-        return PluginsLookup.getDefault().getProvider(song.getProvider()).getBinder().getSongArt(song);
     }
 
     @Override
