@@ -48,6 +48,7 @@
 
         app:fab_colorNormal="@color/primary"
         app:fab_colorPressed="@color/primary_light"
+        app:fab_size="normal"
 
         android:layout_marginBottom="-24dp"
         android:layout_marginEnd="16dp"

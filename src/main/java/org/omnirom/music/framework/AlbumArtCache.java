@@ -197,7 +197,7 @@ public class AlbumArtCache {
 
                         if (tmpUrl != null) {
                             putAlbumArtUrl(artistName, initialQueryStr, tmpUrl);
-                            artKey = tmpUrl.replaceAll("\\W+", "");
+                            artKey = sanitizeUrlToKey(tmpUrl);
                             cache.putAlbumArtKey(album, artKey);
                             break;
                         }

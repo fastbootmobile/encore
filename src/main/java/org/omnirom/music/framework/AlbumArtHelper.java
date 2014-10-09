@@ -20,16 +20,22 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
+import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.IArtCallback;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderCache;
+import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -82,11 +88,18 @@ public class AlbumArtHelper {
         private Context mContext;
         private AlbumArtListener mListener;
         private Handler mHandler;
+        private IArtCallback mProviderArtCallback;
 
         private AlbumArtTask(Context ctx, AlbumArtListener listener) {
             mContext = ctx;
             mListener = listener;
             mHandler = new Handler();
+            mProviderArtCallback = new IArtCallback.Stub() {
+                @Override
+                public void onArtLoaded(Bitmap bitmap) throws RemoteException {
+                    mListener.onArtLoaded(bitmap, mEntity);
+                }
+            };
         }
 
         @Override
@@ -103,80 +116,105 @@ public class AlbumArtHelper {
 
             final ProviderCache cache = ProviderAggregator.getDefault().getCache();
 
-            // Prepare the placeholder/default
             Bitmap bmp = null;
 
-            Bitmap cachedImage = null;
-            String artKey;
-
-            // Load the art key based on what we need
-            if (mEntity instanceof Album) {
-                artKey = cache.getAlbumArtKey((Album) mEntity);
-            } else if (mEntity instanceof Song) {
-                artKey = cache.getSongArtKey((Song) mEntity);
-            } else if (mEntity instanceof Artist) {
-                artKey = cache.getArtistArtKey((Artist) mEntity);
-            } else {
-                throw new RuntimeException("Album art entity should be a song or an album");
+            // First, we try to get it from the provider
+            boolean provided = false;
+            ProviderConnection connection = PluginsLookup.getDefault().getProvider(mEntity.getProvider());
+            try {
+                if (connection != null) {
+                    IMusicProvider provider = connection.getBinder();
+                    if (provider != null) {
+                        if (mEntity instanceof Album) {
+                            provided = provider.getAlbumArt((Album) mEntity, mProviderArtCallback);
+                        } else if (mEntity instanceof Song) {
+                            provided = provider.getSongArt((Song) mEntity, mProviderArtCallback);
+                        } else if (mEntity instanceof Artist) {
+                            provided = provider.getArtistArt((Artist) mEntity, mProviderArtCallback);
+                        } else if (mEntity instanceof Playlist) {
+                            provided = provider.getPlaylistArt((Playlist) mEntity, mProviderArtCallback);
+                        }
+                    }
+                }
+            } catch (RemoteException e) {
+                // Fallback to MB
+                Log.e(TAG, "Remote exception while looking up art from provider", e);
             }
 
-            // If we have the key in cache already, try to see if we have it loaded in cache
-            if (artKey != null) {
-                cachedImage = ImageCache.getDefault().get(artKey);
-            }
+            // If the provider couldn't provide an image, get it from MusicBrainz
+            if (!provided) {
+                Bitmap cachedImage = null;
+                String artKey;
 
-            // If we have it in cache, set it as the bitmap to display, otherwise load it from the
-            // web provider
-            final AlbumArtCache artCache = AlbumArtCache.getDefault();
-            if (cachedImage != null) {
-                bmp = cachedImage;
-            } else {
-                String artUrl = null;
-
-                // Don't allow other views to run the same query
-                if (artCache.isQueryRunning(mEntity)) {
-                    // A query is already running for this entity, we'll revisit it later
-                    output.retry = true;
-                    return output;
+                // Load the art key based on what we need
+                if (mEntity instanceof Album) {
+                    artKey = cache.getAlbumArtKey((Album) mEntity);
+                } else if (mEntity instanceof Song) {
+                    artKey = cache.getSongArtKey((Song) mEntity);
+                } else if (mEntity instanceof Artist) {
+                    artKey = cache.getArtistArtKey((Artist) mEntity);
                 } else {
-                    artCache.notifyQueryRunning(mEntity);
+                    throw new RuntimeException("Album art entity should be a song or an album");
                 }
 
-                // The image isn't loaded, if we don't have the artKey either, load both
-                if (artKey == null) {
-                    StringBuffer urlBuffer = new StringBuffer();
-                    if (mEntity instanceof Album) {
-                        artKey = AlbumArtCache.getDefault().getArtKey((Album) mEntity, urlBuffer);
-                    } else if (mEntity instanceof Song) {
-                        artKey = AlbumArtCache.getDefault().getArtKey((Song) mEntity, urlBuffer);
-                    } else if (mEntity instanceof Artist) {
-                        artKey = AlbumArtCache.getDefault().getArtKey((Artist) mEntity,urlBuffer);
+                // If we have the key in cache already, try to see if we have it loaded in cache
+                if (artKey != null) {
+                    cachedImage = ImageCache.getDefault().get(artKey);
+                }
+
+                // If we have it in cache, set it as the bitmap to display, otherwise load it from the
+                // web provider
+                final AlbumArtCache artCache = AlbumArtCache.getDefault();
+                if (cachedImage != null) {
+                    bmp = cachedImage;
+                } else {
+                    String artUrl = null;
+
+                    // Don't allow other views to run the same query
+                    if (artCache.isQueryRunning(mEntity)) {
+                        // A query is already running for this entity, we'll revisit it later
+                        output.retry = true;
+                        return output;
+                    } else {
+                        artCache.notifyQueryRunning(mEntity);
                     }
 
-                    artUrl = urlBuffer.toString();
+                    // The image isn't loaded, if we don't have the artKey either, load both
+                    if (artKey == null) {
+                        StringBuffer urlBuffer = new StringBuffer();
+                        if (mEntity instanceof Album) {
+                            artKey = AlbumArtCache.getDefault().getArtKey((Album) mEntity, urlBuffer);
+                        } else if (mEntity instanceof Song) {
+                            artKey = AlbumArtCache.getDefault().getArtKey((Song) mEntity, urlBuffer);
+                        } else if (mEntity instanceof Artist) {
+                            artKey = AlbumArtCache.getDefault().getArtKey((Artist) mEntity, urlBuffer);
+                        }
+
+                        artUrl = urlBuffer.toString();
+                    }
+
+                    // We now have the art key, download the actual image if it's not the default art
+                    if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
+                        bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, null);
+                    }
                 }
 
-                // We now have the art key, download the actual image if it's not the default art
-                if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                    bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, null);
+                // We now have a bitmap to display, so let's put it!
+                output.bitmap = bmp;
+                output.retry = false;
+
+                // Cache the image
+                if (mEntity instanceof Album) {
+                    cache.putAlbumArtKey((Album) mEntity, artKey);
+                } else if (mEntity instanceof Song) {
+                    cache.putSongArtKey((Song) mEntity, artKey);
+                } else if (mEntity instanceof Artist) {
+                    cache.putArtistArtKey((Artist) mEntity, artKey);
                 }
+
+                // In all cases, we tell that this entity is loaded
+                artCache.notifyQueryStopped(mEntity);
             }
-
-            // We now have a bitmap to display, so let's put it!
-            output.bitmap = bmp;
-            output.retry = false;
-
-            // Cache the image
-            if (mEntity instanceof Album) {
-                cache.putAlbumArtKey((Album) mEntity, artKey);
-            } else if (mEntity instanceof Song) {
-                cache.putSongArtKey((Song) mEntity, artKey);
-            } else if (mEntity instanceof  Artist) {
-                cache.putArtistArtKey((Artist) mEntity, artKey);
-            }
-
-            // In all cases, we tell that this entity is loaded
-            artCache.notifyQueryStopped(mEntity);
 
             return output;
         }
