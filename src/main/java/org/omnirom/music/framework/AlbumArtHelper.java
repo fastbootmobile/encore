@@ -96,12 +96,14 @@ public class AlbumArtHelper {
             mProviderArtCallback = new IArtCallback.Stub() {
                 @Override
                 public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mListener.onArtLoaded(bitmap, mEntity);
-                        }
-                    });
+                    if (!isCancelled()) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mListener.onArtLoaded(bitmap, mEntity);
+                            }
+                        });
+                    }
                 }
             };
         }
