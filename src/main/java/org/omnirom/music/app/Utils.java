@@ -16,12 +16,14 @@
 package org.omnirom.music.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -413,6 +415,52 @@ public class Utils {
                         } catch (RemoteException e) {
                             Log.e(TAG, "Unable to queue song", e);
                         }
+                        break;
+
+                    case R.id.menu_add_album_to_queue:
+                        try {
+                            pbService.queueAlbum(aggregator.retrieveAlbum(song.getAlbum(),
+                                    song.getProvider()), false);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Unable to queue album", e);
+                        }
+                        break;
+
+                    case R.id.menu_add_to_playlist:
+                        PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
+                        fragment.show(context.getSupportFragmentManager(), song.getRef());
+                        break;
+
+                    default:
+                        return false;
+                }
+                return true;
+            }
+        });
+    }
+
+    public static void showCurrentSongOverflow(final FragmentActivity context, final View parent,
+                                        final Song song) {
+        PopupMenu popupMenu = new PopupMenu(context, parent);
+        popupMenu.inflate(R.menu.queue_overflow);
+        popupMenu.show();
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
+                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
+                final String TAG = "Utils-SongOverflow";
+
+                switch (menuItem.getItemId()) {
+                    case R.id.menu_open_album:
+                        final Resources res = context.getResources();
+                        Intent intent = AlbumActivity.craftIntent(context,
+                                ((BitmapDrawable) res.getDrawable(R.drawable.album_placeholder)).getBitmap(),
+                                aggregator.retrieveAlbum(song.getAlbum(), song.getProvider()),
+                                res.getColor(R.color.default_album_art_background));
+                        context.startActivity(intent);
                         break;
 
                     case R.id.menu_add_album_to_queue:

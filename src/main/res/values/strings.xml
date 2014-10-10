@@ -49,6 +49,7 @@
     <string name="start_recognition">Start recognition</string>
     <string name="stop_recognition">Stop recognition</string>
     <string name="recognizing">Recognizing…</string>
+    <string name="open_album">Show album</string>
 
     <!-- Strings for possible PreferenceActivity Back/Next buttons -->
     <string name="back_button_label">Back</string>

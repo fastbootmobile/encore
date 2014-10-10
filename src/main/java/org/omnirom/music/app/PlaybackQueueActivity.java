@@ -398,7 +398,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
 
             // Load and inflate the playback queue
             List<Song> songs;
-            Song currentTrack;
+            final Song currentTrack;
             int currentTrackIndex;
             try {
                 // We make a copy
@@ -418,7 +418,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 int itemIndex = 0;
                 int currentPlayingTop = 0;
 
-                LayoutInflater inflater = getActivity().getLayoutInflater();
+                final LayoutInflater inflater = getActivity().getLayoutInflater();
                 View itemView;
                 for (final Song song : songs) {
                     if (currentTrackIndex == itemIndex) {
@@ -427,6 +427,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         TextView tvCurrentTitle = (TextView) itemView.findViewById(R.id.tvCurrentTitle);
                         TextView tvCurrentArtist = (TextView) itemView.findViewById(R.id.tvCurrentArtist);
                         AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) itemView.findViewById(R.id.ivCurrentPlayAlbumArt);
+                        final ImageView ivOverflow = (ImageView) itemView.findViewById(R.id.ivOverflow);
 
                         tvCurrentTitle.setText(currentTrack.getTitle());
 
@@ -444,6 +445,14 @@ public class PlaybackQueueActivity extends FragmentActivity {
 
                         mSeekBar = (SeekBar) itemView.findViewById(R.id.sbSeek);
                         mSeekBar.setOnSeekBarChangeListener(mSeekBarListener);
+
+                        ivOverflow.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Utils.showCurrentSongOverflow((FragmentActivity) getActivity(),
+                                        ivOverflow, currentTrack);
+                            }
+                        });
 
                         // Set play pause drawable
                         ImageView ivPlayPause = (ImageView) itemView.findViewById(R.id.ivPlayPause);
