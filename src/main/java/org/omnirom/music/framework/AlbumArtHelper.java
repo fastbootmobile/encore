@@ -20,7 +20,6 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
@@ -132,7 +131,6 @@ public class AlbumArtHelper {
                     if (provider != null) {
                         if (mEntity instanceof Album) {
                             provided = provider.getAlbumArt((Album) mEntity, mProviderArtCallback);
-                            Log.e(TAG, "getAlbumArt: Provider provides? " + provided);
                         } else if (mEntity instanceof Song) {
                             provided = provider.getSongArt((Song) mEntity, mProviderArtCallback);
                         } else if (mEntity instanceof Artist) {
@@ -140,18 +138,12 @@ public class AlbumArtHelper {
                         } else if (mEntity instanceof Playlist) {
                             provided = provider.getPlaylistArt((Playlist) mEntity, mProviderArtCallback);
                         }
-                    } else {
-                        Log.w(TAG, "Null binder provider connection for album art");
                     }
-                } else {
-                    Log.w(TAG, "Null provider connection for album art");
                 }
             } catch (RemoteException e) {
                 // Fallback to MB
                 Log.e(TAG, "Remote exception while looking up art from provider", e);
             }
-
-            Log.d(TAG, "Did provider provide art? " + provided);
 
             // If the provider couldn't provide an image, get it from MusicBrainz
             if (!provided) {
