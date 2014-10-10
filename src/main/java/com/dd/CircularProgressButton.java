@@ -48,6 +48,7 @@ public class CircularProgressButton extends Button {
     private int mIconComplete;
     private int mIconError;
     private int mIconIdle;
+    private int mIconProgress;
     private int mStrokeWidth;
     private int mPaddingProgress;
     private float mCornerRadius;
@@ -205,6 +206,7 @@ public class CircularProgressButton extends Button {
             mIconIdle = attr.getResourceId(R.styleable.CircularProgressButton_cpb_iconIdle, 0);
             mIconComplete = attr.getResourceId(R.styleable.CircularProgressButton_cpb_iconComplete, 0);
             mIconError = attr.getResourceId(R.styleable.CircularProgressButton_cpb_iconError, 0);
+            mIconProgress = attr.getResourceId(R.styleable.CircularProgressButton_cpb_iconProgress, 0);
             mCornerRadius = attr.getDimension(R.styleable.CircularProgressButton_cpb_cornerRadius, 0);
             mPaddingProgress = attr.getDimensionPixelSize(R.styleable.CircularProgressButton_cpb_paddingProgress, 0);
 
@@ -342,7 +344,12 @@ public class CircularProgressButton extends Button {
 
     private void morphToProgress() {
         setWidth(getWidth());
-        setText(mProgressText);
+        if (mIconProgress != 0) {
+            setText(null);
+            setIcon(mIconProgress);
+        } else {
+            setText(mProgressText);
+        }
 
         MorphingAnimation animation = createProgressMorphing(mCornerRadius, getHeight(), getWidth(), getHeight());
 
