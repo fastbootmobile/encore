@@ -43,10 +43,10 @@ public class RemoteControlReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
-            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-            KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            final IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+            final KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
 
-            if (event == null || event.getAction() != KeyEvent.ACTION_DOWN) {
+            if (event == null || service == null || event.getAction() != KeyEvent.ACTION_DOWN) {
                 return;
             }
 
