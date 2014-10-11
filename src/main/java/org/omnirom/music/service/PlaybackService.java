@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
@@ -34,7 +33,6 @@ import android.util.Log;
 
 import org.acra.ACRA;
 import org.omnirom.music.api.echonest.AutoMixManager;
-import org.omnirom.music.app.R;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -614,7 +612,6 @@ public class PlaybackService extends Service
             if (currentSong != null) {
                 // TODO: Refactor that with a threaded Handler that handles messages
                 final ProviderIdentifier identifier = currentSong.getProvider();
-                abandonAudioFocus();
                 mState = STATE_PAUSING;
                 Log.d(TAG, "onSongPaused: Pausing...");
 
@@ -804,6 +801,8 @@ public class PlaybackService extends Service
                     && mCurrentTrack >= 0) {
                 pause();
             }
+
+            abandonAudioFocus();
 
             for (IPlaybackCallback cb : mCallbacks) {
                 try {
