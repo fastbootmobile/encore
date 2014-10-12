@@ -794,34 +794,39 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             public void onClick(View view) {
                 final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
+                final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
                 Song song = (Song) view.getTag();
                 Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
 
-                IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
                 try {
-                    pbService.getCurrentPlaybackQueue().clear();
-                    pbService.queueAlbum(album, false);
+                    if (song.isAvailable() &&
+                            (!aggregator.isOfflineMode()
+                                    || song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY)) {
+                        pbService.getCurrentPlaybackQueue().clear();
+                        pbService.queueAlbum(album, false);
 
-                    Iterator<String> songs = album.songs();
-                    int i = 0;
-                    while (songs.hasNext()) {
-                        String songRef = songs.next();
-                        if (songRef.equals(song.getRef())) {
-                            break;
-                        } else {
-                            ++i;
+                        Iterator<String> songs = album.songs();
+                        int i = 0;
+                        while (songs.hasNext()) {
+                            String songRef = songs.next();
+                            if (songRef.equals(song.getRef())) {
+                                break;
+                            } else {
+                                ++i;
+                            }
                         }
-                    }
 
-                    pbService.playAtQueueIndex(i);
+                        pbService.playAtQueueIndex(i);
+
+                        // Update UI
+                        boldPlayingTrack(song);
+                        updatePlayingAlbum(song.getAlbum());
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to play song", e);
-                    return;
                 }
 
-                // Update UI
-                boldPlayingTrack(song);
-                updatePlayingAlbum(song.getAlbum());
+
             }
         };
 
