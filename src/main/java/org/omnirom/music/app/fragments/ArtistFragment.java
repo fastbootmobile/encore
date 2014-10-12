@@ -1136,15 +1136,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
             while (songsIt.hasNext()) {
                 final Song song = aggregator.retrieveSong(songsIt.next(), album.getProvider());
+                if (song == null) {
+                    Log.w(TAG, "Null song in album!");
+                    continue;
+                }
 
                 View itemRoot = inflater.inflate(R.layout.expanded_albums_item, container, false);
                 container.addView(itemRoot);
                 itemRoot.setTag(song);
 
                 // Set alpha based on offline availability and mode
-                if ((aggregator.isOfflineMode() && song != null
+                if ((aggregator.isOfflineMode()
                         && (song.getOfflineStatus() != BoundEntity.OFFLINE_STATUS_READY)
-                        || (song != null && !song.isAvailable()))) {
+                        || (!song.isAvailable()))) {
                     Utils.setChildrenAlpha((ViewGroup) itemRoot,
                             Float.parseFloat(getString(R.string.unavailable_track_alpha)));
                 } else {
@@ -1156,8 +1160,32 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 TextView tvTrackName = (TextView) itemRoot.findViewById(R.id.tvTrackName);
                 TextView tvTrackDuration = (TextView) itemRoot.findViewById(R.id.tvTrackDuration);
                 final ImageView ivOverflow = (ImageView) itemRoot.findViewById(R.id.ivOverflow);
+                final ImageView ivOffline = (ImageView) itemRoot.findViewById(R.id.ivOffline);
+                ivOffline.setVisibility(View.VISIBLE);
 
-                if (song != null && song.isLoaded()) {
+                switch (song.getOfflineStatus()) {
+                    case BoundEntity.OFFLINE_STATUS_DOWNLOADING:
+                        ivOffline.setImageResource(R.drawable.ic_sync_in_progress);
+                        break;
+
+                    case BoundEntity.OFFLINE_STATUS_ERROR:
+                        ivOffline.setImageResource(R.drawable.ic_sync_problem);
+                        break;
+
+                    case BoundEntity.OFFLINE_STATUS_NO:
+                        ivOffline.setVisibility(View.GONE);
+                        break;
+
+                    case BoundEntity.OFFLINE_STATUS_READY:
+                        ivOffline.setImageResource(R.drawable.ic_track_downloaded);
+                        break;
+
+                    case BoundEntity.OFFLINE_STATUS_PENDING:
+                        ivOffline.setImageResource(R.drawable.ic_track_download_pending);
+                        break;
+                }
+
+                if (song.isLoaded()) {
                     tvTrackName.setText(song.getTitle());
                     tvTrackDuration.setText(Utils.formatTrackLength(song.getDuration()));
                     ivOverflow.setVisibility(View.VISIBLE);
