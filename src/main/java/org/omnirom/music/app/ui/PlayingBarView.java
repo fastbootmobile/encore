@@ -23,11 +23,13 @@ import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -242,6 +244,32 @@ public class PlayingBarView extends RelativeLayout {
         }
     };
 
+    private GestureDetector mGestureDetector;
+    private GestureDetector.SimpleOnGestureListener mGestureListener =
+            new GestureDetector.SimpleOnGestureListener() {
+        public boolean onSingleTapUp(MotionEvent ev) {
+            return false;
+        }
+
+        public void onLongPress(MotionEvent ev) {
+        }
+
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                                float distanceY) {
+            return false;
+        }
+
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                               float velocityY) {
+            if (velocityY > 0) {
+                setWrapped(true);
+            } else {
+                setWrapped(false);
+            }
+            return true;
+        }
+    };
+
     private static final int MAX_PEEK_QUEUE_SIZE = 3;
 
     private boolean mIsPlaying;
@@ -259,16 +287,19 @@ public class PlayingBarView extends RelativeLayout {
     public PlayingBarView(Context context) {
         super(context);
         mAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        mGestureDetector = new GestureDetector(getContext(), mGestureListener);
     }
 
     public PlayingBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        mGestureDetector = new GestureDetector(getContext(), mGestureListener);
     }
 
     public PlayingBarView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        mGestureDetector = new GestureDetector(getContext(), mGestureListener);
     }
 
     @Override
@@ -432,6 +463,12 @@ public class PlayingBarView extends RelativeLayout {
         }
 
         ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(@NonNull MotionEvent ev) {
+        mGestureDetector.onTouchEvent(ev);
+        return super.dispatchTouchEvent(ev);
     }
 
     /**
