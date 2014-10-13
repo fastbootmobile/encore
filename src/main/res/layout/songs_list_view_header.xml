@@ -28,7 +28,7 @@
         android:textSize="22sp" />
 
     <!-- android:viewName="itemImage" -->
-    <ImageView
+    <org.omnirom.music.app.ui.TopCropImageView
         android:id="@+id/ivHero"
         android:layout_width="match_parent"
         android:layout_height="200dp"
