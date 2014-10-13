@@ -48,6 +48,7 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
@@ -201,14 +202,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                         }
                     }
                 } else {
-                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     mFabShouldResume = true;
-                    try {
-                        PluginsLookup.getDefault().getPlaybackService().pause();
-                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot pause playback", e);
-                    }
+                    PlaybackProxy.pause();
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                 }
             }
         });

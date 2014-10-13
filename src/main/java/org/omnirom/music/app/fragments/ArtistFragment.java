@@ -74,6 +74,7 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
@@ -538,22 +539,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             public void onClick(View view) {
                 if (mFabDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
                     if (mFabShouldResume) {
-                        try {
-                            PluginsLookup.getDefault().getPlaybackService().play();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot resume playback", e);
-                        }
+                        PlaybackProxy.play();
                     } else {
                         mArtistTracksFragment.playRecommendation();
                     }
                 } else {
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     mFabShouldResume = true;
-                    try {
-                        PluginsLookup.getDefault().getPlaybackService().pause();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot pause playback", e);
-                    }
+                    PlaybackProxy.pause();
                 }
             }
         });
@@ -727,12 +720,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private Runnable mPausePlaybackRunnable = new Runnable() {
             @Override
             public void run() {
-                final IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-                try {
-                    service.pause();
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Cannot pause", e);
-                }
+                PlaybackProxy.pause();
             }
         };
 
@@ -882,7 +870,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             if (mRecommendationLoaded && mRecommendedSong != null) {
                 try {
                     IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                    pbService.playSong(mRecommendedSong);
+                    PlaybackProxy.playSong(mRecommendedSong);
                     mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
                     mParent.setFabShouldResume(true);
 

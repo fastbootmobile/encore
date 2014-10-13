@@ -53,6 +53,7 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
@@ -426,19 +427,10 @@ public class PlayingBarView extends RelativeLayout {
                 if (mSkipFabAction) {
                     mSkipFabAction = false;
                 } else {
-                    IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
                     if (mIsPlaying) {
-                        try {
-                            playbackService.pause();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Unable to pause playback", e);
-                        }
+                        PlaybackProxy.pause();
                     } else {
-                        try {
-                            playbackService.play();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Unable to resume playback", e);
-                        }
+                        PlaybackProxy.play();
                     }
                 }
             }

@@ -55,6 +55,7 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
@@ -467,18 +468,10 @@ public class PlaybackQueueActivity extends FragmentActivity {
                             public void onClick(View view) {
                                 if (mPlayDrawable.getRequestedShape() == PlayPauseDrawable.SHAPE_PLAY) {
                                     // We're paused, play
-                                    try {
-                                        playbackService.play();
-                                    } catch (RemoteException e) {
-                                        Log.e(TAG, "Cannot play!", e);
-                                    }
+                                    PlaybackProxy.play();
                                 } else {
                                     // We're playing, pause
-                                    try {
-                                        playbackService.pause();
-                                    } catch (RemoteException e) {
-                                        Log.e(TAG, "Cannot pause!", e);
-                                    }
+                                    PlaybackProxy.pause();
                                 }
                             }
                         });
