@@ -19,6 +19,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import com.commonsware.cwac.mediarouter.MediaRouteActionProvider;
+import com.williammora.snackbar.Snackbar;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +28,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.omnirom.music.app.fragments.AutomixFragment;
 import org.omnirom.music.app.fragments.DspProvidersFragment;
@@ -38,8 +41,11 @@ import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.CastModule;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
+
+import java.util.List;
 
 public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -108,6 +114,50 @@ public class MainActivity extends FragmentActivity
 
         // Setup Cast button
         mCastModule = new CastModule(this);
+
+        // Look for un-configured plugins
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+                for (final ProviderConnection conn : providers) {
+                    try {
+                        if (conn.getBinder() != null && !conn.getBinder().isSetup()
+                                && conn.getConfigurationActivity() != null) {
+                            showSnackBar("Plugin '" + conn.getProviderName() + "' not configured", "Configure",
+                                    new Snackbar.ActionClickListener() {
+                                @Override
+                                public void onActionClicked() {
+                                    Intent i = new Intent();
+                                    i.setClassName(conn.getPackage(), conn.getConfigurationActivity());
+                                    try {
+                                        startActivity(i);
+                                    } catch (SecurityException e) {
+                                        Log.e(TAG, "Cannot start: Is your activity not exported?");
+                                        Toast.makeText(MainActivity.this,
+                                                "Cannot start: Make sure you set 'exported=true' flag on your settings activity.",
+                                                Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            });
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Cannot get " + conn + " status", e);
+                    }
+                }
+            }
+        }, 1000);
+
+    }
+
+    public void showSnackBar(String message, String button, Snackbar.ActionClickListener listener) {
+        Snackbar.with(getApplicationContext())
+                .type(Snackbar.SnackbarType.MULTI_LINE)
+                .text(message)
+                .actionLabel(button)
+                .actionListener(listener)
+                .duration(Snackbar.SnackbarDuration.LENGTH_VERY_LONG)
+                .show(this);
     }
 
     public boolean isPlayBarVisible() {

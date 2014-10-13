@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="SnackbarText">
+        <item name="android:paddingBottom">18dp</item>
+        <item name="android:paddingLeft">24dp</item>
+        <item name="android:paddingTop">18dp</item>
+        <item name="android:paddingRight">24dp</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="SnackbarText.Action">
+        <item name="android:textAllCaps">true</item>
+    </style>
+
     <style name="OmniMusic">
     </style>
 

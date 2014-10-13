@@ -46,4 +46,5 @@
     <!-- Blue Grey 900 -->
     <color name="blue_dark">#263238</color>
 
+    <color name="snackbar_background">#ff323232</color>
 </resources>
