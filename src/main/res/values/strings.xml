@@ -159,4 +159,8 @@
     <string name="recognition_failed">Oops, we couldn\'t recognize what we heard!</string>
     <string name="more">More</string>
     <string name="songs">Songs</string>
+
+
+    <string name="plugin_not_configured_snackbar">Plugin '%s' not configured</string>
+    <string name="configure">Configure</string>
 </resources>

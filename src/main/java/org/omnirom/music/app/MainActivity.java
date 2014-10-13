@@ -115,39 +115,48 @@ public class MainActivity extends FragmentActivity
         // Setup Cast button
         mCastModule = new CastModule(this);
 
-        // Look for un-configured plugins
+        // Look for un-configured plugins in a second
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-                for (final ProviderConnection conn : providers) {
-                    try {
-                        if (conn.getBinder() != null && !conn.getBinder().isSetup()
-                                && conn.getConfigurationActivity() != null) {
-                            showSnackBar("Plugin '" + conn.getProviderName() + "' not configured", "Configure",
-                                    new Snackbar.ActionClickListener() {
-                                @Override
-                                public void onActionClicked() {
-                                    Intent i = new Intent();
-                                    i.setClassName(conn.getPackage(), conn.getConfigurationActivity());
-                                    try {
-                                        startActivity(i);
-                                    } catch (SecurityException e) {
-                                        Log.e(TAG, "Cannot start: Is your activity not exported?");
-                                        Toast.makeText(MainActivity.this,
-                                                "Cannot start: Make sure you set 'exported=true' flag on your settings activity.",
-                                                Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                            });
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Cannot get " + conn + " status", e);
-                    }
-                }
+                lookForUnconfiguredProviders();
             }
         }, 1000);
+    }
 
+    private void lookForUnconfiguredProviders() {
+        List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+        for (final ProviderConnection conn : providers) {
+            try {
+                if (conn.getBinder() != null && !conn.getBinder().isSetup()
+                        && conn.getConfigurationActivity() != null) {
+                    notifyUnconfiguredProvider(conn);
+                    break;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot get " + conn + " status", e);
+            }
+        }
+    }
+
+    private void notifyUnconfiguredProvider(final ProviderConnection conn) {
+        showSnackBar(getString(R.string.plugin_not_configured_snackbar, conn.getProviderName()),
+                getString(R.string.configure),
+                new Snackbar.ActionClickListener() {
+                    @Override
+                    public void onActionClicked() {
+                        Intent i = new Intent();
+                        i.setClassName(conn.getPackage(), conn.getConfigurationActivity());
+                        try {
+                            startActivity(i);
+                        } catch (SecurityException e) {
+                            Log.e(TAG, "Cannot start: Is your activity not exported?");
+                            Toast.makeText(MainActivity.this,
+                                    "Cannot start: Make sure you set 'exported=true' flag on your settings activity.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 
     public void showSnackBar(String message, String button, Snackbar.ActionClickListener listener) {
