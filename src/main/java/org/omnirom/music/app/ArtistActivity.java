@@ -29,6 +29,8 @@ import android.view.MenuItem;
 
 import org.omnirom.music.app.fragments.ArtistFragment;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 /**
  * Activity to view an Artist tracks, similar, etc. through
  * an {@link org.omnirom.music.app.fragments.ArtistFragment}
@@ -154,6 +156,11 @@ public class ArtistActivity extends FragmentActivity {
         }
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     @Override

@@ -19,6 +19,7 @@ package org.omnirom.music.app;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -64,6 +65,8 @@ import org.omnirom.music.service.PlaybackService;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 /**
  * Activity showing the current playback queue
  */
@@ -89,6 +92,10 @@ public class PlaybackQueueActivity extends FragmentActivity {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

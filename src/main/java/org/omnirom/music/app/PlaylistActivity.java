@@ -27,6 +27,8 @@ import android.view.MenuItem;
 import org.omnirom.music.app.fragments.PlaylistViewFragment;
 import org.omnirom.music.model.Playlist;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 /**
  * Activity allowing user to view a Playlist contents through
  * a {@link org.omnirom.music.app.fragments.PlaylistViewFragment}
@@ -79,6 +81,11 @@ public class PlaylistActivity extends FragmentActivity {
 
         // This activity changes music stream volume too
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     @Override

@@ -17,6 +17,7 @@ package org.omnirom.music.app;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -33,6 +34,8 @@ import org.omnirom.music.api.echonest.AutoMixBucket;
 import org.omnirom.music.api.echonest.AutoMixManager;
 
 import java.util.Set;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Activity presenting the settings to create an AutoMix Bucket
@@ -64,6 +67,10 @@ public class AutomixCreateActivity extends PreferenceActivity {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

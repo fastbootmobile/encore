@@ -88,4 +88,7 @@
         <attr name="fab_addButtonColorNormal" format="color"/>
         <attr name="fab_addButtonPlusIconColor" format="color"/>
     </declare-styleable>
+
+    <!-- Calligraphy -->
+    <attr name="fontPath" format="string"/>
 </resources>

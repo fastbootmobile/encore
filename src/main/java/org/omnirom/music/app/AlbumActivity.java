@@ -38,6 +38,8 @@ import org.omnirom.music.model.Artist;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackService;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 /**
  * Activity for viewing an album details through
  * {@link org.omnirom.music.app.fragments.AlbumViewFragment}
@@ -118,6 +120,11 @@ public class AlbumActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         PluginsLookup.getDefault().connectPlayback();
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     @Override

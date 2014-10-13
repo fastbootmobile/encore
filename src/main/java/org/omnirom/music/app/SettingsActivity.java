@@ -17,6 +17,7 @@ package org.omnirom.music.app;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.media.AudioManager;
 import android.support.v4.app.FragmentManager;
 import android.os.Build;
@@ -32,6 +33,8 @@ import com.balysv.material.drawable.menu.MaterialMenuView;
 import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Activity showing a {@link org.omnirom.music.app.fragments.SettingsFragment} to configure the app
@@ -79,5 +82,10 @@ public class SettingsActivity extends FragmentActivity {
 
         // Change the music volume here as well
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 }

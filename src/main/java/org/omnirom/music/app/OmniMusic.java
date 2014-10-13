@@ -32,6 +32,8 @@ import org.omnirom.music.providers.ProviderAggregator;
 import java.io.File;
 import java.io.IOException;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+
 // Report crashes with ACRA on our temporary endpoint
 @ReportsCrashes(
         formKey = "",
@@ -81,5 +83,8 @@ public class OmniMusic extends Application {
 
         // Setup Automix system
         AutoMixManager.getDefault().initialize(getApplicationContext());
+
+        // Setup custom fonts
+        CalligraphyConfig.initDefault("fonts/Roboto-Regular.ttf", R.attr.fontPath);
     }
 }

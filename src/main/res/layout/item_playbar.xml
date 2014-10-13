@@ -36,6 +36,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            fontPath="fonts/Roboto-Medium.ttf"
             android:fontFamily="sans-serif-medium"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="#333333" />

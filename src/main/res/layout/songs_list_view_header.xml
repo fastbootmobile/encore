@@ -16,6 +16,7 @@
         android:layout_alignStart="@+id/ivHero"
         android:layout_below="@+id/ivHero"
         android:background="#333"
+        fontPath="fonts/Roboto-Medium.ttf"
         android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical|start"
         android:paddingBottom="16dp"

@@ -2,6 +2,7 @@
 <resources>
     <!-- Material Design Typography -->
     <style name="FontDisplay4">
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textSize">112sp</item>
         <item name="android:textColor">#8A000000</item>
@@ -32,6 +33,7 @@
     </style>
 
     <style name="FontTitle">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">#DD000000</item>
@@ -44,6 +46,7 @@
     </style>
 
     <style name="FontBody2">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">#DD000000</item>
@@ -62,12 +65,14 @@
     </style>
 
     <style name="FontMenu">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">#DD000000</item>
     </style>
 
     <style name="FontButton">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">true</item>
@@ -75,12 +80,14 @@
     </style>
 
     <style name="FontCardLine1">
+        <item name="fontPath">fonts/Roboto-Regular.ttf</item>
         <item name="android:fontFamily">sans-serif-regular</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">#DD000000</item>
     </style>
 
     <style name="FontCardLine2">
+        <item name="fontPath">fonts/Roboto-Regular.ttf</item>
         <item name="android:fontFamily">sans-serif-regular</item>
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">#DD000000</item>
@@ -108,7 +115,7 @@
 
     <!-- Roboto Condensed -->
     <style name="RobotoCondensedLarge" parent="@android:style/TextAppearance.Large">
-        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="fontPath">fonts/RobotoCondensed-Regular.ttf</item>
     </style>
     <style name="RobotoCondensedBoldLarge" parent="@style/RobotoCondensedLarge">
         <item name="android:textStyle">bold</item>
@@ -118,22 +125,22 @@
     </style>
 
     <style name="RobotoCondensedSmall" parent="@android:style/TextAppearance.Small">
-        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="fontPath">fonts/RobotoCondensed-Regular.ttf</item>
     </style>
     <style name="RobotoCondensedCapsSmall" parent="@style/RobotoCondensedSmall">
         <item name="android:textAllCaps">true</item>
     </style>
     <style name="RobotoCondensedCapsBoldSmall" parent="@style/RobotoCondensedCapsSmall">
-        <item name="android:textStyle">bold</item>
+        <item name="fontPath">fonts/RobotoCondensed-Bold.ttf</item>
     </style>
     <style name="RobotoCondensedItalicSmall" parent="@style/RobotoCondensedSmall">
-        <item name="android:textStyle">italic</item>
+        <item name="fontPath">fonts/RobotoCondensed-Italic.ttf</item>
     </style>
 
     <!-- Roboto Regular -->
     <style name="RobotoRegularLarge" parent="@android:style/TextAppearance.Large">
     </style>
     <style name="RobotoRegularBoldLarge" parent="@style/RobotoRegularLarge">
-        <item name="android:textStyle">bold</item>
+        <item name="fontPath">fonts/Roboto-Bold.ttf</item>
     </style>
 </resources>
