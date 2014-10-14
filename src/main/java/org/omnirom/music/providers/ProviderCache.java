@@ -1,7 +1,5 @@
 package org.omnirom.music.providers;
 
-import android.util.Log;
-
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -21,9 +19,6 @@ public class ProviderCache {
     private final Map<String, ProviderIdentifier> mRefProvider;
     private final Map<String, Album> mAlbums;
     private final Map<String, Artist> mArtists;
-    private final Map<Song, String> mSongArtKeys;
-    private final Map<Album, String> mAlbumArtKeys;
-    private final Map<Artist, String> mArtistArtKeys;
     private final List<Playlist> mMultiProviderPlaylists;
 
     /**
@@ -35,9 +30,6 @@ public class ProviderCache {
         mRefProvider = new HashMap<String, ProviderIdentifier>();
         mAlbums = new HashMap<String, Album>();
         mArtists = new HashMap<String, Artist>();
-        mSongArtKeys = new HashMap<Song, String>();
-        mAlbumArtKeys = new HashMap<Album, String>();
-        mArtistArtKeys = new HashMap<Artist, String>();
         mMultiProviderPlaylists = new ArrayList<Playlist>();
     }
 
@@ -130,33 +122,4 @@ public class ProviderCache {
         }
     }
 
-    public void putSongArtKey(final Song song, final String key) {
-        mSongArtKeys.put(song, key);
-    }
-
-    /**
-     * Get the art cache key of the album art for the provided song, or null if none found
-     *
-     * @param song The song to lookup
-     * @return The art key, or null if none found
-     */
-    public String getSongArtKey(final Song song) {
-        return mSongArtKeys.get(song);
-    }
-
-    public String getAlbumArtKey(final Album album) {
-        return mAlbumArtKeys.get(album);
-    }
-
-    public void putAlbumArtKey(final Album album, final String key) {
-        mAlbumArtKeys.put(album, key);
-    }
-
-    public String getArtistArtKey(final Artist album) {
-        return mArtistArtKeys.get(album);
-    }
-
-    public void putArtistArtKey(final Artist album, final String key) {
-        mArtistArtKeys.put(album, key);
-    }
 }

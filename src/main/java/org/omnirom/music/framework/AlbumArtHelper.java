@@ -21,20 +21,10 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Process;
-import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import org.omnirom.music.model.Album;
-import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
-import org.omnirom.music.model.Playlist;
-import org.omnirom.music.model.Song;
-import org.omnirom.music.providers.IArtCallback;
-import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
-import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -51,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AlbumArtHelper {
     private static final String TAG = "AlbumArtHelper";
 
-    private static final int DELAY_BEFORE_RETRY = 60;
+    private static final int DELAY_BEFORE_RETRY = 500;
     private static final int CORE_POOL_SIZE = 4;
     private static final int MAXIMUM_POOL_SIZE = 256;
     private static final int KEEP_ALIVE = 5;
@@ -87,25 +77,23 @@ public class AlbumArtHelper {
         private Context mContext;
         private AlbumArtListener mListener;
         private Handler mHandler;
-        private IArtCallback mProviderArtCallback;
+        private Bitmap mArtBitmap;
+        private AlbumArtCache.IAlbumArtCacheListener mCacheListener = new AlbumArtCache.IAlbumArtCacheListener() {
+            @Override
+            public void onArtLoaded(BoundEntity ent, Bitmap result) {
+                synchronized (AlbumArtTask.this) {
+                    if (!isCancelled()) {
+                        mArtBitmap = result;
+                    }
+                    AlbumArtTask.this.notifyAll();
+                }
+            }
+        };
 
         private AlbumArtTask(Context ctx, AlbumArtListener listener) {
             mContext = ctx;
             mListener = listener;
             mHandler = new Handler();
-            mProviderArtCallback = new IArtCallback.Stub() {
-                @Override
-                public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
-                    if (!isCancelled()) {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mListener.onArtLoaded(bitmap, mEntity);
-                            }
-                        });
-                    }
-                }
-            };
         }
 
         @Override
@@ -120,106 +108,34 @@ public class AlbumArtHelper {
                 return null;
             }
 
-            final ProviderCache cache = ProviderAggregator.getDefault().getCache();
+            final AlbumArtCache artCache = AlbumArtCache.getDefault();
 
-            Bitmap bmp = null;
+            if (artCache.isQueryRunning(mEntity)) {
+                output.retry = true;
+            } else {
+                // Notify other potential tasks we're processing this entity
+                artCache.notifyQueryRunning(mEntity);
 
-            // First, we try to get it from the provider
-            boolean provided = false;
-            ProviderConnection connection = PluginsLookup.getDefault().getProvider(mEntity.getProvider());
-            try {
-                if (connection != null) {
-                    IMusicProvider provider = connection.getBinder();
-                    if (provider != null) {
-                        if (mEntity instanceof Album) {
-                            provided = provider.getAlbumArt((Album) mEntity, mProviderArtCallback);
-                        } else if (mEntity instanceof Song) {
-                            provided = provider.getSongArt((Song) mEntity, mProviderArtCallback);
-                        } else if (mEntity instanceof Artist) {
-                            provided = provider.getArtistArt((Artist) mEntity, mProviderArtCallback);
-                        } else if (mEntity instanceof Playlist) {
-                            provided = provider.getPlaylistArt((Playlist) mEntity, mProviderArtCallback);
+                // Get from the cache
+                synchronized (this) {
+                    if (AlbumArtCache.getDefault().getArt(mEntity, mCacheListener)) {
+                        // Wait for the result
+                        if (mArtBitmap == null) {
+                            try {
+                                wait(6000);
+                            } catch (InterruptedException e) {
+                                Log.w(TAG, "Interrupted while loading art");
+                            }
                         }
                     }
-                }
-            } catch (RemoteException e) {
-                // Fallback to MB
-                Log.e(TAG, "Remote exception while looking up art from provider", e);
-            }
-
-            // If the provider couldn't provide an image, get it from MusicBrainz
-            if (!provided) {
-                Bitmap cachedImage = null;
-                String artKey;
-
-                // Load the art key based on what we need
-                if (mEntity instanceof Album) {
-                    artKey = cache.getAlbumArtKey((Album) mEntity);
-                } else if (mEntity instanceof Song) {
-                    artKey = cache.getSongArtKey((Song) mEntity);
-                } else if (mEntity instanceof Artist) {
-                    artKey = cache.getArtistArtKey((Artist) mEntity);
-                } else {
-                    throw new RuntimeException("Album art entity should be a song or an album");
-                }
-
-                // If we have the key in cache already, try to see if we have it loaded in cache
-                if (artKey != null) {
-                    cachedImage = ImageCache.getDefault().get(artKey);
-                }
-
-                // If we have it in cache, set it as the bitmap to display, otherwise load it from the
-                // web provider
-                final AlbumArtCache artCache = AlbumArtCache.getDefault();
-                if (cachedImage != null) {
-                    bmp = cachedImage;
-                } else {
-                    String artUrl = null;
-
-                    // Don't allow other views to run the same query
-                    if (artCache.isQueryRunning(mEntity)) {
-                        // A query is already running for this entity, we'll revisit it later
-                        output.retry = true;
-                        return output;
-                    } else {
-                        artCache.notifyQueryRunning(mEntity);
-                    }
-
-                    // The image isn't loaded, if we don't have the artKey either, load both
-                    if (artKey == null) {
-                        StringBuffer urlBuffer = new StringBuffer();
-                        if (mEntity instanceof Album) {
-                            artKey = AlbumArtCache.getDefault().getArtKey((Album) mEntity, urlBuffer);
-                        } else if (mEntity instanceof Song) {
-                            artKey = AlbumArtCache.getDefault().getArtKey((Song) mEntity, urlBuffer);
-                        } else if (mEntity instanceof Artist) {
-                            artKey = AlbumArtCache.getDefault().getArtKey((Artist) mEntity, urlBuffer);
-                        }
-
-                        artUrl = urlBuffer.toString();
-                    }
-
-                    // We now have the art key, download the actual image if it's not the default art
-                    if (artKey != null && !artKey.equals(AlbumArtCache.DEFAULT_ART)) {
-                        bmp = AlbumArtCache.getOrDownloadArt(artKey, artUrl, null);
-                    }
-                }
-
-                // We now have a bitmap to display, so let's put it!
-                output.bitmap = bmp;
-                output.retry = false;
-
-                // Cache the image
-                if (mEntity instanceof Album) {
-                    cache.putAlbumArtKey((Album) mEntity, artKey);
-                } else if (mEntity instanceof Song) {
-                    cache.putSongArtKey((Song) mEntity, artKey);
-                } else if (mEntity instanceof Artist) {
-                    cache.putArtistArtKey((Artist) mEntity, artKey);
                 }
 
                 // In all cases, we tell that this entity is loaded
                 artCache.notifyQueryStopped(mEntity);
+
+                // We now have a bitmap to display, so let's put it!
+                output.bitmap = mArtBitmap;
+                output.retry = false;
             }
 
             return output;
@@ -236,20 +152,22 @@ public class AlbumArtHelper {
         protected void onPostExecute(final BackgroundResult result) {
             super.onPostExecute(result);
 
-            if (result != null && result.retry) {
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        AlbumArtTask task = new AlbumArtTask(mContext, mListener);
-                        try {
-                            task.executeOnExecutor(ART_POOL_EXECUTOR, result.request);
-                        } catch (RejectedExecutionException e) {
-                            Log.w(TAG, "Request restart has been denied", e);
+            if (!isCancelled()) {
+                if (result != null && result.retry) {
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            AlbumArtTask task = new AlbumArtTask(mContext, mListener);
+                            try {
+                                task.executeOnExecutor(ART_POOL_EXECUTOR, result.request);
+                            } catch (RejectedExecutionException e) {
+                                Log.w(TAG, "Request restart has been denied", e);
+                            }
                         }
-                    }
-                }, DELAY_BEFORE_RETRY);
-            } else if (result != null) {
-                mListener.onArtLoaded(result.bitmap, result.request);
+                    }, DELAY_BEFORE_RETRY);
+                } else if (result != null) {
+                    mListener.onArtLoaded(result.bitmap, result.request);
+                }
             }
         }
     }

@@ -261,7 +261,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         }
 
         // If we have the image in cache, show it immediately.
-        String cachedKey = AlbumArtCache.getDefault().getCachedArtKey(ent);
+        int cacheStatus = AlbumArtCache.getDefault().getCacheStatus(ent);
 
         // We delay the loading slightly to make sure we don't uselessly load an image that is
         // being quickly flinged through (the requested entity will change in-between as the
@@ -280,11 +280,12 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         };
 
         // When we're crossfading, we're assuming we want the image directly
-        if (mCrossfade || cachedKey != null) {
-            if (cachedKey != null) {
+        if (mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY ||
+                cacheStatus == AlbumArtCache.CACHE_STATUS_DISK) {
+            if (cacheStatus != AlbumArtCache.CACHE_STATUS_UNAVAILABLE) {
                 mSkipTransition = true;
             }
-            mHandler.post(runnable);
+            runnable.run();
         } else {
             setDefaultArt();
             mHandler.postDelayed(runnable, DELAY_BEFORE_START);

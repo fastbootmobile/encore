@@ -18,8 +18,11 @@ package org.omnirom.music.framework;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.util.LruCache;
+
+import org.omnirom.music.app.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,6 +38,7 @@ public class  ImageCache {
 
     private ArrayList<String> mEntries;
     private File mCacheDir;
+    private Bitmap mDefaultArt;
 
     private LruCache<String, Bitmap> mMemoryCache;
 
@@ -65,6 +69,21 @@ public class  ImageCache {
             for (File entry : entries) {
                 mEntries.add(entry.getName());
             }
+        }
+
+        mDefaultArt = ((BitmapDrawable) ctx.getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
+
+    }
+
+    public boolean hasInMemory(final String key) {
+        synchronized (this) {
+            return mMemoryCache.get(key) != null;
+        }
+    }
+
+    public boolean hasOnDisk(final String key) {
+        synchronized (this) {
+            return mEntries.contains(key);
         }
     }
 
@@ -99,19 +118,28 @@ public class  ImageCache {
         put(key, bmp, false);
     }
 
-    public void put(final String key, final Bitmap bmp, final boolean asPNG) {
-        mMemoryCache.put(key, bmp);
+    public void put(final String key, Bitmap bmp, final boolean asPNG) {
+        boolean isDefaultArt = false;
 
-        try {
-            FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + key);
-            bmp.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
-            out.close();
-        } catch (IOException e) {
-            Log.e(TAG, "Unable to write the file to cache", e);
+        if (bmp == null) {
+            bmp = mDefaultArt;
+            isDefaultArt = true;
         }
 
-        synchronized (this) {
-            mEntries.add(key);
+        mMemoryCache.put(key, bmp);
+
+        if (!isDefaultArt) {
+            try {
+                FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + key);
+                bmp.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
+                out.close();
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to write the file to cache", e);
+            }
+
+            synchronized (this) {
+                mEntries.add(key);
+            }
         }
     }
 }

@@ -78,7 +78,6 @@ public class OmniMusic extends Application {
         }
 
         // Setup image cache
-        AlbumArtCache.getDefault().initialize(getApplicationContext());
         ImageCache.getDefault().initialize(getApplicationContext());
 
         // Setup Automix system
