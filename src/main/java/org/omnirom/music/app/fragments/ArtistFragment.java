@@ -782,36 +782,33 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             public void onClick(View view) {
                 final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
-                final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                Song song = (Song) view.getTag();
+                final Song song = (Song) view.getTag();
                 Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
 
-                try {
-                    if (song.isAvailable() &&
-                            (!aggregator.isOfflineMode()
-                                    || song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY)) {
-                        pbService.getCurrentPlaybackQueue().clear();
-                        pbService.queueAlbum(album, false);
+                if (song.isAvailable() &&
+                        (!aggregator.isOfflineMode()
+                                || song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY)) {
+                    // Queue the full album
+                    PlaybackProxy.clearQueue();
+                    PlaybackProxy.queueAlbum(album, false);
 
-                        Iterator<String> songs = album.songs();
-                        int i = 0;
-                        while (songs.hasNext()) {
-                            String songRef = songs.next();
-                            if (songRef.equals(song.getRef())) {
-                                break;
-                            } else {
-                                ++i;
-                            }
+                    // Find the clicked song index and play it
+                    Iterator<String> songs = album.songs();
+                    int i = 0;
+                    while (songs.hasNext()) {
+                        String songRef = songs.next();
+                        if (songRef.equals(song.getRef())) {
+                            break;
+                        } else {
+                            ++i;
                         }
-
-                        pbService.playAtQueueIndex(i);
-
-                        // Update UI
-                        boldPlayingTrack(song);
-                        updatePlayingAlbum(song.getAlbum());
                     }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to play song", e);
+
+                    PlaybackProxy.playAtIndex(i);
+
+                    // Update UI
+                    boldPlayingTrack(song);
+                    updatePlayingAlbum(song.getAlbum());
                 }
 
 
@@ -864,25 +861,24 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
 
         /**
-         * Play the recommended track
+         * Play the artist radio
          */
         private void playRecommendation() {
             if (mRecommendationLoaded && mRecommendedSong != null) {
-                try {
-                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                    PlaybackProxy.playSong(mRecommendedSong);
-                    mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
-                    mParent.setFabShouldResume(true);
+                // Generate radio tracks
+                List<Song> tracks = Suggestor.getInstance().buildArtistRadio(mParent.getArtist());
+                PlaybackProxy.clearQueue();
 
-                    boldPlayingTrack(mRecommendedSong);
-                    updatePlayingAlbum(mRecommendedSong.getAlbum());
-
-                    // TODO: Figure out a better algorithm to find things to play from an artist
-                    final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-                    pbService.queueAlbum(aggregator.retrieveAlbum(mRecommendedSong.getAlbum(), mRecommendedSong.getProvider()), false);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to play recommended song", e);
+                for (Song song : tracks) {
+                    PlaybackProxy.queueSong(song, false);
                 }
+
+                PlaybackProxy.playAtIndex(0);
+                mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
+                mParent.setFabShouldResume(true);
+
+                boldPlayingTrack(mRecommendedSong);
+                updatePlayingAlbum(mRecommendedSong.getAlbum());
             }
         }
 

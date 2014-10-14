@@ -79,11 +79,11 @@
                 <Button
                     android:id="@+id/btnArtistSuggestionPlay"
                     style="@style/OmniMusic.Spec.BorderlessButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="64dp"
                     android:layout_height="36dp"
                     android:layout_marginRight="4dp"
                     android:layout_marginEnd="4dp"
-                    android:text="@string/play_now"
+                    android:text="@string/start_radio"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
