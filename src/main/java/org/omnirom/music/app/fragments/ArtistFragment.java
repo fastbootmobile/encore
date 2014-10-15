@@ -851,14 +851,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 List<Song> tracks = Suggestor.getInstance().buildArtistRadio(mParent.getArtist());
                 PlaybackProxy.clearQueue();
 
+                // Add the recommended song itself first, then the generated tracks
+                PlaybackProxy.queueSong(mRecommendedSong, true);
+
                 for (Song song : tracks) {
                     PlaybackProxy.queueSong(song, false);
                 }
 
+                // And play!
                 PlaybackProxy.playAtIndex(0);
                 mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
                 mParent.setFabShouldResume(true);
 
+                // Update UI indicators
                 boldPlayingTrack(mRecommendedSong);
                 updatePlayingAlbum(mRecommendedSong.getAlbum());
             }
