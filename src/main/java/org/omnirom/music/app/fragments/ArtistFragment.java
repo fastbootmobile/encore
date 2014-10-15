@@ -993,7 +993,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             llAlbums.removeAllViews();
 
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-            Iterator<String> albumIt = mParent.getArtist().albums();
+            Iterator<String> albumIt = new ArrayList<String>(mParent.getArtist().getAlbums()).iterator();
             List<Album> albums = new ArrayList<Album>();
 
             while (albumIt.hasNext()) {
