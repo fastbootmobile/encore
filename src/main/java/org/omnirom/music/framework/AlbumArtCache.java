@@ -81,6 +81,13 @@ public class AlbumArtCache {
     }
 
     /**
+     * Empties the image cache
+     */
+    public void clear() {
+        ImageCache.getDefault().clear();
+    }
+
+    /**
      * Returns whether or not the entity passed in parameter has an album art in the cache
      * @param ent The entity
      * @return One of {@link #CACHE_STATUS_DISK}, {@link #CACHE_STATUS_MEMORY}, or

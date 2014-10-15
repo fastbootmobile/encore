@@ -42,10 +42,16 @@ public class  ImageCache {
 
     private LruCache<String, Bitmap> mMemoryCache;
 
+    /**
+     * @return The default instance
+     */
     public static ImageCache getDefault() {
         return INSTANCE;
     }
 
+    /**
+     * Default constructor, creates an LRU cache of 1/8th the max memory
+     */
     public ImageCache() {
         mEntries = new ArrayList<String>();
 
@@ -58,6 +64,10 @@ public class  ImageCache {
         };
     }
 
+    /**
+     * Initializes the memory cache. Creates the cache directory and load the existing entries.
+     * @param ctx A valid context
+     */
     public void initialize(Context ctx) {
         mCacheDir = new File(ctx.getCacheDir(), "albumart");
         if (!mCacheDir.exists() && !mCacheDir.mkdir()) {
@@ -72,21 +82,50 @@ public class  ImageCache {
         }
 
         mDefaultArt = ((BitmapDrawable) ctx.getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
-
     }
 
+    /**
+     * Clears the cache (both memory and disk)
+     */
+    public void clear() {
+        mMemoryCache.evictAll();
+        mEntries.clear();
+
+        File[] cacheFiles = mCacheDir.listFiles();
+        for (File file : cacheFiles) {
+            if (!file.delete()) {
+                Log.e(TAG, "Cannot delete " + file.getPath());
+            }
+        }
+    }
+
+    /**
+     * Returns whether or not the provided key is currently available in memory
+     * @param key The key to check
+     * @return true if the image is available in memory
+     */
     public boolean hasInMemory(final String key) {
         synchronized (this) {
             return mMemoryCache.get(key) != null;
         }
     }
 
+    /**
+     * Returns whether or not the provided key is currently available on disk
+     * @param key The key to check
+     * @return true if the image is cached on the disk (well, flash storage)
+     */
     public boolean hasOnDisk(final String key) {
         synchronized (this) {
             return mEntries.contains(key);
         }
     }
 
+    /**
+     * Returns the image from the cache (either memory or disk)
+     * @param key The key of the image to get
+     * @return A bitmap corresponding to the key, or null if it's not in the cache
+     */
     public Bitmap get(final String key) {
         if (key == null) {
             return null;
@@ -113,11 +152,21 @@ public class  ImageCache {
         }
     }
 
-
+    /**
+     * Stores the image as WEBP in the cache
+     * @param key The key of the image to put
+     * @param bmp The bitmap to put (or null to put the default art)
+     */
     public void put(final String key, final Bitmap bmp) {
         put(key, bmp, false);
     }
 
+    /**
+     * Stores the image as either WEBP or PNG in the cache
+     * @param key The key of the image to put
+     * @param bmp The bitmap to put (or null to put the default art)
+     * @param asPNG True to store as PNG, false to store as WEBP
+     */
     public void put(final String key, Bitmap bmp, final boolean asPNG) {
         boolean isDefaultArt = false;
 
