@@ -52,17 +52,21 @@ public class FreeBaseClient {
                 true);
 
         JSONArray result = object.getJSONArray("result");
-        JSONObject firstItem = result.getJSONObject(0);
-        String metaId = firstItem.getString("mid");
+        if (result.length() > 0) {
+            JSONObject firstItem = result.getJSONObject(0);
+            String metaId = firstItem.getString("mid");
 
-        // While we could get an image immediately, we're not sure there's actually an image
-        // for that topic. We do one more query to not end up with an ugly "NO IMAGE" result.
-        // We do take the risk however by allowing the image anyway if we go above the rate limit
-        // of Google's API, as the topic endpoint is rate-limited and we're not using any API key.
-        object = JsonGet.getObject(TOPIC_ENDPOINT + metaId, "filter=/common/topic/image&limit=1", true);
+            // While we could get an image immediately, we're not sure there's actually an image
+            // for that topic. We do one more query to not end up with an ugly "NO IMAGE" result.
+            // We do take the risk however by allowing the image anyway if we go above the rate limit
+            // of Google's API, as the topic endpoint is rate-limited and we're not using any API key.
+            object = JsonGet.getObject(TOPIC_ENDPOINT + metaId, "filter=/common/topic/image&limit=1", true);
 
-        if (object.has("property") || object.has("error")) {
-            return IMAGE_ENDPOINT + metaId + "?maxwidth=1080&maxheight=1080";
+            if (object.has("property") || object.has("error")) {
+                return IMAGE_ENDPOINT + metaId + "?maxwidth=1080&maxheight=1080";
+            } else {
+                return null;
+            }
         } else {
             return null;
         }

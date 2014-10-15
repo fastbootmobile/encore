@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.omnirom.music.api.common.HttpGet;
 import org.omnirom.music.api.common.RateLimitException;
 import org.omnirom.music.api.freebase.FreeBaseClient;
+import org.omnirom.music.api.gimages.GoogleImagesClient;
 import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
 import org.omnirom.music.app.Utils;
@@ -218,8 +219,7 @@ public class AlbumArtCache {
         }
 
         if (!providerprovides) {
-            // Get from MusicBrainz as the provider can't provide an image for this album
-            AlbumInfo[] albums = null;
+            String url = null;
             final String artistRef = (album.getSongsCount() > 0 ? Utils.getMainArtist(album) : null);
             final String albumName = album.getName();
             String artistName = (hintArtist != null ? hintArtist.getName() : null);
@@ -232,60 +232,76 @@ public class AlbumArtCache {
                 }
             }
 
-            // Query MusicBrainz
+            // Try to get from Google Images
             try {
-                albums = MusicBrainzClient.getAlbum(artistName, albumName);
+                if (artistName != null) {
+                    url = GoogleImagesClient.getImageUrl("album " + artistName + " " + albumName);
+                } else {
+                    url = GoogleImagesClient.getImageUrl("album " + albumName);
+                }
             } catch (RateLimitException e) {
-                Log.w(TAG, "Can't get from MusicBrainz, rate limited");
+                Log.w(TAG, "Rate limit hit while getting image from Google Images");
+            } catch (JSONException e) {
+                Log.e(TAG, "JSON Error while getting image from Google Images", e);
+            } catch (IOException e) {
+                Log.e(TAG, "IO error while getting image from Google Images", e);
             }
 
-            // If we have results, go and fetch one
-            if (albums != null && albums.length > 0) {
-                AlbumInfo selection = albums[0];
+            if (url == null) {
+                // Get from MusicBrainz as both the provider and Google Images can't provide
+                AlbumInfo[] albums = null;
 
-                if (albums.length > 1) {
-                    // Try to find if we have an album that has the same track count, otherwise use
-                    // the first one
-                    for (AlbumInfo albumInfo : albums) {
-                        if (albumInfo.track_count == album.getSongsCount()) {
-                            selection = albumInfo;
-                            break;
-                        }
-                    }
-                }
-
-                // Get the URL
-                String url = null;
+                // Query MusicBrainz
                 try {
-                    url = MusicBrainzClient.getAlbumArtUrl(selection.id);
+                    albums = MusicBrainzClient.getAlbum(artistName, albumName);
                 } catch (RateLimitException e) {
-                    Log.w(TAG, "Can't get URL from MusicBrainz, rate limited");
-                    result = false;
+                    Log.w(TAG, "Can't get from MusicBrainz, rate limited");
                 }
 
-                if (url != null) {
-                    // Download it
-                    try {
-                        byte[] imageData = HttpGet.getBytes(url, "", true);
-                        result = true;
+                // If we have results, go and fetch one
+                if (albums != null && albums.length > 0) {
+                    AlbumInfo selection = albums[0];
 
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-                        if (bitmap != null) {
-                            ImageCache.getDefault().put(getEntityArtKey(listenerRef), bitmap);
-                            listener.onArtLoaded(listenerRef, bitmap);
-                        } else {
-                            result = false;
+                    if (albums.length > 1) {
+                        // Try to find if we have an album that has the same track count, otherwise use
+                        // the first one
+                        for (AlbumInfo albumInfo : albums) {
+                            if (albumInfo.track_count == album.getSongsCount()) {
+                                selection = albumInfo;
+                                break;
+                            }
                         }
-                    } catch (IOException e) {
-                        Log.e(TAG, "Error while downloading album art", e);
-                        result = false;
-                    } catch (RateLimitException e) {
-                        Log.e(TAG, "Rate limited while downloading album art", e);
-                        result = false;
                     }
+
+                    // Get the URL
+                    try {
+                        url = MusicBrainzClient.getAlbumArtUrl(selection.id);
+                    } catch (RateLimitException e) {
+                        Log.w(TAG, "Can't get URL from MusicBrainz, rate limited");
+                    }
+                }
+            }
+
+            // If we have an URL from either image source, download it and pass it back
+            if (url != null) {
+                // Download it
+                try {
+                    byte[] imageData = HttpGet.getBytes(url, "", true);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+                    if (bitmap != null) {
+                        result = true;
+                        ImageCache.getDefault().put(getEntityArtKey(listenerRef), bitmap);
+                        listener.onArtLoaded(listenerRef, bitmap);
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Error while downloading album art", e);
+                } catch (RateLimitException e) {
+                    Log.e(TAG, "Rate limited while downloading album art", e);
                 }
             } else {
-                result = false;
+                ImageCache.getDefault().put(getEntityArtKey(listenerRef), null);
+                listener.onArtLoaded(listenerRef, null);
+                result = true;
             }
         }
 
@@ -315,9 +331,35 @@ public class AlbumArtCache {
         }
 
         if (!providerprovides) {
+            // Try to get it first from FreeBase, then from Google Image if none found or error
+            // (Google Images might return some random/unwanted images, so prefer FreeBase first)
+            String url = null;
+
             try {
-                String url = FreeBaseClient.getArtistImageUrl(artist.getName());
-                if (url != null) {
+                url = FreeBaseClient.getArtistImageUrl(artist.getName());
+            } catch (JSONException e) {
+                Log.e(TAG, "JSON error while getting image from FreeBase", e);
+            } catch (RateLimitException e) {
+                Log.w(TAG, "Rate limit hit while getting image from FreeBase");
+            } catch (IOException e) {
+                Log.e(TAG, "IO error while getting image from FreeBase", e);
+            }
+
+            if (url == null) {
+                try {
+                    url = GoogleImagesClient.getImageUrl("Music Band " + artist.getName());
+                } catch (RateLimitException e) {
+                    Log.w(TAG, "Rate limit hit while getting image from Google Images");
+                } catch (JSONException e) {
+                    Log.e(TAG, "JSON Error while getting image from Google Images", e);
+                } catch (IOException e) {
+                    Log.e(TAG, "IO error while getting image from Google Images", e);
+                }
+
+            }
+
+            if (url != null) {
+                try {
                     byte[] imageData = HttpGet.getBytes(url, "", true);
                     Bitmap image = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
                     if (image != null) {
@@ -325,18 +367,15 @@ public class AlbumArtCache {
                         ImageCache.getDefault().put(getEntityArtKey(artist), image);
                         listener.onArtLoaded(artist, image);
                     }
-                } else {
-                    ImageCache.getDefault().put(getEntityArtKey(artist), null);
+                } catch (IOException e) {
+                    Log.e(TAG, "IO exception while downloading image", e);
+                } catch (RateLimitException e) {
+                    Log.w(TAG, "Rate limited while getting image");
                 }
-            } catch (JSONException e) {
-                Log.e(TAG, "JSON error while getting image from FreeBase", e);
-                result = false;
-            } catch (RateLimitException e) {
-                Log.w(TAG, "Rate limit hit while getting image from FreeBase");
-                result = false;
-            } catch (IOException e) {
-                Log.e(TAG, "IO error while getting image from FreeBase", e);
-                result = false;
+            } else {
+                ImageCache.getDefault().put(getEntityArtKey(artist), null);
+                listener.onArtLoaded(artist, null);
+                result = true;
             }
         }
 
