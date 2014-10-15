@@ -11,16 +11,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
-import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import com.commonsware.cwac.mediarouter.MediaRouteActionProvider;
-import com.williammora.snackbar.Snackbar;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +24,9 @@ import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.commonsware.cwac.mediarouter.MediaRouteActionProvider;
+import com.williammora.snackbar.Snackbar;
 
 import org.omnirom.music.app.fragments.AutomixFragment;
 import org.omnirom.music.app.fragments.DspProvidersFragment;
@@ -39,10 +37,10 @@ import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.RecognitionFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.CastModule;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
-import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
 
 import java.util.List;
@@ -220,14 +218,9 @@ public class MainActivity extends FragmentActivity
         }
 
         // Release services connections if playback isn't happening
-        IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-        try {
-            int state = playbackService.getState();
-            if (state == PlaybackService.STATE_PAUSED || state == PlaybackService.STATE_STOPPED) {
-                PluginsLookup.getDefault().tearDown();
-            }
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot determine if playbackservice is running");
+        int state = PlaybackProxy.getState();
+        if (state == PlaybackService.STATE_PAUSED || state == PlaybackService.STATE_STOPPED) {
+            PluginsLookup.getDefault().tearDown();
         }
 
         super.onDestroy();

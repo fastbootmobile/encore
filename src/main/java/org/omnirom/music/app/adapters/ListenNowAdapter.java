@@ -27,6 +27,7 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -208,12 +209,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
     }
 
     private void playSong(Song s) {
-        IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-        try {
-            pbService.playSong(s);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Cannot play song", e);
-        }
+        PlaybackProxy.playSong(s);
     }
 
     @Override

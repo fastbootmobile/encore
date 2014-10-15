@@ -33,7 +33,6 @@ import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,7 +47,7 @@ import android.widget.TextView;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
-import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -56,10 +55,8 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.providers.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackCallback;
-import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
@@ -168,26 +165,17 @@ public class PlaybackQueueActivity extends FragmentActivity {
         private Runnable mUpdateSeekBarRunnable = new Runnable() {
             @Override
             public void run() {
-                IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-                if (playbackService == null) {
-                    return;
-                }
-
-                try {
-                    int state = playbackService.getState();
-                    if (state == PlaybackService.STATE_PLAYING
-                            || state == PlaybackService.STATE_PAUSING
-                            || state == PlaybackService.STATE_PAUSED) {
-                        if (mSeekBar != null) {
-                            if (!mSeekBar.isPressed()) {
-                                mSeekBar.setMax(playbackService.getCurrentTrackLength());
-                                mSeekBar.setProgress(playbackService.getCurrentTrackPosition());
-                            }
+                int state = PlaybackProxy.getState();
+                if (state == PlaybackService.STATE_PLAYING
+                        || state == PlaybackService.STATE_PAUSING
+                        || state == PlaybackService.STATE_PAUSED) {
+                    if (mSeekBar != null) {
+                        if (!mSeekBar.isPressed()) {
+                            mSeekBar.setMax(PlaybackProxy.getCurrentTrackLength());
+                            mSeekBar.setProgress(PlaybackProxy.getCurrentTrackPosition());
                         }
-                        mHandler.postDelayed(this, SEEK_UPDATE_DELAY);
                     }
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+                    mHandler.postDelayed(this, SEEK_UPDATE_DELAY);
                 }
             }
         };
@@ -244,30 +232,22 @@ public class PlaybackQueueActivity extends FragmentActivity {
         private ILocalCallback mProviderCallback = new ILocalCallback() {
             @Override
             public void onSongUpdate(List<Song> s) {
-                IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-                if (service != null) {
-                    boolean contains = false;
-                    try {
-                        List<Song> playbackQueue = service.getCurrentPlaybackQueue();
-                        for (Song song : s) {
-                            if (playbackQueue.contains(song)) {
-                                contains = true;
-                                break;
-                            }
+                boolean contains = false;
+                final List<Song> playbackQueue = PlaybackProxy.getCurrentPlaybackQueue();
+                for (Song song : s) {
+                    if (playbackQueue.contains(song)) {
+                        contains = true;
+                        break;
+                    }
+                }
+
+                if (contains) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateQueueLayout();
                         }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot get playback queue", e);
-                    }
-
-                    if (contains) {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateQueueLayout();
-                            }
-                        });
-
-                    }
+                    });
                 }
             }
 
@@ -281,36 +261,28 @@ public class PlaybackQueueActivity extends FragmentActivity {
 
             @Override
             public void onArtistUpdate(List<Artist> a) {
-                IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-                if (service != null) {
-                    boolean contains = false;
-                    try {
-                        List<Song> playbackQueue = service.getCurrentPlaybackQueue();
-                        for (Song song : playbackQueue) {
-                            for (Artist artist : a) {
-                                if (artist.getRef().equals(song.getArtist())) {
-                                    contains = true;
-                                    break;
-                                }
-                            }
-
-                            if (contains) {
-                                break;
-                            }
+                boolean contains = false;
+                List<Song> playbackQueue = PlaybackProxy.getCurrentPlaybackQueue();
+                for (Song song : playbackQueue) {
+                    for (Artist artist : a) {
+                        if (artist.getRef().equals(song.getArtist())) {
+                            contains = true;
+                            break;
                         }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot get playback queue", e);
                     }
 
                     if (contains) {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateQueueLayout();
-                            }
-                        });
-
+                        break;
                     }
+                }
+
+                if (contains) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateQueueLayout();
+                        }
+                    });
                 }
             }
 
@@ -328,16 +300,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
                 if (fromUser) {
-                    new Thread() {
-                        public void run() {
-                            IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
-                            try {
-                                playback.seek(progress);
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Cannot seek", e);
-                            }
-                        }
-                    }.start();
+                    PlaybackProxy.seek(progress);
                 }
             }
 
@@ -370,12 +333,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
         public void onAttach(Activity activity) {
             super.onAttach(activity);
             // Attach this fragment as Playback Listener
-            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-            try {
-                service.addCallback(mPlaybackListener);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot add playback queue activity as listener", e);
-            }
+            PlaybackProxy.addCallback(mPlaybackListener);
             mHandler.post(mUpdateSeekBarRunnable);
 
             ProviderAggregator.getDefault().addUpdateCallback(mProviderCallback);
@@ -385,38 +343,24 @@ public class PlaybackQueueActivity extends FragmentActivity {
         public void onDetach() {
             super.onDetach();
             // Detach this fragment as Playback Listener
-            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-            try {
-                service.removeCallback(mPlaybackListener);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot add playback queue activity as listener", e);
-            }
-
+            PlaybackProxy.removeCallback(mPlaybackListener);
             mHandler.removeCallbacks(mUpdateSeekBarRunnable);
+
             ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
         }
 
         public void updateQueueLayout() {
-            final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             ViewGroup tracksContainer = (ViewGroup) mRootView.findViewById(R.id.llRoot);
 
+            // Load and inflate the playback queue
             // TODO: Recycle
             tracksContainer.removeAllViews();
 
-            // Load and inflate the playback queue
-            List<Song> songs;
-            final Song currentTrack;
-            int currentTrackIndex;
-            try {
-                // We make a copy
-                songs = new ArrayList<Song>(playbackService.getCurrentPlaybackQueue());
-                currentTrack = playbackService.getCurrentTrack();
-                currentTrackIndex = playbackService.getCurrentTrackIndex();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to get current playback queue", e);
-                return;
-            }
+            // We make a copy of the queue as we will modify it locally
+            final List<Song> songs = new ArrayList<Song>(PlaybackProxy.getCurrentPlaybackQueue());
+            final Song currentTrack = PlaybackProxy.getCurrentTrack();
+            final int currentTrackIndex = PlaybackProxy.getCurrentTrackIndex();
 
             // We remove the first song as it's the currently playing song we displayed above
             if (songs.size() > 0) {
@@ -483,29 +427,20 @@ public class PlaybackQueueActivity extends FragmentActivity {
                             }
                         });
 
-                        try {
-                            int state = playbackService.getState();
-                            if (state == PlaybackService.STATE_PLAYING) {
-                                mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                                mPlayDrawable.setBuffering(false);
-                            } else if (state == PlaybackService.STATE_BUFFERING) {
-                                mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                                mPlayDrawable.setBuffering(true);
-                            }
-                        } catch (RemoteException e) {
-                            // ignore
+                        int state = PlaybackProxy.getState();
+                        if (state == PlaybackService.STATE_PLAYING) {
+                            mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                            mPlayDrawable.setBuffering(false);
+                        } else if (state == PlaybackService.STATE_BUFFERING) {
+                            mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                            mPlayDrawable.setBuffering(true);
                         }
 
                         ImageView ivForward = (ImageView) itemView.findViewById(R.id.ivForward);
                         ivForward.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-                                try {
-                                    playbackService.next();
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Cannot move to next track", e);
-                                }
+                                PlaybackProxy.next();
                             }
                         });
 
@@ -513,24 +448,15 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         ivPrevious.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-                                try {
-                                    playbackService.previous();
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Cannot move to previous track", e);
-                                }
+                                PlaybackProxy.previous();
                             }
                         });
 
                         final ImageView ivRepeat = (ImageView) itemView.findViewById(R.id.ivRepeat);
-                        try {
-                            if (playbackService.isRepeatMode()) {
-                                ivRepeat.setImageResource(R.drawable.ic_replay);
-                            } else {
-                                ivRepeat.setImageResource(R.drawable.ic_replay_gray);
-                            }
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot get repeat mode status", e);
+                        if (PlaybackProxy.isRepeatMode()) {
+                            ivRepeat.setImageResource(R.drawable.ic_replay);
+                        } else {
+                            ivRepeat.setImageResource(R.drawable.ic_replay_gray);
                         }
                         ivRepeat.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -539,20 +465,16 @@ public class PlaybackQueueActivity extends FragmentActivity {
                                 final Resources res = getResources();
                                 boolean enable = false;
 
-                                try {
-                                    if (playbackService.isRepeatMode()) {
-                                        // Repeating, disable
-                                        drawables[0] = res.getDrawable(R.drawable.ic_replay);
-                                        drawables[1] = res.getDrawable(R.drawable.ic_replay_gray);
-                                        enable = false;
-                                    } else {
-                                        // Not repeating, enable
-                                        drawables[0] = res.getDrawable(R.drawable.ic_replay_gray);
-                                        drawables[1] = res.getDrawable(R.drawable.ic_replay);
-                                        enable = true;
-                                    }
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Cannot get repeat mode status", e);
+                                if (PlaybackProxy.isRepeatMode()) {
+                                    // Repeating, disable
+                                    drawables[0] = res.getDrawable(R.drawable.ic_replay);
+                                    drawables[1] = res.getDrawable(R.drawable.ic_replay_gray);
+                                    enable = false;
+                                } else {
+                                    // Not repeating, enable
+                                    drawables[0] = res.getDrawable(R.drawable.ic_replay_gray);
+                                    drawables[1] = res.getDrawable(R.drawable.ic_replay);
+                                    enable = true;
                                 }
 
                                 final TransitionDrawable drawable = new TransitionDrawable(drawables);
@@ -569,11 +491,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                                 }, 100);
 
 
-                                try {
-                                    playbackService.setRepeatMode(enable);
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Cannot set repeat mode", e);
-                                }
+                                PlaybackProxy.setRepeatMode(enable);
                             }
                         });
                     } else {
@@ -605,17 +523,11 @@ public class PlaybackQueueActivity extends FragmentActivity {
                             @Override
                             public void onClick(View view) {
                                 // Play that song now
-                                IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
-                                try {
-                                    if (playback != null && playback.getCurrentTrack() != null
-                                            && playback.getCurrentTrack().equals(song)) {
-                                        // We're already playing that song, play it again
-                                        playback.seek(0);
-                                    } else if (playback != null) {
-                                        playback.playAtQueueIndex(itemIndexFinal);
-                                    }
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Error while switching tracks", e);
+                                if (song.equals(PlaybackProxy.getCurrentTrack())) {
+                                    // We're already playing that song, play it again
+                                    PlaybackProxy.seek(0);
+                                } else {
+                                    PlaybackProxy.playAtIndex(itemIndexFinal);
                                 }
                             }
                         });

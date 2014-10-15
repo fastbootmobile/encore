@@ -74,12 +74,11 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.providers.PlaybackProxy;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
-import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
 
@@ -426,7 +425,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mHandler = new Handler();
-        final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
 
         // Setup the inside fragments
         mArtistTracksFragment = new ArtistTracksFragment();
@@ -509,28 +507,23 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mFabDrawable.setPaddingDp(52);
         mFabDrawable.setYOffset(6);
 
-        try {
-            Song currentTrack = playbackService.getCurrentTrack();
-            if (currentTrack != null && currentTrack.getArtist().equals(mArtist.getRef())) {
-                int state = playbackService.getState();
-                if (state == PlaybackService.STATE_PLAYING) {
-                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                } else if (state == PlaybackService.STATE_PAUSED) {
-                    mFabShouldResume = true;
-                } else if (state == PlaybackService.STATE_BUFFERING) {
-                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                    mFabDrawable.setBuffering(true);
-                    mFabShouldResume = true;
-                } else if (state == PlaybackService.STATE_PAUSING) {
-                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                    mFabDrawable.setBuffering(true);
-                    mFabShouldResume = true;
-                }
+        final Song currentTrack = PlaybackProxy.getCurrentTrack();
+        if (currentTrack != null && currentTrack.getArtist().equals(mArtist.getRef())) {
+            int state = PlaybackProxy.getState();
+            if (state == PlaybackService.STATE_PLAYING) {
+                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+            } else if (state == PlaybackService.STATE_PAUSED) {
+                mFabShouldResume = true;
+            } else if (state == PlaybackService.STATE_BUFFERING) {
+                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                mFabDrawable.setBuffering(true);
+                mFabShouldResume = true;
+            } else if (state == PlaybackService.STATE_PAUSING) {
+                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                mFabDrawable.setBuffering(true);
+                mFabShouldResume = true;
             }
-        } catch (RemoteException e) {
-            // ignore
         }
-
 
         mFabDrawable.setPaddingDp(48);
         mFabPlay.setImageDrawable(mFabDrawable);
@@ -553,11 +546,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         // Register for updates
         ProviderAggregator.getDefault().addUpdateCallback(this);
-        try {
-            playbackService.addCallback(mPlaybackCallback);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        PlaybackProxy.addCallback(mPlaybackCallback);
 
         return mRootView;
     }
@@ -728,7 +717,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             @Override
             public void onClick(View view) {
                 final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-                final IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
                 final AlbumViewHolder tag = (AlbumViewHolder) view.getTag();
                 final Album album = tag.album;
                 final PlayPauseDrawable drawable = (PlayPauseDrawable) tag.ivPlayAlbum.getDrawable();
@@ -740,13 +728,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 } else {
                     drawable.setShape(PlayPauseDrawable.SHAPE_STOP);
                     mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
-                    try {
-                        service.playAlbum(album);
-                    } catch (DeadObjectException e) {
-                        Log.e(TAG, "Provider died while trying to play album");
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to play album", e);
-                    }
+                    PlaybackProxy.playAlbum(album);
 
                     // Bold the corresponding track
                     final Iterator<String> songs = album.songs();
@@ -1034,7 +1016,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
             // Then inflate views
             final LayoutInflater inflater = getActivity().getLayoutInflater();
-            final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
             for (final Album album : albums) {
                 AlbumViewHolder holder;
                 View viewRoot;
@@ -1077,16 +1058,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     holder.ivPlayAlbum.setVisibility(View.VISIBLE);
 
                     // Set play or pause based on if this album is playing
-                    try {
-                        int state = pbService.getState();
-                        if (state == PlaybackService.STATE_PLAYING) {
-                            Song currentSong = pbService.getCurrentTrack();
-                            if (currentSong != null && album.getRef().equals(currentSong.getAlbum())) {
-                                updatePlayingAlbum(currentSong.getAlbum());
-                            }
+                    int state = PlaybackProxy.getState();
+                    if (state == PlaybackService.STATE_PLAYING) {
+                        Song currentSong = PlaybackProxy.getCurrentTrack();
+                        if (currentSong != null && album.getRef().equals(currentSong.getAlbum())) {
+                            updatePlayingAlbum(currentSong.getAlbum());
                         }
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
                     }
                 } else {
                     // Album isn't loaded, show "Loading"
@@ -1188,17 +1165,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     });
 
                     // Bold if already playing
-                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                    try {
-                        int state = pbService.getState();
-                        if (state == PlaybackService.STATE_PLAYING) {
-                            Song currentSong = pbService.getCurrentTrack();
-                            if (currentSong != null && song.getRef().equals(currentSong.getRef())) {
-                                boldPlayingTrack(currentSong);
-                            }
+                    int state = PlaybackProxy.getState();
+                    if (state == PlaybackService.STATE_PLAYING) {
+                        Song currentSong = PlaybackProxy.getCurrentTrack();
+                        if (currentSong != null && song.getRef().equals(currentSong.getRef())) {
+                            boldPlayingTrack(currentSong);
                         }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot get playback state", e);
                     }
                 } else {
                     tvTrackName.setText(getString(R.string.loading));

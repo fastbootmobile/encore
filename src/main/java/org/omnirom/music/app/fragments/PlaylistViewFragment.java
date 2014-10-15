@@ -38,6 +38,7 @@ import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.app.ui.PlaylistListView;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -47,11 +48,9 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.providers.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
-import org.omnirom.music.service.IPlaybackService;
 
 import java.util.Iterator;
 import java.util.List;
@@ -187,19 +186,12 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             public void onClick(View view) {
                 if (mFabDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
                     if (mFabShouldResume) {
-                        try {
-                            PluginsLookup.getDefault().getPlaybackService().play();
-                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot resume playback", e);
-                        }
+                        PlaybackProxy.play();
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     } else {
-                        try {
-                            PluginsLookup.getDefault().getPlaybackService().playPlaylist(mPlaylist);
-                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot start playing playlist " + mPlaylist.getRef(), e);
-                        }
+                        PlaybackProxy.playPlaylist(mPlaylist);
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        mFabDrawable.setBuffering(true);
                     }
                 } else {
                     mFabShouldResume = true;
@@ -217,18 +209,13 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (mAdapter.getItem(i - 1).isAvailable()) {
-                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-                    try {
-                        pbService.getCurrentPlaybackQueue().clear();
-                        pbService.queuePlaylist(mPlaylist, false);
-                        pbService.playAtQueueIndex(i - 1);
+                    PlaybackProxy.clearQueue();
+                    PlaybackProxy.queuePlaylist(mPlaylist, false);
+                    PlaybackProxy.playAtIndex(i - 1);
 
-                        // Update FAB
-                        mFabShouldResume = true;
-                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to play song", e);
-                    }
+                    // Update FAB
+                    mFabShouldResume = true;
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                 }
             }
         });
@@ -241,11 +228,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         super.onAttach(activity);
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
-        try {
-            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
-        } catch (RemoteException e) {
-            // ignore
-        }
+        PlaybackProxy.addCallback(mPlaybackCallback);
     }
 
     @Override
@@ -253,14 +236,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         super.onDetach();
 
         ProviderAggregator.getDefault().removeUpdateCallback(this);
-        IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-        if (service != null) {
-            try {
-                service.removeCallback(mPlaybackCallback);
-            } catch (RemoteException e) {
-                // ignore
-            }
-        }
+        PlaybackProxy.removeCallback(mPlaybackCallback);
     }
 
     private void updateOfflineStatus() {

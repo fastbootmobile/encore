@@ -28,7 +28,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -40,6 +39,7 @@ import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.SongsListAdapter;
 import org.omnirom.music.app.ui.ParallaxScrollListView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -48,17 +48,12 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.providers.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
-import org.omnirom.music.service.IPlaybackService;
-import org.omnirom.music.service.PlaybackService;
 
 import java.util.Iterator;
 import java.util.List;
-
-import omnimusic.Plugin;
 
 /**
  * Fragment for viewing an album's details
@@ -188,18 +183,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
             public void onClick(View view) {
                 if (mFabDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
                     if (mFabShouldResume) {
-                        try {
-                            PluginsLookup.getDefault().getPlaybackService().play();
-                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot resume playback", e);
-                        }
+                        PlaybackProxy.play();
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     } else {
-                        try {
-                            PluginsLookup.getDefault().getPlaybackService().playAlbum(mAlbum);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot start playing album " + mAlbum.getRef(), e);
-                        }
+                        PlaybackProxy.playAlbum(mAlbum);
                     }
                 } else {
                     mFabShouldResume = true;
@@ -226,18 +213,13 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
                 if (mAdapter.getItem(position).isAvailable()) {
                     // Play the song (ie. queue the album and play at the selected index)
-                    try {
-                        IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-                        service.getCurrentPlaybackQueue().clear();
-                        service.queueAlbum(mAlbum, false);
-                        service.playAtQueueIndex(position);
+                    PlaybackProxy.clearQueue();
+                    PlaybackProxy.queueAlbum(mAlbum, false);
+                    PlaybackProxy.playAtIndex(position);
 
-                        mFabDrawable.setBuffering(true);
-                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                        mFabShouldResume = true;
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to play song", e);
-                    }
+                    mFabDrawable.setBuffering(true);
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mFabShouldResume = true;
                 }
             }
         });
@@ -255,11 +237,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         ProviderAggregator.getDefault().addUpdateCallback(this);
-        try {
-            PluginsLookup.getDefault().getPlaybackService().addCallback(mPlaybackCallback);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error while adding playback callback", e);
-        }
+        PlaybackProxy.addCallback(mPlaybackCallback);
     }
 
     /**
@@ -269,11 +247,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     public void onDestroy() {
         super.onDestroy();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
-        try {
-            PluginsLookup.getDefault().getPlaybackService().removeCallback(mPlaybackCallback);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error while adding playback callback", e);
-        }
+        PlaybackProxy.removeCallback(mPlaybackCallback);
     }
 
     /**

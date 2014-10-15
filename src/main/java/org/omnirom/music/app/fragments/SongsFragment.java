@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,12 +30,12 @@ import android.widget.ListView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.SongsListAdapter;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.BasePlaybackCallback;
-import org.omnirom.music.service.IPlaybackService;
 
 import java.util.List;
 
@@ -67,13 +66,7 @@ public class SongsFragment extends Fragment {
             Song song = mSongsListAdapter.getItem(i);
 
             if (song != null && song.isAvailable()) {
-                try {
-                    long clock = SystemClock.uptimeMillis();
-                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
-                    Log.e(TAG, "playSong call took " + (SystemClock.uptimeMillis()-clock) + "ms");
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to play song", e);
-                }
+                PlaybackProxy.playSong(song);
             } else {
                 Log.e(TAG, "Trying to play null song!");
             }
@@ -128,24 +121,13 @@ public class SongsFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        try {
-            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-            if (service != null) {
-                service.addCallback(mPlaybackCallback);
-            }
-        } catch (RemoteException e) {
-            // ignore
-        }
+        PlaybackProxy.addCallback(mPlaybackCallback);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        try {
-            PluginsLookup.getDefault().getPlaybackService().removeCallback(mPlaybackCallback);
-        } catch (Exception e) {
-            // ignore
-        }
+        PlaybackProxy.removeCallback(mPlaybackCallback);
     }
 
 }

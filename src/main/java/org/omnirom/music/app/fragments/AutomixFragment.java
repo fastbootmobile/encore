@@ -35,6 +35,7 @@ import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.BucketAdapter;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.service.BasePlaybackCallback;
@@ -123,12 +124,7 @@ public class AutomixFragment extends Fragment {
         });
 
         // Register for playback events
-        IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-        try {
-            pbService.addCallback(mPlaybackCallback);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Cannot register as a playback callback");
-        }
+        PlaybackProxy.addCallback(mPlaybackCallback);
 
         return rootView;
     }

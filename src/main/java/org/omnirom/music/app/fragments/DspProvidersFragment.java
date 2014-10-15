@@ -24,6 +24,7 @@ import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.DspAdapter;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
@@ -47,48 +48,33 @@ public class DspProvidersFragment extends ListFragment {
     private DspAdapter.ClickListener mClickListener = new DspAdapter.ClickListener() {
         @Override
         public void onDeleteClicked(int position) {
-            final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-            try {
-                List<ProviderIdentifier> chain = playbackService.getDSPChain();
-                chain.remove(position);
-                playbackService.setDSPChain(chain);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot update chain of playback service", e);
-            }
+            List<ProviderIdentifier> chain = PlaybackProxy.getDSPChain();
+            chain.remove(position);
+            PlaybackProxy.setDSPChain(chain);
 
-            updateDspChain();
+            postUpdateDspChain();
         }
 
         @Override
         public void onUpClicked(int position) {
-            final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-            try {
-                List<ProviderIdentifier> chain = playbackService.getDSPChain();
-                ProviderIdentifier item = chain.remove(position);
-                position = Math.max(position - 1, 0);
-                chain.add(position, item);
-                playbackService.setDSPChain(chain);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot update chain of playback service", e);
-            }
+            List<ProviderIdentifier> chain = PlaybackProxy.getDSPChain();
+            ProviderIdentifier item = chain.remove(position);
+            position = Math.max(position - 1, 0);
+            chain.add(position, item);
+            PlaybackProxy.setDSPChain(chain);
 
-            updateDspChain();
+            postUpdateDspChain();
         }
 
         @Override
         public void onDownClicked(int position) {
-            final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-            try {
-                List<ProviderIdentifier> chain = playbackService.getDSPChain();
-                ProviderIdentifier item = chain.remove(position);
-                position = Math.min(chain.size(), position + 1);
-                chain.add(position, item);
-                playbackService.setDSPChain(chain);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot update chain of playback service", e);
-            }
+            List<ProviderIdentifier> chain = PlaybackProxy.getDSPChain();
+            ProviderIdentifier item = chain.remove(position);
+            position = Math.min(chain.size(), position + 1);
+            chain.add(position, item);
+            PlaybackProxy.setDSPChain(chain);
 
-            updateDspChain();
+            postUpdateDspChain();
         }
     };
 
@@ -106,31 +92,26 @@ public class DspProvidersFragment extends ListFragment {
         // Required empty public constructor
     }
 
-    public void updateDspChain() {
-        final IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-        if (playbackService != null) {
-            try {
-                List<ProviderIdentifier> chain = playbackService.getDSPChain();
-
-                if (mAdapter == null) {
-                    mAdapter = new DspAdapter(chain);
-                } else {
-                    mAdapter.updateChain(chain);
-                }
-
-                mAdapter.setClickListener(mClickListener);
-                setListAdapter(mAdapter);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot get chain from playback service", e);
+    private void postUpdateDspChain() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateDspChain();
             }
+        });
+    }
+
+    public void updateDspChain() {
+        List<ProviderIdentifier> chain = PlaybackProxy.getDSPChain();
+
+        if (mAdapter == null) {
+            mAdapter = new DspAdapter(chain);
         } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateDspChain();
-                }
-            });
+            mAdapter.updateChain(chain);
         }
+
+        mAdapter.setClickListener(mClickListener);
+        setListAdapter(mAdapter);
     }
 
     @Override
@@ -213,21 +194,16 @@ public class DspProvidersFragment extends ListFragment {
         builder.setTitle(R.string.add_effect);
 
         // Lookup all the DSP effects providers that aren't already in the chain
-        IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
         final List<DSPConnection> availableDsp = PluginsLookup.getDefault().getAvailableDSPs();
-        try {
-            List<ProviderIdentifier> chain = playbackService.getDSPChain();
-            List<DSPConnection> dsps = PluginsLookup.getDefault().getAvailableDSPs();
+        final List<ProviderIdentifier> chain = PlaybackProxy.getDSPChain();
+        final List<DSPConnection> dsps = PluginsLookup.getDefault().getAvailableDSPs();
 
-            for (ProviderIdentifier pi : chain) {
-                for (DSPConnection dsp : dsps) {
-                    if (dsp.getIdentifier().equals(pi)) {
-                        availableDsp.remove(dsp);
-                    }
+        for (ProviderIdentifier pi : chain) {
+            for (DSPConnection dsp : dsps) {
+                if (dsp.getIdentifier().equals(pi)) {
+                    availableDsp.remove(dsp);
                 }
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Cannot get chain from playback service", e);
         }
 
         if (availableDsp.size() > 0) {
@@ -263,13 +239,8 @@ public class DspProvidersFragment extends ListFragment {
     }
 
     public void addEffectToChain(DSPConnection dsp) {
-        try {
-            IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-            List<ProviderIdentifier> chain = pbService.getDSPChain();
-            chain.add(dsp.getIdentifier());
-            pbService.setDSPChain(chain);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Cannot update DSP chain", e);
-        }
+        final List<ProviderIdentifier> chain = PlaybackProxy.getDSPChain();
+        chain.add(dsp.getIdentifier());
+        PlaybackProxy.setDSPChain(chain);
     }
 }

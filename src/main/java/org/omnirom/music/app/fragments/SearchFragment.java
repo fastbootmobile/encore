@@ -39,6 +39,7 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.SearchAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -147,11 +148,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         } else {
             Song song = aggregator.retrieveSong(entry.ref, entry.identifier);
             if (song != null) {
-                try {
-                    PluginsLookup.getDefault().getPlaybackService().playSong(song);
-                } catch (Exception e) {
-                    Log.e(TAG, "Unable to play song", e);
-                }
+                PlaybackProxy.playSong(song);
             }
         }
 

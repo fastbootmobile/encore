@@ -27,12 +27,11 @@ import com.echonest.api.v4.EchoNestException;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackCallback;
-import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,19 +72,16 @@ public class AutoMixManager implements IPlaybackCallback {
                 try {
                     // Fetch the next track
                     String nextTrackRef = mCurrentPlayingBucket.getNextTrack();
-                    IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
 
                     // Queue it
                     Song nextTrack = getSongFromRef(nextTrackRef);
                     if (nextTrack != null) {
-                        pbService.queueSong(nextTrack, false);
+                        PlaybackProxy.queueSong(nextTrack, false);
                     }
 
                     mExpectedSong = nextTrackRef;
                 } catch (EchoNestException e) {
                     Log.e(TAG, "Unable to get next track", e);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to queue next track", e);
                 }
             }
         };
@@ -234,7 +230,6 @@ public class AutoMixManager implements IPlaybackCallback {
         }
 
         // Queue tracks
-        IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
         try {
             String trackRef = null;
 
@@ -257,12 +252,8 @@ public class AutoMixManager implements IPlaybackCallback {
 
                 if (s != null) {
                     mExpectedSong = s.getRef();
-                    try {
-                        playback.playSong(s);
-                        mCurrentPlayingBucket = bucket;
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot start playing bucket", e);
-                    }
+                    mCurrentPlayingBucket = bucket;
+                    PlaybackProxy.playSong(s);
                 } else {
                     Log.e(TAG, "Song is null! Cannot find it back");
                 }

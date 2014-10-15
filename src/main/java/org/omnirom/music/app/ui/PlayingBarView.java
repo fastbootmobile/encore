@@ -53,7 +53,7 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.providers.PlaybackProxy;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.IPlaybackService;
@@ -70,33 +70,26 @@ public class PlayingBarView extends RelativeLayout {
     private static final String TAG = "PlayingBarView";
 
     // Delay after which the seek bar is updated (30Hz)
-    private static final int SEEK_BAR_UPDATE_DELAY = 1000/30;
+    private static final int SEEK_BAR_UPDATE_DELAY = 1000 / 30;
 
     private Runnable mUpdateSeekBarRunnable = new Runnable() {
         @Override
         public void run() {
-            IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-            if (playbackService != null) {
-                try {
-                    int state = playbackService.getState();
-                    if (state == PlaybackService.STATE_PLAYING
-                            || state == PlaybackService.STATE_PAUSING
-                            || state == PlaybackService.STATE_PAUSED) {
-                        if (!mPlayInSeekMode) {
-                            mProgressDrawable.setValue(playbackService.getCurrentTrackPosition());
-                        }
-
-                        // Restart ourselves
-                        mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
-                    } else if (state == PlaybackService.STATE_BUFFERING) {
-                        mProgressDrawable.setValue(0);
-                    } else {
-                        mProgressDrawable.setMax(1);
-                        mProgressDrawable.setValue(1);
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to update seek bar", e);
+            int state = PlaybackProxy.getState();
+            if (state == PlaybackService.STATE_PLAYING
+                    || state == PlaybackService.STATE_PAUSING
+                    || state == PlaybackService.STATE_PAUSED) {
+                if (!mPlayInSeekMode) {
+                    mProgressDrawable.setValue(PlaybackProxy.getCurrentTrackPosition());
                 }
+
+                // Restart ourselves
+                mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
+            } else if (state == PlaybackService.STATE_BUFFERING) {
+                mProgressDrawable.setValue(0);
+            } else {
+                mProgressDrawable.setMax(1);
+                mProgressDrawable.setValue(1);
             }
         }
     };
@@ -109,12 +102,7 @@ public class PlayingBarView extends RelativeLayout {
                 @Override
                 public void run() {
                     updatePlayingQueue();
-                    IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-                    try {
-                        mProgressDrawable.setMax(playbackService.getCurrentTrackLength());
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot get track length", e);
-                    }
+                    mProgressDrawable.setMax(PlaybackProxy.getCurrentTrackLength());
 
                     // Set the visibility and button state
                     setPlayButtonState(buffering, false);
@@ -166,30 +154,23 @@ public class PlayingBarView extends RelativeLayout {
     private ILocalCallback mProviderCallback = new ILocalCallback() {
         @Override
         public void onSongUpdate(List<Song> s) {
-            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-            if (service != null) {
-                boolean contains = false;
-                try {
-                    List<Song> playbackQueue = service.getCurrentPlaybackQueue();
-                    for (Song song : s) {
-                        if (playbackQueue.contains(song)) {
-                            contains = true;
-                            break;
-                        }
+            boolean contains = false;
+            List<Song> playbackQueue = PlaybackProxy.getCurrentPlaybackQueue();
+            for (Song song : s) {
+                if (playbackQueue.contains(song)) {
+                    contains = true;
+                    break;
+                }
+            }
+
+            if (contains) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updatePlayingQueue();
                     }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Cannot get playback queue", e);
-                }
+                });
 
-                if (contains) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            updatePlayingQueue();
-                        }
-                    });
-
-                }
             }
         }
 
@@ -203,36 +184,29 @@ public class PlayingBarView extends RelativeLayout {
 
         @Override
         public void onArtistUpdate(List<Artist> a) {
-            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-            if (service != null) {
-                boolean contains = false;
-                try {
-                    List<Song> playbackQueue = service.getCurrentPlaybackQueue();
-                    for (Song song : playbackQueue) {
-                        for (Artist artist : a) {
-                            if (artist.getRef().equals(song.getArtist())) {
-                                contains = true;
-                                break;
-                            }
-                        }
-
-                        if (contains) {
-                            break;
-                        }
+            boolean contains = false;
+            List<Song> playbackQueue = PlaybackProxy.getCurrentPlaybackQueue();
+            for (Song song : playbackQueue) {
+                for (Artist artist : a) {
+                    if (artist.getRef().equals(song.getArtist())) {
+                        contains = true;
+                        break;
                     }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Cannot get playback queue", e);
                 }
 
                 if (contains) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            updatePlayingQueue();
-                        }
-                    });
-
+                    break;
                 }
+            }
+
+            if (contains) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updatePlayingQueue();
+                    }
+                });
+
             }
         }
 
@@ -248,28 +222,28 @@ public class PlayingBarView extends RelativeLayout {
     private GestureDetector mGestureDetector;
     private GestureDetector.SimpleOnGestureListener mGestureListener =
             new GestureDetector.SimpleOnGestureListener() {
-        public boolean onSingleTapUp(MotionEvent ev) {
-            return false;
-        }
+                public boolean onSingleTapUp(MotionEvent ev) {
+                    return false;
+                }
 
-        public void onLongPress(MotionEvent ev) {
-        }
+                public void onLongPress(MotionEvent ev) {
+                }
 
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
-                                float distanceY) {
-            return false;
-        }
+                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                                        float distanceY) {
+                    return false;
+                }
 
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-                               float velocityY) {
-            if (velocityY > 0) {
-                setWrapped(true);
-            } else {
-                setWrapped(false);
-            }
-            return true;
-        }
-    };
+                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                                       float velocityY) {
+                    if (velocityY > 0) {
+                        setWrapped(true);
+                    } else {
+                        setWrapped(false);
+                    }
+                    return true;
+                }
+            };
 
     private static final int MAX_PEEK_QUEUE_SIZE = 3;
 
@@ -310,22 +284,12 @@ public class PlayingBarView extends RelativeLayout {
         ProviderAggregator.getDefault().addUpdateCallback(mProviderCallback);
 
         // Setup the Playback service callback
-        mHandler.post(new Runnable() {
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-                if (playbackService != null) {
-                    try {
-                        playbackService.addCallback(mPlaybackCallback);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to register the playbar as a callback of the playback", e);
-                    }
-                } else {
-                    // Retry, playback connection not established yet
-                    mHandler.post(this);
-                }
+                PlaybackProxy.addCallback(mPlaybackCallback);
             }
-        });
+        }, 200);
 
 
         // Set FAB info
@@ -342,20 +306,14 @@ public class PlayingBarView extends RelativeLayout {
         mPlayFabDrawable.setYOffset(6);
 
         // Set the original state
-        IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-        try {
-            if (pbService != null && pbService.getState() == PlaybackService.STATE_PLAYING) {
-                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                mIsPlaying = true;
-                mProgressDrawable.setMax(pbService.getCurrentTrackLength());
-                mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
-            } else {
-                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                mIsPlaying = false;
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error while retrieving playback status", e);
+        if (PlaybackProxy.getState() == PlaybackService.STATE_PLAYING) {
+            mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+            mIsPlaying = true;
+            mProgressDrawable.setMax(PlaybackProxy.getCurrentTrackLength());
+            mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
+        } else {
             mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+            mIsPlaying = false;
         }
 
         LayerDrawable drawable = new LayerDrawable(new Drawable[]{
@@ -371,15 +329,8 @@ public class PlayingBarView extends RelativeLayout {
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-
                 boolean result = false;
-                boolean isPlaying = false;
-                try {
-                    isPlaying = (playbackService != null && playbackService.getState() == PlaybackService.STATE_PLAYING);
-                } catch (RemoteException e) {
-                    // ignore
-                }
+                boolean isPlaying = (PlaybackProxy.getState() == PlaybackService.STATE_PLAYING);
 
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && isPlaying) {
                     mIsDragging = true;
@@ -397,18 +348,7 @@ public class PlayingBarView extends RelativeLayout {
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     if (mPlayInSeekMode) {
                         mPlayInSeekMode = false;
-                        new Thread() {
-                            public void run() {
-                                IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-                                try {
-                                    if (playbackService != null) {
-                                        playbackService.seek((long) mSeekValue);
-                                    }
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Cannot seek", e);
-                                }
-                            }
-                        }.start();
+                        PlaybackProxy.seek((long) mSeekValue);
 
                         // If we consume the up action, we cannot "unselect"/"unfocus" the FAB
                         // and it remains in a "selected" state after we lift our finger. We
@@ -444,16 +384,7 @@ public class PlayingBarView extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-
-        IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-        try {
-            if (playbackService != null) {
-                playbackService.removeCallback(mPlaybackCallback);
-            }
-        } catch (RemoteException e) {
-            Log.w(TAG, "Unable to remove the playing bar callback from the playback", e);
-        }
-
+        PlaybackProxy.removeCallback(mPlaybackCallback);
         ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
     }
 
@@ -465,6 +396,7 @@ public class PlayingBarView extends RelativeLayout {
 
     /**
      * Defines the visual state of the play/pause button
+     *
      * @param play true will set the image to a "play" image, false will set to "pause"
      */
     public void setPlayButtonState(boolean buffering, boolean play) {
@@ -478,30 +410,12 @@ public class PlayingBarView extends RelativeLayout {
     }
 
     public void updatePlayingQueue() {
-        IPlaybackService playbackService = PluginsLookup.getDefault().getPlaybackService();
-
-        if (playbackService == null) {
-            // Service not bound yet
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePlayingQueue();
-                }
-            });
-            return;
-        }
-
         List<Song> queue;
         int currentIndex;
-        try {
-            // Do a copy
-            queue = new ArrayList<Song>(playbackService.getCurrentPlaybackQueue());
-            currentIndex = playbackService.getCurrentTrackIndex();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to retrieve the current playback queue");
-            return;
-        }
 
+        // Do a copy
+        queue = new ArrayList<Song>(PlaybackProxy.getCurrentPlaybackQueue());
+        currentIndex = PlaybackProxy.getCurrentTrackIndex();
 
         if (queue.size() > 0) {
             mLastQueue = new ArrayList<Song>(queue);
@@ -568,18 +482,11 @@ public class PlayingBarView extends RelativeLayout {
                     @Override
                     public void onClick(View view) {
                         // Play that song now
-                        IPlaybackService playback = PluginsLookup.getDefault().getPlaybackService();
-                        if (playback != null) {
-                            try {
-                                if (playback.getCurrentTrack().equals(song)) {
-                                    // We're already playing that song, play it again
-                                    playback.seek(0);
-                                } else {
-                                    playback.playAtQueueIndex(itemIndex + removedCount);
-                                }
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Error while switching tracks", e);
-                            }
+                        if (song.equals(PlaybackProxy.getCurrentTrack())) {
+                            // We're already playing that song, play it again
+                            PlaybackProxy.seek(0);
+                        } else {
+                            PlaybackProxy.playAtIndex(itemIndex + removedCount);
                         }
                     }
                 });

@@ -19,9 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,12 +27,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
-import android.os.RemoteException;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlend;
-import android.renderscript.ScriptIntrinsicBlur;
 import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -49,25 +41,17 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
-
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
-import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderCache;
-import org.omnirom.music.service.IPlaybackService;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -395,35 +379,22 @@ public class Utils {
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
                 final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
                 final String TAG = "Utils-SongOverflow";
 
                 switch (menuItem.getItemId()) {
                     case R.id.menu_play_now:
-                        try {
-                            pbService.playSong(song);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Unable to play song", e);
-                        }
+                        PlaybackProxy.playSong(song);
                         break;
 
                     case R.id.menu_add_to_queue:
-                        try {
-                            pbService.queueSong(song, false);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Unable to queue song", e);
-                        }
+                        PlaybackProxy.queueSong(song, false);
                         break;
 
                     case R.id.menu_add_album_to_queue:
-                        try {
-                            pbService.queueAlbum(aggregator.retrieveAlbum(song.getAlbum(),
-                                    song.getProvider()), false);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Unable to queue album", e);
-                        }
+                        PlaybackProxy.queueAlbum(aggregator.retrieveAlbum(song.getAlbum(),
+                                song.getProvider()), false);
                         break;
 
                     case R.id.menu_add_to_playlist:
@@ -448,10 +419,7 @@ public class Utils {
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
                 final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-
-                final String TAG = "Utils-SongOverflow";
 
                 switch (menuItem.getItemId()) {
                     case R.id.menu_open_album:
@@ -464,12 +432,8 @@ public class Utils {
                         break;
 
                     case R.id.menu_add_album_to_queue:
-                        try {
-                            pbService.queueAlbum(aggregator.retrieveAlbum(song.getAlbum(),
-                                    song.getProvider()), false);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Unable to queue album", e);
-                        }
+                        PlaybackProxy.queueAlbum(aggregator.retrieveAlbum(song.getAlbum(),
+                                song.getProvider()), false);
                         break;
 
                     case R.id.menu_add_to_playlist:

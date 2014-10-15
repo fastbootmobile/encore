@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 
 /**
@@ -92,76 +93,35 @@ public class NotifActionService extends IntentService {
         }
     }
 
-    private IPlaybackService getPlaybackService() {
-        return PluginsLookup.getDefault().getPlaybackService();
-    }
-
     /**
      * Handle action NEXT in the provided background thread
      */
     private void handleActionNext() {
-        try {
-            IPlaybackService service = getPlaybackService();
-            if (service != null) {
-                getPlaybackService().next();
-            } else {
-                Log.e(TAG, "Notification is up but Playback Service is dead?!");
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to skip to next song", e);
-        }
+        PlaybackProxy.next();
     }
 
     /**
      * Handle action PREVIOUS in the provided background thread
      */
     private void handleActionPrevious() {
-        try {
-            IPlaybackService service = getPlaybackService();
-            if (service != null) {
-                getPlaybackService().previous();
-            } else {
-                Log.e(TAG, "Notification is up but Playback Service is dead?!");
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to skip to previous song", e);
-        }
+        PlaybackProxy.previous();
     }
 
     /**
      * Handle action STOP in the provided background thread
      */
     private void handleActionStop() {
-        try {
-            IPlaybackService service = getPlaybackService();
-            if (service != null) {
-                getPlaybackService().stop();
-            } else {
-                Log.e(TAG, "Notification is up but Playback Service is dead?!");
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to skip to next song", e);
-        }
+        PlaybackProxy.stop();
     }
 
     /**
      * Handle action TOGGLE_PAUSE in the provided background thread
      */
     private void handleActionTogglePause() {
-        try {
-            IPlaybackService service = getPlaybackService();
-            if (service != null) {
-                int state = service.getState();
-                if (state == PlaybackService.STATE_PAUSED) {
-                    service.play();
-                } else {
-                    service.pause();
-                }
-            } else {
-                Log.e(TAG, "Notification is up but Playback Service is dead?!");
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to skip to next song", e);
+        if (PlaybackProxy.getState() == PlaybackService.STATE_PAUSED) {
+            PlaybackProxy.play();
+        } else {
+            PlaybackProxy.pause();
         }
     }
 

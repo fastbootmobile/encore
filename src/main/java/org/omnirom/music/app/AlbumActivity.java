@@ -32,6 +32,7 @@ import android.view.MenuItem;
 
 import org.omnirom.music.app.fragments.AlbumViewFragment;
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -172,12 +173,7 @@ public class AlbumActivity extends FragmentActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.menu_add_to_queue) {
-            IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-            try {
-                service.queueAlbum(mActiveFragment.getAlbum(), false);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot queue album", e);
-            }
+            PlaybackProxy.queueAlbum(mActiveFragment.getAlbum(), false);
             return true;
         } else if (id == R.id.menu_add_to_playlist) {
             Album album = mActiveFragment.getAlbum();

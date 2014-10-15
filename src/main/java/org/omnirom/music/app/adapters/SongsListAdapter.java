@@ -32,6 +32,7 @@ import android.widget.TextView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
@@ -228,16 +229,10 @@ public class SongsListAdapter extends BaseAdapter {
         // Set current song indicator
         tag.vCurrentIndicator.setVisibility(View.INVISIBLE);
 
-        final IPlaybackService pbService = PluginsLookup.getDefault().getPlaybackService();
-        try {
-            Song currentSong = pbService.getCurrentTrack();
-            if (currentSong != null && currentSong.equals(tag.song)) {
-                tag.vCurrentIndicator.setVisibility(View.VISIBLE);
-            }
-        } catch (RemoteException e) {
-            // ignore
+        Song currentSong = PlaybackProxy.getCurrentTrack();
+        if (currentSong != null && currentSong.equals(tag.song)) {
+            tag.vCurrentIndicator.setVisibility(View.VISIBLE);
         }
-
 
         if (song != null) {
             // Set alpha based on offline availability and mode
