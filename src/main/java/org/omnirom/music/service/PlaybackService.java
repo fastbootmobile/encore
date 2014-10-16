@@ -455,49 +455,53 @@ public class PlaybackService extends Service
             }
 
             if (providerId != null) {
-                IMusicProvider provider = PluginsLookup.getDefault().getProvider(providerId).getBinder();
-                mState = STATE_BUFFERING;
+                ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerId);
+                if (connection != null) {
+                    IMusicProvider provider = connection.getBinder();
+                    if (provider != null) {
 
-                for (IPlaybackCallback cb : mCallbacks) {
-                    try {
-                        cb.onSongStarted(true, next);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot call playback callback for song start event", e);
-                    }
-                }
+                        mState = STATE_BUFFERING;
 
-                Log.d(TAG, "onSongStarted: Buffering...");
-
-                if (!next.isLoaded()) {
-                    // Track not loaded yet, delay until track info arrived
-                    mCurrentTrackWaitLoading = true;
-                    Log.w(TAG, "Track not yet loaded: " + next.getRef() + ", delaying");
-                } else {
-                    mCurrentTrackWaitLoading = false;
-                    mCurrentPlayingProvider = providerId;
-
-                    requestAudioFocus();
-
-                    try {
-                        if (provider != null) {
-                            provider.playSong(next.getRef());
+                        for (IPlaybackCallback cb : mCallbacks) {
+                            try {
+                                cb.onSongStarted(true, next);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Cannot call playback callback for song start event", e);
+                            }
                         }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to play song", e);
-                    } catch (NullPointerException e) {
-                        Log.e(TAG, "No provider attached", e);
-                    }
 
-                    // The notification system takes care of calling startForeground
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mNotification.setCurrentSong(next);
+                        Log.d(TAG, "onSongStarted: Buffering...");
+
+                        if (!next.isLoaded()) {
+                            // Track not loaded yet, delay until track info arrived
+                            mCurrentTrackWaitLoading = true;
+                            Log.w(TAG, "Track not yet loaded: " + next.getRef() + ", delaying");
+                        } else {
+                            mCurrentTrackWaitLoading = false;
+                            mCurrentPlayingProvider = providerId;
+
+                            requestAudioFocus();
+
+                            try {
+                                provider.playSong(next.getRef());
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Unable to play song", e);
+                            } catch (NullPointerException e) {
+                                Log.e(TAG, "No provider attached", e);
+                            }
+
+                            // The notification system takes care of calling startForeground
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mNotification.setCurrentSong(next);
+                                }
+                            });
+
+                            updateRemoteMetadata();
+                            mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_BUFFERING);
                         }
-                    });
-
-                    updateRemoteMetadata();
-                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_BUFFERING);
+                    }
                 }
             } else {
                 Log.e(TAG, "Cannot play the first song of the queue because the Song's " +
