@@ -381,11 +381,14 @@ public class Utils {
             public boolean onMenuItemClick(MenuItem menuItem) {
                 final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
-                final String TAG = "Utils-SongOverflow";
-
                 switch (menuItem.getItemId()) {
                     case R.id.menu_play_now:
                         PlaybackProxy.playSong(song);
+                        break;
+
+                    case R.id.menu_open_artist:
+                        ArtistActivity.craftIntent(context, null, song.getArtist(),
+                                context.getResources().getColor(R.color.default_album_art_background));
                         break;
 
                     case R.id.menu_add_to_queue:
