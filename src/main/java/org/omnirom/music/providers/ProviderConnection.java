@@ -17,6 +17,7 @@ package org.omnirom.music.providers;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -127,6 +128,8 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
             if (mBinder != null) {
                 mBinder.setAudioSocketName(socketName);
             }
+        } catch (DeadObjectException e) {
+            Log.e(TAG, "Provider died while assigning audio socket to " + getProviderName(), e);
         } catch (RemoteException e) {
             Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
         }

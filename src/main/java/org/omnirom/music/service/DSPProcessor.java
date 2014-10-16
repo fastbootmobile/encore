@@ -59,38 +59,44 @@ public class DSPProcessor {
     private PlaybackService mPlaybackService;
     private List<ProviderIdentifier> mDSPChain;
     private AudioSocket mLastProviderSocket;
+    private byte[] mAudioBuffer;
+
+    private final Object mAudioBufferLock = new Object();
 
     private AudioSocket.ISocketCallback mProviderCallback = new AudioSocket.ISocketCallback() {
         @Override
-        public void onAudioData(AudioSocket socket, Plugin.AudioData message) {
+        public void onAudioData(AudioSocket socket, Plugin.AudioData.Builder message) {
             // If we have plugins setup in our DSP chain, process through them, otherwise just
             // consume the audio on the sink directly
-            ByteString bytes = message.getSamples();
-            byte[] data = bytes.toByteArray();
-            int length = bytes.size();
+            final ByteString bytes = message.getSamples();
+            final int length = bytes.size();
+            synchronized (mAudioBufferLock) {
+                ensureBufferSize(length);
+                bytes.copyTo(mAudioBuffer, 0);
 
-            mLastProviderSocket = socket;
+                mLastProviderSocket = socket;
 
-            if (length > 0) {
-                if (mDSPChain.size() > 0) {
-                    inputProviderAudio(data, length);
+                if (length > 0) {
+                    if (mDSPChain.size() > 0) {
+                        inputProviderAudio(mAudioBuffer, length);
+                    } else {
+                        inputDSPAudio(socket, mAudioBuffer, length);
+                    }
                 } else {
-                    inputDSPAudio(socket, data, length);
+                    if (mSink != null) {
+                        mSink.flushSamples();
+                    }
+                    writeAudioResponse(0);
                 }
-            } else {
-                if (mSink != null) {
-                    mSink.flushSamples();
-                }
-                writeAudioResponse(0);
             }
         }
 
         @Override
-        public void onAudioResponse(AudioSocket socket, Plugin.AudioResponse message) {
+        public void onAudioResponse(AudioSocket socket, Plugin.AudioResponse.Builder message) {
         }
 
         @Override
-        public void onRequest(AudioSocket socket, Plugin.Request message) {
+        public void onRequest(AudioSocket socket, Plugin.Request.Builder message) {
             Plugin.Request.RequestType request = message.getRequest();
 
             try {
@@ -111,7 +117,7 @@ public class DSPProcessor {
         }
 
         @Override
-        public void onFormatInfo(AudioSocket socket, Plugin.FormatInfo message) {
+        public void onFormatInfo(AudioSocket socket, Plugin.FormatInfo.Builder message) {
             setupSink(message.getSamplingRate(), message.getChannels());
 
            /* if (mDSPChain.size() > 0) {
@@ -132,34 +138,40 @@ public class DSPProcessor {
         }
 
         @Override
-        public void onBufferInfo(AudioSocket socket, Plugin.BufferInfo message) {
+        public void onBufferInfo(AudioSocket socket, Plugin.BufferInfo.Builder message) {
         }
     };
 
     private AudioSocket.ISocketCallback mDSPCallback = new AudioSocket.ISocketCallback() {
         @Override
-        public void onAudioData(AudioSocket socket, Plugin.AudioData message) {
+        public void onAudioData(AudioSocket socket, Plugin.AudioData.Builder message) {
             final ByteString bytes = message.getSamples();
-            inputDSPAudio(socket, bytes.toByteArray(), bytes.size());
+            final int length = bytes.size();
+
+            synchronized (mAudioBufferLock) {
+                ensureBufferSize(length);
+                bytes.copyTo(mAudioBuffer, 0);
+                inputDSPAudio(socket, mAudioBuffer, length);
+            }
         }
 
         @Override
-        public void onAudioResponse(AudioSocket socket, Plugin.AudioResponse message) {
-
-        }
-
-        @Override
-        public void onRequest(AudioSocket socket, Plugin.Request message) {
-
-        }
-
-        @Override
-        public void onFormatInfo(AudioSocket socket, Plugin.FormatInfo message) {
+        public void onAudioResponse(AudioSocket socket, Plugin.AudioResponse.Builder message) {
 
         }
 
         @Override
-        public void onBufferInfo(AudioSocket socket, Plugin.BufferInfo message) {
+        public void onRequest(AudioSocket socket, Plugin.Request.Builder message) {
+
+        }
+
+        @Override
+        public void onFormatInfo(AudioSocket socket, Plugin.FormatInfo.Builder message) {
+
+        }
+
+        @Override
+        public void onBufferInfo(AudioSocket socket, Plugin.BufferInfo.Builder message) {
 
         }
     };
@@ -184,6 +196,12 @@ public class DSPProcessor {
 
     public AudioSocket.ISocketCallback getDSPCallback() {
         return mDSPCallback;
+    }
+
+    private void ensureBufferSize(int size) {
+        if (mAudioBuffer == null || mAudioBuffer.length < size) {
+            mAudioBuffer = new byte[size];
+        }
     }
 
     /**
