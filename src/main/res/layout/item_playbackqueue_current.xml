@@ -100,6 +100,7 @@
             <ImageView
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:layout_gravity="center_vertical"
                 android:id="@+id/ivRepeat"
                 android:src="@drawable/ic_replay_gray"
                 android:scaleType="centerInside"
@@ -109,25 +110,29 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:id="@+id/ivPrevious"
                 android:clickable="true"
                 android:background="?android:attr/selectableItemBackground"
                 android:src="@drawable/ic_skip_previous" />
 
-            <ImageView
+            <com.getbase.floatingactionbutton.FloatingActionButton
                 android:id="@+id/ivPlayPause"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:alpha="0.9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"/>
+                android:layout_marginRight="8dp"
+                app:fab_size="mini"
+                app:fab_colorNormal="@color/primary"
+                app:fab_colorPressed="@color/primary_dark"/>
 
             <ImageView
                 android:id="@+id/ivForward"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:layout_gravity="center_vertical"
                 android:adjustViewBounds="true"
                 android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
@@ -138,6 +143,7 @@
             <ImageView
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:layout_gravity="center_vertical"
                 android:id="@+id/ivThumbs"
                 android:src="@drawable/ic_thumbs_up_gray"
                 android:scaleType="centerInside"

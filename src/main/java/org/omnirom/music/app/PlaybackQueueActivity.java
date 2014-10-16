@@ -44,6 +44,8 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
@@ -407,10 +409,10 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         });
 
                         // Set play pause drawable
-                        ImageView ivPlayPause = (ImageView) itemView.findViewById(R.id.ivPlayPause);
+                        FloatingActionButton ivPlayPause = (FloatingActionButton) itemView.findViewById(R.id.ivPlayPause);
                         mPlayDrawable = new PlayPauseDrawable(getResources());
-                        mPlayDrawable.setPaddingDp(24);
-                        mPlayDrawable.setColor(getResources().getColor(R.color.primary));
+                        mPlayDrawable.setYOffset(6);
+                        mPlayDrawable.setColor(getResources().getColor(R.color.white));
                         mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                         ivPlayPause.setImageDrawable(mPlayDrawable);
 
