@@ -26,6 +26,10 @@ public class NativeAudioSink implements AudioSink {
         mPlayer = new NativePlayer();
     }
 
+    public NativePlayer getPlayer() {
+        return mPlayer;
+    }
+
     @Override
     public void release() {
         // TODO: Release resources

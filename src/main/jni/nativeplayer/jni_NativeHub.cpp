@@ -1,0 +1,95 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
+#include "jni_NativeHub.h"
+#include "Log.h"
+#include "NativeHub.h"
+#include "Glue.h"
+
+#define LOG_TAG "OM-jniNativeHub"
+
+// JNI fields
+jclass clazz_NativeHub;
+
+jfieldID field_NativeHub_mHandle;
+
+// Functions
+
+// -------------------------------------------------------------------------------------
+NativeHub* get_hub_from_object(JNIEnv* env, jobject javaObject) {
+    return reinterpret_cast<NativeHub*>
+            (env->GetLongField(javaObject, field_NativeHub_mHandle));
+}
+// -------------------------------------------------------------------------------------
+int JNI_NativeHub_SetupFields(JNIEnv* env) {
+    jclass clazz;
+    clazz = env->FindClass("org/omnirom/music/service/NativeHub");
+    if (clazz == NULL) {
+        ALOGE("Can't find org/omnirom/music/service/NativeHub");
+        return -1;
+    }
+
+    field_NativeHub_mHandle = env->GetFieldID(clazz, "mHandle", "J");
+    if (field_NativeHub_mHandle == NULL) {
+        ALOGE("Can't find NativeHub.mHandle");
+        return -1;
+    }
+
+    clazz_NativeHub = (jclass) env->NewGlobalRef(clazz);
+
+    return 0;
+}
+// -------------------------------------------------------------------------------------
+jboolean om_NativeHub_initialize(JNIEnv* env, jobject thiz) {
+    bool result = false;
+
+    NativeHub* hub = new NativeHub();
+    if (hub) {
+        env->SetLongField(thiz, field_NativeHub_mHandle, (jlong) hub);
+    }
+
+    return (hub != nullptr);
+}
+// -------------------------------------------------------------------------------------
+void om_NativeHub_setDSPChain(JNIEnv* env, jobject thiz, jobjectArray chain) {
+    const int length = env->GetArrayLength(chain);
+    std::list<std::string> chain_list;
+
+    for (int i = 0; i < length; ++i) {
+        jstring socket_name = (jstring) env->GetObjectArrayElement(chain, i);
+        const char* socket_name_str = env->GetStringUTFChars(socket_name, 0);
+        chain_list.push_back(socket_name_str);
+        env->ReleaseStringUTFChars(socket_name, socket_name_str);
+    }
+
+    NativeHub* hub = get_hub_from_object(env, thiz);
+    hub->setDSPChain(chain_list);
+}
+// -------------------------------------------------------------------------------------
+jboolean om_NativeHub_createHostSocket(JNIEnv* env, jobject thiz, jstring name, jboolean is_dsp) {
+    const char* socket_name = env->GetStringUTFChars(name, 0);
+    NativeHub* hub = get_hub_from_object(env, thiz);
+
+    SocketCommon* socket = hub->createHostSocket(socket_name, is_dsp);
+    env->ReleaseStringUTFChars(name, socket_name);
+
+    return socket != nullptr;
+}
+// -------------------------------------------------------------------------------------
+void om_NativeHub_setSinkPointer(JNIEnv* env, jobject thiz, jlong handle) {
+    NativeHub* hub = get_hub_from_object(env, thiz);
+    hub->setSink(reinterpret_cast<INativeSink*>(handle));
+}
+// -------------------------------------------------------------------------------------

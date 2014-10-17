@@ -7,12 +7,14 @@ PROVIDERLIB_JNI_PATH := $(PROVIDERLIB_PATH)/src/main/jni
 # Module name and files
 LOCAL_MODULE := libnativeplayerjni
 LOCAL_SRC_FILES := \
-    NativePlayer.cpp \
     Glue.cpp \
+    NativeHub.cpp \
+    NativePlayer.cpp \
+    jni_NativeHub.cpp \
     jni_NativePlayer.cpp
 
 LOCAL_C_INCLUDES := $(PROVIDERLIB_JNI_PATH)/protobuf/src \
-    $(PROVIDERLIB_JNI_PATH)
+    $(PROVIDERLIB_JNI_PATH)/nativesocket
 
 # Optimization CFLAGS
 LOCAL_CFLAGS := -ffast-math -O3 -funroll-loops

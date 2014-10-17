@@ -24,6 +24,7 @@ import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.service.NativeHub;
 
 /**
  * Abstract host class for providers and DSP service connections
@@ -39,7 +40,7 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
     private String mConfigurationActivity;
     private Context mContext;
     protected boolean mIsBound;
-    protected AudioHostSocket mAudioSocket;
+    protected String mAudioSocketName;
     protected ProviderIdentifier mIdentifier;
     protected PluginsLookup.ConnectionListener mListener;
 
@@ -186,30 +187,22 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
     /**
      * Assigns an audio socket to this provider and connects it to the provided name
      * @param socketName The name of the local socket
-     * @return The AudioSocketHost that has been created
+     * @return True if the AudioSocket Host has been created successfully
      */
-    public AudioHostSocket createAudioSocket(final String socketName) {
-        // Remove the previous socket, if any
-        if (mAudioSocket == null) {
-            mAudioSocket = new AudioHostSocket();
+    public boolean createAudioSocket(final NativeHub hub, final String socketName) {
+        // TODO: Disconnect previous socket!
+        if (hub.createHostSocket(socketName, this instanceof DSPConnection)) {
+            mAudioSocketName = socketName;
+            return true;
         } else {
-            mAudioSocket.disconnectSocket();
+            return false;
         }
-
-        // Assign the provider an audio socket
-        try {
-            mAudioSocket.connect(socketName);
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to setup the audio socket for the providers " + mProviderName, e);
-        }
-
-        return mAudioSocket;
     }
 
     /**
      * @return The active audio socket for this provider
      */
-    public AudioHostSocket getAudioSocket() {
-        return mAudioSocket;
+    public String getAudioSocketName() {
+        return mAudioSocketName;
     }
 }

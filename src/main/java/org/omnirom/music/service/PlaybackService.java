@@ -40,8 +40,6 @@ import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.AbstractProviderConnection;
-import org.omnirom.music.providers.AudioHostSocket;
-import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.IProviderCallback;
@@ -122,6 +120,7 @@ public class PlaybackService extends Service
 
     private Handler mHandler;
     private int mNumberBound = 0;
+    private NativeHub mNativeHub;
     private DSPProcessor mDSPProcessor;
     private PlaybackQueue mPlaybackQueue;
     private List<IPlaybackCallback> mCallbacks;
@@ -172,9 +171,15 @@ public class PlaybackService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
+        // Transition zone
+        mNativeHub = new NativeHub();
+        NativeAudioSink sink = new NativeAudioSink();
+        mNativeHub.setSinkPointer(sink.getPlayer().getHandle());
+
+        //
         mDSPProcessor = new DSPProcessor(this);
-        mDSPProcessor.setSink(new NativeAudioSink());
         mDSPProcessor.restoreChain(this);
+        // End of transition zone
 
         PluginsLookup.getDefault().initialize(getApplicationContext());
         PluginsLookup.getDefault().registerProviderListener(this);
@@ -322,6 +327,10 @@ public class PlaybackService extends Service
         connection.bindService();
     }
 
+    public NativeHub getNativeHub() {
+        return mNativeHub;
+    }
+
     private void setupRemoteControl() {
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         mediaButtonIntent.setComponent(RemoteControlReceiver.getComponentName(this));
@@ -361,22 +370,18 @@ public class PlaybackService extends Service
      *
      * @param connection The provider
      */
-    public AudioHostSocket assignProviderAudioSocket(AbstractProviderConnection connection) {
-        AudioHostSocket socket = connection.getAudioSocket();
+    public String assignProviderAudioSocket(AbstractProviderConnection connection) {
+        String socket = connection.getAudioSocketName();
 
         if (socket == null) {
             // Assign the providers an audio socket
-            final String socketName = "org.omnirom.music.AUDIO_SOCKET_" + connection.getProviderName()
+            socket = "org.omnirom.music.AUDIO_SOCKET_" + connection.getProviderName()
                     + "_" + System.currentTimeMillis();
-            socket = connection.createAudioSocket(socketName);
-
-            if (connection instanceof DSPConnection) {
-                socket.setCallback(mDSPProcessor.getDSPCallback());
+            if (connection.createAudioSocket(mNativeHub, socket)) {
+                Log.i(TAG, "Provider connected and socket set: " + connection.getProviderName());
             } else {
-                socket.setCallback(mDSPProcessor.getProviderCallback());
+                Log.w(TAG, "Error while creating audio socket for " + connection.getProviderName());
             }
-
-            Log.i(TAG, "Provider connected and socket set: " + connection.getProviderName());
         }
 
         return socket;

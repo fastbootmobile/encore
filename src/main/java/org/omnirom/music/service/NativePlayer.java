@@ -25,6 +25,10 @@ public class NativePlayer {
         nativeInitialize();
     }
 
+    public long getHandle() {
+        return mHandle;
+    }
+
     /**
      * Sets the input audio format
      * @param sample_rate Sample rate, in hertz (number of samples per second)

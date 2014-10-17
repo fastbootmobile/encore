@@ -14,6 +14,7 @@
  */
 #include "Glue.h"
 #include "jni_NativePlayer.h"
+#include "jni_NativeHub.h"
 
 #define NDEBUG
 #define LOG_TAG "OM-Glue"
@@ -41,6 +42,17 @@ static JNINativeMethod gMethodsNativePlayer[] = {
             reinterpret_cast<void*>(om_NativePlayer_flush)},
 };
 
+static JNINativeMethod gMethodsNativeHub[] = {
+    {"nativeInitialize", "()Z",
+            reinterpret_cast<void*>(om_NativeHub_initialize)},
+    {"nativeSetDSPChain", "([Ljava/lang/String;)V",
+            reinterpret_cast<void*>(om_NativeHub_setDSPChain)},
+    {"nativeCreateHostSocket", "(Ljava/lang/String;Z)Z",
+            reinterpret_cast<void*>(om_NativeHub_createHostSocket)},
+    {"nativeSetSinkPointer", "(J)V",
+            reinterpret_cast<void*>(om_NativeHub_setSinkPointer)},
+};
+
 // -------------------------------------------------------------------------------------
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     ALOGI("JNI_OnLoad");
@@ -57,6 +69,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
     if (JNI_RegisterNativePlayer(env) < 0) {
         ALOGE("ERROR: NativePlayer native registration failed");
+        goto bail;
+    }
+
+    if (JNI_RegisterNativeHub(env) < 0) {
+        ALOGE("ERROR: NativeHub native registration failed");
         goto bail;
     }
 
@@ -133,5 +150,16 @@ int JNI_RegisterNativePlayer(JNIEnv* env) {
 
     return JNI_RegisterNativeMethods(env, "org/omnirom/music/service/NativePlayer",
             gMethodsNativePlayer, NELEM(gMethodsNativePlayer));
+}
+// -------------------------------------------------------------------------------------
+int JNI_RegisterNativeHub(JNIEnv* env) {
+    ALOGD("JNI_RegisterNativeHub");
+    if (JNI_NativeHub_SetupFields(env) < 0) {
+        ALOGE("Cannot setup NativeHub fields");
+        return -1;
+    }
+
+    return JNI_RegisterNativeMethods(env, "org/omnirom/music/service/NativeHub",
+            gMethodsNativeHub, NELEM(gMethodsNativeHub));
 }
 // -------------------------------------------------------------------------------------

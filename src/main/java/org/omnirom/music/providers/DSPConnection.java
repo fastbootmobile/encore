@@ -21,6 +21,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.omnirom.music.service.NativeHub;
+
 /**
  * Class representing a connection to a DSP provider service
  */
@@ -28,7 +30,6 @@ public class DSPConnection extends AbstractProviderConnection {
     private static final String TAG = "DSPConnection";
 
     private IDSPProvider mBinder;
-    private AudioHostSocket mSocket;
 
     /**
      * Constructor
@@ -82,9 +83,9 @@ public class DSPConnection extends AbstractProviderConnection {
             Log.e(TAG, "Remote exception occurred on the set DSP effect", e);
         }
 
-        if (mSocket != null) {
+        if (mAudioSocketName != null) {
             try {
-                mBinder.setAudioSocketName(mSocket.getSocketName());
+                mBinder.setAudioSocketName(mAudioSocketName);
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot restore audio socket to DSP effect", e);
             }
@@ -105,19 +106,21 @@ public class DSPConnection extends AbstractProviderConnection {
      * {@inheritDoc}
      */
     @Override
-    public AudioHostSocket createAudioSocket(final String socketName) {
-        mSocket = super.createAudioSocket(socketName);
-
-        if (mBinder != null) {
-            try {
-                mBinder.setAudioSocketName(socketName);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
+    public boolean createAudioSocket(final NativeHub hub, final String socketName) {
+        if (super.createAudioSocket(hub, socketName)) {
+            if (mBinder != null) {
+                // TODO: Notify DSP chain if socket name changed!!
+                try {
+                    mBinder.setAudioSocketName(socketName);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
+                }
+            } else {
+                bindService();
             }
+            return true;
         } else {
-            bindService();
+            return false;
         }
-
-        return mSocket;
     }
 }

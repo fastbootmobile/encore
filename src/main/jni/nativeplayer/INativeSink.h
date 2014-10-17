@@ -17,9 +17,31 @@
 
 class INativeSink {
  public:
+    // Set audio format
+    virtual bool setAudioFormat(uint32_t sample_rate, uint32_t sample_format,
+            uint32_t channels) = 0;
+
     // Enqueue buffer data if possible to the player
     // @returns The number of samples written (0 means the buffer is full)
     virtual uint32_t enqueue(const void* data, uint32_t len) = 0;
+
+    // Returns the number of samples in the buffer
+    virtual int32_t getBufferedCount() const = 0;
+
+    // Returns the total number of written samples
+    virtual int64_t getTotalWrittenSamples() const = 0;
+
+    // Returns the number of underflow/dropouts since the last flush (or start)
+    virtual int32_t getUnderflowCount() const = 0;
+
+    // Flush the buffers and output
+    virtual void flush() = 0;
+
+    // Returns the active sample rate
+    virtual int32_t getSampleRate() const = 0;
+
+    // Returns the active number of channels
+    virtual int32_t getChannels() const = 0;
 };
 
 

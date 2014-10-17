@@ -23,6 +23,8 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 
+import org.omnirom.music.service.NativeHub;
+
 /**
  * Represents a connection to an audio provider (music source) service
  */
@@ -52,9 +54,10 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
     public void unbindService() {
         if (mIsBound) {
             ProviderAggregator.getDefault().unregisterProvider(this);
-            if (mAudioSocket != null) {
+            // TODO: Disconnect socket
+            /*if (mAudioSocket != null) {
                 mAudioSocket.disconnectSocket();
-            }
+            }*/
 
             mBinder = null;
         }
@@ -95,8 +98,8 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
                 }
             }
 
-            if (mAudioSocket != null) {
-                mBinder.setAudioSocketName(mAudioSocket.getSocketName());
+            if (mAudioSocketName != null) {
+                mBinder.setAudioSocketName(mAudioSocketName);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception occurred on the set providers", e);
@@ -120,30 +123,31 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
      * {@inheritDoc}
      */
     @Override
-    public AudioHostSocket createAudioSocket(final String socketName) {
-        final AudioHostSocket host = super.createAudioSocket(socketName);
-        host.setListener(this);
-
-        try {
+    public boolean createAudioSocket(final NativeHub hub, final String socketName) {
+        if (super.createAudioSocket(hub, socketName)) {
             if (mBinder != null) {
-                mBinder.setAudioSocketName(socketName);
+                try {
+                    mBinder.setAudioSocketName(socketName);
+                } catch (DeadObjectException e) {
+                    Log.e(TAG, "Provider died while assigning audio socket to " + getProviderName(), e);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
+                }
             }
-        } catch (DeadObjectException e) {
-            Log.e(TAG, "Provider died while assigning audio socket to " + getProviderName(), e);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
+            return true;
+        } else {
+            return false;
         }
-
-        return host;
     }
 
     @Override
     public void onSocketError() {
         // Socket got killed. If we're still bound to this service, recreate a new socket and
         // assign it.
+        // TODO: Is this still needed?
         if (mBinder != null) {
-            final String newSockName = mAudioSocket.getSocketName() + SystemClock.uptimeMillis();
-            createAudioSocket(newSockName);
+            final String newSockName = mAudioSocketName + SystemClock.uptimeMillis();
+            // createAudioSocket(newSockName);
         }
     }
 }

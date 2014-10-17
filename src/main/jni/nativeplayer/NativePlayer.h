@@ -57,6 +57,12 @@ class NativePlayer : public INativeSink {
     // Flush the audio output
     void flush();
 
+    // Returns the active sample rate
+    int32_t getSampleRate() const;
+
+    // Returns the active number of channels
+    int32_t getChannels() const;
+
  private:
     bool createAudioPlayer();
     void setPlayState(SLuint32 state);

@@ -349,5 +349,13 @@ void NativePlayer::setPlayState(SLuint32 state) {
     }
 }
 // -------------------------------------------------------------------------------------
+int32_t NativePlayer::getSampleRate() const {
+    return m_iSampleRate;
+}
+// -------------------------------------------------------------------------------------
+int32_t NativePlayer::getChannels() const {
+    return m_iChannels;
+}
+// -------------------------------------------------------------------------------------
 
 

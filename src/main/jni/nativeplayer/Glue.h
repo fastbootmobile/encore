@@ -27,6 +27,9 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved);
 // Called to register NativePlayer JNI methods
 int JNI_RegisterNativePlayer(JNIEnv* env);
 
+// Called to register NativeHub JNI methods
+int JNI_RegisterNativeHub(JNIEnv* env);
+
 // Throw an exception with the specified class and an optional message.
 int JNI_ThrowException(JNIEnv* env, const char* className, const char* msg);
 
