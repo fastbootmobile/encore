@@ -73,7 +73,7 @@ public class MaterialMenuView extends View implements MaterialMenu {
         }
 
         try {
-            color = attr.getColor(R.styleable.MaterialMenuView_color, DEFAULT_COLOR);
+            color = attr.getColor(R.styleable.MaterialMenuView_mmv_color, DEFAULT_COLOR);
             scale = attr.getInteger(R.styleable.MaterialMenuView_scale, DEFAULT_SCALE);
             transformDuration = attr.getInteger(R.styleable.MaterialMenuView_transformDuration, DEFAULT_TRANSFORM_DURATION);
             pressedDuration = attr.getInteger(R.styleable.MaterialMenuView_pressedDuration, DEFAULT_PRESSED_DURATION);

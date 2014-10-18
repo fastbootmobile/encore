@@ -79,10 +79,10 @@ public class PlaybackService extends Service
         @Override
         public void run() {
             if (mState == STATE_PAUSED || mState == STATE_STOPPED) {
-                Log.w(TAG, "Shutting down because of timeout and nothing bound");
+                /*Log.w(TAG, "Shutting down because of timeout and nothing bound");
                 mCurrentTrack = -1;
                 stopForeground(true);
-                stopSelf();
+                stopSelf();*/
             } else {
                 resetShutdownTimeout();
             }

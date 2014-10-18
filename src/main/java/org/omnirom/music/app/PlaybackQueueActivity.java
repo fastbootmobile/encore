@@ -32,7 +32,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -135,8 +134,8 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         .getFinalDrawable().getBitmap();
                 Palette palette = Palette.generate(hero);
 
-                PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
-                PaletteItem darkMutedColor = palette.getDarkMutedColor();
+                Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
+                Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();
 
                 int color;
                 if (darkVibrantColor != null) {

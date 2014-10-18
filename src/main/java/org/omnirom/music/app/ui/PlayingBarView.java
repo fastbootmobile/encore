@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -501,8 +500,8 @@ public class PlayingBarView extends RelativeLayout {
                         if (mPalette == null) {
                             mPalette = Palette.generate(hero);
                         }
-                        PaletteItem darkVibrantColor = mPalette.getDarkVibrantColor();
-                        PaletteItem darkMutedColor = mPalette.getDarkMutedColor();
+                        Palette.Swatch darkVibrantColor = mPalette.getDarkVibrantSwatch();
+                        Palette.Swatch darkMutedColor = mPalette.getDarkMutedSwatch();
 
                         int color;
                         if (darkVibrantColor != null) {

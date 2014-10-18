@@ -24,7 +24,6 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,8 +58,8 @@ public class AlbumsAdapter extends BaseAdapter {
             Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(final Palette palette) {
-                    final PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
-                    final PaletteItem darkMutedColor = palette.getDarkMutedColor();
+                    final Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
+                    final Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();
 
                     mHandler.post(new Runnable() {
                         public void run() {

@@ -22,7 +22,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -270,8 +269,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
             @Override
             public void onGenerated(final Palette palette) {
-                final PaletteItem normalColor = palette.getDarkMutedColor();
-                final PaletteItem pressedColor = palette.getDarkVibrantColor();
+                final Palette.Swatch normalColor = palette.getDarkMutedSwatch();
+                final Palette.Swatch pressedColor = palette.getDarkVibrantSwatch();
                 if (normalColor != null && mRootView != null) {
                     mHandler.post(new Runnable() {
                         @Override

@@ -1,1 +1,3 @@
-<explode/>
+<explode
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/fast_out_slow_in"/>

@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '20.0.0'
+    compileSdkVersion 21
+    buildToolsVersion '21.0.1'
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 19
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
         renderscriptTargetApi = 18
@@ -28,11 +28,11 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v13:20.0.0'
-    compile 'com.android.support:mediarouter-v7:20.0.0'
-    compile 'com.android.support:cardview-v7:21.0.0-rc1'
-    compile 'com.android.support:palette-v7:21.0.0-rc1'
-    compile 'com.android.support:recyclerview-v7:21.0.0-rc1'
+    compile 'com.android.support:support-v13:21.0.0'
+    compile 'com.android.support:mediarouter-v7:21.0.0'
+    compile 'com.android.support:cardview-v7:21.0.0'
+    compile 'com.android.support:palette-v7:21.0.0'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
     compile project(':providerlib')
     compile files('src/main/libs/jEN.jar')
     compile files('src/main/libs/json_simple-1.1.jar')

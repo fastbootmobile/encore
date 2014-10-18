@@ -34,7 +34,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -259,7 +258,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(Palette palette) {
-                    PaletteItem vibrant = palette.getVibrantColor();
+                    Palette.Swatch vibrant = palette.getVibrantSwatch();
 
                     if (vibrant != null && mRootView != null) {
                         mRootView.setBackgroundColor(vibrant.getRgb());
@@ -396,13 +395,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(final Palette palette) {
-                    final PaletteItem normalColor = palette.getDarkMutedColor();
+                    final Palette.Swatch normalColor = palette.getDarkMutedSwatch();
                     if (normalColor != null && mRootView != null) {
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 if (mRootView != null) {
-                                    final PaletteItem pressedColor = palette.getDarkVibrantColor();
+                                    final Palette.Swatch pressedColor = palette.getDarkVibrantSwatch();
                                     mFabPlay.setNormalColor(normalColor.getRgb());
                                     if (pressedColor != null) {
                                         mFabPlay.setPressedColor(pressedColor.getRgb());

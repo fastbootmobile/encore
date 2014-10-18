@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +39,6 @@ import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.SearchAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -161,8 +159,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         int color = 0xffffff;
         if (hero != null) {
             Palette palette = Palette.generate(hero);
-            PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
-            PaletteItem darkMutedColor = palette.getDarkMutedColor();
+            Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
+            Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();
 
             if (darkVibrantColor != null) {
                 color = darkVibrantColor.getRgb();
@@ -197,8 +195,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         int color = 0xffffff;
         if (hero != null) {
             Palette palette = Palette.generate(hero);
-            PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
-            PaletteItem darkMutedColor = palette.getDarkMutedColor();
+            Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
+            Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();
 
             if (darkVibrantColor != null) {
                 color = darkVibrantColor.getRgb();

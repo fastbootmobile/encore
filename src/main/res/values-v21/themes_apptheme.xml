@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--
-    There is currently no way to keep v21 stuff when buliding pre-L (e.g. Kitkat, API 19). We
-    comment this out for now until the SDK allows us to do that.
-    -->
-
-
-<!--
     <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
 
         <item name="android:colorPrimary">@color/primary</item>
@@ -19,7 +12,7 @@
         <item name="android:windowContentTransitions">true</item>
 
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
-        <item name="android:windowAllowExitTransitionOverlap">true</item>
+        <item name="android:windowAllowReturnTransitionOverlap">true</item>
 
         <item name="android:actionBarStyle">@style/AppActionBar</item>
     </style>
@@ -53,5 +46,4 @@
         <item name="android:windowEnterTransition">@transition/explode</item>
         <item name="android:windowExitTransition">@transition/explode</item>
     </style>
--->
 </resources>

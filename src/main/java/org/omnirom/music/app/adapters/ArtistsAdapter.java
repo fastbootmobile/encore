@@ -24,7 +24,6 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -84,8 +83,8 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
                 public void onGenerated(Palette palette) {
                     final int defaultColor = res.getColor(R.color.default_album_art_background);
 
-                    final PaletteItem darkVibrantColor = palette.getDarkVibrantColor();
-                    final PaletteItem darkMutedColor = palette.getDarkMutedColor();
+                    final Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
+                    final Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();
 
                     int targetColor = defaultColor;
 

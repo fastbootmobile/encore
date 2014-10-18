@@ -11,7 +11,6 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -104,7 +103,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                 Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
-                        final PaletteItem item = palette.getDarkVibrantColor();
+                        final Palette.Swatch item = palette.getDarkVibrantSwatch();
                         if (item == null) {
                             return;
                         }

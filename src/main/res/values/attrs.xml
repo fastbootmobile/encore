@@ -10,7 +10,7 @@
 
     <!-- Material Menu View -->
     <declare-styleable name="MaterialMenuView">
-        <attr name="color" format="color"/>
+        <attr name="mmv_color" format="color"/>
         <attr name="scale" format="integer"/>
         <attr name="transformDuration" format="integer"/>
         <attr name="pressedDuration" format="integer"/>

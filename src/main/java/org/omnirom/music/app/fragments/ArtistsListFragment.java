@@ -15,6 +15,7 @@
 
 package org.omnirom.music.app.fragments;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -23,9 +24,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.lucasr.twowayview.ItemClickSupport;
 import org.lucasr.twowayview.TwoWayView;
@@ -33,6 +36,7 @@ import org.lucasr.twowayview.widget.DividerItemDecoration;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
+import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -60,14 +64,14 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
             String artistRef = mAdapter.getItem(tag.position).getRef();
             Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artistRef, tag.itemColor);
 
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                        /*AlbumArtImageView ivCover = tag.ivCover;
-                        TextView tvTitle = tag.tvTitle;
-                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                            new Pair<View, String>(ivCover, "itemImage"),
-                            new Pair<View, String>(tvTitle, "artistName"));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                AlbumArtImageView ivCover = tag.ivCover;
+                TextView tvTitle = tag.tvTitle;
+                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                    new Pair<View, String>(ivCover, "itemImage"),
+                    new Pair<View, String>(tvTitle, "artistName"));
 
-                        ctx.startActivity(intent, opt.toBundle()); */
+                ctx.startActivity(intent, opt.toBundle());
             } else {
                 ctx.startActivity(intent);
             }
