@@ -122,7 +122,7 @@ void NativeHub::onFormatInfo(SocketCommon* socket, const int32_t sample_rate, co
 void NativeHub::onAudioData(SocketCommon* socket, const uint8_t* data, const uint32_t len) {
     bool is_dsp = (m_ProviderSockets[socket->getSocketName()] == nullptr);
 
-    ALOGE("onAudioData(%d bytes)", len);
+    // ALOGE("onAudioData(%d bytes)", len);
 
     if (len > 0) {
         if (is_dsp) {
