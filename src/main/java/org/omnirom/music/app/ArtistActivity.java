@@ -15,6 +15,8 @@
 
 package org.omnirom.music.app;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
@@ -24,8 +26,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.transition.Transition;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 
 import org.omnirom.music.app.fragments.ArtistFragment;
 
@@ -46,6 +52,7 @@ public class ArtistActivity extends FragmentActivity {
 
     private Bundle mInitialIntent;
     private Bitmap mHero;
+    private ArtistFragment mActiveFragment;
 
     /**
      * Creates a proper intent to open this activity
@@ -72,7 +79,7 @@ public class ArtistActivity extends FragmentActivity {
         setContentView(R.layout.activity_artist);
 
         FragmentManager fm = getSupportFragmentManager();
-        ArtistFragment activeFragment = (ArtistFragment) fm.findFragmentByTag(TAG_FRAGMENT);
+        mActiveFragment = (ArtistFragment) fm.findFragmentByTag(TAG_FRAGMENT);
 
         if (savedInstanceState == null) {
             mHero = Utils.dequeueBitmap(BITMAP_ARTIST_HERO);
@@ -82,14 +89,14 @@ public class ArtistActivity extends FragmentActivity {
             mInitialIntent = savedInstanceState.getBundle(EXTRA_RESTORE_INTENT);
         }
 
-        if (activeFragment == null) {
-            activeFragment = new ArtistFragment();
+        if (mActiveFragment == null) {
+            mActiveFragment = new ArtistFragment();
             fm.beginTransaction()
-                    .add(R.id.container, activeFragment, TAG_FRAGMENT)
+                    .add(R.id.container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
         }
 
-        activeFragment.setArguments(mHero, mInitialIntent);
+        mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
         ActionBar actionBar = getActionBar();
@@ -98,18 +105,17 @@ public class ArtistActivity extends FragmentActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            /*
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
                 @Override
                 public void onTransitionStart(Transition transition) {
-                    View fab = activeFragment.findViewById(R.id.fabPlay);
+                    View fab = mActiveFragment.findViewById(R.id.fabPlay);
                     fab.setVisibility(View.INVISIBLE);
                 }
 
                 @Override
                 public void onTransitionEnd(Transition transition) {
-                    View fab = activeFragment.findViewById(R.id.fabPlay);
+                    View fab = mActiveFragment.findViewById(R.id.fabPlay);
                     fab.setVisibility(View.VISIBLE);
 
                     // get the center for the clipping circle
@@ -122,7 +128,7 @@ public class ArtistActivity extends FragmentActivity {
                     // create and start the animator for this view
                     // (the start radius is zero)
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                        ValueAnimator anim =
+                        Animator anim =
                                 ViewAnimationUtils.createCircularReveal(fab, cx, cy, 0, finalRadius);
                         anim.setInterpolator(new DecelerateInterpolator());
                         anim.start();
@@ -152,7 +158,7 @@ public class ArtistActivity extends FragmentActivity {
                 public void onTransitionResume(Transition transition) {
 
                 }
-            });*/
+            });
         }
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -186,8 +192,8 @@ public class ArtistActivity extends FragmentActivity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == android.R.id.home) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                // finishAfterTransition();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                finishAfterTransition();
             } else {
                 finish();
             }

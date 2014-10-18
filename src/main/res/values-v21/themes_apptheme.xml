@@ -10,6 +10,8 @@
         <item name="android:windowBackground">@color/default_fragment_background</item>
 
         <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowSharedElementsUseOverlay">true</item>
+        <item name="android:windowActivityTransitions">true</item>
 
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
