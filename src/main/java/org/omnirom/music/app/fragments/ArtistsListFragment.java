@@ -68,8 +68,7 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
                 AlbumArtImageView ivCover = tag.ivCover;
                 TextView tvTitle = tag.tvTitle;
                 ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                    new Pair<View, String>(ivCover, "itemImage"),
-                    new Pair<View, String>(tvTitle, "artistName"));
+                    ivCover, "itemImage");
 
                 ctx.startActivity(intent, opt.toBundle());
             } else {

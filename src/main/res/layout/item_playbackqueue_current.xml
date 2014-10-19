@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- android:viewName="playback:firstitem:art" -->
+        <!--  -->
         <org.omnirom.music.app.ui.AlbumArtImageView
             android:id="@+id/ivCurrentPlayAlbumArt"
             android:layout_width="64dp"
@@ -19,10 +19,9 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:scaleType="centerCrop"
+            android:transitionName="playback:firstitem:art"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"/>
-
-        <!-- android:viewName="playback:firstitem:title"  -->
 
         <LinearLayout
             android:orientation="horizontal"
@@ -31,6 +30,7 @@
             android:layout_alignBottom="@+id/ivCurrentPlayAlbumArt"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
+            android:transitionName="playback:firstitem:title"
             android:background="@drawable/gradient_overlay_playbar_current"
             android:id="@+id/linearLayout"
             android:paddingLeft="8dp"
@@ -47,7 +47,6 @@
                 <TextView
                     android:id="@+id/tvCurrentTitle"
                     style="@style/FontTitle"
-                    android:text="Title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
@@ -56,7 +55,6 @@
                 <TextView
                     android:id="@+id/tvCurrentArtist"
                     style="@style/FontSubhead"
-                    android:text="Artist"
                     android:textColor="@color/white"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -74,8 +72,6 @@
                 android:scaleType="centerCrop"
                 android:adjustViewBounds="true"/>
         </LinearLayout>
-
-        <!-- android:viewName="playback:firstitem:artist" -->
 
         <SeekBar
             android:id="@+id/sbSeek"

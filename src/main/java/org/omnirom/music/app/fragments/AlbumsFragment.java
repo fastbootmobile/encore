@@ -16,11 +16,13 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -104,12 +106,12 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
                         mAdapter.getItem(position), tag.itemColor);
 
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                             new Pair<View, String>(ivCover, "itemImage"),
                             new Pair<View, String>(tvTitle, "albumName"));
 
-                    startActivity(intent, opt.toBundle()); */
+                    getActivity().startActivity(intent, opt.toBundle());
                 } else {
                     startActivity(intent);
                 }

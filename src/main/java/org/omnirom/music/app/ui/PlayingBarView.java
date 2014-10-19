@@ -15,6 +15,10 @@
 
 package org.omnirom.music.app.ui;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -26,12 +30,13 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -44,7 +49,7 @@ import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaybackQueueActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
-import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -52,10 +57,8 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.IPlaybackCallback;
-import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
@@ -440,8 +443,8 @@ public class PlayingBarView extends RelativeLayout {
 
                 final int itemIndex = shownCount;
                 View itemRoot = inflater.inflate(R.layout.item_playbar, mTracksLayout, false);
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    // itemRoot.setViewName("playbackqueue:preview:" + shownCount);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    itemRoot.setTransitionName("playbackqueue:preview:" + shownCount);
                 }
                 mTracksLayout.addView(itemRoot);
                 itemViews[shownCount] = itemRoot;
@@ -451,10 +454,10 @@ public class PlayingBarView extends RelativeLayout {
                 AlbumArtImageView ivAlbumArt = (AlbumArtImageView) itemRoot.findViewById(R.id.ivAlbumArt);
                 ivAlbumArt.setCrossfade(true);
 
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    //tvArtist.setViewName("playbackqueue:preview:" + shownCount + ":artist");
-                    //tvTitle.setViewName("playbackqueue:preview:" + shownCount + ":title");
-                    //ivAlbumArt.setViewName("playbackqueue:preview:" + shownCount + ":art");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    tvArtist.setTransitionName("playbackqueue:preview:" + shownCount + ":artist");
+                    tvTitle.setTransitionName("playbackqueue:preview:" + shownCount + ":title");
+                    ivAlbumArt.setTransitionName("playbackqueue:preview:" + shownCount + ":art");
                 }
 
                 if (song.isLoaded() && song.getArtist() != null) {
@@ -472,8 +475,8 @@ public class PlayingBarView extends RelativeLayout {
 
                 tvTitle.setText(song.getTitle());
                 ivAlbumArt.loadArtForSong(song);
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    // ivAlbumArt.setViewName(song.getRef() + shownCount);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ivAlbumArt.setTransitionName(song.getRef() + shownCount);
                 }
 
                 // Set root view click listener
@@ -516,11 +519,11 @@ public class PlayingBarView extends RelativeLayout {
                         if (album != null) {
                             Intent intent = AlbumActivity.craftIntent(getContext(), hero, album, color);
 
-                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                            /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
                                     view, "itemImage");
 
-                            getContext().startActivity(intent, opt.toBundle()); */
+                                getContext().startActivity(intent, opt.toBundle());
                             } else {
                                 getContext().startActivity(intent);
                             }
@@ -569,7 +572,7 @@ public class PlayingBarView extends RelativeLayout {
                 public void onClick(View view) {
                     Intent intent = new Intent(getContext(), PlaybackQueueActivity.class);
 
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         List<Pair<View, String>> itemsTransition = new ArrayList<Pair<View, String>>();
 
                         // First item is processed differently.
@@ -590,10 +593,10 @@ public class PlayingBarView extends RelativeLayout {
                             i++;
                         }
 
-                        /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
+                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
                                 viewsToTransition);
 
-                        getContext().startActivity(intent, opt.toBundle()); */
+                        getContext().startActivity(intent, opt.toBundle());
                     } else {
                         getContext().startActivity(intent);
                     }
@@ -633,21 +636,36 @@ public class PlayingBarView extends RelativeLayout {
         }
 
         // create and start the animator for this view (the start radius is zero)
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            /* ValueAnimator anim =
-                    ViewAnimationUtils.createCircularReveal(mPlayFab, cx, cy, 0, finalRadius);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Animator anim =
+                    ViewAnimationUtils.createCircularReveal(mPlayFab, cx, cy, startRadius, finalRadius);
             anim.setInterpolator(new DecelerateInterpolator());
 
             if (!visible) {
-                anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                anim.addListener(new Animator.AnimatorListener() {
                     @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    public void onAnimationStart(Animator animation) {
                         mPlayFab.setVisibility(View.INVISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
                     }
                 });
             }
 
-            anim.start(); */
+            anim.start();
         } else {
             // TODO: Kitkat animation
         }

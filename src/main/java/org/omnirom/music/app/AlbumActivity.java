@@ -20,13 +20,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -37,7 +34,6 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.service.IPlaybackService;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -46,8 +42,6 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * {@link org.omnirom.music.app.fragments.AlbumViewFragment}
  */
 public class AlbumActivity extends FragmentActivity {
-
-    private static final String TAG = "AlbumActivity";
     private static final String TAG_FRAGMENT = "fragment_inner";
 
     public static final String EXTRA_ALBUM = "album";
@@ -185,11 +179,7 @@ public class AlbumActivity extends FragmentActivity {
                     getResources().getColor(R.color.default_album_art_background));
             startActivity(intent);
         } else if (id == android.R.id.home) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                // finishAfterTransition();
-            } else {
-                finish();
-            }
+            supportFinishAfterTransition();
             return true;
         }
 

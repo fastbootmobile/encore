@@ -127,7 +127,7 @@ public class ArtistActivity extends FragmentActivity {
 
                     // create and start the animator for this view
                     // (the start radius is zero)
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         Animator anim =
                                 ViewAnimationUtils.createCircularReveal(fab, cx, cy, 0, finalRadius);
                         anim.setInterpolator(new DecelerateInterpolator());
@@ -177,6 +177,17 @@ public class ArtistActivity extends FragmentActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // TODO: This workaround is needed for as long as we're not using recyclerview.
+            // Causes an IllegalStateException with too large lists
+            finish();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         // getMenuInflater().inflate(R.menu.artist, menu);
@@ -193,7 +204,7 @@ public class ArtistActivity extends FragmentActivity {
             return true;
         } else if (id == android.R.id.home) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                finishAfterTransition();
+                finish();
             } else {
                 finish();
             }

@@ -18,6 +18,7 @@ package org.omnirom.music.app;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -69,9 +71,6 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Activity showing the current playback queue
  */
 public class PlaybackQueueActivity extends FragmentActivity {
-
-    private static final String TAG = "PlaybackQueueActivity";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,11 +110,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == android.R.id.home) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                // finishAfterTransition();
-            } else {
-                finish();
-            }
+            supportFinishAfterTransition();
             return true;
         }
 
@@ -152,11 +147,11 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
                         aggregator.retrieveAlbum(song.getAlbum(), song.getProvider()), color);
 
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                             view, "itemImage");
 
-                    getActivity().startActivity(intent, opt.toBundle()); */
+                    getActivity().startActivity(intent, opt.toBundle());
                 } else {
                     getActivity().startActivity(intent);
                 }
@@ -464,7 +459,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                             public void onClick(View view) {
                                 Drawable[] drawables = new Drawable[2];
                                 final Resources res = getResources();
-                                boolean enable = false;
+                                boolean enable;
 
                                 if (PlaybackProxy.isRepeatMode()) {
                                     // Repeating, disable
@@ -497,8 +492,8 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         });
                     } else {
                         itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                            // itemView.setViewName("playbackqueue:" + itemIndex);
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+                            itemView.setTransitionName("playbackqueue:" + itemIndex);
                         }
                         TextView tvTitle = (TextView) itemView.findViewById(R.id.tvTitle),
                                 tvArtist = (TextView) itemView.findViewById(R.id.tvArtist);
@@ -512,8 +507,8 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         }
                         ivCover.loadArtForSong(song);
 
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                            // ivCover.setViewName("playbackqueue:" + itemIndex + ":cover:" + song.getRef());
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+                            ivCover.setTransitionName("playbackqueue:" + itemIndex + ":cover:" + song.getRef());
                         }
 
                         ivCover.setTag(song);
