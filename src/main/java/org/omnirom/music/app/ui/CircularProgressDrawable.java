@@ -78,23 +78,18 @@ public class CircularProgressDrawable extends Drawable {
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
-        mRect.set(bounds);
+        final float paddedStrokeWidth = (mPaint.getStrokeWidth() + mPadding * 2.0f) / 2.0f;
+        mRect.set(bounds.left + paddedStrokeWidth, bounds.top + paddedStrokeWidth,
+                bounds.right - paddedStrokeWidth, bounds.bottom - paddedStrokeWidth);
     }
 
     @Override
     public void draw(Canvas canvas) {
-        mRect.set(getBounds());
-        final float paddedStrokeWidth = mPaint.getStrokeWidth() + mPadding * 2.0f;
-        mRect.left += paddedStrokeWidth / 2.0f;
-        mRect.right -= paddedStrokeWidth / 2.0f;
-        mRect.top += paddedStrokeWidth / 2.0f;
-        mRect.bottom -= paddedStrokeWidth / 2.0f;
-
-        mRect.top -= 8.0f;
-        mRect.bottom -= 8.0f;
-
+        canvas.save();
+        canvas.translate(0, -8.0f);
         float sweepAngle = mValue * 360.0f / mMax;
         canvas.drawArc(mRect, -90.0f, sweepAngle, false, mPaint);
+        canvas.restore();
     }
 
     @Override

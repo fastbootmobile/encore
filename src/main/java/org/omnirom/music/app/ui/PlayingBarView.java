@@ -301,11 +301,12 @@ public class PlayingBarView extends RelativeLayout {
         mProgressDrawable.setValue(0);
         mProgressDrawable.setColor(getResources().getColor(R.color.white));
         mProgressDrawable.setAlpha(120);
-        mProgressDrawable.setPadding(Utils.dpToPx(getResources(), 12));
+        mProgressDrawable.setPadding(Utils.dpToPx(getResources(), 1));
 
         mPlayFabDrawable = new PlayPauseDrawable(getResources());
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         mPlayFabDrawable.setYOffset(6);
+        mPlayFabDrawable.setPaddingDp(36);
 
         // Set the original state
         if (PlaybackProxy.getState() == PlaybackService.STATE_PLAYING) {

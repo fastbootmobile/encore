@@ -68,7 +68,7 @@ public class FloatingActionButton extends ImageButton {
       initAttributes(context, attributeSet);
     }
 
-    mCircleSize = getDimension(mSize == SIZE_NORMAL ? R.dimen.fab_size_normal : R.dimen.fab_size_mini);
+    mCircleSize = getResources().getDimensionPixelSize(mSize == SIZE_NORMAL ? R.dimen.fab_size_normal : R.dimen.fab_size_mini);
     mShadowRadius = getDimension(R.dimen.fab_shadow_radius);
     mShadowOffset = getDimension(R.dimen.fab_shadow_offset);
     mDrawableSize = (int) (mCircleSize + 2 * mShadowRadius);
@@ -114,7 +114,13 @@ public class FloatingActionButton extends ImageButton {
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    setMeasuredDimension(mDrawableSize, mDrawableSize);
+    if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+        // If someone dare to fix... Only happens on Lollipop. The inner drawable is elliptic
+        // and not a true circle.
+        setMeasuredDimension(mDrawableSize, (int) (mDrawableSize - mShadowOffset));
+    } else {
+        setMeasuredDimension(mDrawableSize, mDrawableSize);
+    }
   }
 
   void updateBackground() {

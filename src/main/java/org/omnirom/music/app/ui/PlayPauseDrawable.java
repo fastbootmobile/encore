@@ -24,12 +24,14 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.dd.CircularAnimatedDrawable;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 
 /**
  * Animated drawable giving native Material animations between Play, Pause and Stop state
@@ -43,7 +45,7 @@ public class PlayPauseDrawable extends Drawable {
     public static final int SHAPE_PLAY = 2;
 
     private static final float TRANSITION_DURATION = 300;
-    private static final float PAUSE_TRIM_RATIO = 0.12f;
+    private static final float PAUSE_TRIM_RATIO = 0.22f;
 
     private int mHalfPadding;
     private int mCurrentShape;
@@ -57,6 +59,7 @@ public class PlayPauseDrawable extends Drawable {
     private boolean mIsBuffering;
     private int mYOffset;
     private CircularAnimatedDrawable mBufferingDrawable;
+    private Rect mBounds;
 
     private Resources mResources;
 
@@ -91,7 +94,7 @@ public class PlayPauseDrawable extends Drawable {
      * @param paddingDp The padding value, in DP
      */
     public void setPaddingDp(int paddingDp) {
-        setPadding(mResources.getDimensionPixelSize(R.dimen.one_dp) * paddingDp) ;
+        setPadding((int) (Utils.dpToPx(Resources.getSystem(), paddingDp) * 1.3f));
     }
 
     /**
@@ -99,7 +102,11 @@ public class PlayPauseDrawable extends Drawable {
      * @param padding The padding value, in pixels
      */
     public void setPadding(int padding) {
-        mHalfPadding = padding / 2;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mHalfPadding = padding / 4;
+        } else {
+            mHalfPadding = padding / 2;
+        }
     }
 
     /**
@@ -175,46 +182,44 @@ public class PlayPauseDrawable extends Drawable {
     }
 
     private void transitionPlayToStop(final float progress) {
-        final int width = getBounds().width();
-        final int height = getBounds().height();
-        final int halfHeight = height / 2;
+        final int width = mBounds.width();
+        final int height = mBounds.height();
+
+        Log.e(TAG, "Width=" + width + " Height=" + height);
+        Log.e(TAG, "Padding = " + mHalfPadding);
 
         // Animation from play to stop: Play rotates 90°, point split at the tip (on the right)
         mPath.reset();
 
         // Make the play triangle, with the "fourth" point at the tip moving towards making a
         // square (they split progressively)
-        mPath.moveTo(mHalfPadding, mHalfPadding);
-        mPath.lineTo(width - mHalfPadding, halfHeight - halfHeight * progress + mHalfPadding * progress);
-        mPath.lineTo(width - mHalfPadding, halfHeight + halfHeight * progress - mHalfPadding * progress);
-        mPath.lineTo(mHalfPadding, height - mHalfPadding);
+        mPath.moveTo(mBounds.left, mBounds.top);
+        mPath.lineTo(mBounds.right, mBounds.centerY() - mBounds.height() * 0.5f * progress);
+        mPath.lineTo(mBounds.right, mBounds.centerY() + mBounds.height() * 0.5f * progress);
+        mPath.lineTo(mBounds.left, mBounds.bottom);
 
         // Rotate it
         Matrix matrix = new Matrix();
-        RectF bounds = new RectF();
-        mPath.computeBounds(bounds, true);
-        matrix.postRotate(90.0f * progress, (bounds.right + bounds.left) / 2, (bounds.bottom + bounds.top) / 2);
+        matrix.postRotate(90.0f * progress, mBounds.centerX(), mBounds.centerY());
         mPath.transform(matrix);
     }
 
     private void transitionStopToPause(float progress) {
-        final int width = getBounds().width();
-        final int height = getBounds().height();
-        final int halfWidth = height / 2;
-
         mPath.reset();
 
+        final int halfWidth = mBounds.width() / 2;
+
         // We glue two half-square together, which we then split and slightly trim (10%)
-        mPath.addRect(mHalfPadding,
-                mHalfPadding,
-                halfWidth - halfWidth * PAUSE_TRIM_RATIO * progress,
-                height - mHalfPadding,
+        mPath.addRect(mBounds.left,
+                mBounds.top,
+                mBounds.centerX() - halfWidth * PAUSE_TRIM_RATIO * progress,
+                mBounds.bottom,
                 Path.Direction.CW);
 
-        mPath.addRect(halfWidth + halfWidth * PAUSE_TRIM_RATIO * progress,
-                mHalfPadding,
-                width - mHalfPadding,
-                height - mHalfPadding,
+        mPath.addRect(mBounds.centerX() + halfWidth * PAUSE_TRIM_RATIO * progress,
+                mBounds.top,
+                mBounds.right,
+                mBounds.bottom,
                 Path.Direction.CW);
 
 
@@ -310,12 +315,8 @@ public class PlayPauseDrawable extends Drawable {
 
         if (mIsBuffering) {
             if (mBufferingDrawable == null) {
-                Rect bounds = getBounds();
                 mBufferingDrawable = new CircularAnimatedDrawable(0xFFFFFFFF, 8.0f);
-                mBufferingDrawable.setBounds((bounds.left + mHalfPadding),
-                        (bounds.top + mHalfPadding),
-                        (bounds.right - mHalfPadding),
-                        (bounds.bottom - mHalfPadding));
+                mBufferingDrawable.setBounds(mBounds);
                 mBufferingDrawable.setCallback(getCallback());
                 mBufferingDrawable.start();
             }
@@ -333,7 +334,11 @@ public class PlayPauseDrawable extends Drawable {
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
-        invalidateSelf();
+        mBounds = new Rect(bounds);
+        mBounds.left += mHalfPadding;
+        mBounds.top += mHalfPadding;
+        mBounds.right -= mHalfPadding;
+        mBounds.bottom -= mHalfPadding;
     }
 
     @Override
