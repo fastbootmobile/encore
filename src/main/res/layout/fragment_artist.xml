@@ -40,23 +40,6 @@
             android:paddingTop="16dp"
             android:textColor="@color/white" />
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabPlay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:layout_above="@+id/tvArtist"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-
-            app:fab_size="normal"
-            app:fab_colorNormal="@color/primary"
-            app:fab_colorPressed="@color/primary_light"
-
-            android:layout_marginBottom="-24dp"
-            android:layout_marginEnd="48dp"
-            android:layout_marginRight="48dp" />
-
         <ImageView
             android:id="@+id/ivSourceLogo"
             android:layout_width="32dp"
@@ -70,6 +53,22 @@
             android:layout_marginStart="8dp"
             android:contentDescription="@string/app_name"
             android:scaleType="centerInside" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabPlay"
+            android:layout_width="@dimen/fab_size_normal"
+            android:layout_height="@dimen/fab_size_normal"
+
+            app:fab_size="normal"
+            app:fab_colorNormal="@color/primary"
+            app:fab_colorPressed="@color/primary_light"
+
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_above="@+id/pagerArtist"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="24dp"/>
 
         <org.omnirom.music.app.ui.WrapContentHeightViewPager
             android:id="@+id/pagerArtist"

@@ -40,20 +40,19 @@
 
     <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabPlay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_above="@+id/tvAlbumName"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
 
         app:fab_colorNormal="@color/primary"
         app:fab_colorPressed="@color/primary_light"
         app:fab_size="normal"
 
-        android:layout_marginBottom="-24dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp" />
+        android:layout_alignBottom="@+id/tvAlbumName"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="24dp"/>
 
 
     <ProgressBar

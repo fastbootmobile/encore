@@ -21,7 +21,6 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DimenRes;
-import android.support.annotation.DrawableRes;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
 
@@ -44,8 +43,9 @@ public class FloatingActionButton extends ImageButton {
   private float mShadowRadius;
   private float mShadowOffset;
   private int mDrawableSize;
+  private boolean mFixup = true;
 
-  public FloatingActionButton(Context context) {
+    public FloatingActionButton(Context context) {
     this(context, null);
   }
 
@@ -111,12 +111,16 @@ public class FloatingActionButton extends ImageButton {
     }
   }
 
+  public void setFixupInset(boolean fixup) {
+      mFixup = fixup;
+  }
+
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+    if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && mFixup) {
         // If someone dare to fix... Only happens on Lollipop. The inner drawable is elliptic
-        // and not a true circle.
+        // and not a true circle in RelativeLayout containers.
         setMeasuredDimension(mDrawableSize, (int) (mDrawableSize - mShadowOffset));
     } else {
         setMeasuredDimension(mDrawableSize, mDrawableSize);
