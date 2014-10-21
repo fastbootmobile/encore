@@ -464,7 +464,6 @@ public class PlaybackService extends Service
                 if (connection != null) {
                     IMusicProvider provider = connection.getBinder();
                     if (provider != null) {
-
                         mState = STATE_BUFFERING;
 
                         for (IPlaybackCallback cb : mCallbacks) {
@@ -481,6 +480,9 @@ public class PlaybackService extends Service
                             // Track not loaded yet, delay until track info arrived
                             mCurrentTrackWaitLoading = true;
                             Log.w(TAG, "Track not yet loaded: " + next.getRef() + ", delaying");
+                        } else if (!next.isAvailable()) {
+                            // Track is not available, skip to the next one
+                            nextImpl();
                         } else {
                             mCurrentTrackWaitLoading = false;
                             mCurrentPlayingProvider = providerId;
@@ -536,6 +538,73 @@ public class PlaybackService extends Service
         } else {
             return null;
         }
+    }
+
+    /**
+     * Moves to the next track
+     */
+    private void nextImpl() {
+        boolean hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
+        if (mPlaybackQueue.size() > 0 && hasNext) {
+            mCurrentTrack++;
+            mHandler.removeCallbacks(mStartPlaybackRunnable);
+            mHandler.post(mStartPlaybackRunnable);
+
+            hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
+            mNotification.setHasNext(hasNext);
+        }
+    }
+
+    /**
+     * Pauses the playback
+     */
+    private void pauseImpl() {
+        final Song currentSong = getCurrentSong();
+        if (currentSong != null) {
+            // TODO: Refactor that with a threaded Handler that handles messages
+            final ProviderIdentifier identifier = currentSong.getProvider();
+            mState = STATE_PAUSING;
+            Log.d(TAG, "onSongPaused: Pausing...");
+
+            new Thread() {
+                public void run() {
+                    IMusicProvider provider = PluginsLookup.getDefault().getProvider(identifier).getBinder();
+                    try {
+                        if (provider != null) {
+                            provider.pause();
+                        } else {
+                            Log.e(TAG, "Provider is null! Has it crashed?");
+                            // TODO: Should we notify pause?
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot pause the track!", e);
+                    }
+                }
+            }.start();
+        }
+    }
+
+    /**
+     * Stops the playback and the service, release the audio focus
+     */
+    private void stopImpl() {
+        if ((mState == STATE_PLAYING || mState == STATE_BUFFERING) && mPlaybackQueue.size() > 0
+                && mCurrentTrack >= 0) {
+            pauseImpl();
+        }
+
+        abandonAudioFocus();
+
+        for (IPlaybackCallback cb : mCallbacks) {
+            try {
+                cb.onPlaybackPause();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+            }
+        }
+
+        mIsStopping = true;
+        stopForeground(true);
     }
 
     /**
@@ -617,29 +686,7 @@ public class PlaybackService extends Service
 
         @Override
         public void pause() throws RemoteException {
-            final Song currentSong = getCurrentSong();
-            if (currentSong != null) {
-                // TODO: Refactor that with a threaded Handler that handles messages
-                final ProviderIdentifier identifier = currentSong.getProvider();
-                mState = STATE_PAUSING;
-                Log.d(TAG, "onSongPaused: Pausing...");
-
-                new Thread() {
-                    public void run() {
-                        IMusicProvider provider = PluginsLookup.getDefault().getProvider(identifier).getBinder();
-                        try {
-                            if (provider != null) {
-                                provider.pause();
-                            } else {
-                                Log.e(TAG, "Provider is null! Has it crashed?");
-                                // TODO: Should we notify pause?
-                            }
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot pause the track!", e);
-                        }
-                    }
-                }.start();
-            }
+            pauseImpl();
         }
 
         @Override
@@ -771,15 +818,7 @@ public class PlaybackService extends Service
 
         @Override
         public void next() throws RemoteException {
-            boolean hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
-            if (mPlaybackQueue.size() > 0 && hasNext) {
-                mCurrentTrack++;
-                mHandler.removeCallbacks(mStartPlaybackRunnable);
-                mHandler.post(mStartPlaybackRunnable);
-
-                hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
-                mNotification.setHasNext(hasNext);
-            }
+            nextImpl();
         }
 
         @Override
@@ -806,23 +845,7 @@ public class PlaybackService extends Service
 
         @Override
         public void stop() throws RemoteException {
-            if ((mState == STATE_PLAYING || mState == STATE_BUFFERING) && mPlaybackQueue.size() > 0
-                    && mCurrentTrack >= 0) {
-                pause();
-            }
-
-            abandonAudioFocus();
-
-            for (IPlaybackCallback cb : mCallbacks) {
-                try {
-                    cb.onPlaybackPause();
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Cannot call playback callback for playback pause event", e);
-                }
-            }
-
-            mIsStopping = true;
-            stopForeground(true);
+            stopImpl();
         }
 
         @Override
