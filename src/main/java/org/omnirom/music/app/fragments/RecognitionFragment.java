@@ -16,6 +16,8 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.app.SearchManager;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import android.widget.TextView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.SearchActivity;
 import org.omnirom.music.framework.EchoPrint;
 
 import java.io.ByteArrayOutputStream;
@@ -57,6 +60,7 @@ public class RecognitionFragment extends Fragment {
     private TextView mTvAlbum;
     private ImageView mIvArt;
     private Button mRecognitionButton;
+    private Button mSearchButton;
     private ProgressBar mProgressRecognizing;
 
     private Runnable mStopRecognition = new Runnable() {
@@ -66,6 +70,7 @@ public class RecognitionFragment extends Fragment {
             mRecognitionButton.setText(R.string.recognizing);
             mProgressRecognizing.setVisibility(View.VISIBLE);
             mTvOops.setVisibility(View.GONE);
+            mSearchButton.setVisibility(View.GONE);
 
             new Thread() {
                 public void run() {
@@ -88,6 +93,7 @@ public class RecognitionFragment extends Fragment {
         public void run() {
             if (mLastResult == null) {
                 mTvOops.setVisibility(View.VISIBLE);
+                mSearchButton.setVisibility(View.GONE);
                 mTvAlbum.setText(null);
                 mTvArtist.setText(null);
                 mTvTitle.setText(null);
@@ -96,6 +102,7 @@ public class RecognitionFragment extends Fragment {
                 mTvAlbum.setText(mLastResult.AlbumName);
                 mTvTitle.setText(mLastResult.TrackName);
                 mTvArtist.setText(mLastResult.ArtistName);
+                mSearchButton.setVisibility(View.VISIBLE);
 
                 // Load the album art in a thread
                 new Thread() {
@@ -187,10 +194,17 @@ public class RecognitionFragment extends Fragment {
         mTvOops = (TextView) root.findViewById(R.id.tvCannotRecognize);
         mIvArt = (ImageView) root.findViewById(R.id.ivRecognitionArt);
         mProgressRecognizing = (ProgressBar) root.findViewById(R.id.pbRecognizing);
+        mSearchButton = (Button) root.findViewById(R.id.btnSearch);
 
         mRecognitionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mTvAlbum.setText(null);
+                mTvArtist.setText(null);
+                mTvTitle.setText(null);
+                mIvArt.setVisibility(View.INVISIBLE);
+                mSearchButton.setVisibility(View.GONE);
+
                 if (mActivePrint == null) {
                     mActivePrint = new EchoPrint();
                     mActivePrint.startRecording();
@@ -203,6 +217,16 @@ public class RecognitionFragment extends Fragment {
                     mHandler.removeCallbacks(mStopRecognition);
                     mHandler.post(mStopRecognition);
                 }
+            }
+        });
+
+        mSearchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent search = new Intent(getActivity(), SearchActivity.class);
+                search.setAction(Intent.ACTION_SEARCH);
+                search.putExtra(SearchManager.QUERY, mLastResult.ArtistName + " " + mLastResult.TrackName);
+                startActivity(search);
             }
         });
 
