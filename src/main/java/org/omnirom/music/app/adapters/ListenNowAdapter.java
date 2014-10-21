@@ -1,5 +1,7 @@
 package org.omnirom.music.app.adapters;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -8,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v7.graphics.Palette;
@@ -132,7 +135,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
     private View.OnClickListener mItemClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            ViewHolder holder = (ViewHolder) view.getTag();
+            final ViewHolder holder = (ViewHolder) view.getTag();
             final int pos = holder.getPosition();
             final ListenNowEntry entry = mEntries.get(pos);
 
@@ -150,13 +153,22 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
             } else if (entry.entity instanceof Artist) {
                 Artist artist = (Artist) entry.entity;
                 intent = ArtistActivity.craftIntent(ctx, hero, artist.getRef(), backColor);
+
             } else if (entry.entity instanceof Song) {
                 Song song = (Song) entry.entity;
                 playSong(song);
             }
 
             if (intent != null) {
-                ctx.startActivity(intent);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    AlbumArtImageView ivCover = holder.ivCover;
+                    ActivityOptions opt =
+                            ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),
+                            ivCover, "itemImage");
+                    ctx.startActivity(intent, opt.toBundle());
+                } else {
+                    ctx.startActivity(intent);
+                }
             }
         }
     };
