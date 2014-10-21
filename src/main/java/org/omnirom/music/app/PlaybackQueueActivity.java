@@ -406,7 +406,11 @@ public class PlaybackQueueActivity extends FragmentActivity {
                         FloatingActionButton ivPlayPause = (FloatingActionButton) itemView.findViewById(R.id.ivPlayPause);
                         mPlayDrawable = new PlayPauseDrawable();
                         mPlayDrawable.setYOffset(6);
-                        mPlayDrawable.setPaddingDp(64);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            mPlayDrawable.setPaddingDp(64);
+                        } else {
+                            mPlayDrawable.setPaddingDp(36);
+                        }
                         mPlayDrawable.setColor(getResources().getColor(R.color.white));
                         mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                         ivPlayPause.setFixupInset(false);
