@@ -501,7 +501,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         showFab(false, false);
 
         // Set the FAB animated drawable
-        mFabDrawable = new PlayPauseDrawable(getResources());
+        mFabDrawable = new PlayPauseDrawable();
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         mFabDrawable.setPaddingDp(52);
         mFabDrawable.setYOffset(6);
@@ -1041,7 +1041,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                             new AlbumGroupClickListener(album, llAlbums, viewRoot, this);
                     viewRoot.setOnClickListener(listener);
 
-                    final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources());
+                    final PlayPauseDrawable drawable = new PlayPauseDrawable();
                     drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                     drawable.setColor(0xCC333333);
                     drawable.setPaddingDp(32);

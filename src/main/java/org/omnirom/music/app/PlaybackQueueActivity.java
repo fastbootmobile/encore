@@ -404,7 +404,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
 
                         // Set play pause drawable
                         FloatingActionButton ivPlayPause = (FloatingActionButton) itemView.findViewById(R.id.ivPlayPause);
-                        mPlayDrawable = new PlayPauseDrawable(getResources());
+                        mPlayDrawable = new PlayPauseDrawable();
                         mPlayDrawable.setYOffset(6);
                         mPlayDrawable.setPaddingDp(64);
                         mPlayDrawable.setColor(getResources().getColor(R.color.white));

@@ -22,7 +22,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
@@ -30,7 +29,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.dd.CircularAnimatedDrawable;
 
-import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 
 /**
@@ -61,14 +59,10 @@ public class PlayPauseDrawable extends Drawable {
     private CircularAnimatedDrawable mBufferingDrawable;
     private Rect mBounds;
 
-    private Resources mResources;
-
     /**
      * Default constructor
-     * @param res A valid Resources handle
      */
-    public PlayPauseDrawable(Resources res) {
-        mResources = res;
+    public PlayPauseDrawable() {
         setPaddingDp(42);
         mCurrentShape = mRequestShape = -1;
         mPath = new Path();
@@ -182,12 +176,6 @@ public class PlayPauseDrawable extends Drawable {
     }
 
     private void transitionPlayToStop(final float progress) {
-        final int width = mBounds.width();
-        final int height = mBounds.height();
-
-        Log.e(TAG, "Width=" + width + " Height=" + height);
-        Log.e(TAG, "Padding = " + mHalfPadding);
-
         // Animation from play to stop: Play rotates 90°, point split at the tip (on the right)
         mPath.reset();
 

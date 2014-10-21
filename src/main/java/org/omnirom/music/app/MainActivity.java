@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
+import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -39,6 +40,7 @@ import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.CastModule;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.PlaybackService;
@@ -82,6 +84,8 @@ public class MainActivity extends FragmentActivity
     private int mCurrentFragmentIndex;
 
     private MenuItem mOfflineMenuItem;
+
+    private ProviderConnection mConfiguringProvider;
 
 
     public MainActivity() {
@@ -148,6 +152,7 @@ public class MainActivity extends FragmentActivity
                         Intent i = new Intent();
                         i.setClassName(conn.getPackage(), conn.getConfigurationActivity());
                         try {
+                            mConfiguringProvider = conn;
                             startActivity(i);
                         } catch (SecurityException e) {
                             Log.e(TAG, "Cannot start: Is your activity not exported?");
@@ -191,6 +196,21 @@ public class MainActivity extends FragmentActivity
     protected void onResume() {
         super.onResume();
         PluginsLookup.getDefault().connectPlayback();
+
+        if (mConfiguringProvider != null) {
+            IMusicProvider provider = mConfiguringProvider.getBinder();
+            if (provider != null) {
+                try {
+                    if (provider.isSetup()) {
+                        provider.login();
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Remote exception while trying to login configured provider", e);
+                }
+            } else {
+                Log.w(TAG, "Configured provider is null!");
+            }
+        }
     }
 
     @Override

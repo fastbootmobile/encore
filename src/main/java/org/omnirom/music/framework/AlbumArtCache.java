@@ -222,7 +222,6 @@ public class AlbumArtCache {
                     }.start();
                 }
             });
-            Log.e(TAG, "Did provider provide album art? " + providerprovides);
         }
 
         if (!providerprovides) {

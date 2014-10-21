@@ -68,6 +68,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     private TextView mTxtNoMusic;
     private static boolean sWarmUp = false;
     private int mWarmUpCount = 0;
+    private boolean mFoundAnything;
 
     /**
      * Runnable responsible of generating the entries to put in the grid
@@ -92,6 +93,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     mTxtNoMusic.setText(R.string.loading);
                 } else {
                     mTxtNoMusic.setText(R.string.no_music_hint);
+                    mFoundAnything = false;
                 }
 
                 mWarmUpCount++;
@@ -100,6 +102,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 return;
             } else {
                 mTxtNoMusic.setVisibility(View.GONE);
+                mFoundAnything = true;
             }
 
             for (Playlist p : playlists) {
@@ -341,6 +344,10 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
+        if (!mFoundAnything || mAdapter.getItemCount() == 0) {
+            mHandler.removeCallbacks(mGenerateEntries);
+            mHandler.post(mGenerateEntries);
+        }
     }
 
     /**
