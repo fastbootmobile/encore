@@ -21,6 +21,7 @@ import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -94,6 +95,10 @@ public class ArtistActivity extends FragmentActivity {
             fm.beginTransaction()
                     .add(R.id.container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
+        }
+
+        if (mHero == null) {
+            mHero = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
         }
 
         mActiveFragment.setArguments(mHero, mInitialIntent);

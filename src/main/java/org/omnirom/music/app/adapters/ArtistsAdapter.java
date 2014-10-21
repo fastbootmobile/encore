@@ -259,7 +259,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
             tag.tvTitle.setTransitionName("grid:title:" + artist.getRef());
         }
 
-        if (artist.isLoaded()) {
+        if (artist.isLoaded() || (artist.getName() != null && !artist.getName().isEmpty())) {
             tag.tvTitle.setText(artist.getName());
         } else {
             tag.tvTitle.setText("...");
