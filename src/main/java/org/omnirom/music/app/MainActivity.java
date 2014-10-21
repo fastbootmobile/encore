@@ -196,6 +196,7 @@ public class MainActivity extends FragmentActivity
     protected void onResume() {
         super.onResume();
         PluginsLookup.getDefault().connectPlayback();
+        PluginsLookup.getDefault().requestUpdatePlugins();
 
         if (mConfiguringProvider != null) {
             IMusicProvider provider = mConfiguringProvider.getBinder();

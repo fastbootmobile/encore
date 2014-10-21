@@ -112,11 +112,7 @@ public class PluginsLookup {
     public void initialize(Context context) {
         mContext = context;
         MultiProviderPlaylistProvider multiproviderPlaylistProvider = new MultiProviderPlaylistProvider(mContext);
-        new Thread() {
-            public void run() {
-                updatePlugins();
-            }
-        }.start();
+        requestUpdatePlugins();
 
         // Inject our Multi-Provider Playlist provider
         HashMap<String, String> item = new HashMap<String, String>();
@@ -136,6 +132,14 @@ public class PluginsLookup {
                 multiproviderPlaylistProvider.asBinder());
 
         connectPlayback();
+    }
+
+    public void requestUpdatePlugins() {
+        new Thread() {
+            public void run() {
+                updatePlugins();
+            }
+        }.start();
     }
 
     public void registerProviderListener(ConnectionListener listener) {
@@ -177,7 +181,6 @@ public class PluginsLookup {
             for (ProviderConnection connection : mConnections) {
                 connection.unbindService();
             }
-            mConnections.clear();
         }
     }
 
