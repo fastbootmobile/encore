@@ -6,16 +6,14 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Process;
 import android.os.SystemClock;
-import android.renderscript.RenderScript;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
-import org.omnirom.music.app.renderscript.GrayscaleRS;
 
 /**
  * <p>
@@ -25,21 +23,18 @@ import org.omnirom.music.app.renderscript.GrayscaleRS;
  * </p>
  */
 public class MaterialTransitionDrawable extends Drawable {
-
     private static final String TAG = "MaterialTransitionDrawable";
     public static final long DEFAULT_DURATION = 1000;
+    public static final long SHORT_DURATION = 300;
 
     private BitmapDrawable mBaseDrawable;
     private BitmapDrawable mTargetDrawable;
-    private BitmapDrawable mTargetGrayDrawable;
     private final AccelerateDecelerateInterpolator mInterpolator;
     private long mStartTime;
     private boolean mAnimating;
     private long mDuration = DEFAULT_DURATION;
-    private Handler mHandler;
-
-    private static final Object mGrayscalerSync = new Object();
-    private static GrayscaleRS mGrayscaler;
+    private ColorMatrix mColorMatSaturation;
+    private Paint mPaint;
 
 
     public MaterialTransitionDrawable(Context ctx, Bitmap base) {
@@ -55,16 +50,8 @@ public class MaterialTransitionDrawable extends Drawable {
     public MaterialTransitionDrawable(Context ctx) {
         mInterpolator = new AccelerateDecelerateInterpolator();
         mAnimating = false;
-        mHandler = new Handler();
-
-        synchronized (mGrayscalerSync) {
-            // We use a shared Grayscale script to avoid allocating multiple time the RenderScript
-            // context.
-            if (mGrayscaler == null) {
-                RenderScript renderScript = RenderScript.create(ctx);
-                mGrayscaler = new GrayscaleRS(renderScript);
-            }
-        }
+        mColorMatSaturation = new ColorMatrix();
+        mPaint = new Paint();
     }
 
     public BitmapDrawable getFinalDrawable() {
@@ -97,43 +84,11 @@ public class MaterialTransitionDrawable extends Drawable {
     public void transitionTo(final Resources res, final BitmapDrawable drawable) {
         if (drawable != mTargetDrawable) {
             mTargetDrawable = drawable;
-            mTargetGrayDrawable = null;
-
-            // The gray drawable will be generated in a separate thread to avoid hogging the UI
-            // thread when calling transitionTo from it
-            new Thread() {
-                public void run() {
-                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                    final Bitmap bmp = drawable.getBitmap();
-                    if (bmp != null && bmp.getWidth() > 0 && bmp.getHeight() > 0
-                            && bmp.getConfig() != null) {
-                        BitmapDrawable grayDrawable = new BitmapDrawable(res, grayscaleBitmap(bmp));
-                        synchronized (MaterialTransitionDrawable.this) {
-                            mTargetGrayDrawable = grayDrawable;
-                            mTargetGrayDrawable.setBounds(getBounds());
-
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    invalidateSelf();
-                                }
-                            });
-                        }
-                    }
-                }
-            }.start();
-
-
             mTargetDrawable.setBounds(getBounds());
 
             mStartTime = -1;
             mAnimating = true;
         }
-    }
-
-
-    private Bitmap grayscaleBitmap(Bitmap bmpOriginal) {
-        return mGrayscaler.apply(bmpOriginal);
     }
 
     @Override
@@ -146,14 +101,11 @@ public class MaterialTransitionDrawable extends Drawable {
         if (mTargetDrawable != null) {
             mTargetDrawable.setBounds(bounds);
         }
-        if (mTargetGrayDrawable != null) {
-            mTargetGrayDrawable.setBounds(bounds);
-        }
     }
 
     @Override
     public void draw(Canvas canvas) {
-        if (mAnimating && mTargetGrayDrawable != null) {
+        if (mAnimating) {
             if (mStartTime < 0) {
                 mStartTime = SystemClock.uptimeMillis();
             }
@@ -163,42 +115,31 @@ public class MaterialTransitionDrawable extends Drawable {
 
             // As per the Material Design spec, animation goes into 3 steps. Ranging from 0 to 100,
             // opacity is full at 50, exposure (gamma + black output) at 75, and saturation at 100.
-            // TODO: Use a real shader for the real full effect. For now, we fade in the grayscale
-            // TODO: then the full image. That's not quite exactly what the guideline says, but
-            // TODO: close enough.
+            // For performance, we only do the saturation and opacity transition
             final float inputOpacity = Math.min(1.0f, rawProgress * (1.0f / 0.5f));
-            //final float inputExposure = Math.min(1.0f, rawProgress * (1.0f / 0.75f));
+            // final float inputExposure = Math.min(1.0f, rawProgress * (1.0f / 0.75f));
 
             final float progressOpacity = mInterpolator.getInterpolation(inputOpacity);
-            //final float progressExposure = mInterpolator.getInterpolation(inputExposure);
+            // final float progressExposure = 1.0f - mInterpolator.getInterpolation(inputExposure);
             final float progressSaturation = mInterpolator.getInterpolation(rawProgress);
 
             if (mBaseDrawable != null) {
                 drawTranslatedBase(canvas);
             }
 
-            mTargetGrayDrawable.setAlpha((int) (255 * progressOpacity));
-            mTargetGrayDrawable.draw(canvas);
+            mColorMatSaturation.setSaturation(progressSaturation);
+            ColorMatrixColorFilter colorMatFilter = new ColorMatrixColorFilter(mColorMatSaturation);
+            mPaint.setAlpha((int) (progressOpacity * 255.0f));
+            mPaint.setColorFilter(colorMatFilter);
 
-            mTargetDrawable.setAlpha((int) (255 * progressSaturation));
-            mTargetDrawable.draw(canvas);
+            canvas.drawBitmap(mTargetDrawable.getBitmap(), 0, 0, mPaint);
 
             if (rawProgress >= 1.0f) {
                 mAnimating = false;
-
                 mBaseDrawable = mTargetDrawable;
-
-                // Release the grayscale bitmap, we don't need it anymore from now on
-                mTargetGrayDrawable.getBitmap().recycle();
-                mTargetGrayDrawable = null;
             } else {
                 invalidateSelf();
             }
-        } else if (mAnimating && mBaseDrawable != null) {
-            // While grayscale is generating, we might already get the new dimensions for the
-            // target (non grayscale) drawable. In that case, we draw the base drawable in the
-            // transformed canvas
-            drawTranslatedBase(canvas);
         } else if (mBaseDrawable != null) {
             mBaseDrawable.draw(canvas);
         }

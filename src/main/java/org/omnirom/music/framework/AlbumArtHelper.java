@@ -173,16 +173,20 @@ public class AlbumArtHelper {
     }
 
     public static AlbumArtTask retrieveAlbumArt(Context ctx, AlbumArtListener listener,
-                                                BoundEntity request) {
+                                                BoundEntity request, boolean immediate) {
         AlbumArtTask task = new AlbumArtTask(ctx, listener);
 
-        // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the predefined
-        // pool, as the custom one causes the app to just crash without any kind of error message
-        // for no reason (at least in the emulator).
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            task.executeOnExecutor(ART_POOL_EXECUTOR, request);
+        if (!immediate) {
+            // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the predefined
+            // pool, as the custom one causes the app to just crash without any kind of error message
+            // for no reason (at least in the emulator).
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                task.executeOnExecutor(ART_POOL_EXECUTOR, request);
+            } else {
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
+            }
         } else {
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
+            task.execute(request);
         }
 
         return task;

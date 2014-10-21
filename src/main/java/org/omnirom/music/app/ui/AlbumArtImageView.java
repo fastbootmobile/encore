@@ -238,7 +238,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         for (int i = 0; i < numSongsComposite; ++i) {
             String entry = playlist.songsList().get(i);
             Song song = aggregator.retrieveSong(entry, playlist.getProvider());
-            AlbumArtHelper.retrieveAlbumArt(getContext(), mCompositeListener, song);
+            AlbumArtHelper.retrieveAlbumArt(getContext(), mCompositeListener, song, false);
         }
     }
 
@@ -269,23 +269,15 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         // image as soon as possible.
         mRequestedEntity = ent;
 
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (mRequestedEntity.equals(ent)) {
-                    mTask = AlbumArtHelper.retrieveAlbumArt(getContext(),
-                            AlbumArtImageView.this, ent);
-                }
-            }
-        };
+        TaskRunnable runnable = new TaskRunnable(ent);
 
         // When we're crossfading, we're assuming we want the image directly
-        if (mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY ||
-                cacheStatus == AlbumArtCache.CACHE_STATUS_DISK) {
+        if (mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY) {
             if (cacheStatus != AlbumArtCache.CACHE_STATUS_UNAVAILABLE) {
                 mSkipTransition = true;
             }
-            runnable.run();
+            setDefaultArt();
+            runnable.run(true);
         } else {
             setDefaultArt();
             mHandler.postDelayed(runnable, DELAY_BEFORE_START);
@@ -298,10 +290,11 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         if (output != null) {
             BitmapDrawable drawable = new BitmapDrawable(getResources(), output);
             if (mSkipTransition) {
-                mDrawable.setImmediateTo(drawable);
+                mDrawable.setTransitionDuration(MaterialTransitionDrawable.SHORT_DURATION);
             } else {
-                mDrawable.transitionTo(getResources(), drawable);
+                mDrawable.setTransitionDuration(MaterialTransitionDrawable.DEFAULT_DURATION);
             }
+            mDrawable.transitionTo(getResources(), drawable);
             forceDrawableReload();
 
             if (mOnArtLoadedListener != null) {
@@ -314,4 +307,25 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable);
     }
 
+    private class TaskRunnable implements Runnable {
+        private BoundEntity mEntity;
+        private boolean mImmediate;
+
+        public TaskRunnable(BoundEntity ent) {
+            mEntity = ent;
+        }
+
+        public void run(boolean immediate) {
+            mImmediate = immediate;
+            run();
+        }
+
+        @Override
+        public void run() {
+            if (mRequestedEntity.equals(mEntity)) {
+                mTask = AlbumArtHelper.retrieveAlbumArt(getContext(),
+                        AlbumArtImageView.this, mEntity, mImmediate);
+            }
+        }
+    }
 }
