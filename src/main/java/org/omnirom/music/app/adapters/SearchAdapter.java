@@ -332,7 +332,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             tag.ivSource.setVisibility(View.GONE);
             tag.tvTitle.setText(R.string.more);
             tag.tvSubtitle.setText(null);
+
+            // TODO: More is not working for now, we'll see that later, so hide it
+            tag.vRoot.setVisibility(View.GONE);
         } else {
+            tag.vRoot.setVisibility(View.VISIBLE);
             tag.albumArtImageView.setVisibility(View.VISIBLE);
             tag.ivSource.setVisibility(View.VISIBLE);
 
