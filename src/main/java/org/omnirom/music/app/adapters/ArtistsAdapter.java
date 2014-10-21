@@ -254,9 +254,9 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         tag.artist = artist;
         tag.position = position;
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            // tag.ivCover.setViewName("grid:image:" + artist.getRef());
-            // tag.tvTitle.setViewName("grid:title:" + artist.getRef());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            tag.ivCover.setTransitionName("grid:image:" + artist.getRef());
+            tag.tvTitle.setTransitionName("grid:title:" + artist.getRef());
         }
 
         if (artist.isLoaded()) {
@@ -271,7 +271,9 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
 
         tag.llRoot.setBackgroundColor(defaultColor);
         tag.itemColor = defaultColor;
-        tag.ivCover.loadArtForArtist(artist);
+        if (artist.getName() != null) {
+            tag.ivCover.loadArtForArtist(artist);
+        }
     }
 
     /**

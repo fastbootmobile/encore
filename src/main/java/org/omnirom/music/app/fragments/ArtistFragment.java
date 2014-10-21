@@ -16,6 +16,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.ActionBar;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -37,6 +38,7 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -1359,14 +1361,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 String artistRef = mAdapter.getItem(tag.position).getRef();
                 Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artistRef, tag.itemColor);
 
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                        /*AlbumArtImageView ivCover = tag.ivCover;
-                        TextView tvTitle = tag.tvTitle;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        AlbumArtImageView ivCover = tag.ivCover;
                         ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                            new Pair<View, String>(ivCover, "itemImage"),
-                            new Pair<View, String>(tvTitle, "artistName"));
+                                ivCover, "itemImage");
 
-                        ctx.startActivity(intent, opt.toBundle()); */
+                        ctx.startActivity(intent, opt.toBundle());
                 } else {
                     ctx.startActivity(intent);
                 }
