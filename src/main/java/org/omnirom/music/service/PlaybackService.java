@@ -952,12 +952,16 @@ public class PlaybackService extends Service
                 // callback.
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
-            } else if (mPlaybackQueue.size() > 0 && mCurrentTrack == mPlaybackQueue.size() - 1
-                    && mRepeatMode) {
-                // We're repeating, go back to the first track and play it
-                mCurrentTrack = 0;
-                mHandler.removeCallbacks(mStartPlaybackRunnable);
-                mHandler.post(mStartPlaybackRunnable);
+            } else if (mPlaybackQueue.size() > 0 && mCurrentTrack == mPlaybackQueue.size() - 1) {
+                if (mRepeatMode) {
+                    // We're repeating, go back to the first track and play it
+                    mCurrentTrack = 0;
+                    mHandler.removeCallbacks(mStartPlaybackRunnable);
+                    mHandler.post(mStartPlaybackRunnable);
+                } else {
+                    // Not repeating and at the end of the playlist, stop
+                    mBinder.stop();
+                }
             }
         }
     };
