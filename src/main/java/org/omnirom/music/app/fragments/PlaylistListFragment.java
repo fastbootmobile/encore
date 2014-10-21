@@ -16,6 +16,9 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -140,8 +143,16 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MainActivity act = (MainActivity) getActivity();
                 PlaylistListAdapter.ViewHolder tag = (PlaylistListAdapter.ViewHolder) view.getTag();
-                act.startActivity(PlaylistActivity.craftIntent(act, mAdapter.getItem(position),
-                        ((MaterialTransitionDrawable) tag.ivCover.getDrawable()).getFinalDrawable().getBitmap()));
+                Intent intent = PlaylistActivity.craftIntent(act, mAdapter.getItem(position),
+                        ((MaterialTransitionDrawable) tag.ivCover.getDrawable()).getFinalDrawable().getBitmap());
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                            tag.ivCover, "itemImage");
+                    act.startActivity(intent, opt.toBundle());
+                } else {
+                    act.startActivity(intent);
+                }
             }
         });
 
