@@ -15,6 +15,7 @@
 
 package org.omnirom.music.app.fragments;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -24,6 +25,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -174,14 +176,11 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         Album album = aggregator.retrieveAlbum(entry.ref, entry.identifier);
         Intent intent = AlbumActivity.craftIntent(getActivity(), hero, album, color);
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            /*
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ImageView ivCover = holder.albumArtImageView;
-            TextView tvTitle = holder.divider;
             ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                    new Pair<View, String>(ivCover, "itemImage"),
-                    new Pair<View, String>(tvTitle, "albumName"));
-            startActivity(intent, opt.toBundle());*/
+                    ivCover, "itemImage");
+            getActivity().startActivity(intent, opt.toBundle());
         } else {
             startActivity(intent);
         }
@@ -190,7 +189,6 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     private void onArtistClick(int i, View v) {
         SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
         ImageView ivCover = holder.albumArtImageView;
-        TextView tvTitle = holder.divider;
         Bitmap hero = ((MaterialTransitionDrawable) ivCover.getDrawable()).getFinalDrawable().getBitmap();
         int color = 0xffffff;
         if (hero != null) {
@@ -213,10 +211,9 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, hero);
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            /* ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                    new Pair<View, String>(ivCover, "itemImage"),
-                    new Pair<View, String>(tvTitle, "albumName"));
-            startActivity(intent, opt.toBundle()); */
+            ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                    ivCover, "itemImage");
+            getActivity().startActivity(intent, opt.toBundle());
         } else {
             startActivity(intent);
         }
