@@ -178,12 +178,13 @@ public class PlaybackQueueActivity extends FragmentActivity {
 
         private IPlaybackCallback mPlaybackListener = new IPlaybackCallback.Stub() {
             @Override
-            public void onSongStarted(boolean buffering, Song s) throws RemoteException {
+            public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
                 mHandler.post(mUpdateSeekBarRunnable);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        mPlayDrawable.setBuffering(buffering);
                         updateQueueLayout();
                     }
                 });
@@ -199,6 +200,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                     @Override
                     public void run() {
                         mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                        mPlayDrawable.setBuffering(false);
                     }
                 });
             }
@@ -210,6 +212,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
                     @Override
                     public void run() {
                         mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        mPlayDrawable.setBuffering(false);
                     }
                 });
             }
