@@ -20,7 +20,7 @@
     <color name="white">#ffffff</color>
     <color name="separator">#dddddd</color>
     <color name="navdrawer_separator">#eaeaea</color>
-    <color name="default_fragment_background">#eaeaea</color>
+    <color name="default_fragment_background">@color/background_material_light</color>
     <color name="selected_item_background">#DDDDDD</color>
 
     <!-- Playbar -->

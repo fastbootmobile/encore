@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.DeadObjectException;
@@ -55,6 +56,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.lucasr.twowayview.ItemClickSupport;
 import org.lucasr.twowayview.TwoWayView;
+import org.lucasr.twowayview.widget.DividerItemDecoration;
 import org.omnirom.music.api.echonest.EchoNest;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
@@ -1485,6 +1487,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             View rootView = inflater.inflate(R.layout.fragment_artist_similar, container, false);
             mArtistsSpinner = (ProgressBar) rootView.findViewById(R.id.pbSimilarArtists);
             mArtistsGrid = (TwoWayView) rootView.findViewById(R.id.twvSimilarArtists);
+            final Drawable divider = getResources().getDrawable(R.drawable.divider);
+            mArtistsGrid.addItemDecoration(new DividerItemDecoration(divider));
             final ItemClickSupport itemClick = ItemClickSupport.addTo(mArtistsGrid);
             itemClick.setOnItemClickListener(mItemClickListener);
             return rootView;
