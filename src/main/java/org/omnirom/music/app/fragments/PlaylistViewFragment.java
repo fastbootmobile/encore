@@ -23,6 +23,9 @@ import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -49,9 +52,11 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -76,11 +81,35 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
-        public void onSongStarted(boolean buffering, Song s) throws RemoteException {
+        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mAdapter.notifyDataSetChanged();
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setBuffering(buffering);
+                }
+            });
+        }
+
+        @Override
+        public void onPlaybackResume() throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setBuffering(false);
+                }
+            });
+        }
+
+        @Override
+        public void onPlaybackPause() throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mFabDrawable.setBuffering(false);
                 }
             });
         }
@@ -189,15 +218,14 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                     if (mFabShouldResume) {
                         PlaybackProxy.play();
                         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                    } else {
-                        PlaybackProxy.playPlaylist(mPlaylist);
-                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                         mFabDrawable.setBuffering(true);
+                    } else {
+                        playNow();
                     }
                 } else {
                     mFabShouldResume = true;
                     PlaybackProxy.pause();
-                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mFabDrawable.setBuffering(true);
                 }
             }
         });
@@ -217,6 +245,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                     // Update FAB
                     mFabShouldResume = true;
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setBuffering(true);
                 }
             }
         });
@@ -238,6 +267,69 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         PlaybackProxy.removeCallback(mPlaybackCallback);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.playlist, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_play_now) {
+            playNow();
+            return true;
+        } else if (item.getItemId() == R.id.menu_add_to_queue) {
+            PlaybackProxy.queuePlaylist(mPlaylist, false);
+            return true;
+        } else if (item.getItemId() == R.id.menu_remove_duplicates) {
+            try {
+                removeDuplicates();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot remove duplicates", e);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private void playNow() {
+        PlaybackProxy.playPlaylist(mPlaylist);
+        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+        mFabDrawable.setBuffering(true);
+    }
+
+    private void removeDuplicates() throws RemoteException {
+        // Process each track and look for the same track
+        Iterator<String> songsIt = mPlaylist.songs();
+        List<String> knownTracks = new ArrayList<String>();
+
+        // Only process if the provider is up
+        ProviderConnection conn = PluginsLookup.getDefault().getProvider(mPlaylist.getProvider());
+        if (conn != null) {
+            IMusicProvider provider = conn.getBinder();
+            if (provider != null) {
+                int position = 0;
+                while (songsIt.hasNext()) {
+                    String songRef = songsIt.next();
+
+                    // If we know the track, remove it (it's the second occurrence of the track).
+                    // Else, add it to the known list and move on.
+                    if (knownTracks.contains(songRef)) {
+                        // Delete the song and restart the process
+                        provider.deleteSongFromPlaylist(position, mPlaylist.getRef());
+                        removeDuplicates();
+                        return;
+                    } else {
+                        knownTracks.add(songRef);
+                    }
+
+                    ++position;
+                }
+            }
+        }
+
     }
 
     private void updateOfflineStatus() {

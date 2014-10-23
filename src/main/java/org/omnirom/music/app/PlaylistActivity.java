@@ -22,6 +22,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import org.omnirom.music.app.fragments.PlaylistViewFragment;
@@ -38,6 +39,7 @@ public class PlaylistActivity extends FragmentActivity {
     public static final String BITMAP_PLAYLIST_HERO = "playlist_hero";
     private Bundle mInitialIntent; // TODO: Test rotation
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
+    private PlaylistViewFragment mActiveFragment;
 
     /**
      * Creates an intent starting this activity with the provided parameters
@@ -58,7 +60,7 @@ public class PlaylistActivity extends FragmentActivity {
         setContentView(R.layout.activity_playlist);
 
         FragmentManager fm = getSupportFragmentManager();
-        PlaylistViewFragment mActiveFragment = (PlaylistViewFragment) fm.findFragmentByTag(TAG_FRAGMENT);
+        mActiveFragment = (PlaylistViewFragment) fm.findFragmentByTag(TAG_FRAGMENT);
         if (savedInstance == null) {
             mInitialIntent = getIntent().getExtras();
         } else {
@@ -89,12 +91,22 @@ public class PlaylistActivity extends FragmentActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        mActiveFragment.onCreateOptionsMenu(menu, getMenuInflater());
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
+        if (!mActiveFragment.onOptionsItemSelected(item)) {
+            if (item.getItemId() == android.R.id.home) {
+                finish();
+                return true;
+            } else {
+                return super.onOptionsItemSelected(item);
+            }
         } else {
-            return super.onOptionsItemSelected(item);
+            return true;
         }
     }
 }

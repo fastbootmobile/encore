@@ -168,4 +168,5 @@
     <string name="pref_clear_caches_title">Clear cached data</string>
     <string name="cache_cleared">Cache cleared</string>
     <string name="menu_open_artist_page">Open artist page</string>
+    <string name="menu_remove_duplicates">Remove duplicates</string>
 </resources>
