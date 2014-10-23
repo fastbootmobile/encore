@@ -118,6 +118,7 @@ void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint
     jobject audioMirrorBufferObj = env->GetObjectField(thiz, field_NativeHub_mAudioMirrorBuffer);
     jbyteArray arr = reinterpret_cast<jbyteArray>(audioMirrorBufferObj);
     env->SetByteArrayRegion(arr, 0, len, reinterpret_cast<const jbyte*>(data));
+    env->DeleteLocalRef(audioMirrorBufferObj);
 
     // Notify Java new bytes are available
     env->CallVoidMethod(thiz, method_NativeHub_onAudioMirrorWritten, len);
