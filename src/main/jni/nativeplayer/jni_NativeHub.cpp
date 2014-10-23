@@ -24,8 +24,10 @@
 jclass clazz_NativeHub;
 
 jfieldID field_NativeHub_mHandle;
+jfieldID field_NativeHub_mAudioMirrorBuffer;
 
 // Functions
+jmethodID method_NativeHub_onAudioMirrorWritten;
 
 // -------------------------------------------------------------------------------------
 NativeHub* get_hub_from_object(JNIEnv* env, jobject javaObject) {
@@ -47,6 +49,18 @@ int JNI_NativeHub_SetupFields(JNIEnv* env) {
         return -1;
     }
 
+    field_NativeHub_mAudioMirrorBuffer = env->GetFieldID(clazz, "mAudioMirrorBuffer", "[B");
+    if (field_NativeHub_mAudioMirrorBuffer == NULL) {
+        ALOGE("Can't find NativeHub.mAudioMirrorBuffer");
+        return -1;
+    }
+
+    method_NativeHub_onAudioMirrorWritten = env->GetMethodID(clazz, "onAudioMirrorWritten", "(I)V");
+    if (method_NativeHub_onAudioMirrorWritten == NULL) {
+        ALOGE("Can't find NativeHub.onAudioMirrorWritten");
+        return -1;
+    }
+
     clazz_NativeHub = (jclass) env->NewGlobalRef(clazz);
 
     return 0;
@@ -55,7 +69,7 @@ int JNI_NativeHub_SetupFields(JNIEnv* env) {
 jboolean om_NativeHub_initialize(JNIEnv* env, jobject thiz) {
     bool result = false;
 
-    NativeHub* hub = new NativeHub();
+    NativeHub* hub = new NativeHub(reinterpret_cast<void*>(env->NewGlobalRef(thiz)));
     if (hub) {
         env->SetLongField(thiz, field_NativeHub_mHandle, (jlong) hub);
     }
@@ -91,5 +105,19 @@ jboolean om_NativeHub_createHostSocket(JNIEnv* env, jobject thiz, jstring name, 
 void om_NativeHub_setSinkPointer(JNIEnv* env, jobject thiz, jlong handle) {
     NativeHub* hub = get_hub_from_object(env, thiz);
     hub->setSink(reinterpret_cast<INativeSink*>(handle));
+}
+// -------------------------------------------------------------------------------------
+void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint len) {
+    JNIEnv* env;
+    bool release_jni = JNI_GetEnv(&env);
+    jobject thiz = (jobject) hub->getUserData();
+
+    // Write the bytes to the host array
+    jobject audioMirrorBufferObj = env->GetObjectField(thiz, field_NativeHub_mAudioMirrorBuffer);
+    jbyteArray arr = reinterpret_cast<jbyteArray>(audioMirrorBufferObj);
+    env->SetByteArrayRegion(arr, 0, len, reinterpret_cast<const jbyte*>(data));
+
+    // Notify Java new bytes are available
+    env->CallVoidMethod(thiz, method_NativeHub_onAudioMirrorWritten, len);
 }
 // -------------------------------------------------------------------------------------

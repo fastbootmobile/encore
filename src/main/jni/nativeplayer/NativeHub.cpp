@@ -16,13 +16,14 @@
 #include "NativeHub.h"
 #include "INativeSink.h"
 #include "Log.h"
+#include "jni_NativeHub.h"
 #include <algorithm>
 
 #define LOG_TAG "NativeHub"
 
 // -------------------------------------------------------------------------------------
-NativeHub::NativeHub() : m_pSink(nullptr), m_pLastProviderSocket(nullptr), m_iSampleRate(44100),
-        m_iChannels(2) {
+NativeHub::NativeHub(void* userdata) : m_pSink(nullptr), m_pLastProviderSocket(nullptr),
+        m_iSampleRate(44100), m_iChannels(2), m_pUserData(userdata) {
 }
 // -------------------------------------------------------------------------------------
 NativeHub::~NativeHub() {
@@ -56,6 +57,10 @@ SocketHost* NativeHub::createHostSocket(const std::string& name, bool is_dsp) {
     return host;
 }
 // -------------------------------------------------------------------------------------
+void* NativeHub::getUserData() const {
+    return m_pUserData;
+}
+// -------------------------------------------------------------------------------------
 SocketHost* NativeHub::findSocketByName(const std::string& name) {
     SocketHost* host = m_ProviderSockets[name];
     if (!host) {
@@ -78,6 +83,9 @@ void NativeHub::writeAudioToSink(const uint8_t* data, const uint32_t len) {
     } else {
         writeAudioResponse(0);
     }
+
+    // Write to Mirror too
+    om_NativeHub_onAudioMirrorWritten(this, data, len);
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::writeAudioResponse(const uint32_t written) {

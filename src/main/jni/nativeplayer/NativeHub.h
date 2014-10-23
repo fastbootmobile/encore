@@ -27,7 +27,7 @@ class INativeSink;
 class NativeHub : public SocketCallbacks {
  public:
     // ctor
-    NativeHub();
+    NativeHub(void* userdata);
 
     // dtor
     ~NativeHub();
@@ -43,6 +43,9 @@ class NativeHub : public SocketCallbacks {
 
     // Creates a host socket for the provider or DSP plugin
     SocketHost* createHostSocket(const std::string& name, bool is_dsp);
+
+    // Returns userdata pointer
+    void* getUserData() const;
 
  protected:
     SocketHost* findSocketByName(const std::string& name);
@@ -101,7 +104,7 @@ class NativeHub : public SocketCallbacks {
     SocketCommon* m_pLastProviderSocket;
     int32_t m_iSampleRate;
     int32_t m_iChannels;
-
+    void* m_pUserData;
 };
 
 

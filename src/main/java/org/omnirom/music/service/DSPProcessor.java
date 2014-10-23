@@ -20,12 +20,9 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.framework.WSStreamer;
 import org.omnirom.music.providers.DSPConnection;
-import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -41,7 +38,6 @@ public class DSPProcessor {
     private static final String PREFS_DSP_CHAIN = "DSP_Chain";
     private static final String PREF_KEY_CHAIN = "chain";
 
-    private WSStreamer mStreamer;
     private List<ProviderIdentifier> mDSPChain;
     private PlaybackService mPlaybackService;
 
@@ -51,12 +47,6 @@ public class DSPProcessor {
     public DSPProcessor(PlaybackService pbs) {
         mPlaybackService = pbs;
         mDSPChain = new ArrayList<ProviderIdentifier>();
-        try {
-            mStreamer = new WSStreamer(8887);
-            mStreamer.start();
-        } catch (UnknownHostException e) {
-            Log.e(TAG, "Error port 8887", e);
-        }
     }
 
     /**

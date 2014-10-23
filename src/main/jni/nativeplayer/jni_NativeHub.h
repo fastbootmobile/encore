@@ -17,6 +17,7 @@
 #define SRC_MAIN_JNI_NATIVEPLAYER_JNI_NATIVEHUB_H_
 
 #include <jni.h>
+#include <cstdint>
 
 class NativeHub;
 
@@ -38,5 +39,11 @@ jboolean om_NativeHub_createHostSocket(JNIEnv* env, jobject thiz, jstring name, 
 
 // NativeHub.setSinkPointer(long handle) ==> NativeHub::setSink(INativeSink* sink)
 void om_NativeHub_setSinkPointer(JNIEnv* env, jobject thiz, jlong handle);
+
+// -----------------------------------------
+// Called from native code to Java
+// -----------------------------------------
+
+void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint len);
 
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_JNI_NATIVEHUB_H_
