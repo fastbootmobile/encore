@@ -21,6 +21,8 @@
 #include <thread>
 #include <list>
 #include <utility>
+#include <atomic>
+#include <mutex>
 #include "INativeSink.h"
 
 // Maximum number of buffered samples (a second at 44100Hz)
