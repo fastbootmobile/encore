@@ -136,6 +136,7 @@ public class PlaybackService extends Service
     private ProviderIdentifier mCurrentPlayingProvider;
     private boolean mHasAudioFocus;
     private boolean mRepeatMode;
+    private Prefetcher mPrefetcher;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -155,6 +156,7 @@ public class PlaybackService extends Service
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<IPlaybackCallback>();
         mRepeatMode = false;
+        mPrefetcher = new Prefetcher(this);
     }
 
     /**
@@ -608,6 +610,18 @@ public class PlaybackService extends Service
     }
 
     /**
+     * @return The reference to the next track in the queue
+     */
+    public Song getNextTrack() {
+        if (mCurrentTrack < mPlaybackQueue.size() - 1) {
+            return mPlaybackQueue.get(mCurrentTrack + 1);
+        } else {
+            // No more tracks
+            return null;
+        }
+    }
+
+    /**
      * The binder implementation of the remote methods
      */
     IPlaybackService.Stub mBinder = new IPlaybackService.Stub() {
@@ -923,6 +937,23 @@ public class PlaybackService extends Service
 
             mNotification.setPlayPauseAction(false);
             mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+
+            // Prepare pre-fetching the next song
+            // Note: We don't take care of the delay being too early when it's paused, as long
+            // as it matches the next track.
+            ProviderConnection conn = PluginsLookup.getDefault().getProvider(provider);
+            if (conn != null) {
+                IMusicProvider binder = conn.getBinder();
+                if (binder != null) {
+                    try {
+                        mHandler.removeCallbacks(mPrefetcher);
+                        mHandler.postDelayed(mPrefetcher,
+                                currentSong.getDuration() - binder.getPrefetchDelay());
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot get prefetch delay from provider", e);
+                    }
+                }
+            }
         }
 
         @Override
