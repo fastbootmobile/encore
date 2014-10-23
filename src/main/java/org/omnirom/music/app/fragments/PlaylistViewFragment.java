@@ -128,11 +128,12 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         PlaylistListView lvPlaylistContents = (PlaylistListView) root.findViewById(R.id.lvPlaylistContents);
         mAdapter = new PlaylistAdapter(root.getContext());
-        lvPlaylistContents.setAdapter(mAdapter);
 
         // Setup the parallaxed header
         View headerView = inflater.inflate(R.layout.songs_list_view_header, null);
         lvPlaylistContents.addParallaxedHeaderView(headerView);
+
+        lvPlaylistContents.setAdapter(mAdapter);
 
         headerView.findViewById(R.id.pbAlbumLoading).setVisibility(View.GONE);
 
