@@ -31,7 +31,6 @@ import android.widget.GridView;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.model.Album;
@@ -117,12 +116,6 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
         View root = inflater.inflate(R.layout.fragment_playlist, container, false);
         GridView playlistLayout = (GridView) root.findViewById(R.id.gvPlaylists);
         playlistLayout.setAdapter(mAdapter);
-
-        // If we're not standalone, remove the huge padding
-        if (!mIsStandalone) {
-            int fourDp = Utils.dpToPx(getResources(), 4);
-            root.setPadding(fourDp, 0, fourDp, 0);
-        }
 
         // Set the initial playlists
         new Thread() {
