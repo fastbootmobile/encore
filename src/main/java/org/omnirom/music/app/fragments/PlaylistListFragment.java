@@ -121,7 +121,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
         // If we're not standalone, remove the huge padding
         if (!mIsStandalone) {
             int fourDp = Utils.dpToPx(getResources(), 4);
-            root.setPadding(fourDp, fourDp, fourDp, fourDp);
+            root.setPadding(fourDp, 0, fourDp, 0);
         }
 
         // Set the initial playlists

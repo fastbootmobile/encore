@@ -53,6 +53,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private List<Bitmap> mPlaylistSource;
     private Paint mPlaylistPaint;
     private boolean mSkipTransition;
+    private List<AlbumArtHelper.AlbumArtTask> mCompositeTasks;
 
     private Runnable mUpdatePlaylistCompositeRunnable = new Runnable() {
         @Override
@@ -68,7 +69,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
                 mPlaylistSource.add(output);
                 if (mPlaylistSource.size() < 4) {
                     mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
-                    mHandler.postDelayed(mUpdatePlaylistCompositeRunnable, 500);
+                    mHandler.postDelayed(mUpdatePlaylistCompositeRunnable, 200);
                 } else {
                     mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
                     mHandler.post(mUpdatePlaylistCompositeRunnable);
@@ -225,6 +226,16 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             return;
         }
 
+        if (mCompositeTasks == null) {
+            mCompositeTasks = new ArrayList<AlbumArtHelper.AlbumArtTask>();
+        } else {
+            // Cancel the current tasks
+            for (AlbumArtHelper.AlbumArtTask task : mCompositeTasks) {
+                task.cancel(true);
+            }
+            mCompositeTasks.clear();
+        }
+
         mRequestedEntity = playlist;
         mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
         setDefaultArt();
@@ -238,7 +249,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         for (int i = 0; i < numSongsComposite; ++i) {
             String entry = playlist.songsList().get(i);
             Song song = aggregator.retrieveSong(entry, playlist.getProvider());
-            AlbumArtHelper.retrieveAlbumArt(getContext(), mCompositeListener, song, false);
+            mCompositeTasks.add(AlbumArtHelper.retrieveAlbumArt(getContext(), mCompositeListener,
+                    song, false));
         }
     }
 

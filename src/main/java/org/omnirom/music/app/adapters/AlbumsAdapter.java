@@ -46,8 +46,6 @@ import java.util.List;
  * Adapter for ListView to show a list of albums
  */
 public class AlbumsAdapter extends BaseAdapter {
-    private static final String TAG = "AlbumsAdapter";
-
     private final List<Album> mAlbums;
     private final Handler mHandler;
     private final int mDefaultArtColor;
@@ -121,7 +119,6 @@ public class AlbumsAdapter extends BaseAdapter {
         public View vRoot;
         public AlbumArtImageView ivCover;
         public TextView tvTitle;
-        public TextView tvSubTitle;
         public Album album;
         public int position;
         public int itemColor;
@@ -130,7 +127,6 @@ public class AlbumsAdapter extends BaseAdapter {
             vRoot = root;
             ivCover = (AlbumArtImageView) root.findViewById(R.id.ivCover);
             tvTitle = (TextView) root.findViewById(R.id.tvTitle);
-            tvSubTitle = (TextView) root.findViewById(R.id.tvSubTitle);
 
             vRoot.setTag(this);
             ivCover.setTag(this);
@@ -254,7 +250,7 @@ public class AlbumsAdapter extends BaseAdapter {
         if (convertView == null) {
             // Recycle the existing view
             LayoutInflater inflater = LayoutInflater.from(ctx);
-            root = inflater.inflate(R.layout.medium_card_two_lines, parent, false);
+            root = inflater.inflate(R.layout.medium_card_one_line, parent, false);
             assert root != null;
             root.setTag(new ViewHolder(root));
         }
@@ -272,26 +268,17 @@ public class AlbumsAdapter extends BaseAdapter {
             tag.vRoot.setBackgroundColor(mDefaultArtColor);
             tag.itemColor = mDefaultArtColor;
 
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                // tag.ivCover.setViewName("list:albums:cover:" + album.getRef());
-                // tag.tvTitle.setViewName("list:albums:title:" + album.getRef());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                tag.ivCover.setTransitionName("list:albums:cover:" + album.getRef());
+                tag.tvTitle.setTransitionName("list:albums:title:" + album.getRef());
             }
 
             if (album.getName() != null && !album.getName().isEmpty()) {
                 tag.tvTitle.setText(album.getName());
-
-                if (album.getSongsCount() > 0) {
-                    tag.tvSubTitle.setText(res.getQuantityString(R.plurals.songs_count, album.getSongsCount(), album.getSongsCount()));
-                    tag.tvSubTitle.setVisibility(View.VISIBLE);
-                } else {
-                    tag.tvSubTitle.setVisibility(View.INVISIBLE);
-                }
-
-                tag.ivCover.loadArtForAlbum(album);
                 tag.ivCover.setOnArtLoadedListener(mArtListener);
+                tag.ivCover.loadArtForAlbum(album);
             } else {
                 tag.tvTitle.setText(res.getString(R.string.loading));
-                tag.tvSubTitle.setText(null);
             }
         }
 

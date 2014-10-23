@@ -3,5 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:horizontalSpacing="4dp"
-    android:numColumns="@integer/main_grids_column_count"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="@dimen/playing_bar_height"
+    android:clipToPadding="false"
+    android:numColumns="@integer/small_grids_column_count"
     android:verticalSpacing="4dp" />

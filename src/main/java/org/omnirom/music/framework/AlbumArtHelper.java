@@ -99,14 +99,14 @@ public class AlbumArtHelper {
         @Override
         protected BackgroundResult doInBackground(BoundEntity... params) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-            BackgroundResult output = new BackgroundResult();
             mEntity = params[0];
-            output.request = mEntity;
 
-            if (mEntity == null) {
+            if (mEntity == null || isCancelled()) {
                 return null;
             }
+
+            BackgroundResult output = new BackgroundResult();
+            output.request = mEntity;
 
             final AlbumArtCache artCache = AlbumArtCache.getDefault();
 
