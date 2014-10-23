@@ -18,6 +18,8 @@
 #include "Log.h"
 #include "jni_NativeHub.h"
 #include <algorithm>
+#include <string>
+#include <list>
 
 #define LOG_TAG "NativeHub"
 
@@ -118,7 +120,8 @@ void NativeHub::onRequest(SocketCommon* socket, const omnimusic::Request_Request
 void NativeHub::onBufferInfo(SocketCommon* socket, const int32_t samples, const int32_t stutter) {
 }
 // -------------------------------------------------------------------------------------
-void NativeHub::onFormatInfo(SocketCommon* socket, const int32_t sample_rate, const int32_t channels) {
+void NativeHub::onFormatInfo(SocketCommon* socket, const int32_t sample_rate,
+        const int32_t channels) {
     m_iSampleRate = sample_rate;
     m_iChannels = channels;
 

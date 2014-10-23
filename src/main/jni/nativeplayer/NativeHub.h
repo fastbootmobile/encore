@@ -27,7 +27,7 @@ class INativeSink;
 class NativeHub : public SocketCallbacks {
  public:
     // ctor
-    NativeHub(void* userdata);
+    explicit NativeHub(void* userdata);
 
     // dtor
     ~NativeHub();

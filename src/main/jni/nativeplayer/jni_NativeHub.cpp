@@ -17,6 +17,8 @@
 #include "Log.h"
 #include "NativeHub.h"
 #include "Glue.h"
+#include <string>
+#include <list>
 
 #define LOG_TAG "OM-jniNativeHub"
 
