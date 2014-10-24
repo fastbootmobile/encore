@@ -249,7 +249,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
     SLuint32 playerState;
     (*m_pPlayer)->GetPlayState(m_pPlayer, &playerState);
 
-    if (playerState != SL_PLAYSTATE_PLAYING && m_iBufferedSamples >= 16384) {
+    if (playerState != SL_PLAYSTATE_PLAYING && m_iBufferedSamples >= BUFFER_MIN_PLAYBACK) {
         // set the player's state to playing
         setPlayState(SL_PLAYSTATE_PLAYING);
     }

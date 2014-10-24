@@ -28,6 +28,12 @@
 // Maximum number of buffered samples (a second at 44100Hz)
 #define BUFFER_MAX_COUNT 44100
 
+// Minimum buffered data to start playing/resume from underrun
+#define BUFFER_MIN_PLAYBACK 16384
+
+// Enqueued buffer minimal size
+#define ENQUEUED_BUFFER_SIZE 8192
+
 class NativePlayer : public INativeSink {
  public:
     // ctor
