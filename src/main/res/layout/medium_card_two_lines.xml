@@ -6,9 +6,9 @@
     android:layout_height="wrap_content"
     android:background="@color/default_album_art_background"
     android:measureWithLargestChild="false"
+    android:stateListAnimator="@anim/button_raise"
     android:orientation="vertical">
 
-    <!-- android:viewName="cover" -->
     <org.omnirom.music.app.ui.AlbumArtImageView
         android:id="@+id/ivCover"
         android:layout_width="match_parent"
