@@ -30,7 +30,7 @@ public class NativeHub {
         Log.i(TAG, "Initializing native hub");
 
         // Create the audio mirror buffer to stream audio to WebSocket, and the WS itself
-        mAudioMirrorBuffer = new byte[32768];
+        mAudioMirrorBuffer = new byte[262144];
         try {
             mStreamer = new WSStreamer(8887);
             mStreamer.start();
