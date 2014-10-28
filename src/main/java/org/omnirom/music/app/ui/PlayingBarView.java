@@ -642,35 +642,37 @@ public class PlayingBarView extends RelativeLayout {
 
         // create and start the animator for this view (the start radius is zero)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Animator anim =
-                    ViewAnimationUtils.createCircularReveal(mPlayFab, cx, cy, startRadius, finalRadius);
-            anim.setInterpolator(new DecelerateInterpolator());
+            if (mPlayFab.isAttachedToWindow()) {
+                Animator anim =
+                        ViewAnimationUtils.createCircularReveal(mPlayFab, cx, cy, startRadius, finalRadius);
+                anim.setInterpolator(new DecelerateInterpolator());
 
-            if (!visible) {
-                anim.addListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        mPlayFab.setVisibility(View.INVISIBLE);
-                    }
+                if (!visible) {
+                    anim.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            mPlayFab.setVisibility(View.INVISIBLE);
+                        }
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
 
-                    }
+                        }
 
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
 
-                    }
+                        }
 
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
 
-                    }
-                });
+                        }
+                    });
+                }
+
+                anim.start();
             }
-
-            anim.start();
         } else {
             // TODO: Kitkat animation
         }
