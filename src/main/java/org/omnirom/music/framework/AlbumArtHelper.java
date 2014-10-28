@@ -130,6 +130,33 @@ public class AlbumArtHelper {
                     }
                 }
 
+                // Resize the image if too large
+                if (mArtBitmap != null) {
+                    final int w = mArtBitmap.getWidth();
+                    final int h = mArtBitmap.getHeight();
+                    Bitmap scaled = null;
+
+                    if (mArtBitmap.getWidth() > mArtBitmap.getHeight()) {
+                        if (mArtBitmap.getWidth() > 1200) {
+                            final float ratio = 1200.0f / ((float) w);
+                            scaled = Bitmap.createScaledBitmap(mArtBitmap, (int) (w * ratio),
+                                    (int) (h * ratio), true);
+                        }
+                    } else {
+                        if (mArtBitmap.getHeight() > 1200) {
+                            final float ratio = 1200.0f / ((float) h);
+                            scaled = Bitmap.createScaledBitmap(mArtBitmap, (int) (w * ratio),
+                                    (int) (h * ratio), true);
+
+                        }
+                    }
+
+                    if (scaled != null) {
+                        mArtBitmap.recycle();
+                        mArtBitmap = scaled;
+                    }
+                }
+
                 // In all cases, we tell that this entity is loaded
                 artCache.notifyQueryStopped(mEntity);
 

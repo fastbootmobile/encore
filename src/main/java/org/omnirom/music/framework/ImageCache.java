@@ -55,11 +55,13 @@ public class  ImageCache {
     public ImageCache() {
         mEntries = new ArrayList<String>();
 
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        mMemoryCache = new LruCache<String, Bitmap>(maxMemory / 8) {
+        final int maxMemory = (int) Runtime.getRuntime().maxMemory();
+        Log.e(TAG, "ImageCache size: " + (maxMemory / 12 / 1024) + " MB");
+
+        mMemoryCache = new LruCache<String, Bitmap>(maxMemory / 12) {
             @Override
             protected int sizeOf(String key, Bitmap value) {
-                return value.getByteCount() / 1024;
+                return value.getByteCount();
             }
         };
     }
@@ -140,6 +142,8 @@ public class  ImageCache {
             // Check if we have it in memory
             Bitmap item = mMemoryCache.get(key);
             if (item == null) {
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inSampleSize = 2;
                 item = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + key);
                 if (item != null) {
                     mMemoryCache.put(key, item);
