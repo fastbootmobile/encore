@@ -141,7 +141,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                            tag.ivCover, "itemImage");
+                            tag.vRoot, "itemGroup");
                     act.startActivity(intent, opt.toBundle());
                 } else {
                     act.startActivity(intent);

@@ -9,4 +9,5 @@
     android:paddingBottom="@dimen/playing_bar_height"
     android:clipToPadding="false"
     android:numColumns="@integer/small_grids_column_count"
-    android:verticalSpacing="4dp" />
+    android:verticalSpacing="4dp"
+    android:transitionName="itemGroup" />

@@ -43,4 +43,9 @@
     <style name="AppTheme.TransparentNavBar.ArtistDetails">
 
     </style>
+
+    <style name="AppTheme.TransparentNavBar.AlbumDetails">
+        <item name="android:windowSharedElementEnterTransition">@transition/album_grid_to_view</item>
+        <item name="android:windowSharedElementReturnTransition">@transition/album_view_to_grid</item>
+    </style>
 </resources>

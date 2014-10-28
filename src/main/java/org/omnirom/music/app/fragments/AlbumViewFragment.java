@@ -26,6 +26,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -68,6 +70,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private PlayPauseDrawable mFabDrawable;
     private int mBackgroundColor;
     private FloatingActionButton mPlayFab;
+    private ParallaxScrollListView mListView;
     private boolean mFabShouldResume = false;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
@@ -120,7 +123,12 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 View loadingBar = findViewById(R.id.pbAlbumLoading);
                 if (loadingBar.getVisibility() == View.VISIBLE && !hasMore) {
                     loadingBar.setVisibility(View.GONE);
-                    showFab(true, true);
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            showFab(true, true);
+                        }
+                    }, 400);
                 }
 
                 // Load the songs into the adapter
@@ -135,10 +143,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     }
                 }
                 mAdapter.notifyDataSetChanged();
+                mListView.startLayoutAnimation();
             } else {
                 // No song loaded, show the loading spinner and hide the play FAB
                 findViewById(R.id.pbAlbumLoading).setVisibility(View.VISIBLE);
-                showFab(false, false);
             }
         }
     };
@@ -155,8 +163,12 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mRootView = inflater.inflate(R.layout.fragment_album_view, container, false);
         assert mRootView != null;
 
+        // Setup the contents list view
+        mListView = (ParallaxScrollListView) mRootView.findViewById(R.id.lvAlbumContents);
+        mAdapter = new SongsListAdapter(getActivity(), false);
+
         // Load the header
-        View headerView = inflater.inflate(R.layout.songs_list_view_header, null);
+        View headerView = inflater.inflate(R.layout.songs_list_view_header, mListView, false);
         ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
         TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
         tvAlbumName.setBackgroundColor(mBackgroundColor);
@@ -194,17 +206,21 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 }
             }
         });
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                showFab(false, false);
+            }
+        });
+
 
         ivHero.setImageBitmap(mHeroImage);
 
-        // Setup the contents list view
-        ParallaxScrollListView listView =
-                (ParallaxScrollListView) mRootView.findViewById(R.id.lvAlbumContents);
-        mAdapter = new SongsListAdapter(getActivity(), false);
-        listView.addParallaxedHeaderView(headerView);
-        listView.setAdapter(mAdapter);
+        // Set the header view and adapter
+        mListView.addParallaxedHeaderView(headerView);
+        mListView.setAdapter(mAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 // We substract the header view
@@ -222,6 +238,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 }
             }
         });
+
+        AlphaAnimation anim = new AlphaAnimation(0.f, 1.f);
+        anim.setDuration(200);
+        mListView.setLayoutAnimation(new LayoutAnimationController(anim));
 
         // Start loading songs in another thread
         loadSongs();
@@ -286,6 +306,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 }
             }
         });
+    }
+
+    public void notifyReturnTransition() {
+        showFab(true, false);
     }
 
     /**

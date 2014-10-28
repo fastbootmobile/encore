@@ -43,6 +43,7 @@ public class PlaylistListAdapter extends BaseAdapter {
         public AlbumArtImageView ivCover;
         public TextView tvTitle;
         public TextView tvSubTitle;
+        public ViewGroup vRoot;
         public Playlist playlist;
     }
 
@@ -168,6 +169,7 @@ public class PlaylistListAdapter extends BaseAdapter {
             assert root != null;
 
             ViewHolder holder = new ViewHolder();
+            holder.vRoot = (ViewGroup) root;
             holder.ivCover = (AlbumArtImageView) root.findViewById(R.id.ivCover);
             holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
             holder.tvSubTitle = (TextView) root.findViewById(R.id.tvSubTitle);

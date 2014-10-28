@@ -28,6 +28,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -73,6 +75,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     private PlaylistAdapter mAdapter;
     private Playlist mPlaylist;
+    private PlaylistListView mListViewContents;
     private FloatingActionButton mPlayFab;
     private PlayPauseDrawable mFabDrawable;
     private boolean mFabShouldResume;
@@ -155,14 +158,14 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         View root = inflater.inflate(R.layout.fragment_playlist_view, container, false);
         assert root != null;
 
-        PlaylistListView lvPlaylistContents = (PlaylistListView) root.findViewById(R.id.lvPlaylistContents);
-        mAdapter = new PlaylistAdapter(root.getContext());
+        mListViewContents = (PlaylistListView) root.findViewById(R.id.lvPlaylistContents);
 
         // Setup the parallaxed header
-        View headerView = inflater.inflate(R.layout.songs_list_view_header, null);
-        lvPlaylistContents.addParallaxedHeaderView(headerView);
+        View headerView = inflater.inflate(R.layout.songs_list_view_header, mListViewContents, false);
+        mListViewContents.addParallaxedHeaderView(headerView);
 
-        lvPlaylistContents.setAdapter(mAdapter);
+        mAdapter = new PlaylistAdapter(root.getContext());
+        mListViewContents.setAdapter(mAdapter);
 
         headerView.findViewById(R.id.pbAlbumLoading).setVisibility(View.GONE);
 
@@ -234,7 +237,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         mAdapter.setPlaylist(mPlaylist);
 
         // Set the list listener
-        lvPlaylistContents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListViewContents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (mAdapter.getItem(i - 1).isAvailable()) {
@@ -249,6 +252,11 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 }
             }
         });
+
+        // Set the display animation
+        AlphaAnimation anim = new AlphaAnimation(0.f, 1.f);
+        anim.setDuration(200);
+        mListViewContents.setLayoutAnimation(new LayoutAnimationController(anim));
 
         return root;
     }

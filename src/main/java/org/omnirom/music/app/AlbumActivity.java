@@ -20,10 +20,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.transition.Transition;
+import android.transition.TransitionValues;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -107,14 +110,41 @@ public class AlbumActivity extends FragmentActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        // We control the Music volume stream here too
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        getWindow().getSharedElementReturnTransition().addListener(new Transition.TransitionListener() {
+            @Override
+            public void onTransitionStart(Transition transition) {
+                mActiveFragment.notifyReturnTransition();
+            }
+
+            @Override
+            public void onTransitionEnd(Transition transition) {
+
+            }
+
+            @Override
+            public void onTransitionCancel(Transition transition) {
+
+            }
+
+            @Override
+            public void onTransitionPause(Transition transition) {
+
+            }
+
+            @Override
+            public void onTransitionResume(Transition transition) {
+
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         PluginsLookup.getDefault().connectPlayback();
+
+        // We control the Music volume stream here too
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     @Override

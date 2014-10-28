@@ -35,4 +35,8 @@
 
     </style>
 
+    <style name="AppTheme.TransparentNavBar.AlbumDetails">
+
+    </style>
+
 </resources>

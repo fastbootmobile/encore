@@ -19,6 +19,7 @@
         fontPath="fonts/Roboto-Medium.ttf"
         android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical|start"
+        android:singleLine="true"
         android:paddingBottom="16dp"
         android:paddingEnd="8dp"
         android:paddingLeft="24dp"
@@ -31,12 +32,12 @@
     <org.omnirom.music.app.ui.TopCropImageView
         android:id="@+id/ivHero"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="175dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:contentDescription="@string/albums"
         android:transitionName="itemImage"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerInside" />
 
     <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabPlay"

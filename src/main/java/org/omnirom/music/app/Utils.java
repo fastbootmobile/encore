@@ -488,19 +488,29 @@ public class Utils {
     public static void animateScale(View v, boolean animate, boolean visible) {
         if (visible) {
             if (animate) {
-                v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(400)
+                v.animate().scaleX(1.0f).scaleY(1.0f)
+                        .alpha(1.0f)
+                        .translationY(0.0f)
+                        .setDuration(400)
                         .setInterpolator(new DecelerateInterpolator()).start();
             } else {
                 v.setScaleX(1.0f);
                 v.setScaleY(1.0f);
+                v.setAlpha(1.0f);
+                v.setTranslationY(0.0f);
             }
         } else {
             if (animate) {
-                v.animate().scaleX(0.0f).scaleY(0.0f).setDuration(400)
+                v.animate().scaleX(0.0f).scaleY(0.0f)
+                        .alpha(0.0f)
+                        .translationY(v.getMeasuredHeight() / 4)
+                        .setDuration(400)
                         .setInterpolator(new DecelerateInterpolator()).start();
             } else {
                 v.setScaleX(0.0f);
                 v.setScaleY(0.0f);
+                v.setAlpha(0.0f);
+                v.setTranslationY(v.getMeasuredHeight() / 4);
             }
         }
     }

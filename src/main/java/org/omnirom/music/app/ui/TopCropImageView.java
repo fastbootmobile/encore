@@ -42,7 +42,7 @@ public class TopCropImageView extends ImageView {
     @Override
     protected boolean setFrame(int l, int t, int r, int b) {
         final Matrix matrix = getImageMatrix();
-        final float width = getWidth();
+        final float width = getMeasuredWidth();
         if (getDrawable() != null) {
             final float intrinsicWidth = getDrawable().getIntrinsicWidth();
 

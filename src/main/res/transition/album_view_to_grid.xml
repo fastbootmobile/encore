@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<transitionSet
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="300"
+    android:interpolator="@android:interpolator/linear_out_slow_in"
+    android:startDelay="300">
+    <targets>
+        <target android:targetId="@id/ivHero" android:targetName="itemImage" />
+    </targets>
+    <changeTransform/>
+    <changeBounds/>
+    <changeImageTransform/>
+    <fade/>
+    <slide/>
+</transitionSet>
