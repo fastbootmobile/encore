@@ -497,6 +497,9 @@ public class PlaybackService extends Service
                                 Log.e(TAG, "Unable to play song", e);
                             } catch (NullPointerException e) {
                                 Log.e(TAG, "No provider attached", e);
+                            } catch (IllegalStateException e) {
+                                Log.e(TAG, "Illegal State from provider", e);
+                                ACRA.getErrorReporter().handleException(e, false);
                             }
 
                             // The notification system takes care of calling startForeground
