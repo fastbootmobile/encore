@@ -212,6 +212,15 @@ public class MainActivity extends FragmentActivity
                 Log.w(TAG, "Configured provider is null!");
             }
         }
+
+
+        // Reload the current fragment for layout changes
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                onNavigationDrawerItemSelected(mCurrentFragmentIndex);
+            }
+        }, 200);
     }
 
     @Override
@@ -252,12 +261,12 @@ public class MainActivity extends FragmentActivity
         super.onConfigurationChanged(newConfig);
 
         // Reload the current fragment for layout changes
-        mHandler.post(new Runnable() {
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 onNavigationDrawerItemSelected(mCurrentFragmentIndex);
             }
-        });
+        }, 200);
     }
 
     @Override
