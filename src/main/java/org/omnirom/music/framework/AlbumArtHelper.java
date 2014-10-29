@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -60,12 +61,12 @@ public class AlbumArtHelper {
 
 
     public interface AlbumArtListener {
-        public void onArtLoaded(Bitmap output, BoundEntity request);
+        public void onArtLoaded(RefCountedBitmap output, BoundEntity request);
     }
 
     public static class BackgroundResult {
         public BoundEntity request;
-        public Bitmap bitmap;
+        public RefCountedBitmap bitmap;
         public boolean retry;
     }
 
@@ -74,13 +75,12 @@ public class AlbumArtHelper {
      */
     public static class AlbumArtTask extends AsyncTask<BoundEntity, Void, BackgroundResult> {
         private BoundEntity mEntity;
-        private Context mContext;
         private AlbumArtListener mListener;
         private Handler mHandler;
-        private Bitmap mArtBitmap;
+        private RefCountedBitmap mArtBitmap;
         private AlbumArtCache.IAlbumArtCacheListener mCacheListener = new AlbumArtCache.IAlbumArtCacheListener() {
             @Override
-            public void onArtLoaded(BoundEntity ent, Bitmap result) {
+            public void onArtLoaded(BoundEntity ent, RefCountedBitmap result) {
                 synchronized (AlbumArtTask.this) {
                     if (!isCancelled()) {
                         mArtBitmap = result;
@@ -90,10 +90,9 @@ public class AlbumArtHelper {
             }
         };
 
-        private AlbumArtTask(Context ctx, AlbumArtListener listener) {
-            mContext = ctx;
+        private AlbumArtTask(AlbumArtListener listener) {
             mListener = listener;
-            mHandler = new Handler();
+            mHandler = new Handler(Looper.getMainLooper());
         }
 
         @Override
@@ -122,38 +121,11 @@ public class AlbumArtHelper {
                         // Wait for the result
                         if (mArtBitmap == null) {
                             try {
-                                wait(6000);
+                                wait(8000);
                             } catch (InterruptedException e) {
                                 Log.w(TAG, "Interrupted while loading art");
                             }
                         }
-                    }
-                }
-
-                // Resize the image if too large
-                if (mArtBitmap != null) {
-                    final int w = mArtBitmap.getWidth();
-                    final int h = mArtBitmap.getHeight();
-                    Bitmap scaled = null;
-
-                    if (mArtBitmap.getWidth() > mArtBitmap.getHeight()) {
-                        if (mArtBitmap.getWidth() > 1200) {
-                            final float ratio = 1200.0f / ((float) w);
-                            scaled = Bitmap.createScaledBitmap(mArtBitmap, (int) (w * ratio),
-                                    (int) (h * ratio), true);
-                        }
-                    } else {
-                        if (mArtBitmap.getHeight() > 1200) {
-                            final float ratio = 1200.0f / ((float) h);
-                            scaled = Bitmap.createScaledBitmap(mArtBitmap, (int) (w * ratio),
-                                    (int) (h * ratio), true);
-
-                        }
-                    }
-
-                    if (scaled != null) {
-                        mArtBitmap.recycle();
-                        mArtBitmap = scaled;
                     }
                 }
 
@@ -184,7 +156,7 @@ public class AlbumArtHelper {
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            AlbumArtTask task = new AlbumArtTask(mContext, mListener);
+                            AlbumArtTask task = new AlbumArtTask(mListener);
                             try {
                                 task.executeOnExecutor(ART_POOL_EXECUTOR, result.request);
                             } catch (RejectedExecutionException e) {
@@ -199,9 +171,9 @@ public class AlbumArtHelper {
         }
     }
 
-    public static AlbumArtTask retrieveAlbumArt(Context ctx, AlbumArtListener listener,
+    public static AlbumArtTask retrieveAlbumArt(AlbumArtListener listener,
                                                 BoundEntity request, boolean immediate) {
-        AlbumArtTask task = new AlbumArtTask(ctx, listener);
+        AlbumArtTask task = new AlbumArtTask(listener);
 
         if (!immediate) {
             // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the predefined

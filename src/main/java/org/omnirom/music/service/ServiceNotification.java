@@ -21,7 +21,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -29,6 +28,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AlbumArtHelper;
+import org.omnirom.music.framework.RefCountedBitmap;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
@@ -40,8 +40,8 @@ import org.omnirom.music.providers.ProviderAggregator;
 public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     private Context mContext;
     private Resources mResources;
-    private final Bitmap mDefaultArt;
-    private Bitmap mCurrentArt;
+    private final RefCountedBitmap mDefaultArt;
+    private RefCountedBitmap mCurrentArt;
     private NotificationChangedListener mListener;
     private Song mCurrentSong;
 
@@ -58,7 +58,9 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
         // Get the default album art
         BitmapDrawable def = (BitmapDrawable) mResources.getDrawable(R.drawable.album_placeholder);
-        mDefaultArt = def.getBitmap();
+        mDefaultArt = new RefCountedBitmap(def.getBitmap());
+        mDefaultArt.acquire();
+
         mCurrentArt = mDefaultArt;
 
         // Build the static notification actions
@@ -86,8 +88,8 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         // Build the core notification
         builder.setSmallIcon(R.drawable.ic_launcher_white)
                 .setContentIntent(pendingIntent)
-                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(mCurrentArt)
-                        .bigLargeIcon(mCurrentArt))
+                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(mCurrentArt.get())
+                        .bigLargeIcon(mCurrentArt.get()))
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
@@ -201,25 +203,37 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     /**
      * @return The current active album art
      */
-    public Bitmap getAlbumArt() {
+    public RefCountedBitmap getAlbumArt() {
         return mCurrentArt;
     }
 
     private void updateAlbumArt() {
         if (mCurrentSong != null) {
+            if (mCurrentArt != null && mCurrentArt != mDefaultArt) {
+                mCurrentArt.release();
+            }
             mCurrentArt = mDefaultArt;
-            AlbumArtHelper.retrieveAlbumArt(mContext, this, mCurrentSong, false);
+            AlbumArtHelper.retrieveAlbumArt(this, mCurrentSong, false);
         }
     }
 
     @Override
-    public void onArtLoaded(Bitmap output, BoundEntity request) {
+    public void onArtLoaded(RefCountedBitmap output, BoundEntity request) {
         if (request.equals(mCurrentSong)) {
+            if (mCurrentArt != null && mCurrentArt != mDefaultArt) {
+                mCurrentArt.release();
+            }
+
             if (output == null) {
-                mCurrentArt = ((BitmapDrawable) mResources.getDrawable(R.drawable.album_placeholder)).getBitmap();
+                mCurrentArt = mDefaultArt;
             } else {
                 mCurrentArt = output;
             }
+
+            if (mCurrentArt != mDefaultArt) {
+                mCurrentArt.acquire();
+            }
+
             buildNotification();
         }
     }

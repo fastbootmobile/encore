@@ -34,6 +34,7 @@ import android.util.Log;
 import org.acra.ACRA;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.RefCountedBitmap;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -222,10 +223,10 @@ public class PlaybackService extends Service
             @Override
             public void onNotificationChanged(ServiceNotification notification) {
                 notification.notify(PlaybackService.this);
-                Bitmap albumArt = notification.getAlbumArt();
+                RefCountedBitmap albumArt = notification.getAlbumArt();
                 mRemoteControlClient.editMetadata(false)
                         .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
-                                albumArt.copy(albumArt.getConfig(), false)).apply();
+                                albumArt.get().copy(albumArt.get().getConfig(), false)).apply();
             }
         });
 

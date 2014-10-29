@@ -28,6 +28,7 @@ import android.widget.TextView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.RefCountedBitmap;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
@@ -69,6 +70,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         public TextView divider;
         public ImageView ivSource;
         public View vRoot;
+        public RefCountedBitmap sourceLogo;
     }
 
     /**
@@ -378,7 +380,14 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                 tag.tvSubtitle.setText(artist.getName());
             }
             tag.albumArtImageView.loadArtForSong(song);
-            tag.ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(song));
+            if (tag.sourceLogo != null) {
+                tag.sourceLogo.release();
+                tag.sourceLogo = null;
+            }
+            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(song);
+            tag.sourceLogo.acquire();
+
+            tag.ivSource.setImageBitmap(tag.sourceLogo.get());
             tag.content = song;
         } else {
             tag.tvTitle.setText(R.string.loading);
@@ -406,7 +415,14 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             }
             tag.albumArtImageView.loadArtForArtist(artist);
             tag.content = artist;
-            tag.ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(artist));
+            if (tag.sourceLogo != null) {
+                tag.sourceLogo.release();
+                tag.sourceLogo = null;
+            }
+            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(artist);
+            tag.sourceLogo.acquire();
+
+            tag.ivSource.setImageBitmap(tag.sourceLogo.get());
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);
@@ -437,7 +453,14 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                 // tag.divider.setViewName("local:album:title:" + albumRef);
             }
             tag.albumArtImageView.loadArtForAlbum(album);
-            tag.ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(album));
+            if (tag.sourceLogo != null) {
+                tag.sourceLogo.release();
+                tag.sourceLogo = null;
+            }
+            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(album);
+            tag.sourceLogo.acquire();
+
+            tag.ivSource.setImageBitmap(tag.sourceLogo.get());
             tag.content = album;
         } else {
             tag.tvTitle.setText(R.string.loading);
@@ -459,7 +482,14 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             tag.tvTitle.setText(playlist.getName());
             tag.tvSubtitle.setText(playlist.getSongsCount() + " songs");
             tag.content = playlist;
-            tag.ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(playlist));
+            if (tag.sourceLogo != null) {
+                tag.sourceLogo.release();
+                tag.sourceLogo = null;
+            }
+            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(playlist);
+            tag.sourceLogo.acquire();
+
+            tag.ivSource.setImageBitmap(tag.sourceLogo.get());
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);

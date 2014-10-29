@@ -346,20 +346,20 @@ public class PluginsLookup {
         return services;
     }
 
-    public Bitmap getCachedLogo(BoundEntity entity) {
+    public RefCountedBitmap getCachedLogo(BoundEntity entity) {
         return getCachedLogo(entity.getProvider(), entity.getLogo());
     }
 
-    public Bitmap getCachedLogo(ProviderIdentifier id, String ref) {
-        Bitmap output = ImageCache.getDefault().get(ref);
+    public RefCountedBitmap getCachedLogo(ProviderIdentifier id, String ref) {
+        RefCountedBitmap output = ImageCache.getDefault().get(ref);
         if (output == null && id != null) {
             try {
                 IMusicProvider binder = getProvider(id).getBinder();
                 if (binder != null) {
-                    output = getProvider(id).getBinder().getLogo(ref);
+                    Bitmap bmp = getProvider(id).getBinder().getLogo(ref);
 
-                    if (output != null) {
-                        ImageCache.getDefault().put(ref, output, true);
+                    if (bmp != null) {
+                        output = ImageCache.getDefault().put(ref, bmp, true);
                     }
                 }
             } catch (RemoteException e) {

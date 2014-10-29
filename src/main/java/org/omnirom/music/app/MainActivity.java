@@ -38,6 +38,7 @@ import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.RecognitionFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.CastModule;
+import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
@@ -86,6 +87,10 @@ public class MainActivity extends FragmentActivity
     private MenuItem mOfflineMenuItem;
 
     private ProviderConnection mConfiguringProvider;
+
+    private int mOrientation;
+
+    private Fragment mActiveFragment;
 
 
     public MainActivity() {
@@ -253,12 +258,16 @@ public class MainActivity extends FragmentActivity
             PluginsLookup.getDefault().tearDown();
         }
 
+        System.gc();
+
         super.onDestroy();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+
+        mOrientation = newConfig.orientation;
 
         // Reload the current fragment for layout changes
         mHandler.postDelayed(new Runnable() {
@@ -274,31 +283,36 @@ public class MainActivity extends FragmentActivity
         // update the main content by replacing fragments
         boolean result = true;
         try {
-            Fragment newFrag = null;
             mCurrentFragmentIndex = position;
-            switch (position+1) {
-                case SECTION_LISTEN_NOW:
-                    newFrag = ListenNowFragment.newInstance();
-                    break;
-                case SECTION_PLAYLISTS:
-                    newFrag = PlaylistListFragment.newInstance(true);
-                    break;
-                case SECTION_MY_SONGS:
-                    newFrag = MySongsFragment.newInstance();
-                    break;
-                case SECTION_AUTOMIX:
-                    newFrag = AutomixFragment.newInstance();
-                    break;
-                case SECTION_RECOGNITION:
-                    newFrag = RecognitionFragment.newInstance();
-                    break;
-                case SECTION_NOW_PLAYING:
-                    startActivity(new Intent(this, PlaybackQueueActivity.class));
-                    break;
+            final String fragmentTag = ""+mCurrentFragmentIndex+"_"+mOrientation;
+
+            Fragment newFrag = getSupportFragmentManager().findFragmentByTag(fragmentTag);
+
+            if (newFrag == null) {
+                switch (position + 1) {
+                    case SECTION_LISTEN_NOW:
+                        newFrag = ListenNowFragment.newInstance();
+                        break;
+                    case SECTION_PLAYLISTS:
+                        newFrag = PlaylistListFragment.newInstance(true);
+                        break;
+                    case SECTION_MY_SONGS:
+                        newFrag = MySongsFragment.newInstance();
+                        break;
+                    case SECTION_AUTOMIX:
+                        newFrag = AutomixFragment.newInstance();
+                        break;
+                    case SECTION_RECOGNITION:
+                        newFrag = RecognitionFragment.newInstance();
+                        break;
+                    case SECTION_NOW_PLAYING:
+                        startActivity(new Intent(this, PlaybackQueueActivity.class));
+                        break;
+                }
             }
 
             if (newFrag != null) {
-                showFragment(newFrag, false);
+                showFragment(newFrag, false, fragmentTag);
                 result = true;
             } else {
                 result = false;
@@ -310,7 +324,7 @@ public class MainActivity extends FragmentActivity
         return result;
     }
 
-    public void showFragment(Fragment f, boolean addToStack) {
+    public void showFragment(Fragment f, boolean addToStack, String tag) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragmentManager.getBackStackEntryCount() > 0 && !addToStack) {
@@ -327,8 +341,12 @@ public class MainActivity extends FragmentActivity
         } else {
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         }
-        ft.replace(R.id.container, f);
+        ft.replace(R.id.container, f, tag);
         ft.commit();
+
+        mActiveFragment = f;
+
+        ImageCache.getDefault().evictAll();
     }
 
     public void onSectionAttached(int number) {
@@ -444,7 +462,7 @@ public class MainActivity extends FragmentActivity
                 break;
 
             case R.id.action_sound_effects:
-                showFragment(new DspProvidersFragment(), true);
+                showFragment(new DspProvidersFragment(), true, "-1_DSPProv");
                 break;
 
             case R.id.action_offline_mode:

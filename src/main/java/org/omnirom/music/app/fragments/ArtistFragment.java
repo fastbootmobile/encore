@@ -68,6 +68,7 @@ import org.omnirom.music.app.ui.ParallaxScrollView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.app.ui.WrapContentHeightViewPager;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.RefCountedBitmap;
 import org.omnirom.music.framework.Suggestor;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -117,6 +118,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private ArtistInfoFragment mArtistInfoFragment;
     private ArtistSimilarFragment mArtistSimilarFragment;
     private FloatingActionButton mFabPlay;
+    private RefCountedBitmap mLogoBitmap;
 
     private Runnable mUpdateAlbumsRunnable = new Runnable() {
         @Override
@@ -498,7 +500,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         // Setup the source logo
         final ImageView ivSource = (ImageView) mRootView.findViewById(R.id.ivSourceLogo);
-        ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(mArtist));
+        mLogoBitmap = PluginsLookup.getDefault().getCachedLogo(mArtist);
+        mLogoBitmap.acquire();
+        ivSource.setImageBitmap(mLogoBitmap.get());
 
         // Outline is required for the FAB shadow to be actually oval
         mFabPlay = (FloatingActionButton) mRootView.findViewById(R.id.fabPlay);
@@ -561,6 +565,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     public void onDestroy() {
         super.onDestroy();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
+        if (mLogoBitmap != null) {
+            mLogoBitmap.release();
+        }
     }
 
     /**

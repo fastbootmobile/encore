@@ -136,7 +136,7 @@ public class AlbumArtCache {
                 } else if (ent instanceof Album) {
                     result = getAlbumArt((Album) ent, listener);
                 } else if (ent instanceof Playlist) {
-
+                    result = getPlaylistArt((Playlist) ent, listener);
                 } else {
                     throw new IllegalArgumentException("Entity is of an unknown class!");
                 }
@@ -162,8 +162,8 @@ public class AlbumArtCache {
                 public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
                     new Thread() {
                         public void run() {
-                            ImageCache.getDefault().put(getEntityArtKey(song), bitmap);
-                            listener.onArtLoaded(song, bitmap);
+                            RefCountedBitmap rfb = ImageCache.getDefault().put(getEntityArtKey(song), bitmap);
+                            listener.onArtLoaded(song, rfb);
                         }
                     }.start();
                 }
@@ -216,8 +216,8 @@ public class AlbumArtCache {
                 public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
                     new Thread() {
                         public void run() {
-                            ImageCache.getDefault().put(getEntityArtKey(album), bitmap);
-                            listener.onArtLoaded(album, bitmap);
+                            RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(album), bitmap);
+                            listener.onArtLoaded(album, rcb);
                         }
                     }.start();
                 }
@@ -296,8 +296,8 @@ public class AlbumArtCache {
                     Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
                     if (bitmap != null) {
                         result = true;
-                        ImageCache.getDefault().put(getEntityArtKey(listenerRef), bitmap);
-                        listener.onArtLoaded(listenerRef, bitmap);
+                        RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(listenerRef), bitmap);
+                        listener.onArtLoaded(listenerRef, rcb);
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "Error while downloading album art", e);
@@ -305,7 +305,7 @@ public class AlbumArtCache {
                     Log.e(TAG, "Rate limited while downloading album art", e);
                 }
             } else {
-                ImageCache.getDefault().put(getEntityArtKey(listenerRef), null);
+                ImageCache.getDefault().put(getEntityArtKey(listenerRef), (RefCountedBitmap) null);
                 listener.onArtLoaded(listenerRef, null);
                 result = true;
             }
@@ -328,8 +328,8 @@ public class AlbumArtCache {
                 public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
                     new Thread() {
                         public void run() {
-                            ImageCache.getDefault().put(getEntityArtKey(artist), bitmap);
-                            listener.onArtLoaded(artist, bitmap);
+                            RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(artist), bitmap);
+                            listener.onArtLoaded(artist, rcb);
                         }
                     }.start();
                 }
@@ -370,8 +370,8 @@ public class AlbumArtCache {
                     Bitmap image = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
                     if (image != null) {
                         result = true;
-                        ImageCache.getDefault().put(getEntityArtKey(artist), image);
-                        listener.onArtLoaded(artist, image);
+                        RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(artist), image);
+                        listener.onArtLoaded(artist, rcb);
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "IO exception while downloading image", e);
@@ -379,10 +379,52 @@ public class AlbumArtCache {
                     Log.w(TAG, "Rate limited while getting image");
                 }
             } else {
-                ImageCache.getDefault().put(getEntityArtKey(artist), null);
+                ImageCache.getDefault().put(getEntityArtKey(artist), (Bitmap) null);
                 listener.onArtLoaded(artist, null);
                 result = true;
             }
+        }
+
+        return result;
+    }
+
+    private boolean getPlaylistArt(final Playlist playlist, final IAlbumArtCacheListener listener) throws RemoteException {
+        // Try to get the art from the provider first
+        final ProviderIdentifier id = playlist.getProvider();
+        final IMusicProvider binder = safeGetBinder(id);
+
+        boolean providerprovides = false;
+        boolean result = false;
+
+        if (binder != null) {
+            providerprovides = result = binder.getPlaylistArt(playlist, new IArtCallback.Stub() {
+                @Override
+                public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
+                    new Thread() {
+                        public void run() {
+                            RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(playlist), bitmap);
+                            listener.onArtLoaded(playlist, rcb);
+                        }
+                    }.start();
+                }
+            });
+        }
+
+        if (!providerprovides) {
+            // Build our own art
+            final PlaylistArtBuilder builder = new PlaylistArtBuilder();
+            builder.start(playlist, new IArtCallback.Stub() {
+                @Override
+                public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
+                    new Thread() {
+                        public void run() {
+                            RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(playlist), bitmap);
+                            listener.onArtLoaded(playlist, rcb);
+                            builder.freeMemory();
+                        }
+                    }.start();
+                }
+            });
         }
 
         return result;
@@ -430,6 +472,6 @@ public class AlbumArtCache {
     }
 
     public interface IAlbumArtCacheListener {
-        public void onArtLoaded(BoundEntity ent, Bitmap result);
+        public void onArtLoaded(BoundEntity ent, RefCountedBitmap result);
     }
 }

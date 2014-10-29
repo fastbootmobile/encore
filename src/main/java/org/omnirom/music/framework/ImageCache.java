@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Handler;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -32,15 +33,16 @@ import java.util.ArrayList;
 /**
  * Image cache in the cache directory on internal storage
  */
-public class  ImageCache {
+public class ImageCache {
     private static final String TAG = "ImageCache";
     private static final ImageCache INSTANCE = new ImageCache();
 
     private ArrayList<String> mEntries;
     private File mCacheDir;
-    private Bitmap mDefaultArt;
+    private RefCountedBitmap mDefaultArt;
+    private Handler mHandler;
 
-    private LruCache<String, Bitmap> mMemoryCache;
+    private final LruCache<String, RefCountedBitmap> mMemoryCache;
 
     /**
      * @return The default instance
@@ -54,14 +56,20 @@ public class  ImageCache {
      */
     public ImageCache() {
         mEntries = new ArrayList<String>();
+        mHandler = new Handler();
 
-        final int maxMemory = (int) Runtime.getRuntime().maxMemory();
-        Log.e(TAG, "ImageCache size: " + (maxMemory / 12 / 1024) + " MB");
+        final int maxMemory = 10 * 1024 * 1024; // (int) Runtime.getRuntime().maxMemory();
+        Log.d(TAG, "ImageCache size: " + (maxMemory / 1024 / 1024) + " MB");
 
-        mMemoryCache = new LruCache<String, Bitmap>(maxMemory / 12) {
+        mMemoryCache = new LruCache<String, RefCountedBitmap>(maxMemory) {
             @Override
-            protected int sizeOf(String key, Bitmap value) {
-                return value.getByteCount();
+            protected int sizeOf(String key, RefCountedBitmap value) {
+                return value.get().getByteCount();
+            }
+
+            @Override
+            protected void entryRemoved(boolean evicted, String key, final RefCountedBitmap oldBitmap, RefCountedBitmap newBitmap) {
+                oldBitmap.release();
             }
         };
     }
@@ -83,7 +91,7 @@ public class  ImageCache {
             }
         }
 
-        mDefaultArt = ((BitmapDrawable) ctx.getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
+        mDefaultArt = new RefCountedBitmap(((BitmapDrawable) ctx.getResources().getDrawable(R.drawable.album_placeholder)).getBitmap());
     }
 
     /**
@@ -98,6 +106,15 @@ public class  ImageCache {
             if (!file.delete()) {
                 Log.e(TAG, "Cannot delete " + file.getPath());
             }
+        }
+    }
+
+    /**
+     * Clears the memory cache
+     */
+    public void evictAll() {
+        synchronized (this) {
+            mMemoryCache.evictAll();
         }
     }
 
@@ -128,7 +145,7 @@ public class  ImageCache {
      * @param key The key of the image to get
      * @return A bitmap corresponding to the key, or null if it's not in the cache
      */
-    public Bitmap get(final String key) {
+    public RefCountedBitmap get(final String key) {
         if (key == null) {
             return null;
         }
@@ -140,12 +157,14 @@ public class  ImageCache {
 
         if (contains) {
             // Check if we have it in memory
-            Bitmap item = mMemoryCache.get(key);
+            RefCountedBitmap item = mMemoryCache.get(key);
             if (item == null) {
                 BitmapFactory.Options opts = new BitmapFactory.Options();
                 opts.inSampleSize = 2;
-                item = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + key);
-                if (item != null) {
+                Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + key);
+                if (bmp != null) {
+                    item = new RefCountedBitmap(bmp);
+                    item.acquire();
                     mMemoryCache.put(key, item);
                 }
             }
@@ -161,7 +180,18 @@ public class  ImageCache {
      * @param key The key of the image to put
      * @param bmp The bitmap to put (or null to put the default art)
      */
-    public void put(final String key, final Bitmap bmp) {
+    public RefCountedBitmap put(final String key, final Bitmap bmp) {
+        RefCountedBitmap rcb = new RefCountedBitmap(bmp);
+        put(key, rcb, false);
+        return rcb;
+    }
+
+    /**
+     * Stores the image as WEBP in the cache
+     * @param key The key of the image to put
+     * @param bmp The bitmap to put (or null to put the default art)
+     */
+    public void put(final String key, final RefCountedBitmap bmp) {
         put(key, bmp, false);
     }
 
@@ -171,7 +201,19 @@ public class  ImageCache {
      * @param bmp The bitmap to put (or null to put the default art)
      * @param asPNG True to store as PNG, false to store as WEBP
      */
-    public void put(final String key, Bitmap bmp, final boolean asPNG) {
+    public RefCountedBitmap put(final String key, Bitmap bmp, final boolean asPNG) {
+        RefCountedBitmap rcb = new RefCountedBitmap(bmp);
+        put(key, rcb, asPNG);
+        return rcb;
+    }
+
+    /**
+     * Stores the image as either WEBP or PNG in the cache
+     * @param key The key of the image to put
+     * @param bmp The bitmap to put (or null to put the default art)
+     * @param asPNG True to store as PNG, false to store as WEBP
+     */
+    public void put(final String key, RefCountedBitmap bmp, final boolean asPNG) {
         boolean isDefaultArt = false;
 
         if (bmp == null) {
@@ -179,13 +221,22 @@ public class  ImageCache {
             isDefaultArt = true;
         }
 
-        mMemoryCache.put(key, bmp);
+        bmp.acquire();
+        synchronized (mMemoryCache) {
+            mMemoryCache.put(key, bmp);
+            // Touch usage
+            bmp = mMemoryCache.get(key);
+        }
 
         if (!isDefaultArt) {
             try {
+                bmp.acquire();
+
                 FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + key);
-                bmp.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
+                bmp.get().compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
                 out.close();
+
+                bmp.release();
             } catch (IOException e) {
                 Log.e(TAG, "Unable to write the file to cache", e);
             }

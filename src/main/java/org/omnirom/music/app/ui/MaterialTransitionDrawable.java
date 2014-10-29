@@ -132,7 +132,9 @@ public class MaterialTransitionDrawable extends Drawable {
             mPaint.setAlpha((int) (progressOpacity * 255.0f));
             mPaint.setColorFilter(colorMatFilter);
 
-            canvas.drawBitmap(mTargetDrawable.getBitmap(), 0, 0, mPaint);
+            if (!mTargetDrawable.getBitmap().isRecycled()) {
+                canvas.drawBitmap(mTargetDrawable.getBitmap(), 0, 0, mPaint);
+            }
 
             if (rawProgress >= 1.0f) {
                 mAnimating = false;
@@ -141,7 +143,9 @@ public class MaterialTransitionDrawable extends Drawable {
                 invalidateSelf();
             }
         } else if (mBaseDrawable != null) {
-            mBaseDrawable.draw(canvas);
+            if (!mBaseDrawable.getBitmap().isRecycled()) {
+                mBaseDrawable.draw(canvas);
+            }
         }
     }
 
@@ -164,7 +168,9 @@ public class MaterialTransitionDrawable extends Drawable {
                 (targetHeight - scaledBaseHeight) * 0.5f);
         canvas.scale(scaling, scaling);
 
-        mBaseDrawable.draw(canvas);
+        if (!mBaseDrawable.getBitmap().isRecycled()) {
+            mBaseDrawable.draw(canvas);
+        }
         canvas.restore();
     }
 

@@ -42,6 +42,7 @@ import org.omnirom.music.app.ui.ParallaxScrollListView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.RefCountedBitmap;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -72,6 +73,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private FloatingActionButton mPlayFab;
     private ParallaxScrollListView mListView;
     private boolean mFabShouldResume = false;
+    private RefCountedBitmap mLogoBitmap;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -181,7 +183,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         // Set source logo
         ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
-        ivSource.setImageBitmap(PluginsLookup.getDefault().getCachedLogo(mAlbum));
+        mLogoBitmap = PluginsLookup.getDefault().getCachedLogo(mAlbum);
+        mLogoBitmap.acquire();
+        ivSource.setImageBitmap(mLogoBitmap.get());
 
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable();
@@ -267,6 +271,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         super.onDestroy();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         PlaybackProxy.removeCallback(mPlaybackCallback);
+
+        if (mLogoBitmap != null) {
+            mLogoBitmap.release();
+        }
     }
 
     /**
