@@ -135,7 +135,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
             public int compare(Artist artist, Artist artist2) {
                 if (artist.isLoaded() && artist2.isLoaded() && artist.getName() != null
                         && artist2.getName() != null) {
-                    return artist.getName().compareTo(artist2.getName());
+                    return artist.getName().toLowerCase().compareTo(artist2.getName().toLowerCase());
                 } else {
                     return artist.getRef().compareTo(artist2.getRef());
                 }
