@@ -17,6 +17,7 @@
 #include "Log.h"
 #include <string>
 #include <utility>
+#include <cmath>
 
 #define LOG_TAG "OM-NativePlayer"
 
@@ -24,7 +25,7 @@
 NativePlayer::NativePlayer() : m_pEngineObj(nullptr), m_pEngine(nullptr),
         m_pOutputMixObj(nullptr), m_pPlayerObj(nullptr), m_pPlayer(nullptr), m_pPlayerVol(nullptr),
         m_pBufferQueue(nullptr), m_iSampleRate(44100), m_iChannels(2), m_iSampleFormat(16),
-        m_iWrittenSamples(0), m_iUnderflowCount(0), m_iActiveBufferIndex(0) {
+        m_iWrittenSamples(0), m_iUnderflowCount(0), m_iActiveBufferIndex(0), m_fVolume(1.0f) {
         m_pActiveBuffer = reinterpret_cast<uint8_t*>(malloc(ENQUEUED_BUFFER_SIZE));
         m_pPlayingBuffer = reinterpret_cast<uint8_t*>(malloc(ENQUEUED_BUFFER_SIZE));
 }
@@ -349,5 +350,12 @@ int32_t NativePlayer::getChannels() const {
     return m_iChannels;
 }
 // -------------------------------------------------------------------------------------
+void NativePlayer::setVolume(float volume) {
+    SLresult result;
+    m_fVolume = volume;
 
+    float attenuation = volume < 0.01f ? -96.0f : 20 * log10(volume);
 
+    (*m_pPlayerVol)->SetVolumeLevel(m_pPlayerVol, (SLmillibel) (attenuation * 100));
+}
+// -------------------------------------------------------------------------------------

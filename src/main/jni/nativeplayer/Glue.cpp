@@ -51,6 +51,8 @@ static JNINativeMethod gMethodsNativeHub[] = {
             reinterpret_cast<void*>(om_NativeHub_createHostSocket)},
     {"nativeSetSinkPointer", "(J)V",
             reinterpret_cast<void*>(om_NativeHub_setSinkPointer)},
+    {"nativeSetDucking", "(Z)V",
+            reinterpret_cast<void*>(om_NativeHub_setDucking)},
 };
 
 // -------------------------------------------------------------------------------------

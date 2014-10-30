@@ -47,6 +47,9 @@ class NativeHub : public SocketCallbacks {
     // Returns userdata pointer
     void* getUserData() const;
 
+    // Sets ducking status
+    void setDucking(bool duck);
+
  protected:
     SocketHost* findSocketByName(const std::string& name);
     void writeAudioToDsp(int chain_index, const uint8_t* data, const uint32_t len);

@@ -612,6 +612,42 @@ public class PlaybackService extends Service
         stopForeground(true);
     }
 
+    private void playImpl() {
+        new Thread() {
+            public void run() {
+                final Song currentSong = getCurrentSong();
+                if (currentSong != null) {
+                    IMusicProvider provider = PluginsLookup.getDefault().getProvider(currentSong.getProvider()).getBinder();
+                    if (provider != null) {
+                        try {
+                            provider.resume();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot resume", e);
+                        }
+                        mIsResuming = true;
+                        mState = STATE_BUFFERING;
+
+                        for (IPlaybackCallback cb : mCallbacks) {
+                            try {
+                                cb.onSongStarted(true, currentSong);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Cannot call playback callback for song start event", e);
+                            }
+                        }
+
+                        requestAudioFocus();
+                        mNotification.setPlayPauseAction(false);
+                    } else {
+                        Log.e(TAG, "Provider is null! Can't resume.");
+                    }
+                } else if (mPlaybackQueue.size() > 0) {
+                    mHandler.removeCallbacks(mStartPlaybackRunnable);
+                    mHandler.post(mStartPlaybackRunnable);
+                }
+            }
+        }.start();
+    }
+
     /**
      * @return The reference to the next track in the queue
      */
@@ -708,40 +744,7 @@ public class PlaybackService extends Service
 
         @Override
         public boolean play() throws RemoteException {
-            new Thread() {
-                public void run() {
-                    final Song currentSong = getCurrentSong();
-                    if (currentSong != null) {
-                        IMusicProvider provider = PluginsLookup.getDefault().getProvider(currentSong.getProvider()).getBinder();
-                        if (provider != null) {
-                            try {
-                                provider.resume();
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Cannot resume", e);
-                            }
-                            mIsResuming = true;
-                            mState = STATE_BUFFERING;
-
-                            for (IPlaybackCallback cb : mCallbacks) {
-                                try {
-                                    cb.onSongStarted(true, currentSong);
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Cannot call playback callback for song start event", e);
-                                }
-                            }
-
-                            requestAudioFocus();
-                            mNotification.setPlayPauseAction(false);
-                        } else {
-                            Log.e(TAG, "Provider is null! Can't resume.");
-                        }
-                    } else if (mPlaybackQueue.size() > 0) {
-                        mHandler.removeCallbacks(mStartPlaybackRunnable);
-                        mHandler.post(mStartPlaybackRunnable);
-                    }
-                }
-            }.start();
-
+            playImpl();
             return true;
         }
 
@@ -1019,47 +1022,34 @@ public class PlaybackService extends Service
 
     @Override
     public void onAudioFocusChange(int focusChange) {
-        final Song currentSong = getCurrentSong();
-        final PluginsLookup lookup = PluginsLookup.getDefault();
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                // You have gained the audio focus.
+                if (mState == STATE_PLAYING) {
+                    mNativeHub.setDucking(false);
+                } else {
+                    playImpl();
+                }
+                break;
 
-        if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-            // Pause playback
-            if (currentSong != null) {
-                IMusicProvider provider = lookup.getProvider(currentSong.getProvider()).getBinder();
-                try {
-                    if (provider != null) {
-                        provider.pause();
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to pause current track for audio focus change");
-                }
-            }
-        } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-            // Resume playback
-            if (currentSong != null) {
-                IMusicProvider provider = lookup.getProvider(currentSong.getProvider()).getBinder();
-                try {
-                    if (provider != null) {
-                        provider.resume();
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to pause current track for audio focus change");
-                }
-            }
-        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            am.unregisterMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
-            am.abandonAudioFocus(this);
-            if (currentSong != null) {
-                IMusicProvider provider = lookup.getProvider(currentSong.getProvider()).getBinder();
-                try {
-                    if (provider != null) {
-                        provider.pause();
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to pause current track for audio focus change");
-                }
-            }
+            case AudioManager.AUDIOFOCUS_LOSS:
+                // You have lost the audio focus for a presumably long time. You must stop all audio
+                // playback.
+                pauseImpl();
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                // You have temporarily lost audio focus, but should receive it back shortly. You
+                // must stop all audio playback, but you can keep your resources because you will
+                // probably get focus back shortly.
+                pauseImpl();
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                // You have temporarily lost audio focus, but you are allowed to continue to play
+                // audio quietly (at a low volume) instead of killing audio completely.
+                mNativeHub.setDucking(true);
+                break;
         }
     }
 

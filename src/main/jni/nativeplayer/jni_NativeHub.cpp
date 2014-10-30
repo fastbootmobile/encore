@@ -109,6 +109,11 @@ void om_NativeHub_setSinkPointer(JNIEnv* env, jobject thiz, jlong handle) {
     hub->setSink(reinterpret_cast<INativeSink*>(handle));
 }
 // -------------------------------------------------------------------------------------
+void om_NativeHub_setDucking(JNIEnv* env, jobject thiz, jboolean duck) {
+    NativeHub* hub = get_hub_from_object(env, thiz);
+    hub->setDucking(duck);
+}
+// -------------------------------------------------------------------------------------
 void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint len) {
     JNIEnv* env;
     bool release_jni = JNI_GetEnv(&env);

@@ -71,6 +71,9 @@ class NativePlayer : public INativeSink {
     // Returns the active number of channels
     int32_t getChannels() const;
 
+    // Sets the active volume
+    void setVolume(float volume);
+
  private:
     bool createAudioPlayer();
     void setPlayState(SLuint32 state);
@@ -92,6 +95,7 @@ class NativePlayer : public INativeSink {
     std::atomic<uint32_t> m_iChannels;
     std::atomic<int64_t> m_iWrittenSamples;
     std::atomic<int32_t> m_iUnderflowCount;
+    std::atomic<float> m_fVolume;
 
     uint8_t* m_pActiveBuffer;
     uint8_t* m_pPlayingBuffer;

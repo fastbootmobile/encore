@@ -40,6 +40,9 @@ jboolean om_NativeHub_createHostSocket(JNIEnv* env, jobject thiz, jstring name, 
 // NativeHub.setSinkPointer(long handle) ==> NativeHub::setSink(INativeSink* sink)
 void om_NativeHub_setSinkPointer(JNIEnv* env, jobject thiz, jlong handle);
 
+// NativeHub.setDucking(boolean duck) ==> NativeHub::setDucking(bool duck)
+void om_NativeHub_setDucking(JNIEnv* env, jobject thiz, jboolean duck);
+
 // -----------------------------------------
 // Called from native code to Java
 // -----------------------------------------

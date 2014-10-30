@@ -42,6 +42,9 @@ class INativeSink {
 
     // Returns the active number of channels
     virtual int32_t getChannels() const = 0;
+
+    // Sets the active volume
+    virtual void setVolume(float volume) = 0;
 };
 
 

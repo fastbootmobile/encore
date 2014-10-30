@@ -67,6 +67,12 @@ public class NativeHub {
         nativeSetSinkPointer(handle);
     }
 
+    /**
+     * Reduce the volume because some other priority operation is happening
+     * @param duck True to reduce volume, false to restore
+     */
+    public void setDucking(boolean duck) { nativeSetDucking(duck); }
+
     // Called from native code
     public void onAudioMirrorWritten(int len) {
         mStreamer.write(mAudioMirrorBuffer, len);
@@ -77,4 +83,5 @@ public class NativeHub {
     private native void nativeSetDSPChain(String[] chain);
     private native boolean nativeCreateHostSocket(String name, boolean isDsp);
     private native void nativeSetSinkPointer(long handle);
+    private native void nativeSetDucking(boolean duck);
 }

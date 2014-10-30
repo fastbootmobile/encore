@@ -63,6 +63,12 @@ void* NativeHub::getUserData() const {
     return m_pUserData;
 }
 // -------------------------------------------------------------------------------------
+void NativeHub::setDucking(bool duck) {
+    if (m_pSink) {
+        m_pSink->setVolume(duck ? 0.5f : 1.0f);
+    }
+}
+// -------------------------------------------------------------------------------------
 SocketHost* NativeHub::findSocketByName(const std::string& name) {
     SocketHost* host = m_ProviderSockets[name];
     if (!host) {
