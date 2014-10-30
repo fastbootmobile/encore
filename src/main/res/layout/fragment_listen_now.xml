@@ -8,8 +8,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="2dp"
         android:scrollbars="vertical"
+        android:paddingBottom="@dimen/playing_bar_height"
+        android:paddingTop="2dp"
+        android:paddingRight="2dp"
+        android:paddingLeft="2dp"
+        android:clipToPadding="false"
         app:layoutManager="StaggeredGridLayoutManager"
         app:numColumns="2"
         app:numRows="300" />
