@@ -70,7 +70,7 @@ public class PlaybackService extends Service
     /**
      * Time after which the service will shutdown if nothing happens
      */
-    private static final int SHUTDOWN_TIMEOUT = 5000;
+    private static final int SHUTDOWN_TIMEOUT = 10000;
 
     /**
      * Runnable that will shutdown this service after timeout. Each action should cancel the
@@ -80,10 +80,9 @@ public class PlaybackService extends Service
         @Override
         public void run() {
             if (mState == STATE_PAUSED || mState == STATE_STOPPED) {
-                /*Log.w(TAG, "Shutting down because of timeout and nothing bound");
-                mCurrentTrack = -1;
+                Log.w(TAG, "Shutting down because of timeout and nothing bound");
                 stopForeground(true);
-                stopSelf();*/
+                stopSelf();
             } else {
                 resetShutdownTimeout();
             }
