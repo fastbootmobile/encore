@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.IOException;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
-/*
+
 // Report crashes with ACRA on our temporary endpoint
 @ReportsCrashes(
         formKey = "",
@@ -43,7 +43,6 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
         formUriBasicAuthLogin = "reporter-omnimusic-alpha",
         formUriBasicAuthPassword = "4lqh4mu51c1337"
 )
-*/
 /**
  * Application structure wrapper to handle various application-wide (activity + services) properties
  */

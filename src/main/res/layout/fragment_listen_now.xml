@@ -9,11 +9,9 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:scrollbars="vertical"
-        android:paddingBottom="@dimen/playing_bar_height"
-        android:paddingTop="2dp"
-        android:paddingRight="2dp"
-        android:paddingLeft="2dp"
+        android:padding="2dp"
         android:clipToPadding="false"
+        android:scrollbarStyle="outsideOverlay"
         app:layoutManager="StaggeredGridLayoutManager"
         app:numColumns="2"
         app:numRows="300" />

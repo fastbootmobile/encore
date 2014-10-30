@@ -387,8 +387,9 @@ public class Utils {
                         break;
 
                     case R.id.menu_open_artist:
-                        ArtistActivity.craftIntent(context, null, song.getArtist(),
+                        Intent intent = ArtistActivity.craftIntent(context, null, song.getArtist(),
                                 context.getResources().getColor(R.color.default_album_art_background));
+                        context.startActivity(intent);
                         break;
 
                     case R.id.menu_add_to_queue:
