@@ -31,8 +31,8 @@
 // Minimum buffered data to start playing/resume from underrun
 #define BUFFER_MIN_PLAYBACK 16384
 
-// Enqueued buffer minimal size
-#define ENQUEUED_BUFFER_SIZE 8192
+// Enqueued buffer maximal size
+#define ENQUEUED_BUFFER_SIZE 44100
 
 class NativePlayer : public INativeSink {
  public:
@@ -90,13 +90,14 @@ class NativePlayer : public INativeSink {
     std::atomic<uint32_t> m_iSampleRate;
     std::atomic<uint32_t> m_iSampleFormat;
     std::atomic<uint32_t> m_iChannels;
-    std::atomic<int32_t> m_iBufferedSamples;
     std::atomic<int64_t> m_iWrittenSamples;
     std::atomic<int32_t> m_iUnderflowCount;
 
-    std::list<std::pair<void*, uint32_t>> m_AudioBuffers;
+    uint8_t* m_pActiveBuffer;
+    uint8_t* m_pPlayingBuffer;
+    uint32_t m_iActiveBufferIndex;
+
     std::mutex m_QueueMutex;
-    void* m_pPreviousBuffer;
 };
 
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_NATIVEPLAYER_H_

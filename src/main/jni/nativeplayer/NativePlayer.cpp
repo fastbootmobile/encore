@@ -22,10 +22,11 @@
 
 // -------------------------------------------------------------------------------------
 NativePlayer::NativePlayer() : m_pEngineObj(nullptr), m_pEngine(nullptr),
-        m_pOutputMixObj(nullptr), m_pPlayerObj(nullptr), m_pPreviousBuffer(nullptr),
-        m_pPlayer(nullptr), m_pPlayerVol(nullptr), m_pBufferQueue(nullptr), m_iSampleRate(44100),
-        m_iChannels(2), m_iSampleFormat(16), m_iBufferedSamples(0), m_iWrittenSamples(0),
-        m_iUnderflowCount(0) {
+        m_pOutputMixObj(nullptr), m_pPlayerObj(nullptr), m_pPlayer(nullptr), m_pPlayerVol(nullptr),
+        m_pBufferQueue(nullptr), m_iSampleRate(44100), m_iChannels(2), m_iSampleFormat(16),
+        m_iWrittenSamples(0), m_iUnderflowCount(0), m_iActiveBufferIndex(0) {
+        m_pActiveBuffer = reinterpret_cast<uint8_t*>(malloc(ENQUEUED_BUFFER_SIZE));
+        m_pPlayingBuffer = reinterpret_cast<uint8_t*>(malloc(ENQUEUED_BUFFER_SIZE));
 }
 // -------------------------------------------------------------------------------------
 NativePlayer::~NativePlayer() {
@@ -240,35 +241,36 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
 // -------------------------------------------------------------------------------------
 uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
     std::lock_guard<std::mutex> lock(m_QueueMutex);
+
     SLAndroidSimpleBufferQueueState qstate;
     (*m_pBufferQueue)->GetState(m_pBufferQueue, &qstate);
 
-    int32_t buffers_available = BUFFER_MAX_COUNT - m_iBufferedSamples;
+    int32_t buffers_available = ENQUEUED_BUFFER_SIZE - m_iActiveBufferIndex;
 
     // Start playing when we have at least a few samples
     SLuint32 playerState;
     (*m_pPlayer)->GetPlayState(m_pPlayer, &playerState);
 
-    if (playerState != SL_PLAYSTATE_PLAYING && m_iBufferedSamples >= BUFFER_MIN_PLAYBACK) {
+    if (playerState != SL_PLAYSTATE_PLAYING && m_iActiveBufferIndex >= BUFFER_MIN_PLAYBACK) {
         // set the player's state to playing
         setPlayState(SL_PLAYSTATE_PLAYING);
     }
 
-    if (buffers_available > 0) {
+    if (buffers_available >= len) {
         // If there's room for a buffer
-        if (qstate.count == 0 && m_AudioBuffers.size() == 0) {
+        if (qstate.count == 0) {
             // We have no buffer pending, enqueue it directly
             SLresult result = (*m_pBufferQueue)->Enqueue(m_pBufferQueue, data, len);
             m_iWrittenSamples += len;
         } else {
             // Queue in our internal buffer queue, and enqueue to the sink in the buffer callback
-            // We use std::string purely as a container
-            void* data_copy = malloc(len);
-            memcpy(data_copy, data, len);
-
-            m_AudioBuffers.push_back(std::make_pair(data_copy, len));
-            m_iBufferedSamples += len;
+            memcpy(&(m_pActiveBuffer[m_iActiveBufferIndex]), data, len);
+            m_iActiveBufferIndex += len;
         }
+
+        return len;
+    } else if (len > ENQUEUED_BUFFER_SIZE) {
+        ALOGE("RECEIVED BUFFER IS LARGER THAN MAX BUFFER SIZE; DROPPING");
         return len;
     } else {
         // Buffers full, retry later
@@ -277,7 +279,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
 }
 // -------------------------------------------------------------------------------------
 int32_t NativePlayer::getBufferedCount() const {
-    return m_iBufferedSamples;
+    return m_iActiveBufferIndex;
 }
 // -------------------------------------------------------------------------------------
 int32_t NativePlayer::getUnderflowCount() const {
@@ -293,8 +295,7 @@ void NativePlayer::flush() {
     (*m_pBufferQueue)->Clear(m_pBufferQueue);
     m_iWrittenSamples = 0;
     m_iUnderflowCount = 0;
-    m_iBufferedSamples = 0;
-    m_AudioBuffers.clear();
+    m_iActiveBufferIndex = 0;
     ALOGI("Flushed");
 }
 // -------------------------------------------------------------------------------------
@@ -304,33 +305,24 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
 
     SLresult result;
 
-    // Check if we can free a previously played buffer
-    if (p->m_pPreviousBuffer) {
-        free(p->m_pPreviousBuffer);
-        p->m_pPreviousBuffer = nullptr;
-    }
-
     // Get queue state
     SLAndroidSimpleBufferQueueState qstate;
     (*p->m_pBufferQueue)->GetState(p->m_pBufferQueue, &qstate);
 
     if (qstate.count == 0) {
         // If we have audio buffers to play, play them
-        if (p->m_AudioBuffers.size() > 0) {
-            std::pair<void*, uint32_t> buffer = p->m_AudioBuffers.front();
-            void* data = buffer.first;
-            const uint32_t size = buffer.second;
+        if (p->m_iActiveBufferIndex > 0) {
+            memcpy(p->m_pPlayingBuffer, p->m_pActiveBuffer, p->m_iActiveBufferIndex);
 
-            result = (*p->m_pBufferQueue)->Enqueue(p->m_pBufferQueue, data, size);
+            result = (*p->m_pBufferQueue)->Enqueue(p->m_pBufferQueue, p->m_pPlayingBuffer,
+                    p->m_iActiveBufferIndex);
+
             if (result == SL_RESULT_SUCCESS) {
-                p->m_AudioBuffers.pop_front();
-                p->m_iBufferedSamples -= size;
-                p->m_iWrittenSamples += size;
-
-                // We will free the data once it's done playing
-                p->m_pPreviousBuffer = data;
+                p->m_iWrittenSamples += p->m_iActiveBufferIndex;
+                p->m_iActiveBufferIndex = 0;
             } else {
                 ALOGW("Enqueue via callback failed (%d), will retry", result);
+                p->setPlayState(SL_PLAYSTATE_PAUSED);
             }
         } else {
             // No more buffers to play, we pause the playback and wait for buffers in enqueue
