@@ -223,7 +223,9 @@ public class MainActivity extends FragmentActivity
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                onNavigationDrawerItemSelected(mCurrentFragmentIndex);
+                if (mCurrentFragmentIndex + 1 != SECTION_NOW_PLAYING) {
+                    onNavigationDrawerItemSelected(mCurrentFragmentIndex);
+                }
             }
         }, 200);
     }
