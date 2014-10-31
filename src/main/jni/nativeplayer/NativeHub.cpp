@@ -34,6 +34,7 @@ NativeHub::~NativeHub() {
 void NativeHub::setSink(INativeSink* sink) {
     m_pSink = sink;
     m_pSink->setAudioFormat(m_iSampleRate, 16, m_iChannels);
+    m_pSink->setHostHub(this);
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::setDSPChain(const std::list<std::string>& chain) {
@@ -91,9 +92,6 @@ void NativeHub::writeAudioToSink(const uint8_t* data, const uint32_t len) {
     } else {
         writeAudioResponse(0);
     }
-
-    // Write to Mirror too
-    om_NativeHub_onAudioMirrorWritten(this, data, len);
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::writeAudioResponse(const uint32_t written) {

@@ -14,6 +14,8 @@
  */
 
 #include "NativePlayer.h"
+#include "NativeHub.h"
+#include "jni_NativeHub.h"
 #include "Log.h"
 #include <string>
 #include <utility>
@@ -25,7 +27,8 @@
 NativePlayer::NativePlayer() : m_pEngineObj(nullptr), m_pEngine(nullptr),
         m_pOutputMixObj(nullptr), m_pPlayerObj(nullptr), m_pPlayer(nullptr), m_pPlayerVol(nullptr),
         m_pBufferQueue(nullptr), m_iSampleRate(44100), m_iChannels(2), m_iSampleFormat(16),
-        m_iWrittenSamples(0), m_iUnderflowCount(0), m_iActiveBufferIndex(0), m_fVolume(1.0f) {
+        m_iWrittenSamples(0), m_iUnderflowCount(0), m_iActiveBufferIndex(0), m_fVolume(1.0f),
+        m_pNativeHub(nullptr) {
         m_pActiveBuffer = reinterpret_cast<uint8_t*>(malloc(ENQUEUED_BUFFER_SIZE));
         m_pPlayingBuffer = reinterpret_cast<uint8_t*>(malloc(ENQUEUED_BUFFER_SIZE));
 }
@@ -240,6 +243,10 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
     }
 }
 // -------------------------------------------------------------------------------------
+void NativePlayer::setHostHub(NativeHub* hub) {
+    m_pNativeHub = hub;
+}
+// -------------------------------------------------------------------------------------
 uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
     std::lock_guard<std::mutex> lock(m_QueueMutex);
 
@@ -263,6 +270,10 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
             // We have no buffer pending, enqueue it directly
             SLresult result = (*m_pBufferQueue)->Enqueue(m_pBufferQueue, data, len);
             m_iWrittenSamples += len;
+            if (m_pNativeHub) {
+                om_NativeHub_onAudioMirrorWritten(m_pNativeHub,
+                    reinterpret_cast<const uint8_t*>(data), len);
+            }
         } else {
             // Queue in our internal buffer queue, and enqueue to the sink in the buffer callback
             memcpy(&(m_pActiveBuffer[m_iActiveBufferIndex]), data, len);
@@ -319,6 +330,11 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
                     p->m_iActiveBufferIndex);
 
             if (result == SL_RESULT_SUCCESS) {
+                if (p->m_pNativeHub) {
+                    om_NativeHub_onAudioMirrorWritten(p->m_pNativeHub,
+                        reinterpret_cast<const uint8_t*>(p->m_pPlayingBuffer),
+                        p->m_iActiveBufferIndex);
+                }
                 p->m_iWrittenSamples += p->m_iActiveBufferIndex;
                 p->m_iActiveBufferIndex = 0;
             } else {
@@ -359,3 +375,4 @@ void NativePlayer::setVolume(float volume) {
     (*m_pPlayerVol)->SetVolumeLevel(m_pPlayerVol, (SLmillibel) (attenuation * 100));
 }
 // -------------------------------------------------------------------------------------
+

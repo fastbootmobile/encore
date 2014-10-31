@@ -62,10 +62,15 @@ public class WSStreamer extends WebSocketServer {
     }
 
     public void write(byte[] frames, int numframes) {
-        Collection<WebSocket> clients = connections();
-        for (WebSocket client : clients) {
-            if (client.isOpen()) {
-                client.send(frames);
+        final Collection<WebSocket> clients = connections();
+        if (clients.size() > 0) {
+            byte[] specificFrames = new byte[numframes];
+            System.arraycopy(frames, 0, specificFrames, 0, numframes);
+
+            for (WebSocket client : clients) {
+                if (client.isOpen()) {
+                    client.send(specificFrames);
+                }
             }
         }
     }

@@ -29,11 +29,12 @@
 #define BUFFER_MAX_COUNT 44100
 
 // Minimum buffered data to start playing/resume from underrun
-#define BUFFER_MIN_PLAYBACK 16384
+#define BUFFER_MIN_PLAYBACK 32768
 
 // Enqueued buffer maximal size
-#define ENQUEUED_BUFFER_SIZE 44100
+#define ENQUEUED_BUFFER_SIZE 88200
 
+class NativeHub;
 class NativePlayer : public INativeSink {
  public:
     // ctor
@@ -47,6 +48,9 @@ class NativePlayer : public INativeSink {
 
     // Changes the active sample rate and channels count
     bool setAudioFormat(uint32_t sample_rate, uint32_t sample_format, uint32_t channels);
+
+    // Sets the native hub host
+    void setHostHub(NativeHub* hub);
 
     // Enqueue buffer data if possible to the player
     // @returns The number of samples written (0 means the buffer is full)
@@ -102,6 +106,7 @@ class NativePlayer : public INativeSink {
     uint32_t m_iActiveBufferIndex;
 
     std::mutex m_QueueMutex;
+    NativeHub* m_pNativeHub;
 };
 
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_NATIVEPLAYER_H_

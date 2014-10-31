@@ -15,8 +15,13 @@
 #ifndef SRC_MAIN_JNI_NATIVEPLAYER_INATIVESINK_H_
 #define SRC_MAIN_JNI_NATIVEPLAYER_INATIVESINK_H_
 
+class NativeHub;
+
 class INativeSink {
  public:
+    // Set native hub host
+    virtual void setHostHub(NativeHub* hub) = 0;
+
     // Set audio format
     virtual bool setAudioFormat(uint32_t sample_rate, uint32_t sample_format,
             uint32_t channels) = 0;

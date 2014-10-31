@@ -258,6 +258,7 @@ public class MainActivity extends FragmentActivity
             PluginsLookup.getDefault().tearDown();
         }
 
+        ImageCache.getDefault().evictAll();
         System.gc();
 
         super.onDestroy();
@@ -347,6 +348,7 @@ public class MainActivity extends FragmentActivity
         mActiveFragment = f;
 
         ImageCache.getDefault().evictAll();
+        System.gc();
     }
 
     public void onSectionAttached(int number) {
