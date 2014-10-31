@@ -15,6 +15,8 @@
 
 package org.omnirom.music.api.freebase;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +46,11 @@ public class FreeBaseClient {
      */
     public static String getArtistImageUrl(String artist)
             throws JSONException, RateLimitException, IOException {
+        if (artist == null) {
+            Log.e(TAG, "getArtistImageUrl: Null artist requested");
+            return null;
+        }
+
         final String ecFilter = URLEncoder.encode("(all type:/music/artist)", "UTF-8");
         final String ecArtist = URLEncoder.encode(artist, "UTF-8");
 
