@@ -30,7 +30,7 @@ import java.net.URLEncoder;
 public class GoogleImagesClient {
     public static String getImageUrl(String query) throws IOException, JSONException, RateLimitException {
         String queryUrl = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="
-                + URLEncoder.encode(query, "UTF-8") + "&imgsz=xlarge";
+                + URLEncoder.encode(query, "UTF-8") + "&imgsz=large";
 
         JSONObject obj = JsonGet.getObject(queryUrl, "", true);
         JSONArray results = obj.getJSONObject("responseData").getJSONArray("results");
