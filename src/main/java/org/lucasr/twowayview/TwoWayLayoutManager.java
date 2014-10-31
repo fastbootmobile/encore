@@ -166,7 +166,7 @@ public abstract class TwoWayLayoutManager extends LayoutManager {
     }
 
     private void recycleChildrenFromEnd(Direction direction, Recycler recycler) {
-        final int childrenEnd = getEndWithPadding();
+        final int childrenEnd = getHeight(); //getEndWithPadding();
         final int childCount = getChildCount();
 
         int firstDetachedPos = 0;
@@ -199,7 +199,8 @@ public abstract class TwoWayLayoutManager extends LayoutManager {
         }
 
         final int start = getStartWithPadding();
-        final int end = getEndWithPadding();
+        final int endWithPadding = getEndWithPadding();
+        final int end = getHeight();
 
         final int totalSpace = getTotalSpace();
         if (delta < 0) {
@@ -211,7 +212,7 @@ public abstract class TwoWayLayoutManager extends LayoutManager {
         final boolean cannotScrollBackward = (mFirstPosition == 0 &&
                 mLayoutStart >= start && delta <= 0);
         final boolean cannotScrollForward = (mFirstPosition + childCount == state.getItemCount() &&
-                mLayoutEnd <= end && delta >= 0);
+                mLayoutEnd <= endWithPadding && delta >= 0);
 
         if (cannotScrollForward || cannotScrollBackward) {
             return 0;
@@ -264,7 +265,7 @@ public abstract class TwoWayLayoutManager extends LayoutManager {
     }
 
     private void fillAfter(int position, Recycler recycler, State state, int extraSpace) {
-        final int limit = getEndWithPadding() + extraSpace;
+        final int limit = getHeight() + extraSpace; // getEndWithPadding() + extraSpace;
 
         final int itemCount = state.getItemCount();
         while (canAddMoreViews(Direction.END, limit) && position < itemCount) {
@@ -352,7 +353,7 @@ public abstract class TwoWayLayoutManager extends LayoutManager {
         }
 
         final int start = getStartWithPadding();
-        final int end = getEndWithPadding();
+        final int end = getHeight(); // getEndWithPadding();
         final int itemCount = state.getItemCount();
 
         // This is how far the start edge of the first view is from the start of the

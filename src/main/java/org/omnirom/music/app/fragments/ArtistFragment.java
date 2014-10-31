@@ -397,7 +397,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
 
         // Prepare the palette to colorize the FAB
-        if (hero != null) {
+        if (hero != null && !hero.isRecycled()) {
             Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(final Palette palette) {

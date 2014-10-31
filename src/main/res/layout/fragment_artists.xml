@@ -8,7 +8,7 @@
     android:paddingLeft="4dp"
     android:paddingRight="4dp"
     android:paddingTop="4dp"
-    android:paddingBottom="4dp"
+    android:paddingBottom="@dimen/playing_bar_height"
     android:clipToPadding="false"
     android:scrollbarStyle="outsideOverlay"
     app:layoutManager="GridLayoutManager"
