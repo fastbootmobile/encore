@@ -17,6 +17,7 @@
 #include "NativeHub.h"
 #include "jni_NativeHub.h"
 #include "Log.h"
+#include "../libresample/resample.h"
 #include <string>
 #include <utility>
 #include <cmath>
@@ -26,11 +27,10 @@
 // -------------------------------------------------------------------------------------
 NativePlayer::NativePlayer() : m_pEngineObj(nullptr), m_pEngine(nullptr),
         m_pOutputMixObj(nullptr), m_pPlayerObj(nullptr), m_pPlayer(nullptr), m_pPlayerVol(nullptr),
-        m_pBufferQueue(nullptr), m_iSampleRate(44100), m_iChannels(2), m_iSampleFormat(16),
-        m_iWrittenSamples(0), m_iUnderflowCount(0), m_iActiveBufferIndex(0), m_fVolume(1.0f),
-        m_pNativeHub(nullptr) {
-        m_pActiveBuffer = reinterpret_cast<uint8_t*>(malloc(ENQUEUED_BUFFER_SIZE));
-        m_pPlayingBuffer = reinterpret_cast<uint8_t*>(malloc(ENQUEUED_BUFFER_SIZE));
+        m_pBufferQueue(nullptr), m_iSampleRate(-1), m_iChannels(-1), m_iSampleFormat(-1),
+        m_iWrittenSamples(0), m_iUnderflowCount(0), m_pActiveBuffer(nullptr),
+        m_pPlayingBuffer(nullptr), m_iActiveBufferIndex(0), m_fVolume(1.0f),
+        m_pNativeHub(nullptr), m_bUseResampler(false) {
 }
 // -------------------------------------------------------------------------------------
 NativePlayer::~NativePlayer() {
@@ -80,7 +80,7 @@ bool NativePlayer::createEngine() {
     ALOGD("Engine created, creating audio player");
 
     // Create the audio player with the default parameters (44100Hz, 2 channels, 16 bits)
-    bool bool_result = createAudioPlayer();
+    bool bool_result = setAudioFormat(44100, 16, 2);
 
     ALOGD("Initialization done!");
 
@@ -185,7 +185,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
     if (m_iChannels != channels || m_iSampleRate != sample_rate
             || m_iSampleFormat != sample_format) {
         // Safety checks
-        switch (m_iChannels) {
+        switch (channels) {
             case 1:
             case 2:
                 // Those values are supported
@@ -196,7 +196,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
                 return false;
         }
 
-        switch (m_iSampleFormat) {
+        switch (sample_format) {
             case 8:
             case 16:
             case 24:
@@ -209,7 +209,14 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
                 return false;
         }
 
-        switch (m_iSampleRate) {
+        if (m_pActiveBuffer) {
+            free(m_pActiveBuffer);
+        }
+        if (m_pPlayingBuffer) {
+            free(m_pPlayingBuffer);
+        }
+
+        switch (sample_rate) {
             // Crappy quality starts here v
             case 8000:
             case 11025:
@@ -223,12 +230,23 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
             case 48000:
                 // These values are supported. Again, barely any phone supports 48KHz true rendering
                 // so we don't bother allowing sampling rates > 48KHz.
+                m_iBufferMinPlayback = sample_rate;
+                m_iBufferMaxSize = sample_rate * 2;
+                m_bUseResampler = false;
                 break;
 
             default:
-                ALOGE("Unsupported sample rate: %d Hz", m_iSampleRate.load());
-                return false;
+                ALOGD("Using sample rate 48KHz, resampling from %d Hz", sample_rate);
+                m_iBufferMinPlayback = sample_rate;
+                m_iBufferMaxSize = sample_rate * 2;
+                m_bUseResampler = true;
+                m_fResampleRatio = 48000.f / ((float) sample_rate);
+                sample_rate = 48000;
+                break;
         }
+
+        m_pActiveBuffer = reinterpret_cast<uint8_t*>(malloc(m_iBufferMaxSize));
+        m_pPlayingBuffer = reinterpret_cast<uint8_t*>(malloc(m_iBufferMaxSize));
 
         // Seems valid, let's apply them
         m_iChannels = channels;
@@ -253,15 +271,71 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
     SLAndroidSimpleBufferQueueState qstate;
     (*m_pBufferQueue)->GetState(m_pBufferQueue, &qstate);
 
-    int32_t buffers_available = ENQUEUED_BUFFER_SIZE - m_iActiveBufferIndex;
+    int32_t buffers_available = m_iBufferMaxSize - m_iActiveBufferIndex;
 
     // Start playing when we have at least a few samples
     SLuint32 playerState;
     (*m_pPlayer)->GetPlayState(m_pPlayer, &playerState);
 
-    if (playerState != SL_PLAYSTATE_PLAYING && m_iActiveBufferIndex >= BUFFER_MIN_PLAYBACK) {
+    if (playerState != SL_PLAYSTATE_PLAYING && m_iActiveBufferIndex >= m_iBufferMinPlayback) {
         // set the player's state to playing
         setPlayState(SL_PLAYSTATE_PLAYING);
+    }
+
+    // If we have to resample, do it now on all the samples
+    if (m_bUseResampler) {
+        if (m_iChannels == 1) {
+            len = resampleBuffersFast(m_fResampleRatio, (HWORD*) data, (HWORD*) data, len);
+        } else {
+            // Process each channel separately
+            uint8_t* left = (uint8_t*) malloc(len);
+            uint8_t* right = (uint8_t*) malloc(len);
+            uint8_t* data_bytes = (uint8_t*) data;
+
+            // Resample 24 bits to 16 bits
+            // Move from 3 bits per channel to 2 bits per channel
+            int left_idx = 0;
+            for (int i = 0; i < len; i += 6) {
+                // store back
+                // [L 1] [R 1] [L 2] [R 2] [L 3] [R 3] ==> [L1][L2][L3]  [R1][R2][R3]
+                //   0 ==> L[0]
+                //   1 ==> R[0]
+                //   2 ==> L[1]
+                //      ...
+                uint32_t intLeft = ((uint32_t)data_bytes[i] << 16) | ((uint32_t)data_bytes[i+2] << 8) | ((uint32_t)data_bytes[i+4]);
+                intLeft = ((double) intLeft) / 16777215.0 * 65535.0;
+                uint16_t castLeft = (uint16_t) intLeft;
+
+                uint32_t intRight = ((uint32_t)data_bytes[i+1] << 16) | ((uint32_t)data_bytes[i+3] << 8) | ((uint32_t)data_bytes[i+5]);
+                intRight = ((double) intRight) / 16777215.0 * 65535.0;
+                uint16_t castRight = (uint16_t) intRight;
+
+                left[left_idx] = (unsigned char)((castLeft >> 8) & 0xff);
+                left[left_idx + 1] = (unsigned char)((castLeft) & 0xff);
+
+                right[left_idx] = (unsigned char)((castRight >> 8) & 0xff);
+                right[left_idx + 1] = (unsigned char)((castRight) & 0xff);
+
+                left_idx += 2;
+            }
+
+            // Resample each channel
+            uint32_t original_len = left_idx;
+            len = resampleBuffersFast(m_fResampleRatio, (HWORD*) left, (HWORD*) left, original_len);
+            len = resampleBuffersFast(m_fResampleRatio, (HWORD*) right, (HWORD*) right, original_len);
+            ALOGE("Output resample right: %d bytes", len);
+
+            // Combine back
+            for (int i = 0; i < len; ++i) {
+                data_bytes[i * 2] = left[i];
+                data_bytes[i * 2 + 1] = right[i];
+            }
+
+            len = len * 2;
+
+            free(left);
+            free(right);
+        }
     }
 
     if (buffers_available >= len) {
@@ -281,7 +355,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
         }
 
         return len;
-    } else if (len > ENQUEUED_BUFFER_SIZE) {
+    } else if (len > m_iBufferMaxSize) {
         ALOGE("RECEIVED BUFFER IS LARGER THAN MAX BUFFER SIZE; DROPPING");
         return len;
     } else {

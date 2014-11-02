@@ -28,12 +28,6 @@
 // Maximum number of buffered samples (a second at 44100Hz)
 #define BUFFER_MAX_COUNT 44100
 
-// Minimum buffered data to start playing/resume from underrun
-#define BUFFER_MIN_PLAYBACK 32768
-
-// Enqueued buffer maximal size
-#define ENQUEUED_BUFFER_SIZE 88200
-
 class NativeHub;
 class NativePlayer : public INativeSink {
  public:
@@ -104,9 +98,14 @@ class NativePlayer : public INativeSink {
     uint8_t* m_pActiveBuffer;
     uint8_t* m_pPlayingBuffer;
     uint32_t m_iActiveBufferIndex;
+    uint32_t m_iBufferMinPlayback;
+    uint32_t m_iBufferMaxSize;
 
     std::mutex m_QueueMutex;
     NativeHub* m_pNativeHub;
+
+    bool m_bUseResampler;
+    float m_fResampleRatio;
 };
 
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_NATIVEPLAYER_H_

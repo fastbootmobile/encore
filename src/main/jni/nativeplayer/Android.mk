@@ -11,7 +11,8 @@ LOCAL_SRC_FILES := \
     NativeHub.cpp \
     NativePlayer.cpp \
     jni_NativeHub.cpp \
-    jni_NativePlayer.cpp
+    jni_NativePlayer.cpp \
+    ../libresample/resamplesubs.cpp
 
 LOCAL_C_INCLUDES := $(PROVIDERLIB_JNI_PATH)/protobuf/src \
     $(PROVIDERLIB_JNI_PATH)/nativesocket
