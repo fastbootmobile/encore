@@ -43,6 +43,19 @@
             </intent-filter>
         </receiver>
 
+        <!-- Receiver for package installed/uninstalled -->
+        <receiver android:name="org.omnirom.music.providers.PacManReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_INSTALL" />
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_CHANGED" />
+                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package"/>
+            </intent-filter>
+        </receiver>
+
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
