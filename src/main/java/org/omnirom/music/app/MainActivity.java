@@ -218,16 +218,17 @@ public class MainActivity extends FragmentActivity
             }
         }
 
-
         // Reload the current fragment for layout changes
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mCurrentFragmentIndex + 1 != SECTION_NOW_PLAYING) {
-                    onNavigationDrawerItemSelected(mCurrentFragmentIndex);
+        if (mCurrentFragmentIndex + 1 != SECTION_MY_SONGS) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (mCurrentFragmentIndex + 1 != SECTION_NOW_PLAYING) {
+                        onNavigationDrawerItemSelected(mCurrentFragmentIndex);
+                    }
                 }
-            }
-        }, 200);
+            }, 200);
+        }
     }
 
     @Override
