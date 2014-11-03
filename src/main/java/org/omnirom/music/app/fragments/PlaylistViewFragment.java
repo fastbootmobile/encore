@@ -151,6 +151,15 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         String playlistRef = args.getString(KEY_PLAYLIST);
         mPlaylist = aggregator.retrievePlaylist(playlistRef, null);
+
+        if (mPlaylist == null) {
+            Log.e(TAG, "Playlist is null (not in cache, aborting)");
+            // TODO: Wait for playlist to be loaded
+            Activity act = getActivity();
+            if (act != null) {
+                act.finish();
+            }
+        }
     }
 
     @Override
@@ -354,6 +363,11 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     }
 
     private void updateOfflineStatus() {
+        if (mPlaylist == null) {
+            Log.e(TAG, "Calling updateOfflineStatus when mPlaylist is null!");
+            return;
+        }
+
         final int offlineStatus = mPlaylist.getOfflineStatus();
 
         switch (offlineStatus) {
