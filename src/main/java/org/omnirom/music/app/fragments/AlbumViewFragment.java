@@ -290,30 +290,34 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mAlbum = ProviderAggregator.getDefault().retrieveAlbum(albumRef, null);
 
         if (mAlbum == null) {
-            throw new IllegalArgumentException("The album to display isn't in cache!");
-        }
-
-        // Prepare the palette to colorize the FAB
-        Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
-            @Override
-            public void onGenerated(final Palette palette) {
-                final Palette.Swatch normalColor = palette.getDarkMutedSwatch();
-                final Palette.Swatch pressedColor = palette.getDarkVibrantSwatch();
-                if (normalColor != null && mRootView != null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mPlayFab.setNormalColor(normalColor.getRgb());
-                            if (pressedColor != null) {
-                                mPlayFab.setPressedColor(pressedColor.getRgb());
-                            } else {
-                                mPlayFab.setPressedColor(normalColor.getRgb());
-                            }
-                        }
-                    });
-                }
+            Log.e(TAG, "Album isn't in cache!");
+            Activity act = getActivity();
+            if (act != null) {
+                act.finish();
             }
-        });
+        } else {
+            // Prepare the palette to colorize the FAB
+            Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
+                @Override
+                public void onGenerated(final Palette palette) {
+                    final Palette.Swatch normalColor = palette.getDarkMutedSwatch();
+                    final Palette.Swatch pressedColor = palette.getDarkVibrantSwatch();
+                    if (normalColor != null && mRootView != null) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mPlayFab.setNormalColor(normalColor.getRgb());
+                                if (pressedColor != null) {
+                                    mPlayFab.setPressedColor(pressedColor.getRgb());
+                                } else {
+                                    mPlayFab.setPressedColor(normalColor.getRgb());
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
     }
 
     public void notifyReturnTransition() {
