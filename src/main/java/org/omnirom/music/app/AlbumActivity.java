@@ -199,12 +199,21 @@ public class AlbumActivity extends FragmentActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.menu_add_to_queue) {
-            PlaybackProxy.queueAlbum(mActiveFragment.getAlbum(), false);
+            Album album = mActiveFragment.getAlbum();
+            if (album.isLoaded()) {
+                PlaybackProxy.queueAlbum(album, false);
+            } else {
+                Utils.shortToast(this, R.string.toast_album_not_loaded_yet);
+            }
             return true;
         } else if (id == R.id.menu_add_to_playlist) {
             Album album = mActiveFragment.getAlbum();
-            PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(album);
-            fragment.show(getSupportFragmentManager(), album.getRef());
+            if (album.isLoaded()) {
+                PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(album);
+                fragment.show(getSupportFragmentManager(), album.getRef());
+            } else {
+                Utils.shortToast(this, R.string.toast_album_not_loaded_yet);
+            }
         } else if (id == R.id.menu_more_from_artist) {
             String artistRef = mActiveFragment.getArtist();
             Intent intent = ArtistActivity.craftIntent(this, null, artistRef,
