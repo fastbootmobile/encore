@@ -92,7 +92,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             } else if (o instanceof String) {
                 return o.equals(ref);
             } else if (o instanceof BoundEntity) {
-                return ((BoundEntity) o).getRef().equals(ref);
+                return ref.equals(((BoundEntity) o).getRef());
             } else if (o instanceof SearchEntry) {
                 return ((SearchEntry) o).ref.equals(ref) &&
                         ((SearchEntry) o).identifier.equals(identifier);
