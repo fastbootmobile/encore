@@ -167,16 +167,21 @@ public class AutomixFragment extends Fragment {
     }
 
     private void updateFabHeight() {
-        // Translate the FAB position to be above the playbar
-        final MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity.isPlayBarVisible()) {
-            mFabCreate.animate()
-                    .translationY(-getResources().getDimensionPixelSize(R.dimen.playing_bar_height))
-                    .start();
-        } else {
-            mFabCreate.animate()
-                    .translationY(0)
-                    .start();
-        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Translate the FAB position to be above the playbar
+                final MainActivity mainActivity = (MainActivity) getActivity();
+                if (mainActivity.isPlayBarVisible()) {
+                    mFabCreate.animate()
+                            .translationY(-getResources().getDimensionPixelSize(R.dimen.playing_bar_height))
+                            .start();
+                } else {
+                    mFabCreate.animate()
+                            .translationY(0)
+                            .start();
+                }
+            }
+        });
     }
 }
