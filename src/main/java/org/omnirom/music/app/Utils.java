@@ -125,7 +125,11 @@ public class Utils {
      * @param res The String resource id
      */
     public static void shortToast(Context context, int res) {
-        Toast.makeText(context, res, Toast.LENGTH_SHORT).show();
+        if (context != null) {
+            Toast.makeText(context, res, Toast.LENGTH_SHORT).show();
+        } else {
+            Log.e(TAG, "Cannot show toast for text ID " + res + " as context is null");
+        }
     }
 
     /**
