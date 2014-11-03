@@ -76,6 +76,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         if (mCurrentBitmap != null) {
             mCurrentBitmap.release();
             mCurrentBitmap = null;
+            mRequestedEntity = null;
         }
         if (mTask != null && !mTask.isCancelled()) {
             mTask.cancel(true);
@@ -93,6 +94,11 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         freeMemory();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
     }
 
     private void forceDrawableReload() {
@@ -157,6 +163,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         }
 
         mSkipTransition = false;
+        mRequestedEntity = ent;
 
         if (mTask != null) {
             mTask.cancel(true);
@@ -169,8 +176,6 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         // being quickly flinged through (the requested entity will change in-between as the
         // view is recycled). We don't wait however in crossfade mode as we expect to see the
         // image as soon as possible.
-        mRequestedEntity = ent;
-
         TaskRunnable runnable = new TaskRunnable(ent);
 
         // When we're crossfading, we're assuming we want the image directly
@@ -230,7 +235,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
         @Override
         public void run() {
-            if (mRequestedEntity.equals(mEntity)) {
+            if (mRequestedEntity != null && mRequestedEntity.equals(mEntity)) {
                 mTask = AlbumArtHelper.retrieveAlbumArt(AlbumArtImageView.this, mEntity, mImmediate);
             }
         }
