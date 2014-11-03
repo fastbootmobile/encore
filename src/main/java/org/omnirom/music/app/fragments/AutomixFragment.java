@@ -65,6 +65,7 @@ public class AutomixFragment extends Fragment {
                     }
                 });
             }
+            updateFabHeight();
         }
     };
 
@@ -156,6 +157,10 @@ public class AutomixFragment extends Fragment {
         mAdapter.setBuckets(mAutoMixManager.getBuckets());
         mAdapter.notifyDataSetChanged();
 
+        updateFabHeight();
+    }
+
+    private void updateFabHeight() {
         // Translate the FAB position to be above the playbar
         final MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity.isPlayBarVisible()) {
