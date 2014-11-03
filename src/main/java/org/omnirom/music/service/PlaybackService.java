@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
@@ -66,6 +67,9 @@ public class PlaybackService extends Service
     public static final int STATE_PAUSED    = 2;
     public static final int STATE_BUFFERING = 3;
     public static final int STATE_PAUSING   = 4;
+
+    private static final String SERVICE_SHARED_PREFS = "PlaybackServicePrefs";
+    private static final String PREF_KEY_REPEAT = "repeatMode";
 
     /**
      * Time after which the service will shutdown if nothing happens
@@ -155,7 +159,6 @@ public class PlaybackService extends Service
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<IPlaybackCallback>();
-        mRepeatMode = false;
         mPrefetcher = new Prefetcher(this);
     }
 
@@ -231,6 +234,10 @@ public class PlaybackService extends Service
 
         // Setup lockscreen remote controls
         setupRemoteControl();
+
+        // Restore preferences
+        SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
+        mRepeatMode = prefs.getBoolean(PREF_KEY_REPEAT, false);
     }
 
     /**
@@ -871,6 +878,10 @@ public class PlaybackService extends Service
         @Override
         public void setRepeatMode(boolean repeat) throws RemoteException {
             mRepeatMode = repeat;
+            SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(PREF_KEY_REPEAT, repeat);
+            editor.apply();
         }
 
         @Override
