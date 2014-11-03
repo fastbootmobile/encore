@@ -15,7 +15,6 @@
 
 package org.omnirom.music.app.adapters;
 
-import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -70,7 +69,6 @@ public class PlaylistAdapter extends SongsListAdapter {
         final ProviderIdentifier providerIdentifier = mPlaylist.getProvider();
         try {
             PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().onUserSwapPlaylistItem(oldPosition, newPosition, mPlaylist.getRef());
-            Log.d(TAG, "swapping " + oldPosition + " and " + newPosition);
             //// resetIds();
         } catch (RemoteException e) {
             Log.e(TAG, "Error: " + e.getMessage());
@@ -107,14 +105,19 @@ public class PlaylistAdapter extends SongsListAdapter {
      */
     public void swap(int original, int newPosition) {
         Song temp = mSongs.get(original);
-        mSongs.set(original, mSongs.get(newPosition));
+        Song newSong = mSongs.get(newPosition);
+        mSongs.set(original, newSong);
         mSongs.set(newPosition, temp);
+
         int tempVis = mVisible.get(original);
         mVisible.set(original, mVisible.get(newPosition));
         mVisible.set(newPosition, tempVis);
+
         int tempId = mIds.get(original);
         mIds.set(original, mIds.get(newPosition));
         mIds.set(newPosition, tempId);
+
+        super.notifyDataSetChanged();
     }
 
     /**
@@ -138,6 +141,8 @@ public class PlaylistAdapter extends SongsListAdapter {
     public void notifyDataSetChanged() {
         // We reload the songs from the playlist associated with this adapter
         mSongs.clear();
+        mIds.clear();
+        mVisible.clear();
 
         final Iterator<String> it = mPlaylist.songs();
         final ProviderIdentifier id = mPlaylist.getProvider();
@@ -192,6 +197,7 @@ public class PlaylistAdapter extends SongsListAdapter {
             return mIds.get(position);
         }
 
+        Log.e(TAG, "Item ID out of bounds: " + position);
         return -1;
     }
 

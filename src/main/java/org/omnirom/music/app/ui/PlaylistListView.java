@@ -36,10 +36,8 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 
@@ -128,9 +126,9 @@ public class PlaylistListView extends ParallaxScrollListView {
                     int itemNum = position - getFirstVisiblePosition();
 
                     View selectedView = getChildAt(itemNum);
-                    mMobileItemId = getAdapter().getItemId(position);
+                    mMobileItemId = ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter().getItemId(position - 1);
                     mHoverCell = getAndAddHoverView(selectedView);
-                    Log.d(TAG, "position:" + position);
+
                     ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter())
                             .setVisibility(position, View.INVISIBLE);
                     selectedView.setVisibility(INVISIBLE);
@@ -204,7 +202,7 @@ public class PlaylistListView extends ParallaxScrollListView {
      * may be invalid.
      */
     private void updateNeighborViewsForID(long itemID) {
-        int position = getPositionForID(itemID);
+        int position = getPositionForID(itemID) - 1;
         PlaylistAdapter adapter = (PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter();
         mAboveItemId = adapter.getItemId(position - 1);
         mBelowItemId = adapter.getItemId(position + 1);
@@ -283,7 +281,10 @@ public class PlaylistListView extends ParallaxScrollListView {
                     if (alpha < 60) {
                         Log.d(TAG, "Deleted");
                         mDeleted = true;
+                    } else {
+                        mDeleted = false;
                     }
+
                     mHoverCell.setAlpha(alpha);
                     mHoverCellCurrentBounds.offsetTo(posX,
                             mHoverCellOriginalBounds.top + deltaY + mTotalOffset);
@@ -344,29 +345,25 @@ public class PlaylistListView extends ParallaxScrollListView {
         boolean isAbove = (aboveView != null) && (deltaYTotal < aboveView.getTop());
 
         if (isBelow || isAbove) {
-
             final long switchItemID = isBelow ? mBelowItemId : mAboveItemId;
             View switchView = isBelow ? belowView : aboveView;
-            final int originalItem = getPositionForView(mobileView);
+            final int originalItem = getPositionForView(mobileView) - 1;
 
-            if (switchView == null) {
-                updateNeighborViewsForID(mMobileItemId);
-                return;
-            }
             mLastItemId = switchItemID;
 
             PlaylistAdapter adapter = (PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter();
-            //swapElements(adapter.getData(),originalItem, getPositionForView(switchView));
-            adapter.swap(originalItem, getPositionForView(switchView));
-            adapter.notifyDataSetChanged();
+            int viewPos = getPositionForView(switchView) - 1;
+            if (viewPos < 0) viewPos = originalItem;
+
+            adapter.swap(originalItem, viewPos);
 
             mDownY = mLastEventY;
 
             final int switchViewStartTop = switchView.getTop();
 
             mobileView.setVisibility(View.INVISIBLE);
-            adapter.setVisibility(getPositionForID(mMobileItemId), View.INVISIBLE);
-            adapter.setVisibility(getPositionForID(switchItemID), View.VISIBLE);
+            adapter.setVisibility(getPositionForID(switchItemID) - 1, View.VISIBLE);
+            adapter.setVisibility(getPositionForID(mMobileItemId) - 1, View.INVISIBLE);
             switchView.setVisibility(View.VISIBLE);
 
             updateNeighborViewsForID(mMobileItemId);
@@ -438,8 +435,9 @@ public class PlaylistListView extends ParallaxScrollListView {
             });
         } else if (mCellIsMobile) {
             Log.d(TAG, "We swap " + mMobileItemId + " and " + mLastItemId);
-            if (mLastItemId != INVALID_ID)
+            if (mLastItemId != INVALID_ID) {
                 adapter.updatePlaylist((int) mMobileItemId, (int) mLastItemId);
+            }
         }
         if (mCellIsMobile || mIsWaitingForScrollFinish) {
             mCellIsMobile = false;
@@ -474,7 +472,6 @@ public class PlaylistListView extends ParallaxScrollListView {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mAboveItemId = INVALID_ID;
-
                     mBelowItemId = INVALID_ID;
                     mobileView.setVisibility(VISIBLE);
                     ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter()).setVisibility(getPositionForID(mMobileItemId), VISIBLE);

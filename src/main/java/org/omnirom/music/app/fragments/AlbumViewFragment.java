@@ -167,7 +167,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         // Setup the contents list view
         mListView = (ParallaxScrollListView) mRootView.findViewById(R.id.lvAlbumContents);
-        mAdapter = new SongsListAdapter(getActivity(), false);
+        mAdapter = new SongsListAdapter(false);
 
         // Load the header
         View headerView = inflater.inflate(R.layout.songs_list_view_header, mListView, false);
@@ -346,7 +346,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
      * @param visible Whether or not to show the button
      */
     private void showFab(final boolean animate, final boolean visible) {
-        getActivity().runOnUiThread(new Runnable() {
+        mHandler.post(new Runnable() {
             @Override
             public void run() {
                 Utils.animateScale(mPlayFab, animate, visible);
