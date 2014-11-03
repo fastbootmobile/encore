@@ -26,9 +26,11 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.Window;
 import android.widget.SearchView;
 
+import org.omnirom.music.app.fragments.DspProvidersFragment;
 import org.omnirom.music.app.fragments.SearchFragment;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
@@ -79,7 +81,7 @@ public class SearchActivity extends FragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.search, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
                 .getActionView();
@@ -88,6 +90,17 @@ public class SearchActivity extends FragmentActivity {
 
         return true;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                supportFinishAfterTransition();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     @Override
     protected void onNewIntent(Intent intent) {
