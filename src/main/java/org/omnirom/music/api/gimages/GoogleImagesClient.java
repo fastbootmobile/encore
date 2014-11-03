@@ -15,6 +15,8 @@
 
 package org.omnirom.music.api.gimages;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,7 +30,14 @@ import java.net.URLEncoder;
  * Client class to get images from Google Images
  */
 public class GoogleImagesClient {
+    private static final String TAG = "GoogleImagesClient";
+
     public static String getImageUrl(String query) throws IOException, JSONException, RateLimitException {
+        if (query == null) {
+            Log.e(TAG, "Null query!");
+            return null;
+        }
+
         String queryUrl = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="
                 + URLEncoder.encode(query, "UTF-8") + "&imgsz=large";
 
