@@ -374,6 +374,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     /**
      * Returns a view in the fragment
+     *
      * @param id The layout item ID
      * @return The view if found, null otherwise
      */
@@ -383,7 +384,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     /**
      * Sets the main arguments for the fragment
-     * @param hero The hero header image bitmap
+     *
+     * @param hero   The hero header image bitmap
      * @param extras The intent bundle extras
      */
     public void setArguments(Bitmap hero, Bundle extras) {
@@ -581,6 +583,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     /**
      * Shows or hides the play Floating Action Button
+     *
      * @param animate Whether or not to animate the transition
      * @param visible Whether or not to display the button
      */
@@ -595,6 +598,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     /**
      * Sets the play FAB drawable shape
+     *
      * @param shape The shape to display (one of {@link org.omnirom.music.app.ui.PlayPauseDrawable}
      *              constants
      */
@@ -605,6 +609,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     /**
      * Sets whether or not tapping the FAB in "Play" shape will start playing from scratch or resume
      * the current playback.
+     *
      * @param shouldResume True to resume, false to play from scratch
      */
     private void setFabShouldResume(boolean shouldResume) {
@@ -829,6 +834,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Sets the parent fragment
+         *
          * @param parent The parent fragment
          */
         public void setParentFragment(ArtistFragment parent) {
@@ -837,6 +843,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Sets whether or not to show the loading spinner
+         *
          * @param show True to show, false otherwise
          */
         private void showLoadingSpinner(final boolean show) {
@@ -943,6 +950,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Displays a toast
+         *
          * @param string A string resource of the text to display
          */
         private void postToast(@StringRes final int string) {
@@ -991,6 +999,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Load and display albums
+         *
          * @param request Whether or not to fetch albums from the provider
          */
         private void loadAlbums(boolean request) {
@@ -1101,7 +1110,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Shows the album tracks of the provided album
-         * @param album The album of which display tracks
+         *
+         * @param album     The album of which display tracks
          * @param container The container in which expand views
          */
         private void showAlbumTracks(Album album, LinearLayout container) {
@@ -1197,6 +1207,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Updates the current playing album
+         *
          * @param albumRef The new album being played
          */
         private void updatePlayingAlbum(String albumRef) {
@@ -1220,6 +1231,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Finds and bolds the track that is currently playing, if we have it
+         *
          * @param s The song that is currently playing
          */
         private void boldPlayingTrack(Song s) {
@@ -1269,6 +1281,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Sets the active artist for which get the biography
+         *
          * @param artist The artist displayed
          */
         public void setArguments(Artist artist) {
@@ -1366,16 +1379,15 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             @Override
             public void onItemClick(RecyclerView parent, View view, int position, long id) {
                 final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
-                final Context ctx = view.getContext();
+                final Context ctx = getActivity();
                 String artistRef = mAdapter.getItem(tag.position).getRef();
                 Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artistRef, tag.itemColor);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        AlbumArtImageView ivCover = tag.ivCover;
-                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                                ivCover, "itemImage");
-
-                        ctx.startActivity(intent, opt.toBundle());
+                    AlbumArtImageView ivCover = tag.ivCover;
+                    ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                            ivCover, "itemImage");
+                    ctx.startActivity(intent, opt.toBundle());
                 } else {
                     ctx.startActivity(intent);
                 }
@@ -1393,6 +1405,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Sets the active artist to display
+         *
          * @param artist The artist displayed
          */
         public void setArguments(Artist artist) {
@@ -1415,6 +1428,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         /**
          * Called when the host fragment notifies that artists have been updated by a provider
+         *
          * @param artists The artists who got updated
          */
         public void notifyArtistUpdate(final List<Artist> artists) {
