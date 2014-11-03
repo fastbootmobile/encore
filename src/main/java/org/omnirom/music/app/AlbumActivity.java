@@ -111,7 +111,8 @@ public class AlbumActivity extends FragmentActivity {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().getSharedElementReturnTransition().addListener(new Transition.TransitionListener() {
+            final Transition returnTransition = getWindow().getSharedElementReturnTransition();
+            returnTransition.addListener(new Transition.TransitionListener() {
                 @Override
                 public void onTransitionStart(Transition transition) {
                     mActiveFragment.notifyReturnTransition();

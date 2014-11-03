@@ -4,9 +4,6 @@
     android:duration="300"
     android:interpolator="@android:interpolator/linear_out_slow_in"
     android:startDelay="300">
-    <targets>
-        <target android:targetId="@id/ivHero" android:targetName="itemImage" />
-    </targets>
     <changeTransform/>
     <changeBounds/>
     <changeImageTransform/>
