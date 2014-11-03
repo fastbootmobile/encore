@@ -16,8 +16,6 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,12 +31,10 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.framework.PlaybackProxy;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.service.IPlaybackService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,12 +87,9 @@ public class SongsListAdapter extends BaseAdapter {
 
     /**
      * Default constructor
-     * @param ctx The host activity context
      * @param showAlbumArt Whether or not to show album art in front of each item
      */
-    public SongsListAdapter(Context ctx, boolean showAlbumArt) {
-        final Resources res = ctx.getResources();
-        assert res != null;
+    public SongsListAdapter(boolean showAlbumArt) {
         mSongs = new ArrayList<Song>();
         mShowAlbumArt = showAlbumArt;
     }

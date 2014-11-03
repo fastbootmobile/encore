@@ -45,10 +45,9 @@ public class PlaylistAdapter extends SongsListAdapter {
 
     /**
      * Default constructor
-     * @param ctx The host activity context
      */
-    public PlaylistAdapter(Context ctx) {
-        super(ctx, true);
+    public PlaylistAdapter() {
+        super(true);
         mVisible = new ArrayList<Integer>();
         mIds = new ArrayList<Integer>();
     }

@@ -87,7 +87,7 @@ public class SongsFragment extends Fragment {
         assert root != null;
         ListView songsList = (ListView) root.findViewById(R.id.songsList);
 
-        mSongsListAdapter = new SongsListAdapter(getActivity(), true);
+        mSongsListAdapter = new SongsListAdapter(true);
         songsList.setAdapter(mSongsListAdapter);
 
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
