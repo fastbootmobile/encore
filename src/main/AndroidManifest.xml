@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="org.omnirom.music.app" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
-    <uses-sdk tools:node="replace" />
 
     <application
         android:name=".OmniMusic"
@@ -64,7 +61,8 @@
         <!-- Search Activity -->
         <activity
             android:name=".SearchActivity"
-            android:label="@string/search_hint" >
+            android:label="@string/search_hint"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -79,7 +77,8 @@
             android:name=".ArtistActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
+            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails"
+            android:launchMode="singleTask">
         </activity>
 
         <!-- Playlist Activity -->
@@ -87,7 +86,8 @@
             android:name=".PlaylistActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
+            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails"
+            android:launchMode="singleTask">
         </activity>
 
         <!-- Album Activity -->
@@ -95,27 +95,31 @@
             android:name=".AlbumActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.AlbumDetails" >
+            android:theme="@style/AppTheme.TransparentNavBar.AlbumDetails"
+            android:launchMode="singleTask">
         </activity>
 
         <!-- Now Playing Activity -->
         <activity
             android:name=".PlaybackQueueActivity"
             android:icon="@drawable/ic_launcher_white"
-            android:label="@string/title_activity_playback_queue" >
+            android:label="@string/title_activity_playback_queue"
+            android:launchMode="singleTask">
         </activity>
 
         <!-- Settings Activity -->
         <activity
             android:name=".SettingsActivity"
             android:icon="@drawable/ic_launcher_white"
-            android:label="@string/title_activity_settings" >
+            android:label="@string/title_activity_settings"
+            android:launchMode="singleTask">
         </activity>
 
         <!-- Automix Creation Activity -->
         <activity
             android:name=".AutomixCreateActivity"
-            android:label="@string/title_activity_automix_create" >
+            android:label="@string/title_activity_automix_create"
+            android:launchMode="singleTask">
         </activity>
 
         <!-- ACRA Crash Reporting -->
