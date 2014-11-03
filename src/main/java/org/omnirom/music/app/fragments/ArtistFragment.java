@@ -1438,7 +1438,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mAdapter.notifyItemChanged(artistIndex);
+                            mAdapter.notifyDataSetChanged();
                         }
                     });
                 }

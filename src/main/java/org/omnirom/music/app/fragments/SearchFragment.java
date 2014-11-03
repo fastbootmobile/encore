@@ -179,7 +179,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ImageView ivCover = holder.albumArtImageView;
             ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                    ivCover, "itemImage");
+                    new Pair<View, String>(ivCover, "itemGroup"));
             getActivity().startActivity(intent, opt.toBundle());
         } else {
             startActivity(intent);
