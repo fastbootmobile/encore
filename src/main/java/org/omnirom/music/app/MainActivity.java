@@ -289,7 +289,15 @@ public class MainActivity extends FragmentActivity
             mCurrentFragmentIndex = position;
             final String fragmentTag = ""+mCurrentFragmentIndex+"_"+mOrientation;
 
-            Fragment newFrag = getSupportFragmentManager().findFragmentByTag(fragmentTag);
+            Fragment newFrag = null;
+            if (position + 1 != SECTION_MY_SONGS) {
+                // Workaround: Getting crash when resuming while user is on My Songs fragment.
+                //             We need to reinstantiate the fragment.
+                // Cause: http://stackoverflow.com/questions/14929907/causing-a-java-illegalstateexception-error-no-activity-only-when-navigating-to
+                //        https://code.google.com/p/android/issues/detail?id=42601
+                // (yay, more years old Android bug that were never fixed!)
+                newFrag = getSupportFragmentManager().findFragmentByTag(fragmentTag);
+            }
 
             if (newFrag == null) {
                 switch (position + 1) {
