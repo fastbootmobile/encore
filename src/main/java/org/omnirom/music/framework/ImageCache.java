@@ -125,7 +125,11 @@ public class ImageCache {
      */
     public boolean hasInMemory(final String key) {
         synchronized (this) {
-            return mMemoryCache.get(key) != null;
+            RefCountedBitmap bmp = mMemoryCache.get(sanitizeKey(key));
+            if (bmp != null && bmp.get().isRecycled()) {
+                mMemoryCache.remove(sanitizeKey(key));
+                return false;
+            } else return bmp != null;
         }
     }
 
@@ -136,7 +140,7 @@ public class ImageCache {
      */
     public boolean hasOnDisk(final String key) {
         synchronized (this) {
-            return mEntries.contains(key);
+            return mEntries.contains(sanitizeKey(key));
         }
     }
 
@@ -150,22 +154,24 @@ public class ImageCache {
             return null;
         }
 
+        final String cleanKey = sanitizeKey(key);
+
         boolean contains;
         synchronized (this) {
-            contains = mEntries.contains(key);
+            contains = mEntries.contains(cleanKey);
         }
 
         if (contains) {
             // Check if we have it in memory
-            RefCountedBitmap item = mMemoryCache.get(key);
+            RefCountedBitmap item = mMemoryCache.get(cleanKey);
             if (item == null) {
                 BitmapFactory.Options opts = new BitmapFactory.Options();
                 opts.inSampleSize = 2;
-                Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + key);
+                Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
                 if (bmp != null) {
                     item = new RefCountedBitmap(bmp);
                     item.acquire();
-                    mMemoryCache.put(key, item);
+                    mMemoryCache.put(cleanKey, item);
                 }
             }
 
@@ -216,6 +222,8 @@ public class ImageCache {
     public void put(final String key, RefCountedBitmap bmp, final boolean asPNG) {
         boolean isDefaultArt = false;
 
+        final String cleanKey = sanitizeKey(key);
+
         if (bmp == null) {
             bmp = mDefaultArt;
             isDefaultArt = true;
@@ -223,16 +231,16 @@ public class ImageCache {
 
         bmp.acquire();
         synchronized (mMemoryCache) {
-            mMemoryCache.put(key, bmp);
+            mMemoryCache.put(cleanKey, bmp);
             // Touch usage
-            bmp = mMemoryCache.get(key);
+            bmp = mMemoryCache.get(cleanKey);
         }
 
         if (!isDefaultArt) {
             try {
                 bmp.acquire();
 
-                FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + key);
+                FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + cleanKey);
                 bmp.get().compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
                 out.close();
 
@@ -242,8 +250,16 @@ public class ImageCache {
             }
 
             synchronized (this) {
-                mEntries.add(key);
+                mEntries.add(cleanKey);
             }
         }
+    }
+
+    /**
+     * Sanitizes the key to remove out unwanted characters
+     * @return A sanitized copy of the key
+     */
+    private String sanitizeKey(String key) {
+        return key.replaceAll("\\W", "_");
     }
 }

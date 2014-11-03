@@ -44,9 +44,12 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.echonest.api.v4.EchoNestException;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
+import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
@@ -71,6 +74,8 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Activity showing the current playback queue
  */
 public class PlaybackQueueActivity extends FragmentActivity {
+    private static final String TAG = "PlaybackQueue";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -188,6 +193,13 @@ public class PlaybackQueueActivity extends FragmentActivity {
                             mPlayDrawable.setBuffering(buffering);
                         }
                         updateQueueLayout();
+
+                        AutoMixManager mixManager = AutoMixManager.getDefault();
+                        if (mixManager.getCurrentPlayingBucket() != null) {
+                            Utils.animateScale(mThumbsUpButton, true, true);
+                        } else {
+                            Utils.animateScale(mThumbsUpButton, true, false);
+                        }
                     }
                 });
             }
@@ -317,6 +329,7 @@ public class PlaybackQueueActivity extends FragmentActivity {
         private Handler mHandler;
         private ScrollView mRootView;
         private PlayPauseDrawable mPlayDrawable;
+        private ImageView mThumbsUpButton;
 
         public SimpleFragment() {
             mHandler = new Handler();
@@ -501,6 +514,38 @@ public class PlaybackQueueActivity extends FragmentActivity {
                                 PlaybackProxy.setRepeatMode(enable);
                             }
                         });
+
+                        mThumbsUpButton = (ImageView) itemView.findViewById(R.id.ivThumbs);
+                        mThumbsUpButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                final AutoMixManager mixManager = AutoMixManager.getDefault();
+                                Utils.animateScale(mThumbsUpButton, true, false);
+
+                                new Thread() {
+                                    public void run() {
+                                        try {
+                                            mixManager.getCurrentPlayingBucket().notifyLike();
+                                            mHandler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Utils.shortToast(getActivity(), R.string.toast_bucket_adjusted);
+                                                }
+                                            });
+                                        } catch (EchoNestException e) {
+                                            Log.e(TAG, "Cannot notify echonest of like");
+                                        }
+                                    }
+                                }.start();
+
+                            }
+                        });
+                        AutoMixManager mixManager = AutoMixManager.getDefault();
+                        if (mixManager.getCurrentPlayingBucket() != null) {
+                            Utils.animateScale(mThumbsUpButton, true, true);
+                        } else {
+                            Utils.animateScale(mThumbsUpButton, true, false);
+                        }
                     } else {
                         itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
                         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {

@@ -298,10 +298,10 @@ public class AutoMixManager implements IPlaybackCallback {
     @Override
     public void onSongStarted(boolean buffering, Song s) throws RemoteException {
         if (mCurrentPlayingBucket != null) {
-            if (buffering) {
+            if (!buffering) {
                 if (!s.getRef().equals(mExpectedSong)) {
                     // Song started is not the one we expected from the bucket, cancel automix playback
-                    Log.d(TAG, "Cancelling automix playback");
+                    Log.d(TAG, "Cancelling automix playback: Playing " + s.getRef() + ", expected " + mExpectedSong);
                     mCurrentPlayingBucket = null;
                 } else {
                     // We're playing the song we expected to be played from the bucket, fetch the next one.

@@ -74,7 +74,7 @@ public class RefCountedBitmap {
 
             if (mCount == 0) {
                 mHandler.removeCallbacks(mEvictRunnable);
-                mHandler.postDelayed(mEvictRunnable, 1000);
+                mHandler.postDelayed(mEvictRunnable, 10000);
             }
         }
         mStackRelease.add(Arrays.toString(Thread.currentThread().getStackTrace()));

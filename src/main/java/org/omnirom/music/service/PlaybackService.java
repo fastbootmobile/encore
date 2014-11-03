@@ -32,6 +32,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.echonest.api.v4.EchoNestException;
+
 import org.acra.ACRA;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.PluginsLookup;
@@ -564,6 +566,15 @@ public class PlaybackService extends Service
 
             hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
             mNotification.setHasNext(hasNext);
+        }
+
+        final AutoMixManager mixManager = AutoMixManager.getDefault();
+        if (mixManager.getCurrentPlayingBucket() != null) {
+            try {
+                mixManager.getCurrentPlayingBucket().notifySkip();
+            } catch (EchoNestException e) {
+                Log.e(TAG, "Cannot notify EchoNest of skip event", e);
+            }
         }
     }
 
