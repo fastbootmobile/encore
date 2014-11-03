@@ -16,6 +16,7 @@ import android.os.RemoteException;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -146,25 +147,32 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
             final int backColor = holder.backColor;
 
             Intent intent = null;
+            ActivityOptions opt = null;
+            final AlbumArtImageView ivCover = holder.ivCover;
 
             if (entry.entity instanceof Album) {
                 Album album = (Album) entry.entity;
                 intent = AlbumActivity.craftIntent(ctx, hero, album, backColor);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),
+                            new Pair<View, String>(ivCover, "itemGroup"));
+                }
             } else if (entry.entity instanceof Artist) {
                 Artist artist = (Artist) entry.entity;
                 intent = ArtistActivity.craftIntent(ctx, hero, artist.getRef(), backColor);
 
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),
+                            new Pair<View, String>(ivCover, "itemImage"));
+                }
             } else if (entry.entity instanceof Song) {
                 Song song = (Song) entry.entity;
                 playSong(song);
             }
 
             if (intent != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    AlbumArtImageView ivCover = holder.ivCover;
-                    ActivityOptions opt =
-                            ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),
-                            ivCover, "itemImage");
+                if (opt != null) {
                     ctx.startActivity(intent, opt.toBundle());
                 } else {
                     ctx.startActivity(intent);
