@@ -141,6 +141,12 @@ public class AutomixFragment extends Fragment {
         mainActivity.setContentShadowTop(0);
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        PlaybackProxy.removeCallback(mPlaybackCallback);
+    }
+
     /**
      * {@inheritDoc}
      */
