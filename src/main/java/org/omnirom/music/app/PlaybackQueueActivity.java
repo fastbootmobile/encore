@@ -183,8 +183,10 @@ public class PlaybackQueueActivity extends FragmentActivity {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                        mPlayDrawable.setBuffering(buffering);
+                        if (mPlayDrawable != null) {
+                            mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                            mPlayDrawable.setBuffering(buffering);
+                        }
                         updateQueueLayout();
                     }
                 });
