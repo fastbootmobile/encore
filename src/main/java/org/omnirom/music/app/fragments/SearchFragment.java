@@ -223,9 +223,11 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.PLAYLIST, i);
         Playlist playlist = aggregator.retrievePlaylist(entry.ref, entry.identifier);
-        Intent intent = PlaylistActivity.craftIntent(getActivity(), playlist,
-                ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap());
-        startActivity(intent);
+        if (playlist != null) {
+            Intent intent = PlaylistActivity.craftIntent(getActivity(), playlist,
+                    ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap());
+            startActivity(intent);
+        }
     }
 
     @Override
