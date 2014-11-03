@@ -782,9 +782,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 final Song song = (Song) view.getTag();
                 Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
 
-                if (song.isAvailable() &&
-                        (!aggregator.isOfflineMode()
-                                || song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY)) {
+                if (Utils.canPlaySong(song)) {
                     // Queue the full album
                     PlaybackProxy.clearQueue();
                     PlaybackProxy.queueAlbum(album, false);

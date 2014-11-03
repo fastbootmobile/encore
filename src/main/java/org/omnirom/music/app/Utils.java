@@ -44,6 +44,7 @@ import android.widget.Toast;
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Album;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -565,5 +566,19 @@ public class Utils {
         for (int i = 0; i < childCount; ++i) {
             root.getChildAt(i).setAlpha(alpha);
         }
+    }
+
+    /**
+     * Returns whether or not the song can be played. This takes into account the track's
+     * availability as reported by the provider, as well as the offline status and mode
+     * @param s The song to check
+     * @return True if the song can be played right now
+     */
+    public static boolean canPlaySong(Song s) {
+        final boolean offlineMode = ProviderAggregator.getDefault().isOfflineMode();
+
+        return s != null
+                && s.isAvailable()
+                && (!offlineMode || s.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY);
     }
 }

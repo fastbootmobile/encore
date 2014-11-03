@@ -170,4 +170,5 @@
     <string name="menu_open_artist_page">Open artist page</string>
     <string name="menu_remove_duplicates">Remove duplicates</string>
     <string name="toast_album_not_loaded_yet">Album is not loaded yet</string>
+    <string name="toast_track_unavailable">This track is unavailable</string>
 </resources>

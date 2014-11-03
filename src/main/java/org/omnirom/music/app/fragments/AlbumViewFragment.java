@@ -229,8 +229,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 // We substract the header view
                 position = position - 1;
+                final Song song = mAdapter.getItem(position);
 
-                if (mAdapter.getItem(position).isAvailable()) {
+                if (Utils.canPlaySong(song)) {
                     // Play the song (ie. queue the album and play at the selected index)
                     PlaybackProxy.clearQueue();
                     PlaybackProxy.queueAlbum(mAlbum, false);

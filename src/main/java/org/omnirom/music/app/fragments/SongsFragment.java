@@ -29,11 +29,14 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.SongsListAdapter;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.BasePlaybackCallback;
 
@@ -64,11 +67,12 @@ public class SongsFragment extends Fragment {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             // Play the song
             Song song = mSongsListAdapter.getItem(i);
-
-            if (song != null && song.isAvailable()) {
+            if (Utils.canPlaySong(song)) {
                 PlaybackProxy.playSong(song);
-            } else {
+            } else if (song == null) {
                 Log.e(TAG, "Trying to play null song!");
+            } else {
+                Utils.shortToast(getActivity(), R.string.toast_track_unavailable);
             }
         }
     };

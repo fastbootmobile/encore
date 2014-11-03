@@ -254,7 +254,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         mListViewContents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (mAdapter.getItem(i - 1).isAvailable()) {
+                Song song = mAdapter.getItem(i - 1);
+                if (Utils.canPlaySong(song)) {
                     PlaybackProxy.clearQueue();
                     PlaybackProxy.queuePlaylist(mPlaylist, false);
                     PlaybackProxy.playAtIndex(i - 1);
