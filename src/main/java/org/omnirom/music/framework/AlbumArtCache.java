@@ -337,6 +337,12 @@ public class AlbumArtCache {
         }
 
         if (!providerprovides) {
+            // Hardcode warning: Image providers tend to return... funny images for empty
+            // names and '<unknown>'. We just don't want images for them then.
+            if (artist.getName().isEmpty() || "<unknown>".equals(artist.getName())) {
+                return false;
+            }
+
             // Try to get it first from FreeBase, then from Google Image if none found or error
             // (Google Images might return some random/unwanted images, so prefer FreeBase first)
             String url = null;
