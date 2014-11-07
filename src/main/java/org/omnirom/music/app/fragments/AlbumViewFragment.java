@@ -94,6 +94,12 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 });
             }
         }
+
+        @Override
+        public void onPlaybackResume() throws RemoteException {
+            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+            mFabDrawable.setBuffering(false);
+        }
     };
 
     private Runnable mLoadSongsRunnable = new Runnable() {
