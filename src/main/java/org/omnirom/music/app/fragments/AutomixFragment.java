@@ -20,7 +20,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,18 +28,16 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
+
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.app.AutomixCreateActivity;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.BucketAdapter;
 import org.omnirom.music.framework.PlaybackProxy;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.service.BasePlaybackCallback;
-import org.omnirom.music.service.IPlaybackCallback;
-import org.omnirom.music.service.IPlaybackService;
 
 /**
  * Fragment showing the AutoMix buckets
@@ -50,7 +47,9 @@ public class AutomixFragment extends Fragment {
     private static final String TAG = "AutomixFragment";
 
     private BucketAdapter mAdapter;
-    private ImageButton mFabCreate;
+    private FloatingActionsMenu mFabCreateMenu;
+    private ImageButton mFabCreateDynamic;
+    private ImageButton mFabCreateStatic;
     private ProgressBar mProgressToHide;
     private AutoMixManager mAutoMixManager = AutoMixManager.getDefault();
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
@@ -91,12 +90,26 @@ public class AutomixFragment extends Fragment {
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_automix, container, false);
 
-        // Setup create FAB
-        mFabCreate = (ImageButton) rootView.findViewById(R.id.fabCreate);
-        mFabCreate.setOnClickListener(new View.OnClickListener() {
+        // Setup create FABs
+        mFabCreateMenu = (FloatingActionsMenu) rootView.findViewById(R.id.fabCreateMenu);
+
+        mFabCreateDynamic = (ImageButton) rootView.findViewById(R.id.fabCreateDynamic);
+        mFabCreateDynamic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), AutomixCreateActivity.class));
+                Intent intent = new Intent(getActivity(), AutomixCreateActivity.class);
+                intent.putExtra(AutomixCreateActivity.EXTRA_MODE, AutomixCreateActivity.MODE_DYNAMIC);
+                startActivity(intent);
+            }
+        });
+
+        mFabCreateStatic = (ImageButton) rootView.findViewById(R.id.fabCreateStatic);
+        mFabCreateStatic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AutomixCreateActivity.class);
+                intent.putExtra(AutomixCreateActivity.EXTRA_MODE, AutomixCreateActivity.MODE_STATIC);
+                startActivity(intent);
             }
         });
 
@@ -124,9 +137,6 @@ public class AutomixFragment extends Fragment {
             }
         });
 
-        // Register for playback events
-        PlaybackProxy.addCallback(mPlaybackCallback);
-
         return rootView;
     }
 
@@ -139,11 +149,16 @@ public class AutomixFragment extends Fragment {
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_AUTOMIX);
         mainActivity.setContentShadowTop(0);
+
+        // Register for playback events
+        PlaybackProxy.addCallback(mPlaybackCallback);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+
+        // Unregister playback events
         PlaybackProxy.removeCallback(mPlaybackCallback);
     }
 
@@ -173,11 +188,11 @@ public class AutomixFragment extends Fragment {
                 // Translate the FAB position to be above the playbar
                 final MainActivity mainActivity = (MainActivity) getActivity();
                 if (mainActivity.isPlayBarVisible()) {
-                    mFabCreate.animate()
+                    mFabCreateMenu.animate()
                             .translationY(-getResources().getDimensionPixelSize(R.dimen.playing_bar_height))
                             .start();
                 } else {
-                    mFabCreate.animate()
+                    mFabCreateMenu.animate()
                             .translationY(0)
                             .start();
                 }

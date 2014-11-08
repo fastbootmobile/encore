@@ -1,33 +1,33 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="org.omnirom.music.app.AutomixActivity$PlaceholderFragment">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="org.omnirom.music.app.AutomixActivity$PlaceholderFragment">
 
     <ImageView
+        android:id="@+id/ivPoweredEchoNest"
         android:layout_width="100dp"
         android:layout_height="32dp"
-        android:id="@+id/ivPoweredEchoNest"
-        android:src="@drawable/powered_by_echonest"
-        android:scaleType="fitCenter"
+        android:layout_alignEnd="@+id/lvBuckets"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/lvBuckets"
-        android:layout_alignEnd="@+id/lvBuckets"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:contentDescription="@string/automix" />
+        android:contentDescription="@string/automix"
+        android:scaleType="fitCenter"
+        android:src="@drawable/powered_by_echonest"/>
 
     <ListView
+        android:id="@+id/lvBuckets"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/lvBuckets"
-        android:layout_below="@+id/ivPoweredEchoNest"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/ivPoweredEchoNest"/>
 
-    <com.getbase.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabCreate"
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
+        android:id="@+id/fabCreateMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
@@ -35,13 +35,30 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
 
+        android:layout_marginBottom="24dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginBottom="24dp"
 
-        app:fab_colorNormal="@color/primary"
-        app:fab_colorPressed="@color/primary_dark"
-        app:fab_icon="@drawable/ic_add"
-        app:fab_size="normal" />
+        app:fab_addButtonColorNormal="@color/primary"
+        app:fab_addButtonColorPressed="@color/primary_dark"
+        app:fab_addButtonPlusIconColor="@color/white">
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabCreateDynamic"
+            app:fab_colorNormal="@color/white"
+            app:fab_colorPressed="@color/grey"
+            app:fab_icon="@drawable/ic_dynamic_playlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabCreateStatic"
+            app:fab_colorNormal="@color/white"
+            app:fab_colorPressed="@color/grey"
+            app:fab_icon="@drawable/ic_static_playlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
 </RelativeLayout>

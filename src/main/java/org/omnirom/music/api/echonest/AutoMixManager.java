@@ -151,6 +151,28 @@ public class AutoMixManager implements IPlaybackCallback {
     }
 
     /**
+     * Creates a new AutoMix Bucket with the provided settings that will be used for a static
+     * playlist instead of a dynamic bucket
+     * @param name The name of the bucket
+     * @param styles The EchoNest styles to include in the bucket
+     * @param moods The EchoNest moods to include in the bucket
+     * @param taste Whether or not to use the user's taste profile
+     * @param adventurous The target adventurousness level [0.0-1.0]
+     * @param songTypes The EchoNest song types to include
+     * @param speechiness The target speechiness level [0.0-1.0]
+     * @param energy The target energy level [0.0-1.0]
+     * @param familiar The target familiarity level [0.0-1.0]
+     * @return The generated {@link org.omnirom.music.api.echonest.AutoMixBucket}
+     */
+    public AutoMixBucket createStaticBucket(String name, String[] styles, String[] moods,
+                                            boolean taste, float adventurous, String[] songTypes,
+                                            float speechiness, float energy, float familiar) {
+
+        return new AutoMixBucket(name, styles, moods, taste, adventurous, songTypes,
+                speechiness, energy, familiar);
+    }
+
+    /**
      * Saves a bucket (ie. its parameters) to the internal storage
      * @param bucket The bucket to save
      */

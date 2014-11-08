@@ -127,7 +127,7 @@
         <!-- Automix Creation Activity -->
         <activity
             android:name=".AutomixCreateActivity"
-            android:label="@string/title_activity_automix_create"
+            android:label="@string/title_activity_automix_create_static"
             android:launchMode="singleTask">
         </activity>
 

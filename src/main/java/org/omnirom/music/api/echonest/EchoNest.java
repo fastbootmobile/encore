@@ -29,6 +29,7 @@ import com.echonest.api.v4.EchoNestException;
 import com.echonest.api.v4.GeneralCatalog;
 import com.echonest.api.v4.IdentifySongParams;
 import com.echonest.api.v4.Params;
+import com.echonest.api.v4.PlaylistParams;
 import com.echonest.api.v4.SongCatalogItem;
 
 import org.omnirom.music.model.Album;
@@ -350,6 +351,95 @@ public class EchoNest {
         return session;
     }
 
+    public List<String> createStaticPlaylist(String type, String seedCatalog, String[] style,
+                                             String[] mood, float adventurous,
+                                             String[] songTypes, float speechiness, float energy,
+                                             float familiar)
+            throws EchoNestException {
+        // Some checks
+        if (!"artist-description".equals(type) && !"catalog-radio".equals(type)) {
+            throw new EchoNestException(-1, "Only 'artist-description' and 'catalog-radio' type " +
+                    "are supported");
+        }
+
+        if ((seedCatalog == null && mood == null && style == null)
+                || ("artist-description".equals(type) && (mood == null || mood.length <= 0) && (style == null || style.length <= 0))
+                || ("catalog-radio".equals(type) && (seedCatalog == null || seedCatalog.isEmpty()))) {
+            throw new EchoNestException(-1, "seedCatalog, mood or style must be filled depending " +
+                    "on the type");
+        }
+
+        // Everything looks plausible, let's craft the query
+        PlaylistParams p = new PlaylistParams();
+        p.setResults(100);
+        p.add("type", type);
+        if (seedCatalog != null) {
+            p.addSeedCatalog(seedCatalog);
+        }
+        if (mood != null) {
+            for (String m : mood) {
+                p.addMood(m);
+            }
+        }
+        if (style != null) {
+            for (String s : style) {
+                p.addStyle(s);
+            }
+        }
+        if (songTypes != null && songTypes.length > 0) {
+            for (String songType : songTypes) {
+                if ("christmas".equals(songType)) {
+                    p.addSongType(com.echonest.api.v4.Song.SongType.christmas,
+                            com.echonest.api.v4.Song.SongTypeFlag.True);
+                } else if ("live".equals(songType)) {
+                    p.addSongType(com.echonest.api.v4.Song.SongType.live,
+                            com.echonest.api.v4.Song.SongTypeFlag.True);
+                } else if ("studio".equals(songType)) {
+                    p.addSongType(com.echonest.api.v4.Song.SongType.studio,
+                            com.echonest.api.v4.Song.SongTypeFlag.True);
+                } else if ("acoustic".equals(songType)) {
+                    p.add("song_type", songType + ":true");
+                } else if ("electric".equals(songType)) {
+                    p.add("song_type", songType + ":true");
+                } else {
+                    Log.e(TAG, "Unrecognized song type: " + songType);
+                }
+            }
+        }
+
+        if (adventurous >= 0) {
+            p.setAdventurousness(adventurous);
+        }
+        if (speechiness >= 0) {
+            p.add("target_speechiness", speechiness);
+        }
+        if (energy >= 0) {
+            p.add("target_energy", energy);
+        }
+        if (familiar >= 0) {
+            p.add("target_artist_familiarity", familiar);
+        }
+
+        String prefix = ProviderAggregator.getDefault().getPreferredRosettaStonePrefix();
+        if (prefix != null) {
+            Log.d(TAG, "Using rosetta prefix " + prefix);
+            p.addIDSpace(prefix);
+            p.includeTracks();
+        }
+        p.setLimit(true);
+
+        // Send the query and get the playlist
+        com.echonest.api.v4.Playlist playlist = mEchoNest.createStaticPlaylist(p);
+        List<String> songs = new ArrayList<String>();
+
+        List<com.echonest.api.v4.Song> enSongs = playlist.getSongs();
+        for (com.echonest.api.v4.Song song : enSongs) {
+            songs.add(song.getTrack(prefix).getForeignID());
+        }
+
+        return songs;
+    }
+
     /**
      * Creates a temporary taste profile.
      *
@@ -399,13 +489,14 @@ public class EchoNest {
 
                     // If we have artist info, add it
                     org.omnirom.music.model.Artist artist = aggregator.retrieveArtist(song.getArtist(), p.getProvider());
-                    if (artist != null && artist.isLoaded()) {
+                    if (artist != null && artist.isLoaded() && artist.getName() != null
+                            && !artist.getName().trim().isEmpty()) {
                         item.setArtistName(artist.getName());
                     }
 
                     // If we have album info, add it
                     Album album = aggregator.retrieveAlbum(song.getAlbum(), p.getProvider());
-                    if (album != null && album.isLoaded()) {
+                    if (album != null && album.isLoaded() && album.getName() != null) {
                         item.setRelease(album.getName());
                     }
 

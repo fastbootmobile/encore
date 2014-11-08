@@ -47,6 +47,7 @@ public class AutoMixBucket {
     float mFamiliar;
 
     private DynamicPlaylistSession mPlaylistSession;
+    private GeneralCatalog mCatalog;
     private boolean mSessionReady;
     private boolean mSessionError;
 
@@ -56,7 +57,8 @@ public class AutoMixBucket {
      * @param name The name of the bucket
      * @param styles The EchoNest styles to include in the bucket
      * @param moods The EchoNest moods to include
-     * @param taste Whether or not this bucket uses the user's taste profile
+     * @param taste Whether or not this bucket uses the user's taste profile. Note that you must
+     *              release the catalog once done using releaseCatalog
      * @param adventurous The level of adventurousness [0.0-1.0]
      * @param songTypes The EchoNest types of songs to include
      * @param speechiness The target level of speechiness [0.0-1.0]
@@ -76,7 +78,8 @@ public class AutoMixBucket {
      * @param name The name of the bucket
      * @param styles The EchoNest styles to include in the bucket
      * @param moods The EchoNest moods to include
-     * @param taste Whether or not this bucket uses the user's taste profile
+     * @param taste Whether or not this bucket uses the user's taste profile. Note that you must
+     *              release the catalog once done using releaseCatalog
      * @param adventurous The level of adventurousness [0.0-1.0]
      * @param songTypes The EchoNest types of songs to include
      * @param speechiness The target level of speechiness [0.0-1.0]
@@ -118,34 +121,12 @@ public class AutoMixBucket {
         mSessionError = false;
 
         EchoNest echoNest = new EchoNest();
-        GeneralCatalog catalog = null;
-        String type;
-
-        if (mUseTaste) {
-            // Generate the taste profile first for use in the playlist session
-            if (DEBUG) Log.d(TAG, "Generating taste profile...");
-            try {
-                catalog = echoNest.createTemporaryTasteProfile();
-            } catch (EchoNestException e) {
-                Log.e(TAG, "Unable to create the taste profile", e);
-                mSessionError = true;
-            } finally {
-                if ((mMoods == null || mMoods.length == 0)
-                        && (mStyles == null || mStyles.length == 0)) {
-                    type = "catalog-radio";
-                } else {
-                    type = "artist-description";
-                }
-                if (DEBUG) Log.d(TAG, "Taste profile generation succeeded.");
-            }
-        } else {
-            type = "artist-description";
-        }
+        String type = generateTasteCatalogIfNeededAndGetType(echoNest);
 
         // Generate the playlist session with the initial parameters
         if (!mSessionError) {
             if (DEBUG) Log.d(TAG, "Creating dynamic playlist.");
-            String catalogId = (catalog != null ? catalog.getID() : null);
+            String catalogId = (mCatalog != null ? mCatalog.getID() : null);
             try {
                 mPlaylistSession = echoNest.createDynamicPlaylist(type, catalogId, mMoods, mStyles);
             } catch (EchoNestException e) {
@@ -184,16 +165,78 @@ public class AutoMixBucket {
             }
         }
 
-        if (catalog != null) {
+        mSessionReady = true;
+        return mPlaylistSession;
+    }
+
+    /**
+     * Generates a taste profile catalog if needed, and return the type of
+     * @param echoNest The echonest api connection
+     * @return 'catalog-radio' or  'artist-description'
+     */
+    private String generateTasteCatalogIfNeededAndGetType(EchoNest echoNest) {
+        String type;
+
+        if (mUseTaste) {
+            // Generate the taste profile first for use in the playlist session
+            if (DEBUG) Log.d(TAG, "Generating taste profile...");
             try {
-                catalog.delete();
+                mCatalog = echoNest.createTemporaryTasteProfile();
+            } catch (EchoNestException e) {
+                Log.e(TAG, "Unable to create the taste profile", e);
+                mSessionError = true;
+            } finally {
+                if ((mMoods == null || mMoods.length == 0)
+                        && (mStyles == null || mStyles.length == 0)) {
+                    type = "catalog-radio";
+                } else {
+                    type = "artist-description";
+                }
+                if (DEBUG) Log.d(TAG, "Taste profile generation succeeded.");
+            }
+        } else {
+            type = "artist-description";
+        }
+
+        return type;
+    }
+
+    /**
+     * When the taste profile is enabled, you MUST release (delete) the catalog, as we have
+     * a limit of 1000 catalogs for a non-commercial account (hence why we only allow that
+     * for static playlists, so that we can generate that on the fly).
+     */
+    private void releaseCatalog() {
+        if (mCatalog != null) {
+            try {
+                mCatalog.delete();
             } catch (EchoNestException e) {
                 Log.e(TAG, "Unable to delete catalog", e);
             }
         }
+    }
 
-        mSessionReady = true;
-        return mPlaylistSession;
+    public List<String> generateStaticPlaylist() {
+        EchoNest echoNest = new EchoNest();
+        String type = generateTasteCatalogIfNeededAndGetType(echoNest);
+        String seedCatalog = null;
+
+        if (mCatalog != null) {
+            seedCatalog = mCatalog.getID();
+        }
+
+        try {
+            List<String> songs = echoNest.createStaticPlaylist(type, seedCatalog, mStyles, mMoods, mAdventurousness,
+                mSongTypes, mSpeechiness, mEnergy, mFamiliar);
+            releaseCatalog();
+            return songs;
+        } catch (EchoNestException e) {
+            Log.e(TAG, "Cannot create playlist", e);
+            mSessionError = true;
+        }
+
+        // If we reach here, we got an error
+        return null;
     }
 
     /**
