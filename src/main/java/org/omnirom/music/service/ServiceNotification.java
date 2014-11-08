@@ -85,14 +85,20 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
 
+        if (mCurrentArt.get().isRecycled()) {
+            mCurrentArt = mDefaultArt;
+        }
         // Build the core notification
         builder.setSmallIcon(R.drawable.ic_launcher_white)
                 .setContentIntent(pendingIntent)
-                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(mCurrentArt.get())
-                        .bigLargeIcon(mCurrentArt.get()))
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        if (!mCurrentArt.get().isRecycled()) {
+            builder.setStyle(new NotificationCompat.BigPictureStyle().bigPicture(mCurrentArt.get())
+                    .bigLargeIcon(mCurrentArt.get()));
+        }
 
         // Set the notification text
         if (mCurrentSong != null) {

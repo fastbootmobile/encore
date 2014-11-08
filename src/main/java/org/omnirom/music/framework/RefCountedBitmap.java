@@ -39,7 +39,9 @@ public class RefCountedBitmap {
     private Runnable mEvictRunnable = new Runnable() {
         @Override
         public void run() {
-            mBitmap.recycle();
+            if (!mBitmap.isRecycled()) {
+                mBitmap.recycle();
+            }
             mBitmap = null;
         }
     };
