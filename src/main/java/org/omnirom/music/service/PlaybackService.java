@@ -126,6 +126,7 @@ public class PlaybackService extends Service
 
     private Handler mHandler;
     private int mNumberBound = 0;
+    private NativeAudioSink mNativeSink;
     private NativeHub mNativeHub;
     private DSPProcessor mDSPProcessor;
     private PlaybackQueue mPlaybackQueue;
@@ -180,8 +181,8 @@ public class PlaybackService extends Service
         super.onCreate();
         // Transition zone
         mNativeHub = new NativeHub();
-        NativeAudioSink sink = new NativeAudioSink();
-        mNativeHub.setSinkPointer(sink.getPlayer().getHandle());
+        mNativeSink = new NativeAudioSink();
+        mNativeHub.setSinkPointer(mNativeSink.getPlayer().getHandle());
 
         //
         mDSPProcessor = new DSPProcessor(this);
@@ -595,6 +596,8 @@ public class PlaybackService extends Service
             final ProviderIdentifier identifier = currentSong.getProvider();
             mState = STATE_PAUSING;
             Log.d(TAG, "onSongPaused: Pausing...");
+
+            mNativeSink.flushSamples();
 
             new Thread() {
                 public void run() {
