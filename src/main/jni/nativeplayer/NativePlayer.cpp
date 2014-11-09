@@ -230,15 +230,15 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
             case 48000:
                 // These values are supported. Again, barely any phone supports 48KHz true rendering
                 // so we don't bother allowing sampling rates > 48KHz.
-                m_iBufferMinPlayback = sample_rate;
-                m_iBufferMaxSize = sample_rate * 2;
+                m_iBufferMinPlayback = sample_rate * channels;
+                m_iBufferMaxSize = m_iBufferMinPlayback * 2;
                 m_bUseResampler = false;
                 break;
 
             default:
                 ALOGD("Using sample rate 48KHz, resampling from %d Hz", sample_rate);
-                m_iBufferMinPlayback = sample_rate;
-                m_iBufferMaxSize = sample_rate * 2;
+                m_iBufferMinPlayback = sample_rate * channels;
+                m_iBufferMaxSize = m_iBufferMinPlayback * 2;
                 m_bUseResampler = true;
                 m_fResampleRatio = 48000.f / ((float) sample_rate);
                 sample_rate = 48000;
