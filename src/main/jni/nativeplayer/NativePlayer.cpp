@@ -434,8 +434,9 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
                     p->m_iSampleRate * p->m_iChannels * 2);
                 p->m_iBufferMaxSize = p->m_iBufferMinPlayback * 2;
                 ALOGD("Raising min buffer size to %d", p->m_iBufferMinPlayback);
+                p->m_LastBuffersCheckUfCount = p->m_iUnderflowCount.load();
             }
-            p->m_LastBuffersCheckUfCount = p->m_iUnderflowCount.load();
+            p->m_LastBuffersCheckTime = now;
         }
     }
 }
