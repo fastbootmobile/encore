@@ -101,6 +101,9 @@ class NativePlayer : public INativeSink {
     uint32_t m_iBufferMinPlayback;
     uint32_t m_iBufferMaxSize;
 
+    std::chrono::system_clock::time_point m_LastBuffersCheckTime;
+    int32_t m_LastBuffersCheckUfCount;
+
     std::mutex m_QueueMutex;
     NativeHub* m_pNativeHub;
 

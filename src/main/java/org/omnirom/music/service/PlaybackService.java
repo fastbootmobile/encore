@@ -597,8 +597,6 @@ public class PlaybackService extends Service
             mState = STATE_PAUSING;
             Log.d(TAG, "onSongPaused: Pausing...");
 
-            mNativeSink.flushSamples();
-
             new Thread() {
                 public void run() {
                     IMusicProvider provider = PluginsLookup.getDefault().getProvider(identifier).getBinder();

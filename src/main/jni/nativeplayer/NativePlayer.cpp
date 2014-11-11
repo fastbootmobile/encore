@@ -30,7 +30,7 @@ NativePlayer::NativePlayer() : m_pEngineObj(nullptr), m_pEngine(nullptr),
         m_pBufferQueue(nullptr), m_iSampleRate(-1), m_iChannels(-1), m_iSampleFormat(-1),
         m_iWrittenSamples(0), m_iUnderflowCount(0), m_pActiveBuffer(nullptr),
         m_pPlayingBuffer(nullptr), m_iActiveBufferIndex(0), m_fVolume(1.0f),
-        m_pNativeHub(nullptr), m_bUseResampler(false) {
+        m_pNativeHub(nullptr), m_bUseResampler(false), m_LastBuffersCheckUfCount(0) {
 }
 // -------------------------------------------------------------------------------------
 NativePlayer::~NativePlayer() {
@@ -230,20 +230,23 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
             case 48000:
                 // These values are supported. Again, barely any phone supports 48KHz true rendering
                 // so we don't bother allowing sampling rates > 48KHz.
-                m_iBufferMinPlayback = sample_rate * channels;
+                m_iBufferMinPlayback = sample_rate * channels / 5;
                 m_iBufferMaxSize = m_iBufferMinPlayback * 2;
                 m_bUseResampler = false;
                 break;
 
             default:
                 ALOGD("Using sample rate 48KHz, resampling from %d Hz", sample_rate);
-                m_iBufferMinPlayback = sample_rate * channels;
+                m_iBufferMinPlayback = sample_rate * channels / 5;
                 m_iBufferMaxSize = m_iBufferMinPlayback * 2;
                 m_bUseResampler = true;
                 m_fResampleRatio = 48000.f / ((float) sample_rate);
                 sample_rate = 48000;
                 break;
         }
+
+        m_LastBuffersCheckTime = std::chrono::system_clock::now();
+        m_LastBuffersCheckUfCount = m_iUnderflowCount;
 
         m_pActiveBuffer = reinterpret_cast<uint8_t*>(malloc(m_iBufferMaxSize));
         m_pPlayingBuffer = reinterpret_cast<uint8_t*>(malloc(m_iBufferMaxSize));
@@ -381,6 +384,7 @@ void NativePlayer::flush() {
     (*m_pBufferQueue)->Clear(m_pBufferQueue);
     m_iWrittenSamples = 0;
     m_iUnderflowCount = 0;
+    m_LastBuffersCheckUfCount = 0;
     m_iActiveBufferIndex = 0;
     ALOGI("Flushed");
 }
@@ -420,6 +424,18 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
             p->setPlayState(SL_PLAYSTATE_PAUSED);
             p->m_iUnderflowCount++;
             ALOGW("Buffer underrun");
+
+            // If we've got at least two underruns in less than 10 seconds, raise the min buffers
+            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+            int len_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - p->m_LastBuffersCheckTime).count();
+            if (p->m_LastBuffersCheckUfCount - p->m_iUnderflowCount > 2 && len_ms < 10000) {
+                // We raise the min buffer size, max 2 seconds
+                p->m_iBufferMinPlayback = std::min(p->m_iBufferMinPlayback + 128,
+                    p->m_iSampleRate * p->m_iChannels * 2);
+                p->m_iBufferMaxSize = p->m_iBufferMinPlayback * 2;
+                ALOGD("Raising min buffer size to %d", p->m_iBufferMinPlayback);
+            }
+            p->m_LastBuffersCheckUfCount = p->m_iUnderflowCount.load();
         }
     }
 }
