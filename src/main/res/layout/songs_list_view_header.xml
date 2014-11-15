@@ -5,6 +5,17 @@
     android:layout_height="wrap_content"
     tools:context="org.omnirom.music.app.ArtistActivity.InnerFragment">
 
+    <org.omnirom.music.app.ui.TopCropImageView
+        android:id="@+id/ivHero"
+        android:layout_width="match_parent"
+        android:layout_height="210dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:contentDescription="@string/albums"
+        android:transitionName="itemImage"
+        android:scaleType="centerInside"
+        android:src="@drawable/test_cover_ptx"/>
+
     <TextView
         android:id="@+id/tvAlbumName"
         android:layout_width="wrap_content"
@@ -13,8 +24,7 @@
         android:layout_alignLeft="@+id/ivHero"
         android:layout_alignRight="@+id/ivHero"
         android:layout_alignStart="@+id/ivHero"
-        android:layout_below="@+id/ivHero"
-        android:background="#333"
+        android:background="#BB333333"
         android:transitionName="albumName"
         fontPath="fonts/Roboto-Medium.ttf"
         android:fontFamily="sans-serif-medium"
@@ -27,17 +37,9 @@
         android:paddingStart="24dp"
         android:paddingTop="16dp"
         android:textColor="@color/white"
-        android:textSize="22sp" />
-
-    <org.omnirom.music.app.ui.TopCropImageView
-        android:id="@+id/ivHero"
-        android:layout_width="match_parent"
-        android:layout_height="175dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:contentDescription="@string/albums"
-        android:transitionName="itemImage"
-        android:scaleType="centerInside" />
+        android:textSize="22sp"
+        android:layout_alignBottom="@+id/ivHero"
+        />
 
     <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabPlay"

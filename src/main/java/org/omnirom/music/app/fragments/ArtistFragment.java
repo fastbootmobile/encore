@@ -264,7 +264,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     Palette.Swatch vibrant = palette.getVibrantSwatch();
 
                     if (vibrant != null && mRootView != null) {
-                        mRootView.setBackgroundColor(vibrant.getRgb());
+                        mRootView.setBackgroundColor(0xBBFFFFFF & vibrant.getRgb());
 
                         float luminance = vibrant.getHsl()[2];
 

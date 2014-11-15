@@ -192,7 +192,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         View headerView = inflater.inflate(R.layout.songs_list_view_header, mListView, false);
         ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
         TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
-        tvAlbumName.setBackgroundColor(mBackgroundColor);
+        tvAlbumName.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
         tvAlbumName.setText(mAlbum.getName());
 
         // Hide download button by default
