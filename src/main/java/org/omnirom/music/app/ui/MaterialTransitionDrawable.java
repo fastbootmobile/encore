@@ -15,6 +15,8 @@ import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import org.omnirom.music.app.R;
+
 /**
  * <p>
  * Class that allows drawable transitions in a way that fits Google's Material Design specifications
@@ -29,12 +31,15 @@ public class MaterialTransitionDrawable extends Drawable {
 
     private BitmapDrawable mBaseDrawable;
     private BitmapDrawable mTargetDrawable;
+    private BitmapDrawable mOfflineDrawable;
     private final AccelerateDecelerateInterpolator mInterpolator;
     private long mStartTime;
     private boolean mAnimating;
     private long mDuration = DEFAULT_DURATION;
     private ColorMatrix mColorMatSaturation;
     private Paint mPaint;
+    private boolean mShowOfflineOverdraw;
+    private long mOfflineStartTime;
 
 
     public MaterialTransitionDrawable(Context ctx, Bitmap base) {
@@ -50,8 +55,10 @@ public class MaterialTransitionDrawable extends Drawable {
     public MaterialTransitionDrawable(Context ctx) {
         mInterpolator = new AccelerateDecelerateInterpolator();
         mAnimating = false;
+        mShowOfflineOverdraw = false;
         mColorMatSaturation = new ColorMatrix();
         mPaint = new Paint();
+        mOfflineDrawable = (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.ic_cloud_offline);
     }
 
     public BitmapDrawable getFinalDrawable() {
@@ -70,6 +77,7 @@ public class MaterialTransitionDrawable extends Drawable {
         // Cancel animation
         mAnimating = false;
         mTargetDrawable = null;
+        mShowOfflineOverdraw = false;
 
         // Set new drawable as base and draw it
         mBaseDrawable = drawable;
@@ -88,6 +96,14 @@ public class MaterialTransitionDrawable extends Drawable {
 
             mStartTime = -1;
             mAnimating = true;
+        }
+    }
+
+    public void setShowOfflineOverdraw(boolean show) {
+        if (mShowOfflineOverdraw != show) {
+            mShowOfflineOverdraw = show;
+            mOfflineStartTime = SystemClock.uptimeMillis();
+            invalidateSelf();
         }
     }
 
@@ -145,6 +161,22 @@ public class MaterialTransitionDrawable extends Drawable {
         } else if (mBaseDrawable != null) {
             if (!mBaseDrawable.getBitmap().isRecycled()) {
                 mBaseDrawable.draw(canvas);
+            }
+        }
+
+        if (mShowOfflineOverdraw) {
+            int alpha = (int) Math.min(160, (SystemClock.uptimeMillis() - mOfflineStartTime) / 4);
+            canvas.drawColor(0x00888888 | ((alpha & 0xFF) << 24));
+
+            mPaint.setAlpha(alpha * 255 / 160);
+            canvas.drawBitmap(mOfflineDrawable.getBitmap(),
+                    getBounds().centerX() - mOfflineDrawable.getIntrinsicWidth() / 2,
+                    getBounds().centerY() - mOfflineDrawable.getIntrinsicHeight() / 2,
+                    mPaint);
+            mOfflineDrawable.draw(canvas);
+
+            if (alpha != 160) {
+                invalidateSelf();
             }
         }
     }

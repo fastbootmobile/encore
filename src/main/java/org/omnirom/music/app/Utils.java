@@ -581,4 +581,28 @@ public class Utils {
                 && s.isAvailable()
                 && (!offlineMode || s.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY);
     }
+
+    /**
+     * Returns whether or not the album is available offline. For that, the album must be loaded
+     * and have at least of track available offline
+     * @param a The album
+     * @return true if the album is available offline
+     */
+    public static boolean isAlbumAvailableOffline(Album a) {
+        if (a == null) {
+            return false;
+        } else if (a.getSongsCount() <= 0) {
+            return false;
+        } else {
+            Iterator<String> songIt = a.songs();
+            while (songIt.hasNext()) {
+                Song song = ProviderAggregator.getDefault().retrieveSong(songIt.next(), a.getProvider());
+                if (canPlaySong(song)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

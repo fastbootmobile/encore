@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.util.AttributeSet;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.AlbumArtHelper;
 import org.omnirom.music.framework.RefCountedBitmap;
@@ -29,6 +30,7 @@ import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ProviderAggregator;
 
 /**
  * Square ImageView displaying album art automatically
@@ -147,6 +149,13 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
     public void loadArtForAlbum(final Album album) {
         loadArtImpl(album);
+
+        // If it's an album and we're offline and album is unavailable,
+        // overlay the offline status thing
+        if (ProviderAggregator.getDefault().isOfflineMode()
+                && !Utils.isAlbumAvailableOffline(album)) {
+            mDrawable.setShowOfflineOverdraw(true);
+        }
     }
 
     public void loadArtForArtist(final Artist artist) {
@@ -214,6 +223,14 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             if (mOnArtLoadedListener != null) {
                 mOnArtLoadedListener.onArtLoaded(this, drawable);
             }
+        }
+
+        // If it's an album and we're offline and album is unavailable,
+        // overlay the offline status thing
+        if (request instanceof Album &&
+                ProviderAggregator.getDefault().isOfflineMode()
+                && !Utils.isAlbumAvailableOffline((Album) request)) {
+            mDrawable.setShowOfflineOverdraw(true);
         }
     }
 
