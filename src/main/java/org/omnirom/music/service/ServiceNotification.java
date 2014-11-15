@@ -104,9 +104,15 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         if (mCurrentSong != null) {
             final Artist artist = ProviderAggregator.getDefault()
                     .retrieveArtist(mCurrentSong.getArtist(), mCurrentSong.getProvider());
-            builder.setContentTitle(mCurrentSong.getTitle());
-            if (artist != null) {
-                builder.setContentText(artist.getName());
+
+            if (mCurrentSong.isLoaded()) {
+                builder.setContentTitle(mCurrentSong.getTitle());
+
+                if (artist != null && artist.getName() != null && !artist.getName().isEmpty()) {
+                    builder.setContentText(artist.getName());
+                }
+            } else {
+                builder.setContentTitle(getString(R.string.loading));
             }
         }
 

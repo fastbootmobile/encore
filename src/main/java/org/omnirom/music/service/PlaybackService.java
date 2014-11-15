@@ -1081,6 +1081,14 @@ public class PlaybackService extends Service
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
             }
+        } else if (s.contains(getCurrentSong())) {
+            updateRemoteMetadata();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mNotification.setCurrentSong(getCurrentSong());
+                }
+            });
         }
     }
 
