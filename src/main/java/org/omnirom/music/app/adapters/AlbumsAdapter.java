@@ -35,6 +35,7 @@ import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.model.Album;
+import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,6 +123,7 @@ public class AlbumsAdapter extends BaseAdapter {
         public Album album;
         public int position;
         public int itemColor;
+        public boolean offlineMode;
 
         public ViewHolder(View root) {
             vRoot = root;
@@ -258,8 +260,10 @@ public class AlbumsAdapter extends BaseAdapter {
         // Fill in the fields
         final Album album = getItem(position);
         final ViewHolder tag = (ViewHolder) root.getTag();
+        final boolean offlineMode = ProviderAggregator.getDefault().isOfflineMode();
 
-        if (tag.album == null || !tag.album.equals(album)) {
+        if (tag.album == null || !tag.album.equals(album) || offlineMode != tag.offlineMode) {
+            tag.offlineMode = offlineMode;
             tag.position = position;
             tag.vRoot = root;
             tag.album = album;

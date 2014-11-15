@@ -21,7 +21,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +31,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
@@ -49,8 +50,9 @@ import java.util.List;
 /**
  * Fragment displaying a list of albums
  */
-public class AlbumsFragment extends Fragment implements ILocalCallback {
+public class AlbumsFragment extends Fragment implements ILocalCallback, ProviderAggregator.OfflineModeListener {
     private AlbumsAdapter mAdapter;
+    private Handler mHandler;
 
     /**
      * Use this factory method to create a new instance of
@@ -77,6 +79,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAdapter = new AlbumsAdapter(getResources());
+        mHandler = new Handler();
     }
 
     /**
@@ -125,6 +128,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         ProviderAggregator.getDefault().addUpdateCallback(this);
+        ProviderAggregator.getDefault().registerOfflineModeListener(this);
     }
 
     /**
@@ -134,6 +138,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
     public void onDetach() {
         super.onDetach();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
+        ProviderAggregator.getDefault().unregisterOfflineModeListener(this);
     }
 
     /**
@@ -184,6 +189,16 @@ public class AlbumsFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onSearchResult(SearchResult searchResult) {
+
+    }
+
+    @Override
+    public void onOfflineModeChange(boolean enabled) {
+        mHandler.post(new Runnable() {
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
 
     }
 }

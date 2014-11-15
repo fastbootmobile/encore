@@ -155,6 +155,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         if (ProviderAggregator.getDefault().isOfflineMode()
                 && !Utils.isAlbumAvailableOffline(album)) {
             mDrawable.setShowOfflineOverdraw(true);
+        } else {
+            mDrawable.setShowOfflineOverdraw(false);
         }
     }
 

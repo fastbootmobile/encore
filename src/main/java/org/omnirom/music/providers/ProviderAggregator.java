@@ -65,6 +65,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private ThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(4);
     private Context mContext;
     private boolean mIsOfflineMode = false;
+    private List<OfflineModeListener> mOfflineModeListeners = new ArrayList<OfflineModeListener>();
 
     private Runnable mPostSongsRunnable = new Runnable() {
         @Override
@@ -568,6 +569,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 }
             }
         });
+
+        for (OfflineModeListener listener : mOfflineModeListeners) {
+            listener.onOfflineModeChange(isEnabled);
+        }
     }
 
     /**
@@ -580,6 +585,17 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         return mIsOfflineMode || !hasNetworkConnectivity();
     }
 
+    public void registerOfflineModeListener(OfflineModeListener listener) {
+        mOfflineModeListeners.add(listener);
+    }
+
+    public void unregisterOfflineModeListener(OfflineModeListener listener) {
+        mOfflineModeListeners.remove(listener);
+    }
+
+    /**
+     * @return true if the device has an active internet connectivity, false otherwise
+     */
     public boolean hasNetworkConnectivity() {
         // Check network connectivity
         final ConnectivityManager cm =
@@ -961,4 +977,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         }
     }
 
+    /**
+     * Interface for offline mode changes
+     */
+    public interface OfflineModeListener {
+        public void onOfflineModeChange(boolean enabled);
+    }
 }
