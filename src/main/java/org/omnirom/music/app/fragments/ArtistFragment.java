@@ -448,7 +448,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         heroImage.setImageBitmap(mHeroImage);
 
         final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
-        tvArtist.setBackgroundColor(mBackgroundColor);
+        tvArtist.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
         tvArtist.setText(mArtist.getName());
 
         // Setup the subfragments pager

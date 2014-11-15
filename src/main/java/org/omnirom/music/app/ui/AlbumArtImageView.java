@@ -63,6 +63,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private void initialize() {
         // Set the placeholder art first-hand
         mHandler = new Handler();
+        setScaleType(ScaleType.CENTER_CROP);
         if (isInEditMode()) {
             setImageDrawable(getResources().getDrawable(R.drawable.album_placeholder));
         } else {

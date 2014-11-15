@@ -13,7 +13,7 @@
             android:id="@+id/ivHero"
             android:transitionName="itemImage"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="320dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:contentDescription="@string/title_activity_artist"
@@ -29,8 +29,7 @@
             android:layout_alignLeft="@+id/ivHero"
             android:layout_alignRight="@+id/ivHero"
             android:layout_alignStart="@+id/ivHero"
-            android:layout_below="@+id/ivHero"
-            android:background="#333"
+            android:background="#BB333333"
             android:gravity="center_vertical|start"
             android:paddingBottom="16dp"
             android:paddingEnd="8dp"
@@ -38,7 +37,8 @@
             android:paddingRight="8dp"
             android:paddingStart="24dp"
             android:paddingTop="16dp"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:layout_alignBottom="@+id/ivHero"/>
 
         <ImageView
             android:id="@+id/ivSourceLogo"
@@ -81,7 +81,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top"
-                android:background="#33b5e5"
+                android:background="#333333"
                 android:paddingBottom="4dp"
                 android:paddingTop="4dp"
                 android:textColor="#fff" />
