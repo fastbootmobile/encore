@@ -15,6 +15,7 @@
 
 package org.omnirom.music.service;
 
+import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -24,17 +25,24 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
+import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
+import android.media.Rating;
 import android.media.RemoteControlClient;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.util.Log;
 
 import com.echonest.api.v4.EchoNestException;
 
 import org.acra.ACRA;
+import org.omnirom.music.api.echonest.AutoMixBucket;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.framework.RefCountedBitmap;
@@ -144,6 +152,7 @@ public class PlaybackService extends Service
     private boolean mHasAudioFocus;
     private boolean mRepeatMode;
     private Prefetcher mPrefetcher;
+    private MediaSession mMediaSession;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -156,6 +165,20 @@ public class PlaybackService extends Service
         @Override
         public void run() {
             new Thread(mStartPlaybackImplRunnable).start();
+        }
+    };
+
+    private Runnable mThumbsUpRunnable = new Runnable() {
+        @Override
+        public void run() {
+            AutoMixBucket bucket = AutoMixManager.getDefault().getCurrentPlayingBucket();
+            if (bucket != null) {
+                try {
+                    bucket.notifyLike();
+                } catch (EchoNestException e) {
+                    Log.e(TAG, "Cannot notify of like event");
+                }
+            }
         }
     };
 
@@ -229,9 +252,17 @@ public class PlaybackService extends Service
             public void onNotificationChanged(ServiceNotification notification) {
                 notification.notify(PlaybackService.this);
                 RefCountedBitmap albumArt = notification.getAlbumArt();
-                mRemoteControlClient.editMetadata(false)
-                        .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
-                                albumArt.get().copy(albumArt.get().getConfig(), false)).apply();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    MediaMetadata.Builder builder
+                            = new MediaMetadata.Builder()
+                            .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART,
+                                    albumArt.get().copy(albumArt.get().getConfig(), false));
+                    mMediaSession.setMetadata(builder.build());
+                } else {
+                    mRemoteControlClient.editMetadata(false)
+                            .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
+                                    albumArt.get().copy(albumArt.get().getConfig(), false)).apply();
+                }
             }
         });
 
@@ -343,38 +374,130 @@ public class PlaybackService extends Service
         return mNativeHub;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setupRemoteControl() {
-        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        mediaButtonIntent.setComponent(RemoteControlReceiver.getComponentName(this));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mMediaSession = new MediaSession(this, "OmniMusic");
+            mMediaSession.setActive(true);
 
-        PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
-                0, mediaButtonIntent, 0);
-        mRemoteControlClient = new RemoteControlClient(mediaPendingIntent);
-        int flags = RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS
-                | RemoteControlClient.FLAG_KEY_MEDIA_NEXT
-                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY
-                | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
-                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE;
-                // | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
-        mRemoteControlClient.setTransportControlFlags(flags);
+            mMediaSession.setCallback(new MediaSession.Callback() {
+                @Override
+                public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
+                    // Buttons actions can be overridden
+                    return super.onMediaButtonEvent(mediaButtonIntent);
+                }
+
+                @Override
+                public void onPlay() {
+                    playImpl();
+                }
+
+                @Override
+                public void onPlayFromMediaId(String mediaId, Bundle extras) {
+                    // Implement when we implement MediaBrowserService
+                    super.onPlayFromMediaId(mediaId, extras);
+                }
+
+                @Override
+                public void onPlayFromSearch(String query, Bundle extras) {
+                    // Implement to support starting song from search query (what search?)
+                    super.onPlayFromSearch(query, extras);
+                }
+
+                @Override
+                public void onSkipToQueueItem(long id) {
+                    playAtIndexImpl((int) id);
+                }
+
+                @Override
+                public void onPause() {
+                    pauseImpl();
+                }
+
+                @Override
+                public void onSkipToNext() {
+                    nextImpl();
+                }
+
+                @Override
+                public void onSkipToPrevious() {
+                    previousImpl();
+                }
+
+                @Override
+                public void onFastForward() {
+                    seekImpl(getCurrentTrackPositionImpl() + 5000);
+                }
+
+                @Override
+                public void onRewind() {
+                    seekImpl(getCurrentTrackPositionImpl() - 5000);
+                }
+
+                @Override
+                public void onStop() {
+                    stopImpl();
+                }
+
+                @Override
+                public void onSeekTo(long pos) {
+                    seekImpl(pos);
+                }
+
+                @Override
+                public void onSetRating(Rating rating) {
+                    if (rating.isThumbUp() || rating.hasHeart()) {
+                        new Thread(mThumbsUpRunnable).start();
+                    }
+                }
+            });
+        } else {
+            Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            mediaButtonIntent.setComponent(RemoteControlReceiver.getComponentName(this));
+
+            PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
+                    0, mediaButtonIntent, 0);
+            mRemoteControlClient = new RemoteControlClient(mediaPendingIntent);
+            int flags = RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS
+                    | RemoteControlClient.FLAG_KEY_MEDIA_NEXT
+                    | RemoteControlClient.FLAG_KEY_MEDIA_PLAY
+                    | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
+                    | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE;
+            // | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
+            mRemoteControlClient.setTransportControlFlags(flags);
+        }
     }
 
     private void updateRemoteMetadata() {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final Song currentSong = mPlaybackQueue.get(mCurrentTrack);
-        Artist artist = aggregator.retrieveArtist(currentSong.getArtist(), currentSong.getProvider());
-        Album album = aggregator.retrieveAlbum(currentSong.getAlbum(), currentSong.getProvider());
+        final Artist artist = aggregator.retrieveArtist(currentSong.getArtist(), currentSong.getProvider());
+        final Album album = aggregator.retrieveAlbum(currentSong.getAlbum(), currentSong.getProvider());
 
-        RemoteControlClient.MetadataEditor edit = mRemoteControlClient.editMetadata(true);
-        if (artist != null) {
-            edit.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, artist.getName());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            MediaMetadata.Builder builder = new MediaMetadata.Builder();
+            if (artist != null) {
+                builder.putString(MediaMetadata.METADATA_KEY_ARTIST, artist.getName());
+            }
+            if (album != null) {
+                builder.putString(MediaMetadata.METADATA_KEY_ALBUM, album.getName());
+                builder.putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, album.getSongsCount());
+            }
+            builder.putString(MediaMetadata.METADATA_KEY_TITLE, currentSong.getTitle());
+            builder.putLong(MediaMetadata.METADATA_KEY_DURATION, currentSong.getDuration());
+            mMediaSession.setMetadata(builder.build());
+        } else {
+            RemoteControlClient.MetadataEditor edit = mRemoteControlClient.editMetadata(true);
+            if (artist != null) {
+                edit.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, artist.getName());
+            }
+            if (album != null) {
+                edit.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, album.getName());
+            }
+            edit.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, currentSong.getTitle());
+            edit.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, currentSong.getDuration());
+            edit.apply();
         }
-        if (album != null) {
-            edit.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, album.getName());
-        }
-        edit.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, currentSong.getTitle());
-        edit.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, currentSong.getDuration());
-        edit.apply();
     }
 
     /**
@@ -420,12 +543,19 @@ public class PlaybackService extends Service
                 am.registerMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
 
                 // create and register the remote control client
-                am.registerRemoteControlClient(mRemoteControlClient);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    PlaybackState.Builder builder = new PlaybackState.Builder();
+                    builder.setState(PlaybackState.STATE_PLAYING,
                             (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
+                    mMediaSession.setPlaybackState(builder.build());
                 } else {
-                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+                    am.registerRemoteControlClient(mRemoteControlClient);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                        mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING,
+                                (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
+                    } else {
+                        mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+                    }
                 }
 
                 // Register AUDIO_BECOMING_NOISY to stop playback when earbuds are pulled
@@ -528,7 +658,14 @@ public class PlaybackService extends Service
                             });
 
                             updateRemoteMetadata();
-                            mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_BUFFERING);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                mMediaSession.setPlaybackState(
+                                        new PlaybackState.Builder(
+                                                mMediaSession.getController().getPlaybackState())
+                                                .setState(PlaybackState.STATE_BUFFERING, 0, 1.0f).build());
+                            } else {
+                                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_BUFFERING);
+                            }
                         }
                     }
                 }
@@ -583,6 +720,22 @@ public class PlaybackService extends Service
             } catch (EchoNestException e) {
                 Log.e(TAG, "Cannot notify EchoNest of skip event", e);
             }
+        }
+    }
+
+    /**
+     * Restarts the current song or goes to the previous one
+     */
+    private void previousImpl() {
+        boolean shouldRestart = (getCurrentTrackPositionImpl() > 4000 || mCurrentTrack == 0);
+        if (shouldRestart) {
+            // Restart playback
+            seekImpl(0);
+        } else {
+            // Go to the previous track
+            mCurrentTrack--;
+            mHandler.removeCallbacks(mStartPlaybackRunnable);
+            mHandler.post(mStartPlaybackRunnable);
         }
     }
 
@@ -675,6 +828,17 @@ public class PlaybackService extends Service
     }
 
     /**
+     * Plays the song in the queue at the specified index
+     * @param index The index to play, 0-based
+     */
+    private void playAtIndexImpl(int index) {
+        Log.d(TAG, "Playing track " + (index + 1) + "/" + mPlaybackQueue.size());
+        mCurrentTrack = index;
+        mHandler.removeCallbacks(mStartPlaybackRunnable);
+        mHandler.post(mStartPlaybackRunnable);
+    }
+
+    /**
      * @return The reference to the next track in the queue
      */
     public Song getNextTrack() {
@@ -683,6 +847,55 @@ public class PlaybackService extends Service
         } else {
             // No more tracks
             return null;
+        }
+    }
+
+    public int getCurrentTrackPositionImpl() {
+        if (mState == STATE_PAUSED) {
+            // When we are paused, we delay the track start time for as long as we are paused
+            // so that the song position actually pauses too. This is more a hack (hey, we
+            // mimic the official Spotify app bug!), and ideally we should calculate the elapsed
+            // time by counting the frames that are fed to the AudioSink.
+            mCurrentTrackStartTime += (System.currentTimeMillis() - mPauseLastTick);
+            mPauseLastTick = System.currentTimeMillis();
+        }
+
+        return (int) (System.currentTimeMillis() - mCurrentTrackStartTime);
+    }
+
+    public void seekImpl(final long timeMs) {
+        final Song currentSong = getCurrentSong();
+        boolean success = false;
+        if (currentSong != null) {
+            ProviderIdentifier id = currentSong.getProvider();
+            ProviderConnection conn = PluginsLookup.getDefault().getProvider(id);
+            if (conn != null) {
+                final IMusicProvider provider = conn.getBinder();
+                if (provider != null) {
+                    try {
+                        provider.seek(timeMs);
+                        success = true;
+                        mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot seek to time", e);
+                    }
+                }
+            }
+        }
+
+        if (success) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    for (IPlaybackCallback cb : mCallbacks) {
+                        try {
+                            cb.onSongScrobble((int) timeMs);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot notify scrobbling", e);
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -789,16 +1002,7 @@ public class PlaybackService extends Service
 
         @Override
         public int getCurrentTrackPosition() throws RemoteException {
-            if (mState == STATE_PAUSED) {
-                // When we are paused, we delay the track start time for as long as we are paused
-                // so that the song position actually pauses too. This is more a hack (hey, we
-                // mimic the official Spotify app bug!), and ideally we should calculate the elapsed
-                // time by counting the frames that are fed to the AudioSink.
-                mCurrentTrackStartTime += (System.currentTimeMillis() - mPauseLastTick);
-                mPauseLastTick = System.currentTimeMillis();
-            }
-
-            return (int) (System.currentTimeMillis() - mCurrentTrackStartTime);
+            return getCurrentTrackPositionImpl();
         }
 
         @Override
@@ -831,35 +1035,7 @@ public class PlaybackService extends Service
 
         @Override
         public void seek(final long timeMs) throws RemoteException {
-            final Song currentSong = getCurrentSong();
-            boolean success = false;
-            if (currentSong != null) {
-                ProviderIdentifier id = currentSong.getProvider();
-                ProviderConnection conn = PluginsLookup.getDefault().getProvider(id);
-                if (conn != null) {
-                    final IMusicProvider provider = conn.getBinder();
-                    if (provider != null) {
-                        provider.seek(timeMs);
-                        success = true;
-                        mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
-                    }
-                }
-            }
-
-            if (success) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (IPlaybackCallback cb : mCallbacks) {
-                            try {
-                                cb.onSongScrobble((int) timeMs);
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Cannot notify scrobbling", e);
-                            }
-                        }
-                    }
-                });
-            }
+            seekImpl(timeMs);
         }
 
         @Override
@@ -869,24 +1045,12 @@ public class PlaybackService extends Service
 
         @Override
         public void previous() throws RemoteException {
-            boolean shouldRestart = (getCurrentTrackPosition() > 4000 || mCurrentTrack == 0);
-            if (shouldRestart) {
-                // Restart playback
-                seek(0);
-            } else {
-                // Go to the previous track
-                mCurrentTrack--;
-                mHandler.removeCallbacks(mStartPlaybackRunnable);
-                mHandler.post(mStartPlaybackRunnable);
-            }
+            previousImpl();
         }
 
         @Override
         public void playAtQueueIndex(int index) {
-            Log.d(TAG, "Playing track " + (index + 1) + "/" + mPlaybackQueue.size());
-            mCurrentTrack = index;
-            mHandler.removeCallbacks(mStartPlaybackRunnable);
-            mHandler.post(mStartPlaybackRunnable);
+            playAtIndexImpl(index);
         }
 
         @Override
@@ -972,7 +1136,12 @@ public class PlaybackService extends Service
             Log.d(TAG, "onSongStarted: Playing...");
 
             mNotification.setPlayPauseAction(false);
-            mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mMediaSession.setPlaybackState(new PlaybackState.Builder(
+                        mMediaSession.getController().getPlaybackState()).setState(PlaybackState.STATE_PLAYING, 0, 1.0f).build());
+            } else {
+                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+            }
 
             // Prepare pre-fetching the next song
             // Note: We don't take care of the delay being too early when it's paused, as long
@@ -1015,7 +1184,12 @@ public class PlaybackService extends Service
                 Log.d(TAG, "onSongPaused: Paused...");
 
                 mNotification.setPlayPauseAction(true);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mMediaSession.setPlaybackState(
+                            new PlaybackState.Builder(mMediaSession.getController().getPlaybackState())
+                                    .setState(PlaybackState.STATE_PAUSED, (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f)
+                                    .build());
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                     mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED,
                             (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
                 } else {
