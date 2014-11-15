@@ -149,14 +149,6 @@
         <item quantity="other">%d albums</item>
     </plurals>
 
-    <string name="crash_toast_text">Ooooops ! I crashed, but a report has been sent to my developer to help fix the issue !</string>
-
-    <string name="crash_dialog_title">CrashTest has crashed</string>
-<string name="crash_dialog_text">An unexpected error occurred forcing the
-    application to stop. Please help us fix this by sending us error data,
-    all you have to do is click OK.</string>
-    <string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
-    <string name="crash_dialog_ok_toast">Thank you !</string>
     <string name="no_music_hint">You don\'t have any music. Configure a provider in the Settings, or copy music on your device via USB!</string>
     <string name="recognition_howto">Point your phone at a speaker, or sing a song, and press the button below. Once you\'re done, or after a few seconds, tap it again to recognize what song that was.</string>
     <string name="recognition_failed">Oops, we couldn\'t recognize what we heard!</string>
@@ -174,4 +166,9 @@
     <string name="toast_album_not_loaded_yet">Album is not loaded yet</string>
     <string name="toast_track_unavailable">This track is unavailable</string>
     <string name="toast_bucket_adjusted">Bucket adjusted to your liking</string>
+
+    <string name="error_album_unavailable_offline">This album is not available offline</string>
+    <string name="error_artist_unavailable_offline">The artist is not available offline</string>
+    <string name="error_similar_unavailable_offline">Similar artists are not available offline</string>
+    <string name="error_biography_unavailable_offline">Biography not available offline</string>
 </resources>

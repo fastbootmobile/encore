@@ -10,16 +10,7 @@
         android:layout_height="@dimen/shadow_height"
         android:background="@drawable/shadow" />
 
-    <!--
-    <Button
-        style="@style/OmniMusic.Spec.BorderlessButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/more_on_the_web"
-        android:id="@+id/btnMoreWeb"
-        android:layout_gravity="right"
-        android:padding="4dp" />
-    -->
+    <include layout="@layout/offline" />
 
     <ProgressBar
         android:layout_width="wrap_content"

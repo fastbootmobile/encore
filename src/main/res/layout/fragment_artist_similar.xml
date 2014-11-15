@@ -19,6 +19,8 @@
         android:layout_gravity="center"
         android:layout_marginTop="@dimen/activity_vertical_margin" />
 
+    <include layout="@layout/offline" />
+
     <org.lucasr.twowayview.TwoWayView
         android:id="@+id/twvSimilarArtists"
         android:layout_margin="2dp"

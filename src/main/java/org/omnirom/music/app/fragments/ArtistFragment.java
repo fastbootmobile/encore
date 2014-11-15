@@ -25,7 +25,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -39,7 +38,6 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,6 +65,7 @@ import org.omnirom.music.app.ui.ObservableScrollView;
 import org.omnirom.music.app.ui.ParallaxScrollView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.app.ui.WrapContentHeightViewPager;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.framework.RefCountedBitmap;
 import org.omnirom.music.framework.Suggestor;
@@ -78,12 +77,10 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
-import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
-import org.omnirom.music.service.IPlaybackService;
 import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
@@ -706,6 +703,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private HashMap<String, View> mAlbumToViewMap = new HashMap<String, View>();
         private View mPreviousSongGroup;
         private View mPreviousAlbumGroup;
+        private TextView mOfflineView;
         private Handler mHandler;
 
         private Comparator<Album> mComparator = new Comparator<Album>() {
@@ -721,13 +719,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         };
 
-        private Runnable mPausePlaybackRunnable = new Runnable() {
-            @Override
-            public void run() {
-                PlaybackProxy.pause();
-            }
-        };
-
         private View.OnClickListener mPlayAlbumClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -739,7 +730,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 if (drawable.getRequestedShape() == PlayPauseDrawable.SHAPE_STOP) {
                     drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                     mParent.setFabShape(PlayPauseDrawable.SHAPE_PLAY);
-                    new Thread(mPausePlaybackRunnable).start();
+                    PlaybackProxy.pause();
                 } else {
                     drawable.setShape(PlayPauseDrawable.SHAPE_STOP);
                     mParent.setFabShape(PlayPauseDrawable.SHAPE_PAUSE);
@@ -817,6 +808,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             mRootView = inflater.inflate(R.layout.fragment_artist_tracks, container, false);
             mHandler = new Handler();
+
+            mOfflineView = (TextView) mRootView.findViewById(R.id.tvErrorMessage);
+            mOfflineView.setText(R.string.error_artist_unavailable_offline);
+            mOfflineView.setVisibility(View.GONE);
 
             // Load recommendation and albums for the first
             mHandler.post(new Runnable() {
@@ -973,7 +968,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                         if (provider != null) {
                             try {
                                 boolean hasMore = provider.fetchArtistAlbums(mParent.getArtist().getRef());
-                                showLoadingSpinner(hasMore);
+                                showLoadingSpinner(hasMore && !ProviderAggregator.getDefault().isOfflineMode());
                                 mParent.showFab(true, !hasMore);
                             } catch (RemoteException e) {
                                 Log.e(TAG, "Unable to fetch artist albums", e);
@@ -1006,29 +1001,39 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 fetchAlbums();
             }
 
+            // Check if we're offline, and if we have nothing to show, then show the offline error
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             final LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
             llAlbums.removeAllViews();
 
-            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             Iterator<String> albumIt = new ArrayList<String>(mParent.getArtist().getAlbums()).iterator();
             List<Album> albums = new ArrayList<Album>();
 
-            while (albumIt.hasNext()) {
-                String albumRef = albumIt.next();
-                Album album = aggregator.retrieveAlbum(albumRef, mParent.getArtist().getProvider());
 
-                if (album != null) {
-                    ProviderConnection conn = PluginsLookup.getDefault().getProvider(album.getProvider());
-                    if (conn != null) {
-                        IMusicProvider provider = conn.getBinder();
-                        try {
-                            if (provider != null) {
-                                provider.fetchAlbumTracks(albumRef);
+            if (aggregator.isOfflineMode() && !albumIt.hasNext()) {
+                mOfflineView.setVisibility(View.VISIBLE);
+                mRootView.findViewById(R.id.tvHeaderAlbums).setVisibility(View.GONE);
+            } else {
+                mOfflineView.setVisibility(View.GONE);
+                mRootView.findViewById(R.id.tvHeaderAlbums).setVisibility(View.VISIBLE);
+
+                while (albumIt.hasNext()) {
+                    String albumRef = albumIt.next();
+                    Album album = aggregator.retrieveAlbum(albumRef, mParent.getArtist().getProvider());
+
+                    if (album != null) {
+                        ProviderConnection conn = PluginsLookup.getDefault().getProvider(album.getProvider());
+                        if (conn != null) {
+                            IMusicProvider provider = conn.getBinder();
+                            try {
+                                if (provider != null) {
+                                    provider.fetchAlbumTracks(albumRef);
+                                }
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Remote exception while trying to fetch album tracks", e);
                             }
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Remote exception while trying to fetch album tracks", e);
+                            albums.add(album);
                         }
-                        albums.add(album);
                     }
                 }
             }
@@ -1266,6 +1271,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private static Artist mArtist;
         private Handler mHandler;
         private TextView mArtistInfo;
+        private TextView mOfflineView;
         private boolean mInfoLoaded;
         private ProgressBar mLoadingSpinner;
 
@@ -1291,12 +1297,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
          */
         public void notifyActive() {
             if (!mInfoLoaded) {
-                mInfoLoaded = true;
-                new Thread() {
-                    public void run() {
-                        loadBiographySync();
-                    }
-                }.start();
+                if (ProviderAggregator.getDefault().isOfflineMode()) {
+                    mOfflineView.setVisibility(View.VISIBLE);
+                    mLoadingSpinner.setVisibility(View.GONE);
+                } else {
+                    mOfflineView.setVisibility(View.GONE);
+                    mLoadingSpinner.setVisibility(View.VISIBLE);
+                    mInfoLoaded = true;
+                    new Thread() {
+                        public void run() {
+                            loadBiographySync();
+                        }
+                    }.start();
+                }
             }
         }
 
@@ -1345,19 +1358,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             View rootView = inflater.inflate(R.layout.fragment_artist_info, container, false);
             mArtistInfo = (TextView) rootView.findViewById(R.id.tvArtistInfo);
             mLoadingSpinner = (ProgressBar) rootView.findViewById(R.id.pbArtistInfo);
-
-            EchoNest echoNest = new EchoNest();
-            if (echoNest.hasArtistInCache(mArtist.getName())) {
-                try {
-                    com.echonest.api.v4.Artist artist = echoNest.searchArtistByName(mArtist.getName());
-                    if (echoNest.hasArtistBiographyCached(artist)) {
-                        loadBiographySync();
-                    }
-                } catch (EchoNestException e) {
-                    // should not happen as we take from cache
-                }
-            }
-
+            mOfflineView = (TextView) rootView.findViewById(R.id.tvErrorMessage);
+            mOfflineView.setText(R.string.error_biography_unavailable_offline);
             return rootView;
         }
     }
@@ -1373,6 +1375,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private Handler mHandler;
         private List<Artist> mSimilarArtists;
         private ProgressBar mArtistsSpinner;
+        private TextView mOfflineView;
         private final ItemClickSupport.OnItemClickListener mItemClickListener = new ItemClickSupport.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView parent, View view, int position, long id) {
@@ -1415,12 +1418,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
          */
         public void notifyActive() {
             if (!mSimilarLoaded) {
-                mSimilarLoaded = true;
-                new Thread() {
-                    public void run() {
-                        loadSimilarSync();
-                    }
-                }.start();
+                if (ProviderAggregator.getDefault().isOfflineMode()) {
+                    mOfflineView.setVisibility(View.VISIBLE);
+                    mArtistsSpinner.setVisibility(View.GONE);
+                } else {
+                    mOfflineView.setVisibility(View.GONE);
+                    mArtistsSpinner.setVisibility(View.VISIBLE);
+                    mSimilarLoaded = true;
+                    new Thread() {
+                        public void run() {
+                            loadSimilarSync();
+                        }
+                    }.start();
+                }
             }
         }
 
@@ -1490,7 +1500,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.shortToast(getActivity(), R.string.unable_fetch_artist_info);
+                        mOfflineView.setVisibility(View.VISIBLE);
                     }
                 });
 
@@ -1510,6 +1520,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mArtistsGrid.addItemDecoration(new DividerItemDecoration(divider));
             final ItemClickSupport itemClick = ItemClickSupport.addTo(mArtistsGrid);
             itemClick.setOnItemClickListener(mItemClickListener);
+            mOfflineView = (TextView) rootView.findViewById(R.id.tvErrorMessage);
+            mOfflineView.setText(R.string.error_similar_unavailable_offline);
             return rootView;
         }
     }
