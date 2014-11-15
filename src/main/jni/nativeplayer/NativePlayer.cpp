@@ -346,7 +346,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
         if (qstate.count == 0) {
             // We have no buffer pending, enqueue it directly
             SLresult result = (*m_pBufferQueue)->Enqueue(m_pBufferQueue, data, len);
-            ALOGE("Enqueued directly %d bytes", len);
+            // ALOGE("Enqueued directly %d bytes", len);
             m_iWrittenSamples += len;
             if (m_pNativeHub) {
                 om_NativeHub_onAudioMirrorWritten(m_pNativeHub,
@@ -408,6 +408,8 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
 
             result = (*p->m_pBufferQueue)->Enqueue(p->m_pBufferQueue, p->m_pPlayingBuffer,
                     p->m_iActiveBufferIndex);
+
+            // ALOGE("Enqueued %d bytes", p->m_iActiveBufferIndex);
 
             if (result == SL_RESULT_SUCCESS) {
                 if (p->m_pNativeHub) {

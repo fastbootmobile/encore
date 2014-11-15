@@ -97,6 +97,8 @@ void NativeHub::writeAudioToSink(const uint8_t* data, const uint32_t len) {
 void NativeHub::writeAudioResponse(const uint32_t written) {
     if (m_pLastProviderSocket) {
         m_pLastProviderSocket->writeAudioResponse(written);
+    } else {
+        ALOGE("CANNOT WRITE AUDIO RESPONSE: NO LAST PROVIDER SOCKET!!!!");
     }
 }
 // -------------------------------------------------------------------------------------
