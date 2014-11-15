@@ -23,12 +23,14 @@ import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -64,7 +66,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private static final String TAG = "AlbumViewFragment";
 
     private SongsListAdapter mAdapter;
-    private View mRootView;
+    private ViewGroup mRootView;
     private Album mAlbum;
     private Handler mHandler;
     private Bitmap mHeroImage;
@@ -74,6 +76,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private ParallaxScrollListView mListView;
     private boolean mFabShouldResume = false;
     private RefCountedBitmap mLogoBitmap;
+    private View mOfflineView;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -126,9 +129,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
             }
 
             // If we already have some songs, show them
+            View loadingBar = findViewById(R.id.pbAlbumLoading);
+            mListView.setVisibility(View.VISIBLE);
             if (mAlbum.getSongsCount() > 0) {
                 // If there's not more tracks, hide the loading bar, otherwise keep on displaying it
-                View loadingBar = findViewById(R.id.pbAlbumLoading);
                 if (loadingBar.getVisibility() == View.VISIBLE && !hasMore) {
                     loadingBar.setVisibility(View.GONE);
                     mHandler.postDelayed(new Runnable() {
@@ -137,6 +141,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                             showFab(true, true);
                         }
                     }, 400);
+                }
+                if (mOfflineView != null) {
+                    mOfflineView.setVisibility(View.GONE);
                 }
 
                 // Load the songs into the adapter
@@ -152,9 +159,15 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                 }
                 mAdapter.notifyDataSetChanged();
                 mListView.startLayoutAnimation();
+            } else if (aggregator.isOfflineMode()) {
+                loadingBar.setVisibility(View.GONE);
+                mListView.setVisibility(View.GONE);
+                mOfflineView = LayoutInflater.from(getActivity())
+                        .inflate(R.layout.offline, (ViewGroup) mRootView.getParent().getParent())
+                        .findViewById(R.id.tvErrorMessage);
             } else {
                 // No song loaded, show the loading spinner and hide the play FAB
-                findViewById(R.id.pbAlbumLoading).setVisibility(View.VISIBLE);
+                loadingBar.setVisibility(View.VISIBLE);
             }
         }
     };
@@ -168,7 +181,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mHandler = new Handler();
 
         // Inflate the layout for this fragment
-        mRootView = inflater.inflate(R.layout.fragment_album_view, container, false);
+        mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_album_view, container, false);
         assert mRootView != null;
 
         // Setup the contents list view

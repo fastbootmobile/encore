@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.os.Bundle;
@@ -459,7 +460,12 @@ public class MainActivity extends FragmentActivity
 
             // Offline mode
             mOfflineMenuItem = menu.findItem(R.id.action_offline_mode);
-            mOfflineMenuItem.setChecked(ProviderAggregator.getDefault().isOfflineMode());
+            ProviderAggregator aggregator = ProviderAggregator.getDefault();
+            if (aggregator.hasNetworkConnectivity()) {
+                mOfflineMenuItem.setChecked(aggregator.isOfflineMode());
+            } else {
+                mOfflineMenuItem.setEnabled(false);
+            }
 
             restoreActionBar();
             return true;

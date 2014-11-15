@@ -385,7 +385,7 @@ public class AlbumArtCache {
                     Log.w(TAG, "Rate limited while getting image");
                 }
             } else {
-                ImageCache.getDefault().put(getEntityArtKey(artist), (Bitmap) null);
+                ImageCache.getDefault().put(getEntityArtKey(artist), (RefCountedBitmap) null);
                 listener.onArtLoaded(artist, null);
                 result = true;
             }

@@ -16,6 +16,9 @@
 package org.omnirom.music.providers;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -540,7 +543,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
-     * Notify the providers that the offline mode has changed
+     * Notify the providers that the offline mode has changed. Unlike isOfflineMode, this method
+     * is only called when the user toggles Offline mode in the main activity overflow menu.
      *
      * @param isEnabled true if offline mode is enabled, false otherwise
      */
@@ -566,8 +570,22 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         });
     }
 
+    /**
+     * Returns whether or not the device is offline. The value will be true if either the user
+     * checked "Offline mode" in the main overflow menu, or no Internet connection has been
+     * detected.
+     * @return true if the device is offline (or user toggled offline mode), false otherwise
+     */
     public boolean isOfflineMode() {
-        return mIsOfflineMode;
+        return mIsOfflineMode || !hasNetworkConnectivity();
+    }
+
+    public boolean hasNetworkConnectivity() {
+        // Check network connectivity
+        final ConnectivityManager cm =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo ni = cm.getActiveNetworkInfo();
+        return ni != null && ni.isConnected();
     }
 
     /**

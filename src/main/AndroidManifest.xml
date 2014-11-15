@@ -2,11 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.omnirom.music.app" >
 
+    <!-- Permission needed for EchoNest / MusicBrainz (album art, automix, etc). -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Permission needed to check whether or not the device is offline -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Permission needed for WebCasting/ChromeCasting -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- Permission needed to cache data -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- Permission needed for recognition -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- Main application declaration -->
     <application
         android:name=".OmniMusic"
         android:allowBackup="true"

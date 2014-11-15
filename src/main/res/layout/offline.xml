@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:gravity="center_vertical|center_horizontal">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="This album is not available offline"
+        android:id="@+id/tvErrorMessage"
+        android:layout_gravity="center_horizontal|bottom"
+        android:textColor="@color/grey"
+        android:drawableTop="@drawable/logo_offline"
+        android:gravity="center_horizontal|bottom"
+        android:layout_marginBottom="64dp"/>
+</FrameLayout>

@@ -554,13 +554,11 @@ public class PlayingBarView extends RelativeLayout {
             final View itemRoot = inflater.inflate(R.layout.item_playbar_action, mTracksLayout, false);
             mTracksLayout.addView(itemRoot);
 
-            TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
             TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
-            ImageView ivActionIcon = (ImageView) itemRoot.findViewById(R.id.ivActionIcon);
+            //ImageView ivActionIcon = (ImageView) itemRoot.findViewById(R.id.ivActionIcon);
 
-            tvArtist.setVisibility(View.GONE);
             tvTitle.setText(getContext().getString(R.string.view_full_queue));
-            ivActionIcon.setImageResource(R.drawable.ic_reduce);
+            /*ivActionIcon.setImageResource(R.drawable.ic_reduce);
             ivActionIcon.setScaleType(ImageView.ScaleType.CENTER);
 
             ivActionIcon.setOnClickListener(new OnClickListener() {
@@ -568,7 +566,8 @@ public class PlayingBarView extends RelativeLayout {
                 public void onClick(View view) {
                     setWrapped(true);
                 }
-            });
+            });*/
+            //ivActionIcon.setVisibility(View.GONE);
 
             final int finalShownCount = shownCount;
             final View[] finalItemViews = itemViews;
