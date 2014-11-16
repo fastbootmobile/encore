@@ -296,7 +296,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                 if (artist != null) {
                     holder.tvSubTitle.setText(artist.getName());
                 } else {
-                    holder.tvSubTitle.setText(null);
+                    holder.tvSubTitle.setText("...");
                 }
             } else {
                 holder.tvSubTitle.setText(null);

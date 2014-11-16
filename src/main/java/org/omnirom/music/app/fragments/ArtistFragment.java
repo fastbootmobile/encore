@@ -450,6 +450,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
         tvArtist.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
         tvArtist.setText(mArtist.getName());
+        tvArtist.setAlpha(0);
+        tvArtist.animate().alpha(1).setDuration(300).setStartDelay(500).start();
 
         // Setup the subfragments pager
         final WrapContentHeightViewPager pager = (WrapContentHeightViewPager) mRootView.findViewById(R.id.pagerArtist);

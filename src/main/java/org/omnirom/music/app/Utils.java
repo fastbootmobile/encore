@@ -492,6 +492,9 @@ public class Utils {
     }
 
     public static void animateScale(View v, boolean animate, boolean visible) {
+        v.setPivotX(v.getMeasuredWidth() / 2);
+        v.setPivotY(v.getMeasuredHeight() / 2);
+
         if (visible) {
             if (animate) {
                 v.animate().scaleX(1.0f).scaleY(1.0f)
@@ -509,14 +512,14 @@ public class Utils {
             if (animate) {
                 v.animate().scaleX(0.0f).scaleY(0.0f)
                         .alpha(0.0f)
-                        .translationY(v.getMeasuredHeight() / 4)
+                        .translationY(v.getHeight() / 4)
                         .setDuration(400)
                         .setInterpolator(new DecelerateInterpolator()).start();
             } else {
                 v.setScaleX(0.0f);
                 v.setScaleY(0.0f);
                 v.setAlpha(0.0f);
-                v.setTranslationY(v.getMeasuredHeight() / 4);
+                v.setTranslationY(v.getHeight() / 4);
             }
         }
     }

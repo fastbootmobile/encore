@@ -21,7 +21,8 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/tile_dual_text_height">
+        android:layout_height="@dimen/tile_dual_text_height"
+        android:minHeight="@dimen/tile_dual_text_height">
 
         <TextView
             android:id="@+id/tvTitle"
@@ -33,7 +34,7 @@
             android:layout_weight="1"
             android:singleLine="true"
             android:gravity="start|bottom"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/tvSubTitle"
