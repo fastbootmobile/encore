@@ -192,7 +192,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
                 break;
 
             default:
-                ALOGE("Unsupported channel count: %d", m_iChannels.load());
+                ALOGE("Unsupported channel count: %d", channels);
                 return false;
         }
 
@@ -205,7 +205,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
                 break;
 
             default:
-                ALOGE("Unsupported sample format: %d bits", m_iSampleFormat.load());
+                ALOGE("Unsupported sample format: %d bits", sample_format);
                 return false;
         }
 
