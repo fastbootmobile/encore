@@ -38,17 +38,22 @@ public class Prefetcher implements Runnable {
     @Override
     public void run() {
         // If we're still expecting this song next, pre-fetch it
-        Song nextSong = mService.getNextTrack();
+        final Song nextSong = mService.getNextTrack();
         if (nextSong != null) {
             final ProviderConnection conn = PluginsLookup.getDefault().getProvider(nextSong.getProvider());
             if (conn != null) {
                 final IMusicProvider provider = conn.getBinder();
                 if (provider != null) {
-                    try {
-                        provider.prefetchSong(nextSong.getRef());
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot pre-fetch song", e);
-                    }
+                    // We prefetch in a thread, as if the provider blocks, this is blocking the UI
+                    new Thread() {
+                        public void run() {
+                            try {
+                                provider.prefetchSong(nextSong.getRef());
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Cannot pre-fetch song", e);
+                            }
+                        }
+                    }.start();
                 }
             }
         }
