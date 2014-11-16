@@ -37,6 +37,8 @@ import java.util.List;
  * Class creating a composite image for playlist cover art
  */
 public class PlaylistArtBuilder {
+    private static final String TAG = "PlaylistArtBuilder";
+
     private Bitmap mPlaylistComposite;
     private List<RefCountedBitmap> mPlaylistSource;
     private Paint mPlaylistPaint;
@@ -50,7 +52,8 @@ public class PlaylistArtBuilder {
     private Runnable mTimeoutWatchdog = new Runnable() {
         @Override
         public void run() {
-            Log.e("PlaylistArtBUilder", "Watchdog kicking " + mNumComposite + " images");
+            Log.e(TAG, "Watchdog kicking " + mNumComposite + " images");
+
             if (mPlaylistComposite != null) {
                 try {
                     mCallback.onArtLoaded(mPlaylistComposite.copy(Bitmap.Config.ARGB_8888, false));
@@ -179,7 +182,7 @@ public class PlaylistArtBuilder {
             }
         }
 
-        Log.e("PlaylistArt", "Got image " + numImages + "/" + mNumComposite);
+        Log.e(TAG, "Got image " + numImages + "/" + mNumComposite);
 
         if (numImages == mNumComposite) {
             mDone = true;

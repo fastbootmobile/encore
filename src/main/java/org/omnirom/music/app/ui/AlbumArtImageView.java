@@ -46,6 +46,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private boolean mCrossfade;
     private boolean mSkipTransition;
     private RefCountedBitmap mCurrentBitmap;
+    private TaskRunnable mRunnable;
 
     public AlbumArtImageView(Context context) {
         super(context);
@@ -75,11 +76,13 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         }
     }
 
-    private void freeMemory() {
+    private void freeMemory(boolean removeRequestedEntity) {
         if (mCurrentBitmap != null) {
             mCurrentBitmap.release();
             mCurrentBitmap = null;
-            mRequestedEntity = null;
+            if (removeRequestedEntity) {
+                mRequestedEntity = null;
+            }
         }
         if (mTask != null && !mTask.isCancelled()) {
             mTask.cancel(true);
@@ -89,19 +92,24 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
     @Override
     protected void finalize() throws Throwable {
-        freeMemory();
+        freeMemory(true);
         super.finalize();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        freeMemory();
+        freeMemory(false);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (mRequestedEntity != null && mTask == null && mRunnable == null) {
+            BoundEntity ent = mRequestedEntity;
+            mRequestedEntity = null;
+            loadArtImpl(ent);
+        }
     }
 
     private void forceDrawableReload() {
@@ -169,7 +177,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     }
 
     private void loadArtImpl(final BoundEntity ent) {
-        if (ent == null || ent.equals(mRequestedEntity)) {
+        if (ent == null
+                || (mRequestedEntity != null && ent.getRef().equals(mRequestedEntity.getRef()))) {
             // Nothing to do, we are displaying the proper thing already
             return;
         }
@@ -188,7 +197,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         // being quickly flinged through (the requested entity will change in-between as the
         // view is recycled). We don't wait however in crossfade mode as we expect to see the
         // image as soon as possible.
-        TaskRunnable runnable = new TaskRunnable(ent);
+        mRunnable = new TaskRunnable(ent);
 
         // When we're crossfading, we're assuming we want the image directly
         if (mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY) {
@@ -196,10 +205,10 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
                 mSkipTransition = true;
             }
             setDefaultArt();
-            runnable.run(true);
+            mRunnable.run(true);
         } else {
             setDefaultArt();
-            mHandler.postDelayed(runnable, DELAY_BEFORE_START);
+            mHandler.postDelayed(mRunnable, DELAY_BEFORE_START);
         }
     }
 
@@ -234,6 +243,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
                 && !Utils.isAlbumAvailableOffline((Album) request)) {
             mDrawable.setShowOfflineOverdraw(true);
         }
+
+        mRunnable = null;
     }
 
     public interface OnArtLoadedListener {

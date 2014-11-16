@@ -236,7 +236,6 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
             }
         });
 
-
         ivHero.setImageBitmap(mHeroImage);
 
         // Set the header view and adapter
@@ -295,6 +294,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         if (mLogoBitmap != null) {
             mLogoBitmap.release();
         }
+        if (mHeroImage != null) {
+            mHeroImage.recycle();
+        }
     }
 
     /**
@@ -303,7 +305,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
      * @param extras The extras contained in the Intent that started the parent activity
      */
     public void setArguments(Bitmap hero, Bundle extras) {
-        mHeroImage = hero;
+        mHeroImage = hero.copy(hero.getConfig(), false);
         mBackgroundColor = extras.getInt(AlbumActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
 
         String albumRef = extras.getString(AlbumActivity.EXTRA_ALBUM);
