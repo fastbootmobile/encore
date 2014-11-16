@@ -43,10 +43,12 @@ public class TopCropImageView extends ImageView {
     protected boolean setFrame(int l, int t, int r, int b) {
         final Matrix matrix = getImageMatrix();
         final float width = getMeasuredWidth();
+        final float height = getMeasuredHeight();
         if (getDrawable() != null) {
             final float intrinsicWidth = getDrawable().getIntrinsicWidth();
+            final float intrinsicHeight = getDrawable().getIntrinsicHeight();
 
-            final float scaleFactor = width / intrinsicWidth;
+            final float scaleFactor = intrinsicHeight < intrinsicWidth ? height / intrinsicHeight : width / intrinsicWidth;
             matrix.setScale(scaleFactor, scaleFactor, 0, 0);
             setImageMatrix(matrix);
         }
