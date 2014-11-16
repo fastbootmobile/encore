@@ -47,6 +47,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private boolean mSkipTransition;
     private RefCountedBitmap mCurrentBitmap;
     private TaskRunnable mRunnable;
+    private boolean mCurrentIsDefault;
 
     public AlbumArtImageView(Context context) {
         super(context);
@@ -131,6 +132,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         }
         mDrawable.setImmediateTo((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
         forceDrawableReload();
+        mCurrentIsDefault = true;
     }
 
     /**
@@ -178,7 +180,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
     private void loadArtImpl(final BoundEntity ent) {
         if (ent == null
-                || (mRequestedEntity != null && ent.getRef().equals(mRequestedEntity.getRef()))) {
+                || (mRequestedEntity != null
+                && !mCurrentIsDefault
+                && ent.getRef().equals(mRequestedEntity.getRef()))) {
             // Nothing to do, we are displaying the proper thing already
             return;
         }
@@ -234,6 +238,10 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             if (mOnArtLoadedListener != null) {
                 mOnArtLoadedListener.onArtLoaded(this, drawable);
             }
+
+            mCurrentIsDefault = false;
+        } else {
+            mCurrentIsDefault = true;
         }
 
         // If it's an album and we're offline and album is unavailable,
