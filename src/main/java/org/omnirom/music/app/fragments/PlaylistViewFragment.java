@@ -205,7 +205,12 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 }
             }
         });
-        updateOfflineStatus();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateOfflineStatus();
+            }
+        }, 1000);
 
         tvAlbumName.setText(mPlaylist.getName());
 
