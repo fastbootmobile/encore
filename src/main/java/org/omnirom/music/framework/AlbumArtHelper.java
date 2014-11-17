@@ -121,7 +121,7 @@ public class AlbumArtHelper {
                         // Wait for the result
                         if (mArtBitmap == null) {
                             try {
-                                wait(8000);
+                                wait(6000);
                             } catch (InterruptedException e) {
                                 Log.w(TAG, "Interrupted while loading art");
                             }

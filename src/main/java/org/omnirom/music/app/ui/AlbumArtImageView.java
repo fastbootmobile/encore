@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
@@ -193,6 +194,10 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         if (mTask != null) {
             mTask.cancel(true);
         }
+        if (mRunnable != null) {
+            mRunnable.cancel();
+            mRunnable = null;
+        }
 
         // If we have the image in cache, show it immediately.
         int cacheStatus = AlbumArtCache.getDefault().getCacheStatus(ent);
@@ -219,6 +224,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     @Override
     public void onArtLoaded(RefCountedBitmap output, BoundEntity request) {
         // If we have an actual result, display it!
+        Log.e("AAIV", "onArtLoaded: " + output);
         if (output != null) {
             if (mCurrentBitmap != null) {
                 mCurrentBitmap.release();
@@ -274,9 +280,13 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
         @Override
         public void run() {
-            if (mRequestedEntity != null && mRequestedEntity.equals(mEntity)) {
+            if (mRequestedEntity != null && mEntity != null && mRequestedEntity.equals(mEntity)) {
                 mTask = AlbumArtHelper.retrieveAlbumArt(AlbumArtImageView.this, mEntity, mImmediate);
             }
+        }
+
+        public void cancel() {
+            mEntity = null;
         }
     }
 }
