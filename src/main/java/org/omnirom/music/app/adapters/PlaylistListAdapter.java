@@ -54,7 +54,7 @@ public class PlaylistListAdapter extends BaseAdapter {
         public int compare(Playlist playlist, Playlist playlist2) {
             if (playlist != null && playlist2 != null && playlist.getName() != null
                     && playlist2.getName() != null) {
-                return playlist.getName().compareTo(playlist2.getName());
+                return playlist.getName().toLowerCase().compareTo(playlist2.getName().toLowerCase());
             } else if (playlist != null && playlist2 != null) {
                 return playlist.getRef().compareTo(playlist2.getRef());
             } else {
