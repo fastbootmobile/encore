@@ -224,7 +224,6 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     @Override
     public void onArtLoaded(RefCountedBitmap output, BoundEntity request) {
         // If we have an actual result, display it!
-        Log.e("AAIV", "onArtLoaded: " + output);
         if (output != null) {
             if (mCurrentBitmap != null) {
                 mCurrentBitmap.release();

@@ -192,7 +192,6 @@ public class AlbumArtCache {
             }
         }
 
-        // TODO: Don't forget to push to imagecache!
         return result;
     }
 
