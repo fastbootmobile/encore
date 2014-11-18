@@ -72,8 +72,8 @@ public class SettingsActivity extends FragmentActivity {
         toggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    //finishAfterTransition();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    finishAfterTransition();
                 } else {
                     finish();
                 }
