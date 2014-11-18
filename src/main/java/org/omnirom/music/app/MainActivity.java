@@ -189,6 +189,15 @@ public class MainActivity extends FragmentActivity
         if (!mPlayingBarLayout.isWrapped()) {
             mPlayingBarLayout.setWrapped(true);
         } else {
+            if (mCurrentFragmentIndex < 0) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCurrentFragmentIndex = 0;
+                        restoreActionBar();
+                    }
+                });
+            }
             super.onBackPressed();
         }
     }

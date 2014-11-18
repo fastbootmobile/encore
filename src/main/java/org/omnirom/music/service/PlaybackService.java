@@ -15,34 +15,21 @@
 
 package org.omnirom.music.service;
 
-import android.annotation.TargetApi;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.media.AudioManager;
-import android.media.MediaMetadata;
-import android.media.MediaMetadataRetriever;
-import android.media.Rating;
-import android.media.RemoteControlClient;
-import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.util.Log;
 
 import com.echonest.api.v4.EchoNestException;
 
 import org.acra.ACRA;
-import org.omnirom.music.api.echonest.AutoMixBucket;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.framework.RefCountedBitmap;
@@ -140,7 +127,6 @@ public class PlaybackService extends Service
     private PlaybackQueue mPlaybackQueue;
     private List<IPlaybackCallback> mCallbacks;
     private ServiceNotification mNotification;
-    private RemoteControlClient mRemoteControlClient;
     private int mCurrentTrack = -1;
     private long mCurrentTrackStartTime;
     private long mPauseLastTick;
@@ -152,7 +138,7 @@ public class PlaybackService extends Service
     private boolean mHasAudioFocus;
     private boolean mRepeatMode;
     private Prefetcher mPrefetcher;
-    private MediaSession mMediaSession;
+    private RemoteMetadataManager mRemoteMetadata;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -168,24 +154,11 @@ public class PlaybackService extends Service
         }
     };
 
-    private Runnable mThumbsUpRunnable = new Runnable() {
-        @Override
-        public void run() {
-            AutoMixBucket bucket = AutoMixManager.getDefault().getCurrentPlayingBucket();
-            if (bucket != null) {
-                try {
-                    bucket.notifyLike();
-                } catch (EchoNestException e) {
-                    Log.e(TAG, "Cannot notify of like event");
-                }
-            }
-        }
-    };
-
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<IPlaybackCallback>();
         mPrefetcher = new Prefetcher(this);
+        mRemoteMetadata = new RemoteMetadataManager(this);
     }
 
     /**
@@ -202,16 +175,16 @@ public class PlaybackService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
-        // Transition zone
+
+        // Native playback initialization
         mNativeHub = new NativeHub();
         mNativeSink = new NativeAudioSink();
         mNativeHub.setSinkPointer(mNativeSink.getPlayer().getHandle());
 
-        //
         mDSPProcessor = new DSPProcessor(this);
         mDSPProcessor.restoreChain(this);
-        // End of transition zone
 
+        // Plugins initialization
         PluginsLookup.getDefault().initialize(getApplicationContext());
         PluginsLookup.getDefault().registerProviderListener(this);
         mHandler = new Handler();
@@ -252,22 +225,14 @@ public class PlaybackService extends Service
             public void onNotificationChanged(ServiceNotification notification) {
                 notification.notify(PlaybackService.this);
                 RefCountedBitmap albumArt = notification.getAlbumArt();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    MediaMetadata.Builder builder
-                            = new MediaMetadata.Builder()
-                            .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART,
-                                    albumArt.get().copy(albumArt.get().getConfig(), false));
-                    mMediaSession.setMetadata(builder.build());
-                } else {
-                    mRemoteControlClient.editMetadata(false)
-                            .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
-                                    albumArt.get().copy(albumArt.get().getConfig(), false)).apply();
-                }
+                albumArt.acquire();
+                mRemoteMetadata.setAlbumArt(albumArt.get());
+                albumArt.release();
             }
         });
 
         // Setup lockscreen remote controls
-        setupRemoteControl();
+        mRemoteMetadata.setup();
 
         // Restore preferences
         SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
@@ -283,6 +248,7 @@ public class PlaybackService extends Service
         Log.i(TAG, "onDestroy()");
 
         ProviderAggregator.getDefault().removeUpdateCallback(this);
+        mRemoteMetadata.release();
 
         // Remove audio hosts from providers
 
@@ -374,132 +340,6 @@ public class PlaybackService extends Service
         return mNativeHub;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void setupRemoteControl() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mMediaSession = new MediaSession(this, "OmniMusic");
-            mMediaSession.setActive(true);
-
-            mMediaSession.setCallback(new MediaSession.Callback() {
-                @Override
-                public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
-                    // Buttons actions can be overridden
-                    return super.onMediaButtonEvent(mediaButtonIntent);
-                }
-
-                @Override
-                public void onPlay() {
-                    playImpl();
-                }
-
-                @Override
-                public void onPlayFromMediaId(String mediaId, Bundle extras) {
-                    // Implement when we implement MediaBrowserService
-                    super.onPlayFromMediaId(mediaId, extras);
-                }
-
-                @Override
-                public void onPlayFromSearch(String query, Bundle extras) {
-                    // Implement to support starting song from search query (what search?)
-                    super.onPlayFromSearch(query, extras);
-                }
-
-                @Override
-                public void onSkipToQueueItem(long id) {
-                    playAtIndexImpl((int) id);
-                }
-
-                @Override
-                public void onPause() {
-                    pauseImpl();
-                }
-
-                @Override
-                public void onSkipToNext() {
-                    nextImpl();
-                }
-
-                @Override
-                public void onSkipToPrevious() {
-                    previousImpl();
-                }
-
-                @Override
-                public void onFastForward() {
-                    seekImpl(getCurrentTrackPositionImpl() + 5000);
-                }
-
-                @Override
-                public void onRewind() {
-                    seekImpl(getCurrentTrackPositionImpl() - 5000);
-                }
-
-                @Override
-                public void onStop() {
-                    stopImpl();
-                }
-
-                @Override
-                public void onSeekTo(long pos) {
-                    seekImpl(pos);
-                }
-
-                @Override
-                public void onSetRating(Rating rating) {
-                    if (rating.isThumbUp() || rating.hasHeart()) {
-                        new Thread(mThumbsUpRunnable).start();
-                    }
-                }
-            });
-        } else {
-            Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-            mediaButtonIntent.setComponent(RemoteControlReceiver.getComponentName(this));
-
-            PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
-                    0, mediaButtonIntent, 0);
-            mRemoteControlClient = new RemoteControlClient(mediaPendingIntent);
-            int flags = RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS
-                    | RemoteControlClient.FLAG_KEY_MEDIA_NEXT
-                    | RemoteControlClient.FLAG_KEY_MEDIA_PLAY
-                    | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
-                    | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE;
-            // | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
-            mRemoteControlClient.setTransportControlFlags(flags);
-        }
-    }
-
-    private void updateRemoteMetadata() {
-        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        final Song currentSong = mPlaybackQueue.get(mCurrentTrack);
-        final Artist artist = aggregator.retrieveArtist(currentSong.getArtist(), currentSong.getProvider());
-        final Album album = aggregator.retrieveAlbum(currentSong.getAlbum(), currentSong.getProvider());
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            MediaMetadata.Builder builder = new MediaMetadata.Builder();
-            if (artist != null) {
-                builder.putString(MediaMetadata.METADATA_KEY_ARTIST, artist.getName());
-            }
-            if (album != null) {
-                builder.putString(MediaMetadata.METADATA_KEY_ALBUM, album.getName());
-                builder.putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, album.getSongsCount());
-            }
-            builder.putString(MediaMetadata.METADATA_KEY_TITLE, currentSong.getTitle());
-            builder.putLong(MediaMetadata.METADATA_KEY_DURATION, currentSong.getDuration());
-            mMediaSession.setMetadata(builder.build());
-        } else {
-            RemoteControlClient.MetadataEditor edit = mRemoteControlClient.editMetadata(true);
-            if (artist != null) {
-                edit.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, artist.getName());
-            }
-            if (album != null) {
-                edit.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, album.getName());
-            }
-            edit.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, currentSong.getTitle());
-            edit.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, currentSong.getDuration());
-            edit.apply();
-        }
-    }
-
     /**
      * Assigns the provided provider an audio client socket
      *
@@ -527,42 +367,24 @@ public class PlaybackService extends Service
      */
     private synchronized void requestAudioFocus() {
         if (!mHasAudioFocus) {
-            Log.d(TAG, "Request audio focus...");
-            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
-            // Request audio focus for playback
-            int result = am.requestAudioFocus(this,
-                    // Use the music stream.
-                    AudioManager.STREAM_MUSIC,
-                    // Request permanent focus.
+            // Request audio focus for music playback
+            int result = am.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
                     AudioManager.AUDIOFOCUS_GAIN);
 
             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                Log.e(TAG, "Request granted");
                 mHasAudioFocus = true;
                 am.registerMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
 
-                // create and register the remote control client
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    PlaybackState.Builder builder = new PlaybackState.Builder();
-                    builder.setState(PlaybackState.STATE_PLAYING,
-                            (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
-                    mMediaSession.setPlaybackState(builder.build());
-                } else {
-                    am.registerRemoteControlClient(mRemoteControlClient);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                        mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING,
-                                (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
-                    } else {
-                        mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
-                    }
-                }
+                // Notify the remote metadata that we're getting active
+                mRemoteMetadata.setActive(true);
 
                 // Register AUDIO_BECOMING_NOISY to stop playback when earbuds are pulled
                 registerReceiver(mAudioNoisyReceiver,
                         new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
             } else {
-                Log.e(TAG, "Request denied: " + result);
+                Log.e(TAG, "Audio focus request denied: " + result);
             }
         }
     }
@@ -572,7 +394,7 @@ public class PlaybackService extends Service
      */
     private synchronized void abandonAudioFocus() {
         if (mHasAudioFocus) {
-            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             am.abandonAudioFocus(this);
             unregisterReceiver(mAudioNoisyReceiver);
             mHasAudioFocus = false;
@@ -657,15 +479,8 @@ public class PlaybackService extends Service
                                 }
                             });
 
-                            updateRemoteMetadata();
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                mMediaSession.setPlaybackState(
-                                        new PlaybackState.Builder(
-                                                mMediaSession.getController().getPlaybackState())
-                                                .setState(PlaybackState.STATE_BUFFERING, 0, 1.0f).build());
-                            } else {
-                                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_BUFFERING);
-                            }
+                            mRemoteMetadata.setCurrentSong(next);
+                            mRemoteMetadata.notifyBuffering();
                         }
                     }
                 }
@@ -702,7 +517,7 @@ public class PlaybackService extends Service
     /**
      * Moves to the next track
      */
-    private void nextImpl() {
+    void nextImpl() {
         boolean hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
         if (mPlaybackQueue.size() > 0 && hasNext) {
             mCurrentTrack++;
@@ -726,7 +541,7 @@ public class PlaybackService extends Service
     /**
      * Restarts the current song or goes to the previous one
      */
-    private void previousImpl() {
+    void previousImpl() {
         boolean shouldRestart = (getCurrentTrackPositionImpl() > 4000 || mCurrentTrack == 0);
         if (shouldRestart) {
             // Restart playback
@@ -742,7 +557,7 @@ public class PlaybackService extends Service
     /**
      * Pauses the playback
      */
-    private void pauseImpl() {
+    void pauseImpl() {
         final Song currentSong = getCurrentSong();
         if (currentSong != null) {
             // TODO: Refactor that with a threaded Handler that handles messages
@@ -771,12 +586,13 @@ public class PlaybackService extends Service
     /**
      * Stops the playback and the service, release the audio focus
      */
-    private void stopImpl() {
+    void stopImpl() {
         if ((mState == STATE_PLAYING || mState == STATE_BUFFERING) && mPlaybackQueue.size() > 0
                 && mCurrentTrack >= 0) {
             pauseImpl();
         }
 
+        mRemoteMetadata.notifyStopped();
         abandonAudioFocus();
 
         for (IPlaybackCallback cb : mCallbacks) {
@@ -791,7 +607,7 @@ public class PlaybackService extends Service
         stopForeground(true);
     }
 
-    private void playImpl() {
+    void playImpl() {
         new Thread() {
             public void run() {
                 final Song currentSong = getCurrentSong();
@@ -863,7 +679,7 @@ public class PlaybackService extends Service
         return (int) (System.currentTimeMillis() - mCurrentTrackStartTime);
     }
 
-    public void seekImpl(final long timeMs) {
+    void seekImpl(final long timeMs) {
         final Song currentSong = getCurrentSong();
         boolean success = false;
         if (currentSong != null) {
@@ -1075,14 +891,15 @@ public class PlaybackService extends Service
 
     @Override
     public void onSongUpdate(List<Song> s) {
-        if (mCurrentTrackWaitLoading) {
-            final Song currentSong = getCurrentSong();
-            if (s.contains(currentSong) && currentSong.isLoaded()) {
+        final Song currentSong = getCurrentSong();
+
+        if (s.contains(currentSong) && currentSong.isLoaded()) {
+            if (mCurrentTrackWaitLoading) {
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
             }
-        } else if (s.contains(getCurrentSong())) {
-            updateRemoteMetadata();
+
+            mRemoteMetadata.setCurrentSong(currentSong);
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -1144,12 +961,7 @@ public class PlaybackService extends Service
             Log.d(TAG, "onSongStarted: Playing...");
 
             mNotification.setPlayPauseAction(false);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mMediaSession.setPlaybackState(new PlaybackState.Builder(
-                        mMediaSession.getController().getPlaybackState()).setState(PlaybackState.STATE_PLAYING, 0, 1.0f).build());
-            } else {
-                mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
-            }
+            mRemoteMetadata.notifyPlaying(0);
 
             // Prepare pre-fetching the next song
             // Note: We don't take care of the delay being too early when it's paused, as long
@@ -1192,17 +1004,7 @@ public class PlaybackService extends Service
                 Log.d(TAG, "onSongPaused: Paused...");
 
                 mNotification.setPlayPauseAction(true);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    mMediaSession.setPlaybackState(
-                            new PlaybackState.Builder(mMediaSession.getController().getPlaybackState())
-                                    .setState(PlaybackState.STATE_PAUSED, (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f)
-                                    .build());
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED,
-                            (System.currentTimeMillis() - mCurrentTrackStartTime), 1.0f);
-                } else {
-                    mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED);
-                }
+                mRemoteMetadata.notifyPaused((System.currentTimeMillis() - mCurrentTrackStartTime));
             }
         }
 
