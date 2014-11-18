@@ -136,7 +136,7 @@ public class PlaybackProxy {
                             break;
 
                         case MSG_REMOVE_CALLBACK:
-                            getPlayback().removeCallback((IPlaybackCallback) msg.obj);
+                            getPlayback(false).removeCallback((IPlaybackCallback) msg.obj);
                             break;
                     }
                 } catch (RemoteException e) {
@@ -146,12 +146,16 @@ public class PlaybackProxy {
         };
     }
 
-    private static IPlaybackService getPlayback() throws RemoteException {
-        IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
+    private static IPlaybackService getPlayback(boolean connectIfNull) throws RemoteException {
+        IPlaybackService service = PluginsLookup.getDefault().getPlaybackService(connectIfNull);
         if (service == null) {
             throw new RemoteException("Playback service is null");
         }
         return service;
+    }
+
+    private static IPlaybackService getPlayback() throws RemoteException {
+        return getPlayback(true);
     }
 
     public static void play() {

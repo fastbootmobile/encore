@@ -251,6 +251,7 @@ public class PlaybackService extends Service
         mRemoteMetadata.release();
 
         // Remove audio hosts from providers
+        PluginsLookup.getDefault().tearDown();
 
         // Shutdown DSP chain
     }

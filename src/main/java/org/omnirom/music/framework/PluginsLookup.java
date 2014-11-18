@@ -185,7 +185,11 @@ public class PluginsLookup {
     }
 
     IPlaybackService getPlaybackService() {
-        if (mPlaybackService == null) {
+        return getPlaybackService(true);
+    }
+
+    IPlaybackService getPlaybackService(boolean connectIfUnavailable) {
+        if (mPlaybackService == null && connectIfUnavailable) {
             connectPlayback();
         }
         return mPlaybackService;
