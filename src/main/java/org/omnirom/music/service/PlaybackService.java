@@ -24,6 +24,7 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -139,6 +140,7 @@ public class PlaybackService extends Service
     private boolean mRepeatMode;
     private Prefetcher mPrefetcher;
     private RemoteMetadataManager mRemoteMetadata;
+    private PowerManager.WakeLock mWakeLock;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -234,6 +236,10 @@ public class PlaybackService extends Service
         // Setup lockscreen remote controls
         mRemoteMetadata.setup();
 
+        // Setup playback wakelock (but don't acquire it yet)
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "OmniMusicPlayback");
+
         // Restore preferences
         SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
         mRepeatMode = prefs.getBoolean(PREF_KEY_REPEAT, false);
@@ -249,6 +255,10 @@ public class PlaybackService extends Service
 
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         mRemoteMetadata.release();
+
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
 
         // Remove audio hosts from providers
         PluginsLookup.getDefault().tearDown();
@@ -384,6 +394,9 @@ public class PlaybackService extends Service
                 // Register AUDIO_BECOMING_NOISY to stop playback when earbuds are pulled
                 registerReceiver(mAudioNoisyReceiver,
                         new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+
+                // Add a WakeLock to avoid CPU going to sleep while music is playing
+                mWakeLock.acquire();
             } else {
                 Log.e(TAG, "Audio focus request denied: " + result);
             }
@@ -399,6 +412,7 @@ public class PlaybackService extends Service
             am.abandonAudioFocus(this);
             unregisterReceiver(mAudioNoisyReceiver);
             mHasAudioFocus = false;
+            mWakeLock.release();
         }
     }
 
