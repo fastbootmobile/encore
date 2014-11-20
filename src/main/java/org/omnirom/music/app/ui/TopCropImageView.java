@@ -48,7 +48,8 @@ public class TopCropImageView extends ImageView {
             final float intrinsicWidth = getDrawable().getIntrinsicWidth();
             final float intrinsicHeight = getDrawable().getIntrinsicHeight();
 
-            final float scaleFactor = intrinsicHeight < intrinsicWidth ? height / intrinsicHeight : width / intrinsicWidth;
+            final float scaleFactor = Math.max(width / intrinsicWidth, height / intrinsicHeight);
+
             matrix.setScale(scaleFactor, scaleFactor, 0, 0);
             setImageMatrix(matrix);
         }
