@@ -116,6 +116,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private ArtistSimilarFragment mArtistSimilarFragment;
     private FloatingActionButton mFabPlay;
     private RefCountedBitmap mLogoBitmap;
+    private boolean mSizeIsLimited;
 
     private Runnable mUpdateAlbumsRunnable = new Runnable() {
         @Override
@@ -369,6 +370,29 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mFabShouldResume = false;
     }
 
+    public void notifySizeLimit() {
+        mSizeIsLimited = true;
+        if (mArtistTracksFragment != null) {
+            mArtistTracksFragment.notifySizeLimit();
+        }
+    }
+
+    public void notifySizeUnlimited() {
+        mSizeIsLimited = false;
+        if (mArtistTracksFragment != null) {
+            mArtistTracksFragment.notifySizeUnlimited();
+        }
+    }
+
+    public void scrollToTop() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mRootView.smoothScrollTo(0, 0);
+            }
+        });
+    }
+
     /**
      * Returns a view in the fragment
      *
@@ -433,6 +457,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         // Setup the inside fragments
         mArtistTracksFragment = new ArtistTracksFragment();
         mArtistTracksFragment.setParentFragment(this);
+        if (mSizeIsLimited) {
+            mArtistTracksFragment.notifySizeLimit();
+        }
 
         mArtistInfoFragment = new ArtistInfoFragment();
         mArtistInfoFragment.setArguments(mArtist);
@@ -707,6 +734,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private View mPreviousAlbumGroup;
         private TextView mOfflineView;
         private Handler mHandler;
+        private boolean mSizeLimited;
 
         private Comparator<Album> mComparator = new Comparator<Album>() {
             @Override
@@ -815,6 +843,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mOfflineView.setText(R.string.error_artist_unavailable_offline);
             mOfflineView.setVisibility(View.GONE);
 
+            if (mSizeLimited) {
+                mRootView.setVisibility(View.GONE);
+            }
+
             // Load recommendation and albums for the first
             mHandler.post(new Runnable() {
                 @Override
@@ -825,6 +857,28 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             });
 
             return mRootView;
+        }
+
+        public void notifySizeLimit() {
+            mSizeLimited = true;
+            if (mRootView != null) {
+                ViewGroup.LayoutParams params = mRootView.getLayoutParams();
+                if (params != null) {
+                    params.height = 1000;
+                    mRootView.setLayoutParams(params);
+                }
+            }
+        }
+
+        public void notifySizeUnlimited() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mRootView.setVisibility(View.VISIBLE);
+                    mRootView.setAlpha(0.0f);
+                    mRootView.animate().alpha(1).setDuration(500).start();
+                }
+            });
         }
 
         /**

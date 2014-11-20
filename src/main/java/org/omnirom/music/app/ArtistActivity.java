@@ -16,7 +16,7 @@
 package org.omnirom.music.app;
 
 import android.animation.Animator;
-import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +25,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.transition.Transition;
@@ -54,6 +55,7 @@ public class ArtistActivity extends FragmentActivity {
     private Bundle mInitialIntent;
     private Bitmap mHero;
     private ArtistFragment mActiveFragment;
+    private Handler mHandler;
 
     /**
      * Creates a proper intent to open this activity
@@ -75,9 +77,12 @@ public class ArtistActivity extends FragmentActivity {
     }
 
     @Override
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
+
+        mHandler = new Handler();
 
         FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (ArtistFragment) fm.findFragmentByTag(TAG_FRAGMENT);
@@ -101,6 +106,7 @@ public class ArtistActivity extends FragmentActivity {
             mHero = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
         }
 
+        mActiveFragment.notifySizeLimit();
         mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
@@ -132,12 +138,10 @@ public class ArtistActivity extends FragmentActivity {
 
                     // create and start the animator for this view
                     // (the start radius is zero)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        Animator anim =
-                                ViewAnimationUtils.createCircularReveal(fab, cx, cy, 0, finalRadius);
-                        anim.setInterpolator(new DecelerateInterpolator());
-                        anim.start();
-                    }
+                    Animator anim =
+                            ViewAnimationUtils.createCircularReveal(fab, cx, cy, 0, finalRadius);
+                    anim.setInterpolator(new DecelerateInterpolator());
+                    anim.start();
 
                     fab.setTranslationX(-fab.getMeasuredWidth() / 4.0f);
                     fab.setTranslationY(-fab.getMeasuredHeight() / 4.0f);
@@ -145,6 +149,9 @@ public class ArtistActivity extends FragmentActivity {
                             .setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime))
                             .setInterpolator(new DecelerateInterpolator())
                             .start();
+
+
+                    mActiveFragment.notifySizeUnlimited();
 
                     getWindow().getEnterTransition().removeListener(this);
                 }
@@ -182,17 +189,6 @@ public class ArtistActivity extends FragmentActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // TODO: This workaround is needed for as long as we're not using recyclerview.
-            // Causes an IllegalStateException with too large lists
-            finish();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         // getMenuInflater().inflate(R.menu.artist, menu);
@@ -208,15 +204,32 @@ public class ArtistActivity extends FragmentActivity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == android.R.id.home) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                finish();
-            } else {
-                finish();
-            }
+            onBackPressed();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            /*
+             * Lollipop workaround: Transitions use hardware GPU layers, which means they are
+             * GPU textures with a max size (for 99% devices) of 4096x4096. To avoid crashes,
+             * we temporarily limit the size of the fragment (by either setting a max height
+             * or by setting the visibility to Gone)
+             */
+            mActiveFragment.notifySizeLimit();
+            mActiveFragment.scrollToTop();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ArtistActivity.super.onBackPressed();
+                }
+            }, 300);
+        } else {
+            super.onBackPressed();
+        }
+    }
 }
