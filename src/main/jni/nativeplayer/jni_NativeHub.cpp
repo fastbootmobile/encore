@@ -85,9 +85,13 @@ void om_NativeHub_setDSPChain(JNIEnv* env, jobject thiz, jobjectArray chain) {
 
     for (int i = 0; i < length; ++i) {
         jstring socket_name = (jstring) env->GetObjectArrayElement(chain, i);
-        const char* socket_name_str = env->GetStringUTFChars(socket_name, 0);
-        chain_list.push_back(socket_name_str);
-        env->ReleaseStringUTFChars(socket_name, socket_name_str);
+        if (!socket_name) {
+            ALOGE("DSPChain(%d): Null pointer for element: %p", i, socket_name);
+        } else {
+            const char* socket_name_str = env->GetStringUTFChars(socket_name, 0);
+            chain_list.push_back(socket_name_str);
+            env->ReleaseStringUTFChars(socket_name, socket_name_str);
+        }
     }
 
     NativeHub* hub = get_hub_from_object(env, thiz);

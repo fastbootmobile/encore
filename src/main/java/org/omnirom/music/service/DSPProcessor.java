@@ -130,6 +130,8 @@ public class DSPProcessor {
 
                 if (socketName == null) {
                     Log.e(TAG, "======== SOCKET NAME STILL NULL AFTER ASSIGNPROVIDERAUDIOSOCKET");
+                } else {
+                    Log.e(TAG, "SOCKET " + index + ": " + socketName);
                 }
                 sockets[index] = socketName;
             } else {
@@ -139,6 +141,8 @@ public class DSPProcessor {
                 Log.e(TAG, "= FIXMEFIXMEFIXMEFIXMEFIXMEFIXMEFIXMEFIXME =");
                 Log.e(TAG, "============================================");
             }
+
+            index++;
         }
 
         hub.setDSPChain(sockets);
