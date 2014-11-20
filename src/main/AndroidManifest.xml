@@ -18,10 +18,10 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!-- Permission for Media Session notification and remote control -->
-    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+    <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
 
     <!-- Audio playback wake lock -->
-    <permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Main application declaration -->
     <application
