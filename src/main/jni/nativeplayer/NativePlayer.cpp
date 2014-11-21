@@ -346,7 +346,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
         if (qstate.count == 0) {
             // We have no buffer pending, enqueue it directly
             SLresult result = (*m_pBufferQueue)->Enqueue(m_pBufferQueue, data, len);
-            ALOGE("Enqueued directly %d bytes", len);
+            // ALOGE("Enqueued directly %d bytes", len);
             m_iWrittenSamples += len;
             if (m_pNativeHub) {
                 om_NativeHub_onAudioMirrorWritten(m_pNativeHub,
@@ -356,7 +356,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
             // Queue in our internal buffer queue, and enqueue to the sink in the buffer callback
             memcpy(&(m_pActiveBuffer[m_iActiveBufferIndex]), data, len);
             m_iActiveBufferIndex += len;
-            ALOGE("Bufferred %d/%d", m_iActiveBufferIndex, m_iBufferMaxSize);
+            // ALOGE("Bufferred %d/%d", m_iActiveBufferIndex, m_iBufferMaxSize);
         }
 
         return len;
