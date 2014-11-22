@@ -335,8 +335,12 @@ public class AlbumArtCache {
                 public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
                     new Thread() {
                         public void run() {
-                            RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(artist), bitmap);
-                            listener.onArtLoaded(artist, rcb);
+                            if (bitmap != null) {
+                                RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(artist), bitmap);
+                                listener.onArtLoaded(artist, rcb);
+                            } else {
+                                listener.onArtLoaded(artist, null);
+                            }
                         }
                     }.start();
                 }
@@ -415,8 +419,12 @@ public class AlbumArtCache {
                 public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
                     new Thread() {
                         public void run() {
-                            RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(playlist), bitmap);
-                            listener.onArtLoaded(playlist, rcb);
+                            if (bitmap != null) {
+                                RefCountedBitmap rcb = ImageCache.getDefault().put(getEntityArtKey(playlist), bitmap);
+                                listener.onArtLoaded(playlist, rcb);
+                            } else {
+                                listener.onArtLoaded(playlist, null);
+                            }
                         }
                     }.start();
                 }
