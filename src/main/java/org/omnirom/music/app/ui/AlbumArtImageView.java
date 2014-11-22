@@ -37,6 +37,8 @@ import org.omnirom.music.providers.ProviderAggregator;
  * Square ImageView displaying album art automatically
  */
 public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper.AlbumArtListener {
+    private final String TAG = "AlbumArtImageView(" + this + ")";
+    private static final boolean DEBUG = false;
     private static final int DELAY_BEFORE_START = 300;
 
     private Handler mHandler;
@@ -101,12 +103,14 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (DEBUG) Log.d(TAG, "onDetachedFromWindow: mRequestedEntity=" + mRequestedEntity);
         freeMemory(false);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (DEBUG) Log.d(TAG, "onAttachedToWindow: mRequestedEntity=" + mRequestedEntity);
         if (mRequestedEntity != null && mTask == null && mRunnable == null) {
             BoundEntity ent = mRequestedEntity;
             mRequestedEntity = null;
@@ -127,10 +131,12 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
      * Displays the placeholder album art without transition
      */
     public void setDefaultArt() {
+        if (DEBUG) Log.d(TAG, "setDefaultArt: mCurrentBitmap=" + mCurrentBitmap);
         if (mCurrentBitmap != null) {
             mCurrentBitmap.release();
             mCurrentBitmap = null;
         }
+
         mDrawable.setImmediateTo((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
         forceDrawableReload();
         mCurrentIsDefault = true;
@@ -223,6 +229,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
     @Override
     public void onArtLoaded(RefCountedBitmap output, BoundEntity request) {
+        if (DEBUG) Log.d(TAG, "onArtLoaded: mCurrentBitmap=" + mCurrentBitmap + " ; output=" + output);
+
         // If we have an actual result, display it!
         if (output != null) {
             if (mCurrentBitmap != null) {

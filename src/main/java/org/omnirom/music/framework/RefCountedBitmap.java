@@ -29,6 +29,7 @@ import java.util.List;
  */
 public class RefCountedBitmap {
     private static final String TAG = "RefCountedBitmap";
+    private static final boolean DEBUG = false;
 
     private Bitmap mBitmap;
     private int mCount;
@@ -39,14 +40,25 @@ public class RefCountedBitmap {
     private Runnable mEvictRunnable = new Runnable() {
         @Override
         public void run() {
-            if (!mBitmap.isRecycled()) {
-                mBitmap.recycle();
+            synchronized (mBitmap) {
+                if (mCount == 0) {
+                    if (mBitmap != null && !mBitmap.isRecycled()) {
+                        mBitmap.recycle();
+                    }
+                    mBitmap = null;
+                } else {
+                    if (DEBUG) Log.e(TAG, "Bitmap eviction cancelled as acquire count = " + mCount);
+                }
             }
-            mBitmap = null;
         }
     };
 
     public RefCountedBitmap(Bitmap bitmap) {
+        if (bitmap == null) {
+            throw new IllegalArgumentException("Bitmap cannot be null! (This is a programming" +
+                    " error, slap xplodwild now)");
+        }
+
         mBitmap = bitmap;
         mCount = 0;
         mHandler = new Handler(Looper.getMainLooper());
@@ -54,21 +66,30 @@ public class RefCountedBitmap {
         mStackRelease = new ArrayList<String>();
     }
 
+    public boolean isRecycled() {
+        return mBitmap == null || mBitmap.isRecycled();
+    }
+
     public void acquire() {
-        if (mBitmap == null) {
-            throw new IllegalStateException("Trying to acquire a null bitmap");
+        if (mBitmap == null || mBitmap.isRecycled()) {
+            Log.e(TAG, "FATAL: Trying to acquire a null or recycled bitmap - dumping acquire/release stacks");
+            dumpLocks();
+            throw new IllegalStateException("Trying to acquire a null bitmap.");
+
         }
 
         synchronized (mBitmap) {
             mCount++;
+            mHandler.removeCallbacks(mEvictRunnable);
         }
-        mHandler.removeCallbacks(mEvictRunnable);
         mStackAcquire.add(Arrays.toString(Thread.currentThread().getStackTrace()));
     }
 
     public void release() {
         if (mBitmap == null) {
-            return;
+            Log.e(TAG, "FATAL: Trying to release a null or recycled bitmap - dumping acquire/release stacks");
+            dumpLocks();
+            throw new IllegalStateException("Trying to release acquire a null bitmap.");
         }
 
         synchronized (mBitmap) {
@@ -76,7 +97,7 @@ public class RefCountedBitmap {
 
             if (mCount == 0) {
                 mHandler.removeCallbacks(mEvictRunnable);
-                mHandler.postDelayed(mEvictRunnable, 1000);
+                mHandler.post(mEvictRunnable);
             }
         }
         mStackRelease.add(Arrays.toString(Thread.currentThread().getStackTrace()));
@@ -84,7 +105,9 @@ public class RefCountedBitmap {
 
     public Bitmap get() {
         if (mBitmap == null) {
-            throw new IllegalStateException("Cannot get recycled bitmap");
+            Log.e(TAG, "FATAL: Trying to get a null or recycled bitmap - dumping acquire/release stacks");
+            dumpLocks();
+            throw new IllegalStateException("Trying to get a null bitmap.");
         }
 
         synchronized (mBitmap) {

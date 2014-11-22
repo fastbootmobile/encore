@@ -36,7 +36,7 @@ import java.util.ArrayList;
 public class ImageCache {
     private static final String TAG = "ImageCache";
     private static final ImageCache INSTANCE = new ImageCache();
-    private static final boolean USE_MEMORY_CACHE = false;
+    private static final boolean USE_MEMORY_CACHE = true;
 
     private ArrayList<String> mEntries;
     private File mCacheDir;
@@ -111,7 +111,9 @@ public class ImageCache {
      */
     public void clear() {
         if (USE_MEMORY_CACHE) {
-            mMemoryCache.evictAll();
+            synchronized (mMemoryCache) {
+                mMemoryCache.evictAll();
+            }
         }
         mEntries.clear();
 
@@ -128,7 +130,7 @@ public class ImageCache {
      */
     public void evictAll() {
         if (USE_MEMORY_CACHE) {
-            synchronized (this) {
+            synchronized (mMemoryCache) {
                 mMemoryCache.evictAll();
             }
         }
@@ -141,9 +143,10 @@ public class ImageCache {
      */
     public boolean hasInMemory(final String key) {
         if (USE_MEMORY_CACHE) {
-            synchronized (this) {
+            synchronized (mMemoryCache) {
                 RefCountedBitmap bmp = mMemoryCache.get(sanitizeKey(key));
-                if (bmp != null && bmp.get().isRecycled()) {
+                if (bmp != null && bmp.isRecycled()) {
+                    Log.e(TAG, "MEMORY CACHE CONTAINS A RECYCLED ENTRY!");
                     mMemoryCache.remove(sanitizeKey(key));
                     return false;
                 } else return bmp != null;
@@ -182,23 +185,27 @@ public class ImageCache {
         }
 
         if (contains) {
-            // Check if we have it in memory
-            RefCountedBitmap item = USE_MEMORY_CACHE ? mMemoryCache.get(cleanKey) : null;
-            if (item == null) {
-                BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inSampleSize = 2;
-                Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
-                if (bmp != null) {
-                    item = new RefCountedBitmap(bmp);
+            synchronized (mMemoryCache) {
+                // Check if we have it in memory
+                RefCountedBitmap item = USE_MEMORY_CACHE ? mMemoryCache.get(cleanKey) : null;
+                if (item == null) {
+                    BitmapFactory.Options opts = new BitmapFactory.Options();
+                    opts.inSampleSize = 2;
+                    Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
+                    if (bmp != null) {
+                        item = new RefCountedBitmap(bmp);
 
-                    if (USE_MEMORY_CACHE) {
-                        item.acquire();
-                        mMemoryCache.put(cleanKey, item);
+                        if (USE_MEMORY_CACHE) {
+                            item.acquire();
+                            mMemoryCache.put(cleanKey, item);
+                        }
                     }
+                } else {
+                    // TODO: The stored bitmap is corrupted, evict it
                 }
-            }
 
-            return item;
+                return item;
+            }
         } else {
             return null;
         }
@@ -253,8 +260,8 @@ public class ImageCache {
         }
 
         if (USE_MEMORY_CACHE) {
-            bmp.acquire();
             synchronized (mMemoryCache) {
+                bmp.acquire();
                 mMemoryCache.put(cleanKey, bmp);
                 // Touch usage
                 bmp = mMemoryCache.get(cleanKey);

@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AlbumArtHelper {
     private static final String TAG = "AlbumArtHelper";
+    private static final boolean DEBUG = false;
 
     private static final int DELAY_BEFORE_RETRY = 500;
     private static final int CORE_POOL_SIZE = 4;
@@ -131,8 +132,17 @@ public class AlbumArtHelper {
                 artCache.notifyQueryStopped(mEntity);
 
                 // We now have a bitmap to display, so let's put it!
-                output.bitmap = mArtBitmap;
-                output.retry = false;
+                if (mArtBitmap != null && !mArtBitmap.isRecycled()) {
+                    mArtBitmap.acquire();
+                    output.bitmap = mArtBitmap;
+                    output.retry = false;
+                } else if (mArtBitmap != null) {
+                    if (DEBUG) Log.w(TAG, "Retrying as fetched bitmap is already recycled");
+                    output.retry = true;
+                } else {
+                    output.bitmap = null;
+                    output.retry = false;
+                }
             }
 
             return output;
@@ -164,6 +174,10 @@ public class AlbumArtHelper {
                     }, DELAY_BEFORE_RETRY);
                 } else if (result != null) {
                     mListener.onArtLoaded(result.bitmap, result.request);
+
+                    if (result.bitmap != null) {
+                        result.bitmap.release();
+                    }
                 }
             }
         }
