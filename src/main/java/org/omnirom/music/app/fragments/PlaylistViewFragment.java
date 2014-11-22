@@ -33,6 +33,7 @@ import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dd.CircularProgressButton;
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -195,6 +196,11 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                         provider.setPlaylistOfflineMode(mPlaylist.getRef(), true);
                         mOfflineBtn.setIndeterminateProgressMode(true);
                         mOfflineBtn.setProgress(1);
+
+                        if (ProviderAggregator.getDefault().isOfflineMode()) {
+                            Toast.makeText(getActivity(), R.string.toast_offline_playlist_sync,
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         provider.setPlaylistOfflineMode(mPlaylist.getRef(), false);
                         mOfflineBtn.setProgress(0);
@@ -374,6 +380,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             return;
         }
 
+        // We bias the playlist status based on the current offline mode
+        ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final int offlineStatus = mPlaylist.getOfflineStatus();
 
         switch (offlineStatus) {
@@ -395,22 +403,26 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 break;
 
             case BoundEntity.OFFLINE_STATUS_DOWNLOADING:
-                mOfflineBtn.setIndeterminateProgressMode(false);
-                float numSyncTracks = getNumSyncTracks();
-                float numTracksToSync = 0;
+                if (aggregator.isOfflineMode()) {
+                    mOfflineBtn.setProgress(50);
+                    mOfflineBtn.setIndeterminateProgressMode(true);
+                } else {
+                    mOfflineBtn.setIndeterminateProgressMode(false);
+                    float numSyncTracks = getNumSyncTracks();
+                    float numTracksToSync = 0;
 
-                // Count the number of tracks to sync (ie. num of tracks available)
-                Iterator<String> songs = mPlaylist.songs();
-                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-                while (songs.hasNext()) {
-                    String ref = songs.next();
-                    Song s = aggregator.retrieveSong(ref, mPlaylist.getProvider());
-                    if (s != null && s.isAvailable()) {
-                        ++numTracksToSync;
+                    // Count the number of tracks to sync (ie. num of tracks available)
+                    final Iterator<String> songs = mPlaylist.songs();
+                    while (songs.hasNext()) {
+                        String ref = songs.next();
+                        Song s = aggregator.retrieveSong(ref, mPlaylist.getProvider());
+                        if (s != null && s.isAvailable()) {
+                            ++numTracksToSync;
+                        }
                     }
-                }
 
-                mOfflineBtn.setProgress(Math.min(100, numSyncTracks * 100.0f / numTracksToSync + 0.1f));
+                    mOfflineBtn.setProgress(Math.min(100, numSyncTracks * 100.0f / numTracksToSync + 0.1f));
+                }
                 break;
         }
 

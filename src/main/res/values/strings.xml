@@ -171,4 +171,5 @@
     <string name="error_artist_unavailable_offline">The artist is not available offline</string>
     <string name="error_similar_unavailable_offline">Similar artists are not available offline</string>
     <string name="error_biography_unavailable_offline">Biography not available offline</string>
+    <string name="toast_offline_playlist_sync">Download will start once you are online</string>
 </resources>
