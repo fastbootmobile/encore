@@ -89,7 +89,9 @@ class RemoteMetadataManager extends MediaSessionCompat.Callback {
 
             MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder()
                     .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, mPreviousAlbumArt);
-            mMediaSession.setMetadata(builder.build());
+            if (mMediaSession != null) {
+                mMediaSession.setMetadata(builder.build());
+            }
         }
     }
 
@@ -109,35 +111,49 @@ class RemoteMetadataManager extends MediaSessionCompat.Callback {
         builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getTitle());
         builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.getDuration());
 
-        mMediaSession.setMetadata(builder.build());
+        if (mMediaSession != null) {
+            mMediaSession.setMetadata(builder.build());
+        }
     }
 
     void notifyPlaying(final long timeElapsed) {
         PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
         builder.setState(PlaybackStateCompat.STATE_PLAYING, timeElapsed, 1.0f);
-        mMediaSession.setPlaybackState(builder.build());
-        mMediaSession.setActive(true);
+
+        if (mMediaSession != null) {
+            mMediaSession.setPlaybackState(builder.build());
+            mMediaSession.setActive(true);
+        }
     }
 
     void notifyBuffering() {
         PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
         builder.setState(PlaybackStateCompat.STATE_BUFFERING, 0, 1.0f);
-        mMediaSession.setPlaybackState(builder.build());
-        mMediaSession.setActive(true);
+
+        if (mMediaSession != null) {
+            mMediaSession.setPlaybackState(builder.build());
+            mMediaSession.setActive(true);
+        }
     }
 
     void notifyPaused(final long timeElapsed) {
         PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
         builder.setState(PlaybackStateCompat.STATE_PAUSED, timeElapsed, 1.0f);
-        mMediaSession.setPlaybackState(builder.build());
-        mMediaSession.setActive(true);
+
+        if (mMediaSession != null) {
+            mMediaSession.setPlaybackState(builder.build());
+            mMediaSession.setActive(true);
+        }
     }
 
     void notifyStopped() {
         PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
         builder.setState(PlaybackStateCompat.STATE_STOPPED, 0, 1.0f);
-        mMediaSession.setPlaybackState(builder.build());
-        mMediaSession.setActive(false);
+
+        if (mMediaSession != null) {
+            mMediaSession.setPlaybackState(builder.build());
+            mMediaSession.setActive(false);
+        }
     }
 
     @Override
