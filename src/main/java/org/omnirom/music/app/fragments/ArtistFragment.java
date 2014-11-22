@@ -384,6 +384,11 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    public void notifyClosing() {
+        Utils.animateScale(mFabPlay, true, false);
+        mRootView.findViewById(R.id.tvArtist).animate().alpha(0.0f).setStartDelay(0).setDuration(500).start();
+    }
+
     public void scrollToTop() {
         mHandler.post(new Runnable() {
             @Override

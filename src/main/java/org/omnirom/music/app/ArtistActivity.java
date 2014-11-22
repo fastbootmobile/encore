@@ -222,6 +222,7 @@ public class ArtistActivity extends FragmentActivity {
              */
             mActiveFragment.notifySizeLimit();
             mActiveFragment.scrollToTop();
+            mActiveFragment.notifyClosing();
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
