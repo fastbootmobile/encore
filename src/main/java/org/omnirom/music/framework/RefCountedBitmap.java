@@ -42,7 +42,7 @@ public class RefCountedBitmap {
         public void run() {
             synchronized (mBitmap) {
                 if (mCount == 0) {
-                    mBitmap.recycle();
+                    // mBitmap.recycle();
                     mBitmap = null;
                 } else {
                     if (DEBUG) Log.e(TAG, "Bitmap eviction cancelled as acquire count = " + mCount);
@@ -94,7 +94,8 @@ public class RefCountedBitmap {
             mCount--;
 
             if (mCount == 0) {
-                mBitmap.recycle();
+                mHandler.removeCallbacks(mEvictRunnable);
+                mHandler.postDelayed(mEvictRunnable, 1000);
             }
         }
         mStackRelease.add(Arrays.toString(Thread.currentThread().getStackTrace()));

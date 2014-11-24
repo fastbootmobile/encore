@@ -271,46 +271,46 @@ public class ImageCache {
             synchronized (mMemoryCache) {
                 bmp.acquire();
                 mMemoryCache.put(cleanKey, bmp);
-                // Touch usage
-                bmp = mMemoryCache.get(cleanKey);
             }
         }
 
-        if (!isDefaultArt) {
-            try {
-                FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + cleanKey);
-                bmp.acquire();
-                Bitmap bitmap = bmp.get();
+        if (!bmp.isRecycled()) {
+            if (!isDefaultArt) {
+                try {
+                    FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + cleanKey);
+                    bmp.acquire();
+                    Bitmap bitmap = bmp.get();
 
-                boolean shouldRecycle = false;
-                final float maxSize = 800;
+                    boolean shouldRecycle = false;
+                    final float maxSize = 800;
 
-                if (bitmap.getWidth() > maxSize && bitmap.getHeight() > maxSize) {
-                    float ratio = (bitmap.getWidth() < bitmap.getHeight()) ?
-                            bitmap.getWidth() / maxSize : bitmap.getHeight() / maxSize;
-                    final int sWidth = (int) (bitmap.getWidth() / ratio);
-                    final int sHeight = (int) (bitmap.getHeight() / ratio);
+                    if (bitmap.getWidth() > maxSize && bitmap.getHeight() > maxSize) {
+                        float ratio = (bitmap.getWidth() < bitmap.getHeight()) ?
+                                bitmap.getWidth() / maxSize : bitmap.getHeight() / maxSize;
+                        final int sWidth = (int) (bitmap.getWidth() / ratio);
+                        final int sHeight = (int) (bitmap.getHeight() / ratio);
 
-                    bitmap = Bitmap.createScaledBitmap(bitmap, sWidth, sHeight, true);
-                    shouldRecycle = true;
+                        bitmap = Bitmap.createScaledBitmap(bitmap, sWidth, sHeight, true);
+                        shouldRecycle = true;
 
-                    Log.d(TAG, "Rescaled to " + sWidth + "x" + sHeight);
+                        Log.d(TAG, "Rescaled to " + sWidth + "x" + sHeight);
+                    }
+
+                    bitmap.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
+                    bmp.release();
+                    out.close();
+
+                    if (shouldRecycle) {
+                        // Scaled image will be used on reload
+                        bitmap.recycle();
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Unable to write the file to cache", e);
                 }
 
-                bitmap.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
-                bmp.release();
-                out.close();
-
-                if (shouldRecycle) {
-                    // Scaled image will be used on reload
-                    bitmap.recycle();
+                synchronized (this) {
+                    mEntries.add(cleanKey);
                 }
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to write the file to cache", e);
-            }
-
-            synchronized (this) {
-                mEntries.add(cleanKey);
             }
         }
     }
