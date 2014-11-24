@@ -23,6 +23,9 @@
     <!-- Audio playback wake lock -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Global effects session ID -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
     <!-- Main application declaration -->
     <application
         android:name=".OmniMusic"

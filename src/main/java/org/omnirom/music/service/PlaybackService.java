@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.media.audiofx.AudioEffect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -397,6 +398,12 @@ public class PlaybackService extends Service
 
                 // Add a WakeLock to avoid CPU going to sleep while music is playing
                 mWakeLock.acquire();
+
+                // Request a global effects session ID
+                final Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
+                intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
+                intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
+                sendBroadcast(intent);
             } else {
                 Log.e(TAG, "Audio focus request denied: " + result);
             }
@@ -413,6 +420,12 @@ public class PlaybackService extends Service
             unregisterReceiver(mAudioNoisyReceiver);
             mHasAudioFocus = false;
             mWakeLock.release();
+
+            final Intent audioEffectsIntent = new Intent(
+                    AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
+            audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
+            audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
+            sendBroadcast(audioEffectsIntent);
         }
     }
 
