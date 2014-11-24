@@ -256,12 +256,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     @Override
     public void onDestroy() {
         mHandler.removeCallbacks(mGenerateEntries);
-        mAdapter.clearEntries();
-
-        View v = getView();
-        if (v != null) {
-            ((ViewGroup) v).removeAllViews();
-        }
         super.onDestroy();
     }
 
@@ -302,6 +296,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     @Override
     public void onDetach() {
         super.onDetach();
+        Log.e(TAG, "onDetach");
         ProviderAggregator.getDefault().removeUpdateCallback(this);
     }
 

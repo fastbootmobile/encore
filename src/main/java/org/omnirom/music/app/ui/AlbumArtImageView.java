@@ -25,6 +25,7 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.AlbumArtHelper;
+import org.omnirom.music.framework.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.RefCountedBitmap;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -52,6 +53,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private TaskRunnable mRunnable;
     private boolean mCurrentIsDefault;
 
+    private static RefCountedBitmap sDefaultBitmap;
+
     public AlbumArtImageView(Context context) {
         super(context);
         initialize();
@@ -71,11 +74,19 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         // Set the placeholder art first-hand
         mHandler = new Handler();
         setScaleType(ScaleType.CENTER_CROP);
+
+
+        if (sDefaultBitmap == null) {
+            sDefaultBitmap = new RefCountedBitmap(
+                    ((BitmapDrawable) getContext().getApplicationContext().getResources()
+                    .getDrawable(R.drawable.album_placeholder)).getBitmap());
+            sDefaultBitmap.acquire();
+        }
+
         if (isInEditMode()) {
             setImageDrawable(getResources().getDrawable(R.drawable.album_placeholder));
         } else {
-            mDrawable = new MaterialTransitionDrawable(getContext(),
-                    (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
+            mDrawable = new MaterialTransitionDrawable(getContext(), sDefaultBitmap);
             setImageDrawable(mDrawable);
         }
     }
@@ -137,7 +148,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             mCurrentBitmap = null;
         }
 
-        mDrawable.setImmediateTo((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
+        mDrawable.setImmediateTo(new RecyclingBitmapDrawable(getResources(), sDefaultBitmap));
         forceDrawableReload();
         mCurrentIsDefault = true;
     }
@@ -239,13 +250,13 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             mCurrentBitmap = output;
             mCurrentBitmap.acquire();
 
-            BitmapDrawable drawable = new BitmapDrawable(getResources(), mCurrentBitmap.get());
+            RecyclingBitmapDrawable drawable = new RecyclingBitmapDrawable(getResources(), mCurrentBitmap);
             if (mSkipTransition) {
                 mDrawable.setTransitionDuration(MaterialTransitionDrawable.SHORT_DURATION);
             } else {
                 mDrawable.setTransitionDuration(MaterialTransitionDrawable.DEFAULT_DURATION);
             }
-            mDrawable.transitionTo(getResources(), drawable);
+            mDrawable.transitionTo(drawable);
             forceDrawableReload();
 
             if (mOnArtLoadedListener != null) {

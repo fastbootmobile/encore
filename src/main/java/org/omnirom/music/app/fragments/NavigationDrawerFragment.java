@@ -79,16 +79,16 @@ public class NavigationDrawerFragment extends Fragment {
 
     private Handler mHandler;
 
-    private Typeface mUnselectedTypeface;
-    private Typeface mSelectedTypeface;
+    private static Typeface sUnselectedTypeface;
+    private static Typeface sSelectedTypeface;
 
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
 
     public NavigationDrawerFragment() {
-        mUnselectedTypeface = Typeface.create("sans-serif-light", 0);
-        mSelectedTypeface = Typeface.create("sans-serif", Typeface.BOLD);
+        sUnselectedTypeface = Typeface.create("sans-serif-light", 0);
+        sSelectedTypeface = Typeface.create("sans-serif", Typeface.BOLD);
     }
 
     @Override
@@ -277,13 +277,13 @@ public class NavigationDrawerFragment extends Fragment {
                     public void run() {
                         if (mCallbacks.onNavigationDrawerItemSelected(position)) {
                             if (mPreviousItem != null) {
-                                mPreviousItem.setTypeface(mUnselectedTypeface);
+                                mPreviousItem.setTypeface(sUnselectedTypeface);
                             }
 
                             View view = mDrawerListView.getChildAt(mCurrentSelectedPosition);
                             if (view != null) {
                                 TextView tv = (TextView) view.findViewById(android.R.id.text1);
-                                tv.setTypeface(mSelectedTypeface);
+                                tv.setTypeface(sSelectedTypeface);
                                 mPreviousItem = tv;
                             }
                         }

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.AudioManager;
-import android.net.ConnectivityManager;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.os.Bundle;
@@ -123,7 +122,7 @@ public class MainActivity extends FragmentActivity
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         // Setup Cast button
-        mCastModule = new CastModule(this);
+        mCastModule = new CastModule(getApplicationContext());
 
         // Look for un-configured plugins in a second
         mHandler.postDelayed(new Runnable() {

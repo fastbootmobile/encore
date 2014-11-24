@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.framework.RecyclingBitmapDrawable;
+import org.omnirom.music.framework.RefCountedBitmap;
 
 /**
  * <p>
@@ -30,8 +32,8 @@ public class MaterialTransitionDrawable extends Drawable {
     public static final long DEFAULT_DURATION = 1000;
     public static final long SHORT_DURATION = 300;
 
-    private BitmapDrawable mBaseDrawable;
-    private BitmapDrawable mTargetDrawable;
+    private RecyclingBitmapDrawable mBaseDrawable;
+    private RecyclingBitmapDrawable mTargetDrawable;
     private BitmapDrawable mOfflineDrawable;
     private final AccelerateDecelerateInterpolator mInterpolator;
     private long mStartTime;
@@ -43,11 +45,11 @@ public class MaterialTransitionDrawable extends Drawable {
     private long mOfflineStartTime;
 
 
-    public MaterialTransitionDrawable(Context ctx, Bitmap base) {
-        this(ctx, new BitmapDrawable(ctx.getResources(), base));
+    public MaterialTransitionDrawable(Context ctx, RefCountedBitmap base) {
+        this(ctx, new RecyclingBitmapDrawable(ctx.getResources(), base));
     }
 
-    public MaterialTransitionDrawable(Context ctx, BitmapDrawable base) {
+    public MaterialTransitionDrawable(Context ctx, RecyclingBitmapDrawable base) {
         this(ctx);
         mBaseDrawable = base;
         invalidateSelf();
@@ -74,7 +76,11 @@ public class MaterialTransitionDrawable extends Drawable {
         mDuration = durationMillis;
     }
 
-    public void setImmediateTo(BitmapDrawable drawable) {
+    public void setImmediateTo(Resources res, RefCountedBitmap bitmap) {
+        setImmediateTo(new RecyclingBitmapDrawable(res, bitmap));
+    }
+
+    public void setImmediateTo(RecyclingBitmapDrawable drawable) {
         // Cancel animation
         mAnimating = false;
         mTargetDrawable = null;
@@ -86,11 +92,11 @@ public class MaterialTransitionDrawable extends Drawable {
         invalidateSelf();
     }
 
-    public void transitionTo(Resources res, Bitmap bitmap) {
-        transitionTo(res, new BitmapDrawable(res, bitmap));
+    public void transitionTo(Resources res, RefCountedBitmap bitmap) {
+        transitionTo(new RecyclingBitmapDrawable(res, bitmap));
     }
 
-    public void transitionTo(final Resources res, final BitmapDrawable drawable) {
+    public void transitionTo(final RecyclingBitmapDrawable drawable) {
         if (drawable != mTargetDrawable) {
             mTargetDrawable = drawable;
             mTargetDrawable.setBounds(getBounds());
