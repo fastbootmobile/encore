@@ -24,11 +24,14 @@ import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.view.View;
+import android.widget.RemoteViews;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AlbumArtHelper;
 import org.omnirom.music.framework.RefCountedBitmap;
+import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
@@ -44,11 +47,12 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     private RefCountedBitmap mCurrentArt;
     private NotificationChangedListener mListener;
     private Song mCurrentSong;
+    private RemoteViews mBaseTemplate;
+    private RemoteViews mExpandedTemplate;
+    private boolean mHasNext;
+    private boolean mShowPlayAction;
 
     private Notification mNotification;
-    private NotificationCompat.Action.Builder mStopActionBuilder;
-    private NotificationCompat.Action.Builder mPlayActionBuilder;
-    private NotificationCompat.Action.Builder mNextActionBuilder;
 
     private static final int NOTIFICATION_ID = 1;
 
@@ -63,12 +67,29 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
         mCurrentArt = mDefaultArt;
 
+        mBaseTemplate = new RemoteViews(ctx.getPackageName(), R.layout.notification_base);
+        mExpandedTemplate = new RemoteViews(ctx.getPackageName(), R.layout.notification_expanded);
+
+        // Setup pending intents
+        PendingIntent piNext = PendingIntent.getService(mContext, 0,
+                NotifActionService.getIntentNext(mContext), 0);
+        PendingIntent piPrevious = PendingIntent.getService(mContext, 0,
+                NotifActionService.getIntentPrevious(mContext), 0);
+        PendingIntent piPause = PendingIntent.getService(mContext,
+                0, NotifActionService.getIntentTogglePause(mContext), 0);
+        PendingIntent piStop = PendingIntent.getService(mContext,
+                0, NotifActionService.getIntentStop(mContext), 0);
+
+        mBaseTemplate.setOnClickPendingIntent(R.id.btnNotifNext, piNext);
+        mExpandedTemplate.setOnClickPendingIntent(R.id.btnNotifNext, piNext);
+        mBaseTemplate.setOnClickPendingIntent(R.id.btnNotifPlayPause, piPause);
+        mExpandedTemplate.setOnClickPendingIntent(R.id.btnNotifPlayPause, piPause);
+        mBaseTemplate.setOnClickPendingIntent(R.id.btnNotifPrevious, piPrevious);
+        mExpandedTemplate.setOnClickPendingIntent(R.id.btnNotifPrevious, piPrevious);
+        mBaseTemplate.setOnClickPendingIntent(R.id.btnNotifClose, piStop);
+        mExpandedTemplate.setOnClickPendingIntent(R.id.btnNotifClose, piStop);
+
         // Build the static notification actions
-        mStopActionBuilder = new NotificationCompat.Action.Builder(R.drawable.ic_notif_stop,
-                getString(R.string.stop),
-                PendingIntent.getService(mContext, 0, NotifActionService.getIntentStop(mContext), 0));
-        mNextActionBuilder = new NotificationCompat.Action.Builder(R.drawable.ic_notif_next,
-                getString(R.string.next), null);
         setPlayPauseActionImpl(false, false);
 
         // Build the initial notification
@@ -93,36 +114,63 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(false)
                 .setOngoing(true)
+                .setContent(mBaseTemplate)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
-        if (!mCurrentArt.get().isRecycled()) {
-            builder.setStyle(new NotificationCompat.BigPictureStyle().bigPicture(mCurrentArt.get())
-                    .bigLargeIcon(mCurrentArt.get()));
-        }
+        // And get the notification object
+        mNotification = builder.build();
 
-        // Set the notification text
+        // Add the expanded controls
+        mNotification.bigContentView = mExpandedTemplate;
+
+        // Update fields
         if (mCurrentSong != null) {
             final Artist artist = ProviderAggregator.getDefault()
                     .retrieveArtist(mCurrentSong.getArtist(), mCurrentSong.getProvider());
 
+            final Album album = ProviderAggregator.getDefault()
+                    .retrieveAlbum(mCurrentSong.getAlbum(), mCurrentSong.getProvider());
+
             if (mCurrentSong.isLoaded()) {
-                builder.setContentTitle(mCurrentSong.getTitle());
+                // Song title
+                mBaseTemplate.setTextViewText(R.id.tvNotifLineOne, mCurrentSong.getTitle());
+                mExpandedTemplate.setTextViewText(R.id.tvNotifLineOne, mCurrentSong.getTitle());
 
                 if (artist != null && artist.getName() != null && !artist.getName().isEmpty()) {
-                    builder.setContentText(artist.getName());
+                    // Artist name
+                    mBaseTemplate.setTextViewText(R.id.tvNotifLineTwo, artist.getName());
+                    mExpandedTemplate.setTextViewText(R.id.tvNotifLineTwo, artist.getName());
+                }
+
+                if (album != null && album.getName() != null && !album.getName().isEmpty()) {
+                    // Album name
+                    mExpandedTemplate.setTextViewText(R.id.tvNotifLineThree, album.getName());
                 }
             } else {
                 builder.setContentTitle(getString(R.string.loading));
             }
         }
 
-        // Add the notification actions
-        builder.addAction(mStopActionBuilder.build());
-        builder.addAction(mPlayActionBuilder.build());
-        builder.addAction(mNextActionBuilder.build());
+        if (mShowPlayAction) {
+            mBaseTemplate.setImageViewResource(R.id.btnNotifPlayPause, R.drawable.ic_notif_play);
+            mExpandedTemplate.setImageViewResource(R.id.btnNotifPlayPause, R.drawable.ic_notif_play);
+        } else {
+            mBaseTemplate.setImageViewResource(R.id.btnNotifPlayPause, R.drawable.ic_notif_pause);
+            mExpandedTemplate.setImageViewResource(R.id.btnNotifPlayPause, R.drawable.ic_notif_pause);
+        }
 
-        // And get the notification object
-        mNotification = builder.build();
+        if (mHasNext) {
+            mBaseTemplate.setViewVisibility(R.id.btnNotifNext, View.VISIBLE);
+            mExpandedTemplate.setViewVisibility(R.id.btnNotifNext, View.VISIBLE);
+        } else {
+            mBaseTemplate.setViewVisibility(R.id.btnNotifNext, View.GONE);
+            mExpandedTemplate.setViewVisibility(R.id.btnNotifNext, View.GONE);
+        }
+
+        if (mCurrentArt != null && !mCurrentArt.isRecycled()) {
+            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.get());
+            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.get());
+        }
 
         // Post update
         if (mListener != null) {
@@ -159,20 +207,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     }
 
     private void setPlayPauseActionImpl(boolean play, boolean callBuild) {
-        int iconDrawable;
-        CharSequence text;
-        PendingIntent pi = PendingIntent.getService(mContext, 0,
-                NotifActionService.getIntentTogglePause(mContext), 0);
-
-        if (play) {
-            iconDrawable = R.drawable.ic_notif_play;
-            text = getString(R.string.play);
-        } else {
-            iconDrawable = R.drawable.ic_notif_pause;
-            text = getString(R.string.pause);
-        }
-
-        mPlayActionBuilder = new NotificationCompat.Action.Builder(iconDrawable, text, pi);
+        mShowPlayAction = play;
 
         if (callBuild) {
             buildNotification();
@@ -194,11 +229,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
      * Sets whether or not the "Next" action should be enabled or not
      */
     public void setHasNext(boolean hasNext) {
-        mNextActionBuilder = new NotificationCompat.Action.Builder(R.drawable.ic_notif_next,
-                getString(R.string.next),
-                hasNext ?
-                        PendingIntent.getService(mContext, 0, NotifActionService.getIntentNext(mContext), 0)
-                        : null);
+        mHasNext = hasNext;
         buildNotification();
     }
 

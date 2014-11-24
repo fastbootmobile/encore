@@ -73,6 +73,18 @@ public class NotifActionService extends IntentService {
         return intent;
     }
 
+    /**
+     * Starts this service to perform action NEXT. If
+     * the service is already performing a task this action will be queued.
+     *
+     * @see IntentService
+     */
+    public static Intent getIntentPrevious(Context context) {
+        Intent intent = new Intent(context, NotifActionService.class);
+        intent.setAction(ACTION_PREVIOUS);
+        return intent;
+    }
+
     public NotifActionService() {
         super("NotifActionService");
     }

@@ -60,4 +60,5 @@
     <dimen name="fab_actions_spacing">16dp</dimen>
 
     <dimen name="snackbar_background_corner_radius">0dp</dimen>
+    <dimen name="notif_action_button">42dp</dimen>
 </resources>

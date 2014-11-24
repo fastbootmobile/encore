@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="OmniMusic.Spec.BorderlessButton" parent="@android:style/Widget.Material.Button.Borderless.Small">
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+</resources>

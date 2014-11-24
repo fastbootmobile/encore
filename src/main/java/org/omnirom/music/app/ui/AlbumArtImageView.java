@@ -38,7 +38,7 @@ import org.omnirom.music.providers.ProviderAggregator;
  * Square ImageView displaying album art automatically
  */
 public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper.AlbumArtListener {
-    private final String TAG = "AlbumArtImageView(" + this + ")";
+    private final String TAG = "AlbumArtImageView";
     private static final boolean DEBUG = false;
     private static final int DELAY_BEFORE_START = 150;
 

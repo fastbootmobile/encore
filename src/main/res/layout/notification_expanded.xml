@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="128.0dip"
+                tools:ignore="ContentDescription" >
+
+    <ImageView
+        android:id="@+id/ivAlbumArt"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/album_placeholder"/>
+
+    <LinearLayout
+        android:id="@+id/notification_expanded_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/ivAlbumArt"
+        android:divider="?android:listDivider"
+        android:dividerPadding="2dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:showDividers="middle" >
+
+        <ImageButton
+            android:id="@+id/btnNotifPrevious"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?android:selectableItemBackground"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_notif_previous" />
+
+        <ImageButton
+            android:id="@+id/btnNotifPlayPause"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?android:selectableItemBackground"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_notif_pause" />
+
+        <ImageButton
+            android:id="@+id/btnNotifNext"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?android:selectableItemBackground"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_notif_next" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:layout_above="@+id/notification_expanded_buttons"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/ivAlbumArt"
+        android:background="?android:dividerHorizontal" />
+
+    <ImageButton
+        android:id="@+id/btnNotifClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="?android:selectableItemBackground"
+        android:padding="4dp"
+        android:src="@drawable/abc_ic_clear_mtrl_alpha" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="center_vertical"
+        android:layout_toLeftOf="@+id/btnNotifClose"
+        android:layout_toRightOf="@+id/ivAlbumArt"
+        android:orientation="vertical"
+        android:paddingLeft="8dp"
+        android:paddingTop="4dp" >
+
+        <TextView
+            android:id="@+id/tvNotifLineOne"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tvNotifLineTwo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent"/>
+
+        <TextView
+            android:id="@+id/tvNotifLineThree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent" />
+    </LinearLayout>
+
+</RelativeLayout>
