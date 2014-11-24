@@ -171,6 +171,8 @@ public class ArtistActivity extends FragmentActivity {
 
                 }
             });
+        } else {
+            mActiveFragment.notifySizeUnlimited();
         }
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
