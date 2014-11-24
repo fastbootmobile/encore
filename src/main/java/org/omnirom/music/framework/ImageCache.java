@@ -189,27 +189,31 @@ public class ImageCache {
         }
 
         if (contains) {
+            RefCountedBitmap item;
             synchronized (mMemoryCache) {
                 // Check if we have it in memory
-                RefCountedBitmap item = USE_MEMORY_CACHE ? mMemoryCache.get(cleanKey) : null;
-                if (item == null) {
-                    BitmapFactory.Options opts = new BitmapFactory.Options();
-                    opts.inSampleSize = 2;
-                    Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
-                    if (bmp != null) {
-                        item = new RefCountedBitmap(bmp);
+                item = USE_MEMORY_CACHE ? mMemoryCache.get(cleanKey) : null;
+            }
 
-                        if (USE_MEMORY_CACHE) {
-                            item.acquire();
+            if (item == null) {
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inSampleSize = 2;
+                Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
+                if (bmp != null) {
+                    item = new RefCountedBitmap(bmp);
+
+                    if (USE_MEMORY_CACHE) {
+                        item.acquire();
+                        synchronized (mMemoryCache) {
                             mMemoryCache.put(cleanKey, item);
                         }
                     }
-                } else {
-                    // TODO: The stored bitmap is corrupted, evict it
                 }
-
-                return item;
+            } else {
+                // TODO: The stored bitmap is corrupted, evict it
             }
+
+            return item;
         } else {
             return null;
         }
@@ -276,9 +280,31 @@ public class ImageCache {
             try {
                 FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + cleanKey);
                 bmp.acquire();
-                bmp.get().compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
+                Bitmap bitmap = bmp.get();
+
+                boolean shouldRecycle = false;
+                final float maxSize = 800;
+
+                if (bitmap.getWidth() > maxSize && bitmap.getHeight() > maxSize) {
+                    float ratio = (bitmap.getWidth() < bitmap.getHeight()) ?
+                            bitmap.getWidth() / maxSize : bitmap.getHeight() / maxSize;
+                    final int sWidth = (int) (bitmap.getWidth() / ratio);
+                    final int sHeight = (int) (bitmap.getHeight() / ratio);
+
+                    bitmap = Bitmap.createScaledBitmap(bitmap, sWidth, sHeight, true);
+                    shouldRecycle = true;
+
+                    Log.d(TAG, "Rescaled to " + sWidth + "x" + sHeight);
+                }
+
+                bitmap.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
                 bmp.release();
                 out.close();
+
+                if (shouldRecycle) {
+                    // Scaled image will be used on reload
+                    bitmap.recycle();
+                }
             } catch (IOException e) {
                 Log.e(TAG, "Unable to write the file to cache", e);
             }

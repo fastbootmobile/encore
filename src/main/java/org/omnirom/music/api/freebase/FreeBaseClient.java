@@ -70,7 +70,7 @@ public class FreeBaseClient {
             object = JsonGet.getObject(TOPIC_ENDPOINT + metaId, "filter=/common/topic/image&limit=1", true);
 
             if (object.has("property") || object.has("error")) {
-                return IMAGE_ENDPOINT + metaId + "?maxwidth=1080&maxheight=1080";
+                return IMAGE_ENDPOINT + metaId + "?maxwidth=800&maxheight=800";
             } else {
                 return null;
             }

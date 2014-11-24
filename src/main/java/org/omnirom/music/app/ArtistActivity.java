@@ -226,7 +226,9 @@ public class ArtistActivity extends FragmentActivity {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    ArtistActivity.super.onBackPressed();
+                    try {
+                        ArtistActivity.super.onBackPressed();
+                    } catch (IllegalStateException ignored) { }
                 }
             }, 300);
         } else {
