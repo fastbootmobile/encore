@@ -7,6 +7,7 @@
     android:layout_height="64dp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
+    android:background="@color/material_blue_grey_900"
     tools:ignore="contentDescription">
 
     <ImageView
