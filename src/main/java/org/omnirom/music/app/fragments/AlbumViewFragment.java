@@ -211,7 +211,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         mFabDrawable.setPaddingDp(52);
         mFabDrawable.setYOffset(6);
-        mPlayFab.setImageDrawable(mFabDrawable);
+
         mPlayFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -233,6 +233,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
             @Override
             public void run() {
                 showFab(false, false);
+                mPlayFab.setImageDrawable(mFabDrawable);
             }
         });
 

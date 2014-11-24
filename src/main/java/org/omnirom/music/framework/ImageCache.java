@@ -66,7 +66,11 @@ public class ImageCache {
             mMemoryCache = new LruCache<String, RefCountedBitmap>(maxMemory) {
                 @Override
                 protected int sizeOf(String key, RefCountedBitmap value) {
-                    return value.get().getByteCount();
+                    if (value.get().isRecycled()) {
+                        return 0;
+                    } else {
+                        return value.get().getByteCount();
+                    }
                 }
 
                 @Override

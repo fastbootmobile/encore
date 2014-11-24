@@ -154,6 +154,7 @@
     <string name="recognition_failed">Oops, we couldn\'t recognize what we heard!</string>
     <string name="more">More</string>
     <string name="songs">Songs</string>
+    <string name="xx_songs">%d songs</string>
 
 
     <string name="plugin_not_configured_snackbar">Plugin \'%s\' not configured</string>
@@ -171,5 +172,6 @@
     <string name="error_artist_unavailable_offline">The artist is not available offline</string>
     <string name="error_similar_unavailable_offline">Similar artists are not available offline</string>
     <string name="error_biography_unavailable_offline">Biography not available offline</string>
+    <string name="error_recognition_unavailable_offline">Recognition not available offline</string>
     <string name="toast_offline_playlist_sync">Download will start once you are online</string>
 </resources>

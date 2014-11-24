@@ -28,6 +28,10 @@ public class MySongsFragment extends Fragment {
         return fragment;
     }
 
+    public MySongsFragment() {
+        mHandler = new Handler();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -46,30 +50,31 @@ public class MySongsFragment extends Fragment {
         return root;
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        mHandler = new Handler();
-
-        final MainActivity mainActivity = (MainActivity) activity;
-        mainActivity.onSectionAttached(MainActivity.SECTION_MY_SONGS);
+    private void updateShadowTop() {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mainActivity.setContentShadowTop(mTabStrip.getMeasuredHeight());
+                final MainActivity act = (MainActivity) getActivity();
+                if (act != null && mTabStrip != null) {
+                    act.setContentShadowTop(mTabStrip.getMeasuredHeight());
+                }
             }
         });
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        final MainActivity mainActivity = (MainActivity) activity;
+        if (mainActivity != null) {
+            mainActivity.onSectionAttached(MainActivity.SECTION_MY_SONGS);
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                final MainActivity mainActivity = (MainActivity) getActivity();
-                mainActivity.setContentShadowTop(mTabStrip.getMeasuredHeight());
-            }
-        });
+        updateShadowTop();
     }
 }

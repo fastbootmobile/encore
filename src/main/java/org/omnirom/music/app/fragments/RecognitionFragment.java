@@ -37,6 +37,7 @@ import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.SearchActivity;
 import org.omnirom.music.framework.EchoPrint;
+import org.omnirom.music.providers.ProviderAggregator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -62,6 +63,7 @@ public class RecognitionFragment extends Fragment {
     private Button mRecognitionButton;
     private Button mSearchButton;
     private ProgressBar mProgressRecognizing;
+    private TextView mTvOfflineError;
 
     private Runnable mStopRecognition = new Runnable() {
         @Override
@@ -195,6 +197,11 @@ public class RecognitionFragment extends Fragment {
         mIvArt = (ImageView) root.findViewById(R.id.ivRecognitionArt);
         mProgressRecognizing = (ProgressBar) root.findViewById(R.id.pbRecognizing);
         mSearchButton = (Button) root.findViewById(R.id.btnSearch);
+        mTvOfflineError = (TextView) root.findViewById(R.id.tvErrorMessage);
+        mTvOfflineError.setText(R.string.error_recognition_unavailable_offline);
+
+        ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        mTvOfflineError.setVisibility(aggregator.isOfflineMode() ? View.VISIBLE : View.GONE);
 
         mRecognitionButton.setOnClickListener(new View.OnClickListener() {
             @Override

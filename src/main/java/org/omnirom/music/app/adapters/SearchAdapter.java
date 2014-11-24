@@ -16,6 +16,7 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -409,10 +410,6 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         if (artist != null && artist.isLoaded()) {
             tag.tvTitle.setText(artist.getName());
             tag.tvSubtitle.setText("");
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                // tag.albumArtImageView.setViewName("local:artist:cover:" + artistRef);
-                // tag.divider.setViewName("local:artist:name:" + artistRef);
-            }
             tag.albumArtImageView.loadArtForArtist(artist);
             tag.content = artist;
             if (tag.sourceLogo != null) {
@@ -448,10 +445,6 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                 tag.tvSubtitle.setText("");
             }
 
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                // tag.albumArtImageView.setViewName("local:album:cover:" + albumRef);
-                // tag.divider.setViewName("local:album:title:" + albumRef);
-            }
             tag.albumArtImageView.loadArtForAlbum(album);
             if (tag.sourceLogo != null) {
                 tag.sourceLogo.release();
@@ -476,11 +469,12 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     private void updatePlaylistTag(int i, ViewHolder tag) {
         final SearchEntry entry = mPlaylists.get(i);
-        Playlist playlist = ProviderAggregator.getDefault().retrievePlaylist(entry.ref, entry.identifier);
+        final Playlist playlist = ProviderAggregator.getDefault().retrievePlaylist(entry.ref, entry.identifier);
+        final Resources res = tag.vRoot.getResources();
 
         if (playlist != null && playlist.isLoaded()) {
             tag.tvTitle.setText(playlist.getName());
-            tag.tvSubtitle.setText(playlist.getSongsCount() + " songs");
+            tag.tvSubtitle.setText(res.getString(R.string.xx_songs, playlist.getSongsCount()));
             tag.content = playlist;
             if (tag.sourceLogo != null) {
                 tag.sourceLogo.release();

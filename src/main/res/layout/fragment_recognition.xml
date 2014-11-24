@@ -8,6 +8,8 @@
     android:orientation="vertical"
     android:weightSum="1">
 
+    <include layout="@layout/offline" />
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"

@@ -210,7 +210,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
                 color);
         Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, hero);
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                     ivCover, "itemImage");
             getActivity().startActivity(intent, opt.toBundle());
