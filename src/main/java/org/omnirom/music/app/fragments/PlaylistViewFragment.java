@@ -186,6 +186,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         // Download button
         mOfflineBtn = (CircularProgressButton) headerView.findViewById(R.id.cpbOffline);
+        mOfflineBtn.setAlpha(0.0f);
         mOfflineBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -216,7 +217,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             public void run() {
                 updateOfflineStatus();
             }
-        }, 1000);
+        }, 500);
 
         tvAlbumName.setText(mPlaylist.getName());
 
@@ -228,9 +229,10 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         // Set source logo
         ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
         mLogoBitmap = PluginsLookup.getDefault().getCachedLogo(mPlaylist);
-        mLogoBitmap.acquire();
-
-        ivSource.setImageBitmap(mLogoBitmap.get());
+        if (mLogoBitmap != null) {
+            mLogoBitmap.acquire();
+            ivSource.setImageBitmap(mLogoBitmap.get());
+        }
 
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable();
@@ -426,7 +428,15 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 break;
         }
 
-        mOfflineBtn.setVisibility((mPlaylist.isLoaded() && mPlaylist.isOfflineCapable()) ? View.VISIBLE : View.GONE);
+        if (mPlaylist.isLoaded() && mPlaylist.isOfflineCapable()) {
+            if (mOfflineBtn.getAlpha() != 1) {
+                mOfflineBtn.animate().alpha(1.0f).setDuration(300).start();
+            }
+        } else {
+            if (mOfflineBtn.getAlpha() != 0) {
+                mOfflineBtn.animate().alpha(0.0f).setDuration(300).start();
+            }
+        }
     }
 
     private int getNumSyncTracks() {
