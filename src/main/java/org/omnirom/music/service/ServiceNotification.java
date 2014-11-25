@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.view.View;
@@ -123,6 +124,10 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         // Add the expanded controls
         mNotification.bigContentView = mExpandedTemplate;
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mNotification.category = Notification.CATEGORY_SERVICE;
+        }
+
         // Update fields
         if (mCurrentSong != null) {
             final Artist artist = ProviderAggregator.getDefault()
@@ -220,17 +225,21 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
      * @param s The song to be displayed
      */
     public void setCurrentSong(Song s) {
-        mCurrentSong = s;
-        updateAlbumArt();
-        buildNotification();
+        if (!s.equals(mCurrentSong)) {
+            mCurrentSong = s;
+            updateAlbumArt();
+            buildNotification();
+        }
     }
 
     /**
      * Sets whether or not the "Next" action should be enabled or not
      */
     public void setHasNext(boolean hasNext) {
-        mHasNext = hasNext;
-        buildNotification();
+        if (mHasNext != hasNext) {
+            mHasNext = hasNext;
+            buildNotification();
+        }
     }
 
     /**
