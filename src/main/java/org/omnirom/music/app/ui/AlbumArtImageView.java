@@ -242,6 +242,11 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     public void onArtLoaded(RefCountedBitmap output, BoundEntity request) {
         if (DEBUG) Log.d(TAG, "onArtLoaded: mCurrentBitmap=" + mCurrentBitmap + " ; output=" + output);
 
+        if (request != mRequestedEntity) {
+            if (DEBUG) Log.d(TAG, "onArtLoaded: Too late for " + request.getRef());
+            return;
+        }
+
         // If we have an actual result, display it!
         if (output != null) {
             if (mCurrentBitmap != null) {
