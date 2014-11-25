@@ -38,7 +38,7 @@ public class ImageCache {
     private static final ImageCache INSTANCE = new ImageCache();
     private static final boolean USE_MEMORY_CACHE = true;
 
-    private ArrayList<String> mEntries;
+    private final ArrayList<String> mEntries;
     private File mCacheDir;
     private RefCountedBitmap mDefaultArt;
     private Handler mHandler;
@@ -119,7 +119,10 @@ public class ImageCache {
                 mMemoryCache.evictAll();
             }
         }
-        mEntries.clear();
+
+        synchronized (mEntries) {
+            mEntries.clear();
+        }
 
         File[] cacheFiles = mCacheDir.listFiles();
         for (File file : cacheFiles) {
@@ -147,14 +150,18 @@ public class ImageCache {
      */
     public boolean hasInMemory(final String key) {
         if (USE_MEMORY_CACHE) {
+            RefCountedBitmap bmp;
             synchronized (mMemoryCache) {
-                RefCountedBitmap bmp = mMemoryCache.get(sanitizeKey(key));
-                if (bmp != null && bmp.isRecycled()) {
-                    Log.e(TAG, "MEMORY CACHE CONTAINS A RECYCLED ENTRY!");
-                    mMemoryCache.remove(sanitizeKey(key));
-                    return false;
-                } else return bmp != null;
+                bmp = mMemoryCache.get(sanitizeKey(key));
             }
+
+            if (bmp != null && bmp.isRecycled()) {
+                Log.e(TAG, "MEMORY CACHE CONTAINS A RECYCLED ENTRY!");
+                synchronized (mMemoryCache) {
+                    mMemoryCache.remove(sanitizeKey(key));
+                }
+                return false;
+            } else return bmp != null;
         } else {
             return false;
         }
@@ -166,7 +173,7 @@ public class ImageCache {
      * @return true if the image is cached on the disk (well, flash storage)
      */
     public boolean hasOnDisk(final String key) {
-        synchronized (this) {
+        synchronized (mEntries) {
             return mEntries.contains(sanitizeKey(key));
         }
     }
@@ -184,7 +191,7 @@ public class ImageCache {
         final String cleanKey = sanitizeKey(key);
 
         boolean contains;
-        synchronized (this) {
+        synchronized (mEntries) {
             contains = mEntries.contains(cleanKey);
         }
 
@@ -308,7 +315,7 @@ public class ImageCache {
                     Log.e(TAG, "Unable to write the file to cache", e);
                 }
 
-                synchronized (this) {
+                synchronized (mEntries) {
                     mEntries.add(cleanKey);
                 }
             }

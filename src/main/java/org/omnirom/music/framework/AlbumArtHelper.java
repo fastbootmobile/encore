@@ -122,7 +122,9 @@ public class AlbumArtHelper {
                             try {
                                 wait(6000);
                             } catch (InterruptedException e) {
-                                Log.w(TAG, "Interrupted while loading art");
+                                // Interrupted, cancel
+                                artCache.notifyQueryStopped(mEntity);
+                                return null;
                             }
                         }
                     }
