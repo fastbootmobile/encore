@@ -40,7 +40,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper.AlbumArtListener {
     private final String TAG = "AlbumArtImageView";
     private static final boolean DEBUG = false;
-    private static final int DELAY_BEFORE_START = 150;
+    private static final int DELAY_BEFORE_START = 90;
 
     private Handler mHandler;
     private OnArtLoadedListener mOnArtLoadedListener;
