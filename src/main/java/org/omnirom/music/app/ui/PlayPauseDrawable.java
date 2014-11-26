@@ -23,13 +23,11 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.dd.CircularAnimatedDrawable;
-
-import org.omnirom.music.app.Utils;
 
 /**
  * Animated drawable giving native Material animations between Play, Pause and Stop state
@@ -43,9 +41,8 @@ public class PlayPauseDrawable extends Drawable {
     public static final int SHAPE_PLAY = 2;
 
     private static final float TRANSITION_DURATION = 300;
-    private static final float PAUSE_TRIM_RATIO = 0.22f;
+    private static final float PAUSE_TRIM_RATIO = 0.12f;
 
-    private int mHalfPadding;
     private int mCurrentShape;
     private int mRequestShape;
     private Path mPath;
@@ -57,13 +54,20 @@ public class PlayPauseDrawable extends Drawable {
     private boolean mIsBuffering;
     private int mYOffset;
     private CircularAnimatedDrawable mBufferingDrawable;
-    private Rect mBounds;
+    private int mIconWidth;
+    private int mIconHeight;
+    private int mWidth;
+    private int mHeight;
+    private int mPadding;
 
     /**
      * Default constructor
      */
-    public PlayPauseDrawable() {
-        setPaddingDp(42);
+    public PlayPauseDrawable(Resources res, float scale) {
+        this(res, scale, scale);
+    }
+
+    public PlayPauseDrawable(Resources res, float scaleOut, float scaleIcon) {
         mCurrentShape = mRequestShape = -1;
         mPath = new Path();
         mPaint = new Paint();
@@ -73,6 +77,12 @@ public class PlayPauseDrawable extends Drawable {
 
         mInitialDrawDone = false;
         mTransitionInterpolator = new AccelerateDecelerateInterpolator();
+
+        mIconWidth = mIconHeight = (int) (dpToPx(res, 34) * scaleIcon);
+        mWidth = mHeight = (int) (dpToPx(res, 48) * scaleOut);
+        mPadding = mWidth - mIconWidth;
+
+        setBounds(0, 0, mWidth, mHeight);
     }
 
     /**
@@ -81,26 +91,6 @@ public class PlayPauseDrawable extends Drawable {
      */
     public void setColor(int color) {
         mPaint.setColor(color);
-    }
-
-    /**
-     * Sets the drawable padding, in DP
-     * @param paddingDp The padding value, in DP
-     */
-    public void setPaddingDp(int paddingDp) {
-        setPadding((int) (Utils.dpToPx(Resources.getSystem(), paddingDp) * 1.3f));
-    }
-
-    /**
-     * Sets the drawable padding, in pixels
-     * @param padding The padding value, in pixels
-     */
-    public void setPadding(int padding) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mHalfPadding = padding / 4;
-        } else {
-            mHalfPadding = padding / 2;
-        }
     }
 
     /**
@@ -181,33 +171,35 @@ public class PlayPauseDrawable extends Drawable {
 
         // Make the play triangle, with the "fourth" point at the tip moving towards making a
         // square (they split progressively)
-        mPath.moveTo(mBounds.left, mBounds.top);
-        mPath.lineTo(mBounds.right, mBounds.centerY() - mBounds.height() * 0.5f * progress);
-        mPath.lineTo(mBounds.right, mBounds.centerY() + mBounds.height() * 0.5f * progress);
-        mPath.lineTo(mBounds.left, mBounds.bottom);
+        mPath.moveTo(mPadding, mPadding);
+        mPath.lineTo(mWidth - mPadding, (mHeight) / 2 - (mHeight - mPadding * 2) / 2 * progress);
+        mPath.lineTo(mWidth - mPadding, (mHeight) / 2 + (mHeight - mPadding * 2) / 2 * progress);
+        mPath.lineTo(mPadding, mHeight - mPadding);
 
         // Rotate it
         Matrix matrix = new Matrix();
-        matrix.postRotate(90.0f * progress, mBounds.centerX(), mBounds.centerY());
+        matrix.postRotate(90.0f * progress,
+                mWidth / 2,
+                mHeight / 2);
         mPath.transform(matrix);
     }
 
     private void transitionStopToPause(float progress) {
         mPath.reset();
 
-        final int halfWidth = mBounds.width() / 2;
+        final int halfWidth = mWidth / 2;
 
         // We glue two half-square together, which we then split and slightly trim (10%)
-        mPath.addRect(mBounds.left,
-                mBounds.top,
-                mBounds.centerX() - halfWidth * PAUSE_TRIM_RATIO * progress,
-                mBounds.bottom,
+        mPath.addRect(mPadding,
+                mPadding,
+                mWidth / 2 - halfWidth * PAUSE_TRIM_RATIO * progress,
+                mHeight - mPadding,
                 Path.Direction.CW);
 
-        mPath.addRect(mBounds.centerX() + halfWidth * PAUSE_TRIM_RATIO * progress,
-                mBounds.top,
-                mBounds.right,
-                mBounds.bottom,
+        mPath.addRect(mWidth / 2 + halfWidth * PAUSE_TRIM_RATIO * progress,
+                mPadding,
+                mWidth - mPadding,
+                mHeight - mPadding,
                 Path.Direction.CW);
 
 
@@ -304,7 +296,7 @@ public class PlayPauseDrawable extends Drawable {
         if (mIsBuffering) {
             if (mBufferingDrawable == null) {
                 mBufferingDrawable = new CircularAnimatedDrawable(0xFFFFFFFF, 8.0f);
-                mBufferingDrawable.setBounds(mBounds);
+                mBufferingDrawable.setBounds(getBounds());
                 mBufferingDrawable.setCallback(getCallback());
                 mBufferingDrawable.start();
             }
@@ -320,16 +312,6 @@ public class PlayPauseDrawable extends Drawable {
     }
 
     @Override
-    protected void onBoundsChange(Rect bounds) {
-        super.onBoundsChange(bounds);
-        mBounds = new Rect(bounds);
-        mBounds.left += mHalfPadding;
-        mBounds.top += mHalfPadding;
-        mBounds.right -= mHalfPadding;
-        mBounds.bottom -= mHalfPadding;
-    }
-
-    @Override
     public void setAlpha(int i) {
 
     }
@@ -342,5 +324,9 @@ public class PlayPauseDrawable extends Drawable {
     @Override
     public int getOpacity() {
         return 255;
+    }
+
+    static float dpToPx(Resources resources, float dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.getDisplayMetrics());
     }
 }

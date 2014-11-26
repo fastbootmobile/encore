@@ -207,9 +207,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         ivSource.setImageBitmap(mLogoBitmap.get());
 
         // Set the FAB animated drawable
-        mFabDrawable = new PlayPauseDrawable();
+        mFabDrawable = new PlayPauseDrawable(getResources(), 1);
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        mFabDrawable.setPaddingDp(52);
         mFabDrawable.setYOffset(6);
 
         mPlayFab.setOnClickListener(new View.OnClickListener() {
@@ -233,9 +232,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
             @Override
             public void run() {
                 showFab(false, false);
-                mPlayFab.setImageDrawable(mFabDrawable);
             }
         });
+        mPlayFab.setImageDrawable(mFabDrawable);
 
         ivHero.setImageBitmap(mHeroImage);
 

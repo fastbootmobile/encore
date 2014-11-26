@@ -234,7 +234,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             mRunnable.run(true);
         } else {
             setDefaultArt();
-            mHandler.postDelayed(mRunnable, DELAY_BEFORE_START);
+            //mHandler.postDelayed(mRunnable, DELAY_BEFORE_START);
+            mHandler.post(mRunnable);
         }
     }
 

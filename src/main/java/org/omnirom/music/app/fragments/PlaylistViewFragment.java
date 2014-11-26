@@ -235,9 +235,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         }
 
         // Set the FAB animated drawable
-        mFabDrawable = new PlayPauseDrawable();
+        mFabDrawable = new PlayPauseDrawable(getResources(), 1);
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        mFabDrawable.setPaddingDp(52);
         mFabDrawable.setYOffset(6);
 
         mPlayFab.setImageDrawable(mFabDrawable);

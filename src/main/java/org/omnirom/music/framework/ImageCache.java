@@ -151,9 +151,7 @@ public class ImageCache {
     public boolean hasInMemory(final String key) {
         if (USE_MEMORY_CACHE) {
             RefCountedBitmap bmp;
-            synchronized (mMemoryCache) {
-                bmp = mMemoryCache.get(sanitizeKey(key));
-            }
+            bmp = mMemoryCache.get(sanitizeKey(key));
 
             if (bmp != null && bmp.isRecycled()) {
                 Log.e(TAG, "MEMORY CACHE CONTAINS A RECYCLED ENTRY!");
