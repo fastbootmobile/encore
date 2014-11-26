@@ -60,6 +60,27 @@ SocketHost* NativeHub::createHostSocket(const std::string& name, bool is_dsp) {
     return host;
 }
 // -------------------------------------------------------------------------------------
+void NativeHub::releaseHostSocket(const std::string& name) {
+    bool is_dsp = false;
+    SocketHost* host = m_ProviderSockets[name];
+
+    if (!host) {
+        host = m_DSPSockets[name];
+        is_dsp = true;
+    }
+
+    if (host) {
+        delete host;
+        if (is_dsp) {
+            m_DSPSockets.erase(name);
+        } else {
+            m_ProviderSockets.erase(name);
+        }
+    } else {
+        ALOGE("Cannot release host socket '%s' as it doesn't seem allocated", name.c_str());
+    }
+}
+// -------------------------------------------------------------------------------------
 void* NativeHub::getUserData() const {
     return m_pUserData;
 }

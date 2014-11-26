@@ -124,7 +124,7 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
     /**
      * Unbinds the service and unregisters the provider from this instance
      */
-    public void unbindService() {
+    public void unbindService(NativeHub hub) {
         if (mIsBound) {
             if (DEBUG) Log.d(TAG, "Unbinding service...");
 
@@ -190,7 +190,13 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
      * @return True if the AudioSocket Host has been created successfully
      */
     public boolean createAudioSocket(final NativeHub hub, final String socketName) {
-        // TODO: Disconnect previous socket!
+        // Release the previous socket, if any
+        if (mAudioSocketName != null) {
+            hub.releaseHostSocket(socketName);
+            mAudioSocketName = null;
+        }
+
+        // Create the new socket
         if (hub.createHostSocket(socketName, this instanceof DSPConnection)) {
             mAudioSocketName = socketName;
             return true;

@@ -537,7 +537,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     } catch (RemoteException e) {
                         // This may perfectly happen if the provider died.
                     }
-                    provider.unbindService();
                 }
             }
         });

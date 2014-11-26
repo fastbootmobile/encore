@@ -37,6 +37,9 @@ void om_NativeHub_setDSPChain(JNIEnv* env, jobject thiz, jobjectArray chain);
 // NativeHub.createHostSocket(String name, boolean isDsp) ==> NativeHub::createHostSocket
 jboolean om_NativeHub_createHostSocket(JNIEnv* env, jobject thiz, jstring name, jboolean is_dsp);
 
+// NativeHub.releaseHostSocket(String name) ==> NativeHub::releaseHostSocket
+void om_NativeHub_releaseHostSocket(JNIEnv* env, jobject thiz, jstring name);
+
 // NativeHub.setSinkPointer(long handle) ==> NativeHub::setSink(INativeSink* sink)
 void om_NativeHub_setSinkPointer(JNIEnv* env, jobject thiz, jlong handle);
 

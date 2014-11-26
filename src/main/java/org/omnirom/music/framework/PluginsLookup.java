@@ -37,6 +37,7 @@ import org.omnirom.music.providers.MultiProviderPlaylistProvider;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.IPlaybackService;
+import org.omnirom.music.service.NativeHub;
 import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
@@ -171,15 +172,23 @@ public class PluginsLookup {
         fetchDSPs();
     }
 
-    public void tearDown() {
+    public void releasePlaybackService() {
+        if (mPlaybackService != null) {
+            mContext.unbindService(mPlaybackConnection);
+            mPlaybackService = null;
+        }
+    }
+
+    public void tearDown(NativeHub hub) {
         Log.i(TAG, "tearDown()");
         if (mPlaybackService != null) {
             mContext.unbindService(mPlaybackConnection);
             mPlaybackService = null;
         }
+
         synchronized (mConnections) {
             for (ProviderConnection connection : mConnections) {
-                connection.unbindService();
+                connection.unbindService(hub);
             }
         }
     }

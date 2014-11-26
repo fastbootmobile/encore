@@ -257,12 +257,16 @@ public class PlaybackService extends Service
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         mRemoteMetadata.release();
 
-        if (mWakeLock.isHeld()) {
-            mWakeLock.release();
+        if (mHasAudioFocus) {
+            abandonAudioFocus();
         }
 
         // Remove audio hosts from providers
-        PluginsLookup.getDefault().tearDown();
+        PluginsLookup.getDefault().tearDown(mNativeHub);
+
+        // Release all currently playing songs
+        mPlaybackQueue.clear();
+        mCurrentTrack = -1;
 
         // Shutdown DSP chain
     }

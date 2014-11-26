@@ -55,12 +55,17 @@ public class DSPConnection extends AbstractProviderConnection {
      * {@inheritDoc}
      */
     @Override
-    public void unbindService() {
+    public void unbindService(NativeHub hub) {
         if (mIsBound) {
             mBinder = null;
         }
 
-        super.unbindService();
+        if (mAudioSocketName != null) {
+            hub.releaseHostSocket(mAudioSocketName);
+            mAudioSocketName = null;
+        }
+
+        super.unbindService(hub);
     }
 
     /**

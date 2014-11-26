@@ -108,6 +108,14 @@ jboolean om_NativeHub_createHostSocket(JNIEnv* env, jobject thiz, jstring name, 
     return socket != nullptr;
 }
 // -------------------------------------------------------------------------------------
+void om_NativeHub_releaseHostSocket(JNIEnv* env, jobject thiz, jstring name) {
+    const char* socket_name = env->GetStringUTFChars(name, 0);
+    NativeHub* hub = get_hub_from_object(env, thiz);
+
+    hub->releaseHostSocket(socket_name);
+    env->ReleaseStringUTFChars(name, socket_name);
+}
+// -------------------------------------------------------------------------------------
 void om_NativeHub_setSinkPointer(JNIEnv* env, jobject thiz, jlong handle) {
     NativeHub* hub = get_hub_from_object(env, thiz);
     hub->setSink(reinterpret_cast<INativeSink*>(handle));

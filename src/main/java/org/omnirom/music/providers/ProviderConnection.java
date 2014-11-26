@@ -51,18 +51,18 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
      * {@inheritDoc}
      */
     @Override
-    public void unbindService() {
+    public void unbindService(NativeHub hub) {
         if (mIsBound) {
             ProviderAggregator.getDefault().unregisterProvider(this);
-            // TODO: Disconnect socket
-            /*if (mAudioSocket != null) {
-                mAudioSocket.disconnectSocket();
-            }*/
+            if (mAudioSocketName != null) {
+                hub.releaseHostSocket(mAudioSocketName);
+                mAudioSocketName = null;
+            }
 
             mBinder = null;
         }
 
-        super.unbindService();
+        super.unbindService(hub);
     }
 
     public IMusicProvider getBinder() {

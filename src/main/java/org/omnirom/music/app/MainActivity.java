@@ -267,7 +267,7 @@ public class MainActivity extends FragmentActivity
         // Release services connections if playback isn't happening
         int state = PlaybackProxy.getState();
         if (state == PlaybackService.STATE_PAUSED || state == PlaybackService.STATE_STOPPED) {
-            PluginsLookup.getDefault().tearDown();
+            PluginsLookup.getDefault().releasePlaybackService();
         }
 
         ImageCache.getDefault().evictAll();

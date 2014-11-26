@@ -44,6 +44,9 @@ class NativeHub : public SocketCallbacks {
     // Creates a host socket for the provider or DSP plugin
     SocketHost* createHostSocket(const std::string& name, bool is_dsp);
 
+    // Releases an host socket previously created and closes it
+    void releaseHostSocket(const std::string& name);
+
     // Returns userdata pointer
     void* getUserData() const;
 

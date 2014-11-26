@@ -60,6 +60,14 @@ public class NativeHub {
     }
 
     /**
+     * Releases an host socket and closes all bound connections
+     * @param name The name of the socket to release
+     */
+    public void releaseHostSocket(String name) {
+        nativeReleaseHostSocket(name);
+    }
+
+    /**
      * Sets the native pointer of the active audio sink
      * @param handle The pointer
      */
@@ -82,6 +90,7 @@ public class NativeHub {
     private native boolean nativeInitialize();
     private native void nativeSetDSPChain(String[] chain);
     private native boolean nativeCreateHostSocket(String name, boolean isDsp);
+    private native void nativeReleaseHostSocket(String name);
     private native void nativeSetSinkPointer(long handle);
     private native void nativeSetDucking(boolean duck);
 }
