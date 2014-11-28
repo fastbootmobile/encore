@@ -73,7 +73,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 /**
  * Activity showing the current playback queue
  */
-public class PlaybackQueueActivity extends FragmentActivity {
+public class PlaybackQueueActivity extends AppActivity {
     private static final String TAG = "PlaybackQueue";
 
     @Override
@@ -90,13 +90,6 @@ public class PlaybackQueueActivity extends FragmentActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     @Override

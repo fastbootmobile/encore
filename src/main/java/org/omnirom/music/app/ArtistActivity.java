@@ -43,7 +43,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Activity to view an Artist tracks, similar, etc. through
  * an {@link org.omnirom.music.app.fragments.ArtistFragment}
  */
-public class ArtistActivity extends FragmentActivity {
+public class ArtistActivity extends AppActivity {
     private static final String TAG = "ArtistActivity";
     private static final String TAG_FRAGMENT = "fragment_inner";
 
@@ -174,13 +174,6 @@ public class ArtistActivity extends FragmentActivity {
         } else {
             mActiveFragment.notifySizeUnlimited();
         }
-
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     @Override

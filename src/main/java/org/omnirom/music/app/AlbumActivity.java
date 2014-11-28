@@ -44,7 +44,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Activity for viewing an album details through
  * {@link org.omnirom.music.app.fragments.AlbumViewFragment}
  */
-public class AlbumActivity extends FragmentActivity {
+public class AlbumActivity extends AppActivity {
     private static final String TAG_FRAGMENT = "fragment_inner";
 
     public static final String EXTRA_ALBUM = "album";
@@ -139,20 +139,6 @@ public class AlbumActivity extends FragmentActivity {
                 }
             });
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        PluginsLookup.getDefault().connectPlayback();
-
-        // We control the Music volume stream here too
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     @Override

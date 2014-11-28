@@ -44,7 +44,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Activity allowing display of search results through
  * a {@link org.omnirom.music.app.fragments.SearchFragment}
  */
-public class SearchActivity extends FragmentActivity {
+public class SearchActivity extends AppActivity {
     private static final String TAG = "SearchActivity";
     private static final String TAG_FRAGMENT = "fragment_inner";
     private SearchFragment mActiveFragment;
@@ -71,12 +71,6 @@ public class SearchActivity extends FragmentActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     @Override

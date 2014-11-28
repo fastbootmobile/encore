@@ -34,7 +34,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Activity allowing user to view a Playlist contents through
  * a {@link org.omnirom.music.app.fragments.PlaylistViewFragment}
  */
-public class PlaylistActivity extends FragmentActivity {
+public class PlaylistActivity extends AppActivity {
     private static final String TAG_FRAGMENT = "fragment_inner";
     public static final String BITMAP_PLAYLIST_HERO = "playlist_hero";
     private Bundle mInitialIntent; // TODO: Test rotation
@@ -80,14 +80,6 @@ public class PlaylistActivity extends FragmentActivity {
         if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
-        // This activity changes music stream volume too
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     @Override

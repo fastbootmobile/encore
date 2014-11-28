@@ -39,7 +39,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 /**
  * Activity showing a {@link org.omnirom.music.app.fragments.SettingsFragment} to configure the app
  */
-public class SettingsActivity extends FragmentActivity {
+public class SettingsActivity extends AppActivity {
     private static final String TAG = "SettingsActivity";
     public static final String TAG_FRAGMENT = "fragment_inner";
 
@@ -79,13 +79,5 @@ public class SettingsActivity extends FragmentActivity {
                 }
             }
         });
-
-        // Change the music volume here as well
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 }

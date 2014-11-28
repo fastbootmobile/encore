@@ -34,15 +34,6 @@ import java.io.IOException;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
-// Report crashes with ACRA on our temporary endpoint
-/*@ReportsCrashes(
-        formKey = "",
-        httpMethod = HttpSender.Method.PUT,
-        reportType = HttpSender.Type.JSON,
-        formUri = "http://nuclear.ouverta.fr/om-acra/_design/acra-storage/_update/report",
-        formUriBasicAuthLogin = "reporter-omnimusic-alpha",
-        formUriBasicAuthPassword = "4lqh4mu51c1337"
-)*/
 /**
  * Application structure wrapper to handle various application-wide (activity + services) properties
  */
@@ -52,9 +43,6 @@ public class OmniMusic extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        // Setup ACRA bug reporting
-        // ACRA.init(this);
 
         // Setup the plugins system
         ProviderAggregator.getDefault().setContext(getApplicationContext());

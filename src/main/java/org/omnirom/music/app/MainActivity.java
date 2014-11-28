@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -39,18 +38,16 @@ import org.omnirom.music.app.fragments.RecognitionFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.framework.CastModule;
 import org.omnirom.music.framework.ImageCache;
-import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
-import org.omnirom.music.service.PlaybackService;
 
 import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class MainActivity extends FragmentActivity
+public class MainActivity extends AppActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     private static final String TAG = "MainActivity";
@@ -209,7 +206,6 @@ public class MainActivity extends FragmentActivity
     @Override
     protected void onResume() {
         super.onResume();
-        PluginsLookup.getDefault().connectPlayback();
         PluginsLookup.getDefault().requestUpdatePlugins();
 
         if (mConfiguringProvider != null) {
@@ -241,11 +237,6 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
     protected void onStart() {
         mCastModule.onStart();
         super.onStart();
@@ -265,11 +256,7 @@ public class MainActivity extends FragmentActivity
         }
 
         // Release services connections if playback isn't happening
-        int state = PlaybackProxy.getState();
-        if (state == PlaybackService.STATE_PAUSED || state == PlaybackService.STATE_STOPPED) {
-            PluginsLookup.getDefault().releasePlaybackService();
-        }
-
+        PluginsLookup.getDefault().releasePlaybackServiceIfPossible();
         ImageCache.getDefault().evictAll();
         System.gc();
 

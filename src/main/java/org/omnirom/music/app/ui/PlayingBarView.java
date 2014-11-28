@@ -390,6 +390,7 @@ public class PlayingBarView extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        mHandler.removeCallbacks(mUpdateSeekBarRunnable);
         PlaybackProxy.removeCallback(mPlaybackCallback);
         ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
     }
