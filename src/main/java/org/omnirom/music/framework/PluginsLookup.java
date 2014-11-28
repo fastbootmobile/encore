@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -49,7 +50,7 @@ import java.util.List;
  */
 public class PluginsLookup {
 
-    private static final boolean DEBUG = BuildConfig.DEBUG;
+    private static final boolean DEBUG = false;
     private static final String TAG = "PluginsLookup";
 
     public static final String DATA_PACKAGE = "package";
@@ -69,6 +70,8 @@ public class PluginsLookup {
     private List<ConnectionListener> mConnectionListeners;
     private IPlaybackService mPlaybackService;
     private ProviderConnection mMultiProviderConnection;
+    private Handler mHandler;
+    private int mServiceUsage;
     private ServiceConnection mPlaybackConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -98,6 +101,14 @@ public class PluginsLookup {
         }
     };
 
+    private Runnable mShutdownPlaybackRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mContext.unbindService(mPlaybackConnection);
+            mPlaybackService = null;
+        }
+    };
+
     private static final PluginsLookup INSTANCE = new PluginsLookup();
 
     public static PluginsLookup getDefault() {
@@ -108,6 +119,7 @@ public class PluginsLookup {
         mConnections = new ArrayList<ProviderConnection>();
         mDSPConnections = new ArrayList<DSPConnection>();
         mConnectionListeners = new ArrayList<ConnectionListener>();
+        mHandler = new Handler();
     }
 
     public void initialize(Context context) {
@@ -135,6 +147,19 @@ public class PluginsLookup {
         connectPlayback();
     }
 
+    public void incPlaybackUsage() {
+        mServiceUsage++;
+        connectPlayback();
+    }
+
+    public void decPlaybackUsage() {
+        mServiceUsage--;
+
+        if (mServiceUsage == 0) {
+            releasePlaybackServiceIfPossible();
+        }
+    }
+
     public void requestUpdatePlugins() {
         new Thread() {
             public void run() {
@@ -158,10 +183,14 @@ public class PluginsLookup {
     /**
      * Connects the app to the playback service
      */
-    public void connectPlayback() {
-        Intent i = new Intent(mContext, PlaybackService.class);
-        mContext.startService(i);
-        mContext.bindService(i, mPlaybackConnection, Context.BIND_AUTO_CREATE);
+    private void connectPlayback() {
+        mHandler.removeCallbacks(mShutdownPlaybackRunnable);
+
+        if (mPlaybackService == null) {
+            Intent i = new Intent(mContext, PlaybackService.class);
+            mContext.startService(i);
+            mContext.bindService(i, mPlaybackConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 
     /**
@@ -172,22 +201,32 @@ public class PluginsLookup {
         fetchDSPs();
     }
 
-    public void releasePlaybackService() {
+    public void releasePlaybackServiceIfPossible() {
         if (mPlaybackService != null) {
-            mContext.unbindService(mPlaybackConnection);
-            mPlaybackService = null;
+            final int state = PlaybackProxy.getState();
+
+            if (state == PlaybackService.STATE_PAUSED || state == PlaybackService.STATE_STOPPED) {
+                releasePlaybackService();
+            }
+        }
+    }
+
+    private void releasePlaybackService() {
+        if (mPlaybackService != null) {
+            mHandler.removeCallbacks(mShutdownPlaybackRunnable);
+            mHandler.postDelayed(mShutdownPlaybackRunnable, 1000);
         }
     }
 
     public void tearDown(NativeHub hub) {
         Log.i(TAG, "tearDown()");
-        if (mPlaybackService != null) {
-            mContext.unbindService(mPlaybackConnection);
-            mPlaybackService = null;
-        }
+        releasePlaybackService();
 
         synchronized (mConnections) {
             for (ProviderConnection connection : mConnections) {
+                connection.unbindService(hub);
+            }
+            for (DSPConnection connection : mDSPConnections) {
                 connection.unbindService(hub);
             }
         }
