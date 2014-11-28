@@ -31,6 +31,11 @@ import org.omnirom.music.providers.ProviderIdentifier;
  */
 public class BaseProviderCallback extends IProviderCallback.Stub {
     @Override
+    public int getIdentifier() throws RemoteException {
+        return this.hashCode();
+    }
+
+    @Override
     public void onLoggedIn(ProviderIdentifier provider, boolean success) throws RemoteException {
     }
 

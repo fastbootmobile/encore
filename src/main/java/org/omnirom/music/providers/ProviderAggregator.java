@@ -50,6 +50,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ProviderAggregator extends IProviderCallback.Stub {
     private static final String TAG = "ProviderAggregator";
     private static final int PROPAGATION_DELAY = 200;
+    private static final boolean DEBUG = false;
 
     private SearchResult mCachedSearch;
     private List<ILocalCallback> mUpdateCallbacks;
@@ -291,7 +292,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         return null;
                     }
                 } else {
-                    Log.e(TAG, "Binder null: provider not yet connected?");
+                    if (DEBUG) Log.e(TAG, "Binder null: provider not yet connected?");
                 }
             } else {
                 Log.e(TAG, "Unknown provider identifier: " + provider);
@@ -669,6 +670,11 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
 
+    @Override
+    public int getIdentifier() throws RemoteException {
+        return this.hashCode();
+    }
+
     /**
      * Called by the providers when a feedback is available about a login request
      *
@@ -890,10 +896,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     if (artist != null) {
                         artist.addAlbum(a.getRef());
                     } else {
-                        Log.e(TAG, "Artist is null!");
+                        if (DEBUG) Log.e(TAG, "Artist is null!");
                     }
                 } else {
-                    Log.e(TAG, "Song is null!");
+                    if (DEBUG) Log.e(TAG, "Song is null!");
                 }
             }
 

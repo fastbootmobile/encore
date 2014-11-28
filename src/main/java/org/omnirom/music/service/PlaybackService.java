@@ -251,9 +251,10 @@ public class PlaybackService extends Service
      */
     @Override
     public void onDestroy() {
-        super.onDestroy();
+
         Log.i(TAG, "onDestroy()");
 
+        PluginsLookup.getDefault().removeProviderListener(this);
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         mRemoteMetadata.release();
 
@@ -262,6 +263,21 @@ public class PlaybackService extends Service
         }
 
         // Remove audio hosts from providers
+        Log.e(TAG, "DESTROY -- UNREGISTERING CALLBACKS");
+        List<ProviderConnection> connections = PluginsLookup.getDefault().getAvailableProviders();
+        for (ProviderConnection pc : connections) {
+            IMusicProvider provider = pc.getBinder();
+            try {
+                if (provider != null) {
+                    provider.unregisterCallback(mProviderCallback);
+                } else {
+                    Log.e(TAG, "Cannot unregister callback: provider binder is null");
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot unregister callback", e);
+            }
+        }
+
         PluginsLookup.getDefault().tearDown(mNativeHub);
 
         // Release all currently playing songs
@@ -269,6 +285,8 @@ public class PlaybackService extends Service
         mCurrentTrack = -1;
 
         // Shutdown DSP chain
+
+        super.onDestroy();
     }
 
     /**
@@ -637,6 +655,7 @@ public class PlaybackService extends Service
 
         mIsStopping = true;
         stopForeground(true);
+        stopSelf();
     }
 
     void playImpl() {
@@ -680,7 +699,7 @@ public class PlaybackService extends Service
      * @param index The index to play, 0-based
      */
     private void playAtIndexImpl(int index) {
-        Log.d(TAG, "Playing track " + (index + 1) + "/" + mPlaybackQueue.size());
+        Log.d(TAG, "Playing track " + (index + 1) + "/" + mPlaybackQueue.size() + " (this=" + this + ")");
         mCurrentTrack = index;
         mHandler.removeCallbacks(mStartPlaybackRunnable);
         mHandler.post(mStartPlaybackRunnable);
@@ -783,7 +802,7 @@ public class PlaybackService extends Service
 
         @Override
         public void playAlbum(Album a) throws RemoteException {
-            Log.i(TAG, "Play album: " + a.getRef());
+            Log.i(TAG, "Play album: " + a.getRef() + " (this=" + this + ")");
             mCurrentTrack = 0;
             mPlaybackQueue.clear();
             queueAlbum(a, false);
@@ -977,6 +996,11 @@ public class PlaybackService extends Service
 
             mState = STATE_PLAYING;
             final Song currentSong = getCurrentSong();
+
+            if (currentSong == null) {
+                throw new IllegalStateException("Current song is null on callback! Queue size=" + mPlaybackQueue.size() +
+                        " and index=" + mCurrentTrack + " and this=" + this);
+            }
 
             for (IPlaybackCallback cb : mCallbacks) {
                 try {

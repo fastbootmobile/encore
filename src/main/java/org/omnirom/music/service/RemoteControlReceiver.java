@@ -43,7 +43,8 @@ public class RemoteControlReceiver extends BroadcastReceiver {
         if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
             final KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
 
-            if (event == null || event.getAction() != KeyEvent.ACTION_DOWN) {
+            if (event == null || event.getAction() != KeyEvent.ACTION_DOWN
+                    || !PlaybackProxy.isServiceConnected()) {
                 return;
             }
 

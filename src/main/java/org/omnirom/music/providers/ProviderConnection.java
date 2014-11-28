@@ -116,7 +116,6 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
         // Release the binder
         mBinder = null;
         super.onServiceDisconnected(name);
-        Log.e(TAG, "Service disconnected: " + name);
     }
 
     /**
