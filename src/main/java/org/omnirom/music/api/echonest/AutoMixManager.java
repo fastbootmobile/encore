@@ -27,11 +27,11 @@ import com.echonest.api.v4.EchoNestException;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
-import org.omnirom.music.model.Song;
 import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
-import org.omnirom.music.service.IPlaybackCallback;
+import org.omnirom.music.service.BasePlaybackCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ import java.util.TreeSet;
 /**
  * Manages the AutoMix buckets and ensures AutoMix playback
  */
-public class AutoMixManager implements IPlaybackCallback {
+public class AutoMixManager extends BasePlaybackCallback {
     private static final String TAG = "AutoMixManager";
 
     private static final String SHARED_PREFS = "automix_buckets";
@@ -316,7 +316,6 @@ public class AutoMixManager implements IPlaybackCallback {
         return s;
     }
 
-
     @Override
     public void onSongStarted(boolean buffering, Song s) throws RemoteException {
         if (mCurrentPlayingBucket != null) {
@@ -332,27 +331,6 @@ public class AutoMixManager implements IPlaybackCallback {
                 }
             }
         }
-    }
-
-    @Override
-    public void onSongScrobble(int timeMs) throws RemoteException {
-    }
-
-    @Override
-    public void onPlaybackPause() throws RemoteException {
-    }
-
-    @Override
-    public void onPlaybackResume() throws RemoteException {
-    }
-
-    @Override
-    public void onPlaybackQueueChanged() throws RemoteException {
-    }
-
-    @Override
-    public IBinder asBinder() {
-        return null;
     }
 
 }

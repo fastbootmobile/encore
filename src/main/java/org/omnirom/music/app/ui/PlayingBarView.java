@@ -58,6 +58,7 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
 
@@ -96,7 +97,7 @@ public class PlayingBarView extends RelativeLayout {
         }
     };
 
-    private IPlaybackCallback.Stub mPlaybackCallback = new IPlaybackCallback.Stub() {
+    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
 
         @Override
         public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
@@ -113,11 +114,6 @@ public class PlayingBarView extends RelativeLayout {
             });
 
             mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
-        }
-
-        @Override
-        public void onSongScrobble(int timeMs) throws RemoteException {
-            /*mScrobble.setProgress(timeMs);*/
         }
 
         @Override
@@ -279,13 +275,15 @@ public class PlayingBarView extends RelativeLayout {
         mGestureDetector = new GestureDetector(getContext(), mGestureListener);
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
+    public void onPause() {
+        mHandler.removeCallbacks(mUpdateSeekBarRunnable);
+        PlaybackProxy.removeCallback(mPlaybackCallback);
+        ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
+    }
 
+    public void onResume() {
         ProviderAggregator.getDefault().addUpdateCallback(mProviderCallback);
 
-        // Setup the Playback service callback
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -293,6 +291,11 @@ public class PlayingBarView extends RelativeLayout {
             }
         }, 200);
 
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
 
         // Set FAB info
         mPlayFab = (FloatingActionButton) findViewById(R.id.fabPlayBarButton);
@@ -382,6 +385,8 @@ public class PlayingBarView extends RelativeLayout {
             }
         });
 
+        onResume();
+
         // Load playing queue
         mTracksLayout = (LinearLayout) findViewById(R.id.playBarTracksLayout);
         updatePlayingQueue();
@@ -390,9 +395,7 @@ public class PlayingBarView extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mHandler.removeCallbacks(mUpdateSeekBarRunnable);
-        PlaybackProxy.removeCallback(mPlaybackCallback);
-        ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
+        onPause();
     }
 
     @Override

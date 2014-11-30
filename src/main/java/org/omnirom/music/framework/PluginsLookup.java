@@ -74,8 +74,8 @@ public class PluginsLookup {
     private int mServiceUsage;
     private ServiceConnection mPlaybackConnection = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            mPlaybackService = (IPlaybackService) iBinder;
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mPlaybackService = IPlaybackService.Stub.asInterface(service);
             Log.i(TAG, "Connected to Playback Service");
         }
 
@@ -149,11 +149,13 @@ public class PluginsLookup {
 
     public void incPlaybackUsage() {
         mServiceUsage++;
+        Log.e(TAG, "Service usage: " + mServiceUsage);
         connectPlayback();
     }
 
     public void decPlaybackUsage() {
         mServiceUsage--;
+        Log.e(TAG, "Service usage: " + mServiceUsage);
 
         if (mServiceUsage == 0) {
             releasePlaybackServiceIfPossible();
@@ -188,8 +190,8 @@ public class PluginsLookup {
 
         if (mPlaybackService == null) {
             Intent i = new Intent(mContext, PlaybackService.class);
-            mContext.startService(i);
-            mContext.bindService(i, mPlaybackConnection, Context.BIND_AUTO_CREATE);
+            mContext.bindService(i, mPlaybackConnection,
+                    Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT);
         }
     }
 

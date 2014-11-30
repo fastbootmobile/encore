@@ -19,12 +19,9 @@ import android.app.Application;
 import android.net.http.HttpResponseCache;
 import android.util.Log;
 
-import org.acra.ACRA;
-import org.acra.ReportingInteractionMode;
-import org.acra.annotation.ReportsCrashes;
-import org.acra.sender.HttpSender;
+import com.joshdholtz.sentry.Sentry;
+
 import org.omnirom.music.api.echonest.AutoMixManager;
-import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -43,6 +40,9 @@ public class OmniMusic extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Sentry.init(this, "http://devops.fastbootmobile.com/sentry",
+                "http://daeeb2e097984abd860bbe798e82dea6:758feef22acb43bd9731212a0e01c424@devops.fastbootmobile.com/sentry/4");
 
         // Setup the plugins system
         ProviderAggregator.getDefault().setContext(getApplicationContext());

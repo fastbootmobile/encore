@@ -146,4 +146,9 @@ interface IPlaybackService {
      * Returns whether or not the repeat mode is enabled
      */
     boolean isRepeatMode();
+
+    /**
+     * Clears the playback queue
+     */
+    void clearPlaybackQueue();
 }

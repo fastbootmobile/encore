@@ -137,22 +137,6 @@ public class CastModule extends MediaRouter.Callback {
 
         mCastListener = new CastListener();
         mCastChannel = new CastChannel();
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                IPlaybackService service = PluginsLookup.getDefault().getPlaybackService();
-                if (service != null) {
-                    try {
-                        service.addCallback(mPlaybackCallback);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unable to add callback", e);
-                    }
-                } else {
-                    mHandler.post(this);
-                }
-            }
-        });
     }
 
     /**
@@ -160,6 +144,7 @@ public class CastModule extends MediaRouter.Callback {
      */
     public void onStart() {
         mMediaRouter.addCallback(mSelector, this, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
+        PlaybackProxy.addCallback(mPlaybackCallback);
     }
 
     /**
@@ -167,6 +152,7 @@ public class CastModule extends MediaRouter.Callback {
      */
     public void onStop() {
         mMediaRouter.removeCallback(this);
+        PlaybackProxy.removeCallback(mPlaybackCallback);
     }
 
     public MediaRouteSelector getSelector() {

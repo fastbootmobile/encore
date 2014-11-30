@@ -13,13 +13,12 @@
 
         <!--  -->
         <org.omnirom.music.app.ui.AlbumArtImageView
-            android:id="@+id/ivCurrentPlayAlbumArt"
+            android:id="@+id/ivAlbumArt"
             android:layout_width="64dp"
             android:layout_height="140dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:scaleType="centerCrop"
-            android:transitionName="playback:firstitem:art"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"/>
 
@@ -27,10 +26,9 @@
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/ivCurrentPlayAlbumArt"
+            android:layout_alignBottom="@+id/ivAlbumArt"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:transitionName="playback:firstitem:title"
             android:background="@drawable/gradient_overlay_playbar_current"
             android:id="@+id/linearLayout"
             android:paddingLeft="8dp"
@@ -45,7 +43,7 @@
                 android:layout_weight="1">
 
                 <TextView
-                    android:id="@+id/tvCurrentTitle"
+                    android:id="@+id/tvTitle"
                     style="@style/FontTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -53,7 +51,7 @@
                     android:textColor="@color/white"/>
 
                 <TextView
-                    android:id="@+id/tvCurrentArtist"
+                    android:id="@+id/tvArtist"
                     style="@style/FontSubhead"
                     android:textColor="@color/white"
                     android:layout_width="match_parent"
@@ -70,7 +68,9 @@
                 android:clickable="true"
                 android:background="?android:attr/selectableItemBackground"
                 android:scaleType="centerCrop"
-                android:adjustViewBounds="true"/>
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/more"/>
+
         </LinearLayout>
 
         <SeekBar
@@ -80,7 +80,7 @@
             android:layout_marginTop="-8dp"
             android:max="0"
             android:progress="0"
-            android:layout_below="@+id/ivCurrentPlayAlbumArt"
+            android:layout_below="@+id/ivAlbumArt"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentRight="true"
@@ -101,7 +101,8 @@
                 android:src="@drawable/ic_replay_gray"
                 android:scaleType="centerInside"
                 android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"/>
+                android:clickable="true"
+                android:contentDescription="@string/repeat"/>
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -110,10 +111,11 @@
                 android:id="@+id/ivPrevious"
                 android:clickable="true"
                 android:background="?android:attr/selectableItemBackground"
-                android:src="@drawable/ic_skip_previous" />
+                android:src="@drawable/ic_skip_previous"
+                android:contentDescription="@string/previous"/>
 
             <com.getbase.floatingactionbutton.FloatingActionButton
-                android:id="@+id/ivPlayPause"
+                android:id="@+id/fabPlay"
                 android:layout_width="@dimen/fab_size_mini"
                 android:layout_height="@dimen/fab_size_mini"
                 android:background="?android:attr/selectableItemBackground"
@@ -134,7 +136,7 @@
                 android:clickable="true"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_skip_next"
-                android:contentDescription="Forward"/>
+                android:contentDescription="@string/forward"/>
 
             <ImageView
                 android:layout_width="48dp"
@@ -144,7 +146,8 @@
                 android:src="@drawable/ic_thumbs_up_gray"
                 android:scaleType="centerInside"
                 android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"/>
+                android:clickable="true"
+                android:contentDescription="@string/thumbs_up_description" />
 
         </LinearLayout>
 

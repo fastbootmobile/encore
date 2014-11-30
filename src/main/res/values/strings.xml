@@ -174,4 +174,8 @@
     <string name="error_biography_unavailable_offline">Biography not available offline</string>
     <string name="error_recognition_unavailable_offline">Recognition not available offline</string>
     <string name="toast_offline_playlist_sync">Download will start once you are online</string>
+    <string name="forward">Forward</string>
+    <string name="thumbs_up_description">Like this song</string>
+    <string name="previous">Previous</string>
+    <string name="repeat">Repeat</string>
 </resources>

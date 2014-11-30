@@ -20,37 +20,24 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ScrollView;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.ListView;
 
-import com.echonest.api.v4.EchoNestException;
-import com.getbase.floatingactionbutton.FloatingActionButton;
-
-import org.omnirom.music.api.echonest.AutoMixManager;
-import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.app.adapters.PlaybackQueueAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
@@ -62,13 +49,11 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.service.IPlaybackCallback;
+import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Activity showing the current playback queue
@@ -156,37 +141,17 @@ public class PlaybackQueueActivity extends AppActivity {
             }
         };
 
-        private Runnable mUpdateSeekBarRunnable = new Runnable() {
-            @Override
-            public void run() {
-                int state = PlaybackProxy.getState();
-                if (state == PlaybackService.STATE_PLAYING
-                        || state == PlaybackService.STATE_PAUSING
-                        || state == PlaybackService.STATE_PAUSED) {
-                    if (mSeekBar != null) {
-                        if (!mSeekBar.isPressed()) {
-                            mSeekBar.setMax(PlaybackProxy.getCurrentTrackLength());
-                            mSeekBar.setProgress(PlaybackProxy.getCurrentTrackPosition());
-                        }
-                    }
-                    mHandler.postDelayed(this, SEEK_UPDATE_DELAY);
-                }
-            }
-        };
-
-        private IPlaybackCallback mPlaybackListener = new IPlaybackCallback.Stub() {
+        private BasePlaybackCallback mPlaybackListener = new BasePlaybackCallback() {
             @Override
             public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
-                mHandler.post(mUpdateSeekBarRunnable);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mPlayDrawable != null) {
-                            mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                            mPlayDrawable.setBuffering(buffering);
-                        }
-                        updateQueueLayout();
+                mHandler.sendEmptyMessage(MSG_UPDATE_SEEKBAR);
+                mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
+                mHandler.obtainMessage(MSG_UPDATE_PLAYSTATE,
+                        buffering ? PLAYSTATE_ARG1_BUFFERING : PLAYSTATE_ARG1_NOT_BUFFERING,
+                        PlayPauseDrawable.SHAPE_PAUSE).sendToTarget();
 
+                /*mHandler.post(new Runnable() {
+                    @Override
                         AutoMixManager mixManager = AutoMixManager.getDefault();
                         if (mixManager.getCurrentPlayingBucket() != null) {
                             Utils.animateScale(mThumbsUpButton, true, true);
@@ -194,44 +159,25 @@ public class PlaybackQueueActivity extends AppActivity {
                             Utils.animateScale(mThumbsUpButton, true, false);
                         }
                     }
-                });
-            }
-
-            @Override
-            public void onSongScrobble(int timeMs) throws RemoteException {
+                });*/
             }
 
             @Override
             public void onPlaybackPause() throws RemoteException {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                        mPlayDrawable.setBuffering(false);
-                    }
-                });
+                mHandler.obtainMessage(MSG_UPDATE_PLAYSTATE,
+                        PLAYSTATE_ARG1_NOT_BUFFERING, PlayPauseDrawable.SHAPE_PLAY).sendToTarget();
             }
 
             @Override
             public void onPlaybackResume() throws RemoteException {
-                mHandler.post(mUpdateSeekBarRunnable);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                        mPlayDrawable.setBuffering(false);
-                    }
-                });
+                mHandler.sendEmptyMessage(MSG_UPDATE_SEEKBAR);
+                mHandler.obtainMessage(MSG_UPDATE_PLAYSTATE,
+                        PLAYSTATE_ARG1_NOT_BUFFERING, PlayPauseDrawable.SHAPE_PAUSE).sendToTarget();
             }
 
             @Override
             public void onPlaybackQueueChanged() throws RemoteException {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateQueueLayout();
-                    }
-                });
+                mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
             }
         };
 
@@ -248,12 +194,7 @@ public class PlaybackQueueActivity extends AppActivity {
                 }
 
                 if (contains) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateQueueLayout();
-                        }
-                    });
+                    mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
                 }
             }
 
@@ -283,12 +224,7 @@ public class PlaybackQueueActivity extends AppActivity {
                 }
 
                 if (contains) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateQueueLayout();
-                        }
-                    });
+                    mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
                 }
             }
 
@@ -301,47 +237,83 @@ public class PlaybackQueueActivity extends AppActivity {
             }
         };
 
+        private static final int SEEK_UPDATE_DELAY = 1000/15;
 
-        private SeekBar.OnSeekBarChangeListener mSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
-                if (fromUser) {
-                    PlaybackProxy.seek(progress);
-                }
-            }
+        private static final int MSG_UPDATE_SEEKBAR = 1;
+        private static final int MSG_UPDATE_QUEUE = 2;
+        private static final int MSG_UPDATE_PLAYSTATE = 3;
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+        private static final int PLAYSTATE_ARG1_NOT_BUFFERING = 0;
+        private static final int PLAYSTATE_ARG1_BUFFERING = 1;
 
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        };
-
-        private static final int SEEK_UPDATE_DELAY = 1000/30;
-        private SeekBar mSeekBar;
         private Handler mHandler;
-        private ScrollView mRootView;
-        private PlayPauseDrawable mPlayDrawable;
-        private ImageView mThumbsUpButton;
+        private FrameLayout mRootView;
+        private ListView mListView;
+        private PlaybackQueueAdapter mAdapter;
+        private View.OnClickListener mPlayFabClickListener;
 
         public SimpleFragment() {
-            mHandler = new Handler();
+            mHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    switch (msg.what) {
+                        case MSG_UPDATE_QUEUE:
+                            updateQueueLayout();
+                            break;
+
+                        case MSG_UPDATE_SEEKBAR:
+                            updateSeekbar();
+                            break;
+
+                        case MSG_UPDATE_PLAYSTATE:
+                            updatePlaystate(msg.arg1, msg.arg2);
+                            break;
+                    }
+                }
+            };
+
+            mPlayFabClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    switch (PlaybackProxy.getState()) {
+                        case PlaybackService.STATE_PAUSED:
+                        case PlaybackService.STATE_STOPPED:
+                        case PlaybackService.STATE_PAUSING:
+                            PlaybackProxy.play();
+                            break;
+
+                        case PlaybackService.STATE_BUFFERING:
+                        case PlaybackService.STATE_PLAYING:
+                            PlaybackProxy.pause();
+                            break;
+
+                    }
+                }
+            };
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            mRootView = (ScrollView) inflater.inflate(R.layout.fragment_playback_queue, container, false);
+            mRootView = (FrameLayout) inflater.inflate(R.layout.fragment_playback_queue, container,
+                    false);
+            mListView = (ListView) mRootView.findViewById(R.id.lvPlaybackQueue);
+
+            mAdapter = new PlaybackQueueAdapter(mPlayFabClickListener);
+            mListView.setAdapter(mAdapter);
+
             updateQueueLayout();
+
             return mRootView;
         }
 
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
+
             // Attach this fragment as Playback Listener
             PlaybackProxy.addCallback(mPlaybackListener);
-            mHandler.post(mUpdateSeekBarRunnable);
+            mHandler.sendEmptyMessage(MSG_UPDATE_SEEKBAR);
 
             ProviderAggregator.getDefault().addUpdateCallback(mProviderCallback);
         }
@@ -349,253 +321,44 @@ public class PlaybackQueueActivity extends AppActivity {
         @Override
         public void onDetach() {
             super.onDetach();
+
             // Detach this fragment as Playback Listener
             PlaybackProxy.removeCallback(mPlaybackListener);
-            mHandler.removeCallbacks(mUpdateSeekBarRunnable);
+            mHandler.removeMessages(MSG_UPDATE_SEEKBAR);
 
             ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
         }
 
         public void updateQueueLayout() {
-            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-            ViewGroup tracksContainer = (ViewGroup) mRootView.findViewById(R.id.llRoot);
-
-            // Load and inflate the playback queue
-            // TODO: Recycle
-            tracksContainer.removeAllViews();
-
-            // We make a copy of the queue as we will modify it locally
             final List<Song> songs = new ArrayList<Song>(PlaybackProxy.getCurrentPlaybackQueue());
-            final Song currentTrack = PlaybackProxy.getCurrentTrack();
-            final int currentTrackIndex = PlaybackProxy.getCurrentTrackIndex();
+            mAdapter.setPlaybackQueue(songs);
+        }
 
-            // We remove the first song as it's the currently playing song we displayed above
-            if (songs.size() > 0) {
-                mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.GONE);
-                mRootView.findViewById(R.id.llRoot).setVisibility(View.VISIBLE);
+        public void updateSeekbar() {
+            PlaybackQueueAdapter.ViewHolder tag = mAdapter.getCurrentTrackTag();
 
-                int itemIndex = 0;
-                int currentPlayingTop = 0;
-
-                final LayoutInflater inflater = getActivity().getLayoutInflater();
-                View itemView;
-                for (final Song song : songs) {
-                    if (currentTrackIndex == itemIndex) {
-                        itemView = inflater.inflate(R.layout.item_playbackqueue_current, tracksContainer, false);
-
-                        TextView tvCurrentTitle = (TextView) itemView.findViewById(R.id.tvCurrentTitle);
-                        TextView tvCurrentArtist = (TextView) itemView.findViewById(R.id.tvCurrentArtist);
-                        AlbumArtImageView ivCurrentPlayAlbumArt = (AlbumArtImageView) itemView.findViewById(R.id.ivCurrentPlayAlbumArt);
-                        final ImageView ivOverflow = (ImageView) itemView.findViewById(R.id.ivOverflow);
-
-                        tvCurrentTitle.setText(currentTrack.getTitle());
-
-                        final String artistRef = currentTrack.getArtist();
-                        Artist artist = aggregator.retrieveArtist(artistRef, currentTrack.getProvider());
-                        if (artist == null) {
-                            artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, currentTrack.getProvider());
-                        }
-                        if (artist != null) {
-                            tvCurrentArtist.setText(artist.getName());
-                        } else {
-                            tvCurrentArtist.setText(getString(R.string.loading));
-                        }
-                        ivCurrentPlayAlbumArt.loadArtForSong(currentTrack);
-
-                        mSeekBar = (SeekBar) itemView.findViewById(R.id.sbSeek);
-                        mSeekBar.setOnSeekBarChangeListener(mSeekBarListener);
-
-                        ivOverflow.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Utils.showCurrentSongOverflow((FragmentActivity) getActivity(),
-                                        ivOverflow, currentTrack);
-                            }
-                        });
-
-                        // Set play pause drawable
-                        FloatingActionButton ivPlayPause = (FloatingActionButton) itemView.findViewById(R.id.ivPlayPause);
-                        mPlayDrawable = new PlayPauseDrawable(getResources(), 1.2f, 1.0f);
-                        mPlayDrawable.setYOffset(6);
-                        mPlayDrawable.setColor(getResources().getColor(R.color.white));
-                        mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                        ivPlayPause.setFixupInset(false);
-                        ivPlayPause.setImageDrawable(mPlayDrawable);
-
-                        ivPlayPause.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if (mPlayDrawable.getRequestedShape() == PlayPauseDrawable.SHAPE_PLAY) {
-                                    // We're paused, play
-                                    PlaybackProxy.play();
-                                } else {
-                                    // We're playing, pause
-                                    PlaybackProxy.pause();
-                                }
-                            }
-                        });
-
-                        int state = PlaybackProxy.getState();
-                        if (state == PlaybackService.STATE_PLAYING) {
-                            mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                            mPlayDrawable.setBuffering(false);
-                        } else if (state == PlaybackService.STATE_BUFFERING) {
-                            mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                            mPlayDrawable.setBuffering(true);
-                        }
-
-                        ImageView ivForward = (ImageView) itemView.findViewById(R.id.ivForward);
-                        ivForward.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                PlaybackProxy.next();
-                            }
-                        });
-
-                        ImageView ivPrevious = (ImageView) itemView.findViewById(R.id.ivPrevious);
-                        ivPrevious.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                PlaybackProxy.previous();
-                            }
-                        });
-
-                        final ImageView ivRepeat = (ImageView) itemView.findViewById(R.id.ivRepeat);
-                        if (PlaybackProxy.isRepeatMode()) {
-                            ivRepeat.setImageResource(R.drawable.ic_replay);
-                        } else {
-                            ivRepeat.setImageResource(R.drawable.ic_replay_gray);
-                        }
-                        ivRepeat.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Drawable[] drawables = new Drawable[2];
-                                final Resources res = getResources();
-                                boolean enable;
-
-                                if (PlaybackProxy.isRepeatMode()) {
-                                    // Repeating, disable
-                                    drawables[0] = res.getDrawable(R.drawable.ic_replay);
-                                    drawables[1] = res.getDrawable(R.drawable.ic_replay_gray);
-                                    enable = false;
-                                } else {
-                                    // Not repeating, enable
-                                    drawables[0] = res.getDrawable(R.drawable.ic_replay_gray);
-                                    drawables[1] = res.getDrawable(R.drawable.ic_replay);
-                                    enable = true;
-                                }
-
-                                final TransitionDrawable drawable = new TransitionDrawable(drawables);
-                                ivRepeat.setImageDrawable(drawable);
-                                final AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
-
-                                mHandler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        drawable.startTransition(500);
-                                        ivRepeat.setRotation(0);
-                                        ivRepeat.animate().rotationBy(-360.0f).setDuration(500).setInterpolator(interpolator).start();
-                                    }
-                                }, 100);
-
-
-                                PlaybackProxy.setRepeatMode(enable);
-                            }
-                        });
-
-                        mThumbsUpButton = (ImageView) itemView.findViewById(R.id.ivThumbs);
-                        mThumbsUpButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                final AutoMixManager mixManager = AutoMixManager.getDefault();
-                                Utils.animateScale(mThumbsUpButton, true, false);
-
-                                new Thread() {
-                                    public void run() {
-                                        try {
-                                            mixManager.getCurrentPlayingBucket().notifyLike();
-                                            mHandler.post(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    Utils.shortToast(getActivity(), R.string.toast_bucket_adjusted);
-                                                }
-                                            });
-                                        } catch (EchoNestException e) {
-                                            Log.e(TAG, "Cannot notify echonest of like");
-                                        }
-                                    }
-                                }.start();
-
-                            }
-                        });
-                        AutoMixManager mixManager = AutoMixManager.getDefault();
-                        if (mixManager.getCurrentPlayingBucket() != null) {
-                            Utils.animateScale(mThumbsUpButton, true, true);
-                        } else {
-                            Utils.animateScale(mThumbsUpButton, true, false);
-                        }
-                    } else {
-                        itemView = inflater.inflate(R.layout.item_playbar, tracksContainer, false);
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                            itemView.setTransitionName("playbackqueue:" + itemIndex);
-                        }
-                        TextView tvTitle = (TextView) itemView.findViewById(R.id.tvTitle),
-                                tvArtist = (TextView) itemView.findViewById(R.id.tvArtist);
-                        AlbumArtImageView ivCover = (AlbumArtImageView) itemView.findViewById(R.id.ivAlbumArt);
-
-                        Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
-
-                        tvTitle.setText(song.getTitle());
-                        if (artist != null) {
-                            tvArtist.setText(artist.getName());
-                        }
-                        ivCover.loadArtForSong(song);
-
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                            ivCover.setTransitionName("playbackqueue:" + itemIndex + ":cover:" + song.getRef());
-                        }
-
-                        ivCover.setTag(song);
-                        ivCover.setOnClickListener(mArtClickListener);
-
-                        final int itemIndexFinal = itemIndex;
-                        itemView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                // Play that song now
-                                if (song.equals(PlaybackProxy.getCurrentTrack())) {
-                                    // We're already playing that song, play it again
-                                    PlaybackProxy.seek(0);
-                                } else {
-                                    PlaybackProxy.playAtIndex(itemIndexFinal);
-                                }
-                            }
-                        });
+            if (tag != null && tag.sbSeek != null) {
+                int state = PlaybackProxy.getState();
+                if (state == PlaybackService.STATE_PLAYING
+                        || state == PlaybackService.STATE_PAUSING
+                        || state == PlaybackService.STATE_PAUSED) {
+                    if (!tag.sbSeek.isPressed()) {
+                        tag.sbSeek.setMax(PlaybackProxy.getCurrentTrackLength());
+                        tag.sbSeek.setProgress(PlaybackProxy.getCurrentTrackPosition());
                     }
 
-                    tracksContainer.addView(itemView);
-                    if (currentTrackIndex == itemIndex) {
-                        currentPlayingTop =
-                                getResources().getDimensionPixelSize(R.dimen.playing_bar_height) * itemIndex
-                                - Utils.dpToPx(getResources(), 8);
-                    }
-
-                    itemIndex++;
+                    mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, SEEK_UPDATE_DELAY);
                 }
-
-                final int finalPlayingTop = currentPlayingTop;
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mRootView.smoothScrollTo(0, finalPlayingTop);
-                    }
-                }, 500);
-
-            } else {
-                mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.VISIBLE);
-                mRootView.findViewById(R.id.llRoot).setVisibility(View.GONE);
             }
+        }
 
+        public void updatePlaystate(int arg1, int arg2) {
+            PlaybackQueueAdapter.ViewHolder tag = mAdapter.getCurrentTrackTag();
+
+            if (tag != null && tag.fabPlayDrawable != null) {
+                tag.fabPlayDrawable.setBuffering(arg1 == PLAYSTATE_ARG1_BUFFERING);
+                tag.fabPlayDrawable.setShape(arg2);
+            }
         }
     }
 }

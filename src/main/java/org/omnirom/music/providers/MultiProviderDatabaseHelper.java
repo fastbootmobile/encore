@@ -89,7 +89,11 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         mPlayListRefID = new HashMap<String, Long>();
         mRefProviderId = new HashMap<String, ProviderIdentifier>();
         mFetched = false;
-        getWritableDatabase();
+        try {
+            getWritableDatabase();
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot get writable database", e);
+        }
     }
 
     public void setIdentifier(ProviderIdentifier providerIdentifier) {

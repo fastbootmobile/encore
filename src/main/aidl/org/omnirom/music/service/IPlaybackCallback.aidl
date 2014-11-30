@@ -8,6 +8,11 @@ import org.omnirom.music.model.Artist;
 interface IPlaybackCallback {
 
     /**
+     * Returns this callback's identifier
+     */
+    int getIdentifier();
+
+    /**
      * Notifies the app that playback of a song started
      */
     void onSongStarted(boolean buffering, in Song s);

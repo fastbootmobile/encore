@@ -16,6 +16,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
@@ -584,7 +585,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         // Register for updates
         ProviderAggregator.getDefault().addUpdateCallback(this);
-        PlaybackProxy.addCallback(mPlaybackCallback);
 
         return mRootView;
     }
@@ -601,12 +601,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        PlaybackProxy.addCallback(mPlaybackCallback);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void onDetach() {
         super.onDetach();
+        PlaybackProxy.removeCallback(mPlaybackCallback);
         mHandler.removeCallbacks(mUpdateAlbumsRunnable);
     }
 

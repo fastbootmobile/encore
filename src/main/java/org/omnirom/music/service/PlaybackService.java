@@ -23,15 +23,16 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.echonest.api.v4.EchoNestException;
 
-import org.acra.ACRA;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.framework.RefCountedBitmap;
@@ -70,27 +71,12 @@ public class PlaybackService extends Service
     private static final String SERVICE_SHARED_PREFS = "PlaybackServicePrefs";
     private static final String PREF_KEY_REPEAT = "repeatMode";
 
-    /**
-     * Time after which the service will shutdown if nothing happens
-     */
-    private static final int SHUTDOWN_TIMEOUT = 10000;
-
-    /**
-     * Runnable that will shutdown this service after timeout. Each action should cancel the
-     * existing mShutdownRunnable in the mHandler
-     */
-    private Runnable mShutdownRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mState == STATE_PAUSED || mState == STATE_STOPPED) {
-                Log.w(TAG, "Shutting down because of timeout and nothing bound");
-                stopForeground(true);
-                stopSelf();
-            } else {
-                resetShutdownTimeout();
-            }
-        }
-    };
+    public static final String ACTION_COMMAND = "command";
+    public static final String EXTRA_COMMAND_NAME = "command_name";
+    public static final int COMMAND_NEXT = 1;
+    public static final int COMMAND_PREVIOUS = 2;
+    public static final int COMMAND_PAUSE = 3;
+    public static final int COMMAND_STOP = 4;
 
     private Runnable mNotifyQueueChangedRunnable = new Runnable() {
         @Override
@@ -115,7 +101,6 @@ public class PlaybackService extends Service
                     mBinder.stop();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Cannot stop playback during AUDIO_BECOMING_NOISY", e);
-                    ACRA.getErrorReporter().handleException(e, false);
                 }
             }
         }
@@ -142,6 +127,7 @@ public class PlaybackService extends Service
     private Prefetcher mPrefetcher;
     private RemoteMetadataManager mRemoteMetadata;
     private PowerManager.WakeLock mWakeLock;
+    private boolean mIsForeground;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -165,19 +151,14 @@ public class PlaybackService extends Service
     }
 
     /**
-     * Resets the shutdown timeout (after which the service would stop)
-     */
-    public void resetShutdownTimeout() {
-        mHandler.removeCallbacks(mShutdownRunnable);
-        mHandler.postDelayed(mShutdownRunnable, SHUTDOWN_TIMEOUT);
-    }
-
-    /**
      * Called when the service is created
      */
     @Override
     public void onCreate() {
         super.onCreate();
+        mHandler = new Handler();
+
+        ProviderAggregator.getDefault().addUpdateCallback(this);
 
         // Native playback initialization
         mNativeHub = new NativeHub();
@@ -190,8 +171,6 @@ public class PlaybackService extends Service
         // Plugins initialization
         PluginsLookup.getDefault().initialize(getApplicationContext());
         PluginsLookup.getDefault().registerProviderListener(this);
-        mHandler = new Handler();
-        resetShutdownTimeout();
 
         List<ProviderConnection> connections = PluginsLookup.getDefault().getAvailableProviders();
         for (ProviderConnection conn : connections) {
@@ -226,7 +205,13 @@ public class PlaybackService extends Service
         mNotification.setOnNotificationChangedListener(new ServiceNotification.NotificationChangedListener() {
             @Override
             public void onNotificationChanged(ServiceNotification notification) {
-                notification.notify(PlaybackService.this);
+                NotificationManagerCompat nmc = NotificationManagerCompat.from(PlaybackService.this);
+                if (mIsForeground) {
+                    notification.notify(nmc);
+                } else {
+                    notification.notify(PlaybackService.this);
+                }
+
                 RefCountedBitmap albumArt = notification.getAlbumArt();
                 albumArt.acquire();
                 mRemoteMetadata.setAlbumArt(albumArt.get());
@@ -251,7 +236,6 @@ public class PlaybackService extends Service
      */
     @Override
     public void onDestroy() {
-
         Log.i(TAG, "onDestroy()");
 
         PluginsLookup.getDefault().removeProviderListener(this);
@@ -261,6 +245,8 @@ public class PlaybackService extends Service
         if (mHasAudioFocus) {
             abandonAudioFocus();
         }
+
+        mIsForeground = false;
 
         // Remove audio hosts from providers
         Log.e(TAG, "DESTROY -- UNREGISTERING CALLBACKS");
@@ -299,8 +285,31 @@ public class PlaybackService extends Service
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "Service starting");
         mIsStopping = false;
+        if (intent != null && intent.getAction() != null
+                && intent.getAction().equals(ACTION_COMMAND)) {
+            switch (intent.getIntExtra(EXTRA_COMMAND_NAME, -1)) {
+                case COMMAND_NEXT:
+                    nextImpl();
+                    break;
+
+                case COMMAND_PREVIOUS:
+                    previousImpl();
+                    break;
+
+                case COMMAND_PAUSE:
+                    if (mState == STATE_STOPPED || mState == STATE_PAUSED || mState == STATE_PAUSING) {
+                        playImpl();
+                    } else {
+                        pauseImpl();
+                    }
+                    break;
+
+                case COMMAND_STOP:
+                    stopImpl();
+                    break;
+            }
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -314,7 +323,6 @@ public class PlaybackService extends Service
     public IBinder onBind(Intent intent) {
         mNumberBound++;
         Log.i(TAG, "Client bound service (" + mNumberBound + ")");
-        ProviderAggregator.getDefault().addUpdateCallback(this);
         return mBinder;
     }
 
@@ -328,12 +336,6 @@ public class PlaybackService extends Service
     public boolean onUnbind(Intent intent) {
         mNumberBound--;
         Log.i(TAG, "Client unbound service (" + mNumberBound + " left)");
-
-        if (mNumberBound == 0 && (mState == STATE_STOPPED || mState == STATE_PAUSED)) {
-            mHandler.removeCallbacks(mShutdownRunnable);
-            mShutdownRunnable.run();
-        }
-
         return super.onUnbind(intent);
     }
 
@@ -350,7 +352,13 @@ public class PlaybackService extends Service
         if (connection instanceof ProviderConnection) {
             try {
                 Log.e(TAG, "RegisterCallback: service connected");
-                ((ProviderConnection) connection).getBinder().registerCallback(mProviderCallback);
+                IMusicProvider binder = ((ProviderConnection) connection).getBinder();
+
+                if (binder != null) {
+                    binder.registerCallback(mProviderCallback);
+                } else {
+                    Log.e(TAG, "Cannot register callback in onServiceConnected, binder is null");
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot register callback on connected service");
             }
@@ -518,7 +526,6 @@ public class PlaybackService extends Service
                                 Log.e(TAG, "No provider attached", e);
                             } catch (IllegalStateException e) {
                                 Log.e(TAG, "Illegal State from provider", e);
-                                ACRA.getErrorReporter().handleException(e, false);
                             }
 
                             // The notification system takes care of calling startForeground
@@ -653,8 +660,10 @@ public class PlaybackService extends Service
             }
         }
 
+        mState = STATE_STOPPED;
         mIsStopping = true;
         stopForeground(true);
+        mIsForeground = false;
         stopSelf();
     }
 
@@ -766,9 +775,7 @@ public class PlaybackService extends Service
         }
     }
 
-    /**
-     * The binder implementation of the remote methods
-     */
+
     IPlaybackService.Stub mBinder = new IPlaybackService.Stub() {
         @Override
         public void addCallback(IPlaybackCallback cb) throws RemoteException {
@@ -776,8 +783,13 @@ public class PlaybackService extends Service
         }
 
         @Override
-        public void removeCallback(IPlaybackCallback cb) {
-            mCallbacks.remove(cb);
+        public void removeCallback(IPlaybackCallback cb) throws RemoteException {
+            for (IPlaybackCallback callback : mCallbacks) {
+                if (cb.getIdentifier() == callback.getIdentifier()) {
+                    mCallbacks.remove(cb);
+                    break;
+                }
+            }
         }
 
         @Override
@@ -938,6 +950,11 @@ public class PlaybackService extends Service
         public boolean isRepeatMode() throws RemoteException {
             return mRepeatMode;
         }
+
+        @Override
+        public void clearPlaybackQueue() throws RemoteException {
+            mPlaybackQueue.clear();
+        }
     };
 
     @Override
@@ -1052,8 +1069,6 @@ public class PlaybackService extends Service
                     } catch (Exception e) {
                         Log.e(TAG, "BIG EXCEPTION DURING REMOTE PLAYBACK PAUSE: ", e);
                         Log.e(TAG, "Callback: " + cb);
-                        // Manually report to ACRA but keep moving
-                        ACRA.getErrorReporter().handleException(e, false);
                     }
                 }
 

@@ -38,7 +38,7 @@ dependencies {
     compile files('src/main/libs/google-play-services.jar')
     compile project(':google_play_services')
     compile files('src/main/libs/java_websocket.jar')
-    compile files('src/main/libs/acra-4.5.0.jar')
     compile files('src/main/libs/cwac-mediarouter-0.1.2.jar')
     compile files('src/main/libs/calligraphy-1.1.0.jar')
+    compile files('src/main/libs/sentry-1.1.0.jar')
 }

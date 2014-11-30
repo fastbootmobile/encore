@@ -16,22 +16,15 @@
 package org.omnirom.music.service;
 
 import android.app.IntentService;
-import android.content.Intent;
 import android.content.Context;
-import android.os.RemoteException;
-import android.util.Log;
-
-import org.omnirom.music.framework.PlaybackProxy;
-import org.omnirom.music.framework.PluginsLookup;
+import android.content.Intent;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
- * <p>
+ * <p/>
  */
 public class NotifActionService extends IntentService {
-    private static final String TAG = "NotifActionService";
-
     public static final String ACTION_TOGGLE_PAUSE = "org.omnirom.music.action.TOGGLE_PAUSE";
     public static final String ACTION_STOP = "org.omnirom.music.action.STOP";
     public static final String ACTION_NEXT = "org.omnirom.music.action.NEXT";
@@ -93,14 +86,19 @@ public class NotifActionService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_NEXT.equals(action)) {
-                handleActionNext();
-            } else if (ACTION_TOGGLE_PAUSE.equals(action)) {
-                handleActionTogglePause();
-            } else if (ACTION_STOP.equals(action)) {
-                handleActionStop();
-            } else if (ACTION_PREVIOUS.equals(action)) {
-                handleActionPrevious();
+            switch (action) {
+                case ACTION_NEXT:
+                    handleActionNext();
+                    break;
+                case ACTION_TOGGLE_PAUSE:
+                    handleActionTogglePause();
+                    break;
+                case ACTION_STOP:
+                    handleActionStop();
+                    break;
+                case ACTION_PREVIOUS:
+                    handleActionPrevious();
+                    break;
             }
         }
     }
@@ -109,32 +107,35 @@ public class NotifActionService extends IntentService {
      * Handle action NEXT in the provided background thread
      */
     private void handleActionNext() {
-        PlaybackProxy.next();
+        startServiceIntent(PlaybackService.COMMAND_NEXT);
     }
 
     /**
      * Handle action PREVIOUS in the provided background thread
      */
     private void handleActionPrevious() {
-        PlaybackProxy.previous();
+        startServiceIntent(PlaybackService.COMMAND_PREVIOUS);
     }
 
     /**
      * Handle action STOP in the provided background thread
      */
     private void handleActionStop() {
-        PlaybackProxy.stop();
+        startServiceIntent(PlaybackService.COMMAND_STOP);
     }
 
     /**
      * Handle action TOGGLE_PAUSE in the provided background thread
      */
     private void handleActionTogglePause() {
-        if (PlaybackProxy.getState() == PlaybackService.STATE_PAUSED) {
-            PlaybackProxy.play();
-        } else {
-            PlaybackProxy.pause();
-        }
+        startServiceIntent(PlaybackService.COMMAND_PAUSE);
+    }
+
+    private void startServiceIntent(final int command) {
+        final Intent i = new Intent(this, PlaybackService.class);
+        i.setAction(PlaybackService.ACTION_COMMAND);
+        i.putExtra(PlaybackService.EXTRA_COMMAND_NAME, command);
+        startService(i);
     }
 
 }

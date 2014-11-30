@@ -149,8 +149,7 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
         if (DEBUG) Log.d(TAG, "Binding service...");
         Intent i = new Intent();
         i.setClassName(mPackage, mServiceName);
-        mContext.startService(i);
-        mContext.bindService(i, this, Context.BIND_AUTO_CREATE);
+        mContext.bindService(i, this, Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY);
     }
 
     /**

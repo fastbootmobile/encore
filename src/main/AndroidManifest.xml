@@ -48,6 +48,8 @@
         <!-- Playback Service -->
         <service
             android:name="org.omnirom.music.service.PlaybackService"
+            android:process=":service"
+            android:stopWithTask="false"
             android:enabled="true"
             android:exported="false" />
 

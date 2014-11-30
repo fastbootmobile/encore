@@ -42,7 +42,7 @@ public class RefCountedBitmap {
         public void run() {
             synchronized (mBitmap) {
                 if (mCount == 0) {
-                    // mBitmap.recycle();
+                    mBitmap.recycle();
                     mBitmap = null;
                 } else {
                     if (DEBUG) Log.e(TAG, "Bitmap eviction cancelled as acquire count = " + mCount);

@@ -208,6 +208,8 @@ public class MainActivity extends AppActivity
         super.onResume();
         PluginsLookup.getDefault().requestUpdatePlugins();
 
+        mPlayingBarLayout.onResume();
+
         if (mConfiguringProvider != null) {
             IMusicProvider provider = mConfiguringProvider.getBinder();
             if (provider != null) {
@@ -237,10 +239,17 @@ public class MainActivity extends AppActivity
     }
 
     @Override
+    protected void onPause() {
+        mPlayingBarLayout.onPause();
+        super.onPause();
+    }
+
+    @Override
     protected void onStart() {
         mCastModule.onStart();
         super.onStart();
     }
+
 
     @Override
     protected void onStop() {

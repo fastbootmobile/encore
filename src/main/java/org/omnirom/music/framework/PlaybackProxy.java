@@ -88,7 +88,7 @@ public class PlaybackProxy {
                             break;
 
                         case MSG_CLEAR_QUEUE:
-                            getPlayback().getCurrentPlaybackQueue().clear();
+                            getPlayback().clearPlaybackQueue();
                             break;
 
                         case MSG_QUEUE_SONG:
@@ -154,6 +154,7 @@ public class PlaybackProxy {
         if (service == null && connectIfNull) {
             throw new RemoteException("Playback service is null");
         }
+
         return service;
     }
 

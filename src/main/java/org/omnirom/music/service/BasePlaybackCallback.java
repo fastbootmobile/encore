@@ -24,6 +24,11 @@ import org.omnirom.music.model.Song;
  */
 public class BasePlaybackCallback extends IPlaybackCallback.Stub {
     @Override
+    public int getIdentifier() throws RemoteException {
+        return this.hashCode();
+    }
+
+    @Override
     public void onSongStarted(boolean buffering, Song s) throws RemoteException {
 
     }
