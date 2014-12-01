@@ -22,7 +22,7 @@
             android:summary="@string/settings_taste_learning_summary"
             android:title="@string/settings_taste_learning_title" />
     </PreferenceCategory>
-
+<!--
     <PreferenceCategory android:title="@string/general">
         <CheckBoxPreference
             android:key="cb_download_album_art"
@@ -37,7 +37,7 @@
             android:title="@string/settings_wifi_stream_only_title" />
 
     </PreferenceCategory>
-
+-->
     <PreferenceCategory android:title="@string/other">
         <Preference
             android:key="pref_clear_caches"
