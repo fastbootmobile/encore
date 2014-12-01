@@ -43,7 +43,7 @@ public class BitmapRecycler {
     public void recycle(Bitmap bitmap) {
         if (bitmap != null) {
             Message msg = mHandler.obtainMessage(MSG_RECYCLE, bitmap);
-            mHandler.sendMessageDelayed(msg, 5000);
+            mHandler.sendMessageDelayed(msg, 25000);
         }
     }
 }

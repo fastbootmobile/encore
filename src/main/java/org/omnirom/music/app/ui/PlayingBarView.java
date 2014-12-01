@@ -468,14 +468,14 @@ public class PlayingBarView extends RelativeLayout {
                     ivAlbumArt.setTransitionName("playbackqueue:preview:" + shownCount + ":art");
                 }
 
-                if (song.isLoaded() && song.getArtist() != null) {
+                if (song != null && song.isLoaded() && song.getArtist() != null) {
                     Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
                     if (artist != null) {
                         tvArtist.setText(artist.getName());
                     } else {
                         tvArtist.setText(getContext().getString(R.string.loading));
                     }
-                } else if (song.isLoaded()) {
+                } else if (song != null && song.isLoaded()) {
                     tvArtist.setText(null);
                 } else {
                     tvArtist.setText(R.string.loading);
