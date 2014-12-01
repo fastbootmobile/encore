@@ -21,6 +21,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
@@ -44,8 +45,9 @@ import org.omnirom.music.providers.ProviderAggregator;
 public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     private Context mContext;
     private Resources mResources;
-    private final RefCountedBitmap mDefaultArt;
-    private RefCountedBitmap mCurrentArt;
+    private final Bitmap mDefaultArt;
+    private Bitmap mCurrentArt;
+    private Bitmap mPendingArt;
     private NotificationChangedListener mListener;
     private Song mCurrentSong;
     private RemoteViews mBaseTemplate;
@@ -63,9 +65,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
         // Get the default album art
         BitmapDrawable def = (BitmapDrawable) mResources.getDrawable(R.drawable.album_placeholder);
-        mDefaultArt = new RefCountedBitmap(def.getBitmap());
-        mDefaultArt.acquire();
-
+        mDefaultArt = def.getBitmap();
         mCurrentArt = mDefaultArt;
 
         mBaseTemplate = new RemoteViews(ctx.getPackageName(), R.layout.notification_base);
@@ -107,7 +107,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
 
-        if (mCurrentArt.get().isRecycled()) {
+        if (mCurrentArt == null || mCurrentArt.isRecycled()) {
             mCurrentArt = mDefaultArt;
         }
         // Build the core notification
@@ -173,8 +173,11 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         }
 
         if (mCurrentArt != null && !mCurrentArt.isRecycled()) {
-            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.get());
-            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.get());
+            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt);
+            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt);
+        } else {
+            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt);
+            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt);
         }
 
         // Post update
@@ -255,15 +258,21 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     /**
      * @return The current active album art
      */
-    public RefCountedBitmap getAlbumArt() {
-        return mCurrentArt;
+    public Bitmap getAlbumArt() {
+        if (mCurrentArt == null || mCurrentArt.isRecycled()) {
+            return mDefaultArt;
+        } else {
+            return mCurrentArt;
+        }
     }
 
     private void updateAlbumArt() {
         if (mCurrentSong != null) {
             if (mCurrentArt != null && mCurrentArt != mDefaultArt) {
-                mCurrentArt.release();
+                mPendingArt = mCurrentArt;
             }
+
+
             mCurrentArt = mDefaultArt;
             AlbumArtHelper.retrieveAlbumArt(this, mCurrentSong, false);
         }
@@ -272,18 +281,18 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     @Override
     public void onArtLoaded(RefCountedBitmap output, BoundEntity request) {
         if (request.equals(mCurrentSong)) {
-            if (mCurrentArt != null && mCurrentArt != mDefaultArt) {
-                mCurrentArt.release();
+            if (mPendingArt != null) {
+                //  TODO: recycle causes crash here
+                mPendingArt = null;
             }
 
             if (output == null) {
                 mCurrentArt = mDefaultArt;
             } else {
-                mCurrentArt = output;
-            }
-
-            if (mCurrentArt != mDefaultArt) {
-                mCurrentArt.acquire();
+                output.acquire();
+                Bitmap outputBitmap = output.get();
+                mCurrentArt = outputBitmap.copy(outputBitmap.getConfig(), false);
+                output.release();
             }
 
             buildNotification();

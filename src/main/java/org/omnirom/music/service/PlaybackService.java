@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.os.Binder;
@@ -208,14 +209,13 @@ public class PlaybackService extends Service
                 NotificationManagerCompat nmc = NotificationManagerCompat.from(PlaybackService.this);
                 if (mIsForeground) {
                     notification.notify(nmc);
+                    mIsForeground = true;
                 } else {
                     notification.notify(PlaybackService.this);
                 }
 
-                RefCountedBitmap albumArt = notification.getAlbumArt();
-                albumArt.acquire();
-                mRemoteMetadata.setAlbumArt(albumArt.get());
-                albumArt.release();
+                Bitmap albumArt = notification.getAlbumArt();
+                mRemoteMetadata.setAlbumArt(albumArt);
             }
         });
 

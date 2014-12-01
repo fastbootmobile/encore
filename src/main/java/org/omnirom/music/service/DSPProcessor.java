@@ -110,7 +110,11 @@ public class DSPProcessor {
         }
 
         // Push the new chain to the NativeHub
-        updateHubDspChain();
+        new Thread() {
+            public void run() {
+                updateHubDspChain();
+            }
+        }.start();
     }
 
     /**
