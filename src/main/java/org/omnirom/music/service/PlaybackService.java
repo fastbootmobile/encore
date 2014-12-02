@@ -24,6 +24,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -124,7 +125,7 @@ public class PlaybackService extends Service
     private boolean mHasAudioFocus;
     private boolean mRepeatMode;
     private Prefetcher mPrefetcher;
-    private RemoteMetadataManagerv21 mRemoteMetadata;
+    private IRemoteMetadataManager mRemoteMetadata;
     private PowerManager.WakeLock mWakeLock;
     private boolean mIsForeground;
 
@@ -146,7 +147,6 @@ public class PlaybackService extends Service
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<IPlaybackCallback>();
         mPrefetcher = new Prefetcher(this);
-        mRemoteMetadata = new RemoteMetadataManagerv21(this);
     }
 
     /**
@@ -156,6 +156,12 @@ public class PlaybackService extends Service
     public void onCreate() {
         super.onCreate();
         mHandler = new Handler();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mRemoteMetadata = new RemoteMetadataManagerv21(this);
+        } else {
+            mRemoteMetadata = new RemoteMetadataManager(this);
+        }
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
 
