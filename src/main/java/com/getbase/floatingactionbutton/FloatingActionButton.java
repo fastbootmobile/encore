@@ -93,7 +93,7 @@ public class FloatingActionButton extends ImageButton {
   }
 
   float getDimension(@DimenRes int id) {
-    return getResources().getDimension(id);
+    return getResources().getDimensionPixelSize(id);
   }
 
   private void initAttributes(Context context, AttributeSet attributeSet) {
@@ -145,7 +145,7 @@ public class FloatingActionButton extends ImageButton {
 
     float iconOffset = (mCircleSize - getDimension(R.dimen.fab_icon_size)) / 2f;
 
-    int iconInsetHorizontal = (int) (mShadowRadius + iconOffset * 2);
+    int iconInsetHorizontal = (int) (mShadowRadius + iconOffset);
     int iconInsetTop = (int) (circleTop + iconOffset);
     int iconInsetBottom = (int) (mShadowRadius + mShadowOffset + iconOffset);
 

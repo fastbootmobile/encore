@@ -23,6 +23,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -247,7 +248,9 @@ public class PlayPauseDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
         canvas.save();
-        canvas.translate((canvas.getWidth() - mWidth) / 2, (canvas.getHeight() - mHeight) / 2);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            canvas.translate((canvas.getWidth() - mWidth) / 2, (canvas.getHeight() - mHeight) / 2);
+        }
         canvas.translate(0, -mYOffset);
 
         if (!mInitialDrawDone) {
