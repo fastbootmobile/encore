@@ -246,6 +246,8 @@ public class PlayPauseDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
+        canvas.save();
+        canvas.translate((canvas.getWidth() - mWidth) / 2, (canvas.getHeight() - mHeight) / 2);
         canvas.translate(0, -mYOffset);
 
         if (!mInitialDrawDone) {
@@ -292,14 +294,15 @@ public class PlayPauseDrawable extends Drawable {
         }
 
         canvas.drawPath(mPath, mPaint);
+        canvas.restore();
 
         if (mIsBuffering) {
             if (mBufferingDrawable == null) {
                 mBufferingDrawable = new CircularAnimatedDrawable(0xFFFFFFFF, 8.0f);
-                mBufferingDrawable.setBounds(getBounds());
                 mBufferingDrawable.setCallback(getCallback());
                 mBufferingDrawable.start();
             }
+            mBufferingDrawable.setBounds(getBounds());
             mBufferingDrawable.draw(canvas);
         }
 
