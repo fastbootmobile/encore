@@ -33,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -251,6 +252,8 @@ public class PlaybackQueueActivity extends AppActivity {
         private ListView mListView;
         private PlaybackQueueAdapter mAdapter;
         private View.OnClickListener mPlayFabClickListener;
+        private View.OnClickListener mNextClickListener;
+        private View.OnClickListener mPreviousClickListener;
 
         public SimpleFragment() {
             mHandler = new Handler() {
@@ -290,6 +293,20 @@ public class PlaybackQueueActivity extends AppActivity {
                     }
                 }
             };
+
+            mNextClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PlaybackProxy.next();
+                }
+            };
+
+            mPreviousClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PlaybackProxy.previous();
+                }
+            };
         }
 
         @Override
@@ -299,8 +316,14 @@ public class PlaybackQueueActivity extends AppActivity {
                     false);
             mListView = (ListView) mRootView.findViewById(R.id.lvPlaybackQueue);
 
-            mAdapter = new PlaybackQueueAdapter(mPlayFabClickListener);
+            mAdapter = new PlaybackQueueAdapter(mPlayFabClickListener, mNextClickListener, mPreviousClickListener);
             mListView.setAdapter(mAdapter);
+            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    PlaybackProxy.playAtIndex(position);
+                }
+            });
 
             updateQueueLayout();
 

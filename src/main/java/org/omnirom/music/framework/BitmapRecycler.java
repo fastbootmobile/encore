@@ -30,10 +30,7 @@ public class BitmapRecycler {
                 if (msg.what == MSG_RECYCLE) {
                     Bitmap bmp = ((Bitmap) msg.obj);
                     if (bmp.getByteCount() > 0) {
-                        Log.e("BitmapRecycler", "Recycling " + bmp);
                         ((Bitmap) msg.obj).recycle();
-                    } else {
-                        Log.e("BitmapRecycler", "Skipping recycling " + bmp);
                     }
                 }
             }

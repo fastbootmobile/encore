@@ -20,6 +20,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -43,9 +45,15 @@ public class PlaybackQueueAdapter extends BaseAdapter {
     private List<Song> mQueue;
     private ViewHolder mCurrentTrackTag;
     private View.OnClickListener mPlayFabClickListener;
+    private View.OnClickListener mNextClickListener;
+    private View.OnClickListener mPreviousClickListener;
 
-    public PlaybackQueueAdapter(View.OnClickListener playFabClickListener) {
+    public PlaybackQueueAdapter(View.OnClickListener playFabClickListener,
+                                View.OnClickListener nextClickListener,
+                                View.OnClickListener previousClickListener) {
         mPlayFabClickListener = playFabClickListener;
+        mNextClickListener = nextClickListener;
+        mPreviousClickListener = previousClickListener;
     }
 
     public ViewHolder getCurrentTrackTag() {
@@ -116,8 +124,12 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             tag.tvArtist = (TextView) convertView.findViewById(R.id.tvArtist);
             tag.ivAlbumArt = (AlbumArtImageView) convertView.findViewById(R.id.ivAlbumArt);
 
+            tag.vRoot.setClickable(false);
+
             if (isCurrent) {
                 tag.sbSeek = (SeekBar) convertView.findViewById(R.id.sbSeek);
+                tag.btnNext = (ImageView) convertView.findViewById(R.id.btnForward);
+                tag.btnPrevious = (ImageView) convertView.findViewById(R.id.btnPrevious);
 
                 tag.fabPlay = (FloatingActionButton) convertView.findViewById(R.id.fabPlay);
                 tag.fabPlay.setFixupInset(false);
@@ -128,6 +140,10 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                 updatePlaystate(tag.fabPlayDrawable);
 
                 tag.fabPlay.setImageDrawable(tag.fabPlayDrawable);
+
+                tag.fabPlay.setOnClickListener(mPlayFabClickListener);
+                tag.btnPrevious.setOnClickListener(mPreviousClickListener);
+                tag.btnNext.setOnClickListener(mNextClickListener);
             }
 
             convertView.setTag(tag);
@@ -204,5 +220,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
         public SeekBar sbSeek;
         public FloatingActionButton fabPlay;
         public PlayPauseDrawable fabPlayDrawable;
+        public ImageView btnNext;
+        public ImageView btnPrevious;
     }
 }

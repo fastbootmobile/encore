@@ -97,7 +97,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="center_vertical"
-                android:id="@+id/ivRepeat"
+                android:id="@+id/btnRepeat"
                 android:src="@drawable/ic_replay_gray"
                 android:scaleType="centerInside"
                 android:background="?android:attr/selectableItemBackground"
@@ -108,7 +108,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:id="@+id/ivPrevious"
+                android:id="@+id/btnPrevious"
                 android:clickable="true"
                 android:background="?android:attr/selectableItemBackground"
                 android:src="@drawable/ic_skip_previous"
@@ -127,7 +127,7 @@
                 app:fab_colorPressed="@color/primary_dark"/>
 
             <ImageView
-                android:id="@+id/ivForward"
+                android:id="@+id/btnForward"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="center_vertical"
@@ -142,7 +142,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="center_vertical"
-                android:id="@+id/ivThumbs"
+                android:id="@+id/btnThumbs"
                 android:src="@drawable/ic_thumbs_up_gray"
                 android:scaleType="centerInside"
                 android:background="?android:attr/selectableItemBackground"
