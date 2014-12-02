@@ -46,7 +46,7 @@ public class MaterialTransitionDrawable extends Drawable {
 
 
     public MaterialTransitionDrawable(Context ctx, RefCountedBitmap base) {
-        this(ctx, new RecyclingBitmapDrawable(ctx.getResources(), base));
+        this(ctx, RecyclingBitmapDrawable.from(ctx.getResources(), base));
     }
 
     public MaterialTransitionDrawable(Context ctx, RecyclingBitmapDrawable base) {
@@ -77,7 +77,7 @@ public class MaterialTransitionDrawable extends Drawable {
     }
 
     public void setImmediateTo(Resources res, RefCountedBitmap bitmap) {
-        setImmediateTo(new RecyclingBitmapDrawable(res, bitmap));
+        setImmediateTo(RecyclingBitmapDrawable.from(res, bitmap));
     }
 
     public void setImmediateTo(RecyclingBitmapDrawable drawable) {
@@ -87,13 +87,13 @@ public class MaterialTransitionDrawable extends Drawable {
         mShowOfflineOverdraw = false;
 
         // Set new drawable as base and draw it
+        if (mBaseDrawable != null) {
+            mBaseDrawable.release();
+        }
+
         mBaseDrawable = drawable;
         mBaseDrawable.setBounds(getBounds());
         invalidateSelf();
-    }
-
-    public void transitionTo(Resources res, RefCountedBitmap bitmap) {
-        transitionTo(new RecyclingBitmapDrawable(res, bitmap));
     }
 
     public void transitionTo(final RecyclingBitmapDrawable drawable) {
@@ -161,6 +161,9 @@ public class MaterialTransitionDrawable extends Drawable {
 
             if (rawProgress >= 1.0f) {
                 mAnimating = false;
+                if (mBaseDrawable != null) {
+                    mBaseDrawable.release();
+                }
                 mBaseDrawable = mTargetDrawable;
             } else {
                 invalidateSelf();

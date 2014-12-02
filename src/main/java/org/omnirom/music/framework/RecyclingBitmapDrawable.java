@@ -19,6 +19,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
+import android.util.Log;
 
 /**
  * Ref-counted aware Bitmap Drawable
@@ -26,16 +27,27 @@ import android.os.Build;
 public class RecyclingBitmapDrawable extends BitmapDrawable {
     private Bitmap mBitmap;
 
-    public RecyclingBitmapDrawable(Resources res, RefCountedBitmap bitmap) {
-        super(res, bitmap.get().copy(bitmap.get().getConfig(), false));
-        mBitmap = getBitmap();
+    public static RecyclingBitmapDrawable from(Resources res, RefCountedBitmap rcd) {
+        rcd.acquire();
+        final Bitmap source = rcd.get();
+        RecyclingBitmapDrawable output = null;
+
+        if (source != null) {
+            Bitmap copy = source.copy(source.getConfig(), false);
+            output = new RecyclingBitmapDrawable(res, copy);
+        }
+
+        rcd.release();
+
+        return output;
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mBitmap.recycle();
-        }
-        super.finalize();
+    private RecyclingBitmapDrawable(Resources res, Bitmap bitmap) {
+        super(res, bitmap);
+        mBitmap = bitmap;
+    }
+
+    public void release() {
+        mBitmap.recycle();
     }
 }

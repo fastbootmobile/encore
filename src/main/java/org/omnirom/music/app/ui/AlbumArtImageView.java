@@ -16,6 +16,7 @@
 package org.omnirom.music.app.ui;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -148,7 +149,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             mCurrentBitmap = null;
         }
 
-        mDrawable.setImmediateTo(new RecyclingBitmapDrawable(getResources(), sDefaultBitmap));
+        mDrawable.setImmediateTo(RecyclingBitmapDrawable.from(getResources(), sDefaultBitmap));
         forceDrawableReload();
         mCurrentIsDefault = true;
     }
@@ -250,13 +251,13 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
         // If we have an actual result, display it!
         if (output != null && !output.isRecycled()) {
-            if (mCurrentBitmap != null) {
+            if (mCurrentBitmap != null && mCurrentBitmap != output) {
                 mCurrentBitmap.release();
             }
             mCurrentBitmap = output;
             mCurrentBitmap.acquire();
 
-            RecyclingBitmapDrawable drawable = new RecyclingBitmapDrawable(getResources(), mCurrentBitmap);
+            RecyclingBitmapDrawable drawable = RecyclingBitmapDrawable.from(getResources(), mCurrentBitmap);
             if (mSkipTransition) {
                 mDrawable.setTransitionDuration(MaterialTransitionDrawable.SHORT_DURATION);
             } else {

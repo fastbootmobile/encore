@@ -101,6 +101,8 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
         } else {
             metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, null);
         }
+
+        metadata.apply();
     }
 
     @Override
