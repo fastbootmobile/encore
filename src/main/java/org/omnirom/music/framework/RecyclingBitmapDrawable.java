@@ -16,9 +16,7 @@
 package org.omnirom.music.framework;
 
 import android.content.res.Resources;
-import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.Log;
 
 /**
  * Ref-counted aware Bitmap Drawable
@@ -27,7 +25,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable {
     public RecyclingBitmapDrawable(Resources res, RefCountedBitmap bitmap) {
         super(res, bitmap.get().copy(bitmap.get().getConfig(), false));
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         getBitmap().recycle();

@@ -15,13 +15,15 @@
 
 package org.omnirom.music.service;
 
+import android.annotation.TargetApi;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.MediaMetadata;
+import android.media.Rating;
+import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.RatingCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
+import android.os.Build;
 import android.util.Log;
 
 import com.echonest.api.v4.EchoNestException;
@@ -34,14 +36,17 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 
 /**
- * Class handling the lockscreen/remote metadata system
+ * Class handling the lockscreen/remote metadata system on Lollipop and above
  */
-class RemoteMetadataManager extends MediaSessionCompat.Callback {
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+class RemoteMetadataManagerv21 extends MediaSession.Callback implements IRemoteMetadataManager {
     private static final String TAG = "RemoteMetadataManager";
     private static final String SESSION_NAME = "OmniMusic";
 
     private PlaybackService mService;
-    private MediaSessionCompat mMediaSession;
+    private MediaSession mMediaSession;
+    private MediaMetadata.Builder mBuilder;
+    private PlaybackState.Builder mStateBuilder;
     private Bitmap mPreviousAlbumArt;
 
     private Runnable mThumbsUpRunnable = new Runnable() {
@@ -58,27 +63,50 @@ class RemoteMetadataManager extends MediaSessionCompat.Callback {
         }
     };
 
-    RemoteMetadataManager(PlaybackService service) {
+    RemoteMetadataManagerv21(PlaybackService service) {
         mService = service;
     }
 
-    void setup() {
-        mMediaSession = new MediaSessionCompat(mService, SESSION_NAME);
+    @Override
+    public void setup() {
+        mMediaSession = new MediaSession(mService, SESSION_NAME);
+        mMediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS);
         mMediaSession.setCallback(this);
-        mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-                | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        PendingIntent receiverIntent = PendingIntent.getService(mService, 0,
+                new Intent(mService, RemoteControlReceiver.class), 0);
+        mMediaSession.setMediaButtonReceiver(receiverIntent);
+
+        mBuilder = new MediaMetadata.Builder();
+        mStateBuilder = new PlaybackState.Builder();
+        mStateBuilder.setActions(getActionsFlags(false));
     }
 
-    void release() {
+    private long getActionsFlags(boolean hasNext) {
+        long actions = 0;
+        actions |= PlaybackState.ACTION_PLAY_PAUSE;
+        actions |= PlaybackState.ACTION_SET_RATING;
+        actions |= PlaybackState.ACTION_SKIP_TO_PREVIOUS;
+        if (hasNext) {
+            actions |= PlaybackState.ACTION_SKIP_TO_NEXT;
+        }
+
+        return actions;
+    }
+
+    @Override
+    public void release() {
         mMediaSession.release();
         mMediaSession = null;
     }
 
-    void setActive(final boolean active) {
+    @Override
+    public void setActive(final boolean active) {
         mMediaSession.setActive(active);
     }
 
-    void setAlbumArt(final Bitmap bmp) {
+    @Override
+    public void setAlbumArt(final Bitmap bmp) {
         if (mPreviousAlbumArt != null) {
             mPreviousAlbumArt.recycle();
             mPreviousAlbumArt = null;
@@ -87,71 +115,73 @@ class RemoteMetadataManager extends MediaSessionCompat.Callback {
         if (bmp != null) {
             mPreviousAlbumArt = bmp.copy(bmp.getConfig(), false);
 
-            MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder()
-                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, mPreviousAlbumArt);
+            mBuilder.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, mPreviousAlbumArt);
             if (mMediaSession != null) {
-                mMediaSession.setMetadata(builder.build());
+                mMediaSession.setMetadata(mBuilder.build());
             }
         }
     }
 
-    void setCurrentSong(final Song song) {
+    @Override
+    public void setCurrentSong(final Song song, final boolean hasNext) {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
         final Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
 
-        MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
         if (artist != null) {
-            builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist.getName());
+            mBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST, artist.getName());
         }
         if (album != null) {
-            builder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album.getName());
-            builder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, album.getSongsCount());
+            mBuilder.putString(MediaMetadata.METADATA_KEY_ALBUM, album.getName());
+            mBuilder.putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, album.getSongsCount());
         }
-        builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getTitle());
-        builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.getDuration());
+        mBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, song.getTitle());
+        mBuilder.putLong(MediaMetadata.METADATA_KEY_DURATION, song.getDuration());
+
+        mStateBuilder.setActions(getActionsFlags(hasNext));
 
         if (mMediaSession != null) {
-            mMediaSession.setMetadata(builder.build());
+            mMediaSession.setMetadata(mBuilder.build());
+            mMediaSession.setPlaybackState(mStateBuilder.build());
         }
     }
 
-    void notifyPlaying(final long timeElapsed) {
-        PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
-        builder.setState(PlaybackStateCompat.STATE_PLAYING, timeElapsed, 1.0f);
+    @Override
+    public void notifyPlaying(final long timeElapsed) {
+        mStateBuilder.setState(PlaybackState.STATE_PLAYING, timeElapsed, 1.0f);
 
         if (mMediaSession != null) {
-            mMediaSession.setPlaybackState(builder.build());
+            mMediaSession.setPlaybackState(mStateBuilder.build());
             mMediaSession.setActive(true);
         }
     }
 
-    void notifyBuffering() {
-        PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
-        builder.setState(PlaybackStateCompat.STATE_BUFFERING, 0, 1.0f);
+    @Override
+    public void notifyBuffering() {
+        mStateBuilder.setState(PlaybackState.STATE_BUFFERING, 0, 1.0f);
 
         if (mMediaSession != null) {
-            mMediaSession.setPlaybackState(builder.build());
+            mMediaSession.setPlaybackState(mStateBuilder.build());
             mMediaSession.setActive(true);
         }
     }
 
-    void notifyPaused(final long timeElapsed) {
-        PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
-        builder.setState(PlaybackStateCompat.STATE_PAUSED, timeElapsed, 1.0f);
+    @Override
+    public void notifyPaused(final long timeElapsed) {
+        mStateBuilder.setState(PlaybackState.STATE_PAUSED, timeElapsed, 1.0f);
 
         if (mMediaSession != null) {
-            mMediaSession.setPlaybackState(builder.build());
+            mMediaSession.setPlaybackState(mStateBuilder.build());
             mMediaSession.setActive(true);
         }
     }
 
-    void notifyStopped() {
-        PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
-        builder.setState(PlaybackStateCompat.STATE_STOPPED, 0, 1.0f);
+    @Override
+    public void notifyStopped() {
+        mStateBuilder.setState(PlaybackState.STATE_STOPPED, 0, 1.0f);
 
         if (mMediaSession != null) {
-            mMediaSession.setPlaybackState(builder.build());
+            mMediaSession.setPlaybackState(mStateBuilder.build());
             mMediaSession.setActive(false);
         }
     }
@@ -159,6 +189,7 @@ class RemoteMetadataManager extends MediaSessionCompat.Callback {
     @Override
     public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
         // Buttons actions can be overridden
+        Log.e(TAG, "onMediaButtonEvent");
         return super.onMediaButtonEvent(mediaButtonIntent);
     }
 
@@ -203,7 +234,7 @@ class RemoteMetadataManager extends MediaSessionCompat.Callback {
     }
 
     @Override
-    public void onSetRating(RatingCompat rating) {
+    public void onSetRating(Rating rating) {
         if (rating.isThumbUp() || rating.hasHeart()) {
             new Thread(mThumbsUpRunnable).start();
         }

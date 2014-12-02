@@ -24,7 +24,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -36,7 +35,6 @@ import com.echonest.api.v4.EchoNestException;
 
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.framework.RefCountedBitmap;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -126,7 +124,7 @@ public class PlaybackService extends Service
     private boolean mHasAudioFocus;
     private boolean mRepeatMode;
     private Prefetcher mPrefetcher;
-    private RemoteMetadataManager mRemoteMetadata;
+    private RemoteMetadataManagerv21 mRemoteMetadata;
     private PowerManager.WakeLock mWakeLock;
     private boolean mIsForeground;
 
@@ -148,7 +146,7 @@ public class PlaybackService extends Service
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<IPlaybackCallback>();
         mPrefetcher = new Prefetcher(this);
-        mRemoteMetadata = new RemoteMetadataManager(this);
+        mRemoteMetadata = new RemoteMetadataManagerv21(this);
     }
 
     /**
@@ -536,7 +534,7 @@ public class PlaybackService extends Service
                                 }
                             });
 
-                            mRemoteMetadata.setCurrentSong(next);
+                            mRemoteMetadata.setCurrentSong(next, getNextTrack() != null);
                             mRemoteMetadata.notifyBuffering();
                         }
                     }
@@ -967,7 +965,7 @@ public class PlaybackService extends Service
                 mHandler.post(mStartPlaybackRunnable);
             }
 
-            mRemoteMetadata.setCurrentSong(currentSong);
+            mRemoteMetadata.setCurrentSong(currentSong, getNextTrack() != null);
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {

@@ -249,7 +249,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         }
 
         // If we have an actual result, display it!
-        if (output != null) {
+        if (output != null && !output.isRecycled()) {
             if (mCurrentBitmap != null) {
                 mCurrentBitmap.release();
             }
