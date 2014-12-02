@@ -89,7 +89,7 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
 
     @Override
     public void setAlbumArt(Bitmap bmp) {
-        if (mPreviousAlbumArt != null) {
+        if (mPreviousAlbumArt != null && mPreviousAlbumArt != bmp) {
             mPreviousAlbumArt.recycle();
             mPreviousAlbumArt = null;
         }
@@ -97,7 +97,7 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
         RemoteControlClient.MetadataEditor metadata = mClient.editMetadata(false);
         if (bmp != null) {
             mPreviousAlbumArt = bmp.copy(bmp.getConfig(), false);
-            metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, bmp);
+            metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, mPreviousAlbumArt);
         } else {
             metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, null);
         }

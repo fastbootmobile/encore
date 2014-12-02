@@ -175,9 +175,12 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         if (mCurrentArt != null && !mCurrentArt.isRecycled()) {
             mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt);
             mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt);
-        } else {
+        } else if (!mDefaultArt.isRecycled()) {
             mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt);
             mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt);
+        } else {
+            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, null);
+            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, null);
         }
 
         // Post update
