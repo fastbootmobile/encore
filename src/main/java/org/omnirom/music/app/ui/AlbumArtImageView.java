@@ -27,7 +27,6 @@ import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtCache;
 import org.omnirom.music.framework.AlbumArtHelper;
 import org.omnirom.music.framework.RecyclingBitmapDrawable;
-import org.omnirom.music.framework.RefCountedBitmap;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
@@ -50,11 +49,11 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private MaterialTransitionDrawable mDrawable;
     private boolean mCrossfade;
     private boolean mSkipTransition;
-    private RefCountedBitmap mCurrentBitmap;
+    private RecyclingBitmapDrawable mCurrentBitmap;
     private TaskRunnable mRunnable;
     private boolean mCurrentIsDefault;
 
-    private static RefCountedBitmap sDefaultBitmap;
+    private static RecyclingBitmapDrawable sDefaultBitmap;
 
     public AlbumArtImageView(Context context) {
         super(context);
@@ -78,10 +77,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
 
         if (sDefaultBitmap == null) {
-            sDefaultBitmap = new RefCountedBitmap(
-                    ((BitmapDrawable) getContext().getApplicationContext().getResources()
+            sDefaultBitmap = new RecyclingBitmapDrawable(getResources(), ((BitmapDrawable) getContext().getApplicationContext().getResources()
                     .getDrawable(R.drawable.album_placeholder)).getBitmap());
-            sDefaultBitmap.acquire();
         }
 
         if (isInEditMode()) {
@@ -94,7 +91,6 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
     private void freeMemory(boolean removeRequestedEntity) {
         if (mCurrentBitmap != null) {
-            mCurrentBitmap.release();
             mCurrentBitmap = null;
             if (removeRequestedEntity) {
                 mRequestedEntity = null;
@@ -145,11 +141,10 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     public void setDefaultArt() {
         if (DEBUG) Log.d(TAG, "setDefaultArt: mCurrentBitmap=" + mCurrentBitmap);
         if (mCurrentBitmap != null) {
-            mCurrentBitmap.release();
             mCurrentBitmap = null;
         }
 
-        mDrawable.setImmediateTo(RecyclingBitmapDrawable.from(getResources(), sDefaultBitmap));
+        mDrawable.setImmediateTo(sDefaultBitmap);
         forceDrawableReload();
         mCurrentIsDefault = true;
     }
@@ -241,7 +236,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     }
 
     @Override
-    public void onArtLoaded(RefCountedBitmap output, BoundEntity request) {
+    public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
         if (DEBUG) Log.d(TAG, "onArtLoaded: mCurrentBitmap=" + mCurrentBitmap + " ; output=" + output);
 
         if (request != mRequestedEntity) {
@@ -250,24 +245,19 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         }
 
         // If we have an actual result, display it!
-        if (output != null && !output.isRecycled()) {
-            if (mCurrentBitmap != null && mCurrentBitmap != output) {
-                mCurrentBitmap.release();
-            }
+        if (output != null) {
             mCurrentBitmap = output;
-            mCurrentBitmap.acquire();
 
-            RecyclingBitmapDrawable drawable = RecyclingBitmapDrawable.from(getResources(), mCurrentBitmap);
             if (mSkipTransition) {
                 mDrawable.setTransitionDuration(MaterialTransitionDrawable.SHORT_DURATION);
             } else {
                 mDrawable.setTransitionDuration(MaterialTransitionDrawable.DEFAULT_DURATION);
             }
-            mDrawable.transitionTo(drawable);
+            mDrawable.transitionTo(mCurrentBitmap);
             forceDrawableReload();
 
             if (mOnArtLoadedListener != null) {
-                mOnArtLoadedListener.onArtLoaded(this, drawable);
+                mOnArtLoadedListener.onArtLoaded(this, mCurrentBitmap);
             }
 
             mCurrentIsDefault = false;
@@ -306,7 +296,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         @Override
         public void run() {
             if (mRequestedEntity != null && mEntity != null && mRequestedEntity.equals(mEntity)) {
-                mTask = AlbumArtHelper.retrieveAlbumArt(AlbumArtImageView.this, mEntity, mImmediate);
+                mTask = AlbumArtHelper.retrieveAlbumArt(getResources(), AlbumArtImageView.this, mEntity, mImmediate);
             }
         }
 

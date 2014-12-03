@@ -46,7 +46,7 @@ import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.app.ui.PlaylistListView;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.framework.RefCountedBitmap;
+import org.omnirom.music.framework.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
@@ -83,7 +83,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     private boolean mFabShouldResume;
     private Handler mHandler;
     private CircularProgressButton mOfflineBtn;
-    private RefCountedBitmap mLogoBitmap;
+    private RecyclingBitmapDrawable mLogoBitmap;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -228,11 +228,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         // Set source logo
         ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
-        mLogoBitmap = PluginsLookup.getDefault().getCachedLogo(mPlaylist);
-        if (mLogoBitmap != null) {
-            mLogoBitmap.acquire();
-            ivSource.setImageBitmap(mLogoBitmap.get());
-        }
+        mLogoBitmap = PluginsLookup.getDefault().getCachedLogo(getResources(), mPlaylist);
+        ivSource.setImageDrawable(mLogoBitmap);
 
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources(), 1);
@@ -302,14 +299,6 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         PlaybackProxy.removeCallback(mPlaybackCallback);
-    }
-
-    @Override
-    public void onDestroy() {
-        if (mLogoBitmap != null) {
-            mLogoBitmap.release();
-        }
-        super.onDestroy();
     }
 
     @Override

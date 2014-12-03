@@ -18,36 +18,88 @@ package org.omnirom.music.framework;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.util.Log;
 
+import org.omnirom.music.app.BuildConfig;
+
 /**
- * Ref-counted aware Bitmap Drawable
+ * A BitmapDrawable that keeps track of whether it is being displayed or cached.
+ * When the drawable is no longer being displayed or cached,
+ * {@link android.graphics.Bitmap#recycle() recycle()} will be called on this drawable's bitmap.
  */
 public class RecyclingBitmapDrawable extends BitmapDrawable {
-    private Bitmap mBitmap;
+    static final String TAG = "RecyclingBitmapDrawable";
 
-    public static RecyclingBitmapDrawable from(Resources res, RefCountedBitmap rcd) {
-        rcd.acquire();
-        final Bitmap source = rcd.get();
-        RecyclingBitmapDrawable output = null;
+    private int mCacheRefCount = 0;
+    private int mDisplayRefCount = 0;
 
-        if (source != null) {
-            Bitmap copy = source.copy(source.getConfig(), false);
-            output = new RecyclingBitmapDrawable(res, copy);
+    private boolean mHasBeenDisplayed;
+
+    public RecyclingBitmapDrawable(Resources res, Bitmap bitmap) {
+        super(res, bitmap);
+    }
+
+    /**
+     * Notify the drawable that the displayed state has changed. Internally a
+     * count is kept so that the drawable knows when it is no longer being
+     * displayed.
+     *
+     * @param isDisplayed - Whether the drawable is being displayed or not
+     */
+    public void setIsDisplayed(boolean isDisplayed) {
+        synchronized (this) {
+            if (isDisplayed) {
+                mDisplayRefCount++;
+                mHasBeenDisplayed = true;
+            } else {
+                mDisplayRefCount--;
+            }
         }
 
-        rcd.release();
-
-        return output;
+        // Check to see if recycle() can be called
+        checkState();
     }
 
-    private RecyclingBitmapDrawable(Resources res, Bitmap bitmap) {
-        super(res, bitmap);
-        mBitmap = bitmap;
+    /**
+     * Notify the drawable that the cache state has changed. Internally a count
+     * is kept so that the drawable knows when it is no longer being cached.
+     *
+     * @param isCached - Whether the drawable is being cached or not
+     */
+    public void setIsCached(boolean isCached) {
+        synchronized (this) {
+            if (isCached) {
+                mCacheRefCount++;
+            } else {
+                mCacheRefCount--;
+            }
+        }
+
+        // Check to see if recycle() can be called
+        checkState();
     }
 
-    public void release() {
-        mBitmap.recycle();
+    private synchronized void checkState() {
+        // DISABLED FOR NOW - LEAVING DEFAULT BITMAPDRAWABLE BEHAVIOR, SINCE AS OF
+        // HONEYCOMB THIS SHOULD BE RECYCLED AUTOMATICALLY (SHOULD)
+        if (false) {
+            // If the drawable cache and display ref counts = 0, and this drawable
+            // has been displayed, then recycle
+            if (mCacheRefCount <= 0 && mDisplayRefCount <= 0 && mHasBeenDisplayed
+                    && hasValidBitmap()) {
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "No longer being used or cached so recycling. "
+                            + toString());
+                }
+
+                getBitmap().recycle();
+            }
+        }
     }
+
+    private synchronized boolean hasValidBitmap() {
+        Bitmap bitmap = getBitmap();
+        return bitmap != null && !bitmap.isRecycled();
+    }
+
 }

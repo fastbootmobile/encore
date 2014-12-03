@@ -15,20 +15,29 @@
 
 package org.omnirom.music.framework;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.util.LruCache;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Image cache in the cache directory on internal storage
@@ -36,14 +45,16 @@ import java.util.ArrayList;
 public class ImageCache {
     private static final String TAG = "ImageCache";
     private static final ImageCache INSTANCE = new ImageCache();
+
     private static final boolean USE_MEMORY_CACHE = true;
+    private static final int MEMORY_CACHE_SIZE = 1024 * 1024 * 30; // 30 MB
 
     private final ArrayList<String> mEntries;
     private File mCacheDir;
-    private RefCountedBitmap mDefaultArt;
-    private Handler mHandler;
+    private Bitmap mDefaultArt;
 
-    private final LruCache<String, RefCountedBitmap> mMemoryCache;
+    private final LruCache<String, RecyclingBitmapDrawable> mMemoryCache;
+    private Set<SoftReference<Bitmap>> mReusableBitmaps;
 
     /**
      * @return The default instance
@@ -53,29 +64,41 @@ public class ImageCache {
     }
 
     /**
-     * Default constructor, creates an LRU cache of 1/8th the max memory
+     * Default constructor, creates an LRU cache of the specified size
      */
     public ImageCache() {
-        mEntries = new ArrayList<String>();
-        mHandler = new Handler();
+        mEntries = new ArrayList<>();
+
+        // We create a set of reusable bitmaps that can be
+        // populated into the inBitmap field of BitmapFactory.Options. Note that the set is
+        // of SoftReferences which will actually not be very effective due to the garbage
+        // collector being aggressive clearing Soft/WeakReferences. A better approach
+        // would be to use a strongly references bitmaps, however this would require some
+        // balancing of memory usage between this set and the bitmap LruCache. It would also
+        // require knowledge of the expected size of the bitmaps. From Honeycomb to JellyBean
+        // the size would need to be precise, from KitKat onward the size would just need to
+        // be the upper bound (due to changes in how inBitmap can re-use bitmaps).
+        mReusableBitmaps =
+                Collections.synchronizedSet(new HashSet<SoftReference<Bitmap>>());
+
 
         if (USE_MEMORY_CACHE) {
-            final int maxMemory = 10 * 1024 * 1024; // (int) Runtime.getRuntime().maxMemory();
-            Log.d(TAG, "ImageCache size: " + (maxMemory / 1024 / 1024) + " MB");
-
-            mMemoryCache = new LruCache<String, RefCountedBitmap>(maxMemory) {
+            mMemoryCache = new LruCache<String, RecyclingBitmapDrawable>(MEMORY_CACHE_SIZE) {
                 @Override
-                protected int sizeOf(String key, RefCountedBitmap value) {
-                    if (value.get().isRecycled()) {
-                        return 0;
-                    } else {
-                        return value.get().getByteCount();
-                    }
+                protected int sizeOf(String key, RecyclingBitmapDrawable value) {
+                    final int bitmapSize = ImageUtils.getBitmapSize(value) / 1024;
+                    return bitmapSize == 0 ? 1 : bitmapSize;
                 }
 
                 @Override
-                protected void entryRemoved(boolean evicted, String key, final RefCountedBitmap oldBitmap, RefCountedBitmap newBitmap) {
-                    oldBitmap.release();
+                protected void entryRemoved(boolean evicted, String key,
+                                            final RecyclingBitmapDrawable oldBitmap, RecyclingBitmapDrawable newBitmap) {
+                    if (newBitmap != null) {
+                        newBitmap.setIsCached(true);
+                    }
+
+                    oldBitmap.setIsCached(false);
+                    mReusableBitmaps.add(new SoftReference<>(oldBitmap.getBitmap()));
                 }
             };
         } else {
@@ -100,14 +123,8 @@ public class ImageCache {
             }
         }
 
-        mDefaultArt = new RefCountedBitmap(((BitmapDrawable) ctx.getResources().getDrawable(R.drawable.album_placeholder)).getBitmap());
-        mDefaultArt.acquire();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        mDefaultArt.release();
-        super.finalize();
+        mDefaultArt = ((BitmapDrawable) ctx.getResources()
+                .getDrawable(R.drawable.album_placeholder)).getBitmap();
     }
 
     /**
@@ -150,16 +167,9 @@ public class ImageCache {
      */
     public boolean hasInMemory(final String key) {
         if (USE_MEMORY_CACHE) {
-            RefCountedBitmap bmp;
+            RecyclingBitmapDrawable bmp;
             bmp = mMemoryCache.get(sanitizeKey(key));
-
-            if (bmp != null && bmp.isRecycled()) {
-                Log.e(TAG, "MEMORY CACHE CONTAINS A RECYCLED ENTRY!");
-                synchronized (mMemoryCache) {
-                    mMemoryCache.remove(sanitizeKey(key));
-                }
-                return false;
-            } else return bmp != null;
+            return bmp != null;
         } else {
             return false;
         }
@@ -181,7 +191,7 @@ public class ImageCache {
      * @param key The key of the image to get
      * @return A bitmap corresponding to the key, or null if it's not in the cache
      */
-    public RefCountedBitmap get(final String key) {
+    public RecyclingBitmapDrawable get(final Resources res , final String key) {
         if (key == null) {
             return null;
         }
@@ -194,7 +204,7 @@ public class ImageCache {
         }
 
         if (contains) {
-            RefCountedBitmap item;
+            RecyclingBitmapDrawable item;
             synchronized (mMemoryCache) {
                 // Check if we have it in memory
                 item = USE_MEMORY_CACHE ? mMemoryCache.get(cleanKey) : null;
@@ -202,16 +212,12 @@ public class ImageCache {
 
             if (item == null) {
                 BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inSampleSize = 2;
                 Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
                 if (bmp != null) {
-                    item = new RefCountedBitmap(bmp);
+                    item = new RecyclingBitmapDrawable(res, bmp);
 
                     if (USE_MEMORY_CACHE) {
-                        item.acquire();
-                        synchronized (mMemoryCache) {
-                            mMemoryCache.put(cleanKey, item);
-                        }
+                        mMemoryCache.put(cleanKey, item);
                     }
                 }
             } else {
@@ -225,13 +231,48 @@ public class ImageCache {
     }
 
     /**
+     * @param options - BitmapFactory.Options with out* options populated
+     * @return Bitmap that case be used for inBitmap
+     */
+    protected Bitmap getBitmapFromReusableSet(BitmapFactory.Options options) {
+        Bitmap bitmap = null;
+
+        if (mReusableBitmaps != null && !mReusableBitmaps.isEmpty()) {
+            synchronized (mReusableBitmaps) {
+                final Iterator<SoftReference<Bitmap>> iterator = mReusableBitmaps.iterator();
+                Bitmap item;
+
+                while (iterator.hasNext()) {
+                    item = iterator.next().get();
+
+                    if (null != item && item.isMutable()) {
+                        // Check to see it the item can be used for inBitmap
+                        if (ImageUtils.canUseForInBitmap(item, options)) {
+                            bitmap = item;
+
+                            // Remove from reusable set so it can't be used again
+                            iterator.remove();
+                            break;
+                        }
+                    } else {
+                        // Remove from the set if the reference has been cleared.
+                        iterator.remove();
+                    }
+                }
+            }
+        }
+
+        return bitmap;
+    }
+
+    /**
      * Stores the image as WEBP in the cache
      * @param key The key of the image to put
      * @param bmp The bitmap to put (or null to put the default art)
      */
-    public RefCountedBitmap put(final String key, final Bitmap bmp) {
-        RefCountedBitmap rcb = new RefCountedBitmap(bmp);
-        put(key, rcb, false);
+    public RecyclingBitmapDrawable put(final Resources res, final String key, final Bitmap bmp) {
+        RecyclingBitmapDrawable rcb = new RecyclingBitmapDrawable(res, bmp);
+        put(res, key, rcb, false);
         return rcb;
     }
 
@@ -240,8 +281,8 @@ public class ImageCache {
      * @param key The key of the image to put
      * @param bmp The bitmap to put (or null to put the default art)
      */
-    public void put(final String key, final RefCountedBitmap bmp) {
-        put(key, bmp, false);
+    public void put(final Resources res, final String key, final RecyclingBitmapDrawable bmp) {
+        put(res, key, bmp, false);
     }
 
     /**
@@ -250,9 +291,9 @@ public class ImageCache {
      * @param bmp The bitmap to put (or null to put the default art)
      * @param asPNG True to store as PNG, false to store as WEBP
      */
-    public RefCountedBitmap put(final String key, Bitmap bmp, final boolean asPNG) {
-        RefCountedBitmap rcb = new RefCountedBitmap(bmp);
-        put(key, rcb, asPNG);
+    public RecyclingBitmapDrawable put(final Resources res, final String key, Bitmap bmp, final boolean asPNG) {
+        RecyclingBitmapDrawable rcb = new RecyclingBitmapDrawable(res, bmp);
+        put(res, key, rcb, asPNG);
         return rcb;
     }
 
@@ -262,60 +303,53 @@ public class ImageCache {
      * @param bmp The bitmap to put (or null to put the default art)
      * @param asPNG True to store as PNG, false to store as WEBP
      */
-    public void put(final String key, RefCountedBitmap bmp, final boolean asPNG) {
+    public void put(final Resources res, final String key, RecyclingBitmapDrawable bmp, final boolean asPNG) {
         boolean isDefaultArt = false;
 
         final String cleanKey = sanitizeKey(key);
 
         if (bmp == null) {
-            bmp = mDefaultArt;
+            bmp = new RecyclingBitmapDrawable(res, mDefaultArt.copy(mDefaultArt.getConfig(), false));
             isDefaultArt = true;
         }
 
         if (USE_MEMORY_CACHE) {
-            synchronized (mMemoryCache) {
-                bmp.acquire();
-                mMemoryCache.put(cleanKey, bmp);
-            }
+            mMemoryCache.put(cleanKey, bmp);
         }
 
-        if (!bmp.isRecycled()) {
-            if (!isDefaultArt) {
-                try {
-                    FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + cleanKey);
-                    bmp.acquire();
-                    Bitmap bitmap = bmp.get();
+        if (!isDefaultArt) {
+            try {
+                FileOutputStream out = new FileOutputStream(mCacheDir.getAbsolutePath() + "/" + cleanKey);
+                Bitmap bitmap = bmp.getBitmap();
 
-                    boolean shouldRecycle = false;
-                    final float maxSize = 800;
+                boolean shouldRecycle = false;
+                final float maxSize = 800;
 
-                    if (bitmap.getWidth() > maxSize && bitmap.getHeight() > maxSize) {
-                        float ratio = (bitmap.getWidth() < bitmap.getHeight()) ?
-                                bitmap.getWidth() / maxSize : bitmap.getHeight() / maxSize;
-                        final int sWidth = (int) (bitmap.getWidth() / ratio);
-                        final int sHeight = (int) (bitmap.getHeight() / ratio);
+                if (bitmap.getWidth() > maxSize && bitmap.getHeight() > maxSize) {
+                    float ratio = (bitmap.getWidth() < bitmap.getHeight()) ?
+                            bitmap.getWidth() / maxSize : bitmap.getHeight() / maxSize;
+                    final int sWidth = (int) (bitmap.getWidth() / ratio);
+                    final int sHeight = (int) (bitmap.getHeight() / ratio);
 
-                        bitmap = Bitmap.createScaledBitmap(bitmap, sWidth, sHeight, true);
-                        shouldRecycle = true;
+                    bitmap = Bitmap.createScaledBitmap(bitmap, sWidth, sHeight, true);
+                    shouldRecycle = true;
 
-                        Log.d(TAG, "Rescaled to " + sWidth + "x" + sHeight);
-                    }
-
-                    bitmap.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
-                    bmp.release();
-                    out.close();
-
-                    if (shouldRecycle) {
-                        // Scaled image will be used on reload
-                        bitmap.recycle();
-                    }
-                } catch (IOException e) {
-                    Log.e(TAG, "Unable to write the file to cache", e);
+                    Log.d(TAG, "Rescaled to " + sWidth + "x" + sHeight);
                 }
 
-                synchronized (mEntries) {
-                    mEntries.add(cleanKey);
+                bitmap.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
+                out.close();
+
+                if (shouldRecycle) {
+                    // Scaled image will be used on reload
+                    bitmap.recycle();
                 }
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to write the file to cache", e);
+            }
+
+            synchronized (mEntries) {
+                mEntries.add(cleanKey);
             }
         }
     }

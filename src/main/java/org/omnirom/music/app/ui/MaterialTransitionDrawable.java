@@ -2,8 +2,6 @@
 package org.omnirom.music.app.ui;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
@@ -13,12 +11,10 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.RecyclingBitmapDrawable;
-import org.omnirom.music.framework.RefCountedBitmap;
 
 /**
  * <p>
@@ -28,7 +24,6 @@ import org.omnirom.music.framework.RefCountedBitmap;
  * </p>
  */
 public class MaterialTransitionDrawable extends Drawable {
-    private static final String TAG = "MaterialTransitionDrawable";
     public static final long DEFAULT_DURATION = 1000;
     public static final long SHORT_DURATION = 300;
 
@@ -44,10 +39,6 @@ public class MaterialTransitionDrawable extends Drawable {
     private boolean mShowOfflineOverdraw;
     private long mOfflineStartTime;
 
-
-    public MaterialTransitionDrawable(Context ctx, RefCountedBitmap base) {
-        this(ctx, RecyclingBitmapDrawable.from(ctx.getResources(), base));
-    }
 
     public MaterialTransitionDrawable(Context ctx, RecyclingBitmapDrawable base) {
         this(ctx);
@@ -76,10 +67,6 @@ public class MaterialTransitionDrawable extends Drawable {
         mDuration = durationMillis;
     }
 
-    public void setImmediateTo(Resources res, RefCountedBitmap bitmap) {
-        setImmediateTo(RecyclingBitmapDrawable.from(res, bitmap));
-    }
-
     public void setImmediateTo(RecyclingBitmapDrawable drawable) {
         // Cancel animation
         mAnimating = false;
@@ -88,11 +75,12 @@ public class MaterialTransitionDrawable extends Drawable {
 
         // Set new drawable as base and draw it
         if (mBaseDrawable != null) {
-            mBaseDrawable.release();
+            mBaseDrawable.setIsDisplayed(false);
         }
 
         mBaseDrawable = drawable;
         mBaseDrawable.setBounds(getBounds());
+        mBaseDrawable.setIsDisplayed(true);
         invalidateSelf();
     }
 
@@ -162,7 +150,7 @@ public class MaterialTransitionDrawable extends Drawable {
             if (rawProgress >= 1.0f) {
                 mAnimating = false;
                 if (mBaseDrawable != null) {
-                    mBaseDrawable.release();
+                    mBaseDrawable.setIsDisplayed(false);
                 }
                 mBaseDrawable = mTargetDrawable;
             } else {

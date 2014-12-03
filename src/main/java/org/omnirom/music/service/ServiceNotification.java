@@ -32,7 +32,7 @@ import android.widget.RemoteViews;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.AlbumArtHelper;
-import org.omnirom.music.framework.RefCountedBitmap;
+import org.omnirom.music.framework.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
@@ -277,25 +277,18 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
 
             mCurrentArt = mDefaultArt;
-            AlbumArtHelper.retrieveAlbumArt(this, mCurrentSong, false);
+            AlbumArtHelper.retrieveAlbumArt(mContext.getResources(), this, mCurrentSong, false);
         }
     }
 
     @Override
-    public void onArtLoaded(RefCountedBitmap output, BoundEntity request) {
+    public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
         if (request.equals(mCurrentSong)) {
-            if (mPendingArt != null) {
-                //  TODO: recycle causes crash here
-                mPendingArt = null;
-            }
-
             if (output == null) {
                 mCurrentArt = mDefaultArt;
             } else {
-                output.acquire();
-                Bitmap outputBitmap = output.get();
+                Bitmap outputBitmap = output.getBitmap();
                 mCurrentArt = outputBitmap.copy(outputBitmap.getConfig(), false);
-                output.release();
             }
 
             buildNotification();

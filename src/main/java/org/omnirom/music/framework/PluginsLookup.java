@@ -22,6 +22,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.IBinder;
@@ -400,12 +401,12 @@ public class PluginsLookup {
         return services;
     }
 
-    public RefCountedBitmap getCachedLogo(BoundEntity entity) {
-        return getCachedLogo(entity.getProvider(), entity.getLogo());
+    public RecyclingBitmapDrawable getCachedLogo(final Resources res, final BoundEntity entity) {
+        return getCachedLogo(res, entity.getProvider(), entity.getLogo());
     }
 
-    public RefCountedBitmap getCachedLogo(ProviderIdentifier id, String ref) {
-        RefCountedBitmap output = ImageCache.getDefault().get(ref);
+    public RecyclingBitmapDrawable getCachedLogo(final Resources res, ProviderIdentifier id, String ref) {
+        RecyclingBitmapDrawable output = ImageCache.getDefault().get(res, ref);
         if (output == null && id != null) {
             try {
                 IMusicProvider binder = getProvider(id).getBinder();
@@ -413,7 +414,7 @@ public class PluginsLookup {
                     Bitmap bmp = getProvider(id).getBinder().getLogo(ref);
 
                     if (bmp != null) {
-                        output = ImageCache.getDefault().put(ref, bmp, true);
+                        output = ImageCache.getDefault().put(res, ref, bmp, true);
                     }
                 }
             } catch (RemoteException e) {

@@ -15,6 +15,7 @@
 
 package org.omnirom.music.framework;
 
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -39,7 +40,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AlbumArtHelper {
     private static final String TAG = "AlbumArtHelper";
-    private static final boolean DEBUG = false;
 
     private static final int DELAY_BEFORE_RETRY = 500;
     private static final int CORE_POOL_SIZE = 4;
@@ -53,19 +53,19 @@ public class AlbumArtHelper {
         }
     };
     private static final BlockingQueue<Runnable> sPoolWorkQueue =
-            new LinkedBlockingQueue<Runnable>(10);
+            new LinkedBlockingQueue<>(10);
     private static final Executor ART_POOL_EXECUTOR
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
             TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
 
 
     public interface AlbumArtListener {
-        public void onArtLoaded(RefCountedBitmap output, BoundEntity request);
+        public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request);
     }
 
     public static class BackgroundResult {
         public BoundEntity request;
-        public RefCountedBitmap bitmap;
+        public RecyclingBitmapDrawable bitmap;
         public boolean retry;
     }
 
@@ -76,10 +76,11 @@ public class AlbumArtHelper {
         private BoundEntity mEntity;
         private AlbumArtListener mListener;
         private Handler mHandler;
-        private RefCountedBitmap mArtBitmap;
+        private RecyclingBitmapDrawable mArtBitmap;
+        private Resources mResources;
         private AlbumArtCache.IAlbumArtCacheListener mCacheListener = new AlbumArtCache.IAlbumArtCacheListener() {
             @Override
-            public void onArtLoaded(BoundEntity ent, RefCountedBitmap result) {
+            public void onArtLoaded(BoundEntity ent, RecyclingBitmapDrawable result) {
                 synchronized (AlbumArtTask.this) {
                     if (!isCancelled()) {
                         mArtBitmap = result;
@@ -89,9 +90,10 @@ public class AlbumArtHelper {
             }
         };
 
-        private AlbumArtTask(AlbumArtListener listener) {
+        private AlbumArtTask(Resources res, AlbumArtListener listener) {
             mListener = listener;
             mHandler = new Handler(Looper.getMainLooper());
+            mResources = res;
         }
 
         @Override
@@ -116,7 +118,7 @@ public class AlbumArtHelper {
 
                 // Get from the cache
                 synchronized (this) {
-                    if (AlbumArtCache.getDefault().getArt(mEntity, mCacheListener)) {
+                    if (AlbumArtCache.getDefault().getArt(mResources, mEntity, mCacheListener)) {
                         // Wait for the result
                         if (mArtBitmap == null) {
                             try {
@@ -134,13 +136,9 @@ public class AlbumArtHelper {
                 artCache.notifyQueryStopped(mEntity);
 
                 // We now have a bitmap to display, so let's put it!
-                if (mArtBitmap != null && !mArtBitmap.isRecycled()) {
-                    mArtBitmap.acquire();
+                if (mArtBitmap != null) {
                     output.bitmap = mArtBitmap;
                     output.retry = false;
-                } else if (mArtBitmap != null) {
-                    if (DEBUG) Log.w(TAG, "Retrying as fetched bitmap is already recycled");
-                    output.retry = true;
                 } else {
                     output.bitmap = null;
                     output.retry = false;
@@ -166,7 +164,7 @@ public class AlbumArtHelper {
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            AlbumArtTask task = new AlbumArtTask(mListener);
+                            AlbumArtTask task = new AlbumArtTask(mResources, mListener);
                             try {
                                 task.executeOnExecutor(ART_POOL_EXECUTOR, result.request);
                             } catch (RejectedExecutionException e) {
@@ -176,18 +174,14 @@ public class AlbumArtHelper {
                     }, DELAY_BEFORE_RETRY);
                 } else if (result != null) {
                     mListener.onArtLoaded(result.bitmap, result.request);
-
-                    if (result.bitmap != null) {
-                        result.bitmap.release();
-                    }
                 }
             }
         }
     }
 
-    public static AlbumArtTask retrieveAlbumArt(AlbumArtListener listener,
+    public static AlbumArtTask retrieveAlbumArt(Resources res, AlbumArtListener listener,
                                                 BoundEntity request, boolean immediate) {
-        AlbumArtTask task = new AlbumArtTask(listener);
+        AlbumArtTask task = new AlbumArtTask(res, listener);
 
         if (!immediate) {
             // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the predefined

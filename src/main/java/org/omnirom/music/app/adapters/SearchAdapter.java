@@ -29,7 +29,7 @@ import android.widget.TextView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.framework.RefCountedBitmap;
+import org.omnirom.music.framework.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
@@ -71,7 +71,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         public TextView divider;
         public ImageView ivSource;
         public View vRoot;
-        public RefCountedBitmap sourceLogo;
+        public RecyclingBitmapDrawable sourceLogo;
     }
 
     /**
@@ -381,14 +381,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                 tag.tvSubtitle.setText(artist.getName());
             }
             tag.albumArtImageView.loadArtForSong(song);
-            if (tag.sourceLogo != null) {
-                tag.sourceLogo.release();
-                tag.sourceLogo = null;
-            }
-            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(song);
-            tag.sourceLogo.acquire();
-
-            tag.ivSource.setImageBitmap(tag.sourceLogo.get());
+            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), song);
+            tag.ivSource.setImageDrawable(tag.sourceLogo);
             tag.content = song;
         } else {
             tag.tvTitle.setText(R.string.loading);
@@ -412,14 +406,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             tag.tvSubtitle.setText("");
             tag.albumArtImageView.loadArtForArtist(artist);
             tag.content = artist;
-            if (tag.sourceLogo != null) {
-                tag.sourceLogo.release();
-                tag.sourceLogo = null;
-            }
-            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(artist);
-            tag.sourceLogo.acquire();
-
-            tag.ivSource.setImageBitmap(tag.sourceLogo.get());
+            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), artist);
+            tag.ivSource.setImageDrawable(tag.sourceLogo);
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);
@@ -446,14 +434,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             }
 
             tag.albumArtImageView.loadArtForAlbum(album);
-            if (tag.sourceLogo != null) {
-                tag.sourceLogo.release();
-                tag.sourceLogo = null;
-            }
-            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(album);
-            tag.sourceLogo.acquire();
-
-            tag.ivSource.setImageBitmap(tag.sourceLogo.get());
+            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), album);
+            tag.ivSource.setImageDrawable(tag.sourceLogo);
             tag.content = album;
         } else {
             tag.tvTitle.setText(R.string.loading);
@@ -476,14 +458,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             tag.tvTitle.setText(playlist.getName());
             tag.tvSubtitle.setText(res.getString(R.string.xx_songs, playlist.getSongsCount()));
             tag.content = playlist;
-            if (tag.sourceLogo != null) {
-                tag.sourceLogo.release();
-                tag.sourceLogo = null;
-            }
-            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(playlist);
-            tag.sourceLogo.acquire();
-
-            tag.ivSource.setImageBitmap(tag.sourceLogo.get());
+            tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), playlist);
+            tag.ivSource.setImageDrawable(tag.sourceLogo);
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);

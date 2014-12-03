@@ -15,6 +15,7 @@
 
 package org.omnirom.music.framework;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -40,7 +41,7 @@ public class PlaylistArtBuilder {
     private static final String TAG = "PlaylistArtBuilder";
 
     private Bitmap mPlaylistComposite;
-    private List<RefCountedBitmap> mPlaylistSource;
+    private List<RecyclingBitmapDrawable> mPlaylistSource;
     private Paint mPlaylistPaint;
     private List<AlbumArtHelper.AlbumArtTask> mCompositeTasks;
     private List<BoundEntity> mCompositeRequests;
@@ -76,13 +77,12 @@ public class PlaylistArtBuilder {
 
     private AlbumArtHelper.AlbumArtListener mCompositeListener = new AlbumArtHelper.AlbumArtListener() {
         @Override
-        public void onArtLoaded(RefCountedBitmap output, BoundEntity request) {
+        public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
             if (!mCompositeRequests.contains(request) || mPlaylistSource == null || mDone) {
                 return;
             }
 
             if (output != null) {
-                output.acquire();
                 mPlaylistSource.add(output);
                 if (mPlaylistSource.size() < 4) {
                     mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
@@ -105,9 +105,6 @@ public class PlaylistArtBuilder {
             mPlaylistComposite = null;
         }
         if (mPlaylistSource != null) {
-            for (RefCountedBitmap bmp : mPlaylistSource) {
-                bmp.release();
-            }
             mPlaylistSource.clear();
             mPlaylistSource = null;
         }
@@ -123,7 +120,7 @@ public class PlaylistArtBuilder {
 
     private synchronized void makePlaylistComposite() {
         if (mPlaylistComposite == null) {
-            mPlaylistComposite = Bitmap.createBitmap(1080, 1080, Bitmap.Config.ARGB_8888);
+            mPlaylistComposite = Bitmap.createBitmap(800, 800, Bitmap.Config.ARGB_8888);
         }
 
         if (mPlaylistPaint == null) {
@@ -141,16 +138,15 @@ public class PlaylistArtBuilder {
                 mDone = true;
                 mHandler.removeCallbacks(mTimeoutWatchdog);
                 try {
-                    mCallback.onArtLoaded(mPlaylistSource.get(0).get());
+                    mCallback.onArtLoaded(mPlaylistSource.get(0).getBitmap());
                 } catch (RemoteException ignored) {
                 }
                 return;
             }
         } else if (numImages == 2 || numImages == 3) {
             int i = 0;
-            for (RefCountedBitmap item : mPlaylistSource) {
-                item.acquire();
-                Bitmap itemBmp = item.get();
+            for (RecyclingBitmapDrawable item : mPlaylistSource) {
+                Bitmap itemBmp = item.getBitmap();
 
                 Rect src = new Rect(0, 0, itemBmp.getWidth(), itemBmp.getHeight());
                 Rect dst = new Rect(i * compositeWidth / numImages,
@@ -159,14 +155,12 @@ public class PlaylistArtBuilder {
                         compositeHeight);
 
                 canvas.drawBitmap(itemBmp, src, dst, mPlaylistPaint);
-                item.release();
                 ++i;
             }
         } else {
             for (int i = 0; i < 4; ++i) {
-                RefCountedBitmap item = mPlaylistSource.get(i);
-                item.acquire();
-                Bitmap itemBmp = item.get();
+                RecyclingBitmapDrawable item = mPlaylistSource.get(i);
+                Bitmap itemBmp = item.getBitmap();
 
                 int row = (int) Math.floor(i / 2);
                 int col = (i % 2);
@@ -178,7 +172,6 @@ public class PlaylistArtBuilder {
                         row * compositeHeight / 2 + compositeHeight / 2);
 
                 canvas.drawBitmap(itemBmp, src, dst, mPlaylistPaint);
-                item.release();
             }
         }
 
@@ -194,12 +187,14 @@ public class PlaylistArtBuilder {
         }
     }
 
-    public void start(Playlist playlist, IArtCallback callback) {
+    public void start(Resources res, Playlist playlist, IArtCallback callback) {
+        Log.e(TAG, "Starting to build playlist art for " + playlist.getName());
+
         mDone = false;
         mCallback = callback;
 
         if (mCompositeTasks == null) {
-            mCompositeTasks = new ArrayList<AlbumArtHelper.AlbumArtTask>();
+            mCompositeTasks = new ArrayList<>();
         } else {
             // Cancel the current tasks
             for (AlbumArtHelper.AlbumArtTask task : mCompositeTasks) {
@@ -208,14 +203,8 @@ public class PlaylistArtBuilder {
             mCompositeTasks.clear();
         }
 
-        if (mPlaylistSource != null) {
-            for (RefCountedBitmap bmp : mPlaylistSource) {
-                bmp.release();
-            }
-        }
-
         // Load 4 songs if possible and compose them into one picture
-        mPlaylistSource = new ArrayList<RefCountedBitmap>();
+        mPlaylistSource = new ArrayList<>();
         mCompositeRequests = new ArrayList<BoundEntity>();
         mNumComposite = Math.min(4, playlist.getSongsCount());
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
@@ -223,7 +212,7 @@ public class PlaylistArtBuilder {
         for (int i = 0; i < mNumComposite; ++i) {
             String entry = playlist.songsList().get(i);
             Song song = aggregator.retrieveSong(entry, playlist.getProvider());
-            mCompositeTasks.add(AlbumArtHelper.retrieveAlbumArt( mCompositeListener, song, false));
+            mCompositeTasks.add(AlbumArtHelper.retrieveAlbumArt(res, mCompositeListener, song, false));
             mCompositeRequests.add(song);
         }
 
