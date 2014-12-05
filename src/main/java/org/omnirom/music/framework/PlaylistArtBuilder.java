@@ -205,7 +205,7 @@ public class PlaylistArtBuilder {
 
         // Load 4 songs if possible and compose them into one picture
         mPlaylistSource = new ArrayList<>();
-        mCompositeRequests = new ArrayList<BoundEntity>();
+        mCompositeRequests = new ArrayList<>();
         mNumComposite = Math.min(4, playlist.getSongsCount());
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 

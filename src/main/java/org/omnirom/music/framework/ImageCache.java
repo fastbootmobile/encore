@@ -42,6 +42,7 @@ import java.util.Set;
 /**
  * Image cache in the cache directory on internal storage
  */
+@SuppressWarnings("SynchronizeOnNonFinalField")
 public class ImageCache {
     private static final String TAG = "ImageCache";
     private static final ImageCache INSTANCE = new ImageCache();
@@ -212,6 +213,9 @@ public class ImageCache {
 
             if (item == null) {
                 BitmapFactory.Options opts = new BitmapFactory.Options();
+                ImageUtils.addInBitmapOptions(opts, this);
+
+
                 Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
                 if (bmp != null) {
                     item = new RecyclingBitmapDrawable(res, bmp);

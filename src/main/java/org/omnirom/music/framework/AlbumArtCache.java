@@ -304,7 +304,9 @@ public class AlbumArtCache {
                 // Download it
                 try {
                     byte[] imageData = HttpGet.getBytes(url, "", true);
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+                    BitmapFactory.Options opts = new BitmapFactory.Options();
+                    opts.inMutable = true;
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length, opts);
                     if (bitmap != null) {
                         result = true;
                         RecyclingBitmapDrawable rcb = ImageCache.getDefault().put(res, getEntityArtKey(listenerRef), bitmap);
@@ -388,7 +390,9 @@ public class AlbumArtCache {
             if (url != null) {
                 try {
                     byte[] imageData = HttpGet.getBytes(url, "", true);
-                    Bitmap image = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+                    BitmapFactory.Options opts = new BitmapFactory.Options();
+                    opts.inMutable = true;
+                    Bitmap image = BitmapFactory.decodeByteArray(imageData, 0, imageData.length, opts);
                     if (image != null) {
                         result = true;
                         RecyclingBitmapDrawable rcb = ImageCache.getDefault().put(res, getEntityArtKey(artist), image);

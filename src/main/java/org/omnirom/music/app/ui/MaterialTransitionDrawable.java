@@ -38,6 +38,7 @@ public class MaterialTransitionDrawable extends Drawable {
     private Paint mPaint;
     private boolean mShowOfflineOverdraw;
     private long mOfflineStartTime;
+    private final Object mDrawLock = new Object();
 
 
     public MaterialTransitionDrawable(Context ctx, RecyclingBitmapDrawable base) {
@@ -56,48 +57,58 @@ public class MaterialTransitionDrawable extends Drawable {
     }
 
     public BitmapDrawable getFinalDrawable() {
-        if (mTargetDrawable != null) {
-            return mTargetDrawable;
-        } else {
-            return mBaseDrawable;
+        synchronized (mDrawLock) {
+            if (mTargetDrawable != null) {
+                return mTargetDrawable;
+            } else {
+                return mBaseDrawable;
+            }
         }
     }
 
     public void setTransitionDuration(long durationMillis) {
-        mDuration = durationMillis;
+        synchronized (mDrawLock) {
+            mDuration = durationMillis;
+        }
     }
 
     public void setImmediateTo(RecyclingBitmapDrawable drawable) {
-        // Cancel animation
-        mAnimating = false;
-        mTargetDrawable = null;
-        mShowOfflineOverdraw = false;
+        synchronized (mDrawLock) {
+            // Cancel animation
+            mAnimating = false;
+            mTargetDrawable = null;
+            mShowOfflineOverdraw = false;
 
-        // Set new drawable as base and draw it
-        if (mBaseDrawable != null) {
-            mBaseDrawable.setIsDisplayed(false);
+            // Set new drawable as base and draw it
+            if (mBaseDrawable != null) {
+                mBaseDrawable.setIsDisplayed(false);
+            }
+
+            mBaseDrawable = drawable;
+            mBaseDrawable.setBounds(getBounds());
+            mBaseDrawable.setIsDisplayed(true);
         }
-
-        mBaseDrawable = drawable;
-        mBaseDrawable.setBounds(getBounds());
-        mBaseDrawable.setIsDisplayed(true);
         invalidateSelf();
     }
 
     public void transitionTo(final RecyclingBitmapDrawable drawable) {
-        if (drawable != mTargetDrawable) {
-            mTargetDrawable = drawable;
-            mTargetDrawable.setBounds(getBounds());
+        synchronized (mDrawLock) {
+            if (drawable != mTargetDrawable) {
+                mTargetDrawable = drawable;
+                mTargetDrawable.setBounds(getBounds());
 
-            mStartTime = -1;
-            mAnimating = true;
+                mStartTime = -1;
+                mAnimating = true;
+            }
         }
     }
 
     public void setShowOfflineOverdraw(boolean show) {
         if (mShowOfflineOverdraw != show) {
-            mShowOfflineOverdraw = show;
-            mOfflineStartTime = SystemClock.uptimeMillis();
+            synchronized (mDrawLock) {
+                mShowOfflineOverdraw = show;
+                mOfflineStartTime = SystemClock.uptimeMillis();
+            }
             invalidateSelf();
         }
     }
@@ -106,75 +117,79 @@ public class MaterialTransitionDrawable extends Drawable {
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
 
-        if (mBaseDrawable != null & !mAnimating) {
-            mBaseDrawable.setBounds(bounds);
-        }
-        if (mTargetDrawable != null) {
-            mTargetDrawable.setBounds(bounds);
+        synchronized (mDrawLock) {
+            if (mBaseDrawable != null & !mAnimating) {
+                mBaseDrawable.setBounds(bounds);
+            }
+            if (mTargetDrawable != null) {
+                mTargetDrawable.setBounds(bounds);
+            }
         }
     }
 
     @Override
     public void draw(Canvas canvas) {
-        if (mAnimating) {
-            if (mStartTime < 0) {
-                mStartTime = SystemClock.uptimeMillis();
-            }
-
-            final float rawProgress = Math.min(1.0f,
-                    ((float) (SystemClock.uptimeMillis() - mStartTime)) / ((float) mDuration));
-
-            // As per the Material Design spec, animation goes into 3 steps. Ranging from 0 to 100,
-            // opacity is full at 50, exposure (gamma + black output) at 75, and saturation at 100.
-            // For performance, we only do the saturation and opacity transition
-            final float inputOpacity = Math.min(1.0f, rawProgress * (1.0f / 0.5f));
-            // final float inputExposure = Math.min(1.0f, rawProgress * (1.0f / 0.75f));
-
-            final float progressOpacity = mInterpolator.getInterpolation(inputOpacity);
-            // final float progressExposure = 1.0f - mInterpolator.getInterpolation(inputExposure);
-            final float progressSaturation = mInterpolator.getInterpolation(rawProgress);
-
-            if (mBaseDrawable != null) {
-                drawTranslatedBase(canvas);
-            }
-
-            mColorMatSaturation.setSaturation(progressSaturation);
-            ColorMatrixColorFilter colorMatFilter = new ColorMatrixColorFilter(mColorMatSaturation);
-            mPaint.setAlpha((int) (progressOpacity * 255.0f));
-            mPaint.setColorFilter(colorMatFilter);
-
-            if (!mTargetDrawable.getBitmap().isRecycled()) {
-                canvas.drawBitmap(mTargetDrawable.getBitmap(), 0, 0, mPaint);
-            }
-
-            if (rawProgress >= 1.0f) {
-                mAnimating = false;
-                if (mBaseDrawable != null) {
-                    mBaseDrawable.setIsDisplayed(false);
+        synchronized (mDrawLock) {
+            if (mAnimating) {
+                if (mStartTime < 0) {
+                    mStartTime = SystemClock.uptimeMillis();
                 }
-                mBaseDrawable = mTargetDrawable;
-            } else {
-                invalidateSelf();
+
+                final float rawProgress = Math.min(1.0f,
+                        ((float) (SystemClock.uptimeMillis() - mStartTime)) / ((float) mDuration));
+
+                // As per the Material Design spec, animation goes into 3 steps. Ranging from 0 to 100,
+                // opacity is full at 50, exposure (gamma + black output) at 75, and saturation at 100.
+                // For performance, we only do the saturation and opacity transition
+                final float inputOpacity = Math.min(1.0f, rawProgress * (1.0f / 0.5f));
+                // final float inputExposure = Math.min(1.0f, rawProgress * (1.0f / 0.75f));
+
+                final float progressOpacity = mInterpolator.getInterpolation(inputOpacity);
+                // final float progressExposure = 1.0f - mInterpolator.getInterpolation(inputExposure);
+                final float progressSaturation = mInterpolator.getInterpolation(rawProgress);
+
+                if (mBaseDrawable != null) {
+                    drawTranslatedBase(canvas);
+                }
+
+                mColorMatSaturation.setSaturation(progressSaturation);
+                ColorMatrixColorFilter colorMatFilter = new ColorMatrixColorFilter(mColorMatSaturation);
+                mPaint.setAlpha((int) (progressOpacity * 255.0f));
+                mPaint.setColorFilter(colorMatFilter);
+
+                if (!mTargetDrawable.getBitmap().isRecycled()) {
+                    canvas.drawBitmap(mTargetDrawable.getBitmap(), 0, 0, mPaint);
+                }
+
+                if (rawProgress >= 1.0f) {
+                    mAnimating = false;
+                    if (mBaseDrawable != null) {
+                        mBaseDrawable.setIsDisplayed(false);
+                    }
+                    mBaseDrawable = mTargetDrawable;
+                } else {
+                    invalidateSelf();
+                }
+            } else if (mBaseDrawable != null) {
+                if (!mBaseDrawable.getBitmap().isRecycled()) {
+                    mBaseDrawable.draw(canvas);
+                }
             }
-        } else if (mBaseDrawable != null) {
-            if (!mBaseDrawable.getBitmap().isRecycled()) {
-                mBaseDrawable.draw(canvas);
-            }
-        }
 
-        if (mShowOfflineOverdraw) {
-            int alpha = (int) Math.min(160, (SystemClock.uptimeMillis() - mOfflineStartTime) / 4);
-            canvas.drawColor(0x00888888 | ((alpha & 0xFF) << 24));
+            if (mShowOfflineOverdraw) {
+                int alpha = (int) Math.min(160, (SystemClock.uptimeMillis() - mOfflineStartTime) / 4);
+                canvas.drawColor(0x00888888 | ((alpha & 0xFF) << 24));
 
-            mPaint.setAlpha(alpha * 255 / 160);
-            canvas.drawBitmap(mOfflineDrawable.getBitmap(),
-                    getBounds().centerX() - mOfflineDrawable.getIntrinsicWidth() / 2,
-                    getBounds().centerY() - mOfflineDrawable.getIntrinsicHeight() / 2,
-                    mPaint);
-            mOfflineDrawable.draw(canvas);
+                mPaint.setAlpha(alpha * 255 / 160);
+                canvas.drawBitmap(mOfflineDrawable.getBitmap(),
+                        getBounds().centerX() - mOfflineDrawable.getIntrinsicWidth() / 2,
+                        getBounds().centerY() - mOfflineDrawable.getIntrinsicHeight() / 2,
+                        mPaint);
+                mOfflineDrawable.draw(canvas);
 
-            if (alpha != 160) {
-                invalidateSelf();
+                if (alpha != 160) {
+                    invalidateSelf();
+                }
             }
         }
     }
