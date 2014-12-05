@@ -58,6 +58,9 @@ public class AlbumArtHelper {
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
             TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
 
+    private static final Object mPauseWorkLock = new Object();
+    private static boolean mPauseWork = false;
+
 
     public interface AlbumArtListener {
         public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request);
@@ -100,6 +103,15 @@ public class AlbumArtHelper {
         protected BackgroundResult doInBackground(BoundEntity... params) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             mEntity = params[0];
+
+            // Wait here if work is paused and the task is not cancelled
+            synchronized (mPauseWorkLock) {
+                while (mPauseWork && !isCancelled()) {
+                    try {
+                        mPauseWorkLock.wait();
+                    } catch (InterruptedException ignored) {}
+                }
+            }
 
             if (mEntity == null || isCancelled()) {
                 return null;
@@ -197,5 +209,14 @@ public class AlbumArtHelper {
         }
 
         return task;
+    }
+
+    public static void setPauseWork(boolean pause) {
+        synchronized (mPauseWorkLock) {
+            mPauseWork = pause;
+            if (!mPauseWork) {
+                mPauseWorkLock.notifyAll();
+            }
+        }
     }
 }
