@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.graphics.Palette;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,6 +38,7 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SeekBar;
 
 import org.omnirom.music.app.adapters.PlaybackQueueAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
@@ -248,12 +250,16 @@ public class PlaybackQueueActivity extends AppActivity {
         private static final int PLAYSTATE_ARG1_BUFFERING = 1;
 
         private Handler mHandler;
+        private boolean mLockSeekBarUpdate;
         private FrameLayout mRootView;
         private ListView mListView;
         private PlaybackQueueAdapter mAdapter;
         private View.OnClickListener mPlayFabClickListener;
         private View.OnClickListener mNextClickListener;
         private View.OnClickListener mPreviousClickListener;
+        private SeekBar.OnSeekBarChangeListener mSeekListener;
+        private View.OnClickListener mRepeatClickListener;
+        private View.OnClickListener mLikeClickListener;
 
         public SimpleFragment() {
             mHandler = new Handler() {
@@ -307,6 +313,55 @@ public class PlaybackQueueActivity extends AppActivity {
                     PlaybackProxy.previous();
                 }
             };
+
+            mSeekListener = new SeekBar.OnSeekBarChangeListener() {
+                private int mStartProgress;
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    mLockSeekBarUpdate = true;
+                    mStartProgress = seekBar.getProgress();
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    mLockSeekBarUpdate = false;
+                    int endProgress = seekBar.getProgress();
+
+                    if (endProgress != mStartProgress) {
+                        PlaybackProxy.seek(endProgress);
+                    }
+                }
+            };
+
+            mRepeatClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean currentMode = PlaybackProxy.isRepeatMode();
+                    boolean newMode = !currentMode;
+
+                    PlaybackProxy.setRepeatMode(newMode);
+                    v.animate().rotationBy(-360).setDuration(600).start();
+
+                    if (newMode) {
+                        ((ImageView) v).setImageResource(R.drawable.ic_replay);
+                    } else {
+                        ((ImageView) v).setImageResource(R.drawable.ic_replay_gray);
+                    }
+                }
+            };
+
+            mLikeClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            };
         }
 
         @Override
@@ -315,9 +370,6 @@ public class PlaybackQueueActivity extends AppActivity {
             mRootView = (FrameLayout) inflater.inflate(R.layout.fragment_playback_queue, container,
                     false);
             mListView = (ListView) mRootView.findViewById(R.id.lvPlaybackQueue);
-
-            mAdapter = new PlaybackQueueAdapter(mPlayFabClickListener, mNextClickListener, mPreviousClickListener);
-            mListView.setAdapter(mAdapter);
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -333,6 +385,11 @@ public class PlaybackQueueActivity extends AppActivity {
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
+
+            mAdapter = new PlaybackQueueAdapter((FragmentActivity) getActivity(),
+                    mPlayFabClickListener, mNextClickListener, mPreviousClickListener,
+                    mSeekListener, mRepeatClickListener, mLikeClickListener);
+            mListView.setAdapter(mAdapter);
 
             // Attach this fragment as Playback Listener
             PlaybackProxy.addCallback(mPlaybackListener);
@@ -355,6 +412,11 @@ public class PlaybackQueueActivity extends AppActivity {
         public void updateQueueLayout() {
             final List<Song> songs = new ArrayList<Song>(PlaybackProxy.getCurrentPlaybackQueue());
             mAdapter.setPlaybackQueue(songs);
+
+            final int trackIndex = PlaybackProxy.getCurrentTrackIndex();
+            if (trackIndex >= 0) {
+                mListView.smoothScrollToPosition(trackIndex + 1);
+            }
         }
 
         public void updateSeekbar() {
@@ -365,7 +427,7 @@ public class PlaybackQueueActivity extends AppActivity {
                 if (state == PlaybackService.STATE_PLAYING
                         || state == PlaybackService.STATE_PAUSING
                         || state == PlaybackService.STATE_PAUSED) {
-                    if (!tag.sbSeek.isPressed()) {
+                    if (!mLockSeekBarUpdate) {
                         tag.sbSeek.setMax(PlaybackProxy.getCurrentTrackLength());
                         tag.sbSeek.setProgress(PlaybackProxy.getCurrentTrackPosition());
                     }

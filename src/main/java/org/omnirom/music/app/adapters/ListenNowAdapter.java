@@ -124,7 +124,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                                 final ViewHolder holder = (ViewHolder) view.getTag();
                                 holder.backColor = item.getRgb();
                                 Utils.setViewBackground(holder.llRoot, transition);
-                                transition.startTransition(1000);
+                                transition.startTransition(500);
                             }
                         });
                     }

@@ -6,8 +6,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 21
-        versionCode 2
-        versionName "0.1.1-BETA"
+        versionCode 3
+        versionName "0.1.2-BETA"
         renderscriptTargetApi = 18
     }
     buildTypes {
@@ -41,4 +41,5 @@ dependencies {
     compile files('src/main/libs/cwac-mediarouter-0.1.2.jar')
     compile files('src/main/libs/calligraphy-1.1.0.jar')
     compile files('src/main/libs/sentry-1.1.0.jar')
+    compile files('src/main/libs/sentry-1.1.4.jar')
 }

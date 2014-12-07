@@ -16,11 +16,11 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.res.Resources;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
@@ -47,13 +48,31 @@ public class PlaybackQueueAdapter extends BaseAdapter {
     private View.OnClickListener mPlayFabClickListener;
     private View.OnClickListener mNextClickListener;
     private View.OnClickListener mPreviousClickListener;
+    private View.OnClickListener mRepeatClickListener;
+    private View.OnClickListener mLikeClickListener;
+    private View.OnClickListener mOverflowClickListener;
+    private SeekBar.OnSeekBarChangeListener mSeekListener;
 
-    public PlaybackQueueAdapter(View.OnClickListener playFabClickListener,
+    public PlaybackQueueAdapter(final FragmentActivity context,
+                                View.OnClickListener playFabClickListener,
                                 View.OnClickListener nextClickListener,
-                                View.OnClickListener previousClickListener) {
+                                View.OnClickListener previousClickListener,
+                                SeekBar.OnSeekBarChangeListener seekListener,
+                                View.OnClickListener repeatClickListener,
+                                View.OnClickListener likeClickListener) {
         mPlayFabClickListener = playFabClickListener;
         mNextClickListener = nextClickListener;
         mPreviousClickListener = previousClickListener;
+        mSeekListener = seekListener;
+        mRepeatClickListener = repeatClickListener;
+        mLikeClickListener = likeClickListener;
+        mOverflowClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewHolder tag = (ViewHolder) v.getTag();
+                Utils.showCurrentSongOverflow(context, v, tag.song);
+            }
+        };
     }
 
     public ViewHolder getCurrentTrackTag() {
@@ -127,23 +146,39 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             tag.vRoot.setClickable(false);
 
             if (isCurrent) {
+                // Lookup views
                 tag.sbSeek = (SeekBar) convertView.findViewById(R.id.sbSeek);
                 tag.btnNext = (ImageView) convertView.findViewById(R.id.btnForward);
                 tag.btnPrevious = (ImageView) convertView.findViewById(R.id.btnPrevious);
-
+                tag.btnRepeat = (ImageView) convertView.findViewById(R.id.btnRepeat);
+                tag.btnThumbs = (ImageView) convertView.findViewById(R.id.btnThumbs);
+                tag.btnOverflow = (ImageView) convertView.findViewById(R.id.btnOverflow);
                 tag.fabPlay = (FloatingActionButton) convertView.findViewById(R.id.fabPlay);
-                tag.fabPlay.setFixupInset(false);
 
+                // Setup some initial states
+                if (PlaybackProxy.isRepeatMode()) {
+                    tag.btnRepeat.setImageResource(R.drawable.ic_replay);
+                } else {
+                    tag.btnRepeat.setImageResource(R.drawable.ic_replay_gray);
+                }
+                tag.btnOverflow.setTag(tag);
+
+                // Play FAB drawable
+                tag.fabPlay.setFixupInset(false);
                 tag.fabPlayDrawable = new PlayPauseDrawable(res, 1.2f, 1.1f);
                 tag.fabPlayDrawable.setYOffset(6);
                 tag.fabPlayDrawable.setColor(res.getColor(R.color.white));
                 updatePlaystate(tag.fabPlayDrawable);
-
                 tag.fabPlay.setImageDrawable(tag.fabPlayDrawable);
 
+                // Click listeners
                 tag.fabPlay.setOnClickListener(mPlayFabClickListener);
                 tag.btnPrevious.setOnClickListener(mPreviousClickListener);
                 tag.btnNext.setOnClickListener(mNextClickListener);
+                tag.sbSeek.setOnSeekBarChangeListener(mSeekListener);
+                tag.btnRepeat.setOnClickListener(mRepeatClickListener);
+                tag.btnThumbs.setOnClickListener(mLikeClickListener);
+                tag.btnOverflow.setOnClickListener(mOverflowClickListener);
             }
 
             convertView.setTag(tag);
@@ -152,6 +187,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
         }
 
         tag.isCurrent = isCurrent;
+        tag.song = item;
 
         if (isCurrent) {
             mCurrentTrackTag = tag;
@@ -222,5 +258,9 @@ public class PlaybackQueueAdapter extends BaseAdapter {
         public PlayPauseDrawable fabPlayDrawable;
         public ImageView btnNext;
         public ImageView btnPrevious;
+        public ImageView btnRepeat;
+        public ImageView btnThumbs;
+        public ImageView btnOverflow;
+        public Song song;
     }
 }

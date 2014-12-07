@@ -22,6 +22,8 @@ import android.util.Log;
 
 import com.joshdholtz.sentry.Sentry;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
@@ -44,25 +46,30 @@ public class OmniMusic extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Sentry.init(this, "http://devops.fastbootmobile.com/sentry",
-                "http://daeeb2e097984abd860bbe798e82dea6:758feef22acb43bd9731212a0e01c424@devops.fastbootmobile.com/sentry/4");
         Sentry.setCaptureListener(new Sentry.SentryEventCaptureListener() {
             @Override
             public Sentry.SentryEventBuilder beforeCapture(Sentry.SentryEventBuilder sentryEventBuilder) {
-                Map<String, String> tags = new HashMap<String, String>();
-                tags.put("OS", "Android " + Build.VERSION.RELEASE);
-                tags.put("OSCodename", Build.VERSION.CODENAME);
-                tags.put("Device", Build.DEVICE);
-                tags.put("Model", Build.MODEL);
-                tags.put("Manufacturer", Build.MANUFACTURER);
-                tags.put("AppVersionCode", String.valueOf(BuildConfig.VERSION_CODE));
-                tags.put("AppVersionName", BuildConfig.VERSION_NAME);
-                tags.put("AppFlavor", BuildConfig.FLAVOR);
-                sentryEventBuilder.setTags(tags);
+                JSONObject tags = sentryEventBuilder.getTags();
+                try {
+                    tags.put("OS", "Android " + Build.VERSION.RELEASE);
+                    tags.put("OSCodename", Build.VERSION.CODENAME);
+                    tags.put("Device", Build.DEVICE);
+                    tags.put("Model", Build.MODEL);
+                    tags.put("Manufacturer", Build.MANUFACTURER);
+                    tags.put("AppVersionCode", String.valueOf(BuildConfig.VERSION_CODE));
+                    tags.put("AppVersionName", BuildConfig.VERSION_NAME);
+                    tags.put("AppFlavor", BuildConfig.FLAVOR);
+                } catch (JSONException e) {
+                    Log.e(TAG, "Failed to put a tag into Sentry", e);
+                }
+
                 sentryEventBuilder.addModule("app", BuildConfig.VERSION_NAME);
                 return sentryEventBuilder;
             }
         });
+        Sentry.init(this, "http://devops.fastbootmobile.com/sentry",
+                "http://daeeb2e097984abd860bbe798e82dea6:758feef22acb43bd9731212a0e01c424@devops.fastbootmobile.com/sentry/4");
+
 
         // Setup the plugins system
         ProviderAggregator.getDefault().setContext(getApplicationContext());

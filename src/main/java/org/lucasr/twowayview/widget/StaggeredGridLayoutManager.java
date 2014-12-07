@@ -104,7 +104,8 @@ public class StaggeredGridLayoutManager extends GridLayoutManager {
     int getLaneSpanForPosition(int position) {
         final StaggeredItemEntry entry = (StaggeredItemEntry) getItemEntryForPosition(position);
         if (entry == null) {
-            throw new IllegalStateException("Could not find span for position " + position);
+            // throw new IllegalStateException("Could not find span for position " + position);
+            return 1;
         }
 
         return entry.span;

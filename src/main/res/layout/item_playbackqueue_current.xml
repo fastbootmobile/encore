@@ -62,7 +62,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/ivOverflow"
+                android:id="@+id/btnOverflow"
                 android:src="@drawable/ic_more_vert_light"
                 android:layout_gravity="bottom"
                 android:clickable="true"
@@ -100,7 +100,6 @@
                 android:id="@+id/btnRepeat"
                 android:src="@drawable/ic_replay_gray"
                 android:scaleType="centerInside"
-                android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:contentDescription="@string/repeat"/>
 
