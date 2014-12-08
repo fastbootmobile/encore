@@ -20,6 +20,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -43,10 +44,12 @@ public class SearchActivity extends AppActivity {
     private static final String TAG = "SearchActivity";
     private static final String TAG_FRAGMENT = "fragment_inner";
     private SearchFragment mActiveFragment;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
+        mHandler = new Handler();
 
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_search);
@@ -97,25 +100,31 @@ public class SearchActivity extends AppActivity {
         handleIntent(intent);
     }
 
-    private void handleIntent(Intent intent) {
+    private void handleIntent(final Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY).trim();
-            mActiveFragment.resetResults();
-            mActiveFragment.setArguments(query);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    String query = intent.getStringExtra(SearchManager.QUERY).trim();
+                    mActiveFragment.resetResults();
+                    mActiveFragment.setArguments(query);
 
-            List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-            for (ProviderConnection providerConnection : providers) {
-                try {
-                    final IMusicProvider binder = providerConnection.getBinder();
-                    if (binder != null) {
-                        binder.startSearch(query);
-                    } else {
-                        Log.e(TAG, "Null binder, cannot search on " + providerConnection.getIdentifier());
+                    List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+                    for (ProviderConnection providerConnection : providers) {
+                        try {
+                            final IMusicProvider binder = providerConnection.getBinder();
+                            if (binder != null) {
+                                binder.startSearch(query);
+                            } else {
+                                Log.e(TAG, "Null binder, cannot search on " + providerConnection.getIdentifier());
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot run search on a provider", e);
+                        }
                     }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Cannot run search on a provider", e);
+
                 }
-            }
+            }, 200);
 
         }
 
