@@ -15,15 +15,12 @@
 
 package org.omnirom.music.app;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.content.Context;
-import android.media.AudioManager;
-import android.support.v4.app.FragmentManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.view.Menu;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -31,10 +28,6 @@ import com.balysv.material.drawable.menu.MaterialMenuDrawable;
 import com.balysv.material.drawable.menu.MaterialMenuView;
 
 import org.omnirom.music.app.fragments.SettingsFragment;
-import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.providers.ProviderAggregator;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Activity showing a {@link org.omnirom.music.app.fragments.SettingsFragment} to configure the app
@@ -43,10 +36,17 @@ public class SettingsActivity extends AppActivity {
     private static final String TAG = "SettingsActivity";
     public static final String TAG_FRAGMENT = "fragment_inner";
 
+    private Toolbar mToolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_artist);
+        setContentView(R.layout.activity_settings);
+
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         FragmentManager fm = getSupportFragmentManager();
         SettingsFragment activeFragment = (SettingsFragment) fm.findFragmentByTag(TAG_FRAGMENT);
@@ -57,27 +57,15 @@ public class SettingsActivity extends AppActivity {
                     .add(R.id.container, activeFragment, TAG_FRAGMENT)
                     .commit();
         }
+    }
 
-        // Setup L-style action bar
-        ActionBar actionBar = getActionBar();
-        assert actionBar != null;
-        actionBar.setHomeButtonEnabled(false);
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setDisplayHomeAsUpEnabled(false);
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setCustomView(R.layout.action_bar);
-        MaterialMenuView toggle = (MaterialMenuView) actionBar.getCustomView().findViewById(R.id.action_bar_menu);
-        toggle.setState(MaterialMenuDrawable.IconState.CHECK);
-        toggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    finishAfterTransition();
-                } else {
-                    finish();
-                }
-            }
-        });
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (Utils.hasLollipop()) {
+            finishAfterTransition();
+        } else {
+            finish();
+        }
+        return true;
     }
 }

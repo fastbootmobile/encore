@@ -5,12 +5,10 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.media.AudioManager;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Process;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -88,8 +86,6 @@ public class MainActivity extends AppActivity
     private ProviderConnection mConfiguringProvider;
 
     private int mOrientation;
-
-    private Fragment mActiveFragment;
 
     private Toolbar mToolbar;
 
@@ -366,8 +362,6 @@ public class MainActivity extends AppActivity
         }
         ft.replace(R.id.container, f, tag);
         ft.commit();
-
-        mActiveFragment = f;
 
         ImageCache.getDefault().evictAll();
         System.gc();
