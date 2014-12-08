@@ -377,6 +377,10 @@ public class PlaybackQueueActivity extends AppActivity {
                 }
             });
 
+            if (mAdapter != null) {
+                mListView.setAdapter(mAdapter);
+            }
+
             updateQueueLayout();
 
             return mRootView;
@@ -389,7 +393,10 @@ public class PlaybackQueueActivity extends AppActivity {
             mAdapter = new PlaybackQueueAdapter((FragmentActivity) getActivity(),
                     mPlayFabClickListener, mNextClickListener, mPreviousClickListener,
                     mSeekListener, mRepeatClickListener, mLikeClickListener);
-            mListView.setAdapter(mAdapter);
+
+            if (mListView != null) {
+                mListView.setAdapter(mAdapter);
+            }
 
             // Attach this fragment as Playback Listener
             PlaybackProxy.addCallback(mPlaybackListener);
@@ -416,6 +423,12 @@ public class PlaybackQueueActivity extends AppActivity {
             final int trackIndex = PlaybackProxy.getCurrentTrackIndex();
             if (trackIndex >= 0) {
                 mListView.smoothScrollToPosition(trackIndex + 1);
+            }
+
+            if (songs.size() <= 0) {
+                mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.VISIBLE);
+            } else {
+                mRootView.findViewById(R.id.txtEmptyQueue).setVisibility(View.GONE);
             }
         }
 

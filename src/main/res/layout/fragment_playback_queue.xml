@@ -14,7 +14,8 @@
         android:paddingTop="48dp"
         android:text="@string/empty_playback_queue"
         android:textStyle="italic"
-        android:visibility="gone"/>
+        android:visibility="visible"
+        android:drawableTop="@drawable/logo_none_playing"/>
 
     <ListView
         android:id="@+id/lvPlaybackQueue"
