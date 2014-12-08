@@ -15,17 +15,10 @@
 
 package org.omnirom.music.app;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
-
-import com.balysv.material.drawable.menu.MaterialMenuDrawable;
-import com.balysv.material.drawable.menu.MaterialMenuView;
 
 import org.omnirom.music.app.fragments.SettingsFragment;
 

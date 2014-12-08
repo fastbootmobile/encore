@@ -8,14 +8,6 @@
         <attr name="circular_parallax" format="boolean" />
     </declare-styleable>
 
-    <!-- Material Menu View -->
-    <declare-styleable name="MaterialMenuView">
-        <attr name="mmv_color" format="color"/>
-        <attr name="scale" format="integer"/>
-        <attr name="transformDuration" format="integer"/>
-        <attr name="pressedDuration" format="integer"/>
-    </declare-styleable>
-
     <!-- Two Way View -->
     <declare-styleable name="TwoWayView">
         <attr name="layoutManager" format="string"/>

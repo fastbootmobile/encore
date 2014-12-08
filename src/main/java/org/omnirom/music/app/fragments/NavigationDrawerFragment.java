@@ -27,7 +27,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,10 +36,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.balysv.material.drawable.menu.MaterialMenuDrawable;
-import com.balysv.material.drawable.menu.MaterialMenuView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
