@@ -399,7 +399,7 @@ public class MainActivity extends AppActivity
     public void setContentShadowTop(final float pxTop) {
         View actionBarShadow = findViewById(R.id.action_bar_shadow);
         if (actionBarShadow != null) {
-            actionBarShadow.setTranslationY(pxTop);
+            actionBarShadow.setTranslationY(pxTop + mToolbar.getMeasuredHeight());
         } else {
             mHandler.post(new Runnable() {
                 @Override
