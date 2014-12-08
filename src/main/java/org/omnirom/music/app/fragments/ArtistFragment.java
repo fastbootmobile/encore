@@ -423,6 +423,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         if (mArtist == null) {
             Log.e(TAG, "No artist found in cache for " + artistRef + "!");
+            throw new IllegalStateException("Artist is null in ArtistFragment arguments!");
         }
 
         // Prepare the palette to colorize the FAB
