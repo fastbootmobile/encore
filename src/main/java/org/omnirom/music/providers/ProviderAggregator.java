@@ -52,9 +52,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private static final int PROPAGATION_DELAY = 200;
     private static final boolean DEBUG = false;
 
-    private SearchResult mCachedSearch;
+    private final Map<String, SearchResult> mCachedSearches;
     private List<ILocalCallback> mUpdateCallbacks;
-    final private List<ProviderConnection> mProviders;
+    private final List<ProviderConnection> mProviders;
     private ProviderCache mCache;
     private Handler mHandler;
     private final List<Song> mPostedUpdateSongs = new ArrayList<Song>();
@@ -163,10 +163,11 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * Default constructor
      */
     private ProviderAggregator() {
-        mUpdateCallbacks = new ArrayList<ILocalCallback>();
-        mProviders = new ArrayList<ProviderConnection>();
+        mUpdateCallbacks = new ArrayList<>();
+        mProviders = new ArrayList<>();
         mCache = new ProviderCache();
         mHandler = new Handler();
+        mCachedSearches = new HashMap<>();
     }
 
     public void setContext(Context ctx) {
@@ -953,33 +954,50 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return;
         }
 
-        if (mCachedSearch == null || !mCachedSearch.getQuery().equals(searchResult.getQuery())) {
-            Log.d(TAG, "new search cache");
-            mCachedSearch = searchResult;
+        final String query = searchResult.getQuery();
+
+        if (!mCachedSearches.containsKey(query)) {
+            // No cached results for this query, add this one
+            Log.d(TAG, "New search cache for '" + query + "'");
+            mCachedSearches.put(query, searchResult);
+
+            // Feed results to the callback
+            for (ILocalCallback cb : mUpdateCallbacks) {
+                cb.onSearchResult(searchResult);
+            }
         } else {
-            //if we don't have the same search cache we merge the new and the cache
-            Log.d(TAG, "updating search result");
-            mCachedSearch.setIdentifier(searchResult.getIdentifier());
+            // We already have cached results for this query, add new results
+            Log.d(TAG, "Updating search result for '" + query + "'");
+            SearchResult cachedResults = mCachedSearches.get(query);
+
+            cachedResults.setIdentifier(searchResult.getIdentifier());
             for (String song : searchResult.getSongsList()) {
-                if (!mCachedSearch.getSongsList().contains(song))
-                    mCachedSearch.getSongsList().add(song);
+                if (!cachedResults.getSongsList().contains(song)) {
+                    cachedResults.getSongsList().add(song);
+                }
             }
             for (String artist : searchResult.getArtistList()) {
-                if (!mCachedSearch.getArtistList().contains(artist))
-                    mCachedSearch.getArtistList().add(artist);
+                if (!cachedResults.getArtistList().contains(artist)) {
+                    cachedResults.getArtistList().add(artist);
+                }
             }
             for (String album : searchResult.getAlbumsList()) {
-                if (!mCachedSearch.getAlbumsList().contains(album))
-                    mCachedSearch.getAlbumsList().add(album);
+                if (!cachedResults.getAlbumsList().contains(album)) {
+                    cachedResults.getAlbumsList().add(album);
+                }
             }
             for (String playlist : searchResult.getPlaylistList()) {
-                if (!mCachedSearch.getPlaylistList().contains(playlist))
-                    mCachedSearch.getPlaylistList().add(playlist);
+                if (!cachedResults.getPlaylistList().contains(playlist)) {
+                    cachedResults.getPlaylistList().add(playlist);
+                }
+            }
+
+            // Feed updated results to the callbacks
+            for (ILocalCallback cb : mUpdateCallbacks) {
+                cb.onSearchResult(cachedResults);
             }
         }
-        for (ILocalCallback cb : mUpdateCallbacks) {
-            cb.onSearchResult(mCachedSearch);
-        }
+
     }
 
     /**

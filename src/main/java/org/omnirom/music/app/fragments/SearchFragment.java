@@ -15,6 +15,7 @@
 
 package org.omnirom.music.app.fragments;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -22,6 +23,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
@@ -31,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.ArtistActivity;
@@ -58,17 +59,47 @@ import java.util.List;
 public class SearchFragment extends Fragment implements ILocalCallback {
     private static final String TAG = "SearchFragment";
 
-    private static SearchResult sSearchResult;
+    private static final int MSG_UPDATE_RESULTS = 1;
 
     private SearchAdapter mAdapter;
     private Handler mHandler;
+    private SearchResult mSearchResult;
+    private String mQuery;
 
     /**
      * Default constructor
      */
     public SearchFragment() {
-        ProviderAggregator.getDefault().addUpdateCallback(this);
-        mHandler = new Handler();
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                final Activity act = getActivity();
+
+                if (msg.what == MSG_UPDATE_RESULTS) {
+                    if (act != null) {
+                        getActivity().setTitle("'" + mSearchResult.getQuery() + "'");
+                        getActivity().setProgressBarIndeterminateVisibility(false);
+                    } else {
+                        mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
+                    }
+
+                    if (mAdapter != null) {
+                        if (mSearchResult.getIdentifier() == null) {
+                            Log.e(TAG, "Search provider identifier is null!");
+                        } else {
+                            mAdapter.appendResults(mSearchResult);
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+            }
+        };
+
+        setRetainInstance(true);
+    }
+
+    public void setArguments(String query) {
+        mQuery = query;
     }
 
     @Override
@@ -92,7 +123,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i2, long l) {
-                if (sSearchResult != null) {
+                if (mSearchResult != null) {
                     switch (i) {
                         case SearchAdapter.ARTIST:
                             onArtistClick(i2, view);
@@ -123,13 +154,24 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         });
 
         // Restore previous search results, in case we're rotating
-        // TODO: Persist the adapter instead
-        if (sSearchResult != null) {
-            mAdapter.appendResults(sSearchResult);
+        if (mSearchResult != null) {
+            mAdapter.appendResults(mSearchResult);
             mAdapter.notifyDataSetChanged();
         }
 
         return root;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ProviderAggregator.getDefault().addUpdateCallback(this);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
     }
 
     public void resetResults() {
@@ -221,7 +263,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     private void onPlaylistClick(int i, View v) {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.PLAYLIST, i);
+        final SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.PLAYLIST, i);
         Playlist playlist = aggregator.retrievePlaylist(entry.ref, entry.identifier);
         if (playlist != null) {
             Intent intent = PlaylistActivity.craftIntent(getActivity(), playlist,
@@ -276,34 +318,9 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onSearchResult(final SearchResult searchResult) {
-        Log.d(TAG, "search result received " + searchResult + " (" + searchResult.getIdentifier()
-                + " / " + searchResult.mIdentifier + ")");
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (getActivity() != null) {
-                    getActivity().setTitle("'" + searchResult.getQuery() + "'");
-                    getActivity().setProgressBarIndeterminateVisibility(false);
-                } else {
-                    mHandler.post(this);
-                }
-            }
-        });
-
-        sSearchResult = searchResult;
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mAdapter != null) {
-                    if (searchResult.getIdentifier() == null) {
-                        Log.e(TAG, "Search provider identifier is null!");
-                    } else {
-                        mAdapter.appendResults(searchResult);
-                        mAdapter.notifyDataSetChanged();
-                    }
-                }
-            }
-        });
+        if (searchResult.getQuery().equals(mQuery)) {
+            mSearchResult = searchResult;
+            mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
+        }
     }
 }

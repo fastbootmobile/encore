@@ -253,7 +253,6 @@ public class PlaybackService extends Service
         mIsForeground = false;
 
         // Remove audio hosts from providers
-        Log.e(TAG, "DESTROY -- UNREGISTERING CALLBACKS");
         List<ProviderConnection> connections = PluginsLookup.getDefault().getAvailableProviders();
         for (ProviderConnection pc : connections) {
             IMusicProvider provider = pc.getBinder();

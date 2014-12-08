@@ -17,7 +17,6 @@ package org.omnirom.music.app.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,20 +60,6 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     private List<SearchEntry> mAlbums;
 
     /**
-     * ViewHolder for list items
-     */
-    public static class ViewHolder {
-        public AlbumArtImageView albumArtImageView;
-        public TextView tvTitle;
-        public TextView tvSubtitle;
-        public Object content;
-        public TextView divider;
-        public ImageView ivSource;
-        public View vRoot;
-        public RecyclingBitmapDrawable sourceLogo;
-    }
-
-    /**
      * Class representing search entries
      */
     public class SearchEntry {
@@ -107,22 +92,24 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      * Default constructor
      */
     public SearchAdapter() {
-        mSearchResults = new ArrayList<SearchResult>();
-        mSongs = new ArrayList<SearchEntry>();
-        mArtists = new ArrayList<SearchEntry>();
-        mPlaylists = new ArrayList<SearchEntry>();
-        mAlbums = new ArrayList<SearchEntry>();
+        mSearchResults = new ArrayList<>();
+        mSongs = new ArrayList<>();
+        mArtists = new ArrayList<>();
+        mPlaylists = new ArrayList<>();
+        mAlbums = new ArrayList<>();
     }
 
     /**
      * Clear all the results from the adapter
      */
     public void clear() {
-        mSearchResults.clear();
-        mSongs.clear();
-        mArtists.clear();
-        mPlaylists.clear();
-        mAlbums.clear();
+        synchronized (this) {
+            mSearchResults.clear();
+            mSongs.clear();
+            mArtists.clear();
+            mPlaylists.clear();
+            mAlbums.clear();
+        }
     }
 
     /**
@@ -130,63 +117,71 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public int getGroupCount() {
-        if (mSearchResults.size() > 0) {
-            return COUNT;
-        } else {
-            return 0;
+        synchronized (this) {
+            if (mSearchResults.size() > 0) {
+                return COUNT;
+            } else {
+                return 0;
+            }
         }
     }
 
     /**
-     * Add the results to the current adapter's restults
+     * Add the results to the current adapter's results
+     *
      * @param searchResult The results to append
      */
     public void appendResults(SearchResult searchResult) {
-        mSearchResults.add(searchResult);
+        synchronized (this) {
+            mSearchResults.add(searchResult);
 
-        final ProviderIdentifier id = searchResult.getIdentifier();
+            final ProviderIdentifier id = searchResult.getIdentifier();
 
-        final List<String> songs = searchResult.getSongsList();
-        final List<String> artists = searchResult.getArtistList();
-        final List<String> playlists = searchResult.getPlaylistList();
-        final List<String> albums = searchResult.getAlbumsList();
+            final List<String> songs = searchResult.getSongsList();
+            final List<String> artists = searchResult.getArtistList();
+            final List<String> playlists = searchResult.getPlaylistList();
+            final List<String> albums = searchResult.getAlbumsList();
 
-        for (String song : songs) {
-            mSongs.add(new SearchEntry(song, id));
-        }
+            for (String song : songs) {
+                mSongs.add(new SearchEntry(song, id));
+            }
 
-        for (String artist : artists) {
-            mArtists.add(new SearchEntry(artist, id));
-        }
+            for (String artist : artists) {
+                mArtists.add(new SearchEntry(artist, id));
+            }
 
-        for (String playlist : playlists) {
-            mPlaylists.add(new SearchEntry(playlist, id));
-        }
+            for (String playlist : playlists) {
+                mPlaylists.add(new SearchEntry(playlist, id));
+            }
 
-        for (String album : albums) {
-            mAlbums.add(new SearchEntry(album, id));
+            for (String album : albums) {
+                mAlbums.add(new SearchEntry(album, id));
+            }
         }
     }
 
     /**
      * Returns whether or not the search results contains the provided entity
+     *
      * @param ent The entity to check
      * @return True if the search results contains the entity, false otherwise
      */
     public boolean contains(BoundEntity ent) {
-        SearchEntry compare = new SearchEntry(ent.getRef(), ent.getProvider());
+        synchronized (this) {
+            SearchEntry compare = new SearchEntry(ent.getRef(), ent.getProvider());
 
-        if (ent instanceof Song) {
-            return mSongs.contains(compare);
-        } else if (ent instanceof Artist) {
-            return mArtists.contains(compare);
-        } else if (ent instanceof Album) {
-            return mAlbums.contains(compare);
-        } else if (ent instanceof Playlist) {
-            return mPlaylists.contains(compare);
+            if (ent instanceof Song) {
+                return mSongs.contains(compare);
+            } else if (ent instanceof Artist) {
+                return mArtists.contains(compare);
+            } else if (ent instanceof Album) {
+                return mAlbums.contains(compare);
+            } else if (ent instanceof Playlist) {
+                return mPlaylists.contains(compare);
+            }
+
+            return false;
         }
-
-        return false;
     }
 
     /**
@@ -194,17 +189,15 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public int getChildrenCount(int i) {
-        List children = getGroup(i);
+        synchronized (this) {
+            List children = getGroup(i);
 
-        if (children != null) {
-            if (children.size() == 0) {
-                return 0;
+            if (children != null) {
+                return Math.min(10, children.size());
             } else {
-                return Math.min(10, children.size() + 1);
+                return 0;
             }
         }
-
-        return 0;
     }
 
     /**
@@ -212,16 +205,24 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public List<SearchEntry> getGroup(int i) {
-        if (mSearchResults.size() > 0) {
+        synchronized (this) {
             switch (i) {
-                case ARTIST: return mArtists;
-                case ALBUM: return mAlbums;
-                case SONG: return mSongs;
-                case PLAYLIST: return mPlaylists;
+                case ARTIST:
+                    return mArtists;
+
+                case ALBUM:
+                    return mAlbums;
+
+                case SONG:
+                    return mSongs;
+
+                case PLAYLIST:
+                    return mPlaylists;
+
+                default:
+                    return null;
             }
         }
-
-        return null;
     }
 
     /**
@@ -229,7 +230,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public SearchEntry getChild(int i, int i2) {
-        return getGroup(i).get(i2);
+        synchronized (this) {
+            return getGroup(i).get(i2);
+        }
     }
 
     /**
@@ -245,18 +248,18 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public long getChildId(int i, int i2) {
-        if (i < getGroupCount() && i2 < getChildrenCount(i)) {
-            try {
-                long code = getChild(i, i2).hashCode();
-                Log.e(TAG, "Child " + i + ", " + i2 + ": " + code);
-                return code;
-            } catch (IndexOutOfBoundsException e) {
-                // It's the 'more' item
-                // TODO: Better heuristic for that
-                return -2;
+        synchronized (this) {
+            if (i < getGroupCount() && i2 < getChildrenCount(i)) {
+                try {
+                    return (long) getChild(i, i2).hashCode();
+                } catch (IndexOutOfBoundsException e) {
+                    // It's the 'more' item
+                    // TODO: Better heuristic for that
+                    return -2;
+                }
+            } else {
+                return -1;
             }
-        } else {
-            return -1;
         }
     }
 
@@ -273,38 +276,48 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public View getGroupView(int i, boolean b, View view, ViewGroup parent) {
-        final Context ctx = parent.getContext();
-        assert ctx != null;
-        if (view == null) {
-            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.item_group_separator, parent, false);
-        }
-        TextView textView = (TextView) view.findViewById(R.id.tv_search_separator);
-        int title;
-        switch (i) {
-            case ARTIST:
-                title = R.string.tab_artists;
-                break;
-            case ALBUM:
-                title = R.string.albums;
-                break;
-            case SONG:
-                title = R.string.songs;
-                break;
-            case PLAYLIST:
-                title = R.string.tab_playlists;
-                break;
-            default:
-                throw new RuntimeException("Unknown group index: " + i);
-        }
+        synchronized (this) {
+            final Context ctx = parent.getContext();
+            assert ctx != null;
 
-        textView.setText(title);
-        if (getChildrenCount(i) == 0) {
-            view.setVisibility(View.GONE);
-        } else {
-            view.setVisibility(View.VISIBLE);
+            GroupViewHolder holder;
+
+            if (view == null) {
+                LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                view = inflater.inflate(R.layout.item_group_separator, parent, false);
+                holder = new GroupViewHolder();
+                holder.tvSearchSeparator = (TextView) view.findViewById(R.id.tv_search_separator);
+                view.setTag(holder);
+            } else {
+                holder = (GroupViewHolder) view.getTag();
+            }
+
+            int title;
+            switch (i) {
+                case ARTIST:
+                    title = R.string.tab_artists;
+                    break;
+                case ALBUM:
+                    title = R.string.albums;
+                    break;
+                case SONG:
+                    title = R.string.songs;
+                    break;
+                case PLAYLIST:
+                    title = R.string.tab_playlists;
+                    break;
+                default:
+                    throw new RuntimeException("Unknown group index: " + i);
+            }
+
+            holder.tvSearchSeparator.setText(title);
+            if (getChildrenCount(i) == 0) {
+                view.setVisibility(View.GONE);
+            } else {
+                view.setVisibility(View.VISIBLE);
+            }
+            return view;
         }
-        return view;
     }
 
     /**
@@ -312,61 +325,64 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public View getChildView(int i, int i2, boolean b, View root, ViewGroup parent) {
-        final Context ctx = parent.getContext();
-        assert ctx != null;
-        if (root == null) {
-            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.item_search_element, parent, false);
-            ViewHolder holder = new ViewHolder();
-            holder.albumArtImageView = (AlbumArtImageView) root.findViewById(R.id.ivCover);
-            holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
-            holder.tvSubtitle = (TextView) root.findViewById(R.id.tvSubTitle);
-            holder.divider = (TextView) root.findViewById(R.id.divider);
-            holder.ivSource = (ImageView) root.findViewById(R.id.ivSource);
-            holder.vRoot = root;
-            root.setTag(holder);
-        }
-
-        final ViewHolder tag = (ViewHolder) root.getTag();
-        tag.albumArtImageView.setDefaultArt();
-
-        if (i2 == getChildrenCount(i) - 1) {
-            tag.albumArtImageView.setVisibility(View.INVISIBLE);
-            tag.ivSource.setVisibility(View.GONE);
-            tag.tvTitle.setText(R.string.more);
-            tag.tvSubtitle.setText(null);
-
-            // TODO: More is not working for now, we'll see that later, so hide it
-            tag.vRoot.setVisibility(View.GONE);
-        } else {
-            tag.vRoot.setVisibility(View.VISIBLE);
-            tag.albumArtImageView.setVisibility(View.VISIBLE);
-            tag.ivSource.setVisibility(View.VISIBLE);
-
-            switch (i) {
-                case ARTIST:
-                    updateArtistTag(i2, tag);
-                    break;
-                case ALBUM:
-                    updateAlbumTag(i2, tag);
-                    break;
-                case SONG:
-                    updateSongTag(i2, tag);
-                    break;
-                case PLAYLIST:
-                    updatePlaylistTag(i2, tag);
-                    break;
-                default:
-                    Log.e(TAG, "Unknown group " + i);
-                    break;
+        synchronized (this) {
+            final Context ctx = parent.getContext();
+            assert ctx != null;
+            if (root == null) {
+                LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                root = inflater.inflate(R.layout.item_search_element, parent, false);
+                ViewHolder holder = new ViewHolder();
+                holder.albumArtImageView = (AlbumArtImageView) root.findViewById(R.id.ivCover);
+                holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
+                holder.tvSubtitle = (TextView) root.findViewById(R.id.tvSubTitle);
+                holder.divider = (TextView) root.findViewById(R.id.divider);
+                holder.ivSource = (ImageView) root.findViewById(R.id.ivSource);
+                holder.vRoot = root;
+                root.setTag(holder);
             }
+
+            final ViewHolder tag = (ViewHolder) root.getTag();
+            tag.albumArtImageView.setDefaultArt();
+
+            if (i2 == getChildrenCount(i) - 1) {
+                tag.albumArtImageView.setVisibility(View.INVISIBLE);
+                tag.ivSource.setVisibility(View.GONE);
+                tag.tvTitle.setText(R.string.more);
+                tag.tvSubtitle.setText(null);
+
+                // TODO: More is not working for now, we'll see that later, so hide it
+                tag.vRoot.setVisibility(View.GONE);
+            } else {
+                tag.vRoot.setVisibility(View.VISIBLE);
+                tag.albumArtImageView.setVisibility(View.VISIBLE);
+                tag.ivSource.setVisibility(View.VISIBLE);
+
+                switch (i) {
+                    case ARTIST:
+                        updateArtistTag(i2, tag);
+                        break;
+                    case ALBUM:
+                        updateAlbumTag(i2, tag);
+                        break;
+                    case SONG:
+                        updateSongTag(i2, tag);
+                        break;
+                    case PLAYLIST:
+                        updatePlaylistTag(i2, tag);
+                        break;
+                    default:
+                        Log.e(TAG, "Unknown group " + i);
+                        break;
+                }
+            }
+            return root;
         }
-        return root;
     }
 
     /**
      * Updates the tag fields considering the entry is a song
-     * @param i The item index
+     *
+     * @param i   The item index
      * @param tag The tag of the view
      */
     private void updateSongTag(int i, ViewHolder tag) {
@@ -393,7 +409,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
     /**
      * Updates the tag fields considering the entry is an artist
-     * @param i The item index
+     *
+     * @param i   The item index
      * @param tag The tag of the view
      */
     private void updateArtistTag(int i, ViewHolder tag) {
@@ -417,7 +434,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
     /**
      * Updates the tag fields considering the entry is an album
-     * @param i The item index
+     *
+     * @param i   The item index
      * @param tag The tag of the view
      */
     private void updateAlbumTag(int i, ViewHolder tag) {
@@ -446,7 +464,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
     /**
      * Updates the tag fields considering the entry is a playlist
-     * @param i The item index
+     *
+     * @param i   The item index
      * @param tag The tag of the view
      */
     private void updatePlaylistTag(int i, ViewHolder tag) {
@@ -472,6 +491,30 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public boolean isChildSelectable(int i, int i2) {
-        return mSearchResults.size() > 0 && getGroup(i) != null;
+        synchronized (this) {
+            return mSearchResults.size() > 0 && getGroup(i) != null;
+        }
+    }
+
+
+    /**
+     * ViewHolder for list items
+     */
+    public static class ViewHolder {
+        public AlbumArtImageView albumArtImageView;
+        public TextView tvTitle;
+        public TextView tvSubtitle;
+        public Object content;
+        public TextView divider;
+        public ImageView ivSource;
+        public View vRoot;
+        public RecyclingBitmapDrawable sourceLogo;
+    }
+
+    /**
+     * ViewHolder for group headers
+     */
+    private static class GroupViewHolder {
+        public TextView tvSearchSeparator;
     }
 }

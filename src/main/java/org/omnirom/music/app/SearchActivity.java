@@ -19,10 +19,8 @@ import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
@@ -30,15 +28,12 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.SearchView;
 
-import org.omnirom.music.app.fragments.DspProvidersFragment;
 import org.omnirom.music.app.fragments.SearchFragment;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.List;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Activity allowing display of search results through
@@ -54,7 +49,6 @@ public class SearchActivity extends AppActivity {
         super.onCreate(savedInstance);
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
         setContentView(R.layout.activity_search);
 
         FragmentManager fm = getSupportFragmentManager();
@@ -65,12 +59,13 @@ public class SearchActivity extends AppActivity {
                     .add(R.id.search_container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
         }
-        handleIntent(getIntent());
 
         final ActionBar actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        handleIntent(getIntent());
     }
 
     @Override
@@ -105,10 +100,8 @@ public class SearchActivity extends AppActivity {
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY).trim();
-
-            if (mActiveFragment != null) {
-                mActiveFragment.resetResults();
-            }
+            mActiveFragment.resetResults();
+            mActiveFragment.setArguments(query);
 
             List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
             for (ProviderConnection providerConnection : providers) {

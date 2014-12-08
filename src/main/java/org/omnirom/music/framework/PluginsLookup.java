@@ -150,13 +150,11 @@ public class PluginsLookup {
 
     public void incPlaybackUsage() {
         mServiceUsage++;
-        Log.e(TAG, "Service usage: " + mServiceUsage);
         connectPlayback();
     }
 
     public void decPlaybackUsage() {
         mServiceUsage--;
-        Log.e(TAG, "Service usage: " + mServiceUsage);
 
         if (mServiceUsage == 0) {
             releasePlaybackServiceIfPossible();

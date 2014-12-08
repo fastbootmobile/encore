@@ -172,7 +172,12 @@ public class ArtistActivity extends AppActivity {
                 }
             });
         } else {
-            mActiveFragment.notifySizeUnlimited();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mActiveFragment.notifySizeUnlimited();
+                }
+            });
         }
     }
 

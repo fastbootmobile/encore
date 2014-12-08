@@ -95,8 +95,7 @@
         <!-- Search Activity -->
         <activity
             android:name=".SearchActivity"
-            android:label="@string/search_hint"
-            android:launchMode="singleTask">
+            android:label="@string/search_hint">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -151,14 +150,6 @@
             android:label="@string/title_activity_automix_create_static"
             android:launchMode="singleTask">
         </activity>
-
-        <!-- ACRA Crash Reporting -->
-        <activity android:name="org.acra.CrashReportDialog"
-            android:theme="@android:style/Theme.Holo.Dialog"
-            android:launchMode="singleInstance"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true" />
-
 
     </application>
 
