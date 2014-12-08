@@ -14,9 +14,8 @@
         android:icon="@drawable/ic_action_search"
         android:title="@string/search"
         app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="ifRoom|collapseActionView"
+        app:showAsAction="ifRoom"
         />
-
 
     <item
         android:id="@+id/action_sound_effects"

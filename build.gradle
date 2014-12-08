@@ -1,20 +1,44 @@
 apply plugin: 'com.android.application'
 
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyyMMddHHmm')
+    return formattedDate
+}
+
 android {
     compileSdkVersion 21
     buildToolsVersion '21.1.1'
+
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 21
         versionCode 3
-        versionName "0.1.2-BETA"
+        versionName "0.1.2"
         renderscriptTargetApi = 18
     }
+
     buildTypes {
+        debug {
+
+        }
         release {
             // minifyEnabled = false
         }
     }
+
+    productFlavors {
+        production {
+            versionName defaultConfig.versionName
+        }
+        dogfood {
+            versionName defaultConfig.versionName + "-dogfood-" + getDate()
+        }
+        dev_xplod {
+            versionName defaultConfig.versionName + "-dev-xplod-" + getDate()
+        }
+    }
+
     sourceSets.main {
         jniLibs.srcDir 'src/main/libs'
         jni.srcDirs = []
@@ -23,7 +47,6 @@ android {
         // provided by providerlib already
         exclude 'lib/armeabi-v7a/libc++_shared.so'
     }
-
 }
 
 dependencies {
@@ -38,8 +61,6 @@ dependencies {
     compile files('src/main/libs/google-play-services.jar')
     compile project(':google_play_services')
     compile files('src/main/libs/java_websocket.jar')
-    compile files('src/main/libs/cwac-mediarouter-0.1.2.jar')
     compile files('src/main/libs/calligraphy-1.1.0.jar')
-    compile files('src/main/libs/sentry-1.1.0.jar')
     compile files('src/main/libs/sentry-1.1.4.jar')
 }

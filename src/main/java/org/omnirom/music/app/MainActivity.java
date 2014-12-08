@@ -440,15 +440,6 @@ public class MainActivity extends AppActivity
             searchView.setSearchableInfo(searchManager
                     .getSearchableInfo(getComponentName()));
 
-            int searchTextViewId = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-            TextView searchTextView = (TextView) searchView.findViewById(searchTextViewId);
-            searchTextView.setHintTextColor(getResources().getColor(R.color.white));
-
-            // Google, why is searchView using a Gingerbread-era enforced icon?
-            int searchImgId = getResources().getIdentifier("android:id/search_button", null, null);
-            ImageView v = (ImageView) searchView.findViewById(searchImgId);
-            v.setImageResource(R.drawable.ic_action_search);
-
             // Setup cast button on 4.2+
             MenuItem castMenu = menu.findItem(R.id.action_cast);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
