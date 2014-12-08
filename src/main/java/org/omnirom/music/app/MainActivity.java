@@ -15,7 +15,10 @@ import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.MediaRouteActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +28,6 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.commonsware.cwac.mediarouter.MediaRouteActionProvider;
 import com.williammora.snackbar.Snackbar;
 
 import org.omnirom.music.app.fragments.AutomixFragment;
@@ -89,6 +91,8 @@ public class MainActivity extends AppActivity
 
     private Fragment mActiveFragment;
 
+    private Toolbar mToolbar;
+
 
     public MainActivity() {
         mHandler = new Handler();
@@ -99,7 +103,8 @@ public class MainActivity extends AppActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -115,9 +120,6 @@ public class MainActivity extends AppActivity
         mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
         mPlayingBarLayout.setWrapped(true, false);
 
-        // Control MUSIC volume with the volume buttons by default now
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
         // Setup Cast button
         mCastModule = new CastModule(getApplicationContext());
 
@@ -128,6 +130,10 @@ public class MainActivity extends AppActivity
                 lookForUnconfiguredProviders();
             }
         }, 1000);
+    }
+
+    public Toolbar getToolbar() {
+        return mToolbar;
     }
 
     private void lookForUnconfiguredProviders() {
@@ -454,7 +460,7 @@ public class MainActivity extends AppActivity
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 Log.d(TAG, "Showing cast action");
                 MediaRouteActionProvider mediaRouteActionProvider =
-                        (MediaRouteActionProvider) castMenu.getActionProvider();
+                        (MediaRouteActionProvider) MenuItemCompat.getActionProvider(castMenu);
                 mediaRouteActionProvider.setRouteSelector(mCastModule.getSelector());
                 castMenu.setVisible(true);
             } else {

@@ -18,6 +18,7 @@ package org.omnirom.music.app.fragments;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +26,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,6 +42,7 @@ import android.widget.Toast;
 import com.balysv.material.drawable.menu.MaterialMenuDrawable;
 import com.balysv.material.drawable.menu.MaterialMenuView;
 
+import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.NavDrawerAdapter;
 
@@ -70,7 +73,7 @@ public class NavigationDrawerFragment extends Fragment {
     /**
      * Helper component that ties the action bar to the navigation drawer.
      */
-    private MaterialMenuView mDrawerToggle;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
@@ -145,6 +148,13 @@ public class NavigationDrawerFragment extends Fragment {
         return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mFragmentContainerView);
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Forward the new configuration the drawer toggle component.
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
     /**
      * Users of this fragment must call this method to set up the navigation drawer interactions.
      *
@@ -157,52 +167,29 @@ public class NavigationDrawerFragment extends Fragment {
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        // set up the drawer's list view with items and click listener
 
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(false);
-            actionBar.setDisplayShowHomeEnabled(false);
-            actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(false);
-            actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(R.layout.action_bar);
-            mDrawerToggle = (MaterialMenuView) actionBar.getCustomView().findViewById(R.id.action_bar_menu);
-
-            mDrawerToggle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (isDrawerOpen()) {
-                        mDrawerLayout.closeDrawer(mFragmentContainerView);
-                        mDrawerToggle.setState(MaterialMenuDrawable.IconState.ARROW);
-                        mDrawerToggle.animatePressedState(MaterialMenuDrawable.IconState.BURGER);
-                    } else {
-                        mDrawerLayout.openDrawer(mFragmentContainerView);
-                        mDrawerToggle.setState(MaterialMenuDrawable.IconState.BURGER);
-                        mDrawerToggle.animatePressedState(MaterialMenuDrawable.IconState.ARROW);
-                    }
-                }
-            });
-
-            actionBar.getCustomView().findViewById(android.R.id.title).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mDrawerToggle.performClick();
-                }
-            });
-        } else {
-            Log.e(TAG, "There is no action bar!?");
-        }
-
-        // This ties together the the proper interactions
+        // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.
-        DrawerLayout.DrawerListener drawerListener = new DrawerLayout.DrawerListener() {
+        mDrawerToggle = new ActionBarDrawerToggle(
+                getActivity(),                    /* host Activity */
+                mDrawerLayout,                    /* DrawerLayout object */
+                ((MainActivity) getActivity()).getToolbar(),
+                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
+                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+        ) {
             @Override
-            public void onDrawerSlide(View view, float v) {
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                if (!isAdded()) {
+                    return;
+                }
+
+                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
 
             @Override
-            public void onDrawerOpened(View view) {
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
                 if (!isAdded()) {
                     return;
                 }
@@ -217,27 +204,8 @@ public class NavigationDrawerFragment extends Fragment {
                 }
 
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-
-                mDrawerToggle.animateState(MaterialMenuDrawable.IconState.ARROW);
-            }
-
-            @Override
-            public void onDrawerClosed(View view) {
-                if (!isAdded()) {
-                    return;
-                }
-
-                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-
-                mDrawerToggle.animateState(MaterialMenuDrawable.IconState.BURGER);
-            }
-
-            @Override
-            public void onDrawerStateChanged(int i) {
             }
         };
-
-        mDrawerLayout.setDrawerListener(drawerListener);
 
         // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
         // per the navigation drawer design guidelines.
@@ -249,13 +217,11 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout.post(new Runnable() {
             @Override
             public void run() {
-                if (isDrawerOpen()) {
-                    mDrawerToggle.setState(MaterialMenuDrawable.IconState.ARROW);
-                } else {
-                    mDrawerToggle.setState(MaterialMenuDrawable.IconState.BURGER);
-                }
+                mDrawerToggle.syncState();
             }
         });
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
     private void selectItem(final int position) {
@@ -322,28 +288,17 @@ public class NavigationDrawerFragment extends Fragment {
         // showGlobalContextActionBar, which controls the top-left area of the action bar.
         if (mDrawerLayout != null && isDrawerOpen()) {
             inflater.inflate(R.menu.global, menu);
-            showGlobalContextActionBar();
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_cast) {
-            Toast.makeText(getActivity(), "Cast action.", Toast.LENGTH_SHORT).show();
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Per the navigation drawer design guidelines, updates the action bar to show the global app
-     * 'context', rather than just what's in the current screen.
-     */
-    private void showGlobalContextActionBar() {
-        ActionBar actionBar = getActionBar();
-        ((TextView)actionBar.getCustomView().findViewById(android.R.id.title)).setText(R.string.app_name);
     }
 
     private ActionBar getActionBar() {
