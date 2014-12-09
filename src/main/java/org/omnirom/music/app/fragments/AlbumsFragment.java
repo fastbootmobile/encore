@@ -15,7 +15,6 @@
 
 package org.omnirom.music.app.fragments;
 
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -23,7 +22,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -125,8 +123,8 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
      * {@inheritDoc}
      */
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onResume() {
+        super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
         ProviderAggregator.getDefault().registerOfflineModeListener(this);
     }
@@ -135,8 +133,8 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
      * {@inheritDoc}
      */
     @Override
-    public void onDetach() {
-        super.onDetach();
+    public void onPause() {
+        super.onPause();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         ProviderAggregator.getDefault().unregisterOfflineModeListener(this);
     }
@@ -146,7 +144,6 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
      */
     @Override
     public void onSongUpdate(List<Song> s) {
-
     }
 
     /**
@@ -199,6 +196,5 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
                 mAdapter.notifyDataSetChanged();
             }
         });
-
     }
 }

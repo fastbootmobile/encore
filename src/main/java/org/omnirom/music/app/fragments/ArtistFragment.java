@@ -583,9 +583,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
         });
 
-        // Register for updates
-        ProviderAggregator.getDefault().addUpdateCallback(this);
-
         return mRootView;
     }
 
@@ -593,25 +590,26 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
      * {@inheritDoc}
      */
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        ProviderAggregator.getDefault().removeUpdateCallback(this);
-    }
+    public void onResume() {
+        super.onResume();
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+        // Register for updates
         PlaybackProxy.addCallback(mPlaybackCallback);
+        ProviderAggregator.getDefault().addUpdateCallback(this);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void onDetach() {
-        super.onDetach();
-        PlaybackProxy.removeCallback(mPlaybackCallback);
+    public void onPause() {
+        super.onPause();
+
         mHandler.removeCallbacks(mUpdateAlbumsRunnable);
+
+        // Unregister callbacks
+        PlaybackProxy.removeCallback(mPlaybackCallback);
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
     }
 
     /**

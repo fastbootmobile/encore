@@ -15,6 +15,7 @@
 
 package org.omnirom.music.app;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -419,7 +420,7 @@ public class Utils {
         });
     }
 
-    public static void showCurrentSongOverflow(final FragmentActivity context, final View parent,
+    public static void showCurrentSongOverflow(final Context context, final View parent,
                                         final Song song) {
         PopupMenu popupMenu = new PopupMenu(context, parent);
         popupMenu.inflate(R.menu.queue_overflow);
@@ -447,7 +448,12 @@ public class Utils {
 
                     case R.id.menu_add_to_playlist:
                         PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
-                        fragment.show(context.getSupportFragmentManager(), song.getRef());
+                        if (context instanceof FragmentActivity) {
+                            FragmentActivity act = (FragmentActivity) context;
+                            fragment.show(act.getSupportFragmentManager(), song.getRef());
+                        } else {
+                            throw new IllegalArgumentException("Context must be an instance of FragmentActivity");
+                        }
                         break;
 
                     default:

@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,8 +92,6 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
     public ArtistsListFragment() {
         mAdapter = new ArtistsAdapter();
         mHandler = new Handler();
-
-        ProviderAggregator.getDefault().addUpdateCallback(this);
     }
 
     /**
@@ -142,8 +139,17 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
      * {@inheritDoc}
      */
     @Override
-    public void onDetach() {
-        super.onDetach();
+    public void onResume() {
+        super.onResume();
+        ProviderAggregator.getDefault().addUpdateCallback(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
     }
 

@@ -53,8 +53,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
     private View.OnClickListener mOverflowClickListener;
     private SeekBar.OnSeekBarChangeListener mSeekListener;
 
-    public PlaybackQueueAdapter(final FragmentActivity context,
-                                View.OnClickListener playFabClickListener,
+    public PlaybackQueueAdapter(View.OnClickListener playFabClickListener,
                                 View.OnClickListener nextClickListener,
                                 View.OnClickListener previousClickListener,
                                 SeekBar.OnSeekBarChangeListener seekListener,
@@ -70,7 +69,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 ViewHolder tag = (ViewHolder) v.getTag();
-                Utils.showCurrentSongOverflow(context, v, tag.song);
+                Utils.showCurrentSongOverflow(tag.vRoot.getContext(), v, tag.song);
             }
         };
     }

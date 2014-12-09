@@ -287,6 +287,14 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_LISTEN_NOW);
         mainActivity.setContentShadowTop(0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
     }
 
@@ -294,18 +302,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      * {@inheritDoc}
      */
     @Override
-    public void onDetach() {
-        super.onDetach();
-        Log.e(TAG, "onDetach");
+    public void onPause() {
+        super.onPause();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
     }
 
     /**

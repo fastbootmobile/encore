@@ -269,14 +269,18 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         return mRootView;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onResume() {
+        super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
         PlaybackProxy.addCallback(mPlaybackCallback);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
+        PlaybackProxy.removeCallback(mPlaybackCallback);
     }
 
     /**
@@ -285,11 +289,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        ProviderAggregator.getDefault().removeUpdateCallback(this);
-        PlaybackProxy.removeCallback(mPlaybackCallback);
 
         if (mHeroImage != null) {
             mHeroImage.recycle();
+            mHeroImage = null;
         }
     }
 

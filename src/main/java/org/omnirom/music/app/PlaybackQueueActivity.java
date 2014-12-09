@@ -390,13 +390,18 @@ public class PlaybackQueueActivity extends AppActivity {
         public void onAttach(Activity activity) {
             super.onAttach(activity);
 
-            mAdapter = new PlaybackQueueAdapter((FragmentActivity) getActivity(),
-                    mPlayFabClickListener, mNextClickListener, mPreviousClickListener,
-                    mSeekListener, mRepeatClickListener, mLikeClickListener);
+            mAdapter = new PlaybackQueueAdapter(mPlayFabClickListener, mNextClickListener,
+                    mPreviousClickListener, mSeekListener, mRepeatClickListener,
+                    mLikeClickListener);
 
             if (mListView != null) {
                 mListView.setAdapter(mAdapter);
             }
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
 
             // Attach this fragment as Playback Listener
             PlaybackProxy.addCallback(mPlaybackListener);
@@ -406,14 +411,15 @@ public class PlaybackQueueActivity extends AppActivity {
         }
 
         @Override
-        public void onDetach() {
-            super.onDetach();
+        public void onPause() {
+            super.onPause();
 
-            // Detach this fragment as Playback Listener
+            // Remove callback on various places
             PlaybackProxy.removeCallback(mPlaybackListener);
-            mHandler.removeMessages(MSG_UPDATE_SEEKBAR);
-
             ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
+
+            // Stop updating the seekbar
+            mHandler.removeMessages(MSG_UPDATE_SEEKBAR);
         }
 
         public void updateQueueLayout() {

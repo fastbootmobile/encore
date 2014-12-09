@@ -160,13 +160,17 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
             mainActivity.onSectionAttached(MainActivity.SECTION_PLAYLISTS);
             mainActivity.setContentShadowTop(0);
         }
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
+    public void onPause() {
+        super.onPause();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
     }
 

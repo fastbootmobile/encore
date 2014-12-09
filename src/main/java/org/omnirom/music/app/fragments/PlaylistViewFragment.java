@@ -286,17 +286,15 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
+    public void onResume() {
+        super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
         PlaybackProxy.addCallback(mPlaybackCallback);
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-
+    public void onPause() {
+        super.onPause();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         PlaybackProxy.removeCallback(mPlaybackCallback);
     }
