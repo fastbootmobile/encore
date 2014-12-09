@@ -81,7 +81,7 @@ public class PlaybackService extends Service
     private Runnable mNotifyQueueChangedRunnable = new Runnable() {
         @Override
         public void run() {
-            mNotification.setHasNext(mPlaybackQueue.size() > 1);
+            mNotification.setHasNext(mPlaybackQueue.size() > 1 || (mPlaybackQueue.size() > 0 && mRepeatMode));
 
             for (IPlaybackCallback cb : mCallbacks) {
                 try {
@@ -145,7 +145,7 @@ public class PlaybackService extends Service
 
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
-        mCallbacks = new ArrayList<IPlaybackCallback>();
+        mCallbacks = new ArrayList<>();
         mPrefetcher = new Prefetcher(this);
     }
 
@@ -585,6 +585,7 @@ public class PlaybackService extends Service
             mHandler.post(mStartPlaybackRunnable);
 
             hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
+            hasNext = hasNext || (mPlaybackQueue.size() > 0 && mRepeatMode);
             mNotification.setHasNext(hasNext);
         }
 
