@@ -587,6 +587,11 @@ public class PlaybackService extends Service
             hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
             hasNext = hasNext || (mPlaybackQueue.size() > 0 && mRepeatMode);
             mNotification.setHasNext(hasNext);
+        } else if (mRepeatMode && mPlaybackQueue.size() > 0) {
+            mCurrentTrack = 0;
+            mHandler.removeCallbacks(mStartPlaybackRunnable);
+            mHandler.post(mStartPlaybackRunnable);
+            mNotification.setHasNext(true);
         }
 
         final AutoMixManager mixManager = AutoMixManager.getDefault();
@@ -676,28 +681,31 @@ public class PlaybackService extends Service
             public void run() {
                 final Song currentSong = getCurrentSong();
                 if (currentSong != null) {
-                    IMusicProvider provider = PluginsLookup.getDefault().getProvider(currentSong.getProvider()).getBinder();
-                    if (provider != null) {
-                        try {
-                            provider.resume();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot resume", e);
-                        }
-                        mIsResuming = true;
-                        mState = STATE_BUFFERING;
-
-                        for (IPlaybackCallback cb : mCallbacks) {
+                    ProviderConnection conn = PluginsLookup.getDefault().getProvider(currentSong.getProvider());
+                    if (conn != null) {
+                        IMusicProvider provider = conn.getBinder();
+                        if (provider != null) {
                             try {
-                                cb.onSongStarted(true, currentSong);
+                                provider.resume();
                             } catch (RemoteException e) {
-                                Log.e(TAG, "Cannot call playback callback for song start event", e);
+                                Log.e(TAG, "Cannot resume", e);
                             }
-                        }
+                            mIsResuming = true;
+                            mState = STATE_BUFFERING;
 
-                        requestAudioFocus();
-                        mNotification.setPlayPauseAction(false);
-                    } else {
-                        Log.e(TAG, "Provider is null! Can't resume.");
+                            for (IPlaybackCallback cb : mCallbacks) {
+                                try {
+                                    cb.onSongStarted(true, currentSong);
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot call playback callback for song start event", e);
+                                }
+                            }
+
+                            requestAudioFocus();
+                            mNotification.setPlayPauseAction(false);
+                        } else {
+                            Log.e(TAG, "Provider is null! Can't resume.");
+                        }
                     }
                 } else if (mPlaybackQueue.size() > 0) {
                     mHandler.removeCallbacks(mStartPlaybackRunnable);
