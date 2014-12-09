@@ -117,6 +117,14 @@ public class ArtistActivity extends AppActivity {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // Safeguard in case of no animation
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mActiveFragment.notifySizeUnlimited();
+                }
+            }, 500);
+
             getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
                 @Override
                 public void onTransitionStart(Transition transition) {
@@ -152,7 +160,6 @@ public class ArtistActivity extends AppActivity {
 
 
                     mActiveFragment.notifySizeUnlimited();
-
                     getWindow().getEnterTransition().removeListener(this);
                 }
 
