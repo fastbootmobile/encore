@@ -15,24 +15,20 @@
 
 package org.omnirom.music.framework;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
-import android.os.Handler;
 import android.util.Log;
 import android.util.LruCache;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -48,14 +44,14 @@ public class ImageCache {
     private static final ImageCache INSTANCE = new ImageCache();
 
     private static final boolean USE_MEMORY_CACHE = true;
-    private static final int MEMORY_CACHE_SIZE = 1024 * 1024 * 30; // 30 MB
+    private static final int MEMORY_CACHE_SIZE = 1024 * 1024 * 20; // 20 MB
 
     private final ArrayList<String> mEntries;
     private File mCacheDir;
     private Bitmap mDefaultArt;
 
     private final LruCache<String, RecyclingBitmapDrawable> mMemoryCache;
-    private Set<SoftReference<Bitmap>> mReusableBitmaps;
+    private Set<WeakReference<Bitmap>> mReusableBitmaps;
 
     /**
      * @return The default instance
@@ -72,7 +68,7 @@ public class ImageCache {
 
         // We create a set of reusable bitmaps that can be
         // populated into the inBitmap field of BitmapFactory.Options. Note that the set is
-        // of SoftReferences which will actually not be very effective due to the garbage
+        // of WeakReferences which will actually not be very effective due to the garbage
         // collector being aggressive clearing Soft/WeakReferences. A better approach
         // would be to use a strongly references bitmaps, however this would require some
         // balancing of memory usage between this set and the bitmap LruCache. It would also
@@ -80,7 +76,7 @@ public class ImageCache {
         // the size would need to be precise, from KitKat onward the size would just need to
         // be the upper bound (due to changes in how inBitmap can re-use bitmaps).
         mReusableBitmaps =
-                Collections.synchronizedSet(new HashSet<SoftReference<Bitmap>>());
+                Collections.synchronizedSet(new HashSet<WeakReference<Bitmap>>());
 
 
         if (USE_MEMORY_CACHE) {
@@ -99,7 +95,10 @@ public class ImageCache {
                     }
 
                     oldBitmap.setIsCached(false);
-                    mReusableBitmaps.add(new SoftReference<>(oldBitmap.getBitmap()));
+
+                    synchronized (mReusableBitmaps) {
+                        mReusableBitmaps.add(new WeakReference<>(oldBitmap.getBitmap()));
+                    }
                 }
             };
         } else {
@@ -243,7 +242,7 @@ public class ImageCache {
 
         if (mReusableBitmaps != null && !mReusableBitmaps.isEmpty()) {
             synchronized (mReusableBitmaps) {
-                final Iterator<SoftReference<Bitmap>> iterator = mReusableBitmaps.iterator();
+                final Iterator<WeakReference<Bitmap>> iterator = mReusableBitmaps.iterator();
                 Bitmap item;
 
                 while (iterator.hasNext()) {
