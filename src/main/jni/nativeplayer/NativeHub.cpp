@@ -99,12 +99,26 @@ SocketHost* NativeHub::findSocketByName(const std::string& name) {
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::writeAudioToDsp(int chain_index, const uint8_t* data, const uint32_t len) {
+    bool success = false;
     auto iter = m_DSPChain.begin();
     std::advance(iter, chain_index);
-    std::string name = (*iter);
 
-    SocketHost* next_socket = m_DSPSockets[name];
-    next_socket->writeAudioData(data, len, false);
+    while (iter != m_DSPChain.end() && !success) {
+        std::string name = (*iter);
+        SocketHost* next_socket = m_DSPSockets[name];
+
+        if (next_socket->writeAudioData(data, len, false) == -1) {
+            // Some error occurred while writing to this DSP, forward to the next valid one
+            ++iter;
+        } else {
+            success = true;
+        }
+    }
+
+    // If we're weren't successful at feeding a DSP plugin, feed the sink directly
+    if (!success) {
+        writeAudioToSink(data, len);
+    }
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::writeAudioToSink(const uint8_t* data, const uint32_t len) {
