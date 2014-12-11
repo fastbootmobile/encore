@@ -243,6 +243,18 @@ public class MainActivity extends AppActivity
     @Override
     protected void onPause() {
         mPlayingBarLayout.onPause();
+
+        // Getting "No Activity" error when resuming after a long idle period on the Playlist
+        // screen. No idea where it comes from, undebuggable as it's within the framework,
+        // probably linked to the eternal Android bug of child fragmentmanager retained.
+        if (mCurrentFragmentIndex +1 == SECTION_PLAYLISTS) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mNavigationDrawerFragment.selectItem(SECTION_LISTEN_NOW - 1);
+                }
+            });
+        }
         super.onPause();
     }
 
