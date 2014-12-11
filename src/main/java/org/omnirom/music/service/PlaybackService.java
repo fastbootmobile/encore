@@ -354,13 +354,45 @@ public class PlaybackService extends Service
 
         if (connection instanceof ProviderConnection) {
             try {
-                Log.e(TAG, "RegisterCallback: service connected");
-                IMusicProvider binder = ((ProviderConnection) connection).getBinder();
+                Log.e(TAG, "RegisterCallback: service "
+                        + connection.getIdentifier().mName + " connected");
+                final IMusicProvider binder = ((ProviderConnection) connection).getBinder();
 
                 if (binder != null) {
                     binder.registerCallback(mProviderCallback);
                 } else {
                     Log.e(TAG, "Cannot register callback in onServiceConnected, binder is null");
+                }
+
+                // If we were playing from this provider and it just connected, it means it crashed.
+                // We try to restore its state.
+                if (binder != null && mState == STATE_PLAYING) {
+                    final Song currentSong = getCurrentSong();
+                    if (currentSong != null
+                            && connection.getIdentifier().equals(currentSong.getProvider())) {
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                int restorePosition = getCurrentTrackPositionImpl();
+                                if (restorePosition < 0 || restorePosition > currentSong.getDuration()) {
+                                    restorePosition = 0;
+                                }
+                                Log.d(TAG, "Provider crashed, restoring playback of "
+                                        + currentSong.getRef()
+                                        + " to " + restorePosition + "ms");
+
+                                try {
+                                    binder.playSong(currentSong.getRef());
+                                    if (restorePosition > 0) {
+                                        binder.seek(getCurrentTrackPositionImpl());
+                                    }
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot restore state");
+                                }
+                            }
+                        }, 2000);
+
+                    }
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot register callback on connected service");
@@ -375,8 +407,6 @@ public class PlaybackService extends Service
      */
     @Override
     public void onServiceDisconnected(AbstractProviderConnection connection) {
-        // TODO: Release the audio socket, update the playback status if we were playing from
-        // this provider.
         Log.w(TAG, "Provider disconnected, rebinding before it's too late");
         connection.bindService();
     }
