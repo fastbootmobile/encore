@@ -329,7 +329,7 @@ public class PlayingBarView extends RelativeLayout {
                 mProgressDrawable, mPlayFabDrawable
         });
         mPlayFab.setImageDrawable(drawable);
-        mPlayFab.setVisibility(View.INVISIBLE);
+        mPlayFab.setVisibility(View.GONE);
 
         mPlayFab.setOnTouchListener(new OnTouchListener() {
             private boolean mIsDragging = false;
@@ -622,7 +622,7 @@ public class PlayingBarView extends RelativeLayout {
 
     public void setFabVisible(boolean visible) {
         if (visible && mPlayFab.getVisibility() == View.VISIBLE
-                || !visible && mPlayFab.getVisibility() == View.INVISIBLE) {
+                || !visible && mPlayFab.getVisibility() == View.GONE) {
             return;
         }
         int startRadius;
@@ -653,7 +653,7 @@ public class PlayingBarView extends RelativeLayout {
                     anim.addListener(new Animator.AnimatorListener() {
                         @Override
                         public void onAnimationStart(Animator animation) {
-                            mPlayFab.setVisibility(View.INVISIBLE);
+                            mPlayFab.setVisibility(View.GONE);
                         }
 
                         @Override
