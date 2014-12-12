@@ -16,7 +16,6 @@
 
 package org.omnirom.music.app;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Fragment;
@@ -27,7 +26,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBar;
 import android.support.v7.graphics.Palette;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -74,7 +73,7 @@ public class PlaybackQueueActivity extends AppActivity {
                     .commit();
         }
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
@@ -127,11 +126,10 @@ public class PlaybackQueueActivity extends AppActivity {
                     color = getResources().getColor(R.color.default_album_art_background);
                 }
 
-                ProviderAggregator aggregator = ProviderAggregator.getDefault();
                 Song song = (Song) view.getTag();
 
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
-                        aggregator.retrieveAlbum(song.getAlbum(), song.getProvider()), color);
+                        song.getAlbum(), song.getProvider(), color);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),

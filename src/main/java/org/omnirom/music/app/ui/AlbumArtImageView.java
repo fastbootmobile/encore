@@ -16,7 +16,6 @@
 package org.omnirom.music.app.ui;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -75,7 +74,6 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         mHandler = new Handler();
         setScaleType(ScaleType.CENTER_CROP);
 
-
         if (sDefaultBitmap == null) {
             sDefaultBitmap = new RecyclingBitmapDrawable(getResources(), ((BitmapDrawable) getContext().getApplicationContext().getResources()
                     .getDrawable(R.drawable.album_placeholder)).getBitmap());
@@ -84,7 +82,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         if (isInEditMode()) {
             setImageDrawable(getResources().getDrawable(R.drawable.album_placeholder));
         } else {
-            mDrawable = new MaterialTransitionDrawable(getContext(), sDefaultBitmap);
+            mDrawable = new MaterialTransitionDrawable(getContext().getApplicationContext(),
+                    sDefaultBitmap);
             setImageDrawable(mDrawable);
         }
     }

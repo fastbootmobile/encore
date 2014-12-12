@@ -21,16 +21,22 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.HistoryAdapter;
+import org.omnirom.music.framework.ListenLogger;
+import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ProviderAggregator;
 
 /**
  * A fragment containing a simple view for history.
  */
 public class HistoryFragment extends Fragment {
+    private HistoryAdapter mAdapter;
 
     public static HistoryFragment newInstance() {
         return new HistoryFragment();
@@ -43,7 +49,16 @@ public class HistoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         ListView rootView = (ListView) inflater.inflate(R.layout.fragment_history, container, false);
-        rootView.setAdapter(new HistoryAdapter(container.getContext()));
+        mAdapter = new HistoryAdapter(container.getContext());
+        rootView.setAdapter(mAdapter);
+        rootView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ListenLogger.LogEntry entry = mAdapter.getItem(position);
+                Song song = ProviderAggregator.getDefault().retrieveSong(entry.getReference(), entry.getIdentifier());
+                PlaybackProxy.playSong(song);
+            }
+        });
         return rootView;
     }
 

@@ -436,7 +436,8 @@ public class Utils {
                         final Resources res = context.getResources();
                         Intent intent = AlbumActivity.craftIntent(context,
                                 ((BitmapDrawable) res.getDrawable(R.drawable.album_placeholder)).getBitmap(),
-                                aggregator.retrieveAlbum(song.getAlbum(), song.getProvider()),
+                                song.getAlbum(),
+                                song.getProvider(),
                                 res.getColor(R.color.default_album_art_background));
                         context.startActivity(intent);
                         break;

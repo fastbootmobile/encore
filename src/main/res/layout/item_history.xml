@@ -2,9 +2,8 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/playing_bar_item_background"
-                android:clickable="true">
+                android:layout_height="@dimen/playing_bar_height"
+                android:background="@drawable/playing_bar_item_background">
 
     <org.omnirom.music.app.ui.AlbumArtImageView
         android:id="@+id/ivAlbumArt"
@@ -55,10 +54,25 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/tvPlayDate"
         android:layout_gravity="end"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentRight="false"
         android:layout_alignParentEnd="false"
         android:layout_centerVertical="true"
         android:padding="4dp"
-        android:textColor="#888888"/>
+        android:textColor="#888888"
+        android:layout_toStartOf="@+id/btnOverflow"
+        android:layout_toLeftOf="@+id/btnOverflow"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnOverflow"
+        android:src="@drawable/ic_more_vert_dark"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:transitionName="itemImage" />
 
 </RelativeLayout>

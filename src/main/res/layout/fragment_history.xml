@@ -2,4 +2,6 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="org.omnirom.music.app.HistoryActivity.HistoryFragment" />
+                tools:context="org.omnirom.music.app.HistoryActivity.HistoryFragment"
+                android:clipToPadding="false"
+                android:paddingBottom="@dimen/playing_bar_height"/>

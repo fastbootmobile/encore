@@ -523,18 +523,17 @@ public class PlayingBarView extends RelativeLayout {
                             color = getResources().getColor(R.color.default_album_art_background);
                         }
 
-                        Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
-                        if (album != null) {
-                            Intent intent = AlbumActivity.craftIntent(getContext(), hero, album, color);
 
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
-                                    view, "itemImage");
+                        Intent intent = AlbumActivity.craftIntent(getContext(), hero, song.getAlbum(),
+                                song.getProvider(), color);
 
-                                getContext().startActivity(intent, opt.toBundle());
-                            } else {
-                                getContext().startActivity(intent);
-                            }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
+                                view, "itemImage");
+
+                            getContext().startActivity(intent, opt.toBundle());
+                        } else {
+                            getContext().startActivity(intent);
                         }
                     }
                 });

@@ -215,8 +215,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
             }
         }
         SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.ALBUM, i);
-        Album album = aggregator.retrieveAlbum(entry.ref, entry.identifier);
-        Intent intent = AlbumActivity.craftIntent(getActivity(), hero, album, color);
+        Intent intent = AlbumActivity.craftIntent(getActivity(), hero, entry.ref,
+                entry.identifier, color);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ImageView ivCover = holder.albumArtImageView;

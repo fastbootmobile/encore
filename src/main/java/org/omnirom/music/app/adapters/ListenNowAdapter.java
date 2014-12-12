@@ -152,7 +152,8 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
 
             if (entry.entity instanceof Album) {
                 Album album = (Album) entry.entity;
-                intent = AlbumActivity.craftIntent(ctx, hero, album, backColor);
+                intent = AlbumActivity.craftIntent(ctx, hero, album.getRef(), album.getProvider(),
+                        backColor);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),

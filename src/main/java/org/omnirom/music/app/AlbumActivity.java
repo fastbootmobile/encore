@@ -37,6 +37,7 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderIdentifier;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -48,6 +49,7 @@ public class AlbumActivity extends AppActivity {
     private static final String TAG_FRAGMENT = "fragment_inner";
 
     public static final String EXTRA_ALBUM = "album";
+    public static final String EXTRA_PROVIDER = "provider";
     public static final String EXTRA_BACKGROUND_COLOR = "background_color";
     public static final String BITMAP_ALBUM_HERO = "album_hero";
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
@@ -61,14 +63,16 @@ public class AlbumActivity extends AppActivity {
      * Creates a proper intent to open this activity
      * @param context The original context
      * @param hero The hero image bitmap
-     * @param album The album to view
+     * @param albumRef The reference of the album to view
      * @param backColor The back color of the header bar
      * @return An intent to open this activity
      */
-    public static Intent craftIntent(Context context, Bitmap hero, Album album, int backColor) {
+    public static Intent craftIntent(Context context, Bitmap hero, String albumRef,
+                                     ProviderIdentifier provider, int backColor) {
         Intent intent = new Intent(context, AlbumActivity.class);
 
-        intent.putExtra(EXTRA_ALBUM, album.getRef());
+        intent.putExtra(EXTRA_ALBUM, albumRef);
+        intent.putExtra(EXTRA_PROVIDER, provider.serialize());
         intent.putExtra(EXTRA_BACKGROUND_COLOR, backColor);
         Utils.queueBitmap(BITMAP_ALBUM_HERO, hero);
 

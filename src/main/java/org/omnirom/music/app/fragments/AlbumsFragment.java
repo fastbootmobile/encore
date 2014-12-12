@@ -101,10 +101,11 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 AlbumsAdapter.ViewHolder tag = (AlbumsAdapter.ViewHolder) view.getTag();
                 ImageView ivCover = tag.ivCover;
+                Album item = mAdapter.getItem(position);
 
                 Bitmap hero = ((MaterialTransitionDrawable) ivCover.getDrawable()).getFinalDrawable().getBitmap();
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
-                        mAdapter.getItem(position), tag.itemColor);
+                        item.getRef(), item.getProvider(), tag.itemColor);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),

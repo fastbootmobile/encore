@@ -15,7 +15,6 @@
 
 package org.omnirom.music.app.fragments;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -191,7 +190,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
         TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
         tvAlbumName.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
-        tvAlbumName.setText(mAlbum.getName());
+        if (mAlbum != null) {
+            tvAlbumName.setText(mAlbum.getName());
+        }
 
         // Hide download button by default
         headerView.findViewById(R.id.cpbOffline).setVisibility(View.GONE);
@@ -200,8 +201,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         // Set source logo
         ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
-        mLogoBitmap = PluginsLookup.getDefault().getCachedLogo(getResources(), mAlbum);
-        ivSource.setImageDrawable(mLogoBitmap);
+        if (mAlbum != null) {
+            mLogoBitmap = PluginsLookup.getDefault().getCachedLogo(getResources(), mAlbum);
+            ivSource.setImageDrawable(mLogoBitmap);
+        }
 
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources(), 1);
@@ -306,14 +309,12 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mBackgroundColor = extras.getInt(AlbumActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
 
         String albumRef = extras.getString(AlbumActivity.EXTRA_ALBUM);
-        mAlbum = ProviderAggregator.getDefault().retrieveAlbum(albumRef, null);
+        ProviderIdentifier provider
+                = ProviderIdentifier.fromSerialized(extras.getString(AlbumActivity.EXTRA_PROVIDER));
+        mAlbum = ProviderAggregator.getDefault().retrieveAlbum(albumRef, provider);
 
         if (mAlbum == null) {
-            Log.e(TAG, "Album isn't in cache!");
-            Activity act = getActivity();
-            if (act != null) {
-                act.finish();
-            }
+            Log.e(TAG, "Album isn't in cache and provider returned null!");
         } else {
             // Prepare the palette to colorize the FAB
             Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
