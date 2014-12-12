@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.omnirom.music.app">
+    package="org.omnirom.music.app" >
 
     <!-- Permission needed for EchoNest / MusicBrainz (album art, automix, etc). -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -32,8 +32,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:largeHeap="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
 
         <!-- GMS for Chromecast -->
         <meta-data
@@ -48,9 +47,9 @@
         <!-- Playback Service -->
         <service
             android:name="org.omnirom.music.service.PlaybackService"
-            android:stopWithTask="false"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:stopWithTask="false" />
 
         <!-- Notification Intent Service -->
         <service
@@ -58,14 +57,14 @@
             android:exported="false" />
 
         <!-- Receiver for the media buttons -->
-        <receiver android:name="org.omnirom.music.service.RemoteControlReceiver">
-            <intent-filter android:priority="1000">
+        <receiver android:name="org.omnirom.music.service.RemoteControlReceiver" >
+            <intent-filter android:priority="1000" >
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
 
         <!-- Receiver for package installed/uninstalled -->
-        <receiver android:name="org.omnirom.music.providers.PacManReceiver">
+        <receiver android:name="org.omnirom.music.providers.PacManReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_INSTALL" />
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
@@ -73,16 +72,17 @@
                 <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
                 <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                <data android:scheme="package"/>
+
+                <data android:scheme="package" />
             </intent-filter>
         </receiver>
 
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:launchMode="singleTask">
+            android:label="@string/app_name"
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
@@ -95,7 +95,7 @@
         <!-- Search Activity -->
         <activity
             android:name=".SearchActivity"
-            android:label="@string/search_hint">
+            android:label="@string/search_hint" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -110,7 +110,7 @@
             android:name=".ArtistActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails">
+            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
         </activity>
 
         <!-- Playlist Activity -->
@@ -118,7 +118,7 @@
             android:name=".PlaylistActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails">
+            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
         </activity>
 
         <!-- Album Activity -->
@@ -126,14 +126,14 @@
             android:name=".AlbumActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.AlbumDetails">
+            android:theme="@style/AppTheme.TransparentNavBar.AlbumDetails" >
         </activity>
 
         <!-- Now Playing Activity -->
         <activity
             android:name=".PlaybackQueueActivity"
             android:icon="@drawable/ic_launcher_white"
-            android:label="@string/title_activity_playback_queue">
+            android:label="@string/title_activity_playback_queue" >
         </activity>
 
         <!-- Settings Activity -->
@@ -141,16 +141,15 @@
             android:name=".SettingsActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_settings"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
         </activity>
 
         <!-- Automix Creation Activity -->
         <activity
             android:name=".AutomixCreateActivity"
             android:label="@string/title_activity_automix_create_static"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
         </activity>
-
     </application>
 
 </manifest>

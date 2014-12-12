@@ -5,6 +5,7 @@ import android.media.AudioManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 
+import org.omnirom.music.framework.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -34,6 +35,9 @@ public abstract class AppActivity  extends ActionBarActivity {
     @Override
     protected void onPause() {
         PluginsLookup.getDefault().decPlaybackUsage();
+        ImageCache.getDefault().evictAll();
+        System.gc();
+
         super.onPause();
     }
 }
