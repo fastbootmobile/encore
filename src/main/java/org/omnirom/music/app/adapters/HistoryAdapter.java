@@ -159,6 +159,7 @@ public class HistoryAdapter extends BaseAdapter {
             } else {
                 tag.tvTitle.setText(R.string.loading);
                 tag.tvArtist.setText(null);
+                tag.ivAlbumArt.setDefaultArt();
             }
         }
 

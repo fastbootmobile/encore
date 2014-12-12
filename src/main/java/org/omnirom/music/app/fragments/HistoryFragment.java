@@ -29,13 +29,21 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.HistoryAdapter;
 import org.omnirom.music.framework.ListenLogger;
 import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
+
+import java.util.List;
 
 /**
  * A fragment containing a simple view for history.
  */
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends Fragment implements ILocalCallback {
     private HistoryAdapter mAdapter;
 
     public static HistoryFragment newInstance() {
@@ -71,5 +79,43 @@ public class HistoryFragment extends Fragment {
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_HISTORY);
         mainActivity.setContentShadowTop(0);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ProviderAggregator.getDefault().addUpdateCallback(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
+    }
+
+    @Override
+    public void onSongUpdate(List<Song> s) {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onAlbumUpdate(List<Album> a) {
+    }
+
+    @Override
+    public void onPlaylistUpdate(List<Playlist> p) {
+    }
+
+    @Override
+    public void onArtistUpdate(List<Artist> a) {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onProviderConnected(IMusicProvider provider) {
+    }
+
+    @Override
+    public void onSearchResult(SearchResult searchResult) {
     }
 }
