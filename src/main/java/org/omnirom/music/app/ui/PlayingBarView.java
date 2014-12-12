@@ -291,6 +291,9 @@ public class PlayingBarView extends RelativeLayout {
             }
         }, 200);
 
+        if (mTracksLayout != null) {
+            updatePlayingQueue();
+        }
     }
 
     @Override
@@ -385,11 +388,9 @@ public class PlayingBarView extends RelativeLayout {
             }
         });
 
-        onResume();
-
         // Load playing queue
         mTracksLayout = (LinearLayout) findViewById(R.id.playBarTracksLayout);
-        updatePlayingQueue();
+        onResume();
     }
 
     @Override
