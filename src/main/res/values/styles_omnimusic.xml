@@ -44,4 +44,24 @@
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">14sp</item>
     </style>
+
+
+    <style name="OmniMusic.NavDrawerItem" parent="RobotoLightLarge">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_regular</item>
+    </style>
+
+    <style name="OmniMusic.NavDrawerItem.Selected">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="OmniMusic.NavDrawerAction" parent="RobotoLightLarge">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_regular</item>
+    </style>
+
+    <style name="OmniMusic.NavDrawerAction.Selected">
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>

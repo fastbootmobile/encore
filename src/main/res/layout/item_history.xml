@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/playing_bar_item_background"
+                android:clickable="true">
+
+    <org.omnirom.music.app.ui.AlbumArtImageView
+        android:id="@+id/ivAlbumArt"
+        android:layout_width="@dimen/playing_bar_height"
+        android:layout_height="@dimen/playing_bar_height"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/playing_bar_item_background"
+        android:adjustViewBounds="true"
+        android:clickable="true" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/playing_bar_height"
+        android:layout_toRightOf="@+id/ivAlbumArt"
+        android:layout_toEndOf="@+id/ivAlbumArt"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_alignTop="@+id/ivAlbumArt"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_toLeftOf="@+id/tvPlayDate"
+        android:layout_toStartOf="@+id/tvPlayDate">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fontPath="fonts/Roboto-Medium.ttf"
+            android:fontFamily="sans-serif-medium"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#333333"/>
+
+        <TextView
+            android:id="@+id/tvArtist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/tvPlayDate"
+        android:layout_gravity="end"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="false"
+        android:layout_centerVertical="true"
+        android:padding="4dp"
+        android:textColor="#888888"/>
+
+</RelativeLayout>

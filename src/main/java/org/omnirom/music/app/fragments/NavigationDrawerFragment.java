@@ -85,7 +85,7 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mUserLearnedDrawer;
 
     public NavigationDrawerFragment() {
-        sUnselectedTypeface = Typeface.create("sans-serif-light", 0);
+        sUnselectedTypeface = Typeface.create("sans-serif", 0);
         sSelectedTypeface = Typeface.create("sans-serif", Typeface.BOLD);
     }
 
@@ -224,6 +224,10 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     private void selectItem(final int position, boolean switchToFragment) {
+        if (mDrawerListView != null) {
+            ((NavDrawerAdapter) mDrawerListView.getAdapter()).setActive(position);
+        }
+
         mCurrentSelectedPosition = position;
         if (switchToFragment) {
             if (mDrawerListView != null) {

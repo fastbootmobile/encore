@@ -142,7 +142,6 @@
         <item quantity="one">One song</item>
         <item quantity="other">%d songs</item>
     </plurals>
-
     <plurals name="albums_count">
         <item quantity="zero">No albums</item>
         <item quantity="one">One album</item>
@@ -155,8 +154,6 @@
     <string name="more">More</string>
     <string name="songs">Songs</string>
     <string name="xx_songs">%d songs</string>
-
-
     <string name="plugin_not_configured_snackbar">Plugin \'%s\' not configured</string>
     <string name="configure">Configure</string>
     <string name="pref_clear_caches_summary">This will clear albums art, but not any cached music</string>
@@ -167,7 +164,6 @@
     <string name="toast_album_not_loaded_yet">Album is not loaded yet</string>
     <string name="toast_track_unavailable">This track is unavailable</string>
     <string name="toast_bucket_adjusted">Bucket adjusted to your liking</string>
-
     <string name="error_album_unavailable_offline">This album is not available offline</string>
     <string name="error_artist_unavailable_offline">The artist is not available offline</string>
     <string name="error_similar_unavailable_offline">Similar artists are not available offline</string>
@@ -178,4 +174,8 @@
     <string name="thumbs_up_description">Like this song</string>
     <string name="previous">Previous</string>
     <string name="repeat">Repeat</string>
+    <string name="section_history">History</string>
+    <string name="drive_mode">Drive mode</string>
+    <string name="title_activity_history">HistoryActivity</string>
+
 </resources>

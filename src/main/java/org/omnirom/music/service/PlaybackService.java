@@ -35,6 +35,7 @@ import android.util.Log;
 import com.echonest.api.v4.EchoNestException;
 
 import org.omnirom.music.api.echonest.AutoMixManager;
+import org.omnirom.music.framework.ListenLogger;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -128,6 +129,7 @@ public class PlaybackService extends Service
     private IRemoteMetadataManager mRemoteMetadata;
     private PowerManager.WakeLock mWakeLock;
     private boolean mIsForeground;
+    private ListenLogger mListenLogger;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -156,6 +158,7 @@ public class PlaybackService extends Service
     public void onCreate() {
         super.onCreate();
         mHandler = new Handler();
+        mListenLogger = new ListenLogger(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mRemoteMetadata = new RemoteMetadataManagerv21(this);
@@ -560,6 +563,8 @@ public class PlaybackService extends Service
                             } catch (IllegalStateException e) {
                                 Log.e(TAG, "Illegal State from provider", e);
                             }
+
+                            mListenLogger.addEntry(next);
 
                             // The notification system takes care of calling startForeground
                             mHandler.post(new Runnable() {

@@ -15,6 +15,8 @@
 
 package org.omnirom.music.app.adapters;
 
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,14 +26,26 @@ import android.widget.TextView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 
 /**
  * Adapter for the side-bar navigation drawer
  */
 public class NavDrawerAdapter extends BaseAdapter {
+    private static final int REGULAR_COUNT = 6;
+    private static final int SPECIAL_COUNT = 2;
+
+    private int mActiveEntry = 0;
+
     public static class ViewHolder {
         public TextView tvText;
         public ImageView ivLogo;
+        public View tvDivider;
+    }
+
+    public void setActive(int entry) {
+        mActiveEntry = entry;
+        notifyDataSetChanged();
     }
 
     /**
@@ -39,7 +53,7 @@ public class NavDrawerAdapter extends BaseAdapter {
      */
     @Override
     public int getCount() {
-        return 6;
+        return REGULAR_COUNT + SPECIAL_COUNT;
     }
 
     /**
@@ -58,6 +72,15 @@ public class NavDrawerAdapter extends BaseAdapter {
         return i;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if (position >= 0 && position < REGULAR_COUNT) {
+            return 1;
+        } else {
+            return 2;
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -66,45 +89,111 @@ public class NavDrawerAdapter extends BaseAdapter {
         ViewHolder tag;
         if (view == null) {
             LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-            view = inflater.inflate(R.layout.nav_drawer_list_item_activated, viewGroup, false);
 
-            tag = new ViewHolder();
-            tag.tvText = (TextView) view.findViewById(android.R.id.text1);
-            tag.ivLogo = (ImageView) view.findViewById(android.R.id.icon);
-            view.setTag(tag);
+            if (getItemViewType(i) == 1) {
+                view = inflater.inflate(R.layout.nav_drawer_regular_item, viewGroup, false);
+
+                tag = new ViewHolder();
+                tag.tvText = (TextView) view.findViewById(android.R.id.text1);
+                tag.ivLogo = (ImageView) view.findViewById(android.R.id.icon);
+                view.setTag(tag);
+            } else {
+                view = inflater.inflate(R.layout.nav_drawer_special_item, viewGroup, false);
+
+                tag = new ViewHolder();
+                tag.tvText = (TextView) view.findViewById(android.R.id.text1);
+                tag.tvDivider = view.findViewById(R.id.navdrawer_divider);
+                view.setTag(tag);
+            }
         } else {
             tag = (ViewHolder) view.getTag();
+        }
+
+        if (i == mActiveEntry) {
+            tag.tvText.setTextColor(tag.tvText.getResources().getColor(R.color.primary));
+            view.setBackgroundColor(0xFFEAEAEA);
+        } else {
+            tag.tvText.setTextColor(tag.tvText.getResources().getColor(R.color.text_regular));
+            int[] attrs = new int[] { android.R.attr.selectableItemBackground };
+            TypedArray ta = view.getContext().obtainStyledAttributes(attrs);
+            Drawable drawableFromTheme = ta.getDrawable(0);
+            ta.recycle();
+
+            Utils.setViewBackground(view, drawableFromTheme);
+        }
+
+        if (tag.tvDivider != null) {
+            if (i == REGULAR_COUNT) {
+                tag.tvDivider.setVisibility(View.VISIBLE);
+            } else {
+                tag.tvDivider.setVisibility(View.GONE);
+            }
         }
 
         switch (i+1) {
             case MainActivity.SECTION_LISTEN_NOW:
                 tag.tvText.setText(R.string.title_section_listen_now);
-                tag.ivLogo.setImageResource(R.drawable.ic_nav_listen_now);
+                if (i == mActiveEntry) {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_listen_now_active);
+                } else {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_listen_now);
+                }
                 break;
 
             case MainActivity.SECTION_MY_SONGS:
                 tag.tvText.setText(R.string.title_section_my_songs);
-                tag.ivLogo.setImageResource(R.drawable.ic_nav_library);
+                if (i == mActiveEntry) {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_library_active);
+                } else {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_library);
+                }
                 break;
 
             case MainActivity.SECTION_PLAYLISTS:
                 tag.tvText.setText(R.string.title_section_playlists);
-                tag.ivLogo.setImageResource(R.drawable.ic_nav_playlist);
+                if (i == mActiveEntry) {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_playlist_active);
+                } else {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_playlist);
+                }
                 break;
 
             case MainActivity.SECTION_AUTOMIX:
                 tag.tvText.setText(R.string.title_section_automix);
-                tag.ivLogo.setImageResource(R.drawable.ic_nav_automix);
+                if (i == mActiveEntry) {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_automix_active);
+                } else {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_automix);
+                }
                 break;
 
             case MainActivity.SECTION_RECOGNITION:
                 tag.tvText.setText(R.string.title_section_recognition);
-                tag.ivLogo.setImageResource(R.drawable.ic_mic);
+                if (i == mActiveEntry) {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_recognition_active);
+                } else {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_recognition);
+                }
                 break;
 
+            case MainActivity.SECTION_HISTORY:
+                tag.tvText.setText(R.string.section_history);
+                if (i == mActiveEntry) {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_history_active);
+                } else {
+                    tag.ivLogo.setImageResource(R.drawable.ic_nav_history);
+                }
+                break;
+
+            // Special actions
             case MainActivity.SECTION_NOW_PLAYING:
                 tag.tvText.setText(R.string.title_activity_playback_queue);
-                tag.ivLogo.setImageResource(R.drawable.ic_nav_nowplaying);
+                break;
+
+            case MainActivity.SECTION_DRIVE_MODE:
+                tag.tvText.setText(R.string.drive_mode);
+                break;
+
         }
 
         return view;

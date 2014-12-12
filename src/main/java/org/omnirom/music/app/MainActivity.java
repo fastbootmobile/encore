@@ -1,6 +1,5 @@
 package org.omnirom.music.app;
 
-import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -15,13 +14,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +29,7 @@ import com.williammora.snackbar.Snackbar;
 
 import org.omnirom.music.app.fragments.AutomixFragment;
 import org.omnirom.music.app.fragments.DspProvidersFragment;
+import org.omnirom.music.app.fragments.HistoryFragment;
 import org.omnirom.music.app.fragments.ListenNowFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
@@ -57,7 +57,9 @@ public class MainActivity extends AppActivity
     public static final int SECTION_PLAYLISTS  = 3;
     public static final int SECTION_AUTOMIX    = 4;
     public static final int SECTION_RECOGNITION= 5;
-    public static final int SECTION_NOW_PLAYING= 6;
+    public static final int SECTION_HISTORY    = 6;
+    public static final int SECTION_NOW_PLAYING= 7;
+    public static final int SECTION_DRIVE_MODE = 8;
 
     public static final int SECTION_DSP_EFFECTS= -1;
 
@@ -336,6 +338,9 @@ public class MainActivity extends AppActivity
                     case SECTION_RECOGNITION:
                         newFrag = RecognitionFragment.newInstance();
                         break;
+                    case SECTION_HISTORY:
+                        newFrag = HistoryFragment.newInstance();
+                        break;
                     case SECTION_NOW_PLAYING:
                         startActivity(new Intent(this, PlaybackQueueActivity.class));
                         break;
@@ -374,9 +379,6 @@ public class MainActivity extends AppActivity
         }
         ft.replace(R.id.container, f, tag);
         ft.commit();
-
-        ImageCache.getDefault().evictAll();
-        System.gc();
     }
 
     public void onSectionAttached(int number) {
@@ -398,6 +400,9 @@ public class MainActivity extends AppActivity
                 break;
             case SECTION_DSP_EFFECTS:
                 mTitle = getString(R.string.settings_dsp_config_title);
+                break;
+            case SECTION_HISTORY:
+                mTitle = getString(R.string.section_history);
                 break;
         }
     }
@@ -426,10 +431,8 @@ public class MainActivity extends AppActivity
     }
 
     public void restoreActionBar() {
-        ActionBar actionBar = getActionBar();
-
-        if (actionBar != null) {
-            ((TextView) actionBar.getCustomView().findViewById(android.R.id.title)).setText(mTitle);
+        if (mToolbar != null) {
+            mToolbar.setTitle(mTitle);
         }
     }
 

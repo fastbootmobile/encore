@@ -51,9 +51,14 @@ public class ListenLogger {
         mPrefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
+    /**
+     * Adds an entry to the song history. The time used will be the current time.
+     * @param song The song to add
+     */
     public void addEntry(Song song) {
         SharedPreferences.Editor editor = mPrefs.edit();
-        Set<String> entries = mPrefs.getStringSet(PREF_HISTORY_ENTRIES, new TreeSet<String>());
+        Set<String> entries = new TreeSet<>(mPrefs.getStringSet(PREF_HISTORY_ENTRIES,
+                new TreeSet<String>()));
 
         JSONObject jsonRoot = new JSONObject();
         try {
@@ -67,10 +72,15 @@ public class ListenLogger {
         editor.apply();
     }
 
+    /**
+     * Fetches and builds a list of all the history entries
+     * @return A list of entries
+     */
     public List<LogEntry> getEntries() {
         Set<String> entries = mPrefs.getStringSet(PREF_HISTORY_ENTRIES, null);
         List<LogEntry> output = new ArrayList<>();
         if (entries != null) {
+            if (DEBUG) Log.d(TAG, "Log entries: " + entries.size());
             for (String entry : entries) {
                 try {
                     JSONObject jsonObj = new JSONObject(entry);
@@ -79,7 +89,8 @@ public class ListenLogger {
                     long timestamp = jsonObj.getLong(KEY_TIMESTAMP);
 
                     output.add(new LogEntry(songRef, providerSerialized, timestamp));
-                } catch (JSONException ignore) {
+                } catch (JSONException e) {
+                    Log.e(TAG, "JSON Exception while trying to get log entry", e);
                 }
             }
         }
@@ -87,6 +98,10 @@ public class ListenLogger {
         return output;
     }
 
+    /**
+     * Adds, if not already, a song to the list of liked songs.
+     * @param song The song to add
+     */
     public void addLike(Song song) {
         SharedPreferences.Editor editor = mPrefs.edit();
         Set<String> entries = mPrefs.getStringSet(PREF_LIKED_ENTRIES, new TreeSet<String>());
@@ -101,6 +116,10 @@ public class ListenLogger {
         editor.apply();
     }
 
+    /**
+     * Removes a song from the list of liked songs
+     * @param song The song to remove
+     */
     public void removeLike(Song song) {
         SharedPreferences.Editor editor = mPrefs.edit();
         Set<String> entries = mPrefs.getStringSet(PREF_LIKED_ENTRIES, new TreeSet<String>());
@@ -115,6 +134,9 @@ public class ListenLogger {
         editor.apply();
     }
 
+    /**
+     * @return a list of all the liked entries
+     */
     public List<LogEntry> getLikedEntries() {
         Set<String> entries = mPrefs.getStringSet(PREF_HISTORY_ENTRIES, null);
         List<LogEntry> output = new ArrayList<>();
@@ -126,7 +148,8 @@ public class ListenLogger {
                     String providerSerialized = jsonObj.getString(KEY_PROVIDER);
 
                     output.add(new LogEntry(songRef, providerSerialized, 0));
-                } catch (JSONException ignore) {
+                } catch (JSONException e) {
+                    Log.e(TAG, "JSON Exception while trying to get liked entries", e);
                 }
             }
         }
@@ -134,6 +157,11 @@ public class ListenLogger {
         return output;
     }
 
+    /**
+     * Returns whether or not the song reference provided is in the list of liked songs or not
+     * @param ref The reference of the song
+     * @return true if the song is liked
+     */
     public boolean isLiked(String ref) {
         Set<String> entries = mPrefs.getStringSet(PREF_HISTORY_ENTRIES, null);
         if (entries != null) {
@@ -154,6 +182,9 @@ public class ListenLogger {
         }
     }
 
+    /**
+     * Class representing an entry in either the log or the list of liked songs
+     */
     public static class LogEntry {
         private Date mTimestamp;
         private String mSongRef;
@@ -165,14 +196,23 @@ public class ListenLogger {
             mTimestamp = new Date(timestamp);
         }
 
+        /**
+         * @return The reference of the song
+         */
         public String getReference() {
             return mSongRef;
         }
 
+        /**
+         * @return The provider identifier of the song
+         */
         public ProviderIdentifier getIdentifier() {
             return mIdentifier;
         }
 
+        /**
+         * @return The timestamp at which this song was added (valid only for history, not likes)
+         */
         public Date getTimestamp() {
             return mTimestamp;
         }
