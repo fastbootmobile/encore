@@ -46,6 +46,7 @@ import org.omnirom.music.providers.AbstractProviderConnection;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.IProviderCallback;
+import org.omnirom.music.providers.PacManReceiver;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
@@ -130,6 +131,7 @@ public class PlaybackService extends Service
     private PowerManager.WakeLock mWakeLock;
     private boolean mIsForeground;
     private ListenLogger mListenLogger;
+    private PacManReceiver mPacManReceiver;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -145,6 +147,7 @@ public class PlaybackService extends Service
         }
     };
 
+
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<>();
@@ -159,6 +162,17 @@ public class PlaybackService extends Service
         super.onCreate();
         mHandler = new Handler();
         mListenLogger = new ListenLogger(this);
+
+        // Register package manager to receive updates
+        mPacManReceiver = new PacManReceiver();
+        IntentFilter pacManFilter = new IntentFilter();
+        pacManFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        pacManFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        pacManFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+        pacManFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        pacManFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        pacManFilter.addDataScheme("package");
+        registerReceiver(mPacManReceiver, pacManFilter);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mRemoteMetadata = new RemoteMetadataManagerv21(this);
@@ -245,6 +259,7 @@ public class PlaybackService extends Service
     public void onDestroy() {
         Log.i(TAG, "onDestroy()");
 
+        unregisterReceiver(mPacManReceiver);
         PluginsLookup.getDefault().removeProviderListener(this);
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         mRemoteMetadata.release();

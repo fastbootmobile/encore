@@ -33,11 +33,6 @@ import org.omnirom.music.service.PlaybackService;
 public class PacManReceiver extends BroadcastReceiver {
     private static final String TAG = "PacManReceiver";
 
-    public static ComponentName getComponentName(Context ctx) {
-        return new ComponentName(ctx.getPackageName(),
-                "org.omnirom.music.providers.PacManReceiver");
-    }
-
     /**
      * {@inheritDoc}
      */
