@@ -59,6 +59,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         public final TextView tvSubTitle;
         public final AlbumArtImageView ivCover;
         public int backColor;
+        public BoundEntity entity;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -271,10 +272,12 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
 
         final Resources res = holder.llRoot.getResources();
 
-        // Reset root color
-        final int defaultColor = res.getColor(R.color.default_album_art_background);
-        holder.llRoot.setBackgroundColor(defaultColor);
-        holder.backColor = defaultColor;
+        if (!entry.entity.equals(holder.entity)) {
+            // Reset root color
+            final int defaultColor = res.getColor(R.color.default_album_art_background);
+            holder.llRoot.setBackgroundColor(defaultColor);
+            holder.backColor = defaultColor;
+        }
 
         // Update entry contents
         if (entry.entity instanceof Playlist) {
@@ -311,6 +314,8 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         } else {
             Log.e(TAG, "Unsupported entity type: " + entry.entity);
         }
+
+        holder.entity = entry.entity;
     }
 
     @Override
