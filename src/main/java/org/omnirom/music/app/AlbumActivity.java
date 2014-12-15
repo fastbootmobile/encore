@@ -15,31 +15,26 @@
 
 package org.omnirom.music.app;
 
-import android.app.ActionBar;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
 import android.transition.Transition;
-import android.transition.TransitionValues;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import org.omnirom.music.app.fragments.AlbumViewFragment;
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
 import org.omnirom.music.framework.PlaybackProxy;
-import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Activity for viewing an album details through
@@ -79,6 +74,7 @@ public class AlbumActivity extends AppActivity {
         return intent;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,13 +104,13 @@ public class AlbumActivity extends AppActivity {
         mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle("");
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Utils.hasLollipop()) {
             final Transition returnTransition = getWindow().getSharedElementReturnTransition();
             returnTransition.addListener(new Transition.TransitionListener() {
                 @Override

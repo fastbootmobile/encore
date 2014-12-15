@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.http.HttpResponseCache;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -14,7 +13,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -22,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.williammora.snackbar.Snackbar;
@@ -44,8 +41,6 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.List;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -200,11 +195,6 @@ public class MainActivity extends AppActivity
             }
             super.onBackPressed();
         }
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     @Override
@@ -445,8 +435,7 @@ public class MainActivity extends AppActivity
 
             // Setup cast button on 4.2+
             MenuItem castMenu = menu.findItem(R.id.action_cast);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                Log.d(TAG, "Showing cast action");
+            if (Utils.hasJellyBeanMR1()) {
                 MediaRouteActionProvider mediaRouteActionProvider =
                         (MediaRouteActionProvider) MenuItemCompat.getActionProvider(castMenu);
                 mediaRouteActionProvider.setRouteSelector(mCastModule.getSelector());

@@ -17,17 +17,15 @@ package org.omnirom.music.app;
 
 import android.animation.Animator;
 import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
 import android.transition.Transition;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,8 +34,6 @@ import android.view.ViewAnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 
 import org.omnirom.music.app.fragments.ArtistFragment;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Activity to view an Artist tracks, similar, etc. through
@@ -110,13 +106,13 @@ public class ArtistActivity extends AppActivity {
         mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle("");
+            actionBar.setTitle(null);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Utils.hasLollipop()) {
             // Safeguard in case of no animation
             mHandler.postDelayed(new Runnable() {
                 @Override
@@ -220,7 +216,7 @@ public class ArtistActivity extends AppActivity {
 
     @Override
     public void onBackPressed() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Utils.hasLollipop()) {
             /*
              * Lollipop workaround: Transitions use hardware GPU layers, which means they are
              * GPU textures with a max size (for 99% devices) of 4096x4096. To avoid crashes,

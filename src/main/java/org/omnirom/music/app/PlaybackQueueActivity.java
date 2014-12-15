@@ -131,7 +131,7 @@ public class PlaybackQueueActivity extends AppActivity {
                 Intent intent = AlbumActivity.craftIntent(getActivity(), hero,
                         song.getAlbum(), song.getProvider(), color);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (Utils.hasLollipop()) {
                     ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                             view, "itemImage");
 

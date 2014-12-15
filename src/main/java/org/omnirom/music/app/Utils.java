@@ -15,7 +15,6 @@
 
 package org.omnirom.music.app;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -24,9 +23,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
@@ -62,7 +58,7 @@ import java.util.concurrent.TimeUnit;
 public class Utils {
     private static final String TAG = "Utils";
 
-    private static final Map<String, Bitmap> mBitmapQueue = new HashMap<String, Bitmap>();
+    private static final Map<String, Bitmap> mBitmapQueue = new HashMap<>();
 
     /**
      * Format milliseconds into an human-readable track length.
@@ -243,29 +239,6 @@ public class Utils {
         };
         a.setDuration(500);
         return a;
-    }
-
-
-    public static void setLargeFabOutline(View[] views) {
-        setFabOutline(R.dimen.floating_button_large_size, views);
-    }
-
-    public static void setSmallFabOutline(View[] views) {
-        setFabOutline(R.dimen.floating_button_small_size, views);
-    }
-
-    private static void setFabOutline(int dimenRes, View[] views) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            /* Resources res = views[0].getResources();
-            int size = res.getDimensionPixelSize(dimenRes);
-
-            Outline outline = new Outline();
-            outline.setOval(0, 0, size, size);
-
-            for (View v : views) {
-                v.setOutline(outline);
-            } */
-        }
     }
 
     /**
@@ -531,46 +504,6 @@ public class Utils {
         }
     }
 
-    public static void colorFloatingButton(View fab, int color, boolean bigFab) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            // RippleDrawable ripple = (RippleDrawable) fab.getBackground();
-            // GradientDrawable back = (GradientDrawable) ripple.getDrawable(0);
-            // back.setColor(color);
-        } else {
-            StateListDrawable rootShape = (StateListDrawable) fab.getBackground();
-            LayerDrawable layer = (LayerDrawable) rootShape.getCurrent();
-            GradientDrawable shape = (GradientDrawable) layer.getDrawable(1);
-            shape.setColor(color);
-        }
-    }
-
-    public static void setupLargeFabShadow(View fab) {
-        setupFabShadow(fab, Utils.dpToPx(fab.getResources(), 48));
-    }
-
-    public static void setupSmallFabShadow(View fab) {
-        int measuredWidth = fab.getMeasuredWidth();
-        if (measuredWidth <= 0) {
-            measuredWidth = fab.getWidth();
-        }
-        if (measuredWidth <= 0) {
-            measuredWidth = Utils.dpToPx(fab.getResources(), 30);
-        }
-        setupFabShadow(fab, measuredWidth - 8);
-    }
-
-    private static void setupFabShadow(View fab, int radius) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
-                && Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-            StateListDrawable rootShape = (StateListDrawable) fab.getBackground();
-            LayerDrawable layer = (LayerDrawable) rootShape.getCurrent();
-            GradientDrawable shadow = (GradientDrawable) layer.getDrawable(0);
-            shadow.setColors(new int[]{0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000,
-                    0x80000000, 0x0});
-            shadow.setGradientRadius(radius);
-        }
-    }
-
     public static void setChildrenAlpha(ViewGroup root, final float alpha) {
         final int childCount = root.getChildCount();
         for (int i = 0; i < childCount; ++i) {
@@ -622,5 +555,9 @@ public class Utils {
 
     public static boolean hasLollipop() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    public static boolean hasJellyBeanMR1() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
     }
 }
