@@ -199,9 +199,9 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             mCurrentTrackTag = tag;
         }
 
-        if (mListenLogger.isLiked(item.getRef())) {
+        if (tag.btnThumbs != null && mListenLogger.isLiked(item.getRef())) {
             tag.btnThumbs.setImageResource(R.drawable.ic_thumbs_up);
-        } else {
+        } else if (tag.btnThumbs != null) {
             tag.btnThumbs.setImageResource(R.drawable.ic_thumbs_up_gray);
         }
 
