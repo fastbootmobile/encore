@@ -190,7 +190,7 @@ public class PluginsLookup {
         if (mPlaybackService == null) {
             Intent i = new Intent(mContext, PlaybackService.class);
             mContext.bindService(i, mPlaybackConnection,
-                    Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT);
+                    Context.BIND_AUTO_CREATE | Context.BIND_ABOVE_CLIENT);
         }
     }
 
