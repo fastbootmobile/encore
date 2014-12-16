@@ -104,7 +104,7 @@ public class ListenLogger {
      */
     public void addLike(Song song) {
         SharedPreferences.Editor editor = mPrefs.edit();
-        Set<String> entries = mPrefs.getStringSet(PREF_LIKED_ENTRIES, new TreeSet<String>());
+        Set<String> entries = new TreeSet<>(mPrefs.getStringSet(PREF_LIKED_ENTRIES, new TreeSet<String>()));
 
         JSONObject jsonRoot = new JSONObject();
         try {
@@ -113,6 +113,8 @@ public class ListenLogger {
         } catch (JSONException ignore) {}
 
         entries.add(jsonRoot.toString());
+
+        editor.putStringSet(PREF_LIKED_ENTRIES, entries);
         editor.apply();
     }
 
@@ -122,7 +124,7 @@ public class ListenLogger {
      */
     public void removeLike(Song song) {
         SharedPreferences.Editor editor = mPrefs.edit();
-        Set<String> entries = mPrefs.getStringSet(PREF_LIKED_ENTRIES, new TreeSet<String>());
+        Set<String> entries = new TreeSet<>(mPrefs.getStringSet(PREF_LIKED_ENTRIES, new TreeSet<String>()));
 
         JSONObject jsonRoot = new JSONObject();
         try {
@@ -131,6 +133,7 @@ public class ListenLogger {
         } catch (JSONException ignore) {}
 
         entries.remove(jsonRoot.toString());
+        editor.putStringSet(PREF_LIKED_ENTRIES, entries);
         editor.apply();
     }
 
@@ -138,7 +141,7 @@ public class ListenLogger {
      * @return a list of all the liked entries
      */
     public List<LogEntry> getLikedEntries() {
-        Set<String> entries = mPrefs.getStringSet(PREF_HISTORY_ENTRIES, null);
+        Set<String> entries = mPrefs.getStringSet(PREF_LIKED_ENTRIES, null);
         List<LogEntry> output = new ArrayList<>();
         if (entries != null) {
             for (String entry : entries) {
@@ -163,12 +166,13 @@ public class ListenLogger {
      * @return true if the song is liked
      */
     public boolean isLiked(String ref) {
-        Set<String> entries = mPrefs.getStringSet(PREF_HISTORY_ENTRIES, null);
+        Set<String> entries = mPrefs.getStringSet(PREF_LIKED_ENTRIES, null);
         if (entries != null) {
             for (String entry : entries) {
                 try {
                     JSONObject jsonObj = new JSONObject(entry);
                     String songRef = jsonObj.getString(KEY_SONG_REF);
+                    Log.e(TAG, "Liked entry: " + songRef);
                     if (songRef.equals(ref)) {
                         return true;
                     }

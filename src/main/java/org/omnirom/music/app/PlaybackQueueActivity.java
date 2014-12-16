@@ -28,6 +28,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBar;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,9 +40,14 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 
+import com.echonest.api.v4.EchoNestException;
+
+import org.omnirom.music.api.echonest.AutoMixBucket;
+import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.app.adapters.PlaybackQueueAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
+import org.omnirom.music.framework.ListenLogger;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -150,17 +156,6 @@ public class PlaybackQueueActivity extends AppActivity {
                 mHandler.obtainMessage(MSG_UPDATE_PLAYSTATE,
                         buffering ? PLAYSTATE_ARG1_BUFFERING : PLAYSTATE_ARG1_NOT_BUFFERING,
                         PlayPauseDrawable.SHAPE_PAUSE).sendToTarget();
-
-                /*mHandler.post(new Runnable() {
-                    @Override
-                        AutoMixManager mixManager = AutoMixManager.getDefault();
-                        if (mixManager.getCurrentPlayingBucket() != null) {
-                            Utils.animateScale(mThumbsUpButton, true, true);
-                        } else {
-                            Utils.animateScale(mThumbsUpButton, true, false);
-                        }
-                    }
-                });*/
             }
 
             @Override
@@ -357,7 +352,29 @@ public class PlaybackQueueActivity extends AppActivity {
             mLikeClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    ListenLogger logger = new ListenLogger(getActivity());
+                    PlaybackQueueAdapter.ViewHolder tag = (PlaybackQueueAdapter.ViewHolder) v.getTag();
+                    boolean isLiked = logger.isLiked(tag.song.getRef());
 
+                    Log.e(TAG, "isLiked: " + isLiked);
+
+                    if (isLiked) {
+                        logger.removeLike(tag.song);
+                        ((ImageView) v).setImageResource(R.drawable.ic_thumbs_up_gray);
+                    } else {
+                        logger.addLike(tag.song);
+
+                        AutoMixBucket bucket = AutoMixManager.getDefault().getCurrentPlayingBucket();
+                        if (bucket != null) {
+                            try {
+                                bucket.notifyLike();
+                            } catch (EchoNestException e) {
+                                Log.e(TAG, "Unable to notify like event to EchoNest");
+                            }
+                        }
+
+                        ((ImageView) v).setImageResource(R.drawable.ic_thumbs_up);
+                    }
                 }
             };
         }

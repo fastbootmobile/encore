@@ -31,6 +31,7 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
+import org.omnirom.music.framework.ListenLogger;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
@@ -43,6 +44,7 @@ import java.util.List;
  * Adapter for playback queue
  */
 public class PlaybackQueueAdapter extends BaseAdapter {
+    private ListenLogger mListenLogger;
     private List<Song> mQueue;
     private ViewHolder mCurrentTrackTag;
     private View.OnClickListener mPlayFabClickListener;
@@ -117,6 +119,10 @@ public class PlaybackQueueAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        if (mListenLogger == null) {
+            mListenLogger = new ListenLogger(parent.getContext());
+        }
+
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final Resources res = parent.getResources();
         final Song item;
@@ -161,6 +167,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                     tag.btnRepeat.setImageResource(R.drawable.ic_replay_gray);
                 }
                 tag.btnOverflow.setTag(tag);
+                tag.btnThumbs.setTag(tag);
 
                 // Play FAB drawable
                 tag.fabPlay.setFixupInset(false);
@@ -190,6 +197,12 @@ public class PlaybackQueueAdapter extends BaseAdapter {
 
         if (isCurrent) {
             mCurrentTrackTag = tag;
+        }
+
+        if (mListenLogger.isLiked(item.getRef())) {
+            tag.btnThumbs.setImageResource(R.drawable.ic_thumbs_up);
+        } else {
+            tag.btnThumbs.setImageResource(R.drawable.ic_thumbs_up_gray);
         }
 
         if (item.isLoaded()) {
