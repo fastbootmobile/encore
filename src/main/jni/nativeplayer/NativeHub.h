@@ -18,6 +18,7 @@
 #include <list>
 #include <string>
 #include <unordered_map>
+#include <mutex>
 #include "../nativesocket/SocketCallbacks.h"
 #include "../nativesocket/SocketCommon.h"
 #include "../nativesocket/SocketHost.h"
@@ -111,6 +112,7 @@ class NativeHub : public SocketCallbacks {
     int32_t m_iSampleRate;
     int32_t m_iChannels;
     void* m_pUserData;
+    std::recursive_mutex m_ChainMutex;
 };
 
 

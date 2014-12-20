@@ -56,6 +56,7 @@ public class DSPConnection extends AbstractProviderConnection {
      */
     @Override
     public void unbindService(NativeHub hub) {
+        Log.e(TAG, "unbindService: mIsBound=" + mIsBound + ", name=" + getProviderName() + ", socket=" + mAudioSocketName);
         if (mIsBound) {
             mBinder = null;
         }
@@ -75,7 +76,7 @@ public class DSPConnection extends AbstractProviderConnection {
     public void onServiceConnected(ComponentName name, IBinder service) {
         mBinder = IDSPProvider.Stub.asInterface(service);
 
-        if (DEBUG) Log.d(TAG, "Connected to providers " + name);
+        if (DEBUG) Log.d(TAG, "Connected to DSP " + name);
 
         if (mListener != null) {
             mListener.onServiceConnected(this);
@@ -95,6 +96,8 @@ public class DSPConnection extends AbstractProviderConnection {
                 Log.e(TAG, "Cannot restore audio socket to DSP effect", e);
             }
         }
+
+        super.onServiceConnected(name, service);
     }
 
     /**
@@ -120,8 +123,6 @@ public class DSPConnection extends AbstractProviderConnection {
                 } catch (RemoteException e) {
                     Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
                 }
-            } else {
-                bindService();
             }
             return true;
         } else {

@@ -38,10 +38,12 @@ void NativeHub::setSink(INativeSink* sink) {
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::setDSPChain(const std::list<std::string>& chain) {
+    std::lock_guard<std::recursive_mutex> lock(m_ChainMutex);
     m_DSPChain = chain;
 }
 // -------------------------------------------------------------------------------------
 SocketHost* NativeHub::createHostSocket(const std::string& name, bool is_dsp) {
+    std::lock_guard<std::recursive_mutex> lock(m_ChainMutex);
     SocketHost* host = new SocketHost(name);
     if (!host->initialize()) {
         ALOGE("Unable to initialize host socket %s", name.c_str());
@@ -61,6 +63,7 @@ SocketHost* NativeHub::createHostSocket(const std::string& name, bool is_dsp) {
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::releaseHostSocket(const std::string& name) {
+    std::lock_guard<std::recursive_mutex> lock(m_ChainMutex);
     bool is_dsp = false;
     SocketHost* host = m_ProviderSockets[name];
 
@@ -99,6 +102,8 @@ SocketHost* NativeHub::findSocketByName(const std::string& name) {
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::writeAudioToDsp(int chain_index, const uint8_t* data, const uint32_t len) {
+    std::lock_guard<std::recursive_mutex> lock(m_ChainMutex);
+
     bool success = false;
     auto iter = m_DSPChain.begin();
     std::advance(iter, chain_index);
@@ -172,6 +177,7 @@ void NativeHub::onFormatInfo(SocketCommon* socket, const int32_t sample_rate,
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::onAudioData(SocketCommon* socket, const uint8_t* data, const uint32_t len) {
+    std::lock_guard<std::recursive_mutex> lock(m_ChainMutex);
     bool is_dsp = (m_ProviderSockets[socket->getSocketName()] == nullptr);
 
     // ALOGE("onAudioData(%d bytes)", len);

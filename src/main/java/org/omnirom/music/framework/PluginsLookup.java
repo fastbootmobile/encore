@@ -286,13 +286,13 @@ public class PluginsLookup {
     public List<ProviderConnection> getAvailableProviders() {
         // That list may be modified, so we return a copy
         synchronized (mConnections) {
-            return new ArrayList<ProviderConnection>(mConnections);
+            return new ArrayList<>(mConnections);
         }
     }
 
     public List<DSPConnection> getAvailableDSPs() {
         synchronized (mDSPConnections) {
-            return new ArrayList<DSPConnection>(mDSPConnections);
+            return new ArrayList<>(mDSPConnections);
         }
     }
 
@@ -349,7 +349,6 @@ public class PluginsLookup {
                             if (conn.getPackage().equals(sinfo.packageName)
                                     && conn.getServiceName().equals(sinfo.name)) {
                                 found = true;
-                                conn.bindService();
                                 break;
                             }
                         }

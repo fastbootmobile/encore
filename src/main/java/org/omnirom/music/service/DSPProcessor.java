@@ -63,7 +63,7 @@ public class DSPProcessor {
      * @param ctx A valid context
      * @param chain The chain of plugins to use
      */
-    public void setActiveChain(Context ctx, List<ProviderIdentifier> chain) {
+    public void setActiveChain(Context ctx, List<ProviderIdentifier> chain, NativeHub hub) {
         // We make a copy to avoid any external modification
         mDSPChain = new ArrayList<ProviderIdentifier>(chain);
 
@@ -79,8 +79,18 @@ public class DSPProcessor {
         editor.putStringSet(PREF_KEY_CHAIN, identifiers);
         editor.apply();
 
+        // Bind (if necessary) the new services, and unbind unused DSP services
+        final PluginsLookup plugins = PluginsLookup.getDefault();
+        final List<DSPConnection> list = new ArrayList<>(plugins.getAvailableDSPs());
         for (ProviderIdentifier id : chain) {
-            PluginsLookup.getDefault().getDSP(id).bindService();
+            DSPConnection conn = plugins.getDSP(id);
+            conn.bindService();
+            list.remove(conn);
+        }
+
+        for (DSPConnection conn : list) {
+            Log.e(TAG, "Unbinding: " + conn.getProviderName());
+            conn.unbindService(hub);
         }
 
         updateHubDspChain();
@@ -98,16 +108,18 @@ public class DSPProcessor {
      * @param ctx A valid context
      */
     public void restoreChain(Context ctx) {
-        SharedPreferences prefs = ctx.getSharedPreferences(PREFS_DSP_CHAIN, 0);
-        Set<String> identifiers = prefs.getStringSet(PREF_KEY_CHAIN, null);
-        mDSPChain = new ArrayList<ProviderIdentifier>();
+        final SharedPreferences prefs = ctx.getSharedPreferences(PREFS_DSP_CHAIN, 0);
+        final Set<String> identifiers = prefs.getStringSet(PREF_KEY_CHAIN, null);
+        final PluginsLookup plugins = PluginsLookup.getDefault();
+
+        mDSPChain = new ArrayList<>();
 
         if (identifiers != null) {
             for (String id : identifiers) {
                 ProviderIdentifier identifier = ProviderIdentifier.fromSerialized(id);
                 if (identifier != null) {
                     mDSPChain.add(identifier);
-                    PluginsLookup.getDefault().getDSP(identifier).bindService();
+                    plugins.getDSP(identifier).bindService();
                 } else {
                     Log.e(TAG, "Cannot restore from serialized string " + id);
                 }

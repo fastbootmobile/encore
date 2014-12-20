@@ -123,7 +123,7 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
      */
     public void unbindService(NativeHub hub) {
         if (mIsBound) {
-            if (DEBUG) Log.d(TAG, "Unbinding service...");
+            if (DEBUG) Log.d(TAG, "Unbinding service " + mProviderName + "...");
 
             mContext.unbindService(this);
             Intent i = new Intent();
@@ -143,7 +143,7 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
             return;
         }
 
-        if (DEBUG) Log.d(TAG, "Binding service...");
+        if (DEBUG) Log.d(TAG, "Binding service " + mPackage + "/" + mServiceName + "...");
         Intent i = new Intent();
         i.setClassName(mPackage, mServiceName);
         mContext.bindService(i, this, Context.BIND_AUTO_CREATE

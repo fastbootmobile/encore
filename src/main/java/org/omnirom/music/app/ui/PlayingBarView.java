@@ -557,19 +557,7 @@ public class PlayingBarView extends RelativeLayout {
             mTracksLayout.addView(itemRoot);
 
             TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
-            //ImageView ivActionIcon = (ImageView) itemRoot.findViewById(R.id.ivActionIcon);
-
             tvTitle.setText(getContext().getString(R.string.view_full_queue));
-            /*ivActionIcon.setImageResource(R.drawable.ic_reduce);
-            ivActionIcon.setScaleType(ImageView.ScaleType.CENTER);
-
-            ivActionIcon.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    setWrapped(true);
-                }
-            });*/
-            //ivActionIcon.setVisibility(View.GONE);
 
             final int finalShownCount = shownCount;
             final View[] finalItemViews = itemViews;
@@ -627,17 +615,20 @@ public class PlayingBarView extends RelativeLayout {
             case PlaybackService.STATE_STOPPED:
                 mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                 mPlayFabDrawable.setBuffering(false);
+                mIsPlaying = false;
                 break;
 
             case PlaybackService.STATE_BUFFERING:
             case PlaybackService.STATE_PAUSING:
                 mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                 mPlayFabDrawable.setBuffering(true);
+                mIsPlaying = true;
                 break;
 
             case PlaybackService.STATE_PLAYING:
-                mPlayFabDrawable.setShape(PlaybackService.STATE_PLAYING);
+                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                 mPlayFabDrawable.setBuffering(false);
+                mIsPlaying = true;
                 break;
         }
     }

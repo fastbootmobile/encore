@@ -972,7 +972,7 @@ public class PlaybackService extends Service
 
         @Override
         public void setDSPChain(List<ProviderIdentifier> chain) throws RemoteException {
-            mDSPProcessor.setActiveChain(PlaybackService.this, chain);
+            mDSPProcessor.setActiveChain(PlaybackService.this, chain, mNativeHub);
         }
 
         @Override
