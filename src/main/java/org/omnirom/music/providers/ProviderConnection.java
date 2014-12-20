@@ -45,6 +45,9 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
     public ProviderConnection(Context ctx, String providerName, String authorName, String pkg,
                               String serviceName, String configActivity) {
         super(ctx, providerName, authorName, pkg, serviceName, configActivity);
+
+        // Try to bind to the service
+        bindService();
     }
 
     /**

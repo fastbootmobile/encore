@@ -98,7 +98,6 @@ public class ImageCache {
 
                     synchronized (mReusableBitmaps) {
                         mReusableBitmaps.add(new SoftReference<>(oldBitmap.getBitmap()));
-                        Log.e(TAG, "Reusable bitmaps: " + mReusableBitmaps.size());
                     }
                 }
             };

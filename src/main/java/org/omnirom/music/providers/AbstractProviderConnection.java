@@ -65,9 +65,6 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
 
         // Retain a generic identity of this provider
         mIdentifier = new ProviderIdentifier(mPackage, mServiceName, mProviderName);
-
-        // Try to bind to the service
-        bindService();
     }
 
     /**
@@ -149,7 +146,8 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
         if (DEBUG) Log.d(TAG, "Binding service...");
         Intent i = new Intent();
         i.setClassName(mPackage, mServiceName);
-        mContext.bindService(i, this, Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY);
+        mContext.bindService(i, this, Context.BIND_AUTO_CREATE
+                | Context.BIND_WAIVE_PRIORITY | Context.BIND_IMPORTANT);
     }
 
     /**

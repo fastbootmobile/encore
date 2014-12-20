@@ -79,6 +79,10 @@ public class DSPProcessor {
         editor.putStringSet(PREF_KEY_CHAIN, identifiers);
         editor.apply();
 
+        for (ProviderIdentifier id : chain) {
+            PluginsLookup.getDefault().getDSP(id).bindService();
+        }
+
         updateHubDspChain();
     }
 
@@ -103,6 +107,7 @@ public class DSPProcessor {
                 ProviderIdentifier identifier = ProviderIdentifier.fromSerialized(id);
                 if (identifier != null) {
                     mDSPChain.add(identifier);
+                    PluginsLookup.getDefault().getDSP(identifier).bindService();
                 } else {
                     Log.e(TAG, "Cannot restore from serialized string " + id);
                 }
