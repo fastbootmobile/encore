@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
@@ -40,7 +41,7 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
     private RemoteControlClient mClient;
     private final ComponentName mEventReceiver;
     private final AudioManager mAudioManager;
-    private Bitmap mPreviousAlbumArt;
+    private BitmapDrawable mPreviousAlbumArt;
 
     public RemoteMetadataManager(PlaybackService service) {
         mEventReceiver = new ComponentName(service, RemoteControlReceiver.class);
@@ -88,21 +89,19 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
     }
 
     @Override
-    public void setAlbumArt(Bitmap bmp) {
-        if (mPreviousAlbumArt != null && mPreviousAlbumArt != bmp) {
-            mPreviousAlbumArt.recycle();
-            mPreviousAlbumArt = null;
-        }
+    public void setAlbumArt(BitmapDrawable bmp) {
+        if (mPreviousAlbumArt != bmp) {
+            RemoteControlClient.MetadataEditor metadata = mClient.editMetadata(false);
+            if (bmp != null) {
+                mPreviousAlbumArt = bmp;
+                metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
+                        mPreviousAlbumArt.getBitmap());
+            } else {
+                metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, null);
+            }
 
-        RemoteControlClient.MetadataEditor metadata = mClient.editMetadata(false);
-        if (bmp != null) {
-            mPreviousAlbumArt = bmp.copy(bmp.getConfig(), false);
-            metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, mPreviousAlbumArt);
-        } else {
-            metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, null);
+            metadata.apply();
         }
-
-        metadata.apply();
     }
 
     @Override

@@ -19,6 +19,7 @@ import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.session.MediaSession;
@@ -47,7 +48,7 @@ class RemoteMetadataManagerv21 extends MediaSession.Callback implements IRemoteM
     private MediaSession mMediaSession;
     private MediaMetadata.Builder mBuilder;
     private PlaybackState.Builder mStateBuilder;
-    private Bitmap mPreviousAlbumArt;
+    private BitmapDrawable mPreviousAlbumArt;
 
     private Runnable mThumbsUpRunnable = new Runnable() {
         @Override
@@ -106,18 +107,15 @@ class RemoteMetadataManagerv21 extends MediaSession.Callback implements IRemoteM
     }
 
     @Override
-    public void setAlbumArt(final Bitmap bmp) {
-        if (mPreviousAlbumArt != null) {
-            mPreviousAlbumArt.recycle();
-            mPreviousAlbumArt = null;
-        }
+    public void setAlbumArt(final BitmapDrawable bmp) {
+        if (mPreviousAlbumArt != bmp) {
+            if (bmp != null) {
+                mPreviousAlbumArt = bmp;
 
-        if (bmp != null) {
-            mPreviousAlbumArt = bmp.copy(bmp.getConfig(), false);
-
-            mBuilder.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, mPreviousAlbumArt);
-            if (mMediaSession != null) {
-                mMediaSession.setMetadata(mBuilder.build());
+                mBuilder.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, mPreviousAlbumArt.getBitmap());
+                if (mMediaSession != null) {
+                    mMediaSession.setMetadata(mBuilder.build());
+                }
             }
         }
     }

@@ -21,9 +21,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.view.View;
@@ -31,6 +29,7 @@ import android.widget.RemoteViews;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.AlbumArtHelper;
 import org.omnirom.music.framework.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
@@ -43,18 +42,21 @@ import org.omnirom.music.providers.ProviderAggregator;
  * Class handling the playback service notification
  */
 public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
+    private static final String TAG = "ServiceNotification";
+
     private Context mContext;
     private Resources mResources;
-    private final Bitmap mDefaultArt;
-    private Bitmap mCurrentArt;
-    private Bitmap mPendingArt;
+    private final BitmapDrawable mDefaultArt;
+    private BitmapDrawable mCurrentArt;
     private NotificationChangedListener mListener;
     private Song mCurrentSong;
     private RemoteViews mBaseTemplate;
     private RemoteViews mExpandedTemplate;
     private boolean mHasNext;
     private boolean mShowPlayAction;
+    private AlbumArtHelper.AlbumArtTask mArtTask;
 
+    private NotificationCompat.Builder mBuilder;
     private Notification mNotification;
 
     private static final int NOTIFICATION_ID = 1;
@@ -64,8 +66,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         mResources = ctx.getResources();
 
         // Get the default album art
-        BitmapDrawable def = (BitmapDrawable) mResources.getDrawable(R.drawable.album_placeholder);
-        mDefaultArt = def.getBitmap();
+        mDefaultArt = (BitmapDrawable) mResources.getDrawable(R.drawable.album_placeholder);
         mCurrentArt = mDefaultArt;
 
         mBaseTemplate = new RemoteViews(ctx.getPackageName(), R.layout.notification_base);
@@ -94,6 +95,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         setPlayPauseActionImpl(false, false);
 
         // Build the initial notification
+        buildBaseNotification();
         buildNotification();
     }
 
@@ -101,40 +103,44 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         return mResources.getString(resId);
     }
 
-    private void buildNotification() {
+    private void buildBaseNotification() {
         Intent notificationIntent = new Intent(mContext, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
+        mBuilder = new NotificationCompat.Builder(mContext);
+        mCurrentArt = mDefaultArt;
 
-        if (mCurrentArt == null || mCurrentArt.isRecycled()) {
-            mCurrentArt = mDefaultArt;
-        }
         // Build the core notification
-        builder.setSmallIcon(R.drawable.ic_launcher_white)
+        mBuilder.setSmallIcon(R.drawable.ic_launcher_white)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setContent(mBaseTemplate)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
+    }
+
+    private void buildNotification() {
+        if (mCurrentArt == null) {
+            mCurrentArt = mDefaultArt;
+        }
 
         // And get the notification object
-        mNotification = builder.build();
+        mNotification = mBuilder.build();
 
         // Add the expanded controls
         mNotification.bigContentView = mExpandedTemplate;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Utils.hasLollipop()) {
             mNotification.category = Notification.CATEGORY_SERVICE;
         }
 
         // Update fields
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         if (mCurrentSong != null) {
-            final Artist artist = ProviderAggregator.getDefault()
-                    .retrieveArtist(mCurrentSong.getArtist(), mCurrentSong.getProvider());
+            final Artist artist = aggregator.retrieveArtist(mCurrentSong.getArtist(), mCurrentSong.getProvider());
 
-            final Album album = ProviderAggregator.getDefault()
-                    .retrieveAlbum(mCurrentSong.getAlbum(), mCurrentSong.getProvider());
+            final Album album = aggregator.retrieveAlbum(mCurrentSong.getAlbum(),
+                    mCurrentSong.getProvider());
 
             if (mCurrentSong.isLoaded()) {
                 // Song title
@@ -152,7 +158,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
                     mExpandedTemplate.setTextViewText(R.id.tvNotifLineThree, album.getName());
                 }
             } else {
-                builder.setContentTitle(getString(R.string.loading));
+                mBuilder.setContentTitle(getString(R.string.loading));
             }
         }
 
@@ -172,12 +178,12 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
             mExpandedTemplate.setViewVisibility(R.id.btnNotifNext, View.GONE);
         }
 
-        if (mCurrentArt != null && !mCurrentArt.isRecycled()) {
-            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt);
-            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt);
-        } else if (!mDefaultArt.isRecycled()) {
-            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt);
-            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt);
+        if (mCurrentArt != null) {
+            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.getBitmap());
+            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.getBitmap());
+        } else if (mDefaultArt != null) {
+            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt.getBitmap());
+            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt.getBitmap());
         } else {
             mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, null);
             mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, null);
@@ -261,8 +267,8 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     /**
      * @return The current active album art
      */
-    public Bitmap getAlbumArt() {
-        if (mCurrentArt == null || mCurrentArt.isRecycled()) {
+    public BitmapDrawable getAlbumArt() {
+        if (mCurrentArt == null) {
             return mDefaultArt;
         } else {
             return mCurrentArt;
@@ -271,13 +277,13 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
     private void updateAlbumArt() {
         if (mCurrentSong != null) {
-            if (mCurrentArt != null && mCurrentArt != mDefaultArt) {
-                mPendingArt = mCurrentArt;
+            mCurrentArt = mDefaultArt;
+            if (mArtTask != null) {
+                mArtTask.cancel(true);
             }
 
-
-            mCurrentArt = mDefaultArt;
-            AlbumArtHelper.retrieveAlbumArt(mContext.getResources(), this, mCurrentSong, false);
+            mArtTask = AlbumArtHelper.retrieveAlbumArt(mContext.getApplicationContext().getResources(),
+                    this, mCurrentSong, false);
         }
     }
 
@@ -287,12 +293,13 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
             if (output == null) {
                 mCurrentArt = mDefaultArt;
             } else {
-                Bitmap outputBitmap = output.getBitmap();
-                mCurrentArt = outputBitmap.copy(outputBitmap.getConfig(), false);
+                mCurrentArt = output;
             }
 
             buildNotification();
         }
+
+        mArtTask = null;
     }
 
     public interface NotificationChangedListener {

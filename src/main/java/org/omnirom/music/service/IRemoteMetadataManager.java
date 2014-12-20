@@ -16,6 +16,7 @@
 package org.omnirom.music.service;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 
 import org.omnirom.music.model.Song;
 
@@ -26,7 +27,7 @@ interface IRemoteMetadataManager {
     void setup();
     void release();
     void setActive(final boolean active);
-    void setAlbumArt(final Bitmap bmp);
+    void setAlbumArt(final BitmapDrawable bmp);
     void setCurrentSong(final Song song, final boolean hasNext);
     void notifyPlaying(final long timeElapsed);
     void notifyBuffering();
