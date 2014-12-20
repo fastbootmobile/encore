@@ -25,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.graphics.Palette;
@@ -67,83 +68,31 @@ import java.util.List;
  * ViewGroup for the sticky bottom playing bar
  */
 public class PlayingBarView extends RelativeLayout {
-
     private static final String TAG = "PlayingBarView";
 
-    // Delay after which the seek bar is updated (30Hz)
-    private static final int SEEK_BAR_UPDATE_DELAY = 1000 / 30;
-
-    private Runnable mUpdateSeekBarRunnable = new Runnable() {
-        @Override
-        public void run() {
-            int state = PlaybackProxy.getState();
-            if (state == PlaybackService.STATE_PLAYING
-                    || state == PlaybackService.STATE_PAUSING
-                    || state == PlaybackService.STATE_PAUSED) {
-                if (!mPlayInSeekMode) {
-                    mProgressDrawable.setValue(PlaybackProxy.getCurrentTrackPosition());
-                }
-
-                // Restart ourselves
-                mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
-            } else if (state == PlaybackService.STATE_BUFFERING) {
-                mProgressDrawable.setValue(0);
-            } else {
-                mProgressDrawable.setMax(1);
-                mProgressDrawable.setValue(1);
-            }
-        }
-    };
+    // Delay after which the seek bar is updated (10Hz)
+    private static final int SEEK_BAR_UPDATE_DELAY = 1000 / 10;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
-
         @Override
         public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePlayingQueue();
-                    mProgressDrawable.setMax(PlaybackProxy.getCurrentTrackLength());
-
-                    // Set the visibility and button state
-                    setPlayButtonState(buffering, false);
-                    mIsPlaying = true;
-                }
-            });
-
-            mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
         }
 
         @Override
         public void onPlaybackPause() throws RemoteException {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setPlayButtonState(false, true);
-                    mIsPlaying = false;
-                }
-            });
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
         }
 
         @Override
         public void onPlaybackResume() throws RemoteException {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setPlayButtonState(false, false);
-                    mIsPlaying = true;
-                }
-            });
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
         }
 
         @Override
         public void onPlaybackQueueChanged() throws RemoteException {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePlayingQueue();
-                }
-            });
+            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
         }
     };
 
@@ -166,7 +115,6 @@ public class PlayingBarView extends RelativeLayout {
                         updatePlayingQueue();
                     }
                 });
-
             }
         }
 
@@ -243,38 +191,66 @@ public class PlayingBarView extends RelativeLayout {
 
     private static final int MAX_PEEK_QUEUE_SIZE = 3;
 
+    private static final int MSG_UPDATE_QUEUE = 1;
+    private static final int MSG_UPDATE_SEEK = 2;
+    private static final int MSG_UPDATE_FAB = 3;
+
     private boolean mIsPlaying;
     private LinearLayout mTracksLayout;
     private ImageButton mPlayFab;
     private PlayPauseDrawable mPlayFabDrawable;
     private CircularProgressDrawable mProgressDrawable;
     private List<Song> mLastQueue;
-    private Handler mHandler = new Handler();
-    private final int mAnimationDuration;
+    private Handler mHandler;
+    private int mAnimationDuration;
     private boolean mWrapped;
     private boolean mPlayInSeekMode;
     private boolean mSkipFabAction;
 
     public PlayingBarView(Context context) {
         super(context);
-        mAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
-        mGestureDetector = new GestureDetector(getContext(), mGestureListener);
+        init();
     }
 
     public PlayingBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
-        mGestureDetector = new GestureDetector(getContext(), mGestureListener);
+        init();
     }
 
     public PlayingBarView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        init();
+    }
+
+    private void init() {
         mAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
         mGestureDetector = new GestureDetector(getContext(), mGestureListener);
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_UPDATE_QUEUE:
+                        mProgressDrawable.setMax(PlaybackProxy.getCurrentTrackLength());
+                        updatePlayingQueue();
+                        break;
+
+                    case MSG_UPDATE_SEEK:
+                        updateSeekBar();
+                        break;
+
+                    case MSG_UPDATE_FAB:
+                        updatePlayFab();
+                        break;
+                }
+            }
+        };
     }
 
     public void onPause() {
-        mHandler.removeCallbacks(mUpdateSeekBarRunnable);
+        mHandler.removeMessages(MSG_UPDATE_QUEUE);
+        mHandler.removeMessages(MSG_UPDATE_SEEK);
+        mHandler.removeMessages(MSG_UPDATE_FAB);
+
         PlaybackProxy.removeCallback(mPlaybackCallback);
         ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
     }
@@ -290,8 +266,9 @@ public class PlayingBarView extends RelativeLayout {
         }, 200);
 
         if (mTracksLayout != null) {
-            updatePlayingQueue();
-            updatePlayFab();
+            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
         }
     }
 
@@ -315,17 +292,6 @@ public class PlayingBarView extends RelativeLayout {
         mPlayFabDrawable = new PlayPauseDrawable(getResources(), 0.70f);
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         mPlayFabDrawable.setYOffset(6);
-
-        // Set the original state
-        if (PlaybackProxy.getState() == PlaybackService.STATE_PLAYING) {
-            mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-            mIsPlaying = true;
-            mProgressDrawable.setMax(PlaybackProxy.getCurrentTrackLength());
-            mHandler.postDelayed(mUpdateSeekBarRunnable, SEEK_BAR_UPDATE_DELAY);
-        } else {
-            mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-            mIsPlaying = false;
-        }
 
         LayerDrawable drawable = new LayerDrawable(new Drawable[]{
                 mProgressDrawable, mPlayFabDrawable
@@ -404,19 +370,23 @@ public class PlayingBarView extends RelativeLayout {
         return super.dispatchTouchEvent(ev);
     }
 
-    /**
-     * Defines the visual state of the play/pause button
-     *
-     * @param play true will set the image to a "play" image, false will set to "pause"
-     */
-    public void setPlayButtonState(boolean buffering, boolean play) {
-        if (play) {
-            mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        } else {
-            mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-        }
+    public void updateSeekBar() {
+        int state = PlaybackProxy.getState();
+        if (state == PlaybackService.STATE_PLAYING
+                || state == PlaybackService.STATE_PAUSING
+                || state == PlaybackService.STATE_PAUSED) {
+            if (!mPlayInSeekMode) {
+                mProgressDrawable.setValue(PlaybackProxy.getCurrentTrackPosition());
+            }
 
-        mPlayFabDrawable.setBuffering(buffering);
+            // Restart ourselves
+            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
+        } else if (state == PlaybackService.STATE_BUFFERING) {
+            mProgressDrawable.setValue(0);
+        } else {
+            mProgressDrawable.setMax(1);
+            mProgressDrawable.setValue(1);
+        }
     }
 
     public void updatePlayingQueue() {
@@ -424,11 +394,11 @@ public class PlayingBarView extends RelativeLayout {
         int currentIndex;
 
         // Do a copy
-        queue = new ArrayList<Song>(PlaybackProxy.getCurrentPlaybackQueue());
+        queue = new ArrayList<>(PlaybackProxy.getCurrentPlaybackQueue());
         currentIndex = PlaybackProxy.getCurrentTrackIndex();
 
         if (queue.size() > 0) {
-            mLastQueue = new ArrayList<Song>(queue);
+            mLastQueue = new ArrayList<>(queue);
             mTracksLayout.removeAllViews();
             mTracksLayout.setVisibility(View.VISIBLE);
 
@@ -481,10 +451,13 @@ public class PlayingBarView extends RelativeLayout {
                     tvArtist.setText(R.string.loading);
                 }
 
-                tvTitle.setText(song.getTitle());
-                ivAlbumArt.loadArtForSong(song);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ivAlbumArt.setTransitionName(song.getRef() + shownCount);
+                if (song != null) {
+                    tvTitle.setText(song.getTitle());
+
+                    ivAlbumArt.loadArtForSong(song);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        ivAlbumArt.setTransitionName(song.getRef() + shownCount);
+                    }
                 }
 
                 // Set root view click listener
@@ -492,7 +465,7 @@ public class PlayingBarView extends RelativeLayout {
                     @Override
                     public void onClick(View view) {
                         // Play that song now
-                        if (song.equals(PlaybackProxy.getCurrentTrack())) {
+                        if (song != null && song.equals(PlaybackProxy.getCurrentTrack())) {
                             // We're already playing that song, play it again
                             PlaybackProxy.seek(0);
                         } else {
