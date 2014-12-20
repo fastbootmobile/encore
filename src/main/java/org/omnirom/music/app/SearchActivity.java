@@ -15,7 +15,6 @@
 
 package org.omnirom.music.app;
 
-import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +22,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,6 +46,7 @@ public class SearchActivity extends AppActivity {
     private static final String TAG_FRAGMENT = "fragment_inner";
     private SearchFragment mActiveFragment;
     private Handler mHandler;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstance) {
@@ -54,6 +56,9 @@ public class SearchActivity extends AppActivity {
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_search);
 
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
         FragmentManager fm = getSupportFragmentManager();
         mActiveFragment = (SearchFragment) fm.findFragmentByTag(TAG_FRAGMENT);
         if (mActiveFragment == null) {
@@ -61,11 +66,6 @@ public class SearchActivity extends AppActivity {
             fm.beginTransaction()
                     .add(R.id.search_container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
-        }
-
-        final ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         handleIntent(getIntent());
