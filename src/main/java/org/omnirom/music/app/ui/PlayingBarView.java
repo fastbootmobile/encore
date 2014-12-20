@@ -16,7 +16,6 @@
 package org.omnirom.music.app.ui;
 
 import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -59,7 +58,6 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
-import org.omnirom.music.service.IPlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
@@ -293,6 +291,7 @@ public class PlayingBarView extends RelativeLayout {
 
         if (mTracksLayout != null) {
             updatePlayingQueue();
+            updatePlayFab();
         }
     }
 
@@ -617,6 +616,29 @@ public class PlayingBarView extends RelativeLayout {
             mWrapped = true;
             mTracksLayout.setVisibility(View.GONE);
             setFabVisible(false);
+        }
+    }
+
+    public void updatePlayFab() {
+        int state = PlaybackProxy.getState();
+
+        switch (state) {
+            case PlaybackService.STATE_PAUSED:
+            case PlaybackService.STATE_STOPPED:
+                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                mPlayFabDrawable.setBuffering(false);
+                break;
+
+            case PlaybackService.STATE_BUFFERING:
+            case PlaybackService.STATE_PAUSING:
+                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                mPlayFabDrawable.setBuffering(true);
+                break;
+
+            case PlaybackService.STATE_PLAYING:
+                mPlayFabDrawable.setShape(PlaybackService.STATE_PLAYING);
+                mPlayFabDrawable.setBuffering(false);
+                break;
         }
     }
 
