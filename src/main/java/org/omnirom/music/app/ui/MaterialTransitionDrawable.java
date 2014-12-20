@@ -40,20 +40,19 @@ public class MaterialTransitionDrawable extends Drawable {
     private long mOfflineStartTime;
     private final Object mDrawLock = new Object();
 
-
-    public MaterialTransitionDrawable(Context ctx, RecyclingBitmapDrawable base) {
-        this(ctx);
+    public MaterialTransitionDrawable(BitmapDrawable offlineDrawable, RecyclingBitmapDrawable base) {
+        this(offlineDrawable);
         mBaseDrawable = base;
         invalidateSelf();
     }
 
-    public MaterialTransitionDrawable(Context ctx) {
+    public MaterialTransitionDrawable(BitmapDrawable offlineDrawable) {
         mInterpolator = new AccelerateDecelerateInterpolator();
         mAnimating = false;
         mShowOfflineOverdraw = false;
         mColorMatSaturation = new ColorMatrix();
         mPaint = new Paint();
-        mOfflineDrawable = (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.ic_cloud_offline);
+        mOfflineDrawable = offlineDrawable;
     }
 
     public BitmapDrawable getFinalDrawable() {
