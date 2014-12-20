@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.omnirom.music.app.ui.AlbumArtImageView;
@@ -33,7 +35,10 @@ import java.util.List;
 public class DriveModeActivity extends AppActivity implements ILocalCallback, View.OnClickListener {
     private static final String TAG = "DriveModeActivity";
 
+    private static final int DELAY_SEEKBAR_UPDATE = 1000 / 15;  // 15 Hz
+
     private static final int MSG_UPDATE_PLAYBACK_STATUS = 1;
+    private static final int MSG_UPDATE_SEEKBAR = 2;
 
     private Handler mHandler;
     private DrivePlaybackCallback mPlaybackCallback;
@@ -47,6 +52,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private TextView mTvTitle;
     private TextView mTvArtist;
     private AlbumArtImageView mIvAlbumArt;
+    private SeekBar mSeek;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +60,14 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         mHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                if (msg.what == MSG_UPDATE_PLAYBACK_STATUS) {
-                    updatePlaybackStatus();
+                switch (msg.what) {
+                    case MSG_UPDATE_PLAYBACK_STATUS:
+                        updatePlaybackStatus();
+                        break;
+
+                    case MSG_UPDATE_SEEKBAR:
+                        updateSeekBar();
+                        break;
                 }
             }
         };
@@ -72,6 +84,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         mTvTitle = (TextView) findViewById(R.id.tvTitle);
         mTvArtist = (TextView) findViewById(R.id.tvArtist);
         mIvAlbumArt = (AlbumArtImageView) findViewById(R.id.ivAlbumArt);
+        mSeek = (SeekBar) findViewById(R.id.sbSeek);
 
         mPlayDrawable = new PlayPauseDrawable(getResources(), 1.5f, 1.6f);
         mPlayDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
@@ -85,6 +98,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
 
         hideSystemUI();
         mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+        mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
     }
 
     @Override
@@ -154,12 +168,26 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
                 mTvArtist.setText(R.string.loading);
             }
             mIvAlbumArt.loadArtForSong(currentTrack);
+            mSeek.setMax(currentTrack.getDuration());
         } else if (currentTrack != null) {
             mTvTitle.setText(R.string.loading);
             mTvArtist.setText(null);
             mIvAlbumArt.setDefaultArt();
         } else {
             // TODO: No song playing
+        }
+    }
+
+    private void updateSeekBar() {
+        int state = PlaybackProxy.getState();
+        Log.e(TAG, "updateSeekBar: state=" + state);
+
+        if (state == PlaybackService.STATE_PLAYING) {
+            mSeek.setVisibility(View.VISIBLE);
+            mSeek.setProgress(PlaybackProxy.getCurrentTrackPosition());
+            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
+        } else {
+            mSeek.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -191,12 +219,26 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
                     PlaybackProxy.play();
                     break;
             }
+        } else if (v == mPreviousButton) {
+            PlaybackProxy.previous();
+        } else if (v == mSkipButton) {
+            PlaybackProxy.next();
+        } else if (v == mThumbsButton) {
+
+        } else if (v == mVoiceButton) {
+
         }
     }
 
     @Override
     public void onSongUpdate(List<Song> s) {
+        final Song currentTrack = PlaybackProxy.getCurrentTrack();
 
+        if (s.contains(currentTrack)) {
+            if (!mHandler.hasMessages(MSG_UPDATE_PLAYBACK_STATUS)) {
+                mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+            }
+        }
     }
 
     @Override
@@ -211,7 +253,16 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
 
     @Override
     public void onArtistUpdate(List<Artist> a) {
+        final Song currentTrack = PlaybackProxy.getCurrentTrack();
 
+        for (Artist artist : a) {
+            if (artist.getRef().equals(currentTrack.getArtist())) {
+                if (!mHandler.hasMessages(MSG_UPDATE_PLAYBACK_STATUS)) {
+                    mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+                }
+                break;
+            }
+        }
     }
 
     @Override
@@ -236,6 +287,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
             if (!mHandler.hasMessages(MSG_UPDATE_PLAYBACK_STATUS)) {
                 mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+                mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
             }
         }
 
@@ -243,6 +295,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         public void onPlaybackResume() throws RemoteException {
             if (!mHandler.hasMessages(MSG_UPDATE_PLAYBACK_STATUS)) {
                 mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+                mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
             }
         }
     }
