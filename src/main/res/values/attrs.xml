@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!-- Parallax Scroll View -->
     <declare-styleable name="ParallaxScroll">
         <attr name="parallax_factor" format="float" />
@@ -10,77 +11,77 @@
 
     <!-- Two Way View -->
     <declare-styleable name="TwoWayView">
-        <attr name="layoutManager" format="string"/>
+        <attr name="layoutManager" format="string" />
     </declare-styleable>
-
     <declare-styleable name="TwoWayLayoutManager">
-        <attr name="android:orientation"/>
+        <attr name="android:orientation" />
     </declare-styleable>
-
     <declare-styleable name="GridLayoutManager">
-        <attr name="numColumns" format="integer"/>
-        <attr name="numRows" format="integer"/>
+        <attr name="numColumns" format="integer" />
+        <attr name="numRows" format="integer" />
     </declare-styleable>
-
     <declare-styleable name="SpacingItemDecoration">
-        <attr name="android:verticalSpacing"/>
-        <attr name="android:horizontalSpacing"/>
+        <attr name="android:verticalSpacing" />
+        <attr name="android:horizontalSpacing" />
     </declare-styleable>
-
     <declare-styleable name="DividerItemDecoration">
-        <attr name="android:divider"/>
-        <attr name="verticalDivider" format="reference"/>
-        <attr name="horizontalDivider" format="reference"/>
+        <attr name="android:divider" />
+        <attr name="verticalDivider" format="reference" />
+        <attr name="horizontalDivider" format="reference" />
     </declare-styleable>
-
     <declare-styleable name="StaggeredGridViewChild">
-        <attr name="span" format="integer"/>
+        <attr name="span" format="integer" />
     </declare-styleable>
-
     <declare-styleable name="SpannableGridViewChild">
-        <attr name="colSpan" format="integer"/>
-        <attr name="rowSpan" format="integer"/>
+        <attr name="colSpan" format="integer" />
+        <attr name="rowSpan" format="integer" />
     </declare-styleable>
 
     <!-- Circular progress button -->
     <declare-styleable name="CircularProgressButton">
-        <attr name="cpb_selectorIdle" format="reference"/>
-        <attr name="cpb_selectorComplete" format="reference"/>
-        <attr name="cpb_selectorError" format="reference"/>
-        <attr name="cpb_textComplete" format="string"/>
-        <attr name="cpb_textIdle" format="string"/>
-        <attr name="cpb_textError" format="string"/>
-        <attr name="cpb_textProgress" format="string"/>
-        <attr name="cpb_colorProgress" format="color"/>
-        <attr name="cpb_colorIndicator" format="color"/>
-        <attr name="cpb_colorIndicatorBackground" format="color"/>
-        <attr name="cpb_iconIdle" format="reference"/>
-        <attr name="cpb_iconError" format="reference"/>
-        <attr name="cpb_iconComplete" format="reference"/>
-        <attr name="cpb_iconProgress" format="reference"/>
-        <attr name="cpb_cornerRadius" format="dimension"/>
-        <attr name="cpb_paddingProgress" format="dimension"/>
+        <attr name="cpb_selectorIdle" format="reference" />
+        <attr name="cpb_selectorComplete" format="reference" />
+        <attr name="cpb_selectorError" format="reference" />
+        <attr name="cpb_textComplete" format="string" />
+        <attr name="cpb_textIdle" format="string" />
+        <attr name="cpb_textError" format="string" />
+        <attr name="cpb_textProgress" format="string" />
+        <attr name="cpb_colorProgress" format="color" />
+        <attr name="cpb_colorIndicator" format="color" />
+        <attr name="cpb_colorIndicatorBackground" format="color" />
+        <attr name="cpb_iconIdle" format="reference" />
+        <attr name="cpb_iconError" format="reference" />
+        <attr name="cpb_iconComplete" format="reference" />
+        <attr name="cpb_iconProgress" format="reference" />
+        <attr name="cpb_cornerRadius" format="dimension" />
+        <attr name="cpb_paddingProgress" format="dimension" />
     </declare-styleable>
 
     <!-- FloatingActionButton -->
     <declare-styleable name="FloatingActionButton">
-        <attr name="fab_colorPressed" format="color"/>
-        <attr name="fab_colorNormal" format="color"/>
-        <attr name="fab_icon" format="reference"/>
+        <attr name="fab_colorPressed" format="color" />
+        <attr name="fab_colorNormal" format="color" />
+        <attr name="fab_icon" format="reference" />
         <attr name="fab_size" format="enum">
-            <enum name="normal" value="0"/>
-            <enum name="mini" value="1"/>
+            <enum name="normal" value="0" />
+            <enum name="mini" value="1" />
         </attr>
     </declare-styleable>
     <declare-styleable name="AddFloatingActionButton">
-        <attr name="fab_plusIconColor" format="color"/>
+        <attr name="fab_plusIconColor" format="color" />
     </declare-styleable>
     <declare-styleable name="FloatingActionsMenu">
-        <attr name="fab_addButtonColorPressed" format="color"/>
-        <attr name="fab_addButtonColorNormal" format="color"/>
-        <attr name="fab_addButtonPlusIconColor" format="color"/>
+        <attr name="fab_addButtonColorPressed" format="color" />
+        <attr name="fab_addButtonColorNormal" format="color" />
+        <attr name="fab_addButtonPlusIconColor" format="color" />
     </declare-styleable>
 
     <!-- Calligraphy -->
-    <attr name="fontPath" format="string"/>
+    <attr name="fontPath" format="string" />
+
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr name="metaButtonBarStyle" format="reference" />
+        <attr name="metaButtonBarButtonStyle" format="reference" />
+    </declare-styleable>
+
 </resources>

@@ -136,6 +136,15 @@
             android:label="@string/title_activity_automix_create_static"
             android:launchMode="singleTask" >
         </activity>
+
+        <!-- Drive Mode Activity -->
+        <activity
+            android:name=".DriveModeActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_drive_mode"
+            android:screenOrientation="landscape"
+            android:theme="@style/OmniMusic.FullscreenTheme" >
+        </activity>
     </application>
 
 </manifest>

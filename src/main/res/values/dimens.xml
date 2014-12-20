@@ -61,4 +61,5 @@
 
     <dimen name="snackbar_background_corner_radius">0dp</dimen>
     <dimen name="notif_action_button">42dp</dimen>
+    <dimen name="drive_button_size">100dp</dimen>
 </resources>

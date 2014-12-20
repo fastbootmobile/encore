@@ -50,11 +50,6 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v13:21.0.3'
-    compile 'com.android.support:mediarouter-v7:21.0.3'
-    compile 'com.android.support:cardview-v7:21.0.3'
-    compile 'com.android.support:palette-v7:21.0.3'
-    compile 'com.android.support:recyclerview-v7:21.0.3'
     compile project(':providerlib')
     compile files('src/main/libs/jEN.jar')
     compile files('src/main/libs/json_simple-1.1.jar')
@@ -63,4 +58,10 @@ dependencies {
     compile files('src/main/libs/java_websocket.jar')
     compile files('src/main/libs/calligraphy-1.1.0.jar')
     compile files('src/main/libs/sentry-1.1.4.jar')
+    compile 'com.android.support:support-v13:21.0.3'
+    compile 'com.android.support:mediarouter-v7:21.0.3'
+    compile 'com.android.support:cardview-v7:21.0.3'
+    compile 'com.android.support:palette-v7:21.0.3'
+    compile 'com.android.support:recyclerview-v7:21.0.3'
+    compile 'com.android.support:support-v4:21.0.3'
 }

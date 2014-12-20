@@ -176,6 +176,6 @@
     <string name="repeat">Repeat</string>
     <string name="section_history">History</string>
     <string name="drive_mode">Drive mode</string>
-    <string name="title_activity_history">HistoryActivity</string>
+    <string name="title_activity_drive_mode">Drive Mode</string>
 
 </resources>
