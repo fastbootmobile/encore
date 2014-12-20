@@ -82,7 +82,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         if (isInEditMode()) {
             setImageDrawable(getResources().getDrawable(R.drawable.album_placeholder));
         } else {
-            mDrawable = new MaterialTransitionDrawable(getContext().getApplicationContext(),
+            mDrawable = new MaterialTransitionDrawable(
+                    (BitmapDrawable) (getResources().getDrawable(R.drawable.ic_cloud_offline)),
                     sDefaultBitmap);
             setImageDrawable(mDrawable);
         }
@@ -94,6 +95,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             if (removeRequestedEntity) {
                 mRequestedEntity = null;
             }
+            mDrawable.setImmediateTo(sDefaultBitmap);
         }
         if (mTask != null && !mTask.isCancelled()) {
             mTask.cancel(true);
@@ -295,7 +297,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         @Override
         public void run() {
             if (mRequestedEntity != null && mEntity != null && mRequestedEntity.equals(mEntity)) {
-                mTask = AlbumArtHelper.retrieveAlbumArt(getResources(), AlbumArtImageView.this, mEntity, mImmediate);
+                mTask = AlbumArtHelper.retrieveAlbumArt(getContext().getApplicationContext().getResources(),
+                        AlbumArtImageView.this, mEntity, mImmediate);
             }
         }
 
