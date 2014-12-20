@@ -76,7 +76,7 @@ public class MainActivity extends AppActivity
 
     private Handler mHandler;
 
-    private int mCurrentFragmentIndex;
+    private int mCurrentFragmentIndex = -1;
 
     private MenuItem mOfflineMenuItem;
 
@@ -220,13 +220,15 @@ public class MainActivity extends AppActivity
         }
 
         // Reload the current fragment for layout changes
-        if (mCurrentFragmentIndex + 1 != SECTION_MY_SONGS) {
+        final int activeSection = mCurrentFragmentIndex + 1;
+
+        if (activeSection != SECTION_MY_SONGS
+                && activeSection != SECTION_NOW_PLAYING
+                && activeSection != SECTION_DRIVE_MODE) {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (mCurrentFragmentIndex + 1 != SECTION_NOW_PLAYING) {
-                        onNavigationDrawerItemSelected(mCurrentFragmentIndex);
-                    }
+                    onNavigationDrawerItemSelected(mCurrentFragmentIndex);
                 }
             }, 200);
         }
@@ -283,6 +285,10 @@ public class MainActivity extends AppActivity
 
     @Override
     public boolean onNavigationDrawerItemSelected(int position) {
+        if (mCurrentFragmentIndex == position) {
+            return false;
+        }
+
         // update the main content by replacing fragments
         boolean result = true;
         try {
@@ -290,39 +296,31 @@ public class MainActivity extends AppActivity
             final String fragmentTag = ""+mCurrentFragmentIndex+"_"+mOrientation;
 
             Fragment newFrag = null;
-            if (position + 1 != SECTION_MY_SONGS) {
-                // Workaround: Getting crash when resuming while user is on My Songs fragment.
-                //             We need to reinstantiate the fragment.
-                // Cause: http://stackoverflow.com/questions/14929907/causing-a-java-illegalstateexception-error-no-activity-only-when-navigating-to
-                //        https://code.google.com/p/android/issues/detail?id=42601
-                // (yay, more years old Android bug that were never fixed!)
-                newFrag = getSupportFragmentManager().findFragmentByTag(fragmentTag);
-            }
-
-            if (newFrag == null) {
-                switch (position + 1) {
-                    case SECTION_LISTEN_NOW:
-                        newFrag = ListenNowFragment.newInstance();
-                        break;
-                    case SECTION_PLAYLISTS:
-                        newFrag = PlaylistListFragment.newInstance(true);
-                        break;
-                    case SECTION_MY_SONGS:
-                        newFrag = MySongsFragment.newInstance();
-                        break;
-                    case SECTION_AUTOMIX:
-                        newFrag = AutomixFragment.newInstance();
-                        break;
-                    case SECTION_RECOGNITION:
-                        newFrag = RecognitionFragment.newInstance();
-                        break;
-                    case SECTION_HISTORY:
-                        newFrag = HistoryFragment.newInstance();
-                        break;
-                    case SECTION_NOW_PLAYING:
-                        startActivity(new Intent(this, PlaybackQueueActivity.class));
-                        break;
-                }
+            switch (position + 1) {
+                case SECTION_LISTEN_NOW:
+                    newFrag = ListenNowFragment.newInstance();
+                    break;
+                case SECTION_PLAYLISTS:
+                    newFrag = PlaylistListFragment.newInstance(true);
+                    break;
+                case SECTION_MY_SONGS:
+                    newFrag = MySongsFragment.newInstance();
+                    break;
+                case SECTION_AUTOMIX:
+                    newFrag = AutomixFragment.newInstance();
+                    break;
+                case SECTION_RECOGNITION:
+                    newFrag = RecognitionFragment.newInstance();
+                    break;
+                case SECTION_HISTORY:
+                    newFrag = HistoryFragment.newInstance();
+                    break;
+                case SECTION_NOW_PLAYING:
+                    startActivity(new Intent(this, PlaybackQueueActivity.class));
+                    break;
+                case SECTION_DRIVE_MODE:
+                    startActivity(new Intent(this, DriveModeActivity.class));
+                    break;
             }
 
             if (newFrag != null) {

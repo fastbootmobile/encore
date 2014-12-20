@@ -423,6 +423,10 @@ public class PlaybackQueueActivity extends AppActivity {
             mHandler.sendEmptyMessage(MSG_UPDATE_SEEKBAR);
 
             ProviderAggregator.getDefault().addUpdateCallback(mProviderCallback);
+
+            if (!mHandler.hasMessages(MSG_UPDATE_QUEUE)) {
+                mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
+            }
         }
 
         @Override

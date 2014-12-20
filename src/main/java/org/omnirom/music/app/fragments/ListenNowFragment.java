@@ -16,7 +16,6 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -63,10 +62,11 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "ListenNowFragment";
 
-    private ListenNowAdapter mAdapter;
+    private static ListenNowAdapter sAdapter = new ListenNowAdapter();
+    private static boolean sWarmUp = false;
+
     private Handler mHandler;
     private TextView mTxtNoMusic;
-    private static boolean sWarmUp = false;
     private int mWarmUpCount = 0;
     private boolean mFoundAnything;
 
@@ -125,6 +125,11 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
                 // Make sure we haven't reached all our accessible data
                 if (chosenSongs.size() >= totalSongsCount) {
+                    break;
+                }
+
+                // Make sure we still have playlists
+                if (playlists.size() <= 0) {
                     break;
                 }
 
@@ -210,8 +215,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                             isLarge ? ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_LARGE
                                     : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
                             entity);
-                    mAdapter.addEntry(entry);
-                    mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
+                    sAdapter.addEntry(entry);
+                    sAdapter.notifyItemInserted(sAdapter.getItemCount() - 1);
                 } else {
                     // Something bad happened while getting this entity, try something else
                     i--;
@@ -243,7 +248,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mHandler = new Handler();
-        mAdapter = new ListenNowAdapter();
 
         // Generate entries
         if (!sWarmUp) {
@@ -270,7 +274,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         TwoWayView twvRoot = (TwoWayView) root.findViewById(R.id.twvRoot);
         mTxtNoMusic = (TextView) root.findViewById(R.id.txtNoMusic);
 
-        twvRoot.setAdapter(mAdapter);
+        twvRoot.setAdapter(sAdapter);
         final Drawable divider = getResources().getDrawable(R.drawable.divider);
         twvRoot.addItemDecoration(new DividerItemDecoration(divider));
         twvRoot.setItemAnimator(new DefaultItemAnimator());
@@ -317,9 +321,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             public void run() {
                 int hasThisSong;
                 for (Song song : s) {
-                    hasThisSong = mAdapter.contains(song);
+                    hasThisSong = sAdapter.contains(song);
                     if (hasThisSong >= 0) {
-                        mAdapter.notifyItemChanged(hasThisSong);
+                        sAdapter.notifyItemChanged(hasThisSong);
                     }
                 }
             }
@@ -336,9 +340,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             public void run() {
                 int hasThisAlbum;
                 for (Album album : a) {
-                    hasThisAlbum = mAdapter.contains(album);
+                    hasThisAlbum = sAdapter.contains(album);
                     if (hasThisAlbum >= 0) {
-                        mAdapter.notifyItemChanged(hasThisAlbum);
+                        sAdapter.notifyItemChanged(hasThisAlbum);
                     }
                 }
             }
@@ -350,7 +354,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
-        if (!mFoundAnything || mAdapter.getItemCount() == 0) {
+        if (!mFoundAnything || sAdapter.getItemCount() == 0) {
             mHandler.removeCallbacks(mGenerateEntries);
             mHandler.post(mGenerateEntries);
         }
@@ -366,9 +370,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             public void run() {
                 int hasThisArtist;
                 for (Artist artist : a) {
-                    hasThisArtist = mAdapter.contains(artist);
+                    hasThisArtist = sAdapter.contains(artist);
                     if (hasThisArtist >= 0) {
-                        mAdapter.notifyItemChanged(hasThisArtist);
+                        sAdapter.notifyItemChanged(hasThisArtist);
                     }
                 }
             }

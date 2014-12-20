@@ -142,15 +142,15 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
             final ListenNowEntry entry = mEntries.get(pos);
 
             // Get hero image and background color
-            final Context ctx = holder.llRoot.getContext();
+
             MaterialTransitionDrawable draw = (MaterialTransitionDrawable) holder.ivCover.getDrawable();
             final Bitmap hero = draw.getFinalDrawable().getBitmap();
             final int backColor = holder.backColor;
-
             Intent intent = null;
             ActivityOptions opt = null;
             final AlbumArtImageView ivCover = holder.ivCover;
 
+            final Context ctx = holder.llRoot.getContext();
             if (entry.entity instanceof Album) {
                 Album album = (Album) entry.entity;
                 intent = AlbumActivity.craftIntent(ctx, hero, album.getRef(), album.getProvider(),
