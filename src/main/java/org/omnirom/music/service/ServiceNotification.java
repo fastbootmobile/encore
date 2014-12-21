@@ -21,6 +21,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -178,16 +179,14 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
             mExpandedTemplate.setViewVisibility(R.id.btnNotifNext, View.GONE);
         }
 
-        if (mCurrentArt != null) {
-            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.getBitmap());
-            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.getBitmap());
-        } else if (mDefaultArt != null) {
-            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt.getBitmap());
-            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mDefaultArt.getBitmap());
-        } else {
-            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, null);
-            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, null);
+        Bitmap bitmap = null;
+        if (mCurrentArt != null && !mCurrentArt.getBitmap().isRecycled()) {
+            bitmap = mCurrentArt.getBitmap();
+        } else if (mDefaultArt != null && !mDefaultArt.getBitmap().isRecycled()) {
+            bitmap = mDefaultArt.getBitmap();
         }
+        mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, bitmap);
+        mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, bitmap);
 
         // Post update
         if (mListener != null) {
