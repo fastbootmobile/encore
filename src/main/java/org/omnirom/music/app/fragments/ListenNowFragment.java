@@ -80,6 +80,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
             final List<Playlist> playlists = aggregator.getAllPlaylists();
             final List<String> chosenSongs = new ArrayList<String>();
+            final List<String> usedReferences = new ArrayList<>();
 
             int totalSongsCount = 0;
 
@@ -210,7 +211,10 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         break;
                 }
 
-                if (entity != null) {
+                if (entity != null && usedReferences.contains(entity.getRef())) {
+                    // Already shown that
+                    i--;
+                } else if (entity != null) {
                     ListenNowAdapter.ListenNowEntry entry = new ListenNowAdapter.ListenNowEntry(
                             isLarge ? ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_LARGE
                                     : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
