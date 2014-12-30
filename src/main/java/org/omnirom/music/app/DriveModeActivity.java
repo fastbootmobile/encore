@@ -63,6 +63,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private static final int MSG_UPDATE_PLAYBACK_STATUS = 1;
     private static final int MSG_UPDATE_SEEKBAR = 2;
     private static final int MSG_UPDATE_TIME = 3;
+    private static final int MSG_HIDE_SYSTEM_UI = 4;
 
     private Handler mHandler;
     private DrivePlaybackCallback mPlaybackCallback;
@@ -103,6 +104,10 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
 
                     case MSG_UPDATE_TIME:
                         updateTime();
+                        break;
+
+                    case MSG_HIDE_SYSTEM_UI:
+                        hideSystemUI();
                         break;
                 }
             }
@@ -147,7 +152,9 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
                 resetVoiceRms();
                 mPbVoiceLoading.setVisibility(View.GONE);
                 mTvArtist.setAlpha(1.0f);
-                updatePlaybackStatus();
+                if (!mHandler.hasMessages(MSG_UPDATE_PLAYBACK_STATUS)) {
+                    mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+                }
             }
 
             @Override
@@ -303,7 +310,8 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private void updateTime() {
         Calendar cal = GregorianCalendar.getInstance();
         cal.setTime(new Date());
-        mTvCurrentTime.setText(cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
+        mTvCurrentTime.setText(String.format("%02d:%02d",
+                cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE)));
         mHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, 5000);
     }
 
@@ -347,7 +355,8 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
         PlaybackProxy.addCallback(mPlaybackCallback);
-        hideSystemUI();
+        mHandler.sendEmptyMessageDelayed(MSG_HIDE_SYSTEM_UI, 1000);
+        mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
     }
 
     @Override
@@ -385,11 +394,13 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
                 mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
             }
         }
+
+        mVoiceHelper.onSongUpdate(s);
     }
 
     @Override
     public void onAlbumUpdate(List<Album> a) {
-
+        mVoiceHelper.onAlbumUpdate(a);
     }
 
     @Override

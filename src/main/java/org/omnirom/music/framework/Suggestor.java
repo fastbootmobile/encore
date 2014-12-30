@@ -15,6 +15,8 @@
 
 package org.omnirom.music.framework;
 
+import android.util.Log;
+
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
@@ -51,6 +53,8 @@ public class Suggestor {
         final List<Song> allSongs = new ArrayList<Song>();
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
+
+
         // List all tracks from all albums, get 100 random
         final List<String> albumReferences = artist.getAlbums();
         for (String albumRef : albumReferences) {
@@ -72,6 +76,9 @@ public class Suggestor {
         for (int i = 0; i < numTracks; ++i) {
             output.add(allSongs.get(i));
         }
+
+        Log.d(TAG, "Building artist radio for " + artist.getName() + ": "
+                + artist.getAlbums().size() + " albums, " + output.size() + " songs chosen");
 
         return output;
     }

@@ -223,6 +223,7 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                     msg = mHandler.obtainMessage(MSG_START_PLAY_LIST,
                             Utils.refListToSongList(playlist.songsList(), playlist.getProvider()));
                     bestMatchPercentage = 1;
+                    break;
                 } else {
                     float percent = Utils.distancePercentage(request, playlist.getName());
                     if (percent > bestMatchPercentage) {
@@ -339,9 +340,32 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
     public void onArtistUpdate(List<Artist> artists) {
         if (mPendingAction == VoiceCommander.ACTION_PLAY) {
             if (mPreviousSearchResults != null) {
+                if (DEBUG) Log.d(TAG, "Got updated artist information");
                 onSearchResult(mPreviousSearchResults);
             } else {
                 if (DEBUG) Log.d(TAG, "Got artist update but no pending search results");
+            }
+        }
+    }
+
+    public void onAlbumUpdate(List<Album> albums) {
+        if (mPendingAction == VoiceCommander.ACTION_PLAY) {
+            if (mPreviousSearchResults != null) {
+                if (DEBUG) Log.d(TAG, "Got updated album information");
+                onSearchResult(mPreviousSearchResults);
+            } else {
+                if (DEBUG) Log.d(TAG, "Got album update but no pending search results");
+            }
+        }
+    }
+
+    public void onSongUpdate(List<Song> songs) {
+        if (mPendingAction == VoiceCommander.ACTION_PLAY) {
+            if (mPreviousSearchResults != null) {
+                if (DEBUG) Log.d(TAG, "Got updated song information");
+                onSearchResult(mPreviousSearchResults);
+            } else {
+                if (DEBUG) Log.d(TAG, "Got song update but no pending search results");
             }
         }
     }

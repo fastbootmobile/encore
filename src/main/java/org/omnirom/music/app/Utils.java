@@ -590,7 +590,7 @@ public class Utils {
 
     public static float distancePercentage(String a, String b) {
         float max = Math.max(a.length(), b.length());
-        return ((float) distance(a, b)) / max;
+        return 1.0f - ((float) distance(a, b)) / max;
     }
 
     public static List<Song> refIteratorToSongList(Iterator<String> it, ProviderIdentifier id) {
