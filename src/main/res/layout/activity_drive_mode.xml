@@ -10,47 +10,56 @@
         android:id="@+id/ivAlbumArt"
         android:layout_width="160dp"
         android:layout_height="160dp"
+        android:layout_gravity="start|center_vertical"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_gravity="start|center_vertical"
-        android:layout_marginLeft="32dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/view"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="#80000000"/>
 
     <TextView
         android:id="@+id/tvTitle"
         style="@style/FontDisplay1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/sbSeek"
-        android:layout_alignRight="@+id/sbSeek"
-        android:layout_alignTop="@+id/ivAlbumArt"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_toEndOf="@+id/ivAlbumArt"
-        android:layout_toRightOf="@+id/ivAlbumArt"
         android:ellipsize="end"
         android:fontFamily="sans-serif-medium"
+        fontPath="fonts/Roboto-Medium.ttf"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/white"/>
+        android:textColor="@color/white"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="48dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginRight="48dp"/>
 
     <TextView
         android:id="@+id/tvArtist"
         style="@style/FontHeadline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/llButtons"
         android:layout_alignLeft="@+id/tvTitle"
-        android:layout_alignRight="@+id/llButtons"
         android:layout_alignStart="@+id/tvTitle"
         android:layout_below="@+id/tvTitle"
         android:alpha="0.9"
         android:ellipsize="end"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/white"/>
+        android:textColor="@color/white"
+        android:layout_alignRight="@+id/tvTitle"
+        android:layout_alignEnd="@+id/tvTitle"/>
 
     <TextView
         android:id="@+id/tvAlbum"
@@ -61,10 +70,10 @@
         android:layout_alignRight="@+id/tvArtist"
         android:layout_alignStart="@+id/tvArtist"
         android:layout_below="@+id/tvArtist"
-        android:layout_marginTop="8dp"
         android:alpha="0.7"
         android:ellipsize="end"
         android:fontFamily="sans-serif-medium"
+        fontPath="fonts/Roboto-Medium.ttf"
         android:singleLine="true"
         android:textAllCaps="true"
         android:textColor="@color/white"/>
@@ -73,25 +82,26 @@
         android:id="@+id/sbSeek"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/llButtons"
-        android:layout_alignRight="@+id/llButtons"
+        android:visibility="invisible"
         android:layout_below="@+id/tvAlbum"
-        android:layout_toEndOf="@+id/ivAlbumArt"
-        android:layout_toRightOf="@+id/ivAlbumArt"
-        android:progress="50"/>
+        android:layout_marginTop="8dp"
+        android:layout_toRightOf="@+id/tvTimeElapsed"
+        android:layout_toEndOf="@+id/tvTimeElapsed"
+        android:layout_toLeftOf="@+id/tvTimeTotal"
+        android:layout_toStartOf="@+id/tvTimeTotal"/>
 
     <LinearLayout
         android:id="@+id/llButtons"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@+id/ivAlbumArt"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical|center_horizontal"
         android:longClickable="false"
         android:orientation="horizontal"
         android:padding="8dp"
-        android:background="#222222"
-        android:layout_marginTop="16dp"
-        >
+        android:background="#80000000"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
         <ImageView
             android:id="@+id/btnPrevious"
@@ -148,5 +158,52 @@
             android:src="@drawable/ic_drive_next"
             android:contentDescription="@string/next"/>
     </LinearLayout>
+
+    <TextView
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/tvTimeElapsed"
+        android:layout_alignBottom="@+id/sbSeek"
+        android:gravity="center_vertical|end|right"
+        android:textColor="@color/white"
+        android:layout_alignTop="@+id/sbSeek"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+    <TextView
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/tvTimeTotal"
+        android:layout_alignBottom="@+id/sbSeek"
+        android:layout_alignTop="@+id/sbSeek"
+        android:gravity="center_vertical"
+        android:textColor="@color/white"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/pbVoiceLoading"
+        android:visibility="gone"
+        android:layout_alignTop="@+id/tvArtist"
+        android:layout_toLeftOf="@+id/tvArtist"
+        android:layout_toStartOf="@+id/tvArtist"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/tvCurrentTime"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/white"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"/>
 
 </RelativeLayout>

@@ -292,8 +292,11 @@ public class MainActivity extends AppActivity
         // update the main content by replacing fragments
         boolean result = true;
         try {
-            mCurrentFragmentIndex = position;
-            final String fragmentTag = ""+mCurrentFragmentIndex+"_"+mOrientation;
+            if (position + 1 != SECTION_DRIVE_MODE && position + 1 != SECTION_NOW_PLAYING) {
+                mCurrentFragmentIndex = position;
+            }
+
+            final String fragmentTag = ""+position+"_"+mOrientation;
 
             Fragment newFrag = null;
             switch (position + 1) {

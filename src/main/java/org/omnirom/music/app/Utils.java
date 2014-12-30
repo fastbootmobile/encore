@@ -45,10 +45,13 @@ import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -82,6 +85,8 @@ public class Utils {
             return String.format("%02d:%02d", minutes, seconds);
         } else if (seconds > 0) {
             return String.format("%02ds", seconds);
+        } else if (seconds == 0) {
+            return "-:--";
         } else {
             return "N/A";
         }
@@ -559,5 +564,54 @@ public class Utils {
 
     public static boolean hasJellyBeanMR1() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
+    }
+
+    public static int distance(String a, String b) {
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+        // i == 0
+        int[] costs = new int[b.length() + 1];
+        for (int j = 0; j < costs.length; j++) {
+            costs[j] = j;
+        }
+
+        for (int i = 1; i <= a.length(); i++) {
+            // j == 0; nw = lev(i - 1, j)
+            costs[0] = i;
+            int nw = i - 1;
+            for (int j = 1; j <= b.length(); j++) {
+                int cj = Math.min(1 + Math.min(costs[j], costs[j - 1]), a.charAt(i - 1) == b.charAt(j - 1) ? nw : nw + 1);
+                nw = costs[j];
+                costs[j] = cj;
+            }
+        }
+        return costs[b.length()];
+    }
+
+    public static float distancePercentage(String a, String b) {
+        float max = Math.max(a.length(), b.length());
+        return ((float) distance(a, b)) / max;
+    }
+
+    public static List<Song> refIteratorToSongList(Iterator<String> it, ProviderIdentifier id) {
+        ProviderAggregator aggr = ProviderAggregator.getDefault();
+        List<Song> output = new ArrayList<>();
+
+        while (it.hasNext()) {
+            output.add(aggr.retrieveSong(it.next(), id));
+        }
+
+        return output;
+    }
+
+    public static List<Song> refListToSongList(List<String> refList, ProviderIdentifier id) {
+        ProviderAggregator aggr = ProviderAggregator.getDefault();
+        List<Song> output = new ArrayList<>();
+
+        for (String ref : refList) {
+            output.add(aggr.retrieveSong(ref, id));
+        }
+
+        return output;
     }
 }

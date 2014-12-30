@@ -17,11 +17,13 @@ package org.omnirom.music.app.adapters;
 
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.MainActivity;
@@ -39,7 +41,6 @@ public class NavDrawerAdapter extends BaseAdapter {
 
     public static class ViewHolder {
         public TextView tvText;
-        public ImageView ivLogo;
         public View tvDivider;
     }
 
@@ -95,7 +96,6 @@ public class NavDrawerAdapter extends BaseAdapter {
 
                 tag = new ViewHolder();
                 tag.tvText = (TextView) view.findViewById(android.R.id.text1);
-                tag.ivLogo = (ImageView) view.findViewById(android.R.id.icon);
                 view.setTag(tag);
             } else {
                 view = inflater.inflate(R.layout.nav_drawer_special_item, viewGroup, false);
@@ -134,54 +134,54 @@ public class NavDrawerAdapter extends BaseAdapter {
             case MainActivity.SECTION_LISTEN_NOW:
                 tag.tvText.setText(R.string.title_section_listen_now);
                 if (i == mActiveEntry) {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_listen_now_active);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_listen_now_active);
                 } else {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_listen_now);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_listen_now);
                 }
                 break;
 
             case MainActivity.SECTION_MY_SONGS:
                 tag.tvText.setText(R.string.title_section_my_songs);
                 if (i == mActiveEntry) {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_library_active);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_library_active);
                 } else {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_library);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_library);
                 }
                 break;
 
             case MainActivity.SECTION_PLAYLISTS:
                 tag.tvText.setText(R.string.title_section_playlists);
                 if (i == mActiveEntry) {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_playlist_active);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_playlist_active);
                 } else {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_playlist);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_playlist);
                 }
                 break;
 
             case MainActivity.SECTION_AUTOMIX:
                 tag.tvText.setText(R.string.title_section_automix);
                 if (i == mActiveEntry) {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_automix_active);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_automix_active);
                 } else {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_automix);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_automix);
                 }
                 break;
 
             case MainActivity.SECTION_RECOGNITION:
                 tag.tvText.setText(R.string.title_section_recognition);
                 if (i == mActiveEntry) {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_recognition_active);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_recognition_active);
                 } else {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_recognition);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_recognition);
                 }
                 break;
 
             case MainActivity.SECTION_HISTORY:
                 tag.tvText.setText(R.string.section_history);
                 if (i == mActiveEntry) {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_history_active);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_history_active);
                 } else {
-                    tag.ivLogo.setImageResource(R.drawable.ic_nav_history);
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_history);
                 }
                 break;
 
@@ -197,5 +197,15 @@ public class NavDrawerAdapter extends BaseAdapter {
         }
 
         return view;
+    }
+
+    public static void setCompoundCompat(@NonNull TextView text, @DrawableRes int id) {
+        Drawable drawable = text.getResources().getDrawable(id);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            text.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
+        } else {
+            text.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+        }
     }
 }
