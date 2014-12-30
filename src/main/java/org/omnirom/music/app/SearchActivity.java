@@ -33,6 +33,7 @@ import android.widget.SearchView;
 import org.omnirom.music.app.fragments.SearchFragment;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.List;
@@ -108,25 +109,9 @@ public class SearchActivity extends AppActivity {
                     String query = intent.getStringExtra(SearchManager.QUERY).trim();
                     mActiveFragment.resetResults();
                     mActiveFragment.setArguments(query);
-
-                    List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-                    for (ProviderConnection providerConnection : providers) {
-                        try {
-                            final IMusicProvider binder = providerConnection.getBinder();
-                            if (binder != null) {
-                                binder.startSearch(query);
-                            } else {
-                                Log.e(TAG, "Null binder, cannot search on " + providerConnection.getIdentifier());
-                            }
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot run search on a provider", e);
-                        }
-                    }
-
+                    ProviderAggregator.getDefault().startSearch(query);
                 }
             }, 200);
-
         }
-
     }
 }

@@ -606,6 +606,26 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
+     * Starts a search. Results will be given in onSearchResults
+     * @param query The terms to look for
+     */
+    public void startSearch(final String query) {
+        List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+        for (ProviderConnection providerConnection : providers) {
+            try {
+                final IMusicProvider binder = providerConnection.getBinder();
+                if (binder != null) {
+                    binder.startSearch(query);
+                } else {
+                    Log.e(TAG, "Null binder, cannot search on " + providerConnection.getIdentifier());
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot run search on a provider", e);
+            }
+        }
+    }
+
+    /**
      * Returns the list of all cached playlists. At the same time, providers will be called for
      * updates and/or fetching playlists, and LocalCallbacks will be called when providers notify
      * this class of eventual new entries.
