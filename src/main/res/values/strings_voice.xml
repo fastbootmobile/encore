@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="voice_play_words">
+        <item>play</item>           <!-- Play Coldplay -->
+        <item>listen to</item>      <!-- Listen to Californication -->
+        <item>start</item>          <!-- Start Starred -->
+    </string-array>
+
+    <string-array name="voice_play_source_words">
+        <item>from</item>           <!-- Play Justin Bieber from Spotify -->
+        <item>on</item>             <!-- Start Starred on Spotify -->
+    </string-array>
+
+    <string-array name="voice_pause_words">
+        <item>pause</item>          <!-- Pause -->
+    </string-array>
+
+    <string-array name="voice_jump_words">
+        <item>jump to track</item>          <!-- Jump to track 10 -->
+        <item>go to track</item>            <!-- Go to track 12 -->
+    </string-array>
+
+    <string-array name="voice_next_words">
+        <item>next</item>           <!-- Next -->
+        <item>next track</item>     <!-- Next track -->
+        <item>next song</item>      <!-- Next song -->
+        <item>skip</item>           <!-- Skip -->
+    </string-array>
+
+    <string-array name="voice_previous_words">
+        <item>rewind</item>                 <!-- Rewind -->
+        <item>previous</item>               <!-- Previous -->
+    </string-array>
+
+    <string-array name="voice_time_seconds">
+        <item>seconds</item>                <!-- Rewind 10 seconds -->
+        <item>second</item>
+    </string-array>
+
+    <string-array name="voice_time_minutes">
+        <item>minute</item>
+        <item>minutes</item>                <!-- Skip 2 minutes -->
+    </string-array>
+
+    <string-array name="voice_google_words">
+        <item>google</item>                     <!-- Google what's the weather -->
+        <item>search the web for</item>         <!-- Search the web for australopithecus -->
+    </string-array>
+</resources>
