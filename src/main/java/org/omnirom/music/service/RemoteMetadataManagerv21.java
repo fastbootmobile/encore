@@ -116,6 +116,8 @@ class RemoteMetadataManagerv21 extends MediaSession.Callback implements IRemoteM
                 if (mMediaSession != null) {
                     mMediaSession.setMetadata(mBuilder.build());
                 }
+            } else {
+                mBuilder.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, null);
             }
         }
     }

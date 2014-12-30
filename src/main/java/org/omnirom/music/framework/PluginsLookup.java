@@ -265,6 +265,18 @@ public class PluginsLookup {
         return null;
     }
 
+    public ProviderConnection getProviderByName(final String name) {
+        synchronized (mConnections) {
+            for (ProviderConnection connection : mConnections) {
+                if (connection.getProviderName().equalsIgnoreCase(name)) {
+                    return connection;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public DSPConnection getDSP(ProviderIdentifier id) {
         synchronized (mDSPConnections) {
             for (DSPConnection connection : mDSPConnections) {

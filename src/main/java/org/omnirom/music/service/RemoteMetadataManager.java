@@ -93,9 +93,11 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
         if (mPreviousAlbumArt != bmp) {
             RemoteControlClient.MetadataEditor metadata = mClient.editMetadata(false);
             if (bmp != null) {
+                Bitmap bmpSource = bmp.getBitmap();
+                Bitmap bmpCopy = bmpSource.copy(bmpSource.getConfig(), false);
+
                 mPreviousAlbumArt = bmp;
-                metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK,
-                        mPreviousAlbumArt.getBitmap());
+                metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, bmpCopy);
             } else {
                 metadata.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, null);
             }

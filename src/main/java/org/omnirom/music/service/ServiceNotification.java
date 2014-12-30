@@ -47,7 +47,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
     private Context mContext;
     private Resources mResources;
-    private final BitmapDrawable mDefaultArt;
+    private final Bitmap mDefaultArt;
     private BitmapDrawable mCurrentArt;
     private NotificationChangedListener mListener;
     private Song mCurrentSong;
@@ -67,8 +67,9 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         mResources = ctx.getResources();
 
         // Get the default album art
-        mDefaultArt = (BitmapDrawable) mResources.getDrawable(R.drawable.album_placeholder);
-        mCurrentArt = mDefaultArt;
+        BitmapDrawable bdDefault = (BitmapDrawable) mResources.getDrawable(R.drawable.album_placeholder);
+        mDefaultArt = bdDefault.getBitmap().copy(bdDefault.getBitmap().getConfig(), false);
+        mCurrentArt = null;
 
         mBaseTemplate = new RemoteViews(ctx.getPackageName(), R.layout.notification_base);
         mExpandedTemplate = new RemoteViews(ctx.getPackageName(), R.layout.notification_expanded);
@@ -109,7 +110,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
 
         mBuilder = new NotificationCompat.Builder(mContext);
-        mCurrentArt = mDefaultArt;
+        mCurrentArt = null;
 
         // Build the core notification
         mBuilder.setSmallIcon(R.drawable.ic_launcher_white)
@@ -121,10 +122,6 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     }
 
     private void buildNotification() {
-        if (mCurrentArt == null) {
-            mCurrentArt = mDefaultArt;
-        }
-
         // And get the notification object
         mNotification = mBuilder.build();
 
@@ -179,14 +176,13 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
             mExpandedTemplate.setViewVisibility(R.id.btnNotifNext, View.GONE);
         }
 
-        Bitmap bitmap = null;
         if (mCurrentArt != null && !mCurrentArt.getBitmap().isRecycled()) {
-            bitmap = mCurrentArt.getBitmap();
-        } else if (mDefaultArt != null && !mDefaultArt.getBitmap().isRecycled()) {
-            bitmap = mDefaultArt.getBitmap();
+            mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.getBitmap());
+            mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.getBitmap());
+        } else {
+            mBaseTemplate.setImageViewResource(R.id.ivAlbumArt, R.drawable.album_placeholder);
+            mExpandedTemplate.setImageViewResource(R.id.ivAlbumArt, R.drawable.album_placeholder);
         }
-        mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, bitmap);
-        mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, bitmap);
 
         // Post update
         if (mListener != null) {
@@ -267,16 +263,12 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
      * @return The current active album art
      */
     public BitmapDrawable getAlbumArt() {
-        if (mCurrentArt == null) {
-            return mDefaultArt;
-        } else {
-            return mCurrentArt;
-        }
+        return mCurrentArt;
     }
 
     private void updateAlbumArt() {
         if (mCurrentSong != null) {
-            mCurrentArt = mDefaultArt;
+            mCurrentArt = null;
             if (mArtTask != null) {
                 mArtTask.cancel(true);
             }
@@ -289,12 +281,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     @Override
     public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
         if (request.equals(mCurrentSong)) {
-            if (output == null) {
-                mCurrentArt = mDefaultArt;
-            } else {
-                mCurrentArt = output;
-            }
-
+            mCurrentArt = output;
             buildNotification();
         }
 
