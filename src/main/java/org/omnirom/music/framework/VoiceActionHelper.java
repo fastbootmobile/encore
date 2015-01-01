@@ -252,6 +252,23 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                         break;
                     } else {
                         Log.w(TAG, "Matched exact artist, but artist radio unavailable");
+
+                        // Ensure album contents are fetched
+                        ProviderConnection pc = PluginsLookup.getDefault()
+                                .getProvider(artist.getProvider());
+                        if (pc != null) {
+                            IMusicProvider binder = pc.getBinder();
+                            try {
+                                if (binder != null) {
+                                    List<String> albums = artist.getAlbums();
+                                    for (String albumRef : albums) {
+                                        binder.fetchAlbumTracks(albumRef);
+                                    }
+                                }
+                            } catch (RemoteException e) {
+                                // ignore
+                            }
+                        }
                     }
                 } else {
                     float percent = Utils.distancePercentage(request, artist.getName());
@@ -266,6 +283,23 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                             msg = mHandler.obtainMessage(MSG_START_PLAY_LIST, radio);
                         } else {
                             Log.w(TAG, "Matched average artist, but artist radio unavailable");
+
+                            // Ensure album contents are fetched
+                            ProviderConnection pc = PluginsLookup.getDefault()
+                                    .getProvider(artist.getProvider());
+                            if (pc != null) {
+                                IMusicProvider binder = pc.getBinder();
+                                try {
+                                    if (binder != null) {
+                                        List<String> albums = artist.getAlbums();
+                                        for (String albumRef : albums) {
+                                            binder.fetchAlbumTracks(albumRef);
+                                        }
+                                    }
+                                } catch (RemoteException e) {
+                                    // ignore
+                                }
+                            }
                         }
                     }
                 }

@@ -164,6 +164,14 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
                     mTvArtist.setAlpha(1.0f);
                     mVoiceCommander.processResult(results, mVoiceHelper);
                     mPbVoiceLoading.setVisibility(View.VISIBLE);
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mPbVoiceLoading.setVisibility(View.GONE);
+                            mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+                        }
+                    }, 2000);
                 }
             }
 
@@ -357,6 +365,12 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         PlaybackProxy.addCallback(mPlaybackCallback);
         mHandler.sendEmptyMessageDelayed(MSG_HIDE_SYSTEM_UI, 1000);
         mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        mHandler.sendEmptyMessageDelayed(MSG_HIDE_SYSTEM_UI, 1000);
     }
 
     @Override
