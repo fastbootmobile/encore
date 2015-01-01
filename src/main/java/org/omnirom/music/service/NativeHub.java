@@ -19,6 +19,7 @@ import android.util.Log;
 
 import org.omnirom.music.framework.WSStreamer;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 
 /**
@@ -33,6 +34,7 @@ public class NativeHub {
     }
 
     private WSStreamer mStreamer;
+    private boolean mIsStreamerUp;
 
     // Used in native code
     private long mHandle;
@@ -48,12 +50,31 @@ public class NativeHub {
         mAudioMirrorBuffer = new byte[262144];
         try {
             mStreamer = new WSStreamer(8887);
-            mStreamer.start();
         } catch (UnknownHostException e) {
             Log.e(TAG, "Error: Cannot create WebSocket Streamer on port 8887", e);
         }
 
         nativeInitialize();
+    }
+
+    /**
+     * Called when the playback service starts
+     */
+    public void onStart() {
+        mStreamer.start();
+    }
+
+    /**
+     * Called when the playback service stops
+     */
+    public void onStop() {
+        try {
+            mStreamer.stop();
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while stopping WS Streamer", e);
+        } catch (InterruptedException e) {
+            Log.e(TAG, "InterruptedException while stopping WS Streamer", e);
+        }
     }
 
     /**

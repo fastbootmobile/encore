@@ -187,6 +187,7 @@ public class PlaybackService extends Service
         mNativeHub = new NativeHub();
         mNativeSink = new NativeAudioSink();
         mNativeHub.setSinkPointer(mNativeSink.getPlayer().getHandle());
+        mNativeHub.onStart();
 
         mDSPProcessor = new DSPProcessor(this);
         mDSPProcessor.restoreChain(this);
@@ -268,6 +269,8 @@ public class PlaybackService extends Service
         if (mHasAudioFocus) {
             abandonAudioFocus();
         }
+
+        mNativeHub.onStop();
 
         mIsForeground = false;
 
