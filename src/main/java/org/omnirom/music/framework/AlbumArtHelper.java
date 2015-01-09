@@ -84,11 +84,12 @@ public class AlbumArtHelper {
         private AlbumArtCache.IAlbumArtCacheListener mCacheListener = new AlbumArtCache.IAlbumArtCacheListener() {
             @Override
             public void onArtLoaded(BoundEntity ent, RecyclingBitmapDrawable result) {
+
                 synchronized (AlbumArtTask.this) {
                     if (!isCancelled()) {
                         mArtBitmap = result;
                     }
-                    AlbumArtTask.this.notifyAll();
+                    AlbumArtTask.this.notify();
                 }
             }
         };

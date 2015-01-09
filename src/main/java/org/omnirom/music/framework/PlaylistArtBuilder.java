@@ -25,6 +25,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.omnirom.music.app.BuildConfig;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
@@ -39,6 +40,7 @@ import java.util.List;
  */
 public class PlaylistArtBuilder {
     private static final String TAG = "PlaylistArtBuilder";
+    private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private Bitmap mPlaylistComposite;
     private List<RecyclingBitmapDrawable> mPlaylistSource;
@@ -53,7 +55,7 @@ public class PlaylistArtBuilder {
     private Runnable mTimeoutWatchdog = new Runnable() {
         @Override
         public void run() {
-            Log.e(TAG, "Watchdog kicking " + mNumComposite + " images");
+            if (DEBUG) Log.w(TAG, "Watchdog kicking " + mNumComposite + " images");
 
             if (mPlaylistComposite != null) {
                 try {
@@ -175,7 +177,7 @@ public class PlaylistArtBuilder {
             }
         }
 
-        Log.e(TAG, "Got image " + numImages + "/" + mNumComposite);
+        if (DEBUG) Log.d(TAG, "Got image " + numImages + "/" + mNumComposite);
 
         if (numImages == mNumComposite) {
             mDone = true;
@@ -188,7 +190,7 @@ public class PlaylistArtBuilder {
     }
 
     public void start(Resources res, Playlist playlist, IArtCallback callback) {
-        Log.e(TAG, "Starting to build playlist art for " + playlist.getName());
+        if (DEBUG) Log.d(TAG, "Starting to build playlist art for " + playlist.getName());
 
         mDone = false;
         mCallback = callback;

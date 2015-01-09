@@ -242,6 +242,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
         if (request != mRequestedEntity) {
             if (DEBUG) Log.d(TAG, "onArtLoaded: Too late for " + request.getRef());
+            mRunnable = null;
             return;
         }
 

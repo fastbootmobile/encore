@@ -67,7 +67,7 @@ public class HttpGet {
             throws IOException, RateLimitException {
         final String formattedUrl = inUrl + (query.isEmpty() ? "" : ("?" + query));
 
-        Log.e(TAG, "Formatted URL: " + formattedUrl);
+        Log.d(TAG, "Formatted URL: " + formattedUrl);
 
         URL url = new URL(formattedUrl);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();

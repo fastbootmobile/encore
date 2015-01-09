@@ -454,6 +454,7 @@ public class AlbumArtCache {
                     }.start();
                 }
             });
+            result = true;
         }
 
         return result;
