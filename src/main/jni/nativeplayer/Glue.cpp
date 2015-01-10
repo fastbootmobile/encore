@@ -40,6 +40,8 @@ static JNINativeMethod gMethodsNativePlayer[] = {
             reinterpret_cast<void*>(om_NativePlayer_getTotalWrittenSamples)},
     {"nativeFlush", "()V",
             reinterpret_cast<void*>(om_NativePlayer_flush)},
+    {"nativeShutdown", "()V",
+            reinterpret_cast<void*>(om_NativePlayer_shutdown)},
 };
 
 static JNINativeMethod gMethodsNativeHub[] = {
@@ -55,6 +57,8 @@ static JNINativeMethod gMethodsNativeHub[] = {
             reinterpret_cast<void*>(om_NativeHub_setSinkPointer)},
     {"nativeSetDucking", "(Z)V",
             reinterpret_cast<void*>(om_NativeHub_setDucking)},
+    {"nativeShutdown", "()V",
+            reinterpret_cast<void*>(om_NativeHub_shutdown)},
 };
 
 // -------------------------------------------------------------------------------------

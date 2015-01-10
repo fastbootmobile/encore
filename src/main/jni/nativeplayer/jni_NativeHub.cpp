@@ -79,6 +79,12 @@ jboolean om_NativeHub_initialize(JNIEnv* env, jobject thiz) {
     return (hub != nullptr);
 }
 // -------------------------------------------------------------------------------------
+void om_NativeHub_shutdown(JNIEnv* env, jobject thiz) {
+    NativeHub* hub = get_hub_from_object(env, thiz);
+    delete hub;
+    env->SetLongField(thiz, field_NativeHub_mHandle, (jlong) 0);
+}
+// -------------------------------------------------------------------------------------
 void om_NativeHub_setDSPChain(JNIEnv* env, jobject thiz, jobjectArray chain) {
     const int length = env->GetArrayLength(chain);
     std::list<std::string> chain_list;

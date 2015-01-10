@@ -84,6 +84,13 @@ public class NativePlayer {
         nativeFlush();
     }
 
+    /**
+     * Releases resources and cleans up the player
+     */
+    public void shutdown() {
+        nativeShutdown();
+    }
+
     private native boolean nativeInitialize();
     private native boolean nativeSetAudioFormat(int sample_rate, int channels, int depth);
     private native int nativeEnqueue(byte[] data, int length);
@@ -92,4 +99,5 @@ public class NativePlayer {
     private native int nativeGetUnderflowCount();
     private native long nativeGetTotalWrittenSamples();
     private native void nativeFlush();
+    private native void nativeShutdown();
 }

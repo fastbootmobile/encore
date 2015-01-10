@@ -29,6 +29,21 @@ NativeHub::NativeHub(void* userdata) : m_pSink(nullptr), m_pLastProviderSocket(n
 }
 // -------------------------------------------------------------------------------------
 NativeHub::~NativeHub() {
+    ALOGD("NativeHub releasing (%d dsp sockets left, %d provider sockets left)",
+            m_DSPSockets.size(), m_ProviderSockets.size());
+
+    std::lock_guard<std::recursive_mutex> lock(m_ChainMutex);
+    for (auto it = m_DSPSockets.begin(); it != m_DSPSockets.end(); ++it) {
+        delete it->second;
+    }
+
+    m_DSPSockets.clear();
+
+    for (auto it = m_ProviderSockets.begin(); it != m_ProviderSockets.end(); ++it) {
+        delete it->second;
+    }
+
+    m_ProviderSockets.clear();
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::setSink(INativeSink* sink) {

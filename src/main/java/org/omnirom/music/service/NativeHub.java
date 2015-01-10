@@ -75,6 +75,7 @@ public class NativeHub {
         } catch (InterruptedException e) {
             Log.e(TAG, "InterruptedException while stopping WS Streamer", e);
         }
+        nativeShutdown();
     }
 
     /**
@@ -124,6 +125,7 @@ public class NativeHub {
 
     // Native methods
     private native boolean nativeInitialize();
+    private native void nativeShutdown();
     private native void nativeSetDSPChain(String[] chain);
     private native boolean nativeCreateHostSocket(String name, boolean isDsp);
     private native void nativeReleaseHostSocket(String name);

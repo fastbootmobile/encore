@@ -64,6 +64,12 @@ jboolean om_NativePlayer_initialize(JNIEnv* env, jobject thiz) {
     return (player != NULL) && result;
 }
 // -------------------------------------------------------------------------------------
+void om_NativePlayer_shutdown(JNIEnv* env, jobject thiz) {
+    NativePlayer* player = get_layer_from_object(env, thiz);
+    delete player;
+    env->SetLongField(thiz, field_NativePlayer_mHandle, (jlong) 0);
+}
+// -------------------------------------------------------------------------------------
 jboolean om_NativePlayer_setAudioFormat(JNIEnv* env, jobject thiz, jint sample_rate, jint channels,
                                             jint depth) {
     NativePlayer* player = get_layer_from_object(env, thiz);

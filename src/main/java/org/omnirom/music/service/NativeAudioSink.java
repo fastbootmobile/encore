@@ -32,7 +32,7 @@ public class NativeAudioSink implements AudioSink {
 
     @Override
     public void release() {
-        // TODO: Release resources
+        mPlayer.shutdown();
     }
 
     @Override

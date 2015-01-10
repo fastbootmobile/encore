@@ -31,6 +31,9 @@ int JNI_NativeHub_SetupFields(JNIEnv* env);
 // NativeHub.initialize()
 jboolean om_NativeHub_initialize(JNIEnv* env, jobject thiz);
 
+// NativeHub.shutdown()
+void om_NativeHub_shutdown(JNIEnv* env, jobject thiz);
+
 // NativeHub.setDSPChain(String[] chain) ==> NativeHub::setDSPChain(list<string> chain)
 void om_NativeHub_setDSPChain(JNIEnv* env, jobject thiz, jobjectArray chain);
 

@@ -270,8 +270,6 @@ public class PlaybackService extends Service
             abandonAudioFocus();
         }
 
-        mNativeHub.onStop();
-
         mIsForeground = false;
 
         // Remove audio hosts from providers
@@ -296,6 +294,8 @@ public class PlaybackService extends Service
         mCurrentTrack = -1;
 
         // Shutdown DSP chain
+        mNativeHub.onStop();
+        mNativeSink.release();
 
         super.onDestroy();
     }

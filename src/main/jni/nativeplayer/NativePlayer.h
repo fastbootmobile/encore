@@ -18,7 +18,6 @@
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 #include <cstdint>
-#include <thread>
 #include <list>
 #include <utility>
 #include <atomic>

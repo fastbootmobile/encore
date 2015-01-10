@@ -34,6 +34,26 @@ NativePlayer::NativePlayer() : m_pEngineObj(nullptr), m_pEngine(nullptr),
 }
 // -------------------------------------------------------------------------------------
 NativePlayer::~NativePlayer() {
+    // Destroy the buffer queue audio player object
+    if (m_pPlayerObj) {
+        (*m_pPlayerObj)->Destroy(m_pPlayerObj);
+        m_pPlayerObj = nullptr;
+        m_pBufferQueue = nullptr;
+        m_pPlayerVol = nullptr;
+    }
+
+    // Destroy the output mix object
+    if (m_pOutputMixObj) {
+        (*m_pOutputMixObj)->Destroy(m_pOutputMixObj);
+        m_pOutputMixObj = nullptr;
+    }
+
+    // Destroy the engine object
+    if (m_pEngineObj) {
+        (*m_pEngineObj)->Destroy(m_pEngineObj);
+        m_pEngineObj = nullptr;
+        m_pEngine = nullptr;
+    }
 }
 // -------------------------------------------------------------------------------------
 bool NativePlayer::createEngine() {

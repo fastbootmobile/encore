@@ -30,6 +30,9 @@ int JNI_NativePlayer_SetupFields(JNIEnv* env);
 // NativePlayer.nativeInitialize ==> NativePlayer::createEngine
 jboolean om_NativePlayer_initialize(JNIEnv* env, jobject thiz);
 
+// NativePlayer.nativeShutdown ==> NativePlayer::~NativePlayer
+void om_NativePlayer_shutdown(JNIEnv* env, jobject thiz);
+
 // NativePlayer.nativeSetAudioFormat ==> NativePlayer::setAudioFormat
 jboolean om_NativePlayer_setAudioFormat(JNIEnv* env, jobject thiz, jint sample_rate, jint channels,
                                             jint depth);
