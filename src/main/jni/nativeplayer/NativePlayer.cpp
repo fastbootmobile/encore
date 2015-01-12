@@ -17,10 +17,12 @@
 #include "NativeHub.h"
 #include "jni_NativeHub.h"
 #include "Log.h"
+#include "Glue.h"
 #include "../libresample/resample.h"
 #include <string>
 #include <utility>
 #include <cmath>
+#include <pthread.h>
 
 #define LOG_TAG "OM-NativePlayer"
 
@@ -54,6 +56,8 @@ NativePlayer::~NativePlayer() {
         m_pEngineObj = nullptr;
         m_pEngine = nullptr;
     }
+
+    ALOGD("Released NativePlayer...");
 }
 // -------------------------------------------------------------------------------------
 bool NativePlayer::createEngine() {
@@ -416,6 +420,9 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
     NativePlayer* p = reinterpret_cast<NativePlayer*>(context);
     std::lock_guard<std::mutex> lock(p->m_QueueMutex);
 
+    JNIEnv* env;
+    bool release = JNI_GetEnv(&env);
+
     SLresult result;
 
     // Get queue state
@@ -473,6 +480,8 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
             }
         }
     }
+
+    if (release) JNI_ReleaseEnv();
 }
 // -------------------------------------------------------------------------------------
 void NativePlayer::setPlayState(SLuint32 state) {

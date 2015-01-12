@@ -59,6 +59,7 @@ void NativeHub::setDSPChain(const std::list<std::string>& chain) {
 // -------------------------------------------------------------------------------------
 SocketHost* NativeHub::createHostSocket(const std::string& name, bool is_dsp) {
     std::lock_guard<std::recursive_mutex> lock(m_ChainMutex);
+
     SocketHost* host = new SocketHost(name);
     if (!host->initialize()) {
         ALOGE("Unable to initialize host socket %s", name.c_str());
