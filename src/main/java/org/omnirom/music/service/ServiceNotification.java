@@ -71,8 +71,32 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         mDefaultArt = bdDefault.getBitmap().copy(bdDefault.getBitmap().getConfig(), false);
         mCurrentArt = null;
 
-        mBaseTemplate = new RemoteViews(ctx.getPackageName(), R.layout.notification_base);
-        mExpandedTemplate = new RemoteViews(ctx.getPackageName(), R.layout.notification_expanded);
+        // Build the static notification actions
+        setPlayPauseActionImpl(false, false);
+    }
+
+    public String getString(int resId) {
+        return mResources.getString(resId);
+    }
+
+    private void buildBaseNotification() {
+        Intent notificationIntent = new Intent(mContext, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
+
+        mBuilder = new NotificationCompat.Builder(mContext);
+
+        // Build the core notification
+        mBuilder.setSmallIcon(R.drawable.ic_launcher_white)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(false)
+                .setOngoing(true)
+                .setContent(mBaseTemplate)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+    }
+
+    private void buildRemoteViews() {
+        mBaseTemplate = new RemoteViews(mContext.getPackageName(), R.layout.notification_base);
+        mExpandedTemplate = new RemoteViews(mContext.getPackageName(), R.layout.notification_expanded);
 
         // Setup pending intents
         PendingIntent piNext = PendingIntent.getService(mContext, 0,
@@ -92,36 +116,12 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         mExpandedTemplate.setOnClickPendingIntent(R.id.btnNotifPrevious, piPrevious);
         mBaseTemplate.setOnClickPendingIntent(R.id.btnNotifClose, piStop);
         mExpandedTemplate.setOnClickPendingIntent(R.id.btnNotifClose, piStop);
-
-        // Build the static notification actions
-        setPlayPauseActionImpl(false, false);
-
-        // Build the initial notification
-        buildBaseNotification();
-        buildNotification();
-    }
-
-    public String getString(int resId) {
-        return mResources.getString(resId);
-    }
-
-    private void buildBaseNotification() {
-        Intent notificationIntent = new Intent(mContext, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
-
-        mBuilder = new NotificationCompat.Builder(mContext);
-        mCurrentArt = null;
-
-        // Build the core notification
-        mBuilder.setSmallIcon(R.drawable.ic_launcher_white)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(false)
-                .setOngoing(true)
-                .setContent(mBaseTemplate)
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
     }
 
     private void buildNotification() {
+        buildRemoteViews();
+        buildBaseNotification();
+
         // And get the notification object
         mNotification = mBuilder.build();
 
@@ -180,6 +180,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
             mBaseTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.getBitmap());
             mExpandedTemplate.setImageViewBitmap(R.id.ivAlbumArt, mCurrentArt.getBitmap());
         } else {
+
             mBaseTemplate.setImageViewResource(R.id.ivAlbumArt, R.drawable.album_placeholder);
             mExpandedTemplate.setImageViewResource(R.id.ivAlbumArt, R.drawable.album_placeholder);
         }
