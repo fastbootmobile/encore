@@ -118,7 +118,10 @@ void om_NativeHub_releaseHostSocket(JNIEnv* env, jobject thiz, jstring name) {
     const char* socket_name = env->GetStringUTFChars(name, 0);
     NativeHub* hub = get_hub_from_object(env, thiz);
 
-    hub->releaseHostSocket(socket_name);
+    // HUB pointer might be null if the socket release call happens after shutdown
+    if (hub) {
+        hub->releaseHostSocket(socket_name);
+    }
     env->ReleaseStringUTFChars(name, socket_name);
 }
 // -------------------------------------------------------------------------------------
