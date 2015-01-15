@@ -117,19 +117,6 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
         GridView playlistLayout = (GridView) root.findViewById(R.id.gvPlaylists);
         playlistLayout.setAdapter(mAdapter);
 
-        // Set the initial playlists
-        new Thread() {
-            public void run() {
-                final List<Playlist> playlists = ProviderAggregator.getDefault().getAllPlaylists();
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.addAllUnique(playlists);
-                    }
-                });
-            }
-        }.start();
-
         // Setup the click listener
         playlistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -166,12 +153,27 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     public void onResume() {
         super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
+        updatePlaylists();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
+    }
+
+    private void updatePlaylists() {
+        new Thread() {
+            public void run() {
+                final List<Playlist> playlists = ProviderAggregator.getDefault().getAllPlaylists();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.addAllUnique(playlists);
+                    }
+                });
+            }
+        }.start();
     }
 
     @Override

@@ -9,18 +9,7 @@
         <item name="colorControlHighlight">@color/primary_light</item>
 
         <item name="android:windowBackground">@color/default_fragment_background</item>
-        <item name="android:actionBarStyle">@style/AppActionBar</item>
         <item name="android:windowContentOverlay">@null</item>
-    </style>
-
-    <style name="AppActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
-        <item name="android:background">@color/primary</item>
-        <item name="android:titleTextStyle">@style/AppActionBarText</item>
-        <item name="android:icon">@android:color/transparent</item>
-    </style>
-
-    <style name="AppActionBarText" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="TransparentNavBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">

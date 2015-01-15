@@ -28,9 +28,12 @@ import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.omnirom.music.api.echonest.AutoMixBucket;
@@ -70,6 +73,7 @@ public class AutomixCreateActivity extends PreferenceActivity {
     private AutoMixManager mAutoMixManager = AutoMixManager.getDefault();
     private int mMode;
     private ProgressDialog mProgressDialog;
+    private Toolbar mToolbar;
 
     private final Runnable mInvalidSettingsError = new Runnable() {
         @Override
@@ -110,12 +114,33 @@ public class AutomixCreateActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Lollipop removes toolbars
+        LinearLayout root = (LinearLayout)findViewById(android.R.id.list).getParent().getParent().getParent();
+        mToolbar = (Toolbar) getLayoutInflater().inflate(R.layout.toolbar_automix, root, false);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int id = menuItem.getItemId();
+                if (id == android.R.id.home) {
+                    finish();
+                    return true;
+                } else if (id == R.id.menu_create) {
+                    createBucket();
+                }
+
+                return true;
+            }
+        });
+        root.addView(mToolbar, 0);
+
+        mToolbar.inflateMenu(R.menu.automix);
+
         // Set the title
         mMode = getIntent().getIntExtra(EXTRA_MODE, 0);
         if (mMode == MODE_STATIC) {
-            setTitle(R.string.title_activity_automix_create_static);
+            mToolbar.setTitle(R.string.title_activity_automix_create_static);
         } else if (mMode == MODE_DYNAMIC) {
-            setTitle(R.string.title_activity_automix_create_dynamic);
+            mToolbar.setTitle(R.string.title_activity_automix_create_dynamic);
         }
 
         // Inflate preferences
@@ -127,13 +152,6 @@ public class AutomixCreateActivity extends PreferenceActivity {
 
         findPreference(KEY_ADVENTUROUS).setEnabled(hasTasteSettings);
         findPreference(KEY_TASTE).setEnabled(hasTasteSettings);
-
-        // Customize actionbar
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
     }
 
     @Override
@@ -145,30 +163,6 @@ public class AutomixCreateActivity extends PreferenceActivity {
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(new CalligraphyContextWrapper(newBase));
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.automix, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == android.R.id.home) {
-            finish();
-            return true;
-        } else if (id == R.id.menu_create) {
-            createBucket();
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private void createBucket() {

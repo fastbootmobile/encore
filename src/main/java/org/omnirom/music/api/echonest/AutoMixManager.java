@@ -192,7 +192,7 @@ public class AutoMixManager extends BasePlaybackCallback {
             editor.putString(PREF_PREFIX_STYLES + id, Utils.implode(bucket.mStyles, ","));
             editor.putBoolean(PREF_PREFIX_TASTE + id, bucket.mUseTaste);
 
-            Set<String> set = prefs.getStringSet(PREF_BUCKETS_IDS, new TreeSet<String>());
+            Set<String> set = new TreeSet<>(prefs.getStringSet(PREF_BUCKETS_IDS, new TreeSet<String>()));
             set.add(id);
             editor.putStringSet(PREF_BUCKETS_IDS, set);
 
@@ -284,6 +284,7 @@ public class AutoMixManager extends BasePlaybackCallback {
             if (e.getCode() == 5 && e.getMessage().contains("does not exist")
                     && !bucket.isPlaylistSessionError()) {
                 // The bucket has expired, we must recreate it and restart the play procedure
+                Log.d(TAG, "The bucket has expired, we must recreate it and restart the play procedure");
                 bucket.createPlaylistSession();
                 startPlay(bucket);
             } else {
