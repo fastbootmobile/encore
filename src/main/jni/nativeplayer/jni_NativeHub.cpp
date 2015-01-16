@@ -148,5 +148,9 @@ void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint
 
     // Notify Java new bytes are available
     env->CallVoidMethod(thiz, method_NativeHub_onAudioMirrorWritten, len);
+
+    if (release_jni) {
+        JNI_ReleaseEnv();
+    }
 }
 // -------------------------------------------------------------------------------------
