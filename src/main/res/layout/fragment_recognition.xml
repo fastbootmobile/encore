@@ -22,14 +22,13 @@
         android:textColor="#333333"
         />
 
-    <Button
+    <org.omnirom.music.app.ui.AnimatedMicButton
         android:id="@+id/btnStartRec"
-        style="@style/FontButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:background="@null"
+        android:layout_width="156dp"
+        android:layout_height="156dp"
         android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true"
-        android:text="@string/start_recognition"/>
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:id="@+id/tvCannotRecognize"

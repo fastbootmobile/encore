@@ -22,12 +22,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -36,6 +38,7 @@ import android.widget.TextView;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.SearchActivity;
+import org.omnirom.music.app.ui.AnimatedMicButton;
 import org.omnirom.music.framework.EchoPrint;
 import org.omnirom.music.providers.ProviderAggregator;
 
@@ -49,10 +52,13 @@ import java.net.URL;
 /**
  * Fragment displaying the controls for the song fingerprinting and recognition system
  */
-public class RecognitionFragment extends Fragment {
+public class RecognitionFragment extends Fragment implements EchoPrint.PrintCallback {
     private static final String TAG = "RecognitionFragment";
 
-    private Handler mHandler;
+    private static final int MSG_AUDIO_LEVEL = 1;
+    private static final int MSG_RESULT = 2;
+    private static final int MSG_NO_RESULT = 3;
+
     private EchoPrint mActivePrint;
     private EchoPrint.PrintResult mLastResult;
     private TextView mTvOops;
@@ -60,46 +66,20 @@ public class RecognitionFragment extends Fragment {
     private TextView mTvArtist;
     private TextView mTvAlbum;
     private ImageView mIvArt;
-    private Button mRecognitionButton;
+    private AnimatedMicButton mRecognitionButton;
     private Button mSearchButton;
     private ProgressBar mProgressRecognizing;
     private TextView mTvOfflineError;
 
-    private Runnable mStopRecognition = new Runnable() {
+    private Handler mHandler = new Handler() {
         @Override
-        public void run() {
-            mRecognitionButton.setEnabled(false);
-            mRecognitionButton.setText(R.string.recognizing);
-            mProgressRecognizing.setVisibility(View.VISIBLE);
-            mTvOops.setVisibility(View.GONE);
-            mSearchButton.setVisibility(View.GONE);
-
-            new Thread() {
-                public void run() {
-                    try {
-                        mLastResult = mActivePrint.stopAndSend();
-                    } catch (IOException e) {
-                        Log.e(TAG, "Error while sending audio", e);
-                    }
-
-                    Log.d(TAG, "Result: " + mLastResult);
-                    mHandler.post(mShowRecognitionResult);
-                    mHandler.post(mResetRecognition);
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_AUDIO_LEVEL) {
+                float value = (Float) msg.obj;
+                if (value >= 0.0f) {
+                    mRecognitionButton.setLevel(value);
                 }
-            }.start();
-        }
-    };
-
-    private Runnable mShowRecognitionResult = new Runnable() {
-        @Override
-        public void run() {
-            if (mLastResult == null) {
-                mTvOops.setVisibility(View.VISIBLE);
-                mSearchButton.setVisibility(View.GONE);
-                mTvAlbum.setText(null);
-                mTvArtist.setText(null);
-                mTvTitle.setText(null);
-            } else {
+            } else if (msg.what == MSG_RESULT) {
                 mTvOops.setVisibility(View.GONE);
                 mTvAlbum.setText(mLastResult.AlbumName);
                 mTvTitle.setText(mLastResult.TrackName);
@@ -107,67 +87,36 @@ public class RecognitionFragment extends Fragment {
                 mSearchButton.setVisibility(View.VISIBLE);
 
                 // Load the album art in a thread
-                new Thread() {
-                    public void run () {
-                        URL url;
-                        try {
-                            url = new URL(mLastResult.AlbumImageUrl);
-                        } catch (MalformedURLException e) {
-                            // Too bad
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mIvArt.setImageResource(R.drawable.album_placeholder);
-                                }
-                            });
-                            return;
-                        }
+                loadAlbumArt(mLastResult.AlbumImageUrl, mIvArt);
+            } else if (msg.what == MSG_NO_RESULT) {
+                mTvOops.setVisibility(View.VISIBLE);
+                mSearchButton.setVisibility(View.GONE);
+                mTvAlbum.setText(null);
+                mTvArtist.setText(null);
+                mTvTitle.setText(null);
 
-                        try {
-                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                            InputStream is = conn.getInputStream();
-                            byte[] buffer = new byte[2048];
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            int read;
-                            while ((read = is.read(buffer)) > 0) {
-                                baos.write(buffer, 0, read);
-                            }
-
-                            final Bitmap bmp = BitmapFactory.decodeByteArray(baos.toByteArray(), 0, baos.size());
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mIvArt.setImageBitmap(bmp);
-                                }
-                            });
-                        } catch (IOException e) {
-                            Log.e(TAG, "Error downloading album art", e);
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mIvArt.setImageResource(R.drawable.album_placeholder);
-                                }
-                            });
-                        }
-                    }
-                }.start();
+                mActivePrint = null;
+                mProgressRecognizing.setVisibility(View.GONE);
+                mRecognitionButton.setEnabled(true);
             }
         }
     };
 
-    private Runnable mResetRecognition = new Runnable() {
+    private Runnable mStopRecognition = new Runnable() {
         @Override
         public void run() {
-            mActivePrint = null;
-            mProgressRecognizing.setVisibility(View.GONE);
-            mRecognitionButton.setEnabled(true);
-            mRecognitionButton.setText(R.string.start_recognition);
+            // As long as we haven't received either onNoMatch or onResult, the audio data
+            // should be in a processing state
+            mActivePrint.stopRecording();
+            mRecognitionButton.setActive(false);
+            onStoppedAndRecognizing();
         }
     };
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
+     *
      * @return A new instance of fragment RecognitionFragment.
      */
     public static RecognitionFragment newInstance() {
@@ -179,17 +128,11 @@ public class RecognitionFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mHandler = new Handler();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         RelativeLayout root = (RelativeLayout) inflater.inflate(R.layout.fragment_recognition, container, false);
-        mRecognitionButton = (Button) root.findViewById(R.id.btnStartRec);
+        mRecognitionButton = (AnimatedMicButton) root.findViewById(R.id.btnStartRec);
         mTvAlbum = (TextView) root.findViewById(R.id.tvAlbumName);
         mTvArtist = (TextView) root.findViewById(R.id.tvArtistName);
         mTvTitle = (TextView) root.findViewById(R.id.tvTrackName);
@@ -211,18 +154,17 @@ public class RecognitionFragment extends Fragment {
                 mTvTitle.setText(null);
                 mIvArt.setVisibility(View.INVISIBLE);
                 mSearchButton.setVisibility(View.GONE);
+                mRecognitionButton.setActive(true);
 
                 if (mActivePrint == null) {
-                    mActivePrint = new EchoPrint();
+                    mActivePrint = new EchoPrint(RecognitionFragment.this);
                     mActivePrint.startRecording();
-
-                    mRecognitionButton.setText(R.string.stop_recognition);
 
                     // The buffer has a max size of 20 seconds, so we force stop at around 19 seconds
                     mHandler.postDelayed(mStopRecognition, 19000);
                 } else {
                     mHandler.removeCallbacks(mStopRecognition);
-                    mHandler.post(mStopRecognition);
+                    mStopRecognition.run();
                 }
             }
         });
@@ -253,4 +195,73 @@ public class RecognitionFragment extends Fragment {
         super.onDetach();
     }
 
+    @Override
+    public void onResult(EchoPrint.PrintResult result) {
+        mLastResult = result;
+        mHandler.sendEmptyMessage(MSG_RESULT);
+    }
+
+    @Override
+    public void onNoMatch() {
+        mHandler.sendEmptyMessage(MSG_NO_RESULT);
+    }
+
+    @Override
+    public void onAudioLevel(final float level) {
+        mHandler.obtainMessage(MSG_AUDIO_LEVEL, level).sendToTarget();
+    }
+
+    private void onStoppedAndRecognizing() {
+        mRecognitionButton.setEnabled(false);
+        mProgressRecognizing.setVisibility(View.VISIBLE);
+        mTvOops.setVisibility(View.GONE);
+        mSearchButton.setVisibility(View.GONE);
+    }
+
+    private void loadAlbumArt(final String urlString, final ImageView iv) {
+        new Thread() {
+            public void run() {
+                URL url;
+                try {
+                    url = new URL(urlString);
+                } catch (MalformedURLException e) {
+                    // Too bad
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mIvArt.setImageResource(R.drawable.album_placeholder);
+                        }
+                    });
+                    return;
+                }
+
+                try {
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    InputStream is = conn.getInputStream();
+                    byte[] buffer = new byte[4096];
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    int read;
+                    while ((read = is.read(buffer)) > 0) {
+                        baos.write(buffer, 0, read);
+                    }
+
+                    final Bitmap bmp = BitmapFactory.decodeByteArray(baos.toByteArray(), 0, baos.size());
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            iv.setImageBitmap(bmp);
+                        }
+                    });
+                } catch (IOException e) {
+                    Log.e(TAG, "Error downloading album art", e);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            iv.setImageResource(R.drawable.album_placeholder);
+                        }
+                    });
+                }
+            }
+        }.start();
+    }
 }
