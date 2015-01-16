@@ -84,6 +84,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/ivOffline"
+                    android:contentDescription="@string/downloading"
                     android:src="@drawable/ic_track_downloaded"
                     android:layout_gravity="center_vertical"
                     android:visibility="gone" />

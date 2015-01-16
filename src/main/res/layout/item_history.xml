@@ -73,6 +73,7 @@
         android:layout_alignParentBottom="true"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
+        android:contentDescription="@string/more"
         android:transitionName="itemImage" />
 
 </RelativeLayout>
