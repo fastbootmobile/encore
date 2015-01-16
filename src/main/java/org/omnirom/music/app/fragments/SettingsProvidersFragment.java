@@ -21,9 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -33,7 +31,6 @@ import org.omnirom.music.app.adapters.ProvidersAdapter;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
-import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -28,9 +28,7 @@ import android.widget.TextView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.providers.ProviderConnection;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Inflater;
 
 /**
  * Adapter to display a list of providers in a ListView
@@ -106,7 +104,7 @@ public class ProvidersAdapter extends BaseAdapter {
             tag.ivProviderIcon.setImageDrawable(icon);
         } catch (PackageManager.NameNotFoundException e) {
             // set default icon
-            tag.ivProviderIcon.setImageResource(R.drawable.ic_launcher);
+            tag.ivProviderIcon.setImageResource(R.mipmap.ic_launcher);
         }
 
         return view;

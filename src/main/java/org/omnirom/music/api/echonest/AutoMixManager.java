@@ -18,7 +18,6 @@ package org.omnirom.music.api.echonest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;

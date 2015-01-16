@@ -1,7 +1,6 @@
 
 package org.omnirom.music.app.ui;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
@@ -13,7 +12,6 @@ import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
-import org.omnirom.music.app.R;
 import org.omnirom.music.framework.RecyclingBitmapDrawable;
 
 /**

@@ -17,11 +17,8 @@ package org.omnirom.music.providers;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.media.MediaFormat;
 import android.os.DeadObjectException;
-import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -32,28 +29,10 @@ import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * Created by h4o on 17/06/2014.

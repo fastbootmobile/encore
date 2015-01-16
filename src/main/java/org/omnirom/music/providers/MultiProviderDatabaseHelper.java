@@ -146,7 +146,8 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
                 mPlayListRefID.put(pl.getRef(), playlist_id);
             } while (c.moveToNext());
         }
-        ProviderAggregator.getDefault().getCache().putAllProviderPlaylist(new ArrayList<Playlist>(mPlaylists.values()));
+        ProviderAggregator.getDefault().getCache().putAllProviderPlaylist(new ArrayList<>(mPlaylists.values()));
+        c.close();
     }
 
     private void fetchSongs(Playlist playlist, long playlist_id, SQLiteDatabase database) {
@@ -167,6 +168,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
                 mRefProviderId.put(song, providerIdentifier);
             } while (c.moveToNext());
         }
+        c.close();
     }
 
     @Override

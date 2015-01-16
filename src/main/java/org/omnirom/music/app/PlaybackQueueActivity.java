@@ -16,6 +16,7 @@
 
 package org.omnirom.music.app;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Fragment;
@@ -60,6 +61,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,6 +117,7 @@ public class PlaybackQueueActivity extends AppActivity {
 
         private View.OnClickListener mArtClickListener = new View.OnClickListener() {
             @Override
+            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             public void onClick(View view) {
                 Bitmap hero = ((MaterialTransitionDrawable) ((ImageView) view).getDrawable())
                         .getFinalDrawable().getBitmap();
@@ -242,7 +245,7 @@ public class PlaybackQueueActivity extends AppActivity {
         private static final int PLAYSTATE_ARG1_NOT_BUFFERING = 0;
         private static final int PLAYSTATE_ARG1_BUFFERING = 1;
 
-        private Handler mHandler;
+        private PlaybackQueueHandler mHandler;
         private boolean mLockSeekBarUpdate;
         private FrameLayout mRootView;
         private ListView mListView;
@@ -254,25 +257,33 @@ public class PlaybackQueueActivity extends AppActivity {
         private View.OnClickListener mRepeatClickListener;
         private View.OnClickListener mLikeClickListener;
 
-        public SimpleFragment() {
-            mHandler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    switch (msg.what) {
-                        case MSG_UPDATE_QUEUE:
-                            updateQueueLayout();
-                            break;
+        private static class PlaybackQueueHandler extends Handler {
+            private WeakReference<SimpleFragment> mParent;
 
-                        case MSG_UPDATE_SEEKBAR:
-                            updateSeekbar();
-                            break;
+            public PlaybackQueueHandler(WeakReference<SimpleFragment> parent) {
+                mParent = parent;
+            }
 
-                        case MSG_UPDATE_PLAYSTATE:
-                            updatePlaystate(msg.arg1, msg.arg2);
-                            break;
-                    }
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_UPDATE_QUEUE:
+                        mParent.get().updateQueueLayout();
+                        break;
+
+                    case MSG_UPDATE_SEEKBAR:
+                        mParent.get().updateSeekbar();
+                        break;
+
+                    case MSG_UPDATE_PLAYSTATE:
+                        mParent.get().updatePlaystate(msg.arg1, msg.arg2);
+                        break;
                 }
-            };
+            }
+        }
+
+        public SimpleFragment() {
+            mHandler = new PlaybackQueueHandler(new WeakReference<>(this));
 
             mPlayFabClickListener = new View.OnClickListener() {
                 @Override

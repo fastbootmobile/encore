@@ -15,7 +15,6 @@
 
 package org.omnirom.music.service;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
 import org.omnirom.music.model.Song;

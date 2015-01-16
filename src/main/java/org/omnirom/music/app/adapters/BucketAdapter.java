@@ -16,7 +16,6 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,6 @@ import org.omnirom.music.api.echonest.AutoMixBucket;
 import org.omnirom.music.app.R;
 
 import java.util.List;
-import java.util.zip.Inflater;
 
 /**
  * Adapter to display a ListView of AutoMix buckets

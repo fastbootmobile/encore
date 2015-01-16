@@ -34,6 +34,8 @@ import android.widget.ListView;
 
 import org.omnirom.music.app.R;
 
+import java.lang.ref.WeakReference;
+
 public abstract class PreferenceFragment extends Fragment implements
 		PreferenceManagerCompat.OnPreferenceTreeClickListener {
     
@@ -50,17 +52,25 @@ public abstract class PreferenceFragment extends Fragment implements
     private static final int FIRST_REQUEST_CODE = 100;
 
     private static final int MSG_BIND_PREFERENCES = 1;
-    private Handler mHandler = new Handler() {
+
+    private static class PreferenceHandler extends Handler {
+        private WeakReference<PreferenceFragment> mParent;
+
+        public PreferenceHandler(WeakReference<PreferenceFragment> parent) {
+            mParent = parent;
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-
                 case MSG_BIND_PREFERENCES:
-                    bindPreferences();
+                    mParent.get().bindPreferences();
                     break;
             }
         }
-    };
+    }
+
+    private Handler mHandler = new PreferenceHandler(new WeakReference<>(this));
 
     final private Runnable mRequestFocus = new Runnable() {
         public void run() {

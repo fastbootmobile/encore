@@ -16,7 +16,6 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;

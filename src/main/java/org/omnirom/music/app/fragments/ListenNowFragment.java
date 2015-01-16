@@ -62,7 +62,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
     private static final String TAG = "ListenNowFragment";
 
-    private static ListenNowAdapter sAdapter = new ListenNowAdapter();
+    private static final ListenNowAdapter sAdapter = new ListenNowAdapter();
     private static boolean sWarmUp = false;
 
     private Handler mHandler;
@@ -73,13 +73,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     /**
      * Runnable responsible of generating the entries to put in the grid
      */
-    private Runnable mGenerateEntries = new Runnable() {
+    private final Runnable mGenerateEntries = new Runnable() {
         @Override
         public void run() {
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             final List<Playlist> playlists = aggregator.getAllPlaylists();
-            final List<String> chosenSongs = new ArrayList<String>();
+            final List<String> chosenSongs = new ArrayList<>();
             final List<String> usedReferences = new ArrayList<>();
 
             int totalSongsCount = 0;
@@ -221,6 +221,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                             entity);
                     sAdapter.addEntry(entry);
                     sAdapter.notifyItemInserted(sAdapter.getItemCount() - 1);
+                    usedReferences.add(entity.getRef());
                 } else {
                     // Something bad happened while getting this entity, try something else
                     i--;

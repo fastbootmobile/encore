@@ -18,17 +18,13 @@ package org.omnirom.music.app;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.AudioManager;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import org.omnirom.music.app.fragments.PlaylistViewFragment;
 import org.omnirom.music.model.Playlist;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Activity allowing user to view a Playlist contents through
@@ -77,8 +73,8 @@ public class PlaylistActivity extends AppActivity {
 
         // Remove title
         setTitle(null);
-        if (getActionBar() != null) {
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 

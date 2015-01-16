@@ -15,6 +15,8 @@
 
 package org.omnirom.music.app;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
@@ -53,6 +55,7 @@ public class SettingsActivity extends AppActivity {
     }
 
     @Override
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public boolean onOptionsItemSelected(MenuItem item) {
         if (Utils.hasLollipop()) {
             finishAfterTransition();

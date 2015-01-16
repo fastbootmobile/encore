@@ -31,8 +31,6 @@ import org.omnirom.music.providers.ProviderAggregator;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 

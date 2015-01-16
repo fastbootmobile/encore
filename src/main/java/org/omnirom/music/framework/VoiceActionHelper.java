@@ -34,6 +34,7 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,35 +56,47 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
     private Context mContext;
     private SearchResult mPreviousSearchResults;
 
-    public VoiceActionHelper(Context context) {
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                mPendingMessage = null;
-                mPendingAction = 0;
-                mPendingExtra = 0;
-                mPendingParams = null;
+    private static class VoiceActionHandler extends Handler {
+        private WeakReference<VoiceActionHelper> mParent;
 
-                if (msg.what == MSG_START_PLAY) {
-                    if (DEBUG) Log.d(TAG, "Final handled action: START_PLAY");
+        public VoiceActionHandler(WeakReference<VoiceActionHelper> parent) {
+            mParent = parent;
+        }
 
-                    Song song = (Song) msg.obj;
-                    PlaybackProxy.playSong(song);
-                } else if (msg.what == MSG_START_PLAY_LIST) {
-                    List<Song> songs = (List<Song>) msg.obj;
+        @Override
+        public void handleMessage(Message msg) {
+            mParent.get().resetPendingValues();
 
-                    if (DEBUG) Log.d(TAG, "Final handled action: START_PLAY_LIST (" + songs.size() + " songs)");
+            if (msg.what == MSG_START_PLAY) {
+                if (DEBUG) Log.d(TAG, "Final handled action: START_PLAY");
+
+                Song song = (Song) msg.obj;
+                PlaybackProxy.playSong(song);
+            } else if (msg.what == MSG_START_PLAY_LIST) {
+                List<Song> songs = (List<Song>) msg.obj;
+
+                if (DEBUG) Log.d(TAG, "Final handled action: START_PLAY_LIST (" + songs.size() + " songs)");
 
 
-                    PlaybackProxy.clearQueue();
-                    for (Song song : songs) {
-                        PlaybackProxy.queueSong(song, false);
-                    }
-                    PlaybackProxy.playAtIndex(0);
+                PlaybackProxy.clearQueue();
+                for (Song song : songs) {
+                    PlaybackProxy.queueSong(song, false);
                 }
+                PlaybackProxy.playAtIndex(0);
             }
-        };
+        }
+    }
+
+    public VoiceActionHelper(Context context) {
+        mHandler = new VoiceActionHandler(new WeakReference<>(this));
         mContext = context;
+    }
+
+    private void resetPendingValues() {
+        mPendingMessage = null;
+        mPendingAction = 0;
+        mPendingExtra = 0;
+        mPendingParams = null;
     }
 
     @Override

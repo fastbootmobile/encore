@@ -18,7 +18,6 @@ package org.omnirom.music.service;
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadata;
 import android.media.Rating;

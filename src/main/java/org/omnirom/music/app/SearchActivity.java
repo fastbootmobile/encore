@@ -20,23 +20,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.SearchView;
 
 import org.omnirom.music.app.fragments.SearchFragment;
-import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
-import org.omnirom.music.providers.ProviderConnection;
-
-import java.util.List;
 
 /**
  * Activity allowing display of search results through

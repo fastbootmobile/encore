@@ -51,6 +51,7 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 /**
@@ -66,34 +67,26 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     private SearchResult mSearchResult;
     private String mQuery;
 
+    private static class SearchHandler extends Handler {
+        private WeakReference<SearchFragment> mParent;
+
+        public SearchHandler(WeakReference<SearchFragment> parent) {
+            mParent = parent;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_UPDATE_RESULTS) {
+                mParent.get().updateSearchResults();
+            }
+        }
+    }
+
     /**
      * Default constructor
      */
     public SearchFragment() {
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                final Activity act = getActivity();
-
-                if (msg.what == MSG_UPDATE_RESULTS) {
-                    if (act != null) {
-                        getActivity().setTitle("'" + mSearchResult.getQuery() + "'");
-                        getActivity().setProgressBarIndeterminateVisibility(false);
-                    } else {
-                        mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
-                    }
-
-                    if (mAdapter != null) {
-                        if (mSearchResult.getIdentifier() == null) {
-                            Log.e(TAG, "Search provider identifier is null!");
-                        } else {
-                            mAdapter.appendResults(mSearchResult);
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    }
-                }
-            }
-        };
+        mHandler = new SearchHandler(new WeakReference<>(this));
 
         setRetainInstance(true);
     }
@@ -197,7 +190,6 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     }
 
     private void onAlbumClick(int i, View v) {
-        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
         Bitmap hero = ((MaterialTransitionDrawable) holder.albumArtImageView.getDrawable()).getFinalDrawable().getBitmap();
         int color = 0xffffff;
@@ -321,6 +313,26 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         if (searchResult.getQuery().equals(mQuery)) {
             mSearchResult = searchResult;
             mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
+        }
+    }
+
+    private void updateSearchResults() {
+        final Activity act = getActivity();
+
+        if (act != null) {
+            getActivity().setTitle("'" + mSearchResult.getQuery() + "'");
+            getActivity().setProgressBarIndeterminateVisibility(false);
+        } else {
+            mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
+        }
+
+        if (mAdapter != null) {
+            if (mSearchResult.getIdentifier() == null) {
+                Log.e(TAG, "Search provider identifier is null!");
+            } else {
+                mAdapter.appendResults(mSearchResult);
+                mAdapter.notifyDataSetChanged();
+            }
         }
     }
 }

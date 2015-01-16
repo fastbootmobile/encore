@@ -41,7 +41,6 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.IPlaybackCallback;
-import org.omnirom.music.service.IPlaybackService;
 
 import java.io.IOException;
 

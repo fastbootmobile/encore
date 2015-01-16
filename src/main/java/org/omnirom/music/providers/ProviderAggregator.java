@@ -17,7 +17,6 @@ package org.omnirom.music.providers;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -26,7 +25,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;

@@ -61,6 +61,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +73,32 @@ public class PlayingBarView extends RelativeLayout {
 
     // Delay after which the seek bar is updated (10Hz)
     private static final int SEEK_BAR_UPDATE_DELAY = 1000 / 10;
+
+    private static class PlayingBarHandler extends Handler {
+        private WeakReference<PlayingBarView> mParent;
+
+        public PlayingBarHandler(WeakReference<PlayingBarView> parent) {
+            mParent = parent;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_UPDATE_QUEUE:
+                    mParent.get().mProgressDrawable.setMax(PlaybackProxy.getCurrentTrackLength());
+                    mParent.get().updatePlayingQueue();
+                    break;
+
+                case MSG_UPDATE_SEEK:
+                    mParent.get().updateSeekBar();
+                    break;
+
+                case MSG_UPDATE_FAB:
+                    mParent.get().updatePlayFab();
+                    break;
+            }
+        }
+    }
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -201,7 +228,7 @@ public class PlayingBarView extends RelativeLayout {
     private PlayPauseDrawable mPlayFabDrawable;
     private CircularProgressDrawable mProgressDrawable;
     private List<Song> mLastQueue;
-    private Handler mHandler;
+    private PlayingBarHandler mHandler;
     private int mAnimationDuration;
     private boolean mWrapped;
     private boolean mPlayInSeekMode;
@@ -225,25 +252,7 @@ public class PlayingBarView extends RelativeLayout {
     private void init() {
         mAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
         mGestureDetector = new GestureDetector(getContext(), mGestureListener);
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case MSG_UPDATE_QUEUE:
-                        mProgressDrawable.setMax(PlaybackProxy.getCurrentTrackLength());
-                        updatePlayingQueue();
-                        break;
-
-                    case MSG_UPDATE_SEEK:
-                        updateSeekBar();
-                        break;
-
-                    case MSG_UPDATE_FAB:
-                        updatePlayFab();
-                        break;
-                }
-            }
-        };
+        mHandler = new PlayingBarHandler(new WeakReference<>(this));
     }
 
     public void onPause() {

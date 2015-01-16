@@ -10,7 +10,6 @@ import android.support.v4.app.ListFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,7 +27,6 @@ import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
-import org.omnirom.music.service.IPlaybackService;
 
 import java.util.List;
 

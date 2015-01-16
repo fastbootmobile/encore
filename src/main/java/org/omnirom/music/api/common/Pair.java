@@ -16,8 +16,6 @@
 
 package org.omnirom.music.api.common;
 
-import java.util.Objects;
-
 /**
  * Container to ease passing around a tuple of two objects. This object provides a sensible
  * implementation of equals(), returning true if equals() is true on each of the contained

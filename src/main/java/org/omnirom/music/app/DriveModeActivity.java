@@ -46,6 +46,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
 
+import java.lang.ref.WeakReference;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -65,7 +66,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private static final int MSG_UPDATE_TIME = 3;
     private static final int MSG_HIDE_SYSTEM_UI = 4;
 
-    private Handler mHandler;
+    private DriveHandler mHandler;
     private DrivePlaybackCallback mPlaybackCallback;
     private View mDecorView;
     private PlayPauseDrawable mPlayDrawable;
@@ -87,31 +88,39 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private VoiceCommander mVoiceCommander;
     private VoiceActionHelper mVoiceHelper;
 
+    private static class DriveHandler extends Handler {
+        private WeakReference<DriveModeActivity> mParent;
+
+        public DriveHandler(WeakReference<DriveModeActivity> parent) {
+            mParent = parent;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_UPDATE_PLAYBACK_STATUS:
+                    mParent.get().updatePlaybackStatus();
+                    break;
+
+                case MSG_UPDATE_SEEKBAR:
+                    mParent.get().updateSeekBar();
+                    break;
+
+                case MSG_UPDATE_TIME:
+                    mParent.get().updateTime();
+                    break;
+
+                case MSG_HIDE_SYSTEM_UI:
+                    mParent.get().hideSystemUI();
+                    break;
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case MSG_UPDATE_PLAYBACK_STATUS:
-                        updatePlaybackStatus();
-                        break;
-
-                    case MSG_UPDATE_SEEKBAR:
-                        updateSeekBar();
-                        break;
-
-                    case MSG_UPDATE_TIME:
-                        updateTime();
-                        break;
-
-                    case MSG_HIDE_SYSTEM_UI:
-                        hideSystemUI();
-                        break;
-                }
-            }
-        };
+        mHandler = new DriveHandler(new WeakReference<>(this));
         mPlaybackCallback = new DrivePlaybackCallback();
 
         mVoiceCommander = new VoiceCommander(this);

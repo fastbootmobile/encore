@@ -2,7 +2,6 @@ package org.lucasr.twowayview.widget;
 
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 
 import org.lucasr.twowayview.TwoWayLayoutManager.Direction;
 import org.lucasr.twowayview.widget.Lanes.LaneInfo;

@@ -15,6 +15,7 @@
 
 package org.omnirom.music.service;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -23,6 +24,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.view.View;
@@ -118,6 +120,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         mExpandedTemplate.setOnClickPendingIntent(R.id.btnNotifClose, piStop);
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void buildNotification() {
         buildRemoteViews();
         buildBaseNotification();
