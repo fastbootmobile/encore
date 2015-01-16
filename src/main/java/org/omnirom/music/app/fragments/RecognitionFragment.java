@@ -29,7 +29,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -45,6 +44,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -71,36 +71,29 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
     private ProgressBar mProgressRecognizing;
     private TextView mTvOfflineError;
 
-    private Handler mHandler = new Handler() {
+    private static class RecognitionHandler extends Handler {
+        private WeakReference<RecognitionFragment> mParent;
+
+        public RecognitionHandler(WeakReference<RecognitionFragment> parent) {
+            mParent = parent;
+        }
+
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_AUDIO_LEVEL) {
                 float value = (Float) msg.obj;
                 if (value >= 0.0f) {
-                    mRecognitionButton.setLevel(value);
+                    mParent.get().setVoiceLevel(value);
                 }
             } else if (msg.what == MSG_RESULT) {
-                mTvOops.setVisibility(View.GONE);
-                mTvAlbum.setText(mLastResult.AlbumName);
-                mTvTitle.setText(mLastResult.TrackName);
-                mTvArtist.setText(mLastResult.ArtistName);
-                mSearchButton.setVisibility(View.VISIBLE);
-
-                // Load the album art in a thread
-                loadAlbumArt(mLastResult.AlbumImageUrl, mIvArt);
+                mParent.get().showLastResult();
             } else if (msg.what == MSG_NO_RESULT) {
-                mTvOops.setVisibility(View.VISIBLE);
-                mSearchButton.setVisibility(View.GONE);
-                mTvAlbum.setText(null);
-                mTvArtist.setText(null);
-                mTvTitle.setText(null);
-
-                mActivePrint = null;
-                mProgressRecognizing.setVisibility(View.GONE);
-                mRecognitionButton.setEnabled(true);
+                mParent.get().showNoResult();
             }
         }
-    };
+    }
+
+    private RecognitionHandler mHandler;
 
     private Runnable mStopRecognition = new Runnable() {
         @Override
@@ -125,6 +118,12 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
 
     public RecognitionFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mHandler = new RecognitionHandler(new WeakReference<>(this));
     }
 
     @Override
@@ -263,5 +262,32 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
                 }
             }
         }.start();
+    }
+
+    public void setVoiceLevel(float level) {
+        mRecognitionButton.setLevel(level);
+    }
+
+    public void showLastResult() {
+        mTvOops.setVisibility(View.GONE);
+        mTvAlbum.setText(mLastResult.AlbumName);
+        mTvTitle.setText(mLastResult.TrackName);
+        mTvArtist.setText(mLastResult.ArtistName);
+        mSearchButton.setVisibility(View.VISIBLE);
+
+        // Load the album art in a thread
+        loadAlbumArt(mLastResult.AlbumImageUrl, mIvArt);
+    }
+
+    public void showNoResult() {
+        mTvOops.setVisibility(View.VISIBLE);
+        mSearchButton.setVisibility(View.GONE);
+        mTvAlbum.setText(null);
+        mTvArtist.setText(null);
+        mTvTitle.setText(null);
+
+        mActivePrint = null;
+        mProgressRecognizing.setVisibility(View.GONE);
+        mRecognitionButton.setEnabled(true);
     }
 }
