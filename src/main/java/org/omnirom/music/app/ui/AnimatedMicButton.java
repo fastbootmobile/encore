@@ -15,7 +15,8 @@ import android.widget.ImageButton;
 import org.omnirom.music.app.R;
 
 public class AnimatedMicButton extends ImageButton {
-    private float mLevel = 1.0f;
+    private float mTargetLevel = 1.0f;
+    private float mCurrentLevel = 1.0f;
     private CircleBounceDrawable mBounceDrawable;
     private LayerDrawable mLayeredOn;
     private LayerDrawable mLayeredOff;
@@ -50,12 +51,12 @@ public class AnimatedMicButton extends ImageButton {
             setImageDrawable(mLayeredOn);
         } else {
             setImageDrawable(mLayeredOff);
-            mLevel = 0;
+            mTargetLevel = 0;
         }
     }
 
     public void setLevel(float level) {
-        mLevel = level;
+        mTargetLevel = level;
         postInvalidate();
         mBounceDrawable.invalidateSelf();
     }
@@ -76,7 +77,7 @@ public class AnimatedMicButton extends ImageButton {
             mPaint.setColor(0xFFDDDDDD);
 
             canvas.drawCircle(bounds.centerX(), bounds.centerY(),
-                    bounds.height() / 1.5f + mInterpolator.getInterpolation(mLevel) * bounds.height() / 3.0f,
+                    bounds.height() / 1.5f + mCurrentLevel * bounds.height() / 3.0f,
                     mPaint);
 
             mPaint.setColor(0xFFFFFFFF);
@@ -84,6 +85,11 @@ public class AnimatedMicButton extends ImageButton {
             canvas.drawCircle(bounds.centerX(), bounds.centerY(),
                     bounds.height() / 1.5f,
                     mPaint);
+
+            if (mCurrentLevel != mTargetLevel) {
+                mCurrentLevel += (mTargetLevel - mCurrentLevel) / 4.0f;
+                invalidateSelf();
+            }
         }
 
         @Override
