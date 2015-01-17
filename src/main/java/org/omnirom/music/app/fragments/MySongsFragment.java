@@ -24,8 +24,7 @@ public class MySongsFragment extends Fragment {
     private Handler mHandler;
 
     public static MySongsFragment newInstance() {
-        MySongsFragment fragment = new MySongsFragment();
-        return fragment;
+        return new MySongsFragment();
     }
 
     public MySongsFragment() {

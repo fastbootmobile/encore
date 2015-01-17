@@ -37,6 +37,7 @@ public class SquareImageView extends ImageView {
         super(context, attrs, defStyle);
     }
 
+    @SuppressWarnings("SuspiciousNameCombination")
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);

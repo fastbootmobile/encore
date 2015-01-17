@@ -299,11 +299,9 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
                     } catch (Exception e) {
                         return;
                     }
-                    List<String> songsList = new ArrayList<String>();
-                    List<String> albumList = new ArrayList<String>();
-                    List<String> playlistList = new ArrayList<String>();
-                    List<String> artistList = new ArrayList<String>();
 
+                    // MultiProvider only handles playlists, so we only search for that
+                    List<String> playlistList = new ArrayList<String>();
 
                     for (Playlist playlist : mPlaylists.values()) {
                         if (p.matcher(playlist.getName()).matches()) {

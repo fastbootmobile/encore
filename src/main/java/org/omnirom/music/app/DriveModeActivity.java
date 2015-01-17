@@ -401,7 +401,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         } else if (v == mSkipButton) {
             PlaybackProxy.next();
         } else if (v == mThumbsButton) {
-
+            // TODO: Do thumbs button
         } else if (v == mVoiceButton) {
             setVoiceEmphasis(true, false);
             mVoiceRecognizer.startListening();

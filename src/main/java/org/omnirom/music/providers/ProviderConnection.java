@@ -20,7 +20,6 @@ import android.content.Context;
 import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 
 import org.omnirom.music.service.NativeHub;
@@ -147,9 +146,6 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
         // Socket got killed. If we're still bound to this service, recreate a new socket and
         // assign it.
         // TODO: Is this still needed?
-        if (mBinder != null) {
-            final String newSockName = mAudioSocketName + SystemClock.uptimeMillis();
-            // createAudioSocket(newSockName);
-        }
+        Log.e(TAG, "Socket error");
     }
 }

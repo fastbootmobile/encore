@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.StateSet;
 import android.widget.Button;
@@ -244,7 +245,7 @@ public class CircularProgressButton extends Button {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         if (mProgress > 0 && mState == State.PROGRESS && !mMorphingInProgress) {
@@ -697,7 +698,7 @@ public class CircularProgressButton extends Button {
         }
 
         @Override
-        public void writeToParcel(Parcel out, int flags) {
+        public void writeToParcel(@NonNull Parcel out, int flags) {
             super.writeToParcel(out, flags);
             out.writeFloat(mProgress);
             out.writeInt(mIndeterminateProgressMode ? 1 : 0);

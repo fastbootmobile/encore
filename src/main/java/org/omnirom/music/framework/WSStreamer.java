@@ -22,7 +22,6 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.Collection;
 
 /**
@@ -31,7 +30,7 @@ import java.util.Collection;
 public class WSStreamer extends WebSocketServer {
     private static final String TAG = "WSStreamer";
 
-    public WSStreamer(int port) throws UnknownHostException {
+    public WSStreamer(int port) {
         super(new InetSocketAddress(port));
     }
 

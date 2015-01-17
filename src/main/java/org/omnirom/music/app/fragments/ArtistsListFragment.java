@@ -27,7 +27,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import org.lucasr.twowayview.ItemClickSupport;
 import org.lucasr.twowayview.TwoWayView;
@@ -65,7 +64,6 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 AlbumArtImageView ivCover = tag.ivCover;
-                TextView tvTitle = tag.tvTitle;
                 ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                     ivCover, "itemImage");
 
@@ -92,14 +90,6 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
     public ArtistsListFragment() {
         mAdapter = new ArtistsAdapter();
         mHandler = new Handler();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     /**

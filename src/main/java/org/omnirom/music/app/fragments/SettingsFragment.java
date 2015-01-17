@@ -63,17 +63,21 @@ public class SettingsFragment extends PreferenceFragment {
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         final String prefKey = preference.getKey();
 
-        if (KEY_CLEAR_CACHES.equals(prefKey)) {
-            AlbumArtCache.getDefault().clear();
-            Toast.makeText(getActivity(), getString(R.string.cache_cleared), Toast.LENGTH_SHORT).show();
-        } else if (KEY_LIST_DSP_CONFIG.equals(prefKey)) {
-            Fragment f = new DspProvidersFragment();
-            openFragment(f);
-            return true;
-        } else if (KEY_LIST_PROVIDERS_CONFIG.equals(prefKey)) {
-            Fragment f = new SettingsProvidersFragment();
-            openFragment(f);
-            return true;
+        switch (prefKey) {
+            case KEY_CLEAR_CACHES:
+                AlbumArtCache.getDefault().clear();
+                Toast.makeText(getActivity(), getString(R.string.cache_cleared), Toast.LENGTH_SHORT).show();
+                break;
+            case KEY_LIST_DSP_CONFIG: {
+                Fragment f = new DspProvidersFragment();
+                openFragment(f);
+                return true;
+            }
+            case KEY_LIST_PROVIDERS_CONFIG: {
+                Fragment f = new SettingsProvidersFragment();
+                openFragment(f);
+                return true;
+            }
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);

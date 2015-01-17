@@ -190,11 +190,6 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-    @Override
     public void onResult(EchoPrint.PrintResult result) {
         mLastResult = result;
         mHandler.sendEmptyMessage(MSG_RESULT);

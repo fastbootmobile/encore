@@ -481,39 +481,33 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @param provider The providers that connected
      */
     public void registerProvider(ProviderConnection provider) {
-        boolean added = false;
         synchronized (mProviders) {
-            //if (!mProviders.contains(provider)) {
             mProviders.add(provider);
-            added = true;
-            //}
         }
 
-        if (added) {
-            try {
-                // Register this class as callback
-                provider.getBinder().registerCallback(this);
+        try {
+            // Register this class as callback
+            provider.getBinder().registerCallback(this);
 
-                // Add all rosetta prefixes and map it to this provider
-                List<String> rosettaPrefixes = provider.getBinder().getSupportedRosettaPrefix();
+            // Add all rosetta prefixes and map it to this provider
+            List<String> rosettaPrefixes = provider.getBinder().getSupportedRosettaPrefix();
 
-                if (rosettaPrefixes != null) {
-                    for (String prefix : rosettaPrefixes) {
-                        mRosettaStoneMap.put(prefix, provider.getIdentifier());
-                        if (!mRosettaStonePrefix.contains(prefix)) {
-                            mRosettaStonePrefix.add(prefix);
-                        }
+            if (rosettaPrefixes != null) {
+                for (String prefix : rosettaPrefixes) {
+                    mRosettaStoneMap.put(prefix, provider.getIdentifier());
+                    if (!mRosettaStonePrefix.contains(prefix)) {
+                        mRosettaStonePrefix.add(prefix);
                     }
                 }
-
-                // Notify subclasses of the new provider
-                for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onProviderConnected(provider.getBinder());
-                }
-            } catch (RemoteException e) {
-                // Maybe the service died already?
-                Log.e(TAG, "Unable to register as a callback", e);
             }
+
+            // Notify subclasses of the new provider
+            for (ILocalCallback cb : mUpdateCallbacks) {
+                cb.onProviderConnected(provider.getBinder());
+            }
+        } catch (RemoteException e) {
+            // Maybe the service died already?
+            Log.e(TAG, "Unable to register as a callback", e);
         }
     }
 

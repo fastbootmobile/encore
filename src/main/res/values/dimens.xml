@@ -21,9 +21,6 @@
     <dimen name="card_elevation">6dp</dimen>
     <dimen name="card_press_elevation">12dp</dimen>
 
-    <dimen name="floating_button_large_size">72dp</dimen>
-    <dimen name="floating_button_small_size">48dp</dimen>
-
     <dimen name="one_dp">1dp</dimen>
     <dimen name="tile_text_padding">16dp</dimen>
     <dimen name="tile_single_text_height">48dp</dimen>

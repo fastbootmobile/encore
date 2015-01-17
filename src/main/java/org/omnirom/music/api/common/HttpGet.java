@@ -18,7 +18,6 @@ package org.omnirom.music.api.common;
 import android.util.Log;
 
 import org.apache.http.util.ByteArrayBuffer;
-import org.json.JSONException;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -41,7 +40,7 @@ public class HttpGet {
      * @return A string with the data grabbed from the URL
      */
     public static String get(String inUrl, String query, boolean cached)
-            throws IOException, JSONException, RateLimitException {
+            throws IOException, RateLimitException {
         return new String(getBytes(inUrl, query, cached));
     }
 

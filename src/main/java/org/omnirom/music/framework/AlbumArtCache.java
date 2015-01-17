@@ -422,7 +422,7 @@ public class AlbumArtCache {
         boolean result = false;
 
         if (binder != null) {
-            providerprovides = result = binder.getPlaylistArt(playlist, new IArtCallback.Stub() {
+            providerprovides = binder.getPlaylistArt(playlist, new IArtCallback.Stub() {
                 @Override
                 public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
                     new Thread() {
@@ -437,6 +437,7 @@ public class AlbumArtCache {
                     }.start();
                 }
             });
+            result = providerprovides;
         }
 
         if (!providerprovides) {

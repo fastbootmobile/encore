@@ -388,21 +388,28 @@ public class EchoNest {
         }
         if (songTypes != null && songTypes.length > 0) {
             for (String songType : songTypes) {
-                if ("christmas".equals(songType)) {
-                    p.addSongType(com.echonest.api.v4.Song.SongType.christmas,
-                            com.echonest.api.v4.Song.SongTypeFlag.True);
-                } else if ("live".equals(songType)) {
-                    p.addSongType(com.echonest.api.v4.Song.SongType.live,
-                            com.echonest.api.v4.Song.SongTypeFlag.True);
-                } else if ("studio".equals(songType)) {
-                    p.addSongType(com.echonest.api.v4.Song.SongType.studio,
-                            com.echonest.api.v4.Song.SongTypeFlag.True);
-                } else if ("acoustic".equals(songType)) {
-                    p.add("song_type", songType + ":true");
-                } else if ("electric".equals(songType)) {
-                    p.add("song_type", songType + ":true");
-                } else {
-                    Log.e(TAG, "Unrecognized song type: " + songType);
+                switch (songType) {
+                    case "christmas":
+                        p.addSongType(com.echonest.api.v4.Song.SongType.christmas,
+                                com.echonest.api.v4.Song.SongTypeFlag.True);
+                        break;
+                    case "live":
+                        p.addSongType(com.echonest.api.v4.Song.SongType.live,
+                                com.echonest.api.v4.Song.SongTypeFlag.True);
+                        break;
+                    case "studio":
+                        p.addSongType(com.echonest.api.v4.Song.SongType.studio,
+                                com.echonest.api.v4.Song.SongTypeFlag.True);
+                        break;
+                    case "acoustic":
+                        p.add("song_type", songType + ":true");
+                        break;
+                    case "electric":
+                        p.add("song_type", songType + ":true");
+                        break;
+                    default:
+                        Log.e(TAG, "Unrecognized song type: " + songType);
+                        break;
                 }
             }
         }

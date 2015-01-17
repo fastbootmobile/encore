@@ -38,7 +38,6 @@
     <string name="view_full_queue">View full queue…</string>
     <string name="title_activity_playback_queue">Now playing</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_effect">Add effect</string>
     <string name="cancel">Cancel</string>
     <string name="new_playlist">New playlist…</string>

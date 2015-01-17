@@ -12,7 +12,7 @@
     <org.omnirom.music.app.ui.AlbumArtImageView
         android:id="@+id/ivCover"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="0"
         android:adjustViewBounds="true"
         android:contentDescription="@string/app_name"
