@@ -85,7 +85,6 @@ public class PlayPauseDrawable extends Drawable {
         mPadding = mWidth - mIconWidth;
 
         setBounds(0, 0, mWidth, mHeight);
-        Log.e(TAG, "PLAYPAUSE BOUNDS: " + mWidth + "x" + mHeight);
     }
 
     /**

@@ -15,11 +15,14 @@
 
 package org.omnirom.music.app.fragments;
 
+import android.animation.Animator;
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -40,7 +43,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -384,9 +389,21 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void notifyClosing() {
         Utils.animateScale(mFabPlay, true, false);
-        mRootView.findViewById(R.id.tvArtist).animate().alpha(0.0f).setStartDelay(0).setDuration(500).start();
+        final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
+        if (Utils.hasLollipop()) {
+            final int cx = tvArtist.getMeasuredWidth() / 5;
+            final int cy = tvArtist.getMeasuredHeight() / 2;
+            final int finalRadius = Utils.getEnclosingCircleRadius(tvArtist, cx, cy);
+            Animator animator = ViewAnimationUtils.createCircularReveal(tvArtist, cx, cy, finalRadius, 0)
+                    .setDuration(ArtistActivity.BACK_DELAY);
+            animator.setInterpolator(new DecelerateInterpolator());
+            animator.start();
+        } else {
+            tvArtist.animate().alpha(0.0f).setStartDelay(0).setDuration(ArtistActivity.BACK_DELAY).start();
+        }
     }
 
     public void scrollToTop() {
@@ -456,6 +473,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
      * {@inheritDoc}
      */
     @Override
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mHandler = new Handler();
@@ -483,8 +501,31 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
         tvArtist.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
         tvArtist.setText(mArtist.getName());
-        tvArtist.setAlpha(0);
-        tvArtist.animate().alpha(1).setDuration(300).setStartDelay(500).start();
+
+        if (Utils.hasLollipop()) {
+            tvArtist.setVisibility(View.INVISIBLE);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    final int cx = tvArtist.getMeasuredWidth() / 5;
+                    final int cy = tvArtist.getMeasuredHeight() / 2;
+
+                    if (tvArtist.isAttachedToWindow() && cx > 0) {
+                        final int finalRadius = Utils.getEnclosingCircleRadius(tvArtist, cx, cy);
+                        Animator animator = ViewAnimationUtils.createCircularReveal(tvArtist, cx, cy, 0, finalRadius)
+                                .setDuration(ArtistActivity.BACK_DELAY);
+                        animator.setInterpolator(new DecelerateInterpolator());
+                        animator.start();
+                        tvArtist.setVisibility(View.VISIBLE);
+                    } else {
+                        mHandler.postDelayed(this, 500);
+                    }
+                }
+            }, 500);
+        } else {
+            tvArtist.setAlpha(0);
+            tvArtist.animate().alpha(1).setDuration(300).setStartDelay(500).start();
+        }
 
         // Setup the subfragments pager
         final WrapContentHeightViewPager pager = (WrapContentHeightViewPager) mRootView.findViewById(R.id.pagerArtist);
@@ -669,7 +710,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         if (hasThisArtist) {
             // TODO: Instead of updating everything, update only the relevant entries
             mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-            mHandler.post(mUpdateAlbumsRunnable);
+            mHandler.postDelayed(mUpdateAlbumsRunnable, 300);
         }
     }
 
@@ -699,7 +740,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         if (hasThisArtist) {
             // TODO: Instead of updating everything, update only the relevant entries
             mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-            mHandler.post(mUpdateAlbumsRunnable);
+            mHandler.postDelayed(mUpdateAlbumsRunnable, 300);
         }
     }
 
@@ -711,7 +752,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     public void onArtistUpdate(final List<Artist> a) {
         if (a.contains(mArtist)) {
             mHandler.removeCallbacks(mUpdateAlbumsRunnable);
-            mHandler.post(mUpdateAlbumsRunnable);
+            mHandler.postDelayed(mUpdateAlbumsRunnable, 300);
         }
         mArtistSimilarFragment.notifyArtistUpdate(a);
     }
@@ -1019,6 +1060,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
          * Fetch the albums from the provider
          */
         private void fetchAlbums() {
+            Log.e(TAG, "FETCH ALBUMS");
             new Thread() {
                 public void run() {
                     ProviderIdentifier pi = mParent.getArtist().getProvider();
@@ -1060,6 +1102,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 // Make sure we loaded all the albums for that artist
                 fetchAlbums();
             }
+
+            Log.e(TAG, "LOAD ALBUMS");
 
             // Check if we're offline, and if we have nothing to show, then show the offline error
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();

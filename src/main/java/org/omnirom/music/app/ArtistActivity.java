@@ -48,6 +48,8 @@ public class ArtistActivity extends AppActivity {
     public static final String BITMAP_ARTIST_HERO = "artist_hero";
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
 
+    public static final int BACK_DELAY = 400;
+
     private Bundle mInitialIntent;
     private Bitmap mHero;
     private ArtistFragment mActiveFragment;
@@ -233,7 +235,7 @@ public class ArtistActivity extends AppActivity {
                         ArtistActivity.super.onBackPressed();
                     } catch (IllegalStateException ignored) { }
                 }
-            }, 300);
+            }, BACK_DELAY);
         } else {
             super.onBackPressed();
         }

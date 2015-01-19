@@ -66,9 +66,10 @@ public class Utils {
     /**
      * Format milliseconds into an human-readable track length.
      * Examples:
-     *  - 01:48:24 for 1 hour, 48 minutes, 24 seconds
-     *  - 24:02 for 24 minutes, 2 seconds
-     *  - 52s for 52 seconds
+     * - 01:48:24 for 1 hour, 48 minutes, 24 seconds
+     * - 24:02 for 24 minutes, 2 seconds
+     * - 52s for 52 seconds
+     *
      * @param timeMs The time to format, in milliseconds
      * @return A formatted string
      */
@@ -124,8 +125,9 @@ public class Utils {
 
     /**
      * Shows a short Toast style message
+     *
      * @param context The application context
-     * @param res The String resource id
+     * @param res     The String resource id
      */
     public static void shortToast(Context context, int res) {
         if (context != null) {
@@ -137,7 +139,8 @@ public class Utils {
 
     /**
      * Calculates the optimal size of the text based on the text view width
-     * @param textView The text view in which the text should fit
+     *
+     * @param textView     The text view in which the text should fit
      * @param desiredWidth The desired final text width, or -1 for the TextView's getMeasuredWidth
      */
     public static void adjustTextSize(TextView textView, int desiredWidth) {
@@ -174,6 +177,7 @@ public class Utils {
 
     /**
      * Temporarily store a bitmap
+     *
      * @param key The key
      * @param bmp The bitmap
      */
@@ -183,6 +187,7 @@ public class Utils {
 
     /**
      * Retrieve a bitmap from the store, and removes it
+     *
      * @param key The key used in queueBitmap
      * @return The bitmap associated with the key
      */
@@ -194,7 +199,8 @@ public class Utils {
 
     /**
      * Animate a view expansion (unwrapping)
-     * @param v The view to animate
+     *
+     * @param v      The view to animate
      * @param expand True to animate expanding, false to animate closing
      * @return The animation object created
      */
@@ -215,8 +221,7 @@ public class Utils {
 
         if (expand) {
             v.getLayoutParams().height = 0;
-        }
-        else {
+        } else {
             v.getLayoutParams().height = initialHeight;
         }
         v.setVisibility(View.VISIBLE);
@@ -264,6 +269,7 @@ public class Utils {
 
     /**
      * Figures out the main artist of an album based on its songs
+     *
      * @param a The album
      * @return A reference to the main artist, or null if none
      */
@@ -293,8 +299,8 @@ public class Utils {
         }
 
         // Figure the max
-        Map.Entry<String,Integer> maxEntry = null;
-        for (Map.Entry<String,Integer> entry : occurrences.entrySet()) {
+        Map.Entry<String, Integer> maxEntry = null;
+        for (Map.Entry<String, Integer> entry : occurrences.entrySet()) {
             if (maxEntry == null || entry.getValue() > maxEntry.getValue()) {
                 maxEntry = entry;
             }
@@ -312,6 +318,7 @@ public class Utils {
 
     /**
      * Figures out the main artist of a playlist based on its songs
+     *
      * @param p The playlist
      * @return A reference to the main artist, or null if none
      */
@@ -337,8 +344,8 @@ public class Utils {
         }
 
         // Figure the max
-        Map.Entry<String,Integer> maxEntry = null;
-        for (Map.Entry<String,Integer> entry : occurrences.entrySet()) {
+        Map.Entry<String, Integer> maxEntry = null;
+        for (Map.Entry<String, Integer> entry : occurrences.entrySet()) {
             if (maxEntry == null || entry.getValue() > maxEntry.getValue()) {
                 maxEntry = entry;
             }
@@ -399,7 +406,7 @@ public class Utils {
     }
 
     public static void showCurrentSongOverflow(final Context context, final View parent,
-                                        final Song song) {
+                                               final Song song) {
         PopupMenu popupMenu = new PopupMenu(context, parent);
         popupMenu.inflate(R.menu.queue_overflow);
         popupMenu.show();
@@ -446,10 +453,10 @@ public class Utils {
     /**
      * Serializes a string array with the specified separator
      *
-     * @param elements The elements to serialize
+     * @param elements  The elements to serialize
      * @param separator The separator to use between the elements
      * @return The elements in a single string, separated with the specified separator, an empty
-     *         string if elements is empty, or null if elements is null.
+     * string if elements is empty, or null if elements is null.
      */
     public static String implode(String[] elements, String separator) {
         if (elements == null) {
@@ -519,6 +526,7 @@ public class Utils {
     /**
      * Returns whether or not the song can be played. This takes into account the track's
      * availability as reported by the provider, as well as the offline status and mode
+     *
      * @param s The song to check
      * @return True if the song can be played right now
      */
@@ -533,6 +541,7 @@ public class Utils {
     /**
      * Returns whether or not the album is available offline. For that, the album must be loaded
      * and have at least of track available offline
+     *
      * @param a The album
      * @return true if the album is available offline
      */
@@ -613,5 +622,22 @@ public class Utils {
         }
 
         return output;
+    }
+
+    public static int getEnclosingCircleRadius(View v, int cx, int cy) {
+        int realCenterX = cx + v.getLeft();
+        int realCenterY = cy + v.getTop();
+        int distanceTopLeft = (int) Math.hypot(realCenterX - v.getLeft(), realCenterY - v.getTop());
+        int distanceTopRight = (int) Math.hypot(v.getRight() - realCenterX, realCenterY - v.getTop());
+        int distanceBottomLeft = (int) Math.hypot(realCenterX - v.getLeft(), v.getBottom() - realCenterY);
+        int distanceBotomRight = (int) Math.hypot(v.getRight() - realCenterX, v.getBottom() - realCenterY);
+
+        int[] distances = new int[]{distanceTopLeft, distanceTopRight, distanceBottomLeft, distanceBotomRight};
+        int radius = distances[0];
+        for (int i = 1; i < distances.length; i++) {
+            if (distances[i] > radius)
+                radius = distances[i];
+        }
+        return radius;
     }
 }
