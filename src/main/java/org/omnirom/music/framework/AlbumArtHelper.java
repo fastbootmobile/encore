@@ -43,7 +43,7 @@ public class AlbumArtHelper {
 
     private static final int DELAY_BEFORE_RETRY = 500;
     private static final int CORE_POOL_SIZE = 4;
-    private static final int MAXIMUM_POOL_SIZE = 256;
+    private static final int MAXIMUM_POOL_SIZE = 8;
     private static final int KEEP_ALIVE = 5;
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
@@ -53,7 +53,7 @@ public class AlbumArtHelper {
         }
     };
     private static final BlockingQueue<Runnable> sPoolWorkQueue =
-            new LinkedBlockingQueue<>(10);
+            new LinkedBlockingQueue<>(255);
     private static final Executor ART_POOL_EXECUTOR
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
             TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
