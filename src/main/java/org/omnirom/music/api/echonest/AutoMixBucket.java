@@ -327,13 +327,21 @@ public class AutoMixBucket {
      * Notifies the system that the user liked this song and want more
      */
     public void notifyLike() throws EchoNestException {
-        mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.favorite_song, "last");
+        try {
+            mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.favorite_song, "last");
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot feedback like", e);
+        }
     }
 
     /**
      * Notifies the system that the user skipped the current song so he might not like it
      */
     public void notifySkip() throws EchoNestException {
-        mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.skip_song, "last");
+        try {
+            mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.skip_song, "last");
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot feedback skip", e);
+        }
     }
 }
