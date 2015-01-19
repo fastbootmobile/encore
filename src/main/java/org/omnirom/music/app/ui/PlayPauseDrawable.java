@@ -21,6 +21,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
@@ -59,6 +60,7 @@ public class PlayPauseDrawable extends Drawable {
     private int mWidth;
     private int mHeight;
     private int mPadding;
+    private Rect mBufferingRect = new Rect();
 
     /**
      * Default constructor
@@ -83,6 +85,7 @@ public class PlayPauseDrawable extends Drawable {
         mPadding = mWidth - mIconWidth;
 
         setBounds(0, 0, mWidth, mHeight);
+        Log.e(TAG, "PLAYPAUSE BOUNDS: " + mWidth + "x" + mHeight);
     }
 
     /**
@@ -249,6 +252,8 @@ public class PlayPauseDrawable extends Drawable {
         canvas.save();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             canvas.translate((canvas.getWidth() - mWidth) / 2, (canvas.getHeight() - mHeight) / 2);
+        } else {
+            canvas.translate((getBounds().width() - mWidth) / 2, 0);
         }
         canvas.translate(0, -mYOffset);
 
@@ -304,7 +309,20 @@ public class PlayPauseDrawable extends Drawable {
                 mBufferingDrawable.setCallback(getCallback());
                 mBufferingDrawable.start();
             }
-            mBufferingDrawable.setBounds(getBounds());
+            copyBounds(mBufferingRect);
+            if (mBufferingRect.width() < mBufferingRect.height()) {
+                final int previousHeight = mBufferingRect.height();
+                final int newHeight = mBufferingRect.width();
+                mBufferingRect.top = mBufferingRect.left - ((newHeight - previousHeight) / 2);
+                mBufferingRect.bottom = mBufferingRect.right - ((newHeight - previousHeight) / 2);
+            } else {
+                final int previousWidth = mBufferingRect.width();
+                final int newWidth = mBufferingRect.height();
+                mBufferingRect.left = mBufferingRect.top - ((newWidth - previousWidth) / 2);
+                mBufferingRect.right = mBufferingRect.bottom - ((newWidth - previousWidth) / 2);
+            }
+
+            mBufferingDrawable.setBounds(mBufferingRect);
             mBufferingDrawable.draw(canvas);
         }
 
@@ -314,6 +332,10 @@ public class PlayPauseDrawable extends Drawable {
         }
 
         canvas.translate(0, mYOffset);
+
+        if (getBounds().width() <= 0 || getBounds().height() <= 0) {
+            invalidateSelf();
+        }
     }
 
     @Override
