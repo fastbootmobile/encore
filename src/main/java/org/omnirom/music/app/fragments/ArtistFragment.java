@@ -1060,7 +1060,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
          * Fetch the albums from the provider
          */
         private void fetchAlbums() {
-            Log.e(TAG, "FETCH ALBUMS");
             new Thread() {
                 public void run() {
                     ProviderIdentifier pi = mParent.getArtist().getProvider();
@@ -1102,8 +1101,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 // Make sure we loaded all the albums for that artist
                 fetchAlbums();
             }
-
-            Log.e(TAG, "LOAD ALBUMS");
 
             // Check if we're offline, and if we have nothing to show, then show the offline error
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
