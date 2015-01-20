@@ -125,7 +125,7 @@ bool NativePlayer::createAudioPlayer() {
     SLuint16 sample_format;
     SLuint32 sampling_rate;
 
-    switch (m_iSampleFormat) {
+    switch (m_iSampleFormat.load()) {
         case 8:
             sample_format = SL_PCMSAMPLEFORMAT_FIXED_8;
             break;
