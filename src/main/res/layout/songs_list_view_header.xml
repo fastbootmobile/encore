@@ -14,15 +14,13 @@
         android:contentDescription="@string/albums"
         android:transitionName="itemImage"
         android:scaleType="centerInside"
-        android:src="@drawable/test_cover_ptx"/>
+        />
 
     <TextView
         android:id="@+id/tvAlbumName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/ivHero"
         android:layout_alignLeft="@+id/ivHero"
-        android:layout_alignRight="@+id/ivHero"
         android:layout_alignStart="@+id/ivHero"
         android:background="#BB333333"
         android:transitionName="albumName"
@@ -39,7 +37,10 @@
         android:textColor="@color/white"
         android:textSize="22sp"
         android:layout_alignBottom="@+id/ivHero"
-        />
+        android:layout_toStartOf="@+id/ivSourceLogo"
+        android:ellipsize="end"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
 
     <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabPlay"
