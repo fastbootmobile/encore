@@ -53,7 +53,7 @@ public class AlbumArtHelper {
         }
     };
     private static final BlockingQueue<Runnable> sPoolWorkQueue =
-            new LinkedBlockingQueue<>(255);
+            new LinkedBlockingQueue<>(128);
     private static final Executor ART_POOL_EXECUTOR
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
             TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
@@ -201,6 +201,10 @@ public class AlbumArtHelper {
             // pool, as the custom one causes the app to just crash without any kind of error message
             // for no reason (at least in the emulator).
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                if (sPoolWorkQueue.remainingCapacity() == 0) {
+                    // Release a previous work to free up space in the queue
+                    sPoolWorkQueue.remove(sPoolWorkQueue.iterator().next());
+                }
                 task.executeOnExecutor(ART_POOL_EXECUTOR, request);
             } else {
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
