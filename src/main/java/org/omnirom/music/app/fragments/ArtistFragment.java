@@ -394,34 +394,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         Utils.animateScale(mFabPlay, true, false);
         final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
         if (Utils.hasLollipop()) {
-            final int cx = tvArtist.getMeasuredWidth() / 5;
-            final int cy = tvArtist.getMeasuredHeight() / 2;
-            final int finalRadius = Utils.getEnclosingCircleRadius(tvArtist, cx, cy);
-            Animator animator = ViewAnimationUtils.createCircularReveal(tvArtist, cx, cy, finalRadius, 0)
-                    .setDuration(ArtistActivity.BACK_DELAY);
-            animator.setInterpolator(new DecelerateInterpolator());
-            animator.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    tvArtist.setVisibility(View.INVISIBLE);
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
-
-                }
-            });
-            animator.start();
+            Utils.animateHeadingHiding(tvArtist);
         } else {
             tvArtist.animate().alpha(0.0f).setStartDelay(0).setDuration(ArtistActivity.BACK_DELAY).start();
         }
@@ -528,16 +501,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    final int cx = tvArtist.getMeasuredWidth() / 5;
-                    final int cy = tvArtist.getMeasuredHeight() / 2;
-
-                    if (tvArtist.isAttachedToWindow() && cx > 0) {
-                        final int finalRadius = Utils.getEnclosingCircleRadius(tvArtist, cx, cy);
-                        Animator animator = ViewAnimationUtils.createCircularReveal(tvArtist, cx, cy, 0, finalRadius)
-                                .setDuration(ArtistActivity.BACK_DELAY);
-                        animator.setInterpolator(new DecelerateInterpolator());
-                        animator.start();
-                        tvArtist.setVisibility(View.VISIBLE);
+                    if (tvArtist.isAttachedToWindow() && tvArtist.getMeasuredWidth() > 0) {
+                        Utils.animateHeadingReveal(tvArtist);
                     } else {
                         mHandler.postDelayed(this, 500);
                     }

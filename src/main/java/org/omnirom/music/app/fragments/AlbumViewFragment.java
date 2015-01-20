@@ -15,7 +15,9 @@
 
 package org.omnirom.music.app.fragments;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -74,6 +76,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private boolean mFabShouldResume = false;
     private RecyclingBitmapDrawable mLogoBitmap;
     private View mOfflineView;
+    private ImageView mIvHero;
+    private TextView mTvAlbumName;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -187,12 +191,23 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         // Load the header
         View headerView = inflater.inflate(R.layout.songs_list_view_header, mListView, false);
-        ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
-        TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
-        tvAlbumName.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
+        mIvHero = (ImageView) headerView.findViewById(R.id.ivHero);
+        mTvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
+        mTvAlbumName.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
+        mTvAlbumName.setVisibility(View.INVISIBLE);
         if (mAlbum != null) {
-            tvAlbumName.setText(mAlbum.getName());
+            mTvAlbumName.setText(mAlbum.getName());
         }
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+            public void run() {
+                if (mTvAlbumName.isAttachedToWindow()) {
+                    Utils.animateHeadingReveal(mTvAlbumName);
+                }
+            }
+        }, 500);
 
         // Hide download button by default
         headerView.findViewById(R.id.cpbOffline).setVisibility(View.GONE);
@@ -236,7 +251,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         });
         mPlayFab.setImageDrawable(mFabDrawable);
 
-        ivHero.setImageBitmap(mHeroImage);
+        mIvHero.setImageBitmap(mHeroImage);
 
         // Set the header view and adapter
         mListView.addParallaxedHeaderView(headerView);
@@ -299,6 +314,10 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    public ImageView getHeroImageView() {
+        return mIvHero;
+    }
+
     /**
      * Sets the arguments for this fragment
      * @param hero The hero header image bitmap
@@ -342,6 +361,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
     public void notifyReturnTransition() {
         showFab(true, false);
+        if (Utils.hasLollipop()) {
+            Utils.animateHeadingHiding(mTvAlbumName);
+        }
     }
 
     /**

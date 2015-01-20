@@ -15,6 +15,8 @@
 
 package org.omnirom.music.app;
 
+import android.animation.Animator;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -30,6 +32,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
@@ -639,5 +642,54 @@ public class Utils {
                 radius = distances[i];
         }
         return radius;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void animateHeadingReveal(final View view) {
+        final int cx = view.getMeasuredWidth() / 5;
+        final int cy = view.getMeasuredHeight() / 2;
+        final int radius = Utils.getEnclosingCircleRadius(view, cx, cy);
+        animateCircleReveal(view, cx, cy, 0, radius);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void animateHeadingHiding(final View view) {
+        final int cx = view.getMeasuredWidth() / 5;
+        final int cy = view.getMeasuredHeight() / 2;
+        final int radius = Utils.getEnclosingCircleRadius(view, cx, cy);
+        animateCircleReveal(view, cx, cy, radius, 0);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private static void animateCircleReveal(final View view, final int cx, final int cy,
+                                            final int startRadius, final int endRadius) {
+        Animator animator = ViewAnimationUtils.createCircularReveal(view, cx, cy, startRadius,
+                endRadius)
+                .setDuration(ArtistActivity.BACK_DELAY);
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                view.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (startRadius > endRadius) {
+                    view.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        animator.start();
     }
 }

@@ -16,6 +16,7 @@
 package org.omnirom.music.app;
 
 import android.annotation.TargetApi;
+import android.app.SharedElementCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -25,8 +26,10 @@ import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.transition.Transition;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import org.omnirom.music.app.fragments.AlbumViewFragment;
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
@@ -35,6 +38,9 @@ import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Activity for viewing an album details through
@@ -48,6 +54,8 @@ public class AlbumActivity extends AppActivity {
     public static final String EXTRA_BACKGROUND_COLOR = "background_color";
     public static final String BITMAP_ALBUM_HERO = "album_hero";
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
+
+    public static final int BACK_DELAY = ArtistActivity.BACK_DELAY;
 
     private AlbumViewFragment mActiveFragment;
     private Bundle mInitialIntent;
@@ -111,31 +119,13 @@ public class AlbumActivity extends AppActivity {
         }
 
         if (Utils.hasLollipop()) {
-            final Transition returnTransition = getWindow().getSharedElementReturnTransition();
-            returnTransition.addListener(new Transition.TransitionListener() {
+            setEnterSharedElementCallback(new SharedElementCallback() {
                 @Override
-                public void onTransitionStart(Transition transition) {
-                    mActiveFragment.notifyReturnTransition();
-                }
-
-                @Override
-                public void onTransitionEnd(Transition transition) {
-
-                }
-
-                @Override
-                public void onTransitionCancel(Transition transition) {
-
-                }
-
-                @Override
-                public void onTransitionPause(Transition transition) {
-
-                }
-
-                @Override
-                public void onTransitionResume(Transition transition) {
-
+                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                    View imageHeader = mActiveFragment.getHeroImageView();
+                    if (imageHeader != null) {
+                        sharedElements.put("itemImage", imageHeader);
+                    }
                 }
             });
         }
@@ -212,6 +202,23 @@ public class AlbumActivity extends AppActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (Utils.hasLollipop()) {
+            mActiveFragment.notifyReturnTransition();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        AlbumActivity.super.onBackPressed();
+                    } catch (IllegalStateException ignored) { }
+                }
+            }, BACK_DELAY);
+        } else {
+            super.onBackPressed();
+        }
     }
 
 }

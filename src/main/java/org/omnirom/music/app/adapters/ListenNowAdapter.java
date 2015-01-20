@@ -1,5 +1,6 @@
 package org.omnirom.music.app.adapters;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -131,8 +132,10 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         }
     };
 
+
     private View.OnClickListener mItemClickListener = new View.OnClickListener() {
         @Override
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         public void onClick(View view) {
             final ViewHolder holder = (ViewHolder) view.getTag();
             final int pos = holder.getPosition();
@@ -153,15 +156,15 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                 intent = AlbumActivity.craftIntent(ctx, hero, album.getRef(), album.getProvider(),
                         backColor);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (Utils.hasLollipop()) {
                     opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),
-                            new Pair<View, String>(ivCover, "itemGroup"));
+                            new Pair<View, String>(ivCover, "itemImage"));
                 }
             } else if (entry.entity instanceof Artist) {
                 Artist artist = (Artist) entry.entity;
                 intent = ArtistActivity.craftIntent(ctx, hero, artist.getRef(), backColor);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (Utils.hasLollipop()) {
                     opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),
                             new Pair<View, String>(ivCover, "itemImage"));
                 }
