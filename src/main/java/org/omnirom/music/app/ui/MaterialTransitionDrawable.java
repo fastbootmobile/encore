@@ -25,7 +25,7 @@ public class MaterialTransitionDrawable extends Drawable {
     public static final long DEFAULT_DURATION = 1000;
     public static final long SHORT_DURATION = 300;
 
-    private RecyclingBitmapDrawable mBaseDrawable;
+    private BitmapDrawable mBaseDrawable;
     private RecyclingBitmapDrawable mTargetDrawable;
     private BitmapDrawable mOfflineDrawable;
     private final AccelerateDecelerateInterpolator mInterpolator;
@@ -38,7 +38,7 @@ public class MaterialTransitionDrawable extends Drawable {
     private long mOfflineStartTime;
     private final Object mDrawLock = new Object();
 
-    public MaterialTransitionDrawable(BitmapDrawable offlineDrawable, RecyclingBitmapDrawable base) {
+    public MaterialTransitionDrawable(BitmapDrawable offlineDrawable, BitmapDrawable base) {
         this(offlineDrawable);
         mBaseDrawable = base;
         invalidateSelf();
@@ -69,7 +69,7 @@ public class MaterialTransitionDrawable extends Drawable {
         }
     }
 
-    public void setImmediateTo(RecyclingBitmapDrawable drawable) {
+    public void setImmediateTo(BitmapDrawable drawable) {
         synchronized (mDrawLock) {
             // Cancel animation
             mAnimating = false;
@@ -77,13 +77,16 @@ public class MaterialTransitionDrawable extends Drawable {
             mShowOfflineOverdraw = false;
 
             // Set new drawable as base and draw it
-            if (mBaseDrawable != null) {
-                mBaseDrawable.setIsDisplayed(false);
+            if (mBaseDrawable != null && mBaseDrawable instanceof RecyclingBitmapDrawable) {
+                ((RecyclingBitmapDrawable) mBaseDrawable).setIsDisplayed(false);
             }
 
             mBaseDrawable = drawable;
             mBaseDrawable.setBounds(getBounds());
-            mBaseDrawable.setIsDisplayed(true);
+
+            if (mBaseDrawable instanceof RecyclingBitmapDrawable) {
+                ((RecyclingBitmapDrawable) mBaseDrawable).setIsDisplayed(true);
+            }
         }
         invalidateSelf();
     }
@@ -160,8 +163,8 @@ public class MaterialTransitionDrawable extends Drawable {
 
                 if (rawProgress >= 1.0f) {
                     mAnimating = false;
-                    if (mBaseDrawable != null) {
-                        mBaseDrawable.setIsDisplayed(false);
+                    if (mBaseDrawable != null && mBaseDrawable instanceof RecyclingBitmapDrawable) {
+                        ((RecyclingBitmapDrawable) mBaseDrawable).setIsDisplayed(false);
                     }
                     mBaseDrawable = mTargetDrawable;
                 } else {

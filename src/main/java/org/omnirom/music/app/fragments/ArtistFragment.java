@@ -400,6 +400,27 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             Animator animator = ViewAnimationUtils.createCircularReveal(tvArtist, cx, cy, finalRadius, 0)
                     .setDuration(ArtistActivity.BACK_DELAY);
             animator.setInterpolator(new DecelerateInterpolator());
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    tvArtist.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
             animator.start();
         } else {
             tvArtist.animate().alpha(0.0f).setStartDelay(0).setDuration(ArtistActivity.BACK_DELAY).start();

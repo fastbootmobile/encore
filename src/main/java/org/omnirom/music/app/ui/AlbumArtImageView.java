@@ -17,6 +17,7 @@ package org.omnirom.music.app.ui;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -52,8 +53,6 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private TaskRunnable mRunnable;
     private boolean mCurrentIsDefault;
 
-    private static RecyclingBitmapDrawable sDefaultBitmap;
-
     public AlbumArtImageView(Context context) {
         super(context);
         initialize();
@@ -74,20 +73,20 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         mHandler = new Handler();
         setScaleType(ScaleType.CENTER_CROP);
 
-        if (sDefaultBitmap == null) {
-            sDefaultBitmap = new RecyclingBitmapDrawable(getResources(), ((BitmapDrawable) getContext().getApplicationContext().getResources()
-                    .getDrawable(R.drawable.album_placeholder)).getBitmap());
-        }
-
         if (isInEditMode()) {
             setImageDrawable(getResources().getDrawable(R.drawable.album_placeholder));
         } else {
             mDrawable = new MaterialTransitionDrawable(
                     (BitmapDrawable) (getResources().getDrawable(R.drawable.ic_cloud_offline)),
-                    sDefaultBitmap);
+                    getDefaultBitmap());
             setImageDrawable(mDrawable);
         }
     }
+
+    private BitmapDrawable getDefaultBitmap() {
+        return (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder);
+    }
+
 
     private void freeMemory(boolean removeRequestedEntity) {
         if (mCurrentBitmap != null) {
@@ -95,7 +94,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             if (removeRequestedEntity) {
                 mRequestedEntity = null;
             }
-            mDrawable.setImmediateTo(sDefaultBitmap);
+            mDrawable.setImmediateTo(getDefaultBitmap());
         }
         if (mTask != null && !mTask.isCancelled()) {
             mTask.cancel(true);
@@ -145,7 +144,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             mCurrentBitmap = null;
         }
 
-        mDrawable.setImmediateTo(sDefaultBitmap);
+        mDrawable.setImmediateTo(getDefaultBitmap());
         forceDrawableReload();
         mCurrentIsDefault = true;
     }

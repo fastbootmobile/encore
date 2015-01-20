@@ -249,11 +249,16 @@ public class PlayPauseDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
         canvas.save();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            canvas.translate((canvas.getWidth() - mWidth) / 2, (canvas.getHeight() - mHeight) / 2);
+        if (getBounds().width() > 0 && getBounds().height() > 0) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                canvas.translate((canvas.getWidth() - mWidth) / 2, (canvas.getHeight() - mHeight) / 2);
+            } else {
+                canvas.translate((getBounds().width() - mWidth) / 2, 0);
+            }
         } else {
-            canvas.translate((getBounds().width() - mWidth) / 2, 0);
+            invalidateSelf();
         }
+
         canvas.translate(0, -mYOffset);
 
         if (!mInitialDrawDone) {
@@ -331,10 +336,6 @@ public class PlayPauseDrawable extends Drawable {
         }
 
         canvas.translate(0, mYOffset);
-
-        if (getBounds().width() <= 0 || getBounds().height() <= 0) {
-            invalidateSelf();
-        }
     }
 
     @Override

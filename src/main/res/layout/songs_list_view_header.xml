@@ -50,6 +50,7 @@
         app:fab_colorPressed="@color/primary_light"
         app:fab_size="normal"
 
+        android:scaleType="centerInside"
         android:layout_marginEnd="16dp"
         android:layout_alignBottom="@+id/tvAlbumName"
         android:layout_alignParentRight="true"
