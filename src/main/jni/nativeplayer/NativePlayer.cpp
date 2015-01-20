@@ -14,15 +14,17 @@
  */
 
 #include "NativePlayer.h"
+#include <pthread.h>
+#include <algorithm>
+#include <cmath>
+#include <string>
+#include <utility>
 #include "NativeHub.h"
 #include "jni_NativeHub.h"
 #include "Log.h"
 #include "Glue.h"
 #include "../libresample/resample.h"
-#include <string>
-#include <utility>
-#include <cmath>
-#include <pthread.h>
+
 
 #define LOG_TAG "OM-NativePlayer"
 
@@ -263,7 +265,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
             default:
                 ALOGD("Using sample rate 48KHz, resampling from %d Hz", sample_rate);
                 m_bUseResampler = true;
-                m_fResampleRatio = 48000.f / ((float) sample_rate);
+                m_fResampleRatio = 48000.f / static_cast<float>(sample_rate);
                 sample_rate = 48000;
                 break;
         }
@@ -312,12 +314,13 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
     // If we have to resample, do it now on all the samples
     if (m_bUseResampler) {
         if (m_iChannels == 1) {
-            len = resampleBuffersFast(m_fResampleRatio, (HWORD*) data, (HWORD*) data, len);
+            len = resampleBuffersFast(m_fResampleRatio, (HWORD*)(data),
+                    (HWORD*) (data), len);
         } else {
             // Process each channel separately
-            uint8_t* left = (uint8_t*) malloc(len);
-            uint8_t* right = (uint8_t*) malloc(len);
-            uint8_t* data_bytes = (uint8_t*) data;
+            uint8_t* left = reinterpret_cast<uint8_t*>(malloc(len));
+            uint8_t* right = reinterpret_cast<uint8_t*>(malloc(len));
+            uint8_t* data_bytes = (uint8_t*)(data);
 
             // Resample 24 bits to 16 bits
             // Move from 3 bits per channel to 2 bits per channel
@@ -329,12 +332,14 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
                 //   1 ==> R[0]
                 //   2 ==> L[1]
                 //      ...
-                uint32_t intLeft = ((uint32_t)data_bytes[i] << 16) | ((uint32_t)data_bytes[i+2] << 8) | ((uint32_t)data_bytes[i+4]);
-                intLeft = ((double) intLeft) / 16777215.0 * 65535.0;
+                uint32_t intLeft = ((uint32_t)data_bytes[i] << 16)
+                        | ((uint32_t)data_bytes[i+2] << 8) | ((uint32_t)data_bytes[i+4]);
+                intLeft = static_cast<double>(intLeft) / 16777215.0 * 65535.0;
                 uint16_t castLeft = (uint16_t) intLeft;
 
-                uint32_t intRight = ((uint32_t)data_bytes[i+1] << 16) | ((uint32_t)data_bytes[i+3] << 8) | ((uint32_t)data_bytes[i+5]);
-                intRight = ((double) intRight) / 16777215.0 * 65535.0;
+                uint32_t intRight = ((uint32_t)data_bytes[i+1] << 16)
+                        | ((uint32_t)data_bytes[i+3] << 8) | ((uint32_t)data_bytes[i+5]);
+                intRight = static_cast<double>(intRight) / 16777215.0 * 65535.0;
                 uint16_t castRight = (uint16_t) intRight;
 
                 left[left_idx] = (unsigned char)((castLeft >> 8) & 0xff);
@@ -348,9 +353,10 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
 
             // Resample each channel
             uint32_t original_len = left_idx;
-            len = resampleBuffersFast(m_fResampleRatio, (HWORD*) left, (HWORD*) left, original_len);
-            len = resampleBuffersFast(m_fResampleRatio, (HWORD*) right, (HWORD*) right, original_len);
-            ALOGE("Output resample right: %d bytes", len);
+            len = resampleBuffersFast(m_fResampleRatio, reinterpret_cast<HWORD*>(left),
+                    reinterpret_cast<HWORD*>(left), original_len);
+            len = resampleBuffersFast(m_fResampleRatio, reinterpret_cast<HWORD*>(right),
+                    reinterpret_cast<HWORD*>(right), original_len);
 
             // Combine back
             for (int i = 0; i < len; ++i) {
@@ -459,13 +465,16 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
 
             // If we've got at least two underruns in less than 10 seconds, raise the min buffers
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-            int len_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - p->m_LastBuffersCheckTime).count();
+            int len_ms = std::chrono::duration_cast<std::chrono::milliseconds>
+                    (now - p->m_LastBuffersCheckTime).count();
+
             if (p->m_iUnderflowCount - p->m_LastBuffersCheckUfCount > 2) {
                 if (len_ms < 10000) {
                     // We raise the min buffer size, max 2 seconds
                     p->m_iBufferMinPlayback = std::min(p->m_iBufferMinPlayback + 2048,
                         p->m_iSampleRate * p->m_iChannels * 2);
-                    p->m_iBufferMaxSize = std::max<uint32_t>(p->m_iSampleRate * 2, p->m_iBufferMinPlayback * 2);
+                    p->m_iBufferMaxSize = std::max<uint32_t>(p->m_iSampleRate * 2,
+                            p->m_iBufferMinPlayback * 2);
 
                     free(p->m_pActiveBuffer);
                     free(p->m_pPlayingBuffer);
