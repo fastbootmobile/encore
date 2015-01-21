@@ -15,16 +15,24 @@
 
 package org.omnirom.music.app;
 
+import android.annotation.TargetApi;
+import android.app.SharedElementCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import org.omnirom.music.app.fragments.PlaylistViewFragment;
 import org.omnirom.music.model.Playlist;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Activity allowing user to view a Playlist contents through
@@ -32,10 +40,14 @@ import org.omnirom.music.model.Playlist;
  */
 public class PlaylistActivity extends AppActivity {
     private static final String TAG_FRAGMENT = "fragment_inner";
+
+    public static final int BACK_DELAY = ArtistActivity.BACK_DELAY;
     public static final String BITMAP_PLAYLIST_HERO = "playlist_hero";
-    private Bundle mInitialIntent; // TODO: Test rotation
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
+
+    private Bundle mInitialIntent; // TODO: Test rotation
     private PlaylistViewFragment mActiveFragment;
+    private Handler mHandler = new Handler();
 
     /**
      * Creates an intent starting this activity with the provided parameters
@@ -51,6 +63,7 @@ public class PlaylistActivity extends AppActivity {
     }
 
     @Override
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         setContentView(R.layout.activity_playlist);
@@ -76,6 +89,19 @@ public class PlaylistActivity extends AppActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+
+        if (Utils.hasLollipop()) {
+            setEnterSharedElementCallback(new SharedElementCallback() {
+                @Override
+                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                    View imageHeader = mActiveFragment.getHeroImageView();
+                    if (imageHeader != null) {
+                        sharedElements.put("itemImage", imageHeader);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -95,6 +121,23 @@ public class PlaylistActivity extends AppActivity {
             }
         } else {
             return true;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (Utils.hasLollipop()) {
+            mActiveFragment.notifyReturnTransition();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        PlaylistActivity.super.onBackPressed();
+                    } catch (IllegalStateException ignored) { }
+                }
+            }, BACK_DELAY);
+        } else {
+            super.onBackPressed();
         }
     }
 }

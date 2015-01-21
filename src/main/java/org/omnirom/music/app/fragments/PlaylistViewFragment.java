@@ -15,8 +15,10 @@
 
 package org.omnirom.music.app.fragments;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -38,6 +40,7 @@ import android.widget.Toast;
 import com.dd.CircularProgressButton;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
+import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.Utils;
@@ -84,6 +87,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     private Handler mHandler;
     private CircularProgressButton mOfflineBtn;
     private RecyclingBitmapDrawable mLogoBitmap;
+    private ImageView mIvHero;
+    private TextView mTvPlaylistName;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -181,8 +186,9 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         headerView.findViewById(R.id.pbAlbumLoading).setVisibility(View.GONE);
 
-        ImageView ivHero = (ImageView) headerView.findViewById(R.id.ivHero);
-        TextView tvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
+        mIvHero = (ImageView) headerView.findViewById(R.id.ivHero);
+
+        mTvPlaylistName = (TextView) headerView.findViewById(R.id.tvAlbumName);
 
         // Download button
         mOfflineBtn = (CircularProgressButton) headerView.findViewById(R.id.cpbOffline);
@@ -219,10 +225,28 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             }
         }, 500);
 
-        tvAlbumName.setText(mPlaylist.getName());
+        mTvPlaylistName.setText(mPlaylist.getName());
+        if (Utils.hasLollipop()) {
+            mTvPlaylistName.setVisibility(View.INVISIBLE);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                public void run() {
+                    if (mTvPlaylistName.isAttachedToWindow()) {
+                        Utils.animateHeadingReveal(mTvPlaylistName);
+                    }
+                }
+            }, 500);
+        } else {
+            mTvPlaylistName.setVisibility(View.VISIBLE);
+            mTvPlaylistName.setAlpha(0.0f);
+            mTvPlaylistName.animate().alpha(1.0f).setDuration(AlbumActivity.BACK_DELAY).start();
+        }
+
+
 
         Bitmap hero = Utils.dequeueBitmap(PlaylistActivity.BITMAP_PLAYLIST_HERO);
-        ivHero.setImageBitmap(hero);
+        mIvHero.setImageBitmap(hero);
 
         mPlayFab = (FloatingActionButton) headerView.findViewById(R.id.fabPlay);
 
@@ -322,6 +346,16 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         }
 
         return false;
+    }
+
+    public void notifyReturnTransition() {
+        if (Utils.hasLollipop()) {
+            Utils.animateHeadingHiding(mTvPlaylistName);
+        }
+    }
+
+    public ImageView getHeroImageView() {
+        return mIvHero;
     }
 
     private void playNow() {

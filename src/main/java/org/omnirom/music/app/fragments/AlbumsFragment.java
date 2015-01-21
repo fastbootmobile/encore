@@ -109,7 +109,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                            new Pair<View, String>(tag.vRoot, "itemGroup"));
+                            tag.ivCover, "itemImage");
                     getActivity().startActivity(intent, opt.toBundle());
                 } else {
                     startActivity(intent);

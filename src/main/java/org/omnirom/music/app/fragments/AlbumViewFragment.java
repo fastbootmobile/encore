@@ -194,20 +194,27 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mIvHero = (ImageView) headerView.findViewById(R.id.ivHero);
         mTvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
         mTvAlbumName.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
-        mTvAlbumName.setVisibility(View.INVISIBLE);
+
         if (mAlbum != null) {
             mTvAlbumName.setText(mAlbum.getName());
         }
 
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-            public void run() {
-                if (mTvAlbumName.isAttachedToWindow()) {
-                    Utils.animateHeadingReveal(mTvAlbumName);
+        if (Utils.hasLollipop()) {
+            mTvAlbumName.setVisibility(View.INVISIBLE);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                public void run() {
+                    if (mTvAlbumName.isAttachedToWindow()) {
+                        Utils.animateHeadingReveal(mTvAlbumName);
+                    }
                 }
-            }
-        }, 500);
+            }, 500);
+        } else {
+            mTvAlbumName.setVisibility(View.VISIBLE);
+            mTvAlbumName.setAlpha(0.0f);
+            mTvAlbumName.animate().alpha(1.0f).setDuration(AlbumActivity.BACK_DELAY).start();
+        }
 
         // Hide download button by default
         headerView.findViewById(R.id.cpbOffline).setVisibility(View.GONE);

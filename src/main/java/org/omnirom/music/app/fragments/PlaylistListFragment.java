@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ import android.widget.GridView;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.model.Album;
@@ -128,7 +130,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                            tag.ivCover, "itemGroup");
+                            tag.ivCover, "itemImage");
                     act.startActivity(intent, opt.toBundle());
                 } else {
                     act.startActivity(intent);
