@@ -97,22 +97,24 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_UPDATE_PLAYBACK_STATUS:
-                    mParent.get().updatePlaybackStatus();
-                    break;
+            if (mParent.get() != null) {
+                switch (msg.what) {
+                    case MSG_UPDATE_PLAYBACK_STATUS:
+                        mParent.get().updatePlaybackStatus();
+                        break;
 
-                case MSG_UPDATE_SEEKBAR:
-                    mParent.get().updateSeekBar();
-                    break;
+                    case MSG_UPDATE_SEEKBAR:
+                        mParent.get().updateSeekBar();
+                        break;
 
-                case MSG_UPDATE_TIME:
-                    mParent.get().updateTime();
-                    break;
+                    case MSG_UPDATE_TIME:
+                        mParent.get().updateTime();
+                        break;
 
-                case MSG_HIDE_SYSTEM_UI:
-                    mParent.get().hideSystemUI();
-                    break;
+                    case MSG_HIDE_SYSTEM_UI:
+                        mParent.get().hideSystemUI();
+                        break;
+                }
             }
         }
     }

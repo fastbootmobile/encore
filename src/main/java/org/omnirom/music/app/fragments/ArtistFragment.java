@@ -902,14 +902,16 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
 
         public void notifySizeUnlimited() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mRootView.setVisibility(View.VISIBLE);
-                    mRootView.setAlpha(0.0f);
-                    mRootView.animate().alpha(1).setDuration(500).start();
-                }
-            });
+            if (mHandler != null) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRootView.setVisibility(View.VISIBLE);
+                        mRootView.setAlpha(0.0f);
+                        mRootView.animate().alpha(1).setDuration(500).start();
+                    }
+                });
+            }
         }
 
         /**

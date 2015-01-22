@@ -32,7 +32,7 @@ import java.util.List;
  * Helper class for voice commands
  */
 public class VoiceRecognizer implements RecognitionListener {
-    private static final String TAG = "VoiceCommander";
+    private static final String TAG = "VoiceRecognizer";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private SpeechRecognizer mSpeechRecognizer;
@@ -139,7 +139,7 @@ public class VoiceRecognizer implements RecognitionListener {
                     break;
 
                 case SpeechRecognizer.ERROR_CLIENT:
-                    errorMsg = "Unknown client-side error";
+                    errorMsg = "No voice recnogition service available";
                     break;
 
                 case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
