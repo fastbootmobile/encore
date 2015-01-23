@@ -134,7 +134,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
             mListView.setVisibility(View.VISIBLE);
             if (mAlbum.getSongsCount() > 0) {
                 // If there's not more tracks, hide the loading bar, otherwise keep on displaying it
-                if (loadingBar.getVisibility() == View.VISIBLE && !hasMore) {
+                if (loadingBar.getVisibility() == View.VISIBLE) {
                     loadingBar.setVisibility(View.GONE);
                     mHandler.postDelayed(new Runnable() {
                         @Override
