@@ -193,6 +193,7 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
     public void onResult(EchoPrint.PrintResult result) {
         mLastResult = result;
         mHandler.sendEmptyMessage(MSG_RESULT);
+        mHandler.removeCallbacks(mStopRecognition);
     }
 
     @Override
@@ -229,10 +230,12 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
                     return;
                 }
 
+                Log.d(TAG, "Loading album art: " + urlString);
+
                 try {
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     InputStream is = conn.getInputStream();
-                    byte[] buffer = new byte[4096];
+                    byte[] buffer = new byte[8192];
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     int read;
                     while ((read = is.read(buffer)) > 0) {
@@ -240,18 +243,24 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
                     }
 
                     final Bitmap bmp = BitmapFactory.decodeByteArray(baos.toByteArray(), 0, baos.size());
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            iv.setImageBitmap(bmp);
-                        }
-                    });
+                    if (bmp != null) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                iv.setImageBitmap(bmp);
+                                iv.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    } else {
+                        Log.e(TAG, "Null bitmap from image");
+                    }
                 } catch (IOException e) {
                     Log.e(TAG, "Error downloading album art", e);
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             iv.setImageResource(R.drawable.album_placeholder);
+                            iv.setVisibility(View.VISIBLE);
                         }
                     });
                 }
@@ -269,6 +278,8 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
         mTvTitle.setText(mLastResult.TrackName);
         mTvArtist.setText(mLastResult.ArtistName);
         mSearchButton.setVisibility(View.VISIBLE);
+        mProgressRecognizing.setVisibility(View.GONE);
+        mRecognitionButton.setActive(false);
 
         // Load the album art in a thread
         loadAlbumArt(mLastResult.AlbumImageUrl, mIvArt);

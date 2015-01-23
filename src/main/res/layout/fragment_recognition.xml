@@ -116,6 +116,7 @@
         android:layout_centerVertical="true"
         android:layout_alignLeft="@+id/tvAlbumName"
         android:layout_alignStart="@+id/tvAlbumName"
+        android:layout_below="@+id/tvAlbumName"
         android:visibility="gone" />
 
 </RelativeLayout>

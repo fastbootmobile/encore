@@ -218,16 +218,21 @@ public class ImageCache {
                 ImageUtils.addInBitmapOptions(opts, this);
 
 
-                Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
-                if (bmp != null) {
-                    item = new RecyclingBitmapDrawable(res, bmp);
+                try {
+                    Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
+                    if (bmp != null) {
+                        item = new RecyclingBitmapDrawable(res, bmp);
 
-                    if (USE_MEMORY_CACHE) {
-                        mMemoryCache.put(cleanKey, item);
+                        if (USE_MEMORY_CACHE) {
+                            mMemoryCache.put(cleanKey, item);
+                        }
+                    } else {
+                        // TODO: The stored bitmap is corrupted, evict it
                     }
+                } catch (OutOfMemoryError e) {
+                    Log.e(TAG, "OutOfMemory when decoding input file", e);
+                    return null;
                 }
-            } else {
-                // TODO: The stored bitmap is corrupted, evict it
             }
 
             return item;

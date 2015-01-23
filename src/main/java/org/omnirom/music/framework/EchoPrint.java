@@ -61,7 +61,7 @@ public class EchoPrint {
             while (!isInterrupted() && mBufferIndex < mBuffer.length) {
                 int read;
                 synchronized (this) {
-                    read = mRecorder.read(mBuffer, mBufferIndex, mBuffer.length - mBufferIndex);
+                    read = mRecorder.read(mBuffer, mBufferIndex, Math.min(512, mBuffer.length - mBufferIndex));
 
                     if (read == AudioRecord.ERROR_BAD_VALUE) {
                         Log.e(TAG, "BAD_VALUE while reading recorder");
@@ -119,16 +119,18 @@ public class EchoPrint {
                             return;
                         }
 
+                        mDataSending = true;
+
                         byte[] copy;
                         int length;
                         synchronized (RecorderThread.this) {
                             length = mBufferIndex;
-                            copy = new byte[length];
-                            System.arraycopy(mBuffer, 0, copy, 0, length);
                         }
 
-                        mDataSending = true;
-                        String output_xml = sendAudioData(mBuffer, mBufferIndex);
+                        copy = new byte[length];
+                        System.arraycopy(mBuffer, 0, copy, 0, length);
+
+                        String output_xml = sendAudioData(copy, length);
                         parseXmlResult(output_xml);
                         mDataSending = false;
                     }
@@ -157,7 +159,7 @@ public class EchoPrint {
                 conn.getOutputStream().write(inputBuffer, 0, length);
 
                 InputStream is = conn.getInputStream();
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[8192];
                 int read;
                 StringBuilder sb = new StringBuilder();
                 while ((read = is.read(buffer)) > 0) {
