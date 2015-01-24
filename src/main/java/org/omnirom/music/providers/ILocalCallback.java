@@ -46,5 +46,5 @@ public interface ILocalCallback {
      * Called when a provider returns a search result
      * @param searchResult The result
      */
-    void onSearchResult(SearchResult searchResult);
+    void onSearchResult(List<SearchResult> searchResult);
 }

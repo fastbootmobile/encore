@@ -129,33 +129,47 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     /**
      * Add the results to the current adapter's results
      *
-     * @param searchResult The results to append
+     * @param searchResults The results to append
      */
-    public void appendResults(SearchResult searchResult) {
+    public void appendResults(List<SearchResult> searchResults) {
         synchronized (this) {
-            mSearchResults.add(searchResult);
+            mSearchResults.addAll(searchResults);
 
-            final ProviderIdentifier id = searchResult.getIdentifier();
+            for (SearchResult searchResult : searchResults) {
+                final ProviderIdentifier id = searchResult.getIdentifier();
 
-            final List<String> songs = searchResult.getSongsList();
-            final List<String> artists = searchResult.getArtistList();
-            final List<String> playlists = searchResult.getPlaylistList();
-            final List<String> albums = searchResult.getAlbumsList();
+                final List<String> songs = searchResult.getSongsList();
+                final List<String> artists = searchResult.getArtistList();
+                final List<String> playlists = searchResult.getPlaylistList();
+                final List<String> albums = searchResult.getAlbumsList();
 
-            for (String song : songs) {
-                mSongs.add(new SearchEntry(song, id));
-            }
+                for (String song : songs) {
+                    SearchEntry entry = new SearchEntry(song, id);
+                    if (!mSongs.contains(entry)) {
+                        mSongs.add(entry);
+                    }
+                }
 
-            for (String artist : artists) {
-                mArtists.add(new SearchEntry(artist, id));
-            }
+                for (String artist : artists) {
+                    SearchEntry entry = new SearchEntry(artist, id);
+                    if (!mArtists.contains(entry)) {
+                        mArtists.add(entry);
+                    }
+                }
 
-            for (String playlist : playlists) {
-                mPlaylists.add(new SearchEntry(playlist, id));
-            }
+                for (String playlist : playlists) {
+                    SearchEntry entry = new SearchEntry(playlist, id);
+                    if (!mPlaylists.contains(entry)) {
+                        mPlaylists.add(entry);
+                    }
+                }
 
-            for (String album : albums) {
-                mAlbums.add(new SearchEntry(album, id));
+                for (String album : albums) {
+                    SearchEntry entry = new SearchEntry(album, id);
+                    if (!mAlbums.contains(entry)) {
+                        mAlbums.add(entry);
+                    }
+                }
             }
         }
     }
@@ -403,6 +417,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);
+            tag.ivSource.setImageDrawable(null);
             tag.albumArtImageView.setDefaultArt();
         }
     }
@@ -428,6 +443,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);
+            tag.ivSource.setImageDrawable(null);
             tag.albumArtImageView.setDefaultArt();
         }
     }
@@ -473,7 +489,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         final Playlist playlist = ProviderAggregator.getDefault().retrievePlaylist(entry.ref, entry.identifier);
         final Resources res = tag.vRoot.getResources();
 
-        if (playlist != null && playlist.isLoaded()) {
+        if (playlist != null && (playlist.isLoaded() || playlist.getName() != null)) {
             tag.tvTitle.setText(playlist.getName());
             tag.tvSubtitle.setText(res.getString(R.string.xx_songs, playlist.getSongsCount()));
             tag.content = playlist;
@@ -482,6 +498,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);
+            tag.ivSource.setImageDrawable(null);
             tag.albumArtImageView.setDefaultArt();
         }
     }

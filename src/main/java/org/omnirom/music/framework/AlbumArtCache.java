@@ -194,6 +194,7 @@ public class AlbumArtCache {
             } else if (hasArtist) {
                 // TODO: Get any album art from the artist
             } else {
+                Log.w(TAG, "No album neither artist found for album art");
                 result = false;
             }
         }

@@ -186,7 +186,7 @@ public class PlayingBarView extends RelativeLayout {
         }
 
         @Override
-        public void onSearchResult(SearchResult searchResult) {
+        public void onSearchResult(List<SearchResult> searchResult) {
         }
     };
 

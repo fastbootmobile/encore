@@ -1062,7 +1062,7 @@ public class PlaybackService extends Service
     }
 
     @Override
-    public void onSearchResult(SearchResult searchResult) {
+    public void onSearchResult(List<SearchResult> searchResult) {
 
     }
 

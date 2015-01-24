@@ -144,6 +144,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
             mCurrentBitmap = null;
         }
 
+        if (mTask != null) {
+            mTask.cancel(true);
+        }
         mDrawable.setImmediateTo(getDefaultBitmap());
         forceDrawableReload();
         mCurrentIsDefault = true;

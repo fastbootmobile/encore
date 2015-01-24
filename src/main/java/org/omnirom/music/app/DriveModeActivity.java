@@ -457,7 +457,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     }
 
     @Override
-    public void onSearchResult(SearchResult searchResult) {
+    public void onSearchResult(List<SearchResult> searchResult) {
         mVoiceHelper.onSearchResult(searchResult);
     }
 

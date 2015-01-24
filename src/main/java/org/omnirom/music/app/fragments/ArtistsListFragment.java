@@ -188,6 +188,6 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
      * {@inheritDoc}
      */
     @Override
-    public void onSearchResult(SearchResult searchResult) {
+    public void onSearchResult(List<SearchResult> searchResult) {
     }
 }

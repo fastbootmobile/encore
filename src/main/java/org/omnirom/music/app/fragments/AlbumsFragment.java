@@ -186,7 +186,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
      * {@inheritDoc}
      */
     @Override
-    public void onSearchResult(SearchResult searchResult) {
+    public void onSearchResult(List<SearchResult> searchResult) {
 
     }
 

@@ -116,6 +116,6 @@ public class HistoryFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
-    public void onSearchResult(SearchResult searchResult) {
+    public void onSearchResult(List<SearchResult> searchResult) {
     }
 }

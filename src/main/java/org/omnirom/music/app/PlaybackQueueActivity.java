@@ -232,7 +232,7 @@ public class PlaybackQueueActivity extends AppActivity {
             }
 
             @Override
-            public void onSearchResult(SearchResult searchResult) {
+            public void onSearchResult(List<SearchResult> searchResult) {
             }
         };
 

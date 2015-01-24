@@ -54,7 +54,7 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
     private Handler mHandler;
     private Message mPendingMessage;
     private Context mContext;
-    private SearchResult mPreviousSearchResults;
+    private List<SearchResult> mPreviousSearchResults;
 
     private static class VoiceActionHandler extends Handler {
         private WeakReference<VoiceActionHelper> mParent;
@@ -212,8 +212,8 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
         context.startActivity(intent);
     }
 
-    public void onSearchResult(SearchResult result) {
-        mPreviousSearchResults = result;
+    public void onSearchResult(List<SearchResult> results) {
+        mPreviousSearchResults = results;
         if (mPendingAction == VoiceCommander.ACTION_PLAY) {
             ProviderAggregator aggr = ProviderAggregator.getDefault();
             Message msg = null;
@@ -225,77 +225,48 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
             // and then Song.
             // TODO: We don't handle cases where entities might not be loaded
 
-            // Playlist
-            List<String> playlists = result.getPlaylistList();
-            for (String ref : playlists) {
-                Playlist playlist = aggr.retrievePlaylist(ref, result.getIdentifier());
-                if (playlist == null) continue;
+            for (SearchResult result : results) {
+                // Playlist
+                List<String> playlists = result.getPlaylistList();
+                for (String ref : playlists) {
+                    Playlist playlist = aggr.retrievePlaylist(ref, result.getIdentifier());
+                    if (playlist == null) continue;
 
-                if (request.equalsIgnoreCase(playlist.getName())) {
-                    if (DEBUG) Log.d(TAG, "Got an exact playlist match");
-                    msg = mHandler.obtainMessage(MSG_START_PLAY_LIST,
-                            Utils.refListToSongList(playlist.songsList(), playlist.getProvider()));
-                    bestMatchPercentage = 1;
-                    break;
-                } else {
-                    float percent = Utils.distancePercentage(request, playlist.getName());
-                    if (percent > bestMatchPercentage) {
-                        if (DEBUG) Log.d(TAG, "Matched playlist " + playlist.getName() + " (" + percent + ")");
-                        bestMatchPercentage = percent;
+                    if (request.equalsIgnoreCase(playlist.getName())) {
+                        if (DEBUG) Log.d(TAG, "Got an exact playlist match");
                         msg = mHandler.obtainMessage(MSG_START_PLAY_LIST,
                                 Utils.refListToSongList(playlist.songsList(), playlist.getProvider()));
-                    }
-                }
-            }
-
-            // Artist
-            List<String> artists = result.getArtistList();
-            for (String ref : artists) {
-                Artist artist = aggr.retrieveArtist(ref, result.getIdentifier());
-                if (artist == null) continue;
-
-                if (request.equalsIgnoreCase(artist.getName())) {
-                    if (DEBUG) Log.d(TAG, "Got an exact artist match");
-                    List<Song> radio = Suggestor.getInstance().buildArtistRadio(artist);
-                    bestMatchPercentage = 1;
-                    // Radio songs might be null or empty if artist albums aren't loaded, we wait
-                    // for artist update in callback then.
-                    if (radio != null && radio.size() > 0) {
-                        msg = mHandler.obtainMessage(MSG_START_PLAY_LIST, radio);
+                        bestMatchPercentage = 1;
                         break;
                     } else {
-                        Log.w(TAG, "Matched exact artist, but artist radio unavailable");
-
-                        // Ensure album contents are fetched
-                        ProviderConnection pc = PluginsLookup.getDefault()
-                                .getProvider(artist.getProvider());
-                        if (pc != null) {
-                            IMusicProvider binder = pc.getBinder();
-                            try {
-                                if (binder != null) {
-                                    List<String> albums = artist.getAlbums();
-                                    for (String albumRef : albums) {
-                                        binder.fetchAlbumTracks(albumRef);
-                                    }
-                                }
-                            } catch (RemoteException e) {
-                                // ignore
-                            }
+                        float percent = Utils.distancePercentage(request, playlist.getName());
+                        if (percent > bestMatchPercentage) {
+                            if (DEBUG)
+                                Log.d(TAG, "Matched playlist " + playlist.getName() + " (" + percent + ")");
+                            bestMatchPercentage = percent;
+                            msg = mHandler.obtainMessage(MSG_START_PLAY_LIST,
+                                    Utils.refListToSongList(playlist.songsList(), playlist.getProvider()));
                         }
                     }
-                } else {
-                    float percent = Utils.distancePercentage(request, artist.getName());
-                    if (percent > bestMatchPercentage) {
-                        List<Song> radio = Suggestor.getInstance().buildArtistRadio(artist);
-                        bestMatchPercentage = percent;
-                        if (DEBUG) Log.d(TAG, "Matched artist " + artist.getName() + " (" + percent + ")");
+                }
 
+                // Artist
+                List<String> artists = result.getArtistList();
+                for (String ref : artists) {
+                    Artist artist = aggr.retrieveArtist(ref, result.getIdentifier());
+                    if (artist == null) continue;
+
+                    if (request.equalsIgnoreCase(artist.getName())) {
+                        if (DEBUG) Log.d(TAG, "Got an exact artist match");
+                        List<Song> radio = Suggestor.getInstance().buildArtistRadio(artist);
+                        bestMatchPercentage = 1;
                         // Radio songs might be null or empty if artist albums aren't loaded, we wait
                         // for artist update in callback then.
                         if (radio != null && radio.size() > 0) {
                             msg = mHandler.obtainMessage(MSG_START_PLAY_LIST, radio);
+                            break;
                         } else {
-                            Log.w(TAG, "Matched average artist, but artist radio unavailable");
+                            Log.w(TAG, "Matched exact artist, but artist radio unavailable");
 
                             // Ensure album contents are fetched
                             ProviderConnection pc = PluginsLookup.getDefault()
@@ -314,54 +285,88 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                                 }
                             }
                         }
+                    } else {
+                        float percent = Utils.distancePercentage(request, artist.getName());
+                        if (percent > bestMatchPercentage) {
+                            List<Song> radio = Suggestor.getInstance().buildArtistRadio(artist);
+                            bestMatchPercentage = percent;
+                            if (DEBUG)
+                                Log.d(TAG, "Matched artist " + artist.getName() + " (" + percent + ")");
+
+                            // Radio songs might be null or empty if artist albums aren't loaded, we wait
+                            // for artist update in callback then.
+                            if (radio != null && radio.size() > 0) {
+                                msg = mHandler.obtainMessage(MSG_START_PLAY_LIST, radio);
+                            } else {
+                                Log.w(TAG, "Matched average artist, but artist radio unavailable");
+
+                                // Ensure album contents are fetched
+                                ProviderConnection pc = PluginsLookup.getDefault()
+                                        .getProvider(artist.getProvider());
+                                if (pc != null) {
+                                    IMusicProvider binder = pc.getBinder();
+                                    try {
+                                        if (binder != null) {
+                                            List<String> albums = artist.getAlbums();
+                                            for (String albumRef : albums) {
+                                                binder.fetchAlbumTracks(albumRef);
+                                            }
+                                        }
+                                    } catch (RemoteException e) {
+                                        // ignore
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-            }
 
-            // Album
-            List<String> albums = result.getAlbumsList();
-            for (String ref : albums) {
-                Album album = aggr.retrieveAlbum(ref, result.getIdentifier());
-                if (album == null) continue;
+                // Album
+                List<String> albums = result.getAlbumsList();
+                for (String ref : albums) {
+                    Album album = aggr.retrieveAlbum(ref, result.getIdentifier());
+                    if (album == null) continue;
 
-                if (request.equalsIgnoreCase(album.getName())) {
-                    if (DEBUG) Log.d(TAG, "Got an exact album match");
-                    msg = mHandler.obtainMessage(MSG_START_PLAY_LIST,
-                            Utils.refIteratorToSongList(album.songs(), album.getProvider()));
-                    bestMatchPercentage = 1;
-                    break;
-                } else {
-                    float percent = Utils.distancePercentage(request, album.getName());
-                    if (percent > bestMatchPercentage) {
-                        if (DEBUG) Log.d(TAG, "Matched album " + album.getName() + " (" + percent + ")");
-                        bestMatchPercentage = percent;
+                    if (request.equalsIgnoreCase(album.getName())) {
+                        if (DEBUG) Log.d(TAG, "Got an exact album match");
                         msg = mHandler.obtainMessage(MSG_START_PLAY_LIST,
                                 Utils.refIteratorToSongList(album.songs(), album.getProvider()));
+                        bestMatchPercentage = 1;
+                        break;
+                    } else {
+                        float percent = Utils.distancePercentage(request, album.getName());
+                        if (percent > bestMatchPercentage) {
+                            if (DEBUG)
+                                Log.d(TAG, "Matched album " + album.getName() + " (" + percent + ")");
+                            bestMatchPercentage = percent;
+                            msg = mHandler.obtainMessage(MSG_START_PLAY_LIST,
+                                    Utils.refIteratorToSongList(album.songs(), album.getProvider()));
+                        }
                     }
                 }
-            }
 
-            // Song
-            List<String> songs = result.getSongsList();
-            for (String ref : songs) {
-                Song song = aggr.retrieveSong(ref, result.getIdentifier());
-                if (song == null) continue;
+                // Song
+                List<String> songs = result.getSongsList();
+                for (String ref : songs) {
+                    Song song = aggr.retrieveSong(ref, result.getIdentifier());
+                    if (song == null) continue;
 
-                if (request.equalsIgnoreCase(song.getTitle())) {
-                    if (DEBUG) Log.d(TAG, "Got an exact song title match");
-                    msg = mHandler.obtainMessage(MSG_START_PLAY, song);
-                    bestMatchPercentage = 1;
-                    break;
-                } else {
-                    float percent = Utils.distancePercentage(request, song.getTitle());
-                    if (percent > bestMatchPercentage) {
-                        if (DEBUG) Log.d(TAG, "Matched song " + song.getTitle() + " (" + percent + ")");
-                        bestMatchPercentage = percent;
+                    if (request.equalsIgnoreCase(song.getTitle())) {
+                        if (DEBUG) Log.d(TAG, "Got an exact song title match");
                         msg = mHandler.obtainMessage(MSG_START_PLAY, song);
+                        bestMatchPercentage = 1;
+                        break;
+                    } else {
+                        float percent = Utils.distancePercentage(request, song.getTitle());
+                        if (percent > bestMatchPercentage) {
+                            if (DEBUG)
+                                Log.d(TAG, "Matched song " + song.getTitle() + " (" + percent + ")");
+                            bestMatchPercentage = percent;
+                            msg = mHandler.obtainMessage(MSG_START_PLAY, song);
+                        }
                     }
                 }
             }
-
 
             // If we found a match, go ahead. If we requested a source, post the message
             // immediately. If no exact source was specified, post it 1 second later to allow

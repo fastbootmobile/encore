@@ -64,7 +64,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     private SearchAdapter mAdapter;
     private Handler mHandler;
-    private SearchResult mSearchResult;
+    private List<SearchResult> mSearchResults;
     private String mQuery;
 
     private static class SearchHandler extends Handler {
@@ -116,7 +116,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i2, long l) {
-                if (mSearchResult != null) {
+                if (mSearchResults != null) {
                     switch (i) {
                         case SearchAdapter.ARTIST:
                             onArtistClick(i2, view);
@@ -147,8 +147,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         });
 
         // Restore previous search results, in case we're rotating
-        if (mSearchResult != null) {
-            mAdapter.appendResults(mSearchResult);
+        if (mSearchResults != null) {
+            mAdapter.appendResults(mSearchResults);
             mAdapter.notifyDataSetChanged();
         }
 
@@ -309,10 +309,13 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
-    public void onSearchResult(final SearchResult searchResult) {
-        if (searchResult.getQuery().equals(mQuery)) {
-            mSearchResult = searchResult;
-            mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
+    public void onSearchResult(final List<SearchResult> searchResults) {
+        for (SearchResult searchResult : searchResults) {
+            if (searchResult.getQuery().equals(mQuery)) {
+                mSearchResults = searchResults;
+                mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
+                break;
+            }
         }
     }
 
@@ -320,19 +323,15 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         final Activity act = getActivity();
 
         if (act != null) {
-            getActivity().setTitle("'" + mSearchResult.getQuery() + "'");
+            getActivity().setTitle("'" + mSearchResults.get(0).getQuery() + "'");
             getActivity().setProgressBarIndeterminateVisibility(false);
         } else {
             mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
         }
 
         if (mAdapter != null) {
-            if (mSearchResult.getIdentifier() == null) {
-                Log.e(TAG, "Search provider identifier is null!");
-            } else {
-                mAdapter.appendResults(mSearchResult);
-                mAdapter.notifyDataSetChanged();
-            }
+            mAdapter.appendResults(mSearchResults);
+            mAdapter.notifyDataSetChanged();
         }
     }
 }

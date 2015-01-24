@@ -50,7 +50,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private static final int PROPAGATION_DELAY = 200;
     private static final boolean DEBUG = false;
 
-    private final Map<String, SearchResult> mCachedSearches;
+    private final Map<String, List<SearchResult>> mCachedSearches;
     private List<ILocalCallback> mUpdateCallbacks;
     private final List<ProviderConnection> mProviders;
     private ProviderCache mCache;
@@ -966,41 +966,59 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return;
         }
 
+        if (searchResult.getIdentifier() == null) {
+            Log.e(TAG, "Search result came with no source identifier!");
+            return;
+        }
+
         final String query = searchResult.getQuery();
 
         if (!mCachedSearches.containsKey(query)) {
             // No cached results for this query, add this one
             Log.d(TAG, "New search cache for '" + query + "'");
-            mCachedSearches.put(query, searchResult);
+            List<SearchResult> results = new ArrayList<>();
+            results.add(searchResult);
+            mCachedSearches.put(query, results);
 
             // Feed results to the callback
             for (ILocalCallback cb : mUpdateCallbacks) {
-                cb.onSearchResult(searchResult);
+                cb.onSearchResult(results);
             }
         } else {
             // We already have cached results for this query, add new results
             Log.d(TAG, "Updating search result for '" + query + "'");
-            SearchResult cachedResults = mCachedSearches.get(query);
+            List<SearchResult> cachedResults = mCachedSearches.get(query);
 
-            cachedResults.setIdentifier(searchResult.getIdentifier());
-            for (String song : searchResult.getSongsList()) {
-                if (!cachedResults.getSongsList().contains(song)) {
-                    cachedResults.getSongsList().add(song);
+            SearchResult cachedResult = null;
+            for (SearchResult tmpResult : cachedResults) {
+                if (tmpResult.getIdentifier().equals(searchResult.getIdentifier())) {
+                    cachedResult = tmpResult;
                 }
             }
-            for (String artist : searchResult.getArtistList()) {
-                if (!cachedResults.getArtistList().contains(artist)) {
-                    cachedResults.getArtistList().add(artist);
+
+            if (cachedResult == null) {
+                cachedResults.add(searchResult);
+            } else {
+                cachedResult.setIdentifier(searchResult.getIdentifier());
+                for (String song : searchResult.getSongsList()) {
+                    if (!cachedResult.getSongsList().contains(song)) {
+                        cachedResult.getSongsList().add(song);
+                    }
                 }
-            }
-            for (String album : searchResult.getAlbumsList()) {
-                if (!cachedResults.getAlbumsList().contains(album)) {
-                    cachedResults.getAlbumsList().add(album);
+                for (String artist : searchResult.getArtistList()) {
+                    if (!cachedResult.getArtistList().contains(artist)) {
+                        cachedResult.getArtistList().add(artist);
+                    }
                 }
-            }
-            for (String playlist : searchResult.getPlaylistList()) {
-                if (!cachedResults.getPlaylistList().contains(playlist)) {
-                    cachedResults.getPlaylistList().add(playlist);
+                for (String album : searchResult.getAlbumsList()) {
+                    if (!cachedResult.getAlbumsList().contains(album)) {
+                        cachedResult.getAlbumsList().add(album);
+                    }
+                }
+                for (String playlist : searchResult.getPlaylistList()) {
+                    if (!cachedResult.getPlaylistList().contains(playlist)) {
+                        cachedResult.getPlaylistList().add(playlist);
+                    }
                 }
             }
 
