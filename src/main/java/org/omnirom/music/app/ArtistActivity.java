@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +35,8 @@ import android.view.ViewAnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 
 import org.omnirom.music.app.fragments.ArtistFragment;
+import org.omnirom.music.model.Artist;
+import org.omnirom.music.providers.ProviderAggregator;
 
 /**
  * Activity to view an Artist tracks, similar, etc. through
@@ -54,6 +57,7 @@ public class ArtistActivity extends AppActivity {
     private Bitmap mHero;
     private ArtistFragment mActiveFragment;
     private Handler mHandler;
+    private Toolbar mToolbar;
 
     /**
      * Creates a proper intent to open this activity
@@ -108,10 +112,13 @@ public class ArtistActivity extends AppActivity {
         mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
-        ActionBar actionBar = getSupportActionBar();
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(null);
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setTitle("");
         }
 
         if (Utils.hasLollipop()) {
@@ -193,10 +200,10 @@ public class ArtistActivity extends AppActivity {
         Utils.queueBitmap(BITMAP_ARTIST_HERO, mHero);
     }
 
+
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        // getMenuInflater().inflate(R.menu.artist, menu);
         return true;
     }
 
