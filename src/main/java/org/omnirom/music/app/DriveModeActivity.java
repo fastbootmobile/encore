@@ -381,7 +381,9 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         PlaybackProxy.removeCallback(mPlaybackCallback);
 
-        if (!mBackPressed) {
+        final int state = PlaybackProxy.getState();
+        if (!mBackPressed && state != PlaybackService.STATE_PAUSED
+                && state != PlaybackService.STATE_STOPPED) {
             // Start NavHead for easy going back into Drive mode
             startService(new Intent(this, NavHeadService.class));
         }
