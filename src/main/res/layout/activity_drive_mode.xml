@@ -98,10 +98,11 @@
         android:longClickable="false"
         android:orientation="horizontal"
         android:padding="8dp"
-        android:background="#80000000"
+        android:background="#DD333333"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:elevation="8dp">
 
         <ImageView
             android:id="@+id/btnPrevious"
@@ -200,8 +201,8 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:textStyle="bold"
         android:fontFamily="sans-serif-condensed"
+        fontPath="fonts/RobotoCondensed-Regular.ttf"
         android:textColor="@color/white"
         android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"/>

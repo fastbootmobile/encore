@@ -26,6 +26,12 @@
     <!-- Global effects session ID -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+    <!-- Drive Mode bypass lockscreen -->
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+
+    <!-- Navigation Head (Drive Mode) -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <!-- Main application declaration -->
     <application
         android:name=".OmniMusic"
@@ -143,9 +149,15 @@
             android:name=".DriveModeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_drive_mode"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
             android:theme="@style/OmniMusic.FullscreenTheme" >
         </activity>
+
+        <service
+            android:name="org.omnirom.music.service.NavHeadService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

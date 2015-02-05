@@ -8,7 +8,7 @@
                 android:color="#80000000"/>
             <stroke
                 android:width="2dp"
-                android:color="@color/white"/>
+                android:color="#80FFFFFF"/>
         </shape>
     </item>
 </ripple>

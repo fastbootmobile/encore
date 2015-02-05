@@ -16,6 +16,9 @@
 package org.omnirom.music.app;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.KeyguardManager;
+import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -24,6 +27,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -122,6 +126,8 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+
         mHandler = new DriveHandler(new WeakReference<>(this));
         mPlaybackCallback = new DrivePlaybackCallback();
 
