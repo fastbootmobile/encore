@@ -78,6 +78,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private View mOfflineView;
     private ImageView mIvHero;
     private TextView mTvAlbumName;
+    private boolean mDidHaveMore = true;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -120,12 +121,13 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
             IMusicProvider provider = PluginsLookup.getDefault().getProvider(pi).getBinder();
 
             // Check whether or not the album is fully loaded on the provider's end
-            boolean hasMore = false;
-            if (provider != null) {
-                try {
-                    hasMore = provider.fetchAlbumTracks(mAlbum.getRef());
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error while fetching album tracks", e);
+            if (mDidHaveMore) {
+                if (provider != null) {
+                    try {
+                        mDidHaveMore = provider.fetchAlbumTracks(mAlbum.getRef());
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error while fetching album tracks", e);
+                    }
                 }
             }
 
