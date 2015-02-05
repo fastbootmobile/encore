@@ -154,7 +154,13 @@ bool NativePlayer::createAudioPlayer() {
     format_pcm.samplesPerSec = sampling_rate;
     format_pcm.bitsPerSample = sample_format;
     format_pcm.containerSize = SL_PCMSAMPLEFORMAT_FIXED_16;
-    format_pcm.channelMask = (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT);
+    if (m_iChannels == 2) {
+        format_pcm.channelMask = (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT);
+    } else if (m_iChannels == 1) {
+        format_pcm.channelMask = SL_SPEAKER_FRONT_LEFT;
+    } else {
+        ALOGE("Unhandled channel count %d", m_iChannels.load());
+    }
     format_pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
 
     SLDataSource audio_src = {&loc_bufq, &format_pcm};
