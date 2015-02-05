@@ -251,6 +251,9 @@ public class PlaybackService extends Service
         // Restore preferences
         SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
         mRepeatMode = prefs.getBoolean(PREF_KEY_REPEAT, false);
+
+        // TODO: TEST: Bind NavHead
+        startService(new Intent(this, NavHeadService.class));
     }
 
     /**
@@ -259,6 +262,9 @@ public class PlaybackService extends Service
     @Override
     public void onDestroy() {
         Log.i(TAG, "onDestroy()");
+
+        // TODO: TEST: Bind NavHead
+        stopService(new Intent(this, NavHeadService.class));
 
         unregisterReceiver(mPacManReceiver);
         PluginsLookup.getDefault().removeProviderListener(this);
