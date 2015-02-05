@@ -72,6 +72,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private static final int MSG_UPDATE_TIME = 3;
     private static final int MSG_HIDE_SYSTEM_UI = 4;
 
+    private boolean mBackPressed = false;
     private DriveHandler mHandler;
     private DrivePlaybackCallback mPlaybackCallback;
     private View mDecorView;
@@ -380,8 +381,17 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         PlaybackProxy.removeCallback(mPlaybackCallback);
 
-        // Start NavHead for easy going back into Drive mode
-        startService(new Intent(this, NavHeadService.class));
+        if (!mBackPressed) {
+            // Start NavHead for easy going back into Drive mode
+            startService(new Intent(this, NavHeadService.class));
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Hide NavHead as we're getting back into the app
+        stopService(new Intent(this, NavHeadService.class));
     }
 
     @Override
@@ -405,6 +415,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        mBackPressed = true;
 
         // Stop NavHead if needed
         stopService(new Intent(this, NavHeadService.class));
