@@ -148,6 +148,7 @@
         <activity
             android:name=".DriveModeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTask"
             android:label="@string/title_activity_drive_mode"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/OmniMusic.FullscreenTheme" >

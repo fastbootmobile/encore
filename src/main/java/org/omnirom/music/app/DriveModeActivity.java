@@ -19,6 +19,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -48,6 +49,7 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
+import org.omnirom.music.service.NavHeadService;
 import org.omnirom.music.service.PlaybackService;
 
 import java.lang.ref.WeakReference;
@@ -78,7 +80,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private ImageView mPreviousButton;
     private ImageView mSkipButton;
     private ImageView mVoiceButton;
-    private ImageView mThumbsButton;
+    private ImageView mMapsButton;
     private TextView mTvTitle;
     private TextView mTvArtist;
     private TextView mTvAlbum;
@@ -209,7 +211,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         mPreviousButton = (ImageView) findViewById(R.id.btnPrevious);
         mSkipButton = (ImageView) findViewById(R.id.btnNext);
         mVoiceButton = (ImageView) findViewById(R.id.btnVoice);
-        mThumbsButton = (ImageView) findViewById(R.id.btnThumbs);
+        mMapsButton = (ImageView) findViewById(R.id.btnMaps);
         mTvTitle = (TextView) findViewById(R.id.tvTitle);
         mTvArtist = (TextView) findViewById(R.id.tvArtist);
         mTvAlbum = (TextView) findViewById(R.id.tvAlbum);
@@ -227,7 +229,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         mPlayButton.setOnClickListener(this);
         mPreviousButton.setOnClickListener(this);
         mSkipButton.setOnClickListener(this);
-        mThumbsButton.setOnClickListener(this);
+        mMapsButton.setOnClickListener(this);
         mVoiceButton.setOnClickListener(this);
         mSeek.setOnSeekBarChangeListener(this);
 
@@ -356,7 +358,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         setButtonDarker(mVoiceButton, !voice);
         setButtonDarker(mPreviousButton, emphasis);
         setButtonDarker(mPlayButton, emphasis);
-        setButtonDarker(mThumbsButton, emphasis);
+        setButtonDarker(mMapsButton, emphasis);
         setButtonDarker(mSkipButton, emphasis);
     }
 
@@ -377,6 +379,9 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         super.onPause();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         PlaybackProxy.removeCallback(mPlaybackCallback);
+
+        // Start NavHead for easy going back into Drive mode
+        startService(new Intent(this, NavHeadService.class));
     }
 
     @Override
@@ -386,12 +391,23 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         PlaybackProxy.addCallback(mPlaybackCallback);
         mHandler.sendEmptyMessageDelayed(MSG_HIDE_SYSTEM_UI, 1000);
         mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+
+        // Hide NavHead as we're getting back into the app
+        stopService(new Intent(this, NavHeadService.class));
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         mHandler.sendEmptyMessageDelayed(MSG_HIDE_SYSTEM_UI, 1000);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        // Stop NavHead if needed
+        stopService(new Intent(this, NavHeadService.class));
     }
 
     @Override
@@ -412,8 +428,10 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
             PlaybackProxy.previous();
         } else if (v == mSkipButton) {
             PlaybackProxy.next();
-        } else if (v == mThumbsButton) {
-            // TODO: Do thumbs button
+        } else if (v == mMapsButton) {
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW);
+            mapIntent.setPackage("com.google.android.apps.maps");
+            startActivity(mapIntent);
         } else if (v == mVoiceButton) {
             setVoiceEmphasis(true, false);
             mVoiceRecognizer.startListening();

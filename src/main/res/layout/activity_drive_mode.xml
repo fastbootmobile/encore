@@ -138,14 +138,14 @@
             android:scaleType="centerInside"/>
 
         <ImageView
-            android:id="@+id/btnThumbs"
+            android:id="@+id/btnMaps"
             android:layout_width="@dimen/drive_button_size"
             android:layout_height="@dimen/drive_button_size"
             android:layout_margin="4dp"
             android:background="@drawable/circle_outline"
             android:clickable="true"
             android:padding="16dp"
-            android:src="@drawable/ic_drive_thumb_up"
+            android:src="@drawable/ic_drive_maps"
             android:contentDescription="@string/thumbs_up_description" />
 
         <ImageView
