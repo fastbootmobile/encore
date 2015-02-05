@@ -60,7 +60,7 @@ import java.util.List;
 /**
  *
  */
-public class DriveModeActivity extends AppActivity implements ILocalCallback, View.OnClickListener {
+public class DriveModeActivity extends AppActivity implements ILocalCallback, View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "DriveModeActivity";
 
     private static final int DELAY_SEEKBAR_UPDATE = 1000 / 15;  // 15 Hz
@@ -229,6 +229,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         mSkipButton.setOnClickListener(this);
         mThumbsButton.setOnClickListener(this);
         mVoiceButton.setOnClickListener(this);
+        mSeek.setOnSeekBarChangeListener(this);
 
         mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
         mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
@@ -329,6 +330,9 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
             mSeek.setProgress(elapsedMs);
             mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
             mTvTimeElapsed.setText(Utils.formatTrackLength(elapsedMs));
+            mSeek.setVisibility(View.VISIBLE);
+        } else {
+            mSeek.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -490,5 +494,23 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
                 mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
             }
         }
+    }
+
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (fromUser) {
+            PlaybackProxy.seek(progress);
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
     }
 }

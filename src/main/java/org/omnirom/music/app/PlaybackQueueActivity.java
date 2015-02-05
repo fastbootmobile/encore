@@ -256,6 +256,7 @@ public class PlaybackQueueActivity extends AppActivity {
         private SeekBar.OnSeekBarChangeListener mSeekListener;
         private View.OnClickListener mRepeatClickListener;
         private View.OnClickListener mLikeClickListener;
+        private View.OnClickListener mAlbumArtClickListener;
 
         private static class PlaybackQueueHandler extends Handler {
             private WeakReference<SimpleFragment> mParent;
@@ -388,6 +389,25 @@ public class PlaybackQueueActivity extends AppActivity {
                     }
                 }
             };
+
+            mAlbumArtClickListener = new View.OnClickListener() {
+                @Override
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                public void onClick(View v) {
+                    PlaybackQueueAdapter.ViewHolder tag = (PlaybackQueueAdapter.ViewHolder) v.getTag();
+                    Bitmap hero = ((MaterialTransitionDrawable) tag.ivAlbumArt.getDrawable()).getFinalDrawable().getBitmap();
+                    Intent intent = AlbumActivity.craftIntent(getActivity(), hero, tag.song.getAlbum(),
+                            tag.song.getProvider(), 0xFF333333);
+
+                    if (Utils.hasLollipop()) {
+                        ActivityOptions opts = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                                v, "itemImage");
+                        startActivity(intent, opts.toBundle());
+                    } else {
+                        startActivity(intent);
+                    }
+                }
+            };
         }
 
         @Override
@@ -418,7 +438,7 @@ public class PlaybackQueueActivity extends AppActivity {
 
             mAdapter = new PlaybackQueueAdapter(mPlayFabClickListener, mNextClickListener,
                     mPreviousClickListener, mSeekListener, mRepeatClickListener,
-                    mLikeClickListener);
+                    mLikeClickListener, mAlbumArtClickListener);
 
             if (mListView != null) {
                 mListView.setAdapter(mAdapter);

@@ -39,6 +39,7 @@ public class PlaybackProxy {
     private static final String TAG = "PlaybackProxy";
 
     private static Handler sHandler;
+    private static final List<IPlaybackCallback> sPendingCallbacks = new ArrayList<>();
 
     private static final int MSG_PLAY           = 1;
     private static final int MSG_PAUSE          = 2;
@@ -129,7 +130,15 @@ public class PlaybackProxy {
                         break;
 
                     case MSG_ADD_CALLBACK:
-                        getPlayback().addCallback((IPlaybackCallback) msg.obj);
+                        try {
+                            getPlayback().addCallback((IPlaybackCallback) msg.obj);
+                        } catch (RemoteException e) {
+                            // Service likely isn't bound: queue callback so that it's added when
+                            // the service is ready.
+                            synchronized (sPendingCallbacks) {
+                                sPendingCallbacks.add((IPlaybackCallback) msg.obj);
+                            }
+                        }
                         break;
 
                     case MSG_REMOVE_CALLBACK:
@@ -162,6 +171,15 @@ public class PlaybackProxy {
 
     private static IPlaybackService getPlayback() throws RemoteException {
         return getPlayback(true);
+    }
+
+    static void notifyPlaybackConnected() {
+        synchronized (sPendingCallbacks) {
+            for (IPlaybackCallback callback : sPendingCallbacks) {
+                addCallback(callback);
+            }
+            sPendingCallbacks.clear();
+        }
     }
 
     public static boolean isServiceConnected() {

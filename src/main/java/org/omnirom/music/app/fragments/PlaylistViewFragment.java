@@ -312,7 +312,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     @Override
     public void onResume() {
         super.onResume();
-        ProviderAggregator.getDefault().addUpdateCallback(this);
+
+        ProviderAggregator.getDefault().addUpdateCallback(PlaylistViewFragment.this);
         PlaybackProxy.addCallback(mPlaybackCallback);
     }
 

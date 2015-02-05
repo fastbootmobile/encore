@@ -52,6 +52,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
     private View.OnClickListener mRepeatClickListener;
     private View.OnClickListener mLikeClickListener;
     private View.OnClickListener mOverflowClickListener;
+    private View.OnClickListener mAlbumArtCLickListener;
     private SeekBar.OnSeekBarChangeListener mSeekListener;
 
     public PlaybackQueueAdapter(View.OnClickListener playFabClickListener,
@@ -59,13 +60,15 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                                 View.OnClickListener previousClickListener,
                                 SeekBar.OnSeekBarChangeListener seekListener,
                                 View.OnClickListener repeatClickListener,
-                                View.OnClickListener likeClickListener) {
+                                View.OnClickListener likeClickListener,
+                                View.OnClickListener albumArtClickListener) {
         mPlayFabClickListener = playFabClickListener;
         mNextClickListener = nextClickListener;
         mPreviousClickListener = previousClickListener;
         mSeekListener = seekListener;
         mRepeatClickListener = repeatClickListener;
         mLikeClickListener = likeClickListener;
+        mAlbumArtCLickListener = albumArtClickListener;
         mOverflowClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -146,6 +149,8 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             tag.tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
             tag.tvArtist = (TextView) convertView.findViewById(R.id.tvArtist);
             tag.ivAlbumArt = (AlbumArtImageView) convertView.findViewById(R.id.ivAlbumArt);
+            tag.ivAlbumArt.setOnClickListener(mAlbumArtCLickListener);
+            tag.ivAlbumArt.setTag(tag);
 
             tag.vRoot.setClickable(false);
 

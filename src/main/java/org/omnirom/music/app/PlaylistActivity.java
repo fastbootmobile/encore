@@ -24,6 +24,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,6 +50,7 @@ public class PlaylistActivity extends AppActivity {
     private Bundle mInitialIntent; // TODO: Test rotation
     private PlaylistViewFragment mActiveFragment;
     private Handler mHandler = new Handler();
+    private Toolbar mToolbar;
 
     /**
      * Creates an intent starting this activity with the provided parameters
@@ -84,10 +87,14 @@ public class PlaylistActivity extends AppActivity {
             mActiveFragment.setArguments(mInitialIntent);
         }
 
-        // Remove title
-        setTitle(null);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        // Remove the activity title as we don't want it here
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setTitle("");
         }
 
 

@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,6 +54,8 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class PlaylistListFragment extends Fragment implements ILocalCallback {
+    private static final String TAG = "PlaylistListFragment";
+
     private PlaylistListAdapter mAdapter;
     private Handler mHandler;
     private boolean mIsStandalone;
@@ -201,13 +204,21 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
-    public void onProviderConnected(IMusicProvider provider) {
-        mHandler.post(new Runnable() {
-            @Override
+    public void onProviderConnected(final IMusicProvider provider) {
+        new Thread() {
             public void run() {
-                mAdapter.addAllUnique(ProviderAggregator.getDefault().getAllPlaylists());
+                // HACK: Wait a bit for the provider to be ready
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignore) { }
+
+                try {
+                    onPlaylistUpdate(provider.getPlaylists());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot get playlists");
+                }
             }
-        });
+        }.start();
     }
 
     @Override
