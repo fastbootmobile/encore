@@ -39,7 +39,9 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Adapter that displays Search results in an Expandable ListView
@@ -54,10 +56,15 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     public final static int COUNT = 4;
 
     private List<SearchResult> mSearchResults;
-    private List<SearchEntry> mSongs;
-    private List<SearchEntry> mArtists;
-    private List<SearchEntry> mPlaylists;
-    private List<SearchEntry> mAlbums;
+    private List<SearchEntry> mAllSongs;
+    private List<SearchEntry> mAllArtists;
+    private List<SearchEntry> mAllPlaylists;
+    private List<SearchEntry> mAllAlbums;
+
+    private List<SearchEntry> mSortedSongs;
+    private List<SearchEntry> mSortedArtists;
+    private List<SearchEntry> mSortedPlaylists;
+    private List<SearchEntry> mSortedAlbums;
 
     /**
      * Class representing search entries
@@ -93,10 +100,16 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     public SearchAdapter() {
         mSearchResults = new ArrayList<>();
-        mSongs = new ArrayList<>();
-        mArtists = new ArrayList<>();
-        mPlaylists = new ArrayList<>();
-        mAlbums = new ArrayList<>();
+
+        mAllSongs = new ArrayList<>();
+        mAllArtists = new ArrayList<>();
+        mAllPlaylists = new ArrayList<>();
+        mAllAlbums = new ArrayList<>();
+
+        mSortedSongs = new ArrayList<>();
+        mSortedArtists = new ArrayList<>();
+        mSortedPlaylists = new ArrayList<>();
+        mSortedAlbums = new ArrayList<>();
     }
 
     /**
@@ -105,10 +118,14 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     public void clear() {
         synchronized (this) {
             mSearchResults.clear();
-            mSongs.clear();
-            mArtists.clear();
-            mPlaylists.clear();
-            mAlbums.clear();
+            mAllSongs.clear();
+            mAllArtists.clear();
+            mAllPlaylists.clear();
+            mAllAlbums.clear();
+            mSortedSongs.clear();
+            mSortedArtists.clear();
+            mSortedPlaylists.clear();
+            mSortedAlbums.clear();
         }
     }
 
@@ -132,44 +149,101 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      * @param searchResults The results to append
      */
     public void appendResults(List<SearchResult> searchResults) {
+        mSearchResults.addAll(searchResults);
+
+        for (SearchResult searchResult : searchResults) {
+            final ProviderIdentifier id = searchResult.getIdentifier();
+
+            final List<String> songs = searchResult.getSongsList();
+            final List<String> artists = searchResult.getArtistList();
+            final List<String> playlists = searchResult.getPlaylistList();
+            final List<String> albums = searchResult.getAlbumsList();
+
+            for (String song : songs) {
+                SearchEntry entry = new SearchEntry(song, id);
+                if (!mAllSongs.contains(entry)) {
+                    mAllSongs.add(entry);
+                }
+            }
+
+            for (String artist : artists) {
+                SearchEntry entry = new SearchEntry(artist, id);
+                if (!mAllArtists.contains(entry)) {
+                    mAllArtists.add(entry);
+                }
+            }
+
+            for (String playlist : playlists) {
+                SearchEntry entry = new SearchEntry(playlist, id);
+                if (!mAllPlaylists.contains(entry)) {
+                    mAllPlaylists.add(entry);
+                }
+            }
+
+            for (String album : albums) {
+                SearchEntry entry = new SearchEntry(album, id);
+                if (!mAllAlbums.contains(entry)) {
+                    mAllAlbums.add(entry);
+                }
+            }
+        }
+
         synchronized (this) {
-            mSearchResults.addAll(searchResults);
+            computeResultsList();
+        }
+    }
 
-            for (SearchResult searchResult : searchResults) {
-                final ProviderIdentifier id = searchResult.getIdentifier();
+    private void computeResultsList() {
+        mSortedArtists.clear();
+        mSortedAlbums.clear();
+        mSortedPlaylists.clear();
+        mSortedSongs.clear();
 
-                final List<String> songs = searchResult.getSongsList();
-                final List<String> artists = searchResult.getArtistList();
-                final List<String> playlists = searchResult.getPlaylistList();
-                final List<String> albums = searchResult.getAlbumsList();
+        Map<ProviderIdentifier, Integer> songsPerProvider = new HashMap<>();
+        Map<ProviderIdentifier, Integer> albumsPerProvider = new HashMap<>();
+        Map<ProviderIdentifier, Integer> playlistsPerProvider = new HashMap<>();
+        Map<ProviderIdentifier, Integer> artistsPerProvider = new HashMap<>();
 
-                for (String song : songs) {
-                    SearchEntry entry = new SearchEntry(song, id);
-                    if (!mSongs.contains(entry)) {
-                        mSongs.add(entry);
-                    }
-                }
+        // Use 5 results from each provider for each category
+        final int maxResults = 5;
 
-                for (String artist : artists) {
-                    SearchEntry entry = new SearchEntry(artist, id);
-                    if (!mArtists.contains(entry)) {
-                        mArtists.add(entry);
-                    }
-                }
+        for (SearchEntry song : mAllSongs) {
+            Integer providerCountInteger = songsPerProvider.get(song.identifier);
+            int providerCount = providerCountInteger == null ? 0 : providerCountInteger;
 
-                for (String playlist : playlists) {
-                    SearchEntry entry = new SearchEntry(playlist, id);
-                    if (!mPlaylists.contains(entry)) {
-                        mPlaylists.add(entry);
-                    }
-                }
+            if (providerCount < maxResults) {
+                mSortedSongs.add(song);
+                songsPerProvider.put(song.identifier, providerCount + 1);
+            }
+        }
 
-                for (String album : albums) {
-                    SearchEntry entry = new SearchEntry(album, id);
-                    if (!mAlbums.contains(entry)) {
-                        mAlbums.add(entry);
-                    }
-                }
+        for (SearchEntry album : mAllAlbums) {
+            Integer providerCountInteger = albumsPerProvider.get(album.identifier);
+            int providerCount = providerCountInteger == null ? 0 : providerCountInteger;
+
+            if (providerCount < maxResults) {
+                mSortedAlbums.add(album);
+                albumsPerProvider.put(album.identifier, providerCount + 1);
+            }
+        }
+
+        for (SearchEntry artist : mAllArtists) {
+            Integer providerCountInteger = artistsPerProvider.get(artist.identifier);
+            int providerCount = providerCountInteger == null ? 0 : providerCountInteger;
+
+            if (providerCount < maxResults) {
+                mSortedArtists.add(artist);
+                artistsPerProvider.put(artist.identifier, providerCount + 1);
+            }
+        }
+
+        for (SearchEntry playlist : mAllPlaylists) {
+            Integer providerCountInteger = playlistsPerProvider.get(playlist.identifier);
+            int providerCount = providerCountInteger == null ? 0 : providerCountInteger;
+
+            if (providerCount < maxResults) {
+                mSortedPlaylists.add(playlist);
+                playlistsPerProvider.put(playlist.identifier, providerCount + 1);
             }
         }
     }
@@ -185,13 +259,13 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             SearchEntry compare = new SearchEntry(ent.getRef(), ent.getProvider());
 
             if (ent instanceof Song) {
-                return mSongs.contains(compare);
+                return mAllSongs.contains(compare);
             } else if (ent instanceof Artist) {
-                return mArtists.contains(compare);
+                return mAllArtists.contains(compare);
             } else if (ent instanceof Album) {
-                return mAlbums.contains(compare);
+                return mAllAlbums.contains(compare);
             } else if (ent instanceof Playlist) {
-                return mPlaylists.contains(compare);
+                return mAllPlaylists.contains(compare);
             }
 
             return false;
@@ -207,7 +281,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             List children = getGroup(i);
 
             if (children != null) {
-                return Math.min(10, children.size());
+                return children.size();
             } else {
                 return 0;
             }
@@ -222,16 +296,16 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         synchronized (this) {
             switch (i) {
                 case ARTIST:
-                    return mArtists;
+                    return mSortedArtists;
 
                 case ALBUM:
-                    return mAlbums;
+                    return mSortedAlbums;
 
                 case SONG:
-                    return mSongs;
+                    return mSortedSongs;
 
                 case PLAYLIST:
-                    return mPlaylists;
+                    return mSortedPlaylists;
 
                 default:
                     return null;
@@ -400,7 +474,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      * @param tag The tag of the view
      */
     private void updateSongTag(int i, ViewHolder tag) {
-        final SearchEntry entry = mSongs.get(i);
+        final SearchEntry entry = mSortedSongs.get(i);
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
         Song song = aggregator.retrieveSong(entry.ref, entry.identifier);
@@ -429,7 +503,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      * @param tag The tag of the view
      */
     private void updateArtistTag(int i, ViewHolder tag) {
-        final SearchEntry entry = mArtists.get(i);
+        final SearchEntry entry = mSortedArtists.get(i);
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         Artist artist = aggregator.retrieveArtist(entry.ref, entry.identifier);
 
@@ -455,7 +529,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      * @param tag The tag of the view
      */
     private void updateAlbumTag(int i, ViewHolder tag) {
-        final SearchEntry entry = mAlbums.get(i);
+        final SearchEntry entry = mSortedAlbums.get(i);
         ProviderAggregator aggregator = ProviderAggregator.getDefault();
         Album album = aggregator.retrieveAlbum(entry.ref, entry.identifier);
 
@@ -485,7 +559,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      * @param tag The tag of the view
      */
     private void updatePlaylistTag(int i, ViewHolder tag) {
-        final SearchEntry entry = mPlaylists.get(i);
+        final SearchEntry entry = mSortedPlaylists.get(i);
         final Playlist playlist = ProviderAggregator.getDefault().retrievePlaylist(entry.ref, entry.identifier);
         final Resources res = tag.vRoot.getResources();
 
