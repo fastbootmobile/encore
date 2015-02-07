@@ -340,18 +340,18 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
                 //      ...
                 uint32_t intLeft = ((uint32_t)data_bytes[i] << 16)
                         | ((uint32_t)data_bytes[i+2] << 8) | ((uint32_t)data_bytes[i+4]);
-                intLeft = static_cast<double>(intLeft) / 16777215.0 * 65535.0;
+                intLeft = static_cast<double>(intLeft) / 16777216.0 * 65535.0;
                 uint16_t castLeft = (uint16_t) intLeft;
 
                 uint32_t intRight = ((uint32_t)data_bytes[i+1] << 16)
                         | ((uint32_t)data_bytes[i+3] << 8) | ((uint32_t)data_bytes[i+5]);
-                intRight = static_cast<double>(intRight) / 16777215.0 * 65535.0;
+                intRight = static_cast<double>(intRight) / 16777216.0 * 65535.0;
                 uint16_t castRight = (uint16_t) intRight;
 
-                left[left_idx] = (unsigned char)((castLeft >> 8) & 0xff);
+                left[left_idx] = (unsigned char)(((castLeft & 0xFF00) >> 8) & 0xff);
                 left[left_idx + 1] = (unsigned char)((castLeft) & 0xff);
 
-                right[left_idx] = (unsigned char)((castRight >> 8) & 0xff);
+                right[left_idx] = (unsigned char)(((castRight & 0xFF00) >> 8) & 0xff);
                 right[left_idx + 1] = (unsigned char)((castRight) & 0xff);
 
                 left_idx += 2;
