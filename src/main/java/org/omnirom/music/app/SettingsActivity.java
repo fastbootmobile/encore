@@ -18,6 +18,7 @@ package org.omnirom.music.app;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -32,6 +33,7 @@ public class SettingsActivity extends AppActivity {
     public static final String TAG_FRAGMENT = "fragment_inner";
 
     private Toolbar mToolbar;
+    private Fragment mActiveFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +46,12 @@ public class SettingsActivity extends AppActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         FragmentManager fm = getSupportFragmentManager();
-        SettingsFragment activeFragment = (SettingsFragment) fm.findFragmentByTag(TAG_FRAGMENT);
+        mActiveFragment = (SettingsFragment) fm.findFragmentByTag(TAG_FRAGMENT);
 
-        if (activeFragment == null) {
-            activeFragment = new SettingsFragment();
+        if (mActiveFragment == null) {
+            mActiveFragment = new SettingsFragment();
             fm.beginTransaction()
-                    .add(R.id.container, activeFragment, TAG_FRAGMENT)
+                    .add(R.id.container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
         }
     }
@@ -57,11 +59,14 @@ public class SettingsActivity extends AppActivity {
     @Override
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (Utils.hasLollipop()) {
-            finishAfterTransition();
-        } else {
-            finish();
+        if (!mActiveFragment.onOptionsItemSelected(item)) {
+            if (Utils.hasLollipop()) {
+                finishAfterTransition();
+            } else {
+                finish();
+            }
         }
+
         return true;
     }
 }

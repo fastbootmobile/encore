@@ -403,6 +403,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         PlaybackProxy.addCallback(mPlaybackCallback);
         mHandler.sendEmptyMessageDelayed(MSG_HIDE_SYSTEM_UI, 1000);
         mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
+        mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
 
         // Hide NavHead as we're getting back into the app
         stopService(new Intent(this, NavHeadService.class));

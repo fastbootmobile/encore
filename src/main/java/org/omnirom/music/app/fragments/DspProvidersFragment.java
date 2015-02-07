@@ -165,7 +165,7 @@ public class DspProvidersFragment extends ListFragment {
                 return true;
 
             default:
-                return super.onOptionsItemSelected(item);
+                return false;
         }
     }
 

@@ -15,6 +15,7 @@
 
 package org.omnirom.music.service;
 
+import android.animation.Animator;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -25,10 +26,12 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 
 import org.omnirom.music.app.DriveModeActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.Utils;
 
 public class NavHeadService extends Service {
     private static final String TAG = "NavHeadService";
@@ -63,13 +66,40 @@ public class NavHeadService extends Service {
     public void onDestroy() {
         super.onDestroy();
         if (mHeadView != null) {
-            mWindowManager.removeView(mHeadView);
+            mHeadView.animate().scaleX(0.5f).scaleY(0.5f).alpha(0.0f).setDuration(500)
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .setListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mWindowManager.removeView(mHeadView);
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                            mWindowManager.removeView(mHeadView);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    }).start();
         }
     }
 
     private void createHead() {
         mHeadView = new ImageView(this);
         mHeadView.setImageResource(R.drawable.album_placeholder);
+        mHeadView.setScaleX(0.5f);
+        mHeadView.setScaleY(0.5f);
+        mHeadView.setAlpha(0.0f);
+        mHeadView.animate().scaleX(1.0f).scaleY(1.0f).alpha(1.0f)
+                .setDuration(500).setInterpolator(new AccelerateDecelerateInterpolator()).start();
 
         mHeadLayoutParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -123,7 +153,7 @@ public class NavHeadService extends Service {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), DriveModeActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
             }
         });
