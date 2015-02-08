@@ -191,12 +191,14 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onPlaylistUpdate(final List<Playlist> p) {
-        synchronized (mPlaylistsUpdated) {
-            mPlaylistsUpdated.addAll(p);
-        }
+        if (p != null) {
+            synchronized (mPlaylistsUpdated) {
+                mPlaylistsUpdated.addAll(p);
+            }
 
-        mHandler.removeCallbacks(mUpdateListRunnable);
-        mHandler.post(mUpdateListRunnable);
+            mHandler.removeCallbacks(mUpdateListRunnable);
+            mHandler.post(mUpdateListRunnable);
+        }
     }
 
     @Override
