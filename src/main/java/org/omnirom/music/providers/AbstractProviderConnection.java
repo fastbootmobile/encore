@@ -54,6 +54,19 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
      */
     public AbstractProviderConnection(Context ctx, String providerName, String authorName, String pkg,
                                       String serviceName, String configActivity) {
+        if (providerName == null) {
+            throw new IllegalArgumentException("Provider name cannot be null");
+        }
+        if (authorName == null) {
+            throw new IllegalArgumentException("Author name cannot be null");
+        }
+        if (pkg == null) {
+            throw new IllegalArgumentException("Package cannot be null");
+        }
+        if (serviceName == null) {
+            throw new IllegalArgumentException("Service class name cannot be null");
+        }
+
         mContext = ctx;
         mProviderName = providerName;
         mAuthorName = authorName;
@@ -90,7 +103,8 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
     }
 
     /**
-     * @return The name of the actual service running this provider. See {@link #getProviderName()}
+     * @return The name of the actual Java service running this provider. To get the human
+     * name, see {@link #getProviderName()}.
      */
     public String getServiceName() {
         return mServiceName;

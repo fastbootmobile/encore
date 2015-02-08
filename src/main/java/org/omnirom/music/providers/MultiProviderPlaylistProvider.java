@@ -38,29 +38,31 @@ import java.util.List;
  * Created by h4o on 17/06/2014.
  */
 public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
+    private static final String TAG = "MultiProviderPlaylist";
 
-
-    Handler mHandler = new Handler();
-    private HashMap<String,Playlist> mPlaylists;
-    private HashMap<String,ProviderIdentifier> mSongsProviders;
+    private Handler mHandler = new Handler();
+    private HashMap<String, Playlist> mPlaylists;
+    private HashMap<String, ProviderIdentifier> mSongsProviders;
     private ProviderIdentifier mProviderIdentifier;
     private Context mContext;
-    private String TAG = "MultiProviderPlaylistProvider";
+
     private final List<IProviderCallback> mCallbacks;
     private MultiProviderDatabaseHelper mMultiProviderDatabaseHelper;
-    public MultiProviderPlaylistProvider(Context context){
+
+    public MultiProviderPlaylistProvider(Context context) {
         mContext = context;
-        mPlaylists = new HashMap<String, Playlist>();
-        mMultiProviderDatabaseHelper = new MultiProviderDatabaseHelper(mContext,mLocalCallback);
-        mCallbacks = new ArrayList<IProviderCallback>();
+        mPlaylists = new HashMap<>();
+        mMultiProviderDatabaseHelper = new MultiProviderDatabaseHelper(mContext, mLocalCallback);
+        mCallbacks = new ArrayList<>();
     }
 
     private IMusicProvider getBinder(ProviderIdentifier id) {
         return PluginsLookup.getDefault().getProvider(id).getBinder();
     }
+
     @Override
     public int getVersion() throws RemoteException {
-        return 0;
+        return Constants.API_VERSION;
     }
 
     @Override
@@ -175,7 +177,6 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
 
     @Override
     public void setAudioSocketName(String socketName) throws RemoteException {
-
     }
 
     @Override
@@ -196,20 +197,19 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
 
     @Override
     public void pause() throws RemoteException {
-        Log.e(TAG, "NOT IMPLEMENTED");
     }
 
     @Override
     public void resume() throws RemoteException {
-        Log.e(TAG, "NOT IMPLEMENTED");
     }
 
     @Override
-    public void seek(long timeMs) { Log.e(TAG, "NOT IMPLEMENTED"); }
+    public void seek(long timeMs) {
+    }
 
     @Override
     public boolean onUserSwapPlaylistItem(int oldPosition, int newPosition, String playlistRef) throws RemoteException {
-           return mMultiProviderDatabaseHelper.swapPlaylistItem(oldPosition,newPosition,playlistRef);
+        return mMultiProviderDatabaseHelper.swapPlaylistItem(oldPosition, newPosition, playlistRef);
     }
 
     @Override
@@ -223,17 +223,17 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     @Override
-    public boolean addSongToPlaylist(String songRef, String playlistRef,ProviderIdentifier providerIdentifier) throws RemoteException {
-        return mMultiProviderDatabaseHelper.addSongToPlaylist(songRef,playlistRef,providerIdentifier);
+    public boolean addSongToPlaylist(String songRef, String playlistRef, ProviderIdentifier providerIdentifier) throws RemoteException {
+        return mMultiProviderDatabaseHelper.addSongToPlaylist(songRef, playlistRef, providerIdentifier);
     }
 
     @Override
     public String addPlaylist(String playlistName) throws RemoteException {
-         return mMultiProviderDatabaseHelper.addPlaylist(playlistName);
+        return mMultiProviderDatabaseHelper.addPlaylist(playlistName);
     }
 
     @Override
-    public List<Genre> getGenres(){
+    public List<Genre> getGenres() {
         return null;
     }
 
@@ -255,7 +255,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
                     synchronized (mCallbacks) {
                         for (IProviderCallback cb : mCallbacks) {
                             try {
-                                cb.onPlaylistAddedOrUpdated(mProviderIdentifier,playlist);
+                                cb.onPlaylistAddedOrUpdated(mProviderIdentifier, playlist);
                             } catch (DeadObjectException e) {
                                 removeCallback(cb);
                             } catch (RemoteException e) {
@@ -268,8 +268,8 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
         }
 
         @Override
-        public void searchFinished(final SearchResult searchResult){
-            if(searchResult != null) {
+        public void searchFinished(final SearchResult searchResult) {
+            if (searchResult != null) {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -290,7 +290,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
         }
     };
 
-    public void startSearch(String query){
+    public void startSearch(String query) {
         mMultiProviderDatabaseHelper.startSearch(query);
     }
 

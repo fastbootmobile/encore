@@ -34,6 +34,7 @@ import org.omnirom.music.providers.AbstractProviderConnection;
 import org.omnirom.music.providers.Constants;
 import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.InjectedProviderConnection;
 import org.omnirom.music.providers.MultiProviderPlaylistProvider;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
@@ -69,6 +70,7 @@ public class PluginsLookup {
     private final List<DSPConnection> mDSPConnections;
     private List<ConnectionListener> mConnectionListeners;
     private IPlaybackService mPlaybackService;
+    private MultiProviderPlaylistProvider mMultiProviderPlaylistProvider;
     private ProviderConnection mMultiProviderConnection;
     private Handler mHandler;
     private int mServiceUsage;
@@ -117,35 +119,36 @@ public class PluginsLookup {
     }
 
     private PluginsLookup() {
-        mConnections = new ArrayList<ProviderConnection>();
-        mDSPConnections = new ArrayList<DSPConnection>();
-        mConnectionListeners = new ArrayList<ConnectionListener>();
+        mConnections = new ArrayList<>();
+        mDSPConnections = new ArrayList<>();
+        mConnectionListeners = new ArrayList<>();
         mHandler = new Handler();
     }
 
     public void initialize(Context context) {
         mContext = context;
-        MultiProviderPlaylistProvider multiproviderPlaylistProvider = new MultiProviderPlaylistProvider(mContext);
         requestUpdatePlugins();
-
-        // Inject our Multi-Provider Playlist provider
-        HashMap<String, String> item = new HashMap<String, String>();
-        item.put(DATA_PACKAGE, "org.omnirom.music.providers");
-        item.put(DATA_SERVICE, "org.omnirom.music.providers.MultiProviderPlaylistProvider");
-        item.put(DATA_NAME, "MultiProviderPlaylistProvider");
-        item.put(DATA_AUTHOR, "The OmniROM Project");
-        item.put(DATA_CONFIGCLASS, null);
-        mMultiProviderConnection = new ProviderConnection(mContext,item.get(DATA_NAME),
-                item.get(DATA_AUTHOR),
-                item.get(DATA_PACKAGE), item.get(DATA_SERVICE),
-                item.get(DATA_CONFIGCLASS));
-
-        mMultiProviderConnection.setListener(mProviderListener);
-        mConnections.add(mMultiProviderConnection);
-        mMultiProviderConnection.onServiceConnected(new ComponentName("org.omnirom.music.providers", "org.omnirom.music.providers.MultiProviderPlaylistProvider"),
-                multiproviderPlaylistProvider.asBinder());
-
+        injectMultiProviderPlaylistProvider();
         connectPlayback();
+    }
+
+    private void injectMultiProviderPlaylistProvider() {
+        // Inject our Multi-Provider Playlist provider
+        mMultiProviderPlaylistProvider = new MultiProviderPlaylistProvider(mContext);
+        mMultiProviderConnection = injectProvider(mMultiProviderPlaylistProvider,
+                "org.omnirom.music.providers", "org.omnirom.music.providers.MultiProviderPlaylistProvider",
+                "Multi-Provider Playlists Provider", "The OmniROM Project", null);
+    }
+
+    private InjectedProviderConnection injectProvider(IMusicProvider provider, String pkg,
+                                                      String service, String name, String author,
+                                                      String configClass) {
+        InjectedProviderConnection pc = new InjectedProviderConnection(provider, mContext, name,
+                author, pkg, service, configClass);
+        pc.setListener(mProviderListener);
+        mConnections.add(pc);
+
+        return pc;
     }
 
     public void incPlaybackUsage() {

@@ -37,26 +37,24 @@ import java.util.regex.Pattern;
  * Created by h4o on 01/07/2014.
  */
 public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
+    private static final String TAG = "MultiProviderDBeHelper";
+    private static final int DATABASE_VERSION = 2;
 
-    private final String TAG = "MultiProviderDataBaseHelper";
-    private static int DATABASE_VERSION = 2;
+    private static final String DATABASE_NAME = "multiprovider_playlists";
 
-    private static String DATABASE_NAME = "multiprovider_playlists";
+    private static final String TABLE_PLAYLIST = "playlist";
+    private static final String TABLE_SONGS = "song";
 
-    private static String TABLE_PLAYLIST = "playlist";
-    private static String TABLE_SONGS = "song";
+    private static final String KEY_ID = "id";
 
-    private static String KEY_ID = "id";
+    private static final String KEY_PLAYLIST_NAME = "playlist_name";
 
-    private static String KEY_PLAYLIST_NAME = "playlist_name";
-
-    private static String KEY_SONG_REF = "song_ref";
-    private static String KEY_PLAYLIST_ID = "playlist_id";
-    private static String KEY_PACKAGE_NAME = "package_name";
-    private static String KEY_SERVICE = "service";
-    private static String KEY_PROVIDER = "provider";
-    private static String KEY_POSITION = "position";
-//    private static String KEY_POSITION = "position";
+    private static final String KEY_SONG_REF = "song_ref";
+    private static final String KEY_PLAYLIST_ID = "playlist_id";
+    private static final String KEY_PACKAGE_NAME = "package_name";
+    private static final String KEY_SERVICE = "service";
+    private static final String KEY_PROVIDER = "provider";
+    private static final String KEY_POSITION = "position";
 
     private static final String CREATE_TABLE_PLAYLIST = "CREATE TABLE IF NOT EXISTS " +
             TABLE_PLAYLIST + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + KEY_PLAYLIST_NAME + " TEXT)";
@@ -77,17 +75,16 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
 
     public interface LocalCallback {
         public void playlistUpdated(final Playlist playlist);
-
         public void searchFinished(final SearchResult searchResult);
     }
 
     public MultiProviderDatabaseHelper(Context ctx, LocalCallback localCallback) {
         super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
         mCallback = localCallback;
-        mSongRefID = new HashMap<String, Long>();
-        mPlaylists = new HashMap<String, Playlist>();
-        mPlayListRefID = new HashMap<String, Long>();
-        mRefProviderId = new HashMap<String, ProviderIdentifier>();
+        mSongRefID = new HashMap<>();
+        mPlaylists = new HashMap<>();
+        mPlayListRefID = new HashMap<>();
+        mRefProviderId = new HashMap<>();
         mFetched = false;
         try {
             getWritableDatabase();
@@ -120,16 +117,16 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d(TAG, "creating sql db");
         db.execSQL(CREATE_TABLE_PLAYLIST);
         db.execSQL(CREATE_TABLE_SONGS);
-        Log.d(TAG, "done");
 
     }
 
     private void fetchPlaylists(SQLiteDatabase database) {
-        String query = "SELECT * FROM " + TABLE_PLAYLIST;
-        Log.d(TAG, "fetching playlist");
+        Log.d(TAG, "Fetching playlists (identifier=" + mProviderIdentifier + ")");
+
+        final String query = "SELECT * FROM " + TABLE_PLAYLIST;
+
         Cursor c = database.rawQuery(query, null);
         int id = c.getColumnIndex(KEY_ID);
         int playlist_name = c.getColumnIndex(KEY_PLAYLIST_NAME);
@@ -183,26 +180,26 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //we have no migrating plan for now
+        // We have no migrating plan for now
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PLAYLIST);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_SONGS);
-
-
         onCreate(db);
     }
 
     public List<Playlist> getPlaylists() {
-        return new ArrayList<Playlist>(mPlaylists.values());
+        return new ArrayList<>(mPlaylists.values());
     }
 
     public String addPlaylist(String playlist_name) {
-        Log.d(TAG, "adding the playlist " + playlist_name);
+        Log.d(TAG, "Creating new playlist '" + playlist_name + "'");
+
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(KEY_PLAYLIST_NAME, playlist_name);
-        Log.d(TAG, "let's do some work");
         long playlist_id = db.insert(TABLE_PLAYLIST, null, cv);
-        Log.e(TAG, ".playlist id is: " + playlist_id);
+
+        Log.e(TAG, "Generated playlist ID: " + playlist_id);
+
         Playlist pl = new Playlist("omni:playlist:" + playlist_id);
         pl.setName(playlist_name);
         pl.setIsLoaded(true);
@@ -210,6 +207,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         mPlaylists.put(pl.getRef(), pl);
         mPlayListRefID.put(pl.getRef(), playlist_id);
         mCallback.playlistUpdated(pl);
+
         return pl.getRef();
     }
 
@@ -234,8 +232,10 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
             mCallback.playlistUpdated(p);
             mRefProviderId.put(songref, providerIdentifier);
             return true;
-        } else
+        } else {
+            Log.e(TAG, "Cannot add song to playlist: Ref doesn't exist in PlaylistRefID");
             return false;
+        }
     }
 
     public boolean deletePlaylist(String playlistref) {
