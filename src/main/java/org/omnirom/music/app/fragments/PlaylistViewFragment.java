@@ -17,6 +17,7 @@ package org.omnirom.music.app.fragments;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.drm.DrmStore;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -62,6 +63,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
+import org.omnirom.music.service.PlaybackService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -315,6 +317,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         ProviderAggregator.getDefault().addUpdateCallback(PlaylistViewFragment.this);
         PlaybackProxy.addCallback(mPlaybackCallback);
+        updateFabStatus();
     }
 
     @Override
@@ -347,6 +350,28 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         }
 
         return false;
+    }
+
+    private void updateFabStatus() {
+        final int state = PlaybackProxy.getState();
+        switch (state){
+            case PlaybackService.STATE_PAUSED:
+            case PlaybackService.STATE_STOPPED:
+                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                mFabDrawable.setBuffering(false);
+                break;
+
+            case PlaybackService.STATE_BUFFERING:
+            case PlaybackService.STATE_PAUSING:
+                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                mFabDrawable.setBuffering(true);
+                break;
+
+            case PlaybackService.STATE_PLAYING:
+                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                mFabDrawable.setBuffering(false);
+                break;
+        }
     }
 
     public void notifyReturnTransition() {
