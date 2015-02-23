@@ -143,6 +143,12 @@ class RemoteMetadataManagerv21 extends MediaSession.Callback implements IRemoteM
             mMediaSession.setMetadata(mBuilder.build());
             mMediaSession.setPlaybackState(mStateBuilder.build());
         }
+
+        AvrcpUtils.notifyMetaChanged(mService, song.getRef().hashCode(),
+                artist != null ? artist.getName() : null,
+                album != null ? album.getName() : null,
+                song.getTitle(), mService.getQueue().size(),
+                song.getDuration(), mService.getCurrentTrackPositionImpl());
     }
 
     @Override
@@ -153,6 +159,8 @@ class RemoteMetadataManagerv21 extends MediaSession.Callback implements IRemoteM
             mMediaSession.setPlaybackState(mStateBuilder.build());
             mMediaSession.setActive(true);
         }
+
+        AvrcpUtils.notifyPlayStateChanged(mService, true, timeElapsed);
     }
 
     @Override
@@ -163,6 +171,8 @@ class RemoteMetadataManagerv21 extends MediaSession.Callback implements IRemoteM
             mMediaSession.setPlaybackState(mStateBuilder.build());
             mMediaSession.setActive(true);
         }
+
+        AvrcpUtils.notifyPlayStateChanged(mService, true, 0);
     }
 
     @Override
@@ -173,6 +183,8 @@ class RemoteMetadataManagerv21 extends MediaSession.Callback implements IRemoteM
             mMediaSession.setPlaybackState(mStateBuilder.build());
             mMediaSession.setActive(true);
         }
+
+        AvrcpUtils.notifyPlayStateChanged(mService, true, 0);
     }
 
     @Override
@@ -183,12 +195,13 @@ class RemoteMetadataManagerv21 extends MediaSession.Callback implements IRemoteM
             mMediaSession.setPlaybackState(mStateBuilder.build());
             mMediaSession.setActive(false);
         }
+
+        AvrcpUtils.notifyPlayStateChanged(mService, false, 0);
     }
 
     @Override
     public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
         // Buttons actions can be overridden
-        Log.e(TAG, "onMediaButtonEvent");
         return super.onMediaButtonEvent(mediaButtonIntent);
     }
 

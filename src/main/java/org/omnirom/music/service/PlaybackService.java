@@ -436,6 +436,10 @@ public class PlaybackService extends Service
         return mNativeHub;
     }
 
+    public PlaybackQueue getQueue() {
+        return mPlaybackQueue;
+    }
+
     /**
      * Assigns the provided provider an audio client socket
      *

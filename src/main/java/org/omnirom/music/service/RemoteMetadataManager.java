@@ -42,9 +42,11 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
     private final ComponentName mEventReceiver;
     private final AudioManager mAudioManager;
     private BitmapDrawable mPreviousAlbumArt;
+    private PlaybackService mContext;
 
     public RemoteMetadataManager(PlaybackService service) {
         mEventReceiver = new ComponentName(service, RemoteControlReceiver.class);
+        mContext = service;
 
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         mediaButtonIntent.setComponent(mEventReceiver);
@@ -124,25 +126,35 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
 
         metadata.apply();
         mClient.setTransportControlFlags(getActionsFlags(hasNext));
+
+        AvrcpUtils.notifyMetaChanged(mContext, song.getRef().hashCode(),
+                artist != null ? artist.getName() : null,
+                album != null ? album.getName() : null,
+                song.getTitle(), mContext.getQueue().size(),
+                song.getDuration(), mContext.getCurrentTrackPositionImpl());
     }
 
     @Override
     public void notifyPlaying(long timeElapsed) {
         mClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
+        AvrcpUtils.notifyPlayStateChanged(mContext, true, timeElapsed);
     }
 
     @Override
     public void notifyBuffering() {
         mClient.setPlaybackState(RemoteControlClient.PLAYSTATE_BUFFERING);
+        AvrcpUtils.notifyPlayStateChanged(mContext, true, 0);
     }
 
     @Override
     public void notifyPaused(long timeElapsed) {
         mClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED);
+        AvrcpUtils.notifyPlayStateChanged(mContext, true, 0);
     }
 
     @Override
     public void notifyStopped() {
         mClient.setPlaybackState(RemoteControlClient.PLAYSTATE_STOPPED);
+        AvrcpUtils.notifyPlayStateChanged(mContext, false, 0);
     }
 }
