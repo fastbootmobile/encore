@@ -27,6 +27,7 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
@@ -52,6 +53,7 @@ public class AutomixFragment extends Fragment {
     private ImageButton mFabCreateStatic;
     private ProgressBar mProgressToHide;
     private AutoMixManager mAutoMixManager = AutoMixManager.getDefault();
+    private TextView mNoBucketTextView;
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
         public void onSongStarted(boolean buffering, Song s) throws RemoteException {
@@ -137,6 +139,8 @@ public class AutomixFragment extends Fragment {
             }
         });
 
+        mNoBucketTextView = (TextView) rootView.findViewById(R.id.txtNoBucket);
+
         return rootView;
     }
 
@@ -177,6 +181,12 @@ public class AutomixFragment extends Fragment {
     private void updateBuckets() {
         mAdapter.setBuckets(mAutoMixManager.getBuckets());
         mAdapter.notifyDataSetChanged();
+
+        if (mAdapter.getCount() == 0) {
+            mNoBucketTextView.setVisibility(View.VISIBLE);
+        } else {
+            mNoBucketTextView.setVisibility(View.GONE);
+        }
 
         updateFabHeight();
     }

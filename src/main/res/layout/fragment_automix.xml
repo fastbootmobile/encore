@@ -61,4 +61,16 @@
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="The dynamic playlists you create will appear here. Go ahead!"
+        android:id="@+id/txtNoBucket"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:textStyle="italic"
+        android:padding="8dp"/>
+
 </RelativeLayout>
