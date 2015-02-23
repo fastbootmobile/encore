@@ -175,5 +175,6 @@
     <string name="section_history">History</string>
     <string name="drive_mode">Drive mode</string>
     <string name="title_activity_drive_mode">Drive Mode</string>
+    <string name="automix_no_buckets">The dynamic playlists you create will appear here. Go ahead!</string>
 
 </resources>
