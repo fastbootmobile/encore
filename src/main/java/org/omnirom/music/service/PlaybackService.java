@@ -174,9 +174,12 @@ public class PlaybackService extends Service
         pacManFilter.addDataScheme("package");
         registerReceiver(mPacManReceiver, pacManFilter);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        // Really Google, I'd love to use your new APIs... But they're not working. If you use
+        // the new Lollipop metadata system, you lose Bluetooth AVRCP since the Bluetooth
+        // package still use the old RemoteController system.
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mRemoteMetadata = new RemoteMetadataManagerv21(this);
-        } else {
+        } else*/ {
             mRemoteMetadata = new RemoteMetadataManager(this);
         }
 
