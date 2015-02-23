@@ -16,15 +16,24 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.omnirom.music.api.echonest.AutoMixBucket;
+import org.omnirom.music.api.echonest.AutoMixManager;
+import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.fragments.PlaylistChooserFragment;
+import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.List;
 
@@ -39,6 +48,7 @@ public class BucketAdapter extends BaseAdapter {
     public static class ViewHolder {
         public TextView tvBucketName;
         public ProgressBar pbBucketSpinner;
+        public ImageView ivOverflow;
     }
 
     private List<AutoMixBucket> mBuckets;
@@ -88,13 +98,43 @@ public class BucketAdapter extends BaseAdapter {
             tag = new ViewHolder();
             tag.tvBucketName = (TextView) view.findViewById(R.id.tvBucketName);
             tag.pbBucketSpinner = (ProgressBar) view.findViewById(R.id.pbBucketSpinner);
+            tag.ivOverflow = (ImageView) view.findViewById(R.id.ivOverflow);
             view.setTag(tag);
         } else {
             tag = (ViewHolder) view.getTag();
         }
 
-        AutoMixBucket bucket = getItem(i);
+        final AutoMixBucket bucket = getItem(i);
         tag.tvBucketName.setText(bucket.getName());
+
+        tag.ivOverflow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
+                popupMenu.inflate(R.menu.bucket_overflow);
+                popupMenu.show();
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.menu_play_now:
+                                AutoMixManager.getDefault().startPlay(bucket);
+                                break;
+
+                            case R.id.menu_delete:
+                                AutoMixManager.getDefault().destroyBucket(bucket);
+                                notifyDataSetChanged();
+                                break;
+
+                            default:
+                                return false;
+                        }
+                        return true;
+                    }
+                });
+            }
+        });
 
         return view;
     }

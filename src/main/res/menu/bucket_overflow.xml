@@ -5,12 +5,6 @@
     <item android:id="@+id/menu_play_now"
         android:title="@string/play_now" />
 
-    <item android:id="@+id/menu_history"
-        android:title="@string/bucket_history" />
-
-    <item android:id="@+id/menu_edit"
-        android:title="@string/bucket_edit" />
-
     <item android:id="@+id/menu_delete"
         android:title="@string/remove" />
 

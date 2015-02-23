@@ -26,6 +26,18 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/ivPoweredEchoNest"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/automix_no_buckets"
+        android:id="@+id/txtNoBucket"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:textStyle="italic"
+        android:padding="8dp"/>
+
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/fabCreateMenu"
         android:layout_width="wrap_content"
@@ -61,16 +73,5 @@
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/automix_no_buckets"
-        android:id="@+id/txtNoBucket"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"
-        android:textStyle="italic"
-        android:padding="8dp"/>
 
 </RelativeLayout>

@@ -293,6 +293,24 @@ public class AutoMixManager extends BasePlaybackCallback {
     }
 
     /**
+     * Destroys the provided bucket
+     *
+     * @param bucket The bucket to remove
+     */
+    public void destroyBucket(AutoMixBucket bucket) {
+        SharedPreferences prefs = getPrefs();
+        SharedPreferences.Editor editor = prefs.edit();
+
+        Set<String> set = new TreeSet<>(prefs.getStringSet(PREF_BUCKETS_IDS, new TreeSet<String>()));
+        set.remove(bucket.getSessionId());
+        editor.putStringSet(PREF_BUCKETS_IDS, set);
+
+        editor.apply();
+
+        mBuckets.remove(bucket);
+    }
+
+    /**
      * Retrieves a Song from the preferred Rosetta-stone provider
      * @param ref The reference of the song
      * @return A Song, or null if the provider couldn't retrieve it
