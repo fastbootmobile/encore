@@ -109,7 +109,10 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                 + " params=" + Arrays.toString(params));
 
         switch (action) {
-            case VoiceCommander.ACTION_PLAY:
+            case VoiceCommander.ACTION_PLAY_ALBUM:
+            case VoiceCommander.ACTION_PLAY_ARTIST:
+            case VoiceCommander.ACTION_PLAY_PLAYLIST:
+            case VoiceCommander.ACTION_PLAY_TRACK:
                 if (extra == VoiceCommander.EXTRA_SOURCE) {
                     handlePlay(params[0], params[1]);
                 } else {
@@ -214,18 +217,18 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
 
     public void onSearchResult(List<SearchResult> results) {
         mPreviousSearchResults = results;
-        if (mPendingAction == VoiceCommander.ACTION_PLAY) {
-            ProviderAggregator aggr = ProviderAggregator.getDefault();
-            Message msg = null;
-            float bestMatchPercentage = -1;
-            String request = mPendingParams[0];
 
-            // Match the result to one or multiple songs. We first try to look for an exact match,
-            // and if we have multiple, we'll prefer the following order: Playlist, Artist, Album
-            // and then Song.
-            // TODO: We don't handle cases where entities might not be loaded
+        // Match the result to one or multiple songs. We first try to look for an exact match,
+        // and if we have multiple, we'll prefer the following order: Playlist, Artist, Album
+        // and then Song.
+        // TODO: We don't handle cases where entities might not be loaded
+        ProviderAggregator aggr = ProviderAggregator.getDefault();
+        Message msg = null;
+        String request = mPendingParams[0];
+        float bestMatchPercentage = -1;
 
-            for (SearchResult result : results) {
+        for (SearchResult result : results) {
+            if (mPendingAction == VoiceCommander.ACTION_PLAY_PLAYLIST) {
                 // Playlist
                 List<String> playlists = result.getPlaylistList();
                 for (String ref : playlists) {
@@ -249,7 +252,7 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                         }
                     }
                 }
-
+            } else if (mPendingAction == VoiceCommander.ACTION_PLAY_ARTIST) {
                 // Artist
                 List<String> artists = result.getArtistList();
                 for (String ref : artists) {
@@ -320,7 +323,7 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                         }
                     }
                 }
-
+            } else if (mPendingAction == VoiceCommander.ACTION_PLAY_ALBUM) {
                 // Album
                 List<String> albums = result.getAlbumsList();
                 for (String ref : albums) {
@@ -344,7 +347,7 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                         }
                     }
                 }
-
+            } else if (mPendingAction == VoiceCommander.ACTION_PLAY_TRACK) {
                 // Song
                 List<String> songs = result.getSongsList();
                 for (String ref : songs) {
@@ -367,30 +370,30 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                     }
                 }
             }
+        }
 
-            // If we found a match, go ahead. If we requested a source, post the message
-            // immediately. If no exact source was specified, post it 1 second later to allow
-            // eventual updates. If we have no exact match, either wait for results in update, or
-            // don't do anything.
-            if (msg != null) {
-                if (mPendingExtra == VoiceCommander.EXTRA_SOURCE) {
-                    // We're only expecting one source, so run immediately
-                    msg.sendToTarget();
-                } else {
-                    // Other sources might replay, wait a second and kick the message
-                    if (mPendingMessage != null) {
-                        mHandler.removeMessages(mPendingMessage.what, mPendingMessage.obj);
-                    }
-
-                    mPendingMessage = msg;
-                    mHandler.sendMessageDelayed(msg, 1000);
+        // If we found a match, go ahead. If we requested a source, post the message
+        // immediately. If no exact source was specified, post it 1 second later to allow
+        // eventual updates. If we have no exact match, either wait for results in update, or
+        // don't do anything.
+        if (msg != null) {
+            if (mPendingExtra == VoiceCommander.EXTRA_SOURCE) {
+                // We're only expecting one source, so run immediately
+                msg.sendToTarget();
+            } else {
+                // Other sources might replay, wait a second and kick the message
+                if (mPendingMessage != null) {
+                    mHandler.removeMessages(mPendingMessage.what, mPendingMessage.obj);
                 }
+
+                mPendingMessage = msg;
+                mHandler.sendMessageDelayed(msg, 1000);
             }
         }
     }
 
     public void onArtistUpdate(List<Artist> artists) {
-        if (mPendingAction == VoiceCommander.ACTION_PLAY) {
+        if (mPendingAction == VoiceCommander.ACTION_PLAY_ARTIST) {
             if (mPreviousSearchResults != null) {
                 if (DEBUG) Log.d(TAG, "Got updated artist information");
                 onSearchResult(mPreviousSearchResults);
@@ -401,7 +404,7 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
     }
 
     public void onAlbumUpdate(List<Album> albums) {
-        if (mPendingAction == VoiceCommander.ACTION_PLAY) {
+        if (mPendingAction == VoiceCommander.ACTION_PLAY_ALBUM) {
             if (mPreviousSearchResults != null) {
                 if (DEBUG) Log.d(TAG, "Got updated album information");
                 onSearchResult(mPreviousSearchResults);
@@ -412,7 +415,7 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
     }
 
     public void onSongUpdate(List<Song> songs) {
-        if (mPendingAction == VoiceCommander.ACTION_PLAY) {
+        if (mPendingAction == VoiceCommander.ACTION_PLAY_TRACK) {
             if (mPreviousSearchResults != null) {
                 if (DEBUG) Log.d(TAG, "Got updated song information");
                 onSearchResult(mPreviousSearchResults);

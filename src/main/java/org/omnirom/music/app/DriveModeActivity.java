@@ -142,6 +142,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
             @Override
             public void onReadyForSpeech() {
                 setVoiceEmphasis(true, true);
+                PlaybackProxy.pause();
             }
 
             @Override
@@ -152,6 +153,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
             @Override
             public void onEndOfSpeech() {
                 setVoiceEmphasis(false, true);
+                PlaybackProxy.play();
                 resetVoiceRms();
                 mHandler.postDelayed(new Runnable() {
                     @Override
@@ -170,6 +172,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
             public void onError(int error) {
                 setVoiceEmphasis(false, true);
                 resetVoiceRms();
+                PlaybackProxy.play();
                 mPbVoiceLoading.setVisibility(View.GONE);
                 mTvArtist.setAlpha(1.0f);
                 if (!mHandler.hasMessages(MSG_UPDATE_PLAYBACK_STATUS)) {

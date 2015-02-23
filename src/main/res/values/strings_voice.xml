@@ -1,9 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="voice_play_words">
-        <item>play</item>           <!-- Play Coldplay -->
-        <item>listen to</item>      <!-- Listen to Californication -->
-        <item>start</item>          <!-- Start Starred -->
+        <item>play</item>           <!-- Play Artist Coldplay -->
+        <item>listen to</item>      <!-- Listen to track Californication -->
+        <item>start</item>          <!-- Start playlist Starred -->
+    </string-array>
+
+    <string-array name="voice_play_playlist_words">
+        <item>playlist</item>
+        <item>play list</item>
+        <item>play-list</item>
+    </string-array>
+
+    <string-array name="voice_play_artist_words">
+        <item>artist</item>
+        <item>artists</item>
+        <item>author</item>
+    </string-array>
+
+    <string-array name="voice_play_album_words">
+        <item>album</item>
+        <item>single</item>
+        <item>release</item>
+    </string-array>
+
+    <string-array name="voice_play_track_words">
+        <item>song</item>
+        <item>track</item>
+        <item>title</item>
     </string-array>
 
     <string-array name="voice_play_source_words">

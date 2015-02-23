@@ -31,22 +31,31 @@ import java.util.regex.Pattern;
 public class VoiceCommander {
     private static final String TAG = "VoiceCommander";
 
-    public static final int ACTION_PLAY = 1;
+    public static final int ACTION_PLAY_ALBUM = 1;
+    public static final int ACTION_PLAY_ARTIST = 2;
+    public static final int ACTION_PLAY_PLAYLIST = 3;
+    public static final int ACTION_PLAY_TRACK = 4;
     public static final int EXTRA_SOURCE = 1;
 
-    public static final int ACTION_PAUSE = 2;
+    public static final int ACTION_PAUSE = 5;
 
-    public static final int ACTION_NEXT = 3;
+    public static final int ACTION_NEXT = 6;
     public static final int EXTRA_TIME_SECS = 2;
     public static final int EXTRA_TIME_MINS = 3;
 
-    public static final int ACTION_JUMP = 4;
-    public static final int ACTION_PREVIOUS = 5;
-    public static final int ACTION_GOOGLE = 6;
+    public static final int ACTION_JUMP = 7;
+    public static final int ACTION_PREVIOUS = 8;
+    public static final int ACTION_GOOGLE = 9;
 
 
-    private final List<Pattern> mPlayPatterns = new ArrayList<>();
-    private final List<Pattern> mPlaySourcePatterns = new ArrayList<>();
+    private final List<Pattern> mPlayPlaylistPatterns = new ArrayList<>();
+    private final List<Pattern> mPlayPlaylistSourcePatterns = new ArrayList<>();
+    private final List<Pattern> mPlayArtistPatterns = new ArrayList<>();
+    private final List<Pattern> mPlayArtistSourcePatterns = new ArrayList<>();
+    private final List<Pattern> mPlayAlbumPatterns = new ArrayList<>();
+    private final List<Pattern> mPlayAlbumSourcePatterns = new ArrayList<>();
+    private final List<Pattern> mPlayTrackPatterns = new ArrayList<>();
+    private final List<Pattern> mPlayTrackSourcePatterns = new ArrayList<>();
     private final List<Pattern> mPausePatterns = new ArrayList<>();
     private final List<Pattern> mJumpPatterns = new ArrayList<>();
     private final List<Pattern> mNextPatterns = new ArrayList<>();
@@ -61,6 +70,10 @@ public class VoiceCommander {
         Resources res = context.getResources();
         String[] playWords = res.getStringArray(R.array.voice_play_words);
         String[] playSourceWords = res.getStringArray(R.array.voice_play_source_words);
+        String[] playArtistWords = res.getStringArray(R.array.voice_play_artist_words);
+        String[] playAlbumWords = res.getStringArray(R.array.voice_play_album_words);
+        String[] playPlaylistWords = res.getStringArray(R.array.voice_play_playlist_words);
+        String[] playSongWords = res.getStringArray(R.array.voice_play_track_words);
         String[] pauseWords = res.getStringArray(R.array.voice_pause_words);
         String[] nextWords = res.getStringArray(R.array.voice_next_words);
         String[] jumpWords = res.getStringArray(R.array.voice_jump_words);
@@ -75,15 +88,36 @@ public class VoiceCommander {
         // Play patterns
         for (String playWord : playWords) {
             // Play (without source) patterns
-            pattern = Pattern.compile("^" + playWord + " (.*?)$", Pattern.CASE_INSENSITIVE);
-            mPlayPatterns.add(pattern);
+            for (String artistWord : playArtistWords) {
+                pattern = Pattern.compile("^" + playWord + " " + artistWord
+                        + " (.*?)$", Pattern.CASE_INSENSITIVE);
+                mPlayArtistPatterns.add(pattern);
+            }
 
+            for (String albumWord : playAlbumWords) {
+                pattern = Pattern.compile("^" + playWord + " " + albumWord
+                        + " (.*?)$", Pattern.CASE_INSENSITIVE);
+                mPlayAlbumPatterns.add(pattern);
+            }
+
+            for (String playlistWord : playPlaylistWords) {
+                pattern = Pattern.compile("^" + playWord + " " + playlistWord
+                        + " (.*?)$", Pattern.CASE_INSENSITIVE);
+                mPlayPlaylistPatterns.add(pattern);
+            }
+
+            for (String trackWord : playSongWords) {
+                pattern = Pattern.compile("^" + playWord + " " + trackWord
+                        + " (.*?)$", Pattern.CASE_INSENSITIVE);
+                mPlayTrackPatterns.add(pattern);
+            }
+/*
             // Play (with source) patterns
             for (String sourceWord : playSourceWords) {
                 pattern = Pattern.compile("^" + playWord + " (.*?) " + sourceWord + " (.*?)$",
                         Pattern.CASE_INSENSITIVE);
                 mPlaySourcePatterns.add(pattern);
-            }
+            }*/
         }
 
         // Pause patterns
@@ -145,9 +179,10 @@ public class VoiceCommander {
     public boolean processResult(List<String> results, ResultListener listener) {
         for (String line : results) {
             // We're going to try to match each sentence, longest first for each prefix
+            Matcher matcher;
 
             // Play with source
-            Matcher matcher;
+            /*
             for (Pattern playSourcePattern : mPlaySourcePatterns) {
                 matcher = playSourcePattern.matcher(line);
                 if (matcher.matches()) {
@@ -155,13 +190,34 @@ public class VoiceCommander {
                             new String[]{matcher.group(1), matcher.group(2)});
                     return true;
                 }
-            }
+            }*/
 
             // Play without source
-            for (Pattern playSourcePattern : mPlayPatterns) {
+            for (Pattern playSourcePattern : mPlayTrackPatterns) {
                 matcher = playSourcePattern.matcher(line);
                 if (matcher.matches()) {
-                    listener.onResult(ACTION_PLAY, 0, new String[]{matcher.group(1)});
+                    listener.onResult(ACTION_PLAY_TRACK, 0, new String[]{matcher.group(1)});
+                    return true;
+                }
+            }
+            for (Pattern playSourcePattern : mPlayPlaylistPatterns) {
+                matcher = playSourcePattern.matcher(line);
+                if (matcher.matches()) {
+                    listener.onResult(ACTION_PLAY_PLAYLIST, 0, new String[]{matcher.group(1)});
+                    return true;
+                }
+            }
+            for (Pattern playSourcePattern : mPlayArtistPatterns) {
+                matcher = playSourcePattern.matcher(line);
+                if (matcher.matches()) {
+                    listener.onResult(ACTION_PLAY_ARTIST, 0, new String[]{matcher.group(1)});
+                    return true;
+                }
+            }
+            for (Pattern playSourcePattern : mPlayAlbumPatterns) {
+                matcher = playSourcePattern.matcher(line);
+                if (matcher.matches()) {
+                    listener.onResult(ACTION_PLAY_ALBUM, 0, new String[]{matcher.group(1)});
                     return true;
                 }
             }
