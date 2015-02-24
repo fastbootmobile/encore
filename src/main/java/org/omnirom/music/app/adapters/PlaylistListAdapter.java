@@ -20,10 +20,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ public class PlaylistListAdapter extends BaseAdapter {
         public TextView tvSubTitle;
         public ViewGroup vRoot;
         public Playlist playlist;
+        public ImageView ivOfflineStatus;
     }
 
     private List<Playlist> mPlaylists;
@@ -173,6 +176,7 @@ public class PlaylistListAdapter extends BaseAdapter {
             holder.ivCover = (AlbumArtImageView) root.findViewById(R.id.ivCover);
             holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
             holder.tvSubTitle = (TextView) root.findViewById(R.id.tvSubTitle);
+            holder.ivOfflineStatus = (ImageView) root.findViewById(R.id.ivOfflineStatus);
 
             root.setTag(holder);
         }
@@ -187,10 +191,34 @@ public class PlaylistListAdapter extends BaseAdapter {
             tag.tvTitle.setText(playlist.getName());
             tag.tvSubTitle.setText(ctx.getResources().getQuantityString(R.plurals.songs_count, playlist.getSongsCount(), playlist.getSongsCount()));
             tag.ivCover.loadArtForPlaylist(playlist);
+
+            tag.ivOfflineStatus.setVisibility(View.VISIBLE);
+            switch (playlist.getOfflineStatus()) {
+                case BoundEntity.OFFLINE_STATUS_NO:
+                    tag.ivOfflineStatus.setVisibility(View.GONE);
+                    break;
+
+                case BoundEntity.OFFLINE_STATUS_DOWNLOADING:
+                    tag.ivOfflineStatus.setImageResource(R.drawable.ic_sync_in_progress);
+                    break;
+
+                case BoundEntity.OFFLINE_STATUS_ERROR:
+                    tag.ivOfflineStatus.setImageResource(R.drawable.ic_sync_problem);
+                    break;
+
+                case BoundEntity.OFFLINE_STATUS_PENDING:
+                    tag.ivOfflineStatus.setImageResource(R.drawable.ic_track_download_pending);
+                    break;
+
+                case BoundEntity.OFFLINE_STATUS_READY:
+                    tag.ivOfflineStatus.setImageResource(R.drawable.ic_track_downloaded);
+                    break;
+            }
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubTitle.setText(R.string.loading);
             tag.ivCover.setDefaultArt();
+            tag.ivOfflineStatus.setVisibility(View.GONE);
         }
 
         return root;

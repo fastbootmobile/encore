@@ -22,7 +22,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="@dimen/tile_dual_text_height"
-        android:minHeight="@dimen/tile_dual_text_height">
+        android:minHeight="@dimen/tile_dual_text_height"
+        android:layout_weight="1">
 
         <TextView
             android:id="@+id/tvTitle"
@@ -31,22 +32,46 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/tile_text_padding"
             android:layout_marginRight="@dimen/tile_text_padding"
-            android:layout_weight="1"
             android:singleLine="true"
             android:gravity="start|bottom"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white"
+            android:layout_weight="1"
+            />
 
-        <TextView
-            android:id="@+id/tvSubTitle"
-            style="@style/FontCardLine2"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
             android:layout_marginLeft="@dimen/tile_text_padding"
             android:layout_marginRight="@dimen/tile_text_padding"
             android:layout_weight="1"
-            android:gravity="start|top"
-            android:textColor="@color/white"
-            android:paddingTop="4dp" />
+            android:layout_gravity="top">
+
+            <TextView
+                android:id="@+id/tvSubTitle"
+                style="@style/FontCardLine2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="start|top"
+                android:textColor="@color/white"
+                android:paddingTop="4dp"
+                android:layout_weight="1"
+                android:layout_gravity="top"
+                />
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:id="@+id/ivOfflineStatus"
+                android:src="@drawable/ic_track_downloaded"
+                android:visibility="gone"
+                android:layout_marginRight="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_gravity="top"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
     </LinearLayout>
+
 </LinearLayout>
