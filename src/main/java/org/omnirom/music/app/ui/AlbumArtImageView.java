@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.art.AlbumArtTask;
 import org.omnirom.music.utils.Utils;
 import org.omnirom.music.art.AlbumArtCache;
 import org.omnirom.music.art.AlbumArtHelper;
@@ -43,7 +44,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
     private Handler mHandler;
     private OnArtLoadedListener mOnArtLoadedListener;
-    private AlbumArtHelper.AlbumArtTask mTask;
+    private AlbumArtTask mTask;
     private BoundEntity mRequestedEntity;
     private MaterialTransitionDrawable mDrawable;
     private boolean mCrossfade;

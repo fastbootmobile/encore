@@ -15,29 +15,51 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/automix">
-
+    <PreferenceCategory android:title="@string/settings_bluetooth"
+        android:key="category_bluetooth">
         <CheckBoxPreference
-            android:key="cb_auto_send_like"
-            android:summary="@string/settings_taste_learning_summary"
-            android:title="@string/settings_taste_learning_title" />
+            android:key="bluetooth_autoconnect_enable"
+            android:title="@string/bt_autoconnect_enable_title"
+            android:summary="@string/bt_autoconnect_enable_summary" />
+
+        <ListPreference
+            android:key="bluetooth_autoconnect_name"
+            android:title="@string/bt_autoconnect_device_name_title"
+            android:summary="%1$s"
+            android:dependency="bluetooth_autoconnect_enable" />
+
+        <MultiSelectListPreference
+            android:key="bluetooth_autoconnect_action"
+            android:title="@string/bt_autoconnect_action_title"
+            android:summary="@string/bt_autoconnect_action_summary"
+            android:entries="@array/bluetooth_autoconnect_actions_entries"
+            android:entryValues="@array/bluetooth_autoconnect_actions_values"
+            android:dependency="bluetooth_autoconnect_enable" />
     </PreferenceCategory>
-<!--
-    <PreferenceCategory android:title="@string/general">
-        <CheckBoxPreference
-            android:key="cb_download_album_art"
-            android:checked="true"
-            android:summary="@string/settings_album_art_summary"
-            android:title="@string/settings_album_art_title" />
+    <!--
+        <PreferenceCategory android:title="@string/automix">
 
-        <CheckBoxPreference
-            android:key="cb_wifi_streaming_only"
-            android:checked="true"
-            android:summary="@string/settings_wifi_stream_only_summary"
-            android:title="@string/settings_wifi_stream_only_title" />
+            <CheckBoxPreference
+                android:key="cb_auto_send_like"
+                android:summary="@string/settings_taste_learning_summary"
+                android:title="@string/settings_taste_learning_title" />
+        </PreferenceCategory>
 
-    </PreferenceCategory>
--->
+        <PreferenceCategory android:title="@string/general">
+            <CheckBoxPreference
+                android:key="cb_download_album_art"
+                android:checked="true"
+                android:summary="@string/settings_album_art_summary"
+                android:title="@string/settings_album_art_title" />
+
+            <CheckBoxPreference
+                android:key="cb_wifi_streaming_only"
+                android:checked="true"
+                android:summary="@string/settings_wifi_stream_only_summary"
+                android:title="@string/settings_wifi_stream_only_title" />
+
+        </PreferenceCategory>
+    -->
     <PreferenceCategory android:title="@string/other">
         <Preference
             android:key="pref_clear_caches"

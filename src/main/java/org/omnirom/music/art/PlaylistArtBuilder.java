@@ -45,7 +45,7 @@ public class PlaylistArtBuilder {
     private Bitmap mPlaylistComposite;
     private List<RecyclingBitmapDrawable> mPlaylistSource;
     private Paint mPlaylistPaint;
-    private List<AlbumArtHelper.AlbumArtTask> mCompositeTasks;
+    private List<AlbumArtTask> mCompositeTasks;
     private List<BoundEntity> mCompositeRequests;
     private int mNumComposite;
     private Handler mHandler;
@@ -111,7 +111,7 @@ public class PlaylistArtBuilder {
             mPlaylistSource = null;
         }
         if (mCompositeTasks != null) {
-            for (AlbumArtHelper.AlbumArtTask task : mCompositeTasks) {
+            for (AlbumArtTask task : mCompositeTasks) {
                 task.cancel(true);
             }
             mCompositeTasks.clear();
@@ -199,7 +199,7 @@ public class PlaylistArtBuilder {
             mCompositeTasks = new ArrayList<>();
         } else {
             // Cancel the current tasks
-            for (AlbumArtHelper.AlbumArtTask task : mCompositeTasks) {
+            for (AlbumArtTask task : mCompositeTasks) {
                 task.cancel(true);
             }
             mCompositeTasks.clear();

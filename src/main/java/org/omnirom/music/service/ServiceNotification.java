@@ -32,6 +32,7 @@ import android.widget.RemoteViews;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.art.AlbumArtTask;
 import org.omnirom.music.utils.Utils;
 import org.omnirom.music.art.AlbumArtHelper;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
@@ -57,7 +58,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     private RemoteViews mExpandedTemplate;
     private boolean mHasNext;
     private boolean mShowPlayAction;
-    private AlbumArtHelper.AlbumArtTask mArtTask;
+    private AlbumArtTask mArtTask;
 
     private NotificationCompat.Builder mBuilder;
     private Notification mNotification;

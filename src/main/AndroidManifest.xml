@@ -32,13 +32,20 @@
     <!-- Navigation Head (Drive Mode) -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
+    <!-- Bluetooth Automated Actions -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
     <!-- Main application declaration -->
     <application
         android:name=".OmniMusic"
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:allowTaskReparenting="true"
+        android:hardwareAccelerated="true"
+        android:taskAffinity="org.omnirom.music.task"
+        android:persistent="true"
+        android:process=":main"
         android:theme="@style/AppTheme" >
 
         <!-- GMS for Chromecast -->
@@ -63,10 +70,24 @@
             android:name="org.omnirom.music.service.NotifActionService"
             android:exported="false" />
 
+        <!-- Navigation Head Service -->
+        <service
+            android:name="org.omnirom.music.service.NavHeadService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
+
         <!-- Receiver for the media buttons -->
         <receiver android:name="org.omnirom.music.receivers.RemoteControlReceiver" >
             <intent-filter android:priority="1000" >
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Receiver for Bluetooth actions -->
+        <receiver android:name="org.omnirom.music.receivers.BluetoothReceiver">
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
             </intent-filter>
         </receiver>
 
@@ -80,6 +101,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
 
+                <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.APP_MUSIC" />
             </intent-filter>
@@ -154,11 +176,6 @@
             android:theme="@style/OmniMusic.FullscreenTheme" >
         </activity>
 
-        <service
-            android:name="org.omnirom.music.service.NavHeadService"
-            android:enabled="true"
-            android:exported="false" >
-        </service>
     </application>
 
 </manifest>

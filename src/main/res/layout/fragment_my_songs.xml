@@ -7,15 +7,16 @@
 
     <android.support.v4.view.PagerTabStrip
         android:id="@+id/pager_title_strip"
-        style="@style/OmniMusic.Spec.ViewPager"
+        android:textAppearance="@style/OmniMusic.Spec.ViewPager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_gravity="top"
         android:background="@color/primary"
         android:clickable="true"
         android:paddingBottom="4dp"
         android:paddingTop="4dp"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"
+        android:gravity="center_vertical" />
 
 </android.support.v4.view.ViewPager>
 

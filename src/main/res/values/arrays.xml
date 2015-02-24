@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="bluetooth_autoconnect_actions_entries">
+        <item>Open Drive Mode</item>
+        <item>Start Playing Queue</item>
+    </string-array>
+
+    <string-array name="bluetooth_autoconnect_actions_values">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 <!-- We keep a local copy of moods to translate them and avoid querying the API
 The beautiful PHP script that generated this list:
 

@@ -14,6 +14,8 @@ import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.MySongsAdapter;
 
+import java.io.File;
+
 /**
  * Created by h4o on 19/06/2014.
  */

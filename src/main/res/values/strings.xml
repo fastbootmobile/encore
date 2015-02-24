@@ -176,5 +176,11 @@
     <string name="drive_mode">Drive mode</string>
     <string name="title_activity_drive_mode">Drive Mode</string>
     <string name="automix_no_buckets">The dynamic playlists you create will appear here. Go ahead!</string>
+    <string name="settings_bluetooth">Bluetooth</string>
+    <string name="bt_autoconnect_action_summary">Select to actions to perform when the device is connected</string>
+    <string name="bt_autoconnect_action_title">Actions</string>
+    <string name="bt_autoconnect_device_name_title">Bluetooth device name</string>
+    <string name="bt_autoconnect_enable_summary">Run actions when a specific Bluetooth device is connected</string>
+    <string name="bt_autoconnect_enable_title">Bluetooth automatic actions</string>
 
 </resources>

@@ -15,7 +15,14 @@
 
 package org.omnirom.music.app.fragments;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
 import android.support.v4.app.Fragment;
@@ -26,6 +33,10 @@ import android.widget.Toast;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.art.AlbumArtCache;
+import org.omnirom.music.utils.SettingsKeys;
+
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass to display app's preferences
@@ -34,7 +45,6 @@ public class SettingsFragment extends PreferenceFragment {
     private static final String KEY_LIST_PROVIDERS_CONFIG = "list_providers_config";
     private static final String KEY_LIST_DSP_CONFIG = "list_dsp_config";
     private static final String KEY_CLEAR_CACHES = "pref_clear_caches";
-
     /**
      * Use this factory method to create a new instance of
      * this fragment
@@ -51,12 +61,74 @@ public class SettingsFragment extends PreferenceFragment {
     public SettingsFragment() {
     }
 
+    private SharedPreferences getPrefs() {
+        return getPreferenceManager().getSharedPreferences();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getPreferenceManager().setSharedPreferencesName(SettingsKeys.PREF_SETTINGS);
+
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.settings);
+
+        // Load Bluetooth paired devices
+        final ListPreference btNameList = (ListPreference) findPreference(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME);
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (adapter == null) {
+            // No Bluetooth adapter, remove preferences
+            getPreferenceScreen().removePreference(findPreference(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ENABLE));
+            getPreferenceScreen().removePreference(findPreference(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ACTION));
+            getPreferenceScreen().removePreference(findPreference(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME));
+            getPreferenceScreen().removePreference(findPreference("category_bluetooth"));
+        } else {
+            Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+            CharSequence[] entries = new CharSequence[pairedDevices.size()];
+
+            String currentPreferred = getPrefs().getString(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME, null);
+
+            int i = 0;
+            for (BluetoothDevice device : pairedDevices) {
+                entries[i] = device.getName();
+                ++i;
+            }
+            btNameList.setEntries(entries);
+            btNameList.setEntryValues(entries);
+
+            if (currentPreferred != null) {
+                btNameList.setDefaultValue(currentPreferred);
+            }
+        }
+/*
+        btNameList.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                getPrefs().edit().putString(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME,
+                        (String) newValue).commit();
+                return true;
+            }
+        });
+
+        findPreference(KEY_BT_AUTOCONNECT_ENABLE).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                getPrefs().edit().putBoolean(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ENABLE,
+                        ((CheckBoxPreference) preference).isChecked()).commit();
+                return true;
+            }
+        });
+
+        findPreference(KEY_BT_AUTOCONNECT_ACTIONS).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                getPrefs().edit().putInt(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ACTION,
+                        sum(((MultiSelectListPreference) preference).getValues())).commit();
+                return true;
+            }
+        });*/
     }
 
     @Override
