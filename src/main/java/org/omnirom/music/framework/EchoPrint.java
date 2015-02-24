@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
+import org.omnirom.music.utils.WaveHeader;
 
 import java.io.IOException;
 import java.io.InputStream;

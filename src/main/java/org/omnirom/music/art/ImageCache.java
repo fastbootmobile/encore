@@ -13,7 +13,7 @@
  * if not, see <http://www.gnu.org/licenses>.
  */
 
-package org.omnirom.music.framework;
+package org.omnirom.music.art;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -24,6 +24,7 @@ import android.util.Log;
 import android.util.LruCache;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.utils.ImageUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -245,7 +246,7 @@ public class ImageCache {
      * @param options - BitmapFactory.Options with out* options populated
      * @return Bitmap that case be used for inBitmap
      */
-    protected Bitmap getBitmapFromReusableSet(BitmapFactory.Options options) {
+    public Bitmap getBitmapFromReusableSet(BitmapFactory.Options options) {
         Bitmap bitmap = null;
 
         if (mReusableBitmaps != null && !mReusableBitmaps.isEmpty()) {

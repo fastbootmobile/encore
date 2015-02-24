@@ -13,7 +13,7 @@
  * if not, see <http://www.gnu.org/licenses>.
  */
 
-package org.omnirom.music.framework;
+package org.omnirom.music.voice;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -24,7 +24,10 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
-import org.omnirom.music.app.Utils;
+import org.omnirom.music.utils.Utils;
+import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.framework.Suggestor;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;

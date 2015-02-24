@@ -13,7 +13,7 @@
  * if not, see <http://www.gnu.org/licenses>.
  */
 
-package org.omnirom.music.framework;
+package org.omnirom.music.voice;
 
 import android.content.Context;
 import android.content.res.Resources;

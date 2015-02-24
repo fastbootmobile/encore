@@ -17,16 +17,15 @@ package org.omnirom.music.app.ui;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
-import org.omnirom.music.framework.AlbumArtCache;
-import org.omnirom.music.framework.AlbumArtHelper;
-import org.omnirom.music.framework.RecyclingBitmapDrawable;
+import org.omnirom.music.utils.Utils;
+import org.omnirom.music.art.AlbumArtCache;
+import org.omnirom.music.art.AlbumArtHelper;
+import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.omnirom.music.framework;
+package org.omnirom.music.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

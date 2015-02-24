@@ -25,7 +25,7 @@ import android.util.Log;
 import com.echonest.api.v4.EchoNestException;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
+import org.omnirom.music.utils.Utils;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;

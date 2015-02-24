@@ -13,7 +13,7 @@
  * if not, see <http://www.gnu.org/licenses>.
  */
 
-package org.omnirom.music.framework;
+package org.omnirom.music.art;
 
 import android.content.res.Resources;
 import android.os.AsyncTask;

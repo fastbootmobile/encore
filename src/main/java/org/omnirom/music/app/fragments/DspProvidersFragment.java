@@ -21,7 +21,7 @@ import android.widget.ListView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
+import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.adapters.DspAdapter;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;

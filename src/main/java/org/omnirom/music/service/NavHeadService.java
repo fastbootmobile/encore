@@ -31,7 +31,6 @@ import android.widget.ImageView;
 
 import org.omnirom.music.app.DriveModeActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 
 public class NavHeadService extends Service {
     private static final String TAG = "NavHeadService";

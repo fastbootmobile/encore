@@ -26,7 +26,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
+import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.adapters.ProvidersAdapter;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;

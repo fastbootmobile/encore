@@ -64,7 +64,7 @@
             android:exported="false" />
 
         <!-- Receiver for the media buttons -->
-        <receiver android:name="org.omnirom.music.service.RemoteControlReceiver" >
+        <receiver android:name="org.omnirom.music.receivers.RemoteControlReceiver" >
             <intent-filter android:priority="1000" >
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>

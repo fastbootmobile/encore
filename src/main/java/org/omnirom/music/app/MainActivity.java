@@ -33,12 +33,13 @@ import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.RecognitionFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
-import org.omnirom.music.framework.CastModule;
-import org.omnirom.music.framework.ImageCache;
+import org.omnirom.music.cast.CastModule;
+import org.omnirom.music.art.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
+import org.omnirom.music.utils.Utils;
 
 import java.util.List;
 

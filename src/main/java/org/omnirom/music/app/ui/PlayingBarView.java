@@ -48,7 +48,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaybackQueueActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
+import org.omnirom.music.utils.Utils;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;

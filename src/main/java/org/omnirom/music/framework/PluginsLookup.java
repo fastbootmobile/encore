@@ -29,6 +29,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.omnirom.music.art.ImageCache;
+import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.providers.AbstractProviderConnection;
 import org.omnirom.music.providers.Constants;

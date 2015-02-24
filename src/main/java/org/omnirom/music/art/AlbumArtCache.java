@@ -13,7 +13,7 @@
  * if not, see <http://www.gnu.org/licenses>.
  */
 
-package org.omnirom.music.framework;
+package org.omnirom.music.art;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -28,7 +28,8 @@ import org.omnirom.music.api.freebase.FreeBaseClient;
 import org.omnirom.music.api.gimages.GoogleImagesClient;
 import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
-import org.omnirom.music.app.Utils;
+import org.omnirom.music.utils.Utils;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;

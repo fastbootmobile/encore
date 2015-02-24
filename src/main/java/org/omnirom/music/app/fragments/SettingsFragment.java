@@ -25,7 +25,7 @@ import android.support.v4.preference.PreferenceFragment;
 import android.widget.Toast;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.framework.AlbumArtCache;
+import org.omnirom.music.art.AlbumArtCache;
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass to display app's preferences

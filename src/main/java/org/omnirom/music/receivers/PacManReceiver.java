@@ -13,7 +13,7 @@
  * if not, see <http://www.gnu.org/licenses>.
  */
 
-package org.omnirom.music.providers;
+package org.omnirom.music.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,6 +24,8 @@ import android.util.Log;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.PlaybackService;
 
 /**

@@ -12,7 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
-import org.omnirom.music.framework.RecyclingBitmapDrawable;
+import org.omnirom.music.art.RecyclingBitmapDrawable;
 
 /**
  * <p>

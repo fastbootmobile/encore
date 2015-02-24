@@ -13,7 +13,7 @@
  * if not, see <http://www.gnu.org/licenses>.
  */
 
-package org.omnirom.music.service;
+package org.omnirom.music.utils;
 
 import android.content.Context;
 import android.content.Intent;

@@ -13,7 +13,7 @@
  * if not, see <http://www.gnu.org/licenses>.
  */
 
-package org.omnirom.music.app;
+package org.omnirom.music.utils;
 
 import android.animation.Animator;
 import android.annotation.TargetApi;
@@ -41,6 +41,9 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.omnirom.music.app.AlbumActivity;
+import org.omnirom.music.app.ArtistActivity;
+import org.omnirom.music.app.R;
 import org.omnirom.music.app.fragments.PlaylistChooserFragment;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Album;

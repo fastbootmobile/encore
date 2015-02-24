@@ -32,6 +32,7 @@ import android.view.View;
 
 import org.omnirom.music.app.fragments.PlaylistViewFragment;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.utils.Utils;
 
 import java.util.List;
 import java.util.Map;

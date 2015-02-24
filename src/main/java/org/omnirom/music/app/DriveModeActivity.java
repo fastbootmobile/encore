@@ -16,9 +16,6 @@
 package org.omnirom.music.app;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.KeyguardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -37,9 +34,10 @@ import android.widget.TextView;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
-import org.omnirom.music.framework.VoiceActionHelper;
-import org.omnirom.music.framework.VoiceCommander;
-import org.omnirom.music.framework.VoiceRecognizer;
+import org.omnirom.music.utils.Utils;
+import org.omnirom.music.voice.VoiceActionHelper;
+import org.omnirom.music.voice.VoiceCommander;
+import org.omnirom.music.voice.VoiceRecognizer;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;

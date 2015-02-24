@@ -32,9 +32,9 @@ import android.widget.RemoteViews;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
-import org.omnirom.music.framework.AlbumArtHelper;
-import org.omnirom.music.framework.RecyclingBitmapDrawable;
+import org.omnirom.music.utils.Utils;
+import org.omnirom.music.art.AlbumArtHelper;
+import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;

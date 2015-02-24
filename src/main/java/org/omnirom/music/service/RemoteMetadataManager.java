@@ -31,6 +31,8 @@ import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.receivers.RemoteControlReceiver;
+import org.omnirom.music.utils.AvrcpUtils;
 
 /**
  * Remote Metadata manager for pre-Lollipop devices

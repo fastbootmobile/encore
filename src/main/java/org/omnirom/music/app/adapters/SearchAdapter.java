@@ -28,7 +28,7 @@ import android.widget.TextView;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.framework.RecyclingBitmapDrawable;
+import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;

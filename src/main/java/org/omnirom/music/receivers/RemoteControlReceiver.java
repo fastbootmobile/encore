@@ -13,7 +13,7 @@
  * if not, see <http://www.gnu.org/licenses>.
  */
 
-package org.omnirom.music.service;
+package org.omnirom.music.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.view.KeyEvent;
 
 import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.service.PlaybackService;
 
 /**
  * Broadcast receiver handling media button events (play/pause/skip/... from either lockscreen
@@ -32,7 +33,7 @@ public class RemoteControlReceiver extends BroadcastReceiver {
 
     public static ComponentName getComponentName(Context ctx) {
         return new ComponentName(ctx.getPackageName(),
-                "org.omnirom.music.service.RemoteControlReceiver");
+                "org.omnirom.music.receivers.RemoteControlReceiver");
     }
 
     /**

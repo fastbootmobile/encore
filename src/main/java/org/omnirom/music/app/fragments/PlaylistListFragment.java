@@ -33,7 +33,6 @@ import android.widget.GridView;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.model.Album;

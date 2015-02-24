@@ -60,6 +60,7 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
+import org.omnirom.music.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

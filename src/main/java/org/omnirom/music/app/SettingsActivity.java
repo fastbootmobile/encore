@@ -24,6 +24,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.omnirom.music.app.fragments.SettingsFragment;
+import org.omnirom.music.utils.Utils;
 
 /**
  * Activity showing a {@link org.omnirom.music.app.fragments.SettingsFragment} to configure the app

@@ -28,7 +28,7 @@ import android.widget.TextView;
 
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
+import org.omnirom.music.utils.Utils;
 
 /**
  * Adapter for the side-bar navigation drawer

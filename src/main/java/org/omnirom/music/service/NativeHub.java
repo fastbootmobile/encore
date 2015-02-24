@@ -17,7 +17,7 @@ package org.omnirom.music.service;
 
 import android.util.Log;
 
-import org.omnirom.music.framework.WSStreamer;
+import org.omnirom.music.cast.WSStreamer;
 
 import java.io.IOException;
 

@@ -35,8 +35,7 @@ import android.view.ViewAnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 
 import org.omnirom.music.app.fragments.ArtistFragment;
-import org.omnirom.music.model.Artist;
-import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.utils.Utils;
 
 /**
  * Activity to view an Artist tracks, similar, etc. through

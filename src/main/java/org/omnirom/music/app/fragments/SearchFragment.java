@@ -38,7 +38,7 @@ import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.Utils;
+import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.adapters.SearchAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.framework.PlaybackProxy;

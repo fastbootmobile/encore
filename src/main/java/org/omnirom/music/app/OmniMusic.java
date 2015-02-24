@@ -25,7 +25,7 @@ import com.joshdholtz.sentry.Sentry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.omnirom.music.api.echonest.AutoMixManager;
-import org.omnirom.music.framework.ImageCache;
+import org.omnirom.music.art.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.ProviderAggregator;
 

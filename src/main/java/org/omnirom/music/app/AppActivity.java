@@ -4,7 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.support.v7.app.ActionBarActivity;
 
-import org.omnirom.music.framework.ImageCache;
+import org.omnirom.music.art.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
