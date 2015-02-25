@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import org.omnirom.music.art.RecyclingBitmapDrawable;
@@ -22,6 +23,8 @@ import org.omnirom.music.art.RecyclingBitmapDrawable;
  * </p>
  */
 public class MaterialTransitionDrawable extends Drawable {
+    private static final String TAG = "MaterialTransitionDrawable";
+
     public static final long DEFAULT_DURATION = 1000;
     public static final long SHORT_DURATION = 300;
 
@@ -158,7 +161,11 @@ public class MaterialTransitionDrawable extends Drawable {
                 mPaint.setColorFilter(colorMatFilter);
 
                 if (!mTargetDrawable.getBitmap().isRecycled()) {
-                    canvas.drawBitmap(mTargetDrawable.getBitmap(), 0, 0, mPaint);
+                    try {
+                        canvas.drawBitmap(mTargetDrawable.getBitmap(), 0, 0, mPaint);
+                    } catch (RuntimeException e) {
+                        Log.w(TAG, "Couldn't write target bitmap!");
+                    }
                 }
 
                 if (rawProgress >= 1.0f) {

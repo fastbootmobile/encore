@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.view.ViewPager
     android:id="@+id/pager"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.v4.view.PagerTabStrip
-        android:id="@+id/pager_title_strip"
-        android:textAppearance="@style/OmniMusic.Spec.ViewPager"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_gravity="top"
-        android:background="@color/primary"
-        android:clickable="true"
-        android:paddingBottom="4dp"
-        android:paddingTop="4dp"
-        android:textColor="@color/white"
-        android:gravity="center_vertical" />
+        <android.support.v4.view.PagerTabStrip
+            android:id="@+id/pager_title_strip"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@color/primary"
+            android:gravity="center_vertical"
+            android:textAppearance="@style/OmniMusic.Spec.ViewPager"
+            android:textColor="@color/white"/>
 
 </android.support.v4.view.ViewPager>
 

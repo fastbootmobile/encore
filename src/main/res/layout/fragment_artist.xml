@@ -25,34 +25,34 @@
             android:transitionName="artistName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignEnd="@+id/ivHero"
-            android:layout_alignLeft="@+id/ivHero"
-            android:layout_alignRight="@+id/ivHero"
-            android:layout_alignStart="@+id/ivHero"
             android:background="#BB333333"
-            android:gravity="center_vertical|start"
-            android:paddingBottom="16dp"
+            android:gravity="top|start"
+            android:paddingBottom="64dp"
             android:paddingEnd="8dp"
             android:paddingLeft="24dp"
             android:paddingRight="8dp"
             android:paddingStart="24dp"
             android:paddingTop="16dp"
             android:textColor="@color/white"
-            android:layout_alignBottom="@+id/ivHero"/>
+            android:layout_above="@+id/pagerArtist"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
 
         <ImageView
             android:id="@+id/ivSourceLogo"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_alignBottom="@+id/tvArtist"
             android:layout_alignEnd="@+id/tvArtist"
             android:layout_alignRight="@+id/tvArtist"
             android:layout_alignTop="@+id/tvArtist"
-            android:layout_centerVertical="true"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:contentDescription="@string/app_name"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:layout_alignBottom="@+id/tvArtist"
+            android:layout_marginBottom="48dp"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabPlay"
@@ -68,22 +68,29 @@
             android:layout_above="@+id/pagerArtist"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="72dp"/>
 
         <org.omnirom.music.app.ui.WrapContentHeightViewPager
             android:id="@+id/pagerArtist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tvArtist">
+            android:layout_alignEnd="@+id/ivHero"
+            android:layout_alignLeft="@+id/ivHero"
+            android:layout_alignRight="@+id/ivHero"
+            android:layout_alignStart="@+id/ivHero"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/ivHero"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="-48dp">
 
             <android.support.v4.view.PagerTabStrip
                 android:id="@+id/pagerArtistStrip"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_gravity="top"
-                android:background="#333333"
-                android:paddingBottom="4dp"
-                android:paddingTop="4dp"
+                android:textAppearance="@style/OmniMusic.Spec.ViewPager"
+                android:gravity="center_vertical"
                 android:textColor="#fff" />
 
         </org.omnirom.music.app.ui.WrapContentHeightViewPager>

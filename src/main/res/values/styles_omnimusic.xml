@@ -35,7 +35,7 @@
 
     <style name="OmniMusic.Spec.ViewPager">
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="fontPath">fonts/Roboto-Medium.ttf</item>
     </style>
 

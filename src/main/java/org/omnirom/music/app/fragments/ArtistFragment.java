@@ -389,11 +389,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     public void notifyClosing() {
         Utils.animateScale(mFabPlay, true, false);
         final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
+        final PagerTabStrip strip = (PagerTabStrip) mRootView.findViewById(R.id.pagerArtistStrip);
+
         if (Utils.hasLollipop()) {
             Utils.animateHeadingHiding(tvArtist);
         } else {
             tvArtist.animate().alpha(0.0f).setStartDelay(0).setDuration(ArtistActivity.BACK_DELAY).start();
         }
+        strip.animate().alpha(0.0f).setStartDelay(0).translationY(-20).setDuration(ArtistActivity.BACK_DELAY).start();
     }
 
     public void scrollToTop() {
@@ -492,6 +495,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         tvArtist.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
         tvArtist.setText(mArtist.getName());
 
+        final PagerTabStrip strip = (PagerTabStrip) mRootView.findViewById(R.id.pagerArtistStrip);
+        strip.setDrawFullUnderline(false);
+        strip.setAlpha(0.0f);
+        strip.setTranslationY(-20);
+        strip.animate().alpha(1.0f).setDuration(500).setStartDelay(500).translationY(0).start();
+
         if (Utils.hasLollipop()) {
             tvArtist.setVisibility(View.INVISIBLE);
             mHandler.postDelayed(new Runnable() {
@@ -537,9 +546,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             public void onPageScrollStateChanged(int i) {
             }
         });
-
-        final PagerTabStrip strip = (PagerTabStrip) mRootView.findViewById(R.id.pagerArtistStrip);
-        strip.setBackgroundColor(mBackgroundColor);
 
         mRootView.setOnScrollListener(new ObservableScrollView.ScrollViewListener() {
             @Override
