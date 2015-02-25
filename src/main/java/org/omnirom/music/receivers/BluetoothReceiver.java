@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -39,6 +40,8 @@ import java.util.Set;
  */
 public class BluetoothReceiver extends BroadcastReceiver {
     private static final String TAG = "BluetoothReceiver";
+
+    private Handler mHandler;
 
     /**
      * When Autoconnect device connects, open Drive Mode
@@ -63,13 +66,10 @@ public class BluetoothReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         SharedPreferences prefs = context.getSharedPreferences(SettingsKeys.PREF_SETTINGS,
                 Context.MODE_PRIVATE);
-
-        Log.e(TAG, "GOT BLUETOOTH RECEIVER CALLED!");
+        mHandler = new Handler();
 
         boolean autoconnectEnabled = prefs.getBoolean(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ENABLE,
                 false);
-
-        Log.e(TAG, "Autoconnect enabled=" + autoconnectEnabled);
 
         if (autoconnectEnabled) {
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(intent.getAction())) {
@@ -83,8 +83,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
                                        BluetoothDevice device) {
         String autoconnectName = prefs.getString(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME, null);
 
-        Log.e(TAG, "Autoconnect name=" + autoconnectName);
-
         if (device.getName().equals(autoconnectName)) {
             // Our autoconnect device plugged in, launch the desired action
             Set<String> actionFlagsStr = prefs.getStringSet(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ACTION, null);
@@ -92,8 +90,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
             for (String flag : actionFlagsStr) {
                 actionFlags += Integer.parseInt(flag);
             }
-
-            Log.e(TAG, "Autoconnect flags=" + actionFlags);
 
             if ((actionFlags & BT_AUTOCONNECT_ACTION_OPEN_DRIVE) != 0) {
                 // Open Drive Mode activity
@@ -104,8 +100,19 @@ public class BluetoothReceiver extends BroadcastReceiver {
             }
 
             if ((actionFlags & BT_AUTOCONNECT_ACTION_PLAY_QUEUE) != 0) {
-                // Start playing queue
-                PlaybackProxy.play();
+                // Plugins can take a couple seconds to be ready (e.g. Spotify can only play
+                // music 2 seconds after getting connected). We hit up PlaybackProxy to get
+                // the PlaybackService and the plugins system up (in case the app was off),
+                // then we actually request playback.
+                PlaybackProxy.getState();
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Start playing queue
+                        PlaybackProxy.play();
+                    }
+                }, 2000);
             }
         }
     }
