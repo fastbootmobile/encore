@@ -72,6 +72,7 @@ public class PlaybackService extends Service
     public static final int STATE_PAUSING   = 4;
 
     private static final String SERVICE_SHARED_PREFS = "PlaybackServicePrefs";
+    private static final String QUEUE_SHARED_PREFS = "PlaybackQueueMemory";
     private static final String PREF_KEY_REPEAT = "repeatMode";
 
     public static final String ACTION_COMMAND = "command";
@@ -255,6 +256,20 @@ public class PlaybackService extends Service
         // Restore preferences
         SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
         mRepeatMode = prefs.getBoolean(PREF_KEY_REPEAT, false);
+
+        // TODO: Use callbacks
+        // Restore playback queue after one second - we have multiple things to wait here:
+        //  - The callbacks of the main app's UI
+        //  - The providers connecting
+        //  - The providers ready to send us data
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                SharedPreferences queuePrefs = getSharedPreferences(QUEUE_SHARED_PREFS, MODE_PRIVATE);
+                mPlaybackQueue.restore(queuePrefs);
+                mCurrentTrack = queuePrefs.getInt("current", -1);
+            }
+        }, 1000);
     }
 
     /**
@@ -292,9 +307,10 @@ public class PlaybackService extends Service
 
         PluginsLookup.getDefault().tearDown(mNativeHub);
 
-        // Release all currently playing songs
-        mPlaybackQueue.clear();
-        mCurrentTrack = -1;
+        // Store the playback queue
+        SharedPreferences queuePrefs = getSharedPreferences(QUEUE_SHARED_PREFS, MODE_PRIVATE);
+        mPlaybackQueue.save(queuePrefs.edit());
+        queuePrefs.edit().putInt("current", mCurrentTrack).apply();
 
         // Shutdown DSP chain
         mNativeHub.onStop();

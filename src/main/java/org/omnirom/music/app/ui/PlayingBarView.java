@@ -100,29 +100,6 @@ public class PlayingBarView extends RelativeLayout {
         }
     }
 
-    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
-        @Override
-        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
-            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
-            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
-        }
-
-        @Override
-        public void onPlaybackPause() throws RemoteException {
-            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
-        }
-
-        @Override
-        public void onPlaybackResume() throws RemoteException {
-            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
-        }
-
-        @Override
-        public void onPlaybackQueueChanged() throws RemoteException {
-            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
-        }
-    };
-
     private ILocalCallback mProviderCallback = new ILocalCallback() {
         @Override
         public void onSongUpdate(List<Song> s) {
@@ -187,6 +164,29 @@ public class PlayingBarView extends RelativeLayout {
 
         @Override
         public void onSearchResult(List<SearchResult> searchResult) {
+        }
+    };
+
+    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
+        @Override
+        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
+        }
+
+        @Override
+        public void onPlaybackPause() throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+        }
+
+        @Override
+        public void onPlaybackResume() throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+        }
+
+        @Override
+        public void onPlaybackQueueChanged() throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
         }
     };
 
@@ -271,14 +271,17 @@ public class PlayingBarView extends RelativeLayout {
             @Override
             public void run() {
                 PlaybackProxy.addCallback(mPlaybackCallback);
+
+                // We delay check if we have a queue and/or are playing to leave time to the
+                // playback service to get up
+                if (mTracksLayout != null) {
+                    mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
+                    mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+                    mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
+                }
             }
         }, 200);
 
-        if (mTracksLayout != null) {
-            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
-            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
-            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
-        }
     }
 
     @Override
