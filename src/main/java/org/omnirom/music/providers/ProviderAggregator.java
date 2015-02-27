@@ -749,6 +749,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     // Update the name
                     cached.setName(p.getName());
 
+                    cached.setIsLoaded(p.isLoaded());
+
                     // Empty the playlist
                     while (cached.getSongsCount() > 0) {
                         cached.removeSong(0);

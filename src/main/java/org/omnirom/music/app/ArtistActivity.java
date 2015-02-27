@@ -35,6 +35,7 @@ import android.view.ViewAnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 
 import org.omnirom.music.app.fragments.ArtistFragment;
+import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.utils.Utils;
 
 /**
@@ -46,6 +47,7 @@ public class ArtistActivity extends AppActivity {
     private static final String TAG_FRAGMENT = "fragment_inner";
 
     public static final String EXTRA_ARTIST = "artist";
+    public static final String EXTRA_PROVIDER = "provider";
     public static final String EXTRA_BACKGROUND_COLOR = "background_color";
     public static final String BITMAP_ARTIST_HERO = "artist_hero";
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
@@ -63,13 +65,16 @@ public class ArtistActivity extends AppActivity {
      * @param ctx The current context
      * @param hero The hero (artist image) bitmap
      * @param artistRef The reference of the artist
+     * @param provider The provider of the artist
      * @param color The back color of the header bar
      * @return An intent that will open this activity
      */
-    public static Intent craftIntent(Context ctx, Bitmap hero, String artistRef, int color) {
+    public static Intent craftIntent(Context ctx, Bitmap hero, String artistRef,
+                                     ProviderIdentifier provider, int color) {
         Intent intent = new Intent(ctx, ArtistActivity.class);
 
         intent.putExtra(ArtistActivity.EXTRA_ARTIST, artistRef);
+        intent.putExtra(ArtistActivity.EXTRA_PROVIDER, provider);
         intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR, color);
 
         Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, hero);

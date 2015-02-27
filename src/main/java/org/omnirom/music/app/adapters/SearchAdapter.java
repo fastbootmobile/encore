@@ -16,27 +16,41 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.os.RemoteException;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.omnirom.music.app.AlbumActivity;
+import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.fragments.PlaylistChooserFragment;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
+import org.omnirom.music.framework.Suggestor;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +79,42 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     private List<SearchEntry> mSortedArtists;
     private List<SearchEntry> mSortedPlaylists;
     private List<SearchEntry> mSortedAlbums;
+
+    private final View.OnClickListener mOverflowArtistClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            ViewHolder vh = (ViewHolder) v.getTag();
+            Artist artist = (Artist) vh.content;
+            showArtistOverflow(v.getContext(), v, artist);
+        }
+    };
+
+    private final View.OnClickListener mOverflowAlbumClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            ViewHolder vh = (ViewHolder) v.getTag();
+            Album album = (Album) vh.content;
+            showAlbumOverflow(v.getContext(), v, album);
+        }
+    };
+
+    private final View.OnClickListener mOverflowPlaylistClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            ViewHolder vh = (ViewHolder) v.getTag();
+            Playlist playlist = (Playlist) vh.content;
+            showPlaylistOverflow(v.getContext(), v, playlist);
+        }
+    };
+
+    private final View.OnClickListener mOverflowSongClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            ViewHolder vh = (ViewHolder) v.getTag();
+            Song song = (Song) vh.content;
+            showSongOverflow(v.getContext(), v, song);
+        }
+    };
 
     /**
      * Class representing search entries
@@ -356,7 +406,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public boolean hasStableIds() {
-        return false;
+        return true;
     }
 
     /**
@@ -425,12 +475,14 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                 holder.tvSubtitle = (TextView) root.findViewById(R.id.tvSubTitle);
                 holder.divider = (TextView) root.findViewById(R.id.divider);
                 holder.ivSource = (ImageView) root.findViewById(R.id.ivSource);
+                holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
                 holder.vRoot = root;
+
+                holder.ivOverflow.setTag(holder);
                 root.setTag(holder);
             }
 
             final ViewHolder tag = (ViewHolder) root.getTag();
-            tag.albumArtImageView.setDefaultArt();
 
             if (i2 == getChildrenCount(i) - 1) {
                 tag.albumArtImageView.setVisibility(View.INVISIBLE);
@@ -476,8 +528,13 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     private void updateSongTag(int i, ViewHolder tag) {
         final SearchEntry entry = mSortedSongs.get(i);
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-
         Song song = aggregator.retrieveSong(entry.ref, entry.identifier);
+
+        if (song != null && song.equals(tag.content)) {
+            // We're already displaying it
+            return;
+        }
+
         if (song != null && song.isLoaded()) {
             tag.tvTitle.setText(song.getTitle());
             Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
@@ -488,11 +545,13 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), song);
             tag.ivSource.setImageDrawable(tag.sourceLogo);
             tag.content = song;
+            tag.ivOverflow.setOnClickListener(mOverflowSongClickListener);
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);
             tag.ivSource.setImageDrawable(null);
             tag.albumArtImageView.setDefaultArt();
+            tag.ivOverflow.setOnClickListener(null);
         }
     }
 
@@ -507,6 +566,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         Artist artist = aggregator.retrieveArtist(entry.ref, entry.identifier);
 
+        if (artist != null && artist.equals(tag.content)) {
+            // We're already displaying it
+            return;
+        }
+
         if (artist != null && artist.isLoaded()) {
             tag.tvTitle.setText(artist.getName());
             tag.tvSubtitle.setText("");
@@ -514,11 +578,13 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             tag.content = artist;
             tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), artist);
             tag.ivSource.setImageDrawable(tag.sourceLogo);
+            tag.ivOverflow.setOnClickListener(mOverflowArtistClickListener);
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);
             tag.ivSource.setImageDrawable(null);
             tag.albumArtImageView.setDefaultArt();
+            tag.ivOverflow.setOnClickListener(null);
         }
     }
 
@@ -533,6 +599,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         ProviderAggregator aggregator = ProviderAggregator.getDefault();
         Album album = aggregator.retrieveAlbum(entry.ref, entry.identifier);
 
+        if (album != null && album.equals(tag.content)) {
+            // We're already displaying it
+            return;
+        }
+
         if (album != null) {
             tag.tvTitle.setText(album.getName());
             if (album.getYear() > 0) {
@@ -545,10 +616,25 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), album);
             tag.ivSource.setImageDrawable(tag.sourceLogo);
             tag.content = album;
+            tag.ivOverflow.setOnClickListener(mOverflowAlbumClickListener);
+
+            // Ensure album contents are fetched so that we can do something with it
+            ProviderConnection conn = PluginsLookup.getDefault().getProvider(album.getProvider());
+            if (conn != null) {
+                IMusicProvider binder = conn.getBinder();
+                if (binder != null) {
+                    try {
+                        binder.fetchAlbumTracks(album.getRef());
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot fetch album tracks");
+                    }
+                }
+            }
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);
             tag.albumArtImageView.setDefaultArt();
+            tag.ivOverflow.setOnClickListener(null);
         }
     }
 
@@ -563,17 +649,24 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         final Playlist playlist = ProviderAggregator.getDefault().retrievePlaylist(entry.ref, entry.identifier);
         final Resources res = tag.vRoot.getResources();
 
+        if (playlist != null && playlist.equals(tag.content)) {
+            // We're already displaying it
+            return;
+        }
+
         if (playlist != null && (playlist.isLoaded() || playlist.getName() != null)) {
             tag.tvTitle.setText(playlist.getName());
             tag.tvSubtitle.setText(res.getString(R.string.xx_songs, playlist.getSongsCount()));
             tag.content = playlist;
             tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), playlist);
             tag.ivSource.setImageDrawable(tag.sourceLogo);
+            tag.ivOverflow.setOnClickListener(mOverflowPlaylistClickListener);
         } else {
             tag.tvTitle.setText(R.string.loading);
             tag.tvSubtitle.setText(null);
             tag.ivSource.setImageDrawable(null);
             tag.albumArtImageView.setDefaultArt();
+            tag.ivOverflow.setOnClickListener(null);
         }
     }
 
@@ -586,6 +679,168 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             return mSearchResults.size() > 0 && getGroup(i) != null;
         }
     }
+
+    private void showArtistOverflow(final Context context, View parent, final Artist artist) {
+        PopupMenu popupMenu = new PopupMenu(context, parent);
+        popupMenu.inflate(R.menu.search_res_artist);
+        popupMenu.show();
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.menu_play_now:
+                        List<Song> radio = Suggestor.getInstance().buildArtistRadio(artist);
+                        PlaybackProxy.clearQueue();
+                        for (Song song : radio) {
+                            PlaybackProxy.queueSong(song, false);
+                        }
+                        PlaybackProxy.playAtIndex(0);
+                        break;
+
+                    default:
+                        return false;
+                }
+                return true;
+            }
+        });
+    }
+
+    private void showAlbumOverflow(final Context context, View parent, final Album album) {
+        PopupMenu popupMenu = new PopupMenu(context, parent);
+        popupMenu.inflate(R.menu.search_res_album);
+        popupMenu.show();
+
+        final String artist = Utils.getMainArtist(album);
+
+        if (artist == null) {
+            // No artist could be found for this album, don't show the entry
+            popupMenu.getMenu().removeItem(R.id.menu_open_artist_page);
+        }
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.menu_play_now:
+                        PlaybackProxy.playAlbum(album);
+                        break;
+
+                    case R.id.menu_add_to_queue:
+                        PlaybackProxy.queueAlbum(album, false);
+                        break;
+
+                    case R.id.menu_open_artist_page:
+                        if (artist != null) {
+                            Intent intent = ArtistActivity.craftIntent(context, null, artist,
+                                    album.getProvider(), 0xFF333333);
+                            context.startActivity(intent);
+                        }
+                        break;
+
+                    case R.id.menu_add_to_playlist:
+                        PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(album);
+                        fragment.show(((FragmentActivity) context).getSupportFragmentManager(),
+                                album.getRef());
+                        break;
+
+                    default:
+                        return false;
+                }
+                return true;
+            }
+        });
+    }
+
+    private void showSongOverflow(final Context context, View parent, final Song song) {
+        PopupMenu popupMenu = new PopupMenu(context, parent);
+        popupMenu.inflate(R.menu.search_res_song);
+        popupMenu.show();
+
+        if (song.getArtist() == null) {
+            // No attached artist, don't show the menu entry
+            popupMenu.getMenu().removeItem(R.id.menu_open_artist_page);
+        }
+
+        if (song.getAlbum() == null) {
+            // No attached album, don't show the menu entry
+            popupMenu.getMenu().removeItem(R.id.menu_open_album_page);
+        }
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                Intent intent;
+                switch (menuItem.getItemId()) {
+                    case R.id.menu_play_now:
+                        PlaybackProxy.playSong(song);
+                        break;
+
+                    case R.id.menu_add_to_queue:
+                        PlaybackProxy.queueSong(song, false);
+                        break;
+
+                    case R.id.menu_open_artist_page:
+                        if (song.getArtist() != null) {
+                            intent = ArtistActivity.craftIntent(context, null, song.getArtist(),
+                                    song.getProvider(), 0xFF333333);
+                            context.startActivity(intent);
+                        }
+                        break;
+
+                    case R.id.menu_open_album_page:
+                        if (song.getAlbum() != null) {
+                            intent = AlbumActivity.craftIntent(context, null, song.getAlbum(),
+                                    song.getProvider(), 0xFF333333);
+                            context.startActivity(intent);
+                        }
+                        break;
+
+                    case R.id.menu_add_to_playlist:
+                        PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(song);
+                        fragment.show(((FragmentActivity) context).getSupportFragmentManager(),
+                                song.getRef());
+                        break;
+
+                    default:
+                        return false;
+                }
+                return true;
+            }
+        });
+    }
+
+    private void showPlaylistOverflow(final Context context, View parent, final Playlist playlist) {
+        PopupMenu popupMenu = new PopupMenu(context, parent);
+        popupMenu.inflate(R.menu.search_res_playlist);
+        popupMenu.show();
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.menu_play_now:
+                        PlaybackProxy.playPlaylist(playlist);
+                        break;
+
+                    case R.id.menu_add_to_queue:
+                        PlaybackProxy.queuePlaylist(playlist, false);
+                        break;
+
+                    case R.id.menu_add_to_playlist:
+                        PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(playlist);
+                        fragment.show(((FragmentActivity) context).getSupportFragmentManager(),
+                                playlist.getRef());
+                        break;
+
+                    default:
+                        return false;
+                }
+                return true;
+            }
+        });
+    }
+
 
 
     /**
@@ -600,6 +855,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         public ImageView ivSource;
         public View vRoot;
         public RecyclingBitmapDrawable sourceLogo;
+        public ImageView ivOverflow;
     }
 
     /**

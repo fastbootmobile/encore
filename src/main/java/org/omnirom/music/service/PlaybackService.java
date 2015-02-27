@@ -270,6 +270,7 @@ public class PlaybackService extends Service
                 mPlaybackQueue.restore(queuePrefs);
                 mCurrentTrack = queuePrefs.getInt("current", -1);
                 mCurrentTrackLoaded = false;
+                mNotification.setHasNext(mPlaybackQueue.size() > 1 || (mPlaybackQueue.size() > 0 && mRepeatMode));
             }
         }, 1000);
     }

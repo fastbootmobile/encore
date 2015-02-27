@@ -59,8 +59,9 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
         public void onItemClick(RecyclerView parent, View view, int position, long id) {
             final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
             final Context ctx = view.getContext();
-            String artistRef = mAdapter.getItem(tag.position).getRef();
-            Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artistRef, tag.itemColor);
+            Artist artist = mAdapter.getItem(tag.position);
+            Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artist.getRef(),
+                    artist.getProvider(), tag.itemColor);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 AlbumArtImageView ivCover = tag.ivCover;

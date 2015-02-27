@@ -428,10 +428,11 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mHeroImage = hero;
         mBackgroundColor = extras.getInt(ArtistActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
         final String artistRef = extras.getString(ArtistActivity.EXTRA_ARTIST);
-        mArtist = ProviderAggregator.getDefault().retrieveArtist(artistRef, null);
+        final ProviderIdentifier provider = extras.getParcelable(ArtistActivity.EXTRA_PROVIDER);
+        mArtist = ProviderAggregator.getDefault().retrieveArtist(artistRef, provider);
 
         if (mArtist == null) {
-            Log.e(TAG, "No artist found in cache for " + artistRef + "!");
+            Log.e(TAG, "No cache entry or provider hit for " + artistRef + "!");
             throw new IllegalStateException("Artist is null in ArtistFragment arguments!");
         }
 
@@ -1471,8 +1472,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             public void onItemClick(RecyclerView parent, View view, int position, long id) {
                 final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
                 final Context ctx = getActivity();
-                String artistRef = mAdapter.getItem(tag.position).getRef();
-                Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artistRef, tag.itemColor);
+                Artist artist = mAdapter.getItem(tag.position);
+                Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artist.getRef(),
+                        artist.getProvider(), tag.itemColor);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     AlbumArtImageView ivCover = tag.ivCover;

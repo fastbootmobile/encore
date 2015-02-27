@@ -385,6 +385,7 @@ public class Utils {
 
                     case R.id.menu_open_artist:
                         Intent intent = ArtistActivity.craftIntent(context, null, song.getArtist(),
+                                song.getProvider(),
                                 context.getResources().getColor(R.color.default_album_art_background));
                         context.startActivity(intent);
                         break;
