@@ -123,6 +123,10 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void buildNotification() {
+        if (mCurrentSong == null) {
+            return;
+        }
+        
         buildRemoteViews();
         buildBaseNotification();
 
