@@ -18,6 +18,7 @@ package org.omnirom.music.service;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.omnirom.music.model.Song;
@@ -33,7 +34,7 @@ import java.util.TreeSet;
  */
 public class PlaybackQueue extends ArrayList<Song> {
     private static final String TAG = "PlaybackQueue";
-    private static final String KEY_SONGS = "songs";
+    private static final String KEY_SONGS = "songlist";
 
     /**
      * Adds a song to the queue
@@ -54,20 +55,20 @@ public class PlaybackQueue extends ArrayList<Song> {
      * @param editor The editor in which write the data
      */
     public void save(SharedPreferences.Editor editor) {
-        TreeSet<String> entries = new TreeSet<>();
-
+        JSONArray array = new JSONArray();
         for (Song song : this) {
             JSONObject object = new JSONObject();
             try {
                 object.put("r", song.getRef());
                 object.put("p", song.getProvider().serialize());
-                entries.add(object.toString());
             } catch (JSONException e) {
                 Log.e(TAG, "Cannot save playback queue entry", e);
             }
+
+            array.put(object);
         }
 
-        editor.putStringSet(KEY_SONGS, entries);
+        editor.putString(KEY_SONGS, array.toString());
         editor.apply();
     }
 
@@ -77,12 +78,14 @@ public class PlaybackQueue extends ArrayList<Song> {
      * @param prefs The preferences to read from
      */
     public void restore(SharedPreferences prefs) {
-        Set<String> entries = prefs.getStringSet(KEY_SONGS, null);
+        String entries = prefs.getString(KEY_SONGS, null);
 
         if (entries != null) {
-            for (String json : entries) {
-                try {
-                    JSONObject obj = new JSONObject(json);
+            try {
+                JSONArray array = new JSONArray(entries);
+                final int len = array.length();
+                for (int i = 0; i < len; ++i) {
+                    JSONObject obj = array.getJSONObject(i);
                     String ref = obj.getString("r");
                     String provider = obj.getString("p");
 
@@ -93,9 +96,9 @@ public class PlaybackQueue extends ArrayList<Song> {
                     } else {
                         Log.e(TAG, "Cannot retrieve song " + ref + " from " + provider);
                     }
-                } catch (JSONException e) {
-                    Log.e(TAG, "Cannot restore playback queue entry", e);
                 }
+            } catch (JSONException e) {
+                Log.e(TAG, "Cannot restore playback queue entry", e);
             }
         }
     }

@@ -126,7 +126,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         if (mCurrentSong == null) {
             return;
         }
-        
+
         buildRemoteViews();
         buildBaseNotification();
 
