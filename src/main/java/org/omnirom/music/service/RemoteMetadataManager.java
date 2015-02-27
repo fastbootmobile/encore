@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
+import android.media.MediaMetadataEditor;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
 import android.os.Build;
@@ -125,6 +126,12 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
         }
         metadata.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, song.getTitle());
         metadata.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, song.getDuration());
+
+        // Ensure the defined bitmap is still valid
+        Bitmap check = metadata.getBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK, null);
+        if (check != null && check.isRecycled()) {
+            metadata.putBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK, null);
+        }
 
         metadata.apply();
         mClient.setTransportControlFlags(getActionsFlags(hasNext));
