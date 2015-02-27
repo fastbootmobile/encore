@@ -134,6 +134,7 @@ public class PlaybackService extends Service
     private boolean mIsForeground;
     private ListenLogger mListenLogger;
     private PacManReceiver mPacManReceiver;
+    private boolean mCurrentTrackLoaded;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -268,6 +269,7 @@ public class PlaybackService extends Service
                 SharedPreferences queuePrefs = getSharedPreferences(QUEUE_SHARED_PREFS, MODE_PRIVATE);
                 mPlaybackQueue.restore(queuePrefs);
                 mCurrentTrack = queuePrefs.getInt("current", -1);
+                mCurrentTrackLoaded = false;
             }
         }, 1000);
     }
@@ -586,6 +588,7 @@ public class PlaybackService extends Service
                         if (!next.isLoaded()) {
                             // Track not loaded yet, delay until track info arrived
                             mCurrentTrackWaitLoading = true;
+                            mCurrentTrackLoaded = false;
                             Log.w(TAG, "Track not yet loaded: " + next.getRef() + ", delaying");
                         } else if (!next.isAvailable()) {
                             // Track is not available, skip to the next one
@@ -605,6 +608,8 @@ public class PlaybackService extends Service
                             } catch (IllegalStateException e) {
                                 Log.e(TAG, "Illegal State from provider", e);
                             }
+
+                            mCurrentTrackLoaded = true;
 
                             mListenLogger.addEntry(next);
 
@@ -757,7 +762,7 @@ public class PlaybackService extends Service
         new Thread() {
             public void run() {
                 final Song currentSong = getCurrentSong();
-                if (currentSong != null) {
+                if (currentSong != null && mCurrentTrackLoaded) {
                     ProviderConnection conn = PluginsLookup.getDefault().getProvider(currentSong.getProvider());
                     if (conn != null) {
                         IMusicProvider provider = conn.getBinder();

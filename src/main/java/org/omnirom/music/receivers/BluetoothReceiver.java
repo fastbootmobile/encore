@@ -101,7 +101,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
 
             if ((actionFlags & BT_AUTOCONNECT_ACTION_PLAY_QUEUE) != 0) {
                 // Plugins can take a couple seconds to be ready (e.g. Spotify can only play
-                // music 2 seconds after getting connected). We hit up PlaybackProxy to get
+                // music a few seconds after getting connected). We hit up PlaybackProxy to get
                 // the PlaybackService and the plugins system up (in case the app was off),
                 // then we actually request playback.
                 PlaybackProxy.getState();
