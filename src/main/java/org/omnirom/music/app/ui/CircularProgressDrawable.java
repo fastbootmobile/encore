@@ -78,8 +78,12 @@ public class CircularProgressDrawable extends Drawable {
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
         final float paddedStrokeWidth = (mPaint.getStrokeWidth() + mPadding * 2.0f) / 2.0f;
-        mRect.set(bounds.left + paddedStrokeWidth, bounds.top + paddedStrokeWidth,
-                bounds.right - paddedStrokeWidth, bounds.bottom - paddedStrokeWidth);
+
+        int size = Math.min(bounds.height(), bounds.width());
+
+        mRect.set(0, 0, size, size);
+        mRect.offset(bounds.width() / 2 - size / 2, bounds.height() / 2 - size / 2);
+        mRect.inset(paddedStrokeWidth, paddedStrokeWidth);
     }
 
     @Override

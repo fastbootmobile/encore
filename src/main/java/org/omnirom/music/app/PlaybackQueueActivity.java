@@ -369,8 +369,6 @@ public class PlaybackQueueActivity extends AppActivity {
                     PlaybackQueueAdapter.ViewHolder tag = (PlaybackQueueAdapter.ViewHolder) v.getTag();
                     boolean isLiked = logger.isLiked(tag.song.getRef());
 
-                    Log.e(TAG, "isLiked: " + isLiked);
-
                     if (isLiked) {
                         logger.removeLike(tag.song);
                         ((ImageView) v).setImageResource(R.drawable.ic_thumbs_up_gray);
