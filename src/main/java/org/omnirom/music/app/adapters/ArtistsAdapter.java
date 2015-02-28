@@ -193,7 +193,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         synchronized (mArtists) {
             boolean didChange = false;
             for (Artist p : ps) {
-                if (!mArtists.contains(p)) {
+                if (!mArtists.contains(p) && p != null) {
                     mArtists.add(p);
                     didChange = true;
                 }
