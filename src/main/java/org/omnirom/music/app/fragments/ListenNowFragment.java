@@ -85,6 +85,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             int totalSongsCount = 0;
 
             sWarmUp = true;
+            sAdapter.clearEntries();
 
             // If we don't have any playlists, retry in a short time and display either No Music
             // or Loading... depending on the number of tries, waiting for providers to start
@@ -169,6 +170,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 Song track = aggregator.retrieveSong(trackRef, provider);
                 if (track == null || !track.isLoaded()) {
                     // Some error while loading this track, or it's not loaded yet! Try another
+                    i--;
+                    continue;
+                }
+
+                // Let's see if this song has the type of entity we're looking for
+                if ((type == 0 && track.getArtist() == null) // artist
+                        || (type == 1 && track.getAlbum() == null)) {
                     i--;
                     continue;
                 }
