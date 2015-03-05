@@ -1034,6 +1034,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * Interface for offline mode changes
      */
     public interface OfflineModeListener {
-        public void onOfflineModeChange(boolean enabled);
+        void onOfflineModeChange(boolean enabled);
     }
 }
