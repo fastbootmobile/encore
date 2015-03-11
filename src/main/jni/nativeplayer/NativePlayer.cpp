@@ -409,6 +409,10 @@ int32_t NativePlayer::getBufferedCount() const {
     return m_iActiveBufferIndex;
 }
 // -------------------------------------------------------------------------------------
+int32_t NativePlayer::getFreeBuffersCount() const {
+    return m_iBufferMaxSize - m_iActiveBufferIndex;
+}
+// -------------------------------------------------------------------------------------
 int32_t NativePlayer::getUnderflowCount() const {
     return m_iUnderflowCount;
 }

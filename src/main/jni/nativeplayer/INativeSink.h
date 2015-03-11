@@ -33,6 +33,9 @@ class INativeSink {
     // Returns the number of samples in the buffer
     virtual int32_t getBufferedCount() const = 0;
 
+    // Returns the number of free samples in the buffer
+    virtual int32_t getFreeBuffersCount() const = 0;
+
     // Returns the total number of written samples
     virtual int64_t getTotalWrittenSamples() const = 0;
 
