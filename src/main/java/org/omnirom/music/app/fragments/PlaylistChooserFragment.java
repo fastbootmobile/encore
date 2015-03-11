@@ -129,7 +129,15 @@ public class PlaylistChooserFragment extends DialogFragment {
         Collections.sort(playlistList, new Comparator<Playlist>() {
             @Override
             public int compare(Playlist lhs, Playlist rhs) {
-                return lhs.getName().compareTo(rhs.getName());
+                if (lhs.getName() != null && rhs.getName() != null) {
+                    return lhs.getName().compareTo(rhs.getName());
+                } else if (lhs.getName() == null && rhs.getName() == null) {
+                    return 0;
+                } else if (lhs.getName() == null) {
+                    return 1;
+                } else {
+                    return -1;
+                }
             }
         });
 

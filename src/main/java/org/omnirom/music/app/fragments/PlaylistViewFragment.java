@@ -431,6 +431,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final int offlineStatus = mPlaylist.getOfflineStatus();
 
+        Log.e(TAG, "Playlist " + mPlaylist.getRef() + " offline=" + offlineStatus);
+
         switch (offlineStatus) {
             case BoundEntity.OFFLINE_STATUS_NO:
                 mOfflineBtn.setProgress(0);

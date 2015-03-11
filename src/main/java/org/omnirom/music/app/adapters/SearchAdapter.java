@@ -540,6 +540,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
             if (artist != null) {
                 tag.tvSubtitle.setText(artist.getName());
+            } else {
+                tag.tvSubtitle.setText(null);
             }
             tag.albumArtImageView.loadArtForSong(song);
             tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), song);

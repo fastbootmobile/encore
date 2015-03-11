@@ -17,6 +17,7 @@ package org.omnirom.music.framework;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
@@ -61,6 +62,10 @@ public class PlaybackProxy {
     private static final int MSG_QUEUE_PLAYLIST = 18;
 
     private static class PlaybackProxyHandler extends Handler {
+        public PlaybackProxyHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             try {
@@ -157,7 +162,7 @@ public class PlaybackProxy {
     static {
         HandlerThread thread = new HandlerThread("PlaybackProxy");
         thread.start();
-        sHandler = new PlaybackProxyHandler();
+        sHandler = new PlaybackProxyHandler(thread.getLooper());
     }
 
     private static IPlaybackService getPlayback(boolean connectIfNull) throws RemoteException {

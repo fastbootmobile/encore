@@ -760,6 +760,11 @@ public class PlaybackService extends Service
     }
 
     void playImpl() {
+        if (mState == STATE_PLAYING || mState == STATE_BUFFERING) {
+            // We are already playing, don't do anything
+            return;
+        }
+
         new Thread() {
             public void run() {
                 final Song currentSong = getCurrentSong();

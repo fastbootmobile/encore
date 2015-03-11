@@ -544,41 +544,11 @@ public class PlayingBarView extends RelativeLayout {
             TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
             tvTitle.setText(getContext().getString(R.string.view_full_queue));
 
-            final int finalShownCount = shownCount;
-            final View[] finalItemViews = itemViews;
             itemRoot.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getContext(), PlaybackQueueActivity.class);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        List<Pair<View, String>> itemsTransition = new ArrayList<Pair<View, String>>();
-
-                        // First item is processed differently.
-                        for (int i = 1; i < finalShownCount; i++) {
-                            itemsTransition.add(Pair.create(finalItemViews[i], "playbackqueue:" + i));
-                        }
-
-                        itemsTransition.add(Pair.create(finalItemViews[0].findViewById(R.id.tvTitle), "playback:firstitem:title"));
-                        itemsTransition.add(Pair.create(finalItemViews[0].findViewById(R.id.tvArtist), "playback:firstitem:artist"));
-                        itemsTransition.add(Pair.create(finalItemViews[0].findViewById(R.id.ivAlbumArt), "playback:firstitem:art"));
-
-                        // FIXME: For some reason, List.toArray doesn't work for generic types... So
-                        // we manually copy.
-                        Pair<View, String>[] viewsToTransition = new Pair[itemsTransition.size()];
-                        int i = 0;
-                        for (Pair<View, String> pair : itemsTransition) {
-                            viewsToTransition[i] = pair;
-                            i++;
-                        }
-
-                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
-                                viewsToTransition);
-
-                        getContext().startActivity(intent, opt.toBundle());
-                    } else {
-                        getContext().startActivity(intent);
-                    }
+                    getContext().startActivity(intent);
                 }
             });
 

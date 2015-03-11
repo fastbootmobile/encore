@@ -749,6 +749,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     // Update the name
                     cached.setName(p.getName());
 
+                    if (p.getName() == null) {
+                        Log.w(TAG, "Playlist " + p.getRef() + " updated, but name is null!");
+                    }
+
                     cached.setIsLoaded(p.isLoaded());
 
                     // Empty the playlist
@@ -803,51 +807,55 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return;
         }
 
-        Song cached = mCache.getSong(s.getRef());
-        boolean wasLoaded = false;
-        boolean changed = false;
+        try {
+            Song cached = mCache.getSong(s.getRef());
+            boolean wasLoaded = false;
+            boolean changed = false;
 
-        if (cached == null) {
-            mCache.putSong(provider, s);
-            changed = true;
-            cached = s;
-        } else {
-            wasLoaded = cached.isLoaded();
-            if (s.isLoaded() && !cached.isIdentical(s)) {
-                cached.setAlbum(s.getAlbum());
-                cached.setArtist(s.getArtist());
-                cached.setSourceLogo(s.getLogo());
-                cached.setDuration(s.getDuration());
-                cached.setTitle(s.getTitle());
-                cached.setYear(s.getYear());
-                cached.setOfflineStatus(s.getOfflineStatus());
-                cached.setAvailable(s.isAvailable());
-                cached.setIsLoaded(s.isLoaded());
+            if (cached == null) {
+                mCache.putSong(provider, s);
                 changed = true;
-            }
-        }
-
-        if (!wasLoaded && cached.isLoaded()) {
-            // Match the album with the artist
-            Artist artist = mCache.getArtist(s.getArtist());
-            if (artist == null) {
-                artist = retrieveArtist(s.getArtist(), provider);
-            }
-
-            if (artist != null) {
-                Album album = mCache.getAlbum(s.getAlbum());
-                if (album == null) {
-                    album = retrieveAlbum(s.getAlbum(), provider);
-                }
-
-                if (album != null) {
-                    artist.addAlbum(album.getRef());
+                cached = s;
+            } else {
+                wasLoaded = cached.isLoaded();
+                if (s.isLoaded() && !cached.isIdentical(s)) {
+                    cached.setAlbum(s.getAlbum());
+                    cached.setArtist(s.getArtist());
+                    cached.setSourceLogo(s.getLogo());
+                    cached.setDuration(s.getDuration());
+                    cached.setTitle(s.getTitle());
+                    cached.setYear(s.getYear());
+                    cached.setOfflineStatus(s.getOfflineStatus());
+                    cached.setAvailable(s.isAvailable());
+                    cached.setIsLoaded(s.isLoaded());
+                    changed = true;
                 }
             }
-        }
 
-        if (changed) {
-            postSongForUpdate(cached);
+            if (!wasLoaded && cached.isLoaded()) {
+                // Match the album with the artist
+                Artist artist = mCache.getArtist(s.getArtist());
+                if (artist == null) {
+                    artist = retrieveArtist(s.getArtist(), provider);
+                }
+
+                if (artist != null) {
+                    Album album = mCache.getAlbum(s.getAlbum());
+                    if (album == null) {
+                        album = retrieveAlbum(s.getAlbum(), provider);
+                    }
+
+                    if (album != null) {
+                        artist.addAlbum(album.getRef());
+                    }
+                }
+            }
+
+            if (changed) {
+                postSongForUpdate(cached);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while updating song data", e);
         }
     }
 
