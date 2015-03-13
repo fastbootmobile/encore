@@ -5,6 +5,7 @@ package org.omnirom.music.app.fragments;
 import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.os.Handler;
 import android.support.v4.app.ListFragment;
 import android.content.DialogInterface;
@@ -181,6 +182,9 @@ public class DspProvidersFragment extends ListFragment {
             } catch (SecurityException e) {
                 Utils.shortToast(getActivity(), R.string.plugin_error);
                 Log.e(TAG, "Unable to start configuration activity. Is it exported in the manifest?", e);
+            } catch (ActivityNotFoundException e) {
+                Utils.shortToast(getActivity(), R.string.plugin_error);
+                Log.e(TAG, "Unable to start configuration activity, as the activity wasn't found", e);
             }
         } else {
             Utils.shortToast(getActivity(), R.string.no_settings_dsp);
