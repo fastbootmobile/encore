@@ -798,6 +798,7 @@ public class PlaybackService extends Service
                 } else if (mPlaybackQueue.size() > 0) {
                     mHandler.removeCallbacks(mStartPlaybackRunnable);
                     mHandler.post(mStartPlaybackRunnable);
+                    mIsResuming = false;
                 }
             }
         }.start();
