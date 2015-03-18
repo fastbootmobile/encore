@@ -497,7 +497,6 @@ public class PlaybackService extends Service
                     AudioManager.AUDIOFOCUS_GAIN);
 
             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                mHasAudioFocus = true;
                 am.registerMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
 
                 // Notify the remote metadata that we're getting active
@@ -515,6 +514,8 @@ public class PlaybackService extends Service
                 intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
                 intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
                 sendBroadcast(intent);
+
+                mHasAudioFocus = true;
             } else {
                 Log.e(TAG, "Audio focus request denied: " + result);
             }
@@ -526,17 +527,25 @@ public class PlaybackService extends Service
      */
     private synchronized void abandonAudioFocus() {
         if (mHasAudioFocus) {
+            // Release the audio focus
             final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             am.abandonAudioFocus(this);
             unregisterReceiver(mAudioNoisyReceiver);
-            mHasAudioFocus = false;
+
+            // Release our CPU wakelock
             mWakeLock.release();
 
+            // Notify the remote metadata that we're getting down
+            mRemoteMetadata.setActive(false);
+
+            // Release the Audio effects session for system audio FX
             final Intent audioEffectsIntent = new Intent(
                     AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
             audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
             audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
             sendBroadcast(audioEffectsIntent);
+
+            mHasAudioFocus = false;
         }
     }
 
