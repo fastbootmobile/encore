@@ -384,7 +384,7 @@ public class AlbumArtCache {
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON Error while getting image from Google Images", e);
                 } catch (IOException e) {
-                    Log.e(TAG, "IO error while getting image from Google Images", e);
+                    Log.e(TAG, "IO error while getting image from Google Images (" + e.getMessage() + ")");
                 }
 
             }

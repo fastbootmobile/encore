@@ -94,6 +94,7 @@ public class MainActivity extends AppActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.e(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -200,6 +201,7 @@ public class MainActivity extends AppActivity
 
     @Override
     protected void onResume() {
+        Log.e(TAG, "onResume");
         super.onResume();
         PluginsLookup.getDefault().requestUpdatePlugins();
 
@@ -273,23 +275,21 @@ public class MainActivity extends AppActivity
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        mOrientation = newConfig.orientation;
+        if (mOrientation != newConfig.orientation) {
+            mOrientation = newConfig.orientation;
 
-        // Reload the current fragment for layout changes
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                onNavigationDrawerItemSelected(mCurrentFragmentIndex);
-            }
-        }, 200);
+            // Reload the current fragment for layout changes
+            /*mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    onNavigationDrawerItemSelected(mCurrentFragmentIndex);
+                }
+            });*/
+        }
     }
 
     @Override
     public boolean onNavigationDrawerItemSelected(int position) {
-        if (mCurrentFragmentIndex == position) {
-            return false;
-        }
-
         // update the main content by replacing fragments
         boolean result = true;
         try {

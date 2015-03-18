@@ -16,6 +16,7 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -262,11 +263,15 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         super.onCreate(savedInstanceState);
         mHandler = new Handler();
 
-        // Generate entries
-        if (!sWarmUp) {
-            mHandler.postDelayed(mGenerateEntries, 500);
-        } else {
-            mHandler.post(mGenerateEntries);
+        if (sAdapter.getItemCount() == 0) {
+            // Generate entries
+            if (!sWarmUp) {
+                mHandler.removeCallbacks(mGenerateEntries);
+                mHandler.postDelayed(mGenerateEntries, 500);
+            } else {
+                mHandler.removeCallbacks(mGenerateEntries);
+                mHandler.post(mGenerateEntries);
+            }
         }
     }
 
@@ -286,6 +291,10 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         final FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listen_now, container, false);
         TwoWayView twvRoot = (TwoWayView) root.findViewById(R.id.twvRoot);
         mTxtNoMusic = (TextView) root.findViewById(R.id.txtNoMusic);
+
+        if (sAdapter.getItemCount() > 0) {
+            mTxtNoMusic.setVisibility(View.GONE);
+        }
 
         twvRoot.setAdapter(sAdapter);
         final Drawable divider = getResources().getDrawable(R.drawable.divider);
@@ -397,7 +406,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onProviderConnected(IMusicProvider provider) {
-        if (sWarmUp) {
+        if (sWarmUp && sAdapter.getItemCount() < 2) {
             mHandler.removeCallbacks(mGenerateEntries);
             mHandler.post(mGenerateEntries);
         }
