@@ -1,13 +1,5 @@
-<GridView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/gvPlaylists"
+<android.support.v7.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rvPlaylists"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:horizontalSpacing="4dp"
-    android:paddingLeft="4dp"
-    android:paddingRight="4dp"
-    android:paddingTop="4dp"
-    android:paddingBottom="@dimen/playing_bar_height"
-    android:clipToPadding="false"
-    android:numColumns="@integer/small_grids_column_count"
-    android:verticalSpacing="4dp"
-    android:transitionName="itemGroup" />
+    android:layout_height="match_parent"/>
