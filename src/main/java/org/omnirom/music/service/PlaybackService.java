@@ -1071,7 +1071,8 @@ public class PlaybackService extends Service
     public void onSongUpdate(List<Song> s) {
         final Song currentSong = getCurrentSong();
 
-        if (s.contains(currentSong) && currentSong.isLoaded()) {
+        if (currentSong != null && s.contains(currentSong) && currentSong.isLoaded()
+                && mCurrentTrackLoaded) {
             if (mCurrentTrackWaitLoading) {
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
