@@ -57,8 +57,6 @@ public class MainActivity extends AppActivity
     public static final int SECTION_NOW_PLAYING= 7;
     public static final int SECTION_DRIVE_MODE = 8;
 
-    public static final int SECTION_DSP_EFFECTS= -1;
-
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -94,7 +92,6 @@ public class MainActivity extends AppActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.e(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -277,14 +274,6 @@ public class MainActivity extends AppActivity
 
         if (mOrientation != newConfig.orientation) {
             mOrientation = newConfig.orientation;
-
-            // Reload the current fragment for layout changes
-            /*mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onNavigationDrawerItemSelected(mCurrentFragmentIndex);
-                }
-            });*/
         }
     }
 
@@ -378,9 +367,6 @@ public class MainActivity extends AppActivity
             case SECTION_RECOGNITION:
                 mTitle = getString(R.string.title_section_recognition);
                 break;
-            case SECTION_DSP_EFFECTS:
-                mTitle = getString(R.string.settings_dsp_config_title);
-                break;
             case SECTION_HISTORY:
                 mTitle = getString(R.string.section_history);
                 break;
@@ -470,7 +456,9 @@ public class MainActivity extends AppActivity
                 break;
 
             case R.id.action_sound_effects:
-                showFragment(new DspProvidersFragment(), true, "-1_DSPProv");
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                intent.putExtra("DSP", true);
+                startActivity(intent);
                 break;
 
             case R.id.action_offline_mode:

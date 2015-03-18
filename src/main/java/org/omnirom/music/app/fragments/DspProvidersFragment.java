@@ -42,7 +42,6 @@ public class DspProvidersFragment extends ListFragment {
 
     private DspAdapter mAdapter;
     private Handler mHandler;
-    private float mStoredMATop = -1;
 
     private DspAdapter.ClickListener mClickListener = new DspAdapter.ClickListener() {
         @Override
@@ -121,26 +120,6 @@ public class DspProvidersFragment extends ListFragment {
         mHandler = new Handler();
 
         updateDspChain();
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if (activity instanceof MainActivity) {
-            MainActivity ma = (MainActivity) activity;
-            ma.onSectionAttached(MainActivity.SECTION_DSP_EFFECTS);
-            mStoredMATop = ma.getContentShadowTop();
-            ma.setContentShadowTop(0);
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if (mStoredMATop >= 0) {
-            MainActivity ma = (MainActivity) getActivity();
-            ma.setContentShadowTop(mStoredMATop);
-        }
     }
 
     @Override
