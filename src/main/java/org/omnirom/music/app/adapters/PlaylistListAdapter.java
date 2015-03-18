@@ -62,6 +62,20 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
     private List<Playlist> mPlaylists;
     private PlaylistOrderer mOrderer;
 
+    static class PlaylistSort implements Comparator<Playlist> {
+        private Map<String, Integer> mOrder;
+
+        public PlaylistSort(Map<String,Integer> order) {
+            mOrder = order;
+        }
+
+        public int compare(Playlist o1, Playlist o2) {
+            int index1 = mOrder.containsKey(o1.getRef()) ? mOrder.get(o1.getRef()) : -1;
+            int index2 = mOrder.containsKey(o2.getRef()) ? mOrder.get(o2.getRef()) : -1;
+            return index1 - index2;
+        }
+    }
+
     /**
      * Default constructor
      */
@@ -87,13 +101,9 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
         ensureOrderer(context);
         final Map<String, Integer> order = mOrderer.getOrder();
 
-        Collections.sort(mPlaylists, new Comparator<Playlist>() {
-            public int compare(Playlist o1, Playlist o2) {
-                int index1 = order.containsKey(o1.getRef()) ? order.get(o1.getRef()) : -1;
-                int index2 = order.containsKey(o2.getRef()) ? order.get(o2.getRef()) : -1;
-                return index1 - index2;
-            }
-        });
+        if (order != null) {
+            Collections.sort(mPlaylists, new PlaylistSort(order));
+        }
     }
 
     /**
@@ -115,12 +125,17 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
      *
      * @param ps The collection of {@link org.omnirom.music.model.Playlist} to add
      */
-    public void addAllUnique(Collection<Playlist> ps) {
+    public boolean addAllUnique(Collection<Playlist> ps) {
+        boolean didChange = false;
+
         for (Playlist p : ps) {
             if (p != null && !mPlaylists.contains(p)) {
                 mPlaylists.add(p);
+                didChange = true;
             }
         }
+
+        return didChange;
     }
 
     /**
@@ -203,7 +218,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
             if (bgColor != 0) {
                 holder.container.setBackgroundColor(bgColor);
             } else {
-                int[] attrs = new int[] { android.R.attr.selectableItemBackground /* index 0 */};
+                int[] attrs = new int[]{android.R.attr.selectableItemBackground /* index 0 */};
                 TypedArray ta = holder.container.getContext().obtainStyledAttributes(attrs);
                 Drawable drawableFromTheme = ta.getDrawable(0 /* index */);
                 ta.recycle();

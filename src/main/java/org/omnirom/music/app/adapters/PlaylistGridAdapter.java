@@ -16,6 +16,7 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +24,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.json.JSONException;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.framework.PlaylistOrderer;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 
@@ -33,11 +36,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Adapter to display a list of {@link org.omnirom.music.model.Playlist} in a GridView
  */
 public class PlaylistGridAdapter extends BaseAdapter {
+    private static final String TAG = "PlaylistGridAdapter";
+
     /**
      * ViewHolder for items
      */
@@ -51,33 +57,34 @@ public class PlaylistGridAdapter extends BaseAdapter {
     }
 
     private List<Playlist> mPlaylists;
-
-    private Comparator<Playlist> mComparator = new Comparator<Playlist>() {
-        @Override
-        public int compare(Playlist playlist, Playlist playlist2) {
-            if (playlist != null && playlist2 != null && playlist.getName() != null
-                    && playlist2.getName() != null) {
-                return playlist.getName().toLowerCase().compareTo(playlist2.getName().toLowerCase());
-            } else if (playlist != null && playlist2 != null) {
-                return playlist.getRef().compareTo(playlist2.getRef());
-            } else {
-                return 0;
-            }
-        }
-    };
+    private PlaylistOrderer mOrderer;
 
     /**
      * Default constructor
      */
-    public PlaylistGridAdapter() {
-        mPlaylists = new ArrayList<Playlist>();
+    public PlaylistGridAdapter(Context context) {
+        mPlaylists = new ArrayList<>();
+        ensureOrderer(context);
+    }
+
+    private void ensureOrderer(Context context) {
+        if (mOrderer == null && context != null) {
+            mOrderer = new PlaylistOrderer(context);
+        } else if (mOrderer == null) {
+            throw new IllegalArgumentException("Orderer context is null and orderer is null too!");
+        }
     }
 
     /**
      * Sorts the list alphabetically
      */
-    private void sortList() {
-        Collections.sort(mPlaylists, mComparator);
+    private void sortList(Context context) throws JSONException {
+        ensureOrderer(context);
+        final Map<String, Integer> order = mOrderer.getOrder();
+
+        if (order != null) {
+            Collections.sort(mPlaylists, new PlaylistListAdapter.PlaylistSort(order));
+        }
     }
 
     /**
@@ -105,7 +112,7 @@ public class PlaylistGridAdapter extends BaseAdapter {
      * Add all the elements into the adapter if they're not already there
      * @param ps The collection of {@link org.omnirom.music.model.Playlist} to add
      */
-    public void addAllUnique(Collection<Playlist> ps) {
+    public boolean addAllUnique(Collection<Playlist> ps) {
         boolean didChange = false;
         for (Playlist p : ps) {
             if (p != null && !mPlaylists.contains(p)) {
@@ -117,6 +124,8 @@ public class PlaylistGridAdapter extends BaseAdapter {
         if (didChange) {
             notifyDataSetChanged();
         }
+
+        return didChange;
     }
 
     /**
@@ -230,7 +239,11 @@ public class PlaylistGridAdapter extends BaseAdapter {
     @Override
     public void notifyDataSetChanged() {
         // We sort the list before showing it
-        sortList();
+        try {
+            sortList(null);
+        } catch (JSONException e) {
+            Log.e(TAG, "Cannot sort items", e);
+        }
         super.notifyDataSetChanged();
     }
 }
