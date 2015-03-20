@@ -198,7 +198,6 @@ public class MainActivity extends AppActivity
 
     @Override
     protected void onResume() {
-        Log.e(TAG, "onResume");
         super.onResume();
         PluginsLookup.getDefault().requestUpdatePlugins();
 
@@ -217,20 +216,6 @@ public class MainActivity extends AppActivity
             } else {
                 Log.w(TAG, "Configured provider is null!");
             }
-        }
-
-        // Reload the current fragment for layout changes
-        final int activeSection = mCurrentFragmentIndex + 1;
-
-        if (activeSection != SECTION_MY_SONGS
-                && activeSection != SECTION_NOW_PLAYING
-                && activeSection != SECTION_DRIVE_MODE) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    onNavigationDrawerItemSelected(mCurrentFragmentIndex);
-                }
-            }, 200);
         }
     }
 
