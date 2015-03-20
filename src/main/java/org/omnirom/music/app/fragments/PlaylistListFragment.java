@@ -93,7 +93,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
             }
 
             if (didChange) {
-                if (mAdapter != null) {
+                if (mAdapter != null && getActivity() != null) {
                     try {
                         mAdapter.sortList(getActivity().getApplicationContext());
                     } catch (JSONException e) {
