@@ -469,7 +469,7 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
             }
         } else {
             // No more buffers to play, we pause the playback and wait for buffers in enqueue
-            p->setPlayState(SL_PLAYSTATE_PAUSED);
+            // p->setPlayState(SL_PLAYSTATE_PAUSED);
             p->m_iUnderflowCount++;
             ALOGW("Buffer underrun");
 

@@ -25,7 +25,7 @@
 
 // -------------------------------------------------------------------------------------
 NativeHub::NativeHub(void* userdata) : m_pSink(nullptr), m_pLastProviderSocket(nullptr),
-        m_iSampleRate(44100), m_iChannels(2), m_pUserData(userdata) {
+        m_iSampleRate(44100), m_iChannels(2), m_pUserData(userdata), m_iBuffersInDSP(0) {
 }
 // -------------------------------------------------------------------------------------
 NativeHub::~NativeHub() {
@@ -126,7 +126,7 @@ void NativeHub::writeAudioToDsp(int chain_index, const uint8_t* data, const uint
     // Before even writing to DSP, we check if the sink has free space so that we don't
     // process it worthlessly (and avoid glitches because Biquad filters dislike having
     // unwanted data).
-    if (m_pSink && m_pSink->getFreeBuffersCount() < len) {
+    if (m_pSink && m_pSink->getFreeBuffersCount() < len + m_iBuffersInDSP) {
         writeAudioResponse(0);
     } else {
         bool success = false;
@@ -142,6 +142,7 @@ void NativeHub::writeAudioToDsp(int chain_index, const uint8_t* data, const uint
                 ++iter;
             } else {
                 success = true;
+                m_iBuffersInDSP += len;
             }
         }
 
@@ -213,6 +214,7 @@ void NativeHub::onAudioData(SocketCommon* socket, const uint8_t* data, const uin
             // Audio from a DSP plugin, route it to the next element (or to the sink if no more)
             int index = std::distance(m_DSPChain.begin(),
                     std::find(m_DSPChain.begin(), m_DSPChain.end(), socket->getSocketName()));
+            m_iBuffersInDSP -= len;
             if (index < m_DSPChain.size() - 1) {
                 writeAudioToDsp(index + 1, data, len);
             } else {
