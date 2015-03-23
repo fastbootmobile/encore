@@ -205,7 +205,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     MainActivity act = (MainActivity) getActivity();
-                    PlaylistListAdapter.ViewHolder tag = (PlaylistListAdapter.ViewHolder) view.getTag();
+                    PlaylistGridAdapter.ViewHolder tag = (PlaylistGridAdapter.ViewHolder) view.getTag();
                     Intent intent = PlaylistActivity.craftIntent(act, mGridAdapter.getItem(position),
                             ((MaterialTransitionDrawable) tag.ivCover.getDrawable()).getFinalDrawable().getBitmap());
 
