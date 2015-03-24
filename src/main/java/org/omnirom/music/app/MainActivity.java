@@ -93,35 +93,42 @@ public class MainActivity extends AppActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        if (!WelcomeActivity.hasDoneWelcomeWizard(this)) {
+            Intent intent = new Intent(this, WelcomeActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            setContentView(R.layout.activity_main);
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
+            mToolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(mToolbar);
 
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+            mNavigationDrawerFragment = (NavigationDrawerFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+            mTitle = getTitle();
+
+            // Set up the drawer.
+            mNavigationDrawerFragment.setUp(
+                    R.id.navigation_drawer,
+                    (DrawerLayout) findViewById(R.id.drawer_layout));
 
 
-        // Setup the playing bar click listener
-        mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
-        mPlayingBarLayout.setWrapped(true, false);
+            // Setup the playing bar click listener
+            mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
+            mPlayingBarLayout.setWrapped(true, false);
 
-        // Setup Cast button
-        mCastModule = new CastModule(getApplicationContext());
+            // Setup Cast button
+            mCastModule = new CastModule(getApplicationContext());
 
-        // Look for un-configured plugins in a second
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                lookForUnconfiguredProviders();
-            }
-        }, 1000);
+            // Look for un-configured plugins in a second
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    lookForUnconfiguredProviders();
+                }
+            }, 1000);
+        }
     }
 
     public Toolbar getToolbar() {
