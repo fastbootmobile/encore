@@ -1,10 +1,12 @@
 package org.omnirom.music.app.fragments;
 
 import android.content.Intent;
+import android.os.RemoteException;
 import android.support.annotation.LayoutRes;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.WelcomeActivity;
 import org.omnirom.music.app.adapters.ProvidersAdapter;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ import java.util.List;
  * A placeholder fragment containing a simple view.
  */
 public class WelcomeFragment extends Fragment {
+    private static final String TAG = "WelcomeFragment";
 
     private static final int LAST_STEP = 4;
 
@@ -61,6 +65,7 @@ public class WelcomeFragment extends Fragment {
     @LayoutRes
     private int mLayoutId;
     private int mStep;
+    private ProviderConnection mConfiguringProvider;
 
     public WelcomeFragment() {
     }
@@ -129,9 +134,31 @@ public class WelcomeFragment extends Fragment {
                     Intent intent = new Intent();
                     intent.setPackage(connection.getPackage());
                     intent.setClassName(connection.getPackage(), connection.getConfigurationActivity());
+                    mConfiguringProvider = connection;
                     startActivity(intent);
                 }
             });
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mConfiguringProvider != null) {
+            IMusicProvider provider = mConfiguringProvider.getBinder();
+            if (provider != null) {
+                try {
+                    if (provider.isSetup()) {
+                        provider.login();
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Remote exception while trying to login configured provider", e);
+                }
+            } else {
+                Log.w(TAG, "Configured provider is null!");
+            }
+
+            mConfiguringProvider = null;
         }
     }
 }
