@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -151,8 +152,8 @@ public class NavHeadService extends Service {
         mHeadView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), DriveModeActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                Intent intent = new Intent(getBaseContext(), DriveModeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
         });
@@ -178,11 +179,13 @@ public class NavHeadService extends Service {
     }
 
     public void setHeadPosition(int x, int y) {
+        final int sizePx = getResources().getDimensionPixelSize(R.dimen.nav_head_size);
+
         mHeadLayoutParams.gravity = Gravity.TOP | Gravity.LEFT;
         mHeadLayoutParams.x = x;
         mHeadLayoutParams.y = y;
-        mHeadLayoutParams.width = getResources().getDimensionPixelSize(R.dimen.nav_head_size);
-        mHeadLayoutParams.height = getResources().getDimensionPixelSize(R.dimen.nav_head_size);
+        mHeadLayoutParams.width = sizePx;
+        mHeadLayoutParams.height = sizePx;
 
         mWindowManager.updateViewLayout(mHeadView, mHeadLayoutParams);
     }
