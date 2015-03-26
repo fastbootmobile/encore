@@ -881,6 +881,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 mRootView.setVisibility(View.GONE);
             }
 
+
+            return mRootView;
+        }
+
+        @Override
+        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+
             // Load recommendation and albums for the first
             mHandler.post(new Runnable() {
                 @Override
@@ -889,8 +897,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     loadAlbums(true);
                 }
             });
-
-            return mRootView;
         }
 
         public void notifySizeLimit() {
@@ -974,9 +980,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         /**
          * Load the recommended track
          */
-        private void loadRecommendation() {
-            if (mRecommendationLoaded || mParent == null) {
-                // Already loaded or parent not loaded yet
+        private synchronized void loadRecommendation() {
+            if (mRecommendationLoaded || mParent == null || mRootView == null) {
+                // Already loaded or parent not loaded yet or view not loaded yet
                 return;
             }
 

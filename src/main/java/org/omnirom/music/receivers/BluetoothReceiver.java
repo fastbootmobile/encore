@@ -86,7 +86,8 @@ public class BluetoothReceiver extends BroadcastReceiver {
                                        BluetoothDevice device) {
         String autoconnectName = prefs.getString(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME, null);
 
-        if (autoconnectName != null && device.getName().equals(autoconnectName)) {
+        if (autoconnectName != null && device.getName() != null
+                && device.getName().equals(autoconnectName)) {
             // Our autoconnect device plugged in, launch the desired action
             Set<String> actionFlagsStr = prefs.getStringSet(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ACTION, null);
             int actionFlags = buildActionFlags(actionFlagsStr);
@@ -121,7 +122,8 @@ public class BluetoothReceiver extends BroadcastReceiver {
                                           BluetoothDevice device) {
         String autoconnectName = prefs.getString(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME, null);
 
-        if (autoconnectName != null && device.getName().equals(autoconnectName)) {
+        if (autoconnectName != null && device.getName() != null
+                && device.getName().equals(autoconnectName)) {
             Set<String> actionFlagsStr = prefs.getStringSet(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ACTION, null);
             int actionFlags = buildActionFlags(actionFlagsStr);
 
