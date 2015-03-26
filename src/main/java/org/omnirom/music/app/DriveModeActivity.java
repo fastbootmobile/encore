@@ -16,7 +16,10 @@
 package org.omnirom.music.app;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -63,6 +66,7 @@ import java.util.List;
 public class DriveModeActivity extends AppActivity implements ILocalCallback, View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "DriveModeActivity";
 
+    public static final String ACTION_FINISH = "org.omnirom.music.action.FINISH_DRIVE_MODE";
     private static final int DELAY_SEEKBAR_UPDATE = 1000 / 15;  // 15 Hz
 
     private static final int MSG_UPDATE_PLAYBACK_STATUS = 1;
@@ -92,6 +96,15 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private VoiceRecognizer mVoiceRecognizer;
     private VoiceCommander mVoiceCommander;
     private VoiceActionHelper mVoiceHelper;
+
+    private BroadcastReceiver mBroadcastRcv = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ACTION_FINISH)) {
+                finish();
+            }
+        }
+    };
 
     private static class DriveHandler extends Handler {
         private WeakReference<DriveModeActivity> mParent;
@@ -388,6 +401,8 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
             // Start NavHead for easy going back into Drive mode
             startService(new Intent(this, NavHeadService.class));
         }
+
+        unregisterReceiver(mBroadcastRcv);
     }
 
     @Override
@@ -400,6 +415,10 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Allow for BluetoothReceiver to kill the activity on BT disconnect
+        registerReceiver(mBroadcastRcv, new IntentFilter(ACTION_FINISH));
+
         ProviderAggregator.getDefault().addUpdateCallback(this);
         PlaybackProxy.addCallback(mPlaybackCallback);
         mHandler.sendEmptyMessageDelayed(MSG_HIDE_SYSTEM_UI, 1000);
