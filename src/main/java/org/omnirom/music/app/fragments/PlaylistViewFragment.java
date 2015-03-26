@@ -176,6 +176,11 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         View root = inflater.inflate(R.layout.fragment_playlist_view, container, false);
         assert root != null;
 
+        if (mPlaylist == null) {
+            // If playlist couldn't load, abort early
+            return root;
+        }
+
         mListViewContents = (PlaylistListView) root.findViewById(R.id.lvPlaylistContents);
 
         // Setup the parallaxed header

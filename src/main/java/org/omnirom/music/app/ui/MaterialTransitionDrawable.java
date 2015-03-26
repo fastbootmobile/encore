@@ -180,12 +180,10 @@ public class MaterialTransitionDrawable extends Drawable {
                 }
             } else if (mBaseDrawable != null) {
                 if (!mBaseDrawable.getBitmap().isRecycled()) {
-                    if (Build.VERSION.SDK_INT >= 17) {
-                        if (mBaseDrawable.getBitmap().isPremultiplied()) {
-                            mBaseDrawable.draw(canvas);
-                        }
-                    } else {
+                    try {
                         mBaseDrawable.draw(canvas);
+                    } catch (Exception e) {
+                        Log.w(TAG, "Couldn't draw base drawable: " + e.getMessage());
                     }
                 }
             }
