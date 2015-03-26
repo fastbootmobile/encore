@@ -20,6 +20,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
@@ -36,8 +37,8 @@ import org.omnirom.music.app.R;
 public class NavHeadService extends Service {
     private static final String TAG = "NavHeadService";
     private static final String PREFS = "NAVHEAD";
-    private static final String PREF_HEAD_X = "head_x";
-    private static final String PREF_HEAD_Y = "head_y";
+    private static final String PREF_HEAD_X = "head_x_";
+    private static final String PREF_HEAD_Y = "head_y_";
 
     private WindowManager mWindowManager;
     private ImageView mHeadView;
@@ -59,6 +60,12 @@ public class NavHeadService extends Service {
         super.onCreate();
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         createHead();
+        loadHeadPosition();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         loadHeadPosition();
     }
 
@@ -160,21 +167,27 @@ public class NavHeadService extends Service {
     }
 
     private void loadHeadPosition() {
+        final int rotation = mWindowManager.getDefaultDisplay().getRotation();
+
         // Load position from shared preferences
         SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
 
-        int headX = prefs.getInt(PREF_HEAD_X, 0);
-        int headY = prefs.getInt(PREF_HEAD_Y, 100);
+        int headX = prefs.getInt(PREF_HEAD_X + rotation, 0);
+        int headY = prefs.getInt(PREF_HEAD_Y + rotation, 100);
 
         setHeadPosition(headX, headY);
     }
 
     private void saveHeadPosition() {
+        final int rotation = mWindowManager.getDefaultDisplay().getRotation();
+
         // Save position into shared preferences
         SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(PREF_HEAD_X, mHeadLayoutParams.x);
-        editor.putInt(PREF_HEAD_Y, mHeadLayoutParams.y);
+
+        editor.putInt(PREF_HEAD_X + rotation, mHeadLayoutParams.x);
+        editor.putInt(PREF_HEAD_Y + rotation, mHeadLayoutParams.y);
+
         editor.apply();
     }
 
