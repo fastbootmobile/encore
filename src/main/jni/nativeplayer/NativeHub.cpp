@@ -201,6 +201,17 @@ void NativeHub::onFormatInfo(SocketCommon* socket, const int32_t sample_rate,
     if (m_pSink) {
         m_pSink->setAudioFormat(sample_rate, 16, channels);
     }
+
+    // Notify DSP plugins of format info
+    for (auto it = m_DSPChain.begin(); it != m_DSPChain.end(); ++it) {
+        SocketCommon* socket = m_DSPSockets[*it];
+        if (m_pSink) {
+            socket->writeFormatInfo(m_pSink->getChannels(), m_pSink->getSampleRate());
+        } else {
+            // Default values
+            socket->writeFormatInfo(m_iChannels, m_iSampleRate);
+        }
+    }
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::onAudioData(SocketCommon* socket, const uint8_t* data, const uint32_t len) {
