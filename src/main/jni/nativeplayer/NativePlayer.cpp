@@ -249,7 +249,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
         }
 
         m_iBufferMinPlayback = sample_rate * channels / 40;
-        m_iBufferMaxSize = sample_rate * channels;
+        m_iBufferMaxSize = sample_rate * channels / 2;
 
         switch (sample_rate) {
             // Crappy quality starts here v
