@@ -227,7 +227,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             if (artist != null && artist.getName() != null && !artist.getName().isEmpty()) {
                 tag.tvArtist.setText(artist.getName());
             } else {
-                tag.tvArtist.setText(R.string.loading);
+                tag.tvArtist.setText("...");
             }
 
             tag.ivAlbumArt.loadArtForSong(item);
