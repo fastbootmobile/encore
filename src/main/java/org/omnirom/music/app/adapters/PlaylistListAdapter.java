@@ -70,8 +70,8 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
         }
 
         public int compare(Playlist o1, Playlist o2) {
-            int index1 = mOrder.containsKey(o1.getRef()) ? mOrder.get(o1.getRef()) : 1;
-            int index2 = mOrder.containsKey(o2.getRef()) ? mOrder.get(o2.getRef()) : 1;
+            int index1 = mOrder.containsKey(o1.getRef()) ? mOrder.get(o1.getRef()) : -1;
+            int index2 = mOrder.containsKey(o2.getRef()) ? mOrder.get(o2.getRef()) : -1;
             return index1 - index2;
         }
     }
