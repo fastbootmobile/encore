@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.TransactionTooLargeException;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +39,7 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.BasePlaybackCallback;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -92,29 +94,70 @@ public class SongsFragment extends Fragment {
         mSongsListAdapter = new SongsListAdapter(true);
         songsList.setAdapter(mSongsListAdapter);
 
-        List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-        for (ProviderConnection providerConnection : providers) {
-            try {
-                IMusicProvider provider = providerConnection.getBinder();
-                if (provider != null) {
-                    List<Song> songs = provider.getSongs();
-                    if (songs != null) {
-                        for (Song song : songs) {
-                            if (song != null) {
-                                mSongsListAdapter.put(song);
+        new Thread() {
+            public void run() {
+                List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+                for (ProviderConnection providerConnection : providers) {
+                    try {
+                        IMusicProvider provider = providerConnection.getBinder();
+                        if (provider != null) {
+                            int limit = 5;
+                            int offset = 0;
+                            final List<Song> songsToAdd = new ArrayList<Song>();
+
+                            while (true) {
+                                try {
+                                    List<Song> songs = provider.getSongs(offset, limit);
+
+                                    if (songs == null || songs.size() == 0) {
+                                        // Null or empty list, stop here
+                                        break;
+                                    }
+
+                                    for (Song song : songs) {
+                                        if (song != null) {
+                                            songsToAdd.add(song);
+                                        }
+                                    }
+
+                                    if (songs.size() < limit) {
+                                        // Less songs than requested, assume we're at the end
+                                        break;
+                                    } else {
+                                        offset += limit;
+                                    }
+                                } catch (TransactionTooLargeException e) {
+                                    limit -= 10;
+
+                                    if (limit <= 0) {
+                                        Log.e(TAG, "Transaction failed even at limit = 0, bailing out", e);
+                                        break;
+                                    }
+
+                                    Log.w(TAG, "Transaction too large, reducing limit to " + limit);
+                                }
                             }
+
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mSongsListAdapter.putAll(songsToAdd);
+
+                                    mSongsListAdapter.sortAll();
+                                    mSongsListAdapter.notifyDataSetChanged();
+                                }
+                            });
                         }
+                    } catch (DeadObjectException e) {
+                        Log.e(TAG, "Provider died while getting songs");
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Cannot get songs from a provider", e);
                     }
                 }
-            } catch (DeadObjectException e) {
-                Log.e(TAG, "Provider died while getting songs");
-            } catch (RemoteException e) {
-                Log.w(TAG, "Cannot get songs from a provider", e);
-            }
-        }
 
-        mSongsListAdapter.sortAll();
-        mSongsListAdapter.notifyDataSetChanged();
+            }
+        }.start();
+
 
         songsList.setOnItemClickListener(mItemClickListener);
         return root;

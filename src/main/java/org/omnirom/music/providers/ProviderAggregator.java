@@ -21,6 +21,7 @@ import android.net.NetworkInfo;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.TransactionTooLargeException;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -121,7 +122,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             // We make a copy to avoid synchronization issues and needless locks
             ArrayList<ProviderConnection> providers;
             synchronized (mProviders) {
-                providers = new ArrayList<ProviderConnection>(mProviders);
+                providers = new ArrayList<>(mProviders);
             }
 
             // Then we query the providers
@@ -131,7 +132,33 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                             conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
                         List<Playlist> playlist = conn.getBinder().getPlaylists();
                         ensurePlaylistsSongsCached(conn, playlist);
-                        cacheSongs(conn, conn.getBinder().getSongs());
+
+                        // Cache all songs in batch
+                        int offset = 0;
+                        int limit = 100;
+                        boolean goForIt = true;
+
+                        while (goForIt) {
+                            try {
+                                List<Song> songs = conn.getBinder().getSongs(offset, limit);
+
+                                if (songs == null || songs.size() == 0) {
+                                    goForIt = false;
+                                } else {
+                                    cacheSongs(conn, songs);
+
+                                    if (songs.size() < limit) {
+                                        goForIt = false;
+                                    }
+
+                                    offset += limit;
+                                }
+                            } catch (TransactionTooLargeException ignore) {
+                                limit -= 10;
+                                Log.w(TAG, "Got transaction size error, reducing limit to " + limit);
+                            }
+                        }
+
                         cacheAlbums(conn, conn.getBinder().getAlbums());
                         cacheArtists(conn, conn.getBinder().getArtists());
                     } else if (conn.getBinder() != null) {
@@ -143,7 +170,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         unregisterProvider(conn);
                     }
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to get playlists from " + conn.getProviderName(), e);
+                    Log.e(TAG, "Unable to get data from " + conn.getProviderName(), e);
                     unregisterProvider(conn);
                 }
             }
