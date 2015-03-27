@@ -248,7 +248,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
             free(m_pPlayingBuffer);
         }
 
-        m_iBufferMinPlayback = sample_rate * channels / 4;
+        m_iBufferMinPlayback = sample_rate * channels / 40;
         m_iBufferMaxSize = sample_rate * channels;
 
         switch (sample_rate) {
