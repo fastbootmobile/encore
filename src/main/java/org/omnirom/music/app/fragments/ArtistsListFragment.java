@@ -21,9 +21,13 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
+import android.os.RemoteException;
+import android.os.TransactionTooLargeException;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +39,7 @@ import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -43,13 +48,16 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Fragment displaying a list of artists
  */
 public class ArtistsListFragment extends Fragment implements ILocalCallback {
+    private static final String TAG = "ArtistsListFragment";
 
     private ArtistsAdapter mAdapter;
     private Handler mHandler;
@@ -112,7 +120,21 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
 
         new Thread() {
             public void run() {
-                final List<Artist> artists = ProviderAggregator.getDefault().getCache().getAllArtists();
+                List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+                final List<Artist> artists = new ArrayList<Artist>();
+                for (ProviderConnection providerConnection : providers) {
+                    try {
+                        IMusicProvider provider = providerConnection.getBinder();
+                        if (provider != null) {
+                            artists.addAll(provider.getArtists());
+                        }
+                    } catch (DeadObjectException e) {
+                        Log.e(TAG, "Provider died while getting artists");
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Cannot get artists from a provider", e);
+                    }
+                }
+
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -120,6 +142,7 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
                         mAdapter.notifyDataSetChanged();
                     }
                 });
+
             }
         }.start();
 
