@@ -101,7 +101,7 @@ public class SongsFragment extends Fragment {
                     try {
                         IMusicProvider provider = providerConnection.getBinder();
                         if (provider != null) {
-                            int limit = 5;
+                            int limit = 100;
                             int offset = 0;
                             final List<Song> songsToAdd = new ArrayList<Song>();
 
@@ -122,6 +122,8 @@ public class SongsFragment extends Fragment {
 
                                     if (songs.size() < limit) {
                                         // Less songs than requested, assume we're at the end
+                                        Log.d(TAG, "Got " + songs.size() + " songs, limit="
+                                                + limit + ", assuming end of list");
                                         break;
                                     } else {
                                         offset += limit;
