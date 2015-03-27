@@ -536,10 +536,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 }
                 pager.requestLayout();
 
-                if (i == FRAGMENT_ID_BIOGRAPHY) {
-                    mArtistInfoFragment.notifyActive();
-                } else if (i == FRAGMENT_ID_SIMILAR) {
-                    mArtistSimilarFragment.notifyActive();
+                boolean hasRosetta = ProviderAggregator.getDefault().getRosettaStonePrefix().size() > 0;
+
+                if (hasRosetta) {
+                    if (i == FRAGMENT_ID_BIOGRAPHY) {
+                        mArtistInfoFragment.notifyActive();
+                    } else if (i == FRAGMENT_ID_SIMILAR) {
+                        mArtistSimilarFragment.notifyActive();
+                    }
+                } else {
+                    if (i == FRAGMENT_ID_SIMILAR) {
+                        // This is actually BIOGRAPHY if rosetta is not available
+                        mArtistInfoFragment.notifyActive();
+                    }
                 }
             }
 
@@ -1517,8 +1526,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         public void notifyActive() {
             if (!mSimilarLoaded) {
                 if (ProviderAggregator.getDefault().isOfflineMode()) {
-                    mOfflineView.setVisibility(View.VISIBLE);
-                    mArtistsSpinner.setVisibility(View.GONE);
+                    if (mOfflineView != null) mOfflineView.setVisibility(View.VISIBLE);
+                    if (mArtistsSpinner != null) mArtistsSpinner.setVisibility(View.GONE);
                 } else {
                     mOfflineView.setVisibility(View.GONE);
                     mArtistsSpinner.setVisibility(View.VISIBLE);
