@@ -42,6 +42,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
@@ -416,7 +417,6 @@ public class PlayingBarView extends RelativeLayout {
 
             // Inflate views and make the list out of the first 4 items (or less)
             int shownCount = 0;
-            View itemViews[] = new View[MAX_PEEK_QUEUE_SIZE];
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
@@ -437,7 +437,6 @@ public class PlayingBarView extends RelativeLayout {
                     itemRoot.setTransitionName("playbackqueue:preview:" + shownCount);
                 }
                 mTracksLayout.addView(itemRoot);
-                itemViews[shownCount] = itemRoot;
 
                 TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
                 TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
@@ -492,6 +491,13 @@ public class PlayingBarView extends RelativeLayout {
 
                     @Override
                     public void onClick(View view) {
+                        if (song == null || song.getAlbum() == null) {
+                            Toast.makeText(view.getContext(),
+                                    R.string.toast_song_no_album, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+
                         Bitmap hero = ((MaterialTransitionDrawable) ((ImageView) view).getDrawable()).getFinalDrawable().getBitmap();
                         if (mPalette == null) {
                             mPalette = Palette.generate(hero);

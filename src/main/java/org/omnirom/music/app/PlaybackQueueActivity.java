@@ -40,6 +40,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import com.echonest.api.v4.EchoNestException;
 
@@ -411,16 +412,20 @@ public class PlaybackQueueActivity extends AppActivity {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                 public void onClick(View v) {
                     PlaybackQueueAdapter.ViewHolder tag = (PlaybackQueueAdapter.ViewHolder) v.getTag();
-                    Bitmap hero = ((MaterialTransitionDrawable) tag.ivAlbumArt.getDrawable()).getFinalDrawable().getBitmap();
-                    Intent intent = AlbumActivity.craftIntent(getActivity(), hero, tag.song.getAlbum(),
-                            tag.song.getProvider(), 0xFF333333);
+                    if (tag.song.getAlbum() != null) {
+                        Bitmap hero = ((MaterialTransitionDrawable) tag.ivAlbumArt.getDrawable()).getFinalDrawable().getBitmap();
+                        Intent intent = AlbumActivity.craftIntent(getActivity(), hero, tag.song.getAlbum(),
+                                tag.song.getProvider(), 0xFF333333);
 
-                    if (Utils.hasLollipop()) {
-                        ActivityOptions opts = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                                v, "itemImage");
-                        startActivity(intent, opts.toBundle());
+                        if (Utils.hasLollipop()) {
+                            ActivityOptions opts = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                                    v, "itemImage");
+                            startActivity(intent, opts.toBundle());
+                        } else {
+                            startActivity(intent);
+                        }
                     } else {
-                        startActivity(intent);
+                        Toast.makeText(getActivity(), R.string.toast_song_no_album, Toast.LENGTH_SHORT).show();
                     }
                 }
             };

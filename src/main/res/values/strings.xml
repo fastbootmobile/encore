@@ -193,5 +193,6 @@
     <string name="welcome_finish">Let\'s rock!</string>
     <string name="welcome_step3_body">You may configure your account and other settings for the following plugins:</string>
     <string name="welcome_step3_title">Configure your plugins</string>
+    <string name="toast_song_no_album">This song has no attached album</string>
 
 </resources>
