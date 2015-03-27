@@ -30,6 +30,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -371,6 +372,29 @@ public class Utils {
                                         final Song song) {
         PopupMenu popupMenu = new PopupMenu(context, parent);
         popupMenu.inflate(R.menu.track_overflow);
+
+        if (song.getArtist() == null) {
+            // This song has no artist information, hide the entry
+            Menu menu = popupMenu.getMenu();
+            for (int i = 0; i < menu.size(); ++i) {
+                if (menu.getItem(i).getItemId() == R.id.menu_open_artist) {
+                    menu.removeItem(i);
+                    break;
+                }
+            }
+        }
+
+        if (song.getAlbum() == null) {
+            // This song has no album information, hide the entry
+            Menu menu = popupMenu.getMenu();
+            for (int i = 0; i < menu.size(); ++i) {
+                if (menu.getItem(i).getItemId() == R.id.menu_add_album_to_queue) {
+                    menu.removeItem(i);
+                    break;
+                }
+            }
+        }
+
         popupMenu.show();
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -415,6 +439,24 @@ public class Utils {
                                                final Song song) {
         PopupMenu popupMenu = new PopupMenu(context, parent);
         popupMenu.inflate(R.menu.queue_overflow);
+        if (song.getAlbum() == null) {
+            // This song has no album information, hide the entries
+            Menu menu = popupMenu.getMenu();
+            for (int i = 0; i < menu.size(); ++i) {
+                if (menu.getItem(i).getItemId() == R.id.menu_add_album_to_queue) {
+                    menu.removeItem(i);
+                    break;
+                }
+            }
+
+            for (int i = 0; i < menu.size(); ++i) {
+                if (menu.getItem(i).getItemId() == R.id.menu_open_album) {
+                    menu.removeItem(i);
+                    break;
+                }
+            }
+        }
+
         popupMenu.show();
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
