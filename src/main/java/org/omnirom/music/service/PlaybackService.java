@@ -700,13 +700,22 @@ public class PlaybackService extends Service
      * Restarts the current song or goes to the previous one
      */
     void previousImpl() {
-        boolean shouldRestart = (getCurrentTrackPositionImpl() > 4000 || mCurrentTrack == 0);
+        boolean shouldRestart = (getCurrentTrackPositionImpl() > 4000 || (!mRepeatMode && mCurrentTrack == 0))
+                && mCurrentTrackLoaded;
         if (shouldRestart) {
             // Restart playback
             seekImpl(0);
         } else {
             // Go to the previous track
             mCurrentTrack--;
+            if (mCurrentTrack < 0) {
+                if (mRepeatMode) {
+                    mCurrentTrack = mPlaybackQueue.size() - 1;
+                } else {
+                    mCurrentTrack = 0;
+                }
+            }
+            
             mHandler.removeCallbacks(mStartPlaybackRunnable);
             mHandler.post(mStartPlaybackRunnable);
         }
@@ -852,7 +861,7 @@ public class PlaybackService extends Service
     void seekImpl(final long timeMs) {
         final Song currentSong = getCurrentSong();
         boolean success = false;
-        if (currentSong != null) {
+        if (currentSong != null && mCurrentTrackLoaded) {
             ProviderIdentifier id = currentSong.getProvider();
             ProviderConnection conn = PluginsLookup.getDefault().getProvider(id);
             if (conn != null) {
@@ -864,6 +873,8 @@ public class PlaybackService extends Service
                         mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot seek to time", e);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Provider thrown exception while seeking", e);
                     }
                 }
             }
