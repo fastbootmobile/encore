@@ -258,6 +258,7 @@ public class PlaybackQueueActivity extends AppActivity {
         private View.OnClickListener mRepeatClickListener;
         private View.OnClickListener mLikeClickListener;
         private View.OnClickListener mAlbumArtClickListener;
+        private View.OnClickListener mShuffleClickListener;
 
         private static class PlaybackQueueHandler extends Handler {
             private WeakReference<SimpleFragment> mParent;
@@ -362,6 +363,22 @@ public class PlaybackQueueActivity extends AppActivity {
                 }
             };
 
+            mShuffleClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean currentMode = PlaybackProxy.isShuffleMode();
+                    boolean newMode = !currentMode;
+
+                    PlaybackProxy.setShuffleMode(newMode);
+
+                    if (newMode) {
+                        ((ImageView) v).setImageResource(R.drawable.ic_shuffle);
+                    } else {
+                        ((ImageView) v).setImageResource(R.drawable.ic_shuffle_gray);
+                    }
+                }
+            };
+
             mLikeClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -437,7 +454,7 @@ public class PlaybackQueueActivity extends AppActivity {
 
             mAdapter = new PlaybackQueueAdapter(mPlayFabClickListener, mNextClickListener,
                     mPreviousClickListener, mSeekListener, mRepeatClickListener,
-                    mLikeClickListener, mAlbumArtClickListener);
+                    mLikeClickListener, mAlbumArtClickListener, mShuffleClickListener);
 
             if (mListView != null) {
                 mListView.setAdapter(mAdapter);

@@ -51,6 +51,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.receivers.RemoteControlReceiver;
+import org.omnirom.music.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -74,6 +75,7 @@ public class PlaybackService extends Service
     private static final String SERVICE_SHARED_PREFS = "PlaybackServicePrefs";
     private static final String QUEUE_SHARED_PREFS = "PlaybackQueueMemory";
     private static final String PREF_KEY_REPEAT = "repeatMode";
+    private static final String PREF_KEY_SHUFFLE = "shuffleMode";
 
     public static final String ACTION_COMMAND = "command";
     public static final String EXTRA_COMMAND_NAME = "command_name";
@@ -128,6 +130,7 @@ public class PlaybackService extends Service
     private ProviderIdentifier mCurrentPlayingProvider;
     private boolean mHasAudioFocus;
     private boolean mRepeatMode;
+    private boolean mShuffleMode;
     private Prefetcher mPrefetcher;
     private IRemoteMetadataManager mRemoteMetadata;
     private PowerManager.WakeLock mWakeLock;
@@ -257,6 +260,7 @@ public class PlaybackService extends Service
         // Restore preferences
         SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
         mRepeatMode = prefs.getBoolean(PREF_KEY_REPEAT, false);
+        mShuffleMode = prefs.getBoolean(PREF_KEY_SHUFFLE, false);
 
         // TODO: Use callbacks
         // Restore playback queue after one second - we have multiple things to wait here:
@@ -671,7 +675,16 @@ public class PlaybackService extends Service
      */
     void nextImpl() {
         boolean hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
-        if (mPlaybackQueue.size() > 0 && hasNext) {
+        if (mPlaybackQueue.size() > 1 && mShuffleMode) {
+            // Shuffle mode is enabled, play any track but not the one we just played
+            int previousTrack = mCurrentTrack;
+            while (previousTrack == mCurrentTrack) {
+                mCurrentTrack = Utils.getRandom(mPlaybackQueue.size());
+            }
+            mHandler.removeCallbacks(mStartPlaybackRunnable);
+            mHandler.post(mStartPlaybackRunnable);
+            mNotification.setHasNext(true);
+        } else if (mPlaybackQueue.size() > 0 && hasNext) {
             mCurrentTrack++;
             mHandler.removeCallbacks(mStartPlaybackRunnable);
             mHandler.post(mStartPlaybackRunnable);
@@ -715,7 +728,7 @@ public class PlaybackService extends Service
                     mCurrentTrack = 0;
                 }
             }
-            
+
             mHandler.removeCallbacks(mStartPlaybackRunnable);
             mHandler.post(mStartPlaybackRunnable);
         }
@@ -1073,6 +1086,20 @@ public class PlaybackService extends Service
         }
 
         @Override
+        public void setShuffleMode(boolean shuffle) throws RemoteException {
+            mShuffleMode = shuffle;
+            SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(PREF_KEY_SHUFFLE, shuffle);
+            editor.apply();
+        }
+
+        @Override
+        public boolean isShuffleMode() throws RemoteException {
+            return mShuffleMode;
+        }
+
+        @Override
         public void clearPlaybackQueue() throws RemoteException {
             mPlaybackQueue.clear();
         }
@@ -1203,17 +1230,28 @@ public class PlaybackService extends Service
 
         @Override
         public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
-            if (mPlaybackQueue.size() > 0 && mCurrentTrack < mPlaybackQueue.size() - 1) {
-                // Move to the next track
+            // We restart the queue in an handler. In the case of the Spotify provider, the
+            // endOfTrack callback locks the main API thread, leading to a dead lock if we
+            // try to play a track here while still being in the callstack of the endOfTrack
+            // callback.
+
+            if (mPlaybackQueue.size() > 1 && mShuffleMode) {
+                // Shuffle mode is enabled, play any track but not the one we just played
+                int previousTrack = mCurrentTrack;
+                while (previousTrack == mCurrentTrack) {
+                    mCurrentTrack = Utils.getRandom(mPlaybackQueue.size());
+                }
+
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
+                mHandler.post(mStartPlaybackRunnable);
+            } else if (mPlaybackQueue.size() > 0 && mCurrentTrack < mPlaybackQueue.size() - 1) {
+                // Regular sequential mode, not at the end, move to the next track
                 mCurrentTrack++;
 
-                // We restart the queue in an handler. In the case of the Spotify provider, the
-                // endOfTrack callback locks the main API thread, leading to a dead lock if we
-                // try to play a track here while still being in the callstack of the endOfTrack
-                // callback.
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
             } else if (mPlaybackQueue.size() > 0 && mCurrentTrack == mPlaybackQueue.size() - 1) {
+                // Regular sequential mode, at the end of the queue
                 if (mRepeatMode) {
                     // We're repeating, go back to the first track and play it
                     mCurrentTrack = 0;

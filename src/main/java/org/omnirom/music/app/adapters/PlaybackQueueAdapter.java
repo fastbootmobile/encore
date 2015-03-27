@@ -50,6 +50,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
     private View.OnClickListener mNextClickListener;
     private View.OnClickListener mPreviousClickListener;
     private View.OnClickListener mRepeatClickListener;
+    private View.OnClickListener mShuffleClickListener;
     private View.OnClickListener mLikeClickListener;
     private View.OnClickListener mOverflowClickListener;
     private View.OnClickListener mAlbumArtCLickListener;
@@ -61,7 +62,8 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                                 SeekBar.OnSeekBarChangeListener seekListener,
                                 View.OnClickListener repeatClickListener,
                                 View.OnClickListener likeClickListener,
-                                View.OnClickListener albumArtClickListener) {
+                                View.OnClickListener albumArtClickListener,
+                                View.OnClickListener shuffleClickListener) {
         mPlayFabClickListener = playFabClickListener;
         mNextClickListener = nextClickListener;
         mPreviousClickListener = previousClickListener;
@@ -69,6 +71,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
         mRepeatClickListener = repeatClickListener;
         mLikeClickListener = likeClickListener;
         mAlbumArtCLickListener = albumArtClickListener;
+        mShuffleClickListener = shuffleClickListener;
         mOverflowClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -160,7 +163,9 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                 tag.btnNext = (ImageView) convertView.findViewById(R.id.btnForward);
                 tag.btnPrevious = (ImageView) convertView.findViewById(R.id.btnPrevious);
                 tag.btnRepeat = (ImageView) convertView.findViewById(R.id.btnRepeat);
+                tag.btnShuffle = (ImageView) convertView.findViewById(R.id.btnShuffle);
                 tag.btnThumbs = (ImageView) convertView.findViewById(R.id.btnThumbs);
+                tag.btnThumbsDown = (ImageView) convertView.findViewById(R.id.btnThumbsDown);
                 tag.btnOverflow = (ImageView) convertView.findViewById(R.id.btnOverflow);
                 tag.fabPlay = (FloatingActionButton) convertView.findViewById(R.id.fabPlay);
 
@@ -169,6 +174,11 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                     tag.btnRepeat.setImageResource(R.drawable.ic_replay);
                 } else {
                     tag.btnRepeat.setImageResource(R.drawable.ic_replay_gray);
+                }
+                if (PlaybackProxy.isShuffleMode()) {
+                    tag.btnShuffle.setImageResource(R.drawable.ic_shuffle);
+                } else {
+                    tag.btnShuffle.setImageResource(R.drawable.ic_shuffle_gray);
                 }
                 tag.btnOverflow.setTag(tag);
                 tag.btnThumbs.setTag(tag);
@@ -189,6 +199,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                 tag.btnRepeat.setOnClickListener(mRepeatClickListener);
                 tag.btnThumbs.setOnClickListener(mLikeClickListener);
                 tag.btnOverflow.setOnClickListener(mOverflowClickListener);
+                tag.btnShuffle.setOnClickListener(mShuffleClickListener);
             }
 
             convertView.setTag(tag);
@@ -277,6 +288,8 @@ public class PlaybackQueueAdapter extends BaseAdapter {
         public ImageView btnRepeat;
         public ImageView btnThumbs;
         public ImageView btnOverflow;
+        public ImageView btnShuffle;
+        public ImageView btnThumbsDown;
         public Song song;
     }
 }

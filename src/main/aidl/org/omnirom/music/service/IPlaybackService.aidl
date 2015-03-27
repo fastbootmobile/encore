@@ -148,6 +148,16 @@ interface IPlaybackService {
     boolean isRepeatMode();
 
     /**
+     * Sets whether or not the current playback queue will be played in a random order
+     */
+    void setShuffleMode(boolean shuffle);
+
+    /**
+     * Returns whether or not the shuffle mode is enabled
+     */
+    boolean isShuffleMode();
+
+    /**
      * Clears the playback queue
      */
     void clearPlaybackQueue();

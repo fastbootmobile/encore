@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -695,5 +696,9 @@ public class Utils {
             }
         });
         animator.start();
+    }
+
+    public static int getRandom(int maxExcluded) {
+        return new Random().nextInt(maxExcluded);
     }
 }
