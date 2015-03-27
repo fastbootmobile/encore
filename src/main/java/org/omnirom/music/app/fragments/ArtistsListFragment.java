@@ -126,7 +126,10 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
                     try {
                         IMusicProvider provider = providerConnection.getBinder();
                         if (provider != null) {
-                            artists.addAll(provider.getArtists());
+                            List<Artist> providerArtists = provider.getArtists();
+                            if (providerArtists != null) {
+                                artists.addAll(providerArtists);
+                            }
                         }
                     } catch (DeadObjectException e) {
                         Log.e(TAG, "Provider died while getting artists");
