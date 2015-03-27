@@ -40,6 +40,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import com.echonest.api.v4.EchoNestException;
 
@@ -258,6 +259,7 @@ public class PlaybackQueueActivity extends AppActivity {
         private View.OnClickListener mRepeatClickListener;
         private View.OnClickListener mLikeClickListener;
         private View.OnClickListener mAlbumArtClickListener;
+        private View.OnClickListener mShuffleClickListener;
 
         private static class PlaybackQueueHandler extends Handler {
             private WeakReference<SimpleFragment> mParent;
@@ -362,14 +364,28 @@ public class PlaybackQueueActivity extends AppActivity {
                 }
             };
 
+            mShuffleClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean currentMode = PlaybackProxy.isShuffleMode();
+                    boolean newMode = !currentMode;
+
+                    PlaybackProxy.setShuffleMode(newMode);
+
+                    if (newMode) {
+                        ((ImageView) v).setImageResource(R.drawable.ic_shuffle);
+                    } else {
+                        ((ImageView) v).setImageResource(R.drawable.ic_shuffle_gray);
+                    }
+                }
+            };
+
             mLikeClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     ListenLogger logger = new ListenLogger(getActivity());
                     PlaybackQueueAdapter.ViewHolder tag = (PlaybackQueueAdapter.ViewHolder) v.getTag();
                     boolean isLiked = logger.isLiked(tag.song.getRef());
-
-                    Log.e(TAG, "isLiked: " + isLiked);
 
                     if (isLiked) {
                         logger.removeLike(tag.song);
@@ -396,16 +412,20 @@ public class PlaybackQueueActivity extends AppActivity {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                 public void onClick(View v) {
                     PlaybackQueueAdapter.ViewHolder tag = (PlaybackQueueAdapter.ViewHolder) v.getTag();
-                    Bitmap hero = ((MaterialTransitionDrawable) tag.ivAlbumArt.getDrawable()).getFinalDrawable().getBitmap();
-                    Intent intent = AlbumActivity.craftIntent(getActivity(), hero, tag.song.getAlbum(),
-                            tag.song.getProvider(), 0xFF333333);
+                    if (tag.song.getAlbum() != null) {
+                        Bitmap hero = ((MaterialTransitionDrawable) tag.ivAlbumArt.getDrawable()).getFinalDrawable().getBitmap();
+                        Intent intent = AlbumActivity.craftIntent(getActivity(), hero, tag.song.getAlbum(),
+                                tag.song.getProvider(), 0xFF333333);
 
-                    if (Utils.hasLollipop()) {
-                        ActivityOptions opts = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                                v, "itemImage");
-                        startActivity(intent, opts.toBundle());
+                        if (Utils.hasLollipop()) {
+                            ActivityOptions opts = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                                    v, "itemImage");
+                            startActivity(intent, opts.toBundle());
+                        } else {
+                            startActivity(intent);
+                        }
                     } else {
-                        startActivity(intent);
+                        Toast.makeText(getActivity(), R.string.toast_song_no_album, Toast.LENGTH_SHORT).show();
                     }
                 }
             };
@@ -439,7 +459,7 @@ public class PlaybackQueueActivity extends AppActivity {
 
             mAdapter = new PlaybackQueueAdapter(mPlayFabClickListener, mNextClickListener,
                     mPreviousClickListener, mSeekListener, mRepeatClickListener,
-                    mLikeClickListener, mAlbumArtClickListener);
+                    mLikeClickListener, mAlbumArtClickListener, mShuffleClickListener);
 
             if (mListView != null) {
                 mListView.setAdapter(mAdapter);

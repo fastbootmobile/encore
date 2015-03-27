@@ -23,6 +23,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import org.omnirom.music.app.fragments.DspProvidersFragment;
 import org.omnirom.music.app.fragments.SettingsFragment;
 import org.omnirom.music.utils.Utils;
 
@@ -47,10 +48,17 @@ public class SettingsActivity extends AppActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         FragmentManager fm = getSupportFragmentManager();
-        mActiveFragment = (SettingsFragment) fm.findFragmentByTag(TAG_FRAGMENT);
+        mActiveFragment = fm.findFragmentByTag(TAG_FRAGMENT);
 
         if (mActiveFragment == null) {
-            mActiveFragment = new SettingsFragment();
+            Bundle extras = getIntent().getExtras();
+            if (extras != null && extras.getBoolean("DSP", false)) {
+                mActiveFragment = new DspProvidersFragment();
+                setTitle(R.string.settings_dsp_config_title);
+            } else {
+                mActiveFragment = new SettingsFragment();
+            }
+
             fm.beginTransaction()
                     .add(R.id.container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
@@ -60,14 +68,18 @@ public class SettingsActivity extends AppActivity {
     @Override
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (!mActiveFragment.onOptionsItemSelected(item)) {
-            if (Utils.hasLollipop()) {
-                finishAfterTransition();
-            } else {
-                finish();
+        if (item.getItemId() == android.R.id.home) {
+            if (!mActiveFragment.onOptionsItemSelected(item)) {
+                if (Utils.hasLollipop()) {
+                    finishAfterTransition();
+                } else {
+                    finish();
+                }
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 }

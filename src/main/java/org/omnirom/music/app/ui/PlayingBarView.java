@@ -42,6 +42,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
@@ -99,29 +100,6 @@ public class PlayingBarView extends RelativeLayout {
             }
         }
     }
-
-    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
-        @Override
-        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
-            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
-            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
-        }
-
-        @Override
-        public void onPlaybackPause() throws RemoteException {
-            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
-        }
-
-        @Override
-        public void onPlaybackResume() throws RemoteException {
-            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
-        }
-
-        @Override
-        public void onPlaybackQueueChanged() throws RemoteException {
-            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
-        }
-    };
 
     private ILocalCallback mProviderCallback = new ILocalCallback() {
         @Override
@@ -187,6 +165,29 @@ public class PlayingBarView extends RelativeLayout {
 
         @Override
         public void onSearchResult(List<SearchResult> searchResult) {
+        }
+    };
+
+    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
+        @Override
+        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
+        }
+
+        @Override
+        public void onPlaybackPause() throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+        }
+
+        @Override
+        public void onPlaybackResume() throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+        }
+
+        @Override
+        public void onPlaybackQueueChanged() throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
         }
     };
 
@@ -271,14 +272,17 @@ public class PlayingBarView extends RelativeLayout {
             @Override
             public void run() {
                 PlaybackProxy.addCallback(mPlaybackCallback);
+
+                // We delay check if we have a queue and/or are playing to leave time to the
+                // playback service to get up
+                if (mTracksLayout != null) {
+                    mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
+                    mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+                    mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
+                }
             }
         }, 200);
 
-        if (mTracksLayout != null) {
-            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
-            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
-            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
-        }
     }
 
     @Override
@@ -413,7 +417,6 @@ public class PlayingBarView extends RelativeLayout {
 
             // Inflate views and make the list out of the first 4 items (or less)
             int shownCount = 0;
-            View itemViews[] = new View[MAX_PEEK_QUEUE_SIZE];
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
@@ -434,7 +437,6 @@ public class PlayingBarView extends RelativeLayout {
                     itemRoot.setTransitionName("playbackqueue:preview:" + shownCount);
                 }
                 mTracksLayout.addView(itemRoot);
-                itemViews[shownCount] = itemRoot;
 
                 TextView tvArtist = (TextView) itemRoot.findViewById(R.id.tvArtist);
                 TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
@@ -489,6 +491,13 @@ public class PlayingBarView extends RelativeLayout {
 
                     @Override
                     public void onClick(View view) {
+                        if (song == null || song.getAlbum() == null) {
+                            Toast.makeText(view.getContext(),
+                                    R.string.toast_song_no_album, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+
                         Bitmap hero = ((MaterialTransitionDrawable) ((ImageView) view).getDrawable()).getFinalDrawable().getBitmap();
                         if (mPalette == null) {
                             mPalette = Palette.generate(hero);
@@ -541,41 +550,11 @@ public class PlayingBarView extends RelativeLayout {
             TextView tvTitle = (TextView) itemRoot.findViewById(R.id.tvTitle);
             tvTitle.setText(getContext().getString(R.string.view_full_queue));
 
-            final int finalShownCount = shownCount;
-            final View[] finalItemViews = itemViews;
             itemRoot.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getContext(), PlaybackQueueActivity.class);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        List<Pair<View, String>> itemsTransition = new ArrayList<Pair<View, String>>();
-
-                        // First item is processed differently.
-                        for (int i = 1; i < finalShownCount; i++) {
-                            itemsTransition.add(Pair.create(finalItemViews[i], "playbackqueue:" + i));
-                        }
-
-                        itemsTransition.add(Pair.create(finalItemViews[0].findViewById(R.id.tvTitle), "playback:firstitem:title"));
-                        itemsTransition.add(Pair.create(finalItemViews[0].findViewById(R.id.tvArtist), "playback:firstitem:artist"));
-                        itemsTransition.add(Pair.create(finalItemViews[0].findViewById(R.id.ivAlbumArt), "playback:firstitem:art"));
-
-                        // FIXME: For some reason, List.toArray doesn't work for generic types... So
-                        // we manually copy.
-                        Pair<View, String>[] viewsToTransition = new Pair[itemsTransition.size()];
-                        int i = 0;
-                        for (Pair<View, String> pair : itemsTransition) {
-                            viewsToTransition[i] = pair;
-                            i++;
-                        }
-
-                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
-                                viewsToTransition);
-
-                        getContext().startActivity(intent, opt.toBundle());
-                    } else {
-                        getContext().startActivity(intent);
-                    }
+                    getContext().startActivity(intent);
                 }
             });
 

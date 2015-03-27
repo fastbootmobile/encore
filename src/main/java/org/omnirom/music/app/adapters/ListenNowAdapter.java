@@ -162,7 +162,8 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                 }
             } else if (entry.entity instanceof Artist) {
                 Artist artist = (Artist) entry.entity;
-                intent = ArtistActivity.craftIntent(ctx, hero, artist.getRef(), backColor);
+                intent = ArtistActivity.craftIntent(ctx, hero, artist.getRef(),
+                        artist.getProvider(), backColor);
 
                 if (Utils.hasLollipop()) {
                     opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),

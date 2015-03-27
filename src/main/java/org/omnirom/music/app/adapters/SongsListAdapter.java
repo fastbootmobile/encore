@@ -37,6 +37,7 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -106,7 +107,15 @@ public class SongsListAdapter extends BaseAdapter {
      * @param song The song to add
      */
     public void put(Song song) {
-        mSongs.add(song);
+        if (!mSongs.contains(song)) {
+            mSongs.add(song);
+        }
+    }
+
+    public void putAll(Collection<Song> songs) {
+        for (Song song : songs) {
+            put(song);
+        }
     }
 
     /**

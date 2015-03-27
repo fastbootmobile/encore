@@ -172,7 +172,6 @@ public class ListenLogger {
                 try {
                     JSONObject jsonObj = new JSONObject(entry);
                     String songRef = jsonObj.getString(KEY_SONG_REF);
-                    Log.e(TAG, "Liked entry: " + songRef);
                     if (songRef.equals(ref)) {
                         return true;
                     }

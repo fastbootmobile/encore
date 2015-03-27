@@ -111,6 +111,7 @@ class NativeHub : public SocketCallbacks {
     SocketCommon* m_pLastProviderSocket;
     int32_t m_iSampleRate;
     int32_t m_iChannels;
+    int32_t m_iBuffersInDSP;
     void* m_pUserData;
     std::recursive_mutex m_ChainMutex;
 };

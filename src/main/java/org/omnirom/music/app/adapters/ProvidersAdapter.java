@@ -42,6 +42,7 @@ public class ProvidersAdapter extends BaseAdapter {
     }
 
     private List<ProviderConnection> mProviders;
+    private boolean mWhite = false;
 
     public ProvidersAdapter(List<ProviderConnection> list) {
         mProviders = list;
@@ -49,6 +50,10 @@ public class ProvidersAdapter extends BaseAdapter {
 
     public void addProvider(ProviderConnection connection) {
         mProviders.add(connection);
+    }
+
+    public void setWhite(boolean white) {
+        mWhite = white;
     }
 
     /**
@@ -91,6 +96,11 @@ public class ProvidersAdapter extends BaseAdapter {
             tag.tvProviderName = (TextView) view.findViewById(R.id.tvProviderName);
             tag.ivProviderIcon = (ImageView) view.findViewById(R.id.ivProviderLogo);
             view.setTag(tag);
+
+            if (mWhite) {
+                tag.tvProviderName.setTextColor(0xFFFFFFFF);
+                tag.tvProviderAuthor.setTextColor(0xFFFFFFFF);
+            }
         } else {
             tag = (ViewHolder) view.getTag();
         }

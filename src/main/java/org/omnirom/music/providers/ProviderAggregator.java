@@ -21,6 +21,7 @@ import android.net.NetworkInfo;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.TransactionTooLargeException;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -121,7 +122,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             // We make a copy to avoid synchronization issues and needless locks
             ArrayList<ProviderConnection> providers;
             synchronized (mProviders) {
-                providers = new ArrayList<ProviderConnection>(mProviders);
+                providers = new ArrayList<>(mProviders);
             }
 
             // Then we query the providers
@@ -131,7 +132,33 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                             conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
                         List<Playlist> playlist = conn.getBinder().getPlaylists();
                         ensurePlaylistsSongsCached(conn, playlist);
-                        cacheSongs(conn, conn.getBinder().getSongs());
+
+                        // Cache all songs in batch
+                        int offset = 0;
+                        int limit = 100;
+                        boolean goForIt = true;
+
+                        while (goForIt) {
+                            try {
+                                List<Song> songs = conn.getBinder().getSongs(offset, limit);
+
+                                if (songs == null || songs.size() == 0) {
+                                    goForIt = false;
+                                } else {
+                                    cacheSongs(conn, songs);
+
+                                    if (songs.size() < limit) {
+                                        goForIt = false;
+                                    }
+
+                                    offset += limit;
+                                }
+                            } catch (TransactionTooLargeException ignore) {
+                                limit -= 10;
+                                Log.w(TAG, "Got transaction size error, reducing limit to " + limit);
+                            }
+                        }
+
                         cacheAlbums(conn, conn.getBinder().getAlbums());
                         cacheArtists(conn, conn.getBinder().getArtists());
                     } else if (conn.getBinder() != null) {
@@ -143,7 +170,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         unregisterProvider(conn);
                     }
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to get playlists from " + conn.getProviderName(), e);
+                    Log.e(TAG, "Unable to get data from " + conn.getProviderName(), e);
                     unregisterProvider(conn);
                 }
             }
@@ -749,6 +776,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                     // Update the name
                     cached.setName(p.getName());
 
+                    if (p.getName() == null) {
+                        Log.w(TAG, "Playlist " + p.getRef() + " updated, but name is null!");
+                    }
+
+                    cached.setIsLoaded(p.isLoaded());
+
                     // Empty the playlist
                     while (cached.getSongsCount() > 0) {
                         cached.removeSong(0);
@@ -801,51 +834,55 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return;
         }
 
-        Song cached = mCache.getSong(s.getRef());
-        boolean wasLoaded = false;
-        boolean changed = false;
+        try {
+            Song cached = mCache.getSong(s.getRef());
+            boolean wasLoaded = false;
+            boolean changed = false;
 
-        if (cached == null) {
-            mCache.putSong(provider, s);
-            changed = true;
-            cached = s;
-        } else {
-            wasLoaded = cached.isLoaded();
-            if (s.isLoaded() && !cached.isIdentical(s)) {
-                cached.setAlbum(s.getAlbum());
-                cached.setArtist(s.getArtist());
-                cached.setSourceLogo(s.getLogo());
-                cached.setDuration(s.getDuration());
-                cached.setTitle(s.getTitle());
-                cached.setYear(s.getYear());
-                cached.setOfflineStatus(s.getOfflineStatus());
-                cached.setAvailable(s.isAvailable());
-                cached.setIsLoaded(s.isLoaded());
+            if (cached == null) {
+                mCache.putSong(provider, s);
                 changed = true;
-            }
-        }
-
-        if (!wasLoaded && cached.isLoaded()) {
-            // Match the album with the artist
-            Artist artist = mCache.getArtist(s.getArtist());
-            if (artist == null) {
-                artist = retrieveArtist(s.getArtist(), provider);
-            }
-
-            if (artist != null) {
-                Album album = mCache.getAlbum(s.getAlbum());
-                if (album == null) {
-                    album = retrieveAlbum(s.getAlbum(), provider);
-                }
-
-                if (album != null) {
-                    artist.addAlbum(album.getRef());
+                cached = s;
+            } else {
+                wasLoaded = cached.isLoaded();
+                if (s.isLoaded() && !cached.isIdentical(s)) {
+                    cached.setAlbum(s.getAlbum());
+                    cached.setArtist(s.getArtist());
+                    cached.setSourceLogo(s.getLogo());
+                    cached.setDuration(s.getDuration());
+                    cached.setTitle(s.getTitle());
+                    cached.setYear(s.getYear());
+                    cached.setOfflineStatus(s.getOfflineStatus());
+                    cached.setAvailable(s.isAvailable());
+                    cached.setIsLoaded(s.isLoaded());
+                    changed = true;
                 }
             }
-        }
 
-        if (changed) {
-            postSongForUpdate(cached);
+            if (!wasLoaded && cached.isLoaded()) {
+                // Match the album with the artist
+                Artist artist = mCache.getArtist(s.getArtist());
+                if (artist == null) {
+                    artist = retrieveArtist(s.getArtist(), provider);
+                }
+
+                if (artist != null) {
+                    Album album = mCache.getAlbum(s.getAlbum());
+                    if (album == null) {
+                        album = retrieveAlbum(s.getAlbum(), provider);
+                    }
+
+                    if (album != null) {
+                        artist.addAlbum(album.getRef());
+                    }
+                }
+            }
+
+            if (changed) {
+                postSongForUpdate(cached);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while updating song data", e);
         }
     }
 
@@ -1034,6 +1071,6 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * Interface for offline mode changes
      */
     public interface OfflineModeListener {
-        public void onOfflineModeChange(boolean enabled);
+        void onOfflineModeChange(boolean enabled);
     }
 }

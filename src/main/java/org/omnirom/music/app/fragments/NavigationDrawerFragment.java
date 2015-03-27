@@ -132,7 +132,8 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerListView.post(new Runnable() {
             @Override
             public void run() {
-                selectItem(mCurrentSelectedPosition);
+                selectItem(mCurrentSelectedPosition,
+                        (mCurrentSelectedPosition + 1) < MainActivity.SECTION_NOW_PLAYING);
             }
         });
 
@@ -224,11 +225,15 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     private void selectItem(final int position, boolean switchToFragment) {
-        if (mDrawerListView != null) {
-            ((NavDrawerAdapter) mDrawerListView.getAdapter()).setActive(position);
+        // Don't select special actions
+        if (mCurrentSelectedPosition + 1 < MainActivity.SECTION_NOW_PLAYING) {
+            mCurrentSelectedPosition = position;
+
+            if (mDrawerListView != null) {
+                ((NavDrawerAdapter) mDrawerListView.getAdapter()).setActive(position);
+            }
         }
 
-        mCurrentSelectedPosition = position;
         if (switchToFragment) {
             if (mDrawerListView != null) {
                 mDrawerListView.setItemChecked(position, true);

@@ -28,6 +28,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.model.Playlist;
 import org.omnirom.music.utils.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
@@ -45,13 +46,16 @@ public class NewPlaylistFragment extends DialogFragment {
 
     private static final String KEY_SONG = "song";
     private static final String KEY_ALBUM = "album";
+    private static final String KEY_PLAYLIST = "playlist";
 
     private Song mSong;
     private Album mAlbum;
+    private Playlist mPlaylist;
 
     /**
      * Creates a new instance of the New Playlist dialog fragment to create a new playlist and
      * add a song to it.
+     *
      * @param song The song to add to the playlist
      * @return The fragment generated
      */
@@ -66,6 +70,7 @@ public class NewPlaylistFragment extends DialogFragment {
     /**
      * Creates a new instance of the New Playlist dialog fragment to create a new playlist and
      * add all tracks of an album to it.
+     *
      * @param album The album to add to the playlist
      * @return The fragment generated
      */
@@ -73,6 +78,21 @@ public class NewPlaylistFragment extends DialogFragment {
         NewPlaylistFragment fragment = new NewPlaylistFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(KEY_ALBUM, album);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    /**
+     * Creates a new instance of the New Playlist dialog fragment to create a new playlist and
+     * add all tracks of an existing playlist to it.
+     *
+     * @param playlist The playlist to append to the new playlist
+     * @return The fragment generated
+     */
+    public static NewPlaylistFragment newInstance(Playlist playlist) {
+        NewPlaylistFragment fragment = new NewPlaylistFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(KEY_PLAYLIST, playlist);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -89,6 +109,8 @@ public class NewPlaylistFragment extends DialogFragment {
             mSong = args.getParcelable(KEY_SONG);
         } else if (args.containsKey(KEY_ALBUM)) {
             mAlbum = args.getParcelable(KEY_ALBUM);
+        } else if (args.containsKey(KEY_PLAYLIST)) {
+            mPlaylist = args.getParcelable(KEY_PLAYLIST);
         }
 
     }
@@ -107,7 +129,7 @@ public class NewPlaylistFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         String playlistNameStr = playlistName.getText().toString().trim();
                         if (!playlistNameStr.isEmpty()) {
-                            Log.d(TAG, "Adding new playlist with name" + playlistNameStr);
+                            Log.d(TAG, "Adding new playlist named '" + playlistNameStr + "'");
 
                             try {
                                 ProviderConnection connection;
@@ -123,10 +145,17 @@ public class NewPlaylistFragment extends DialogFragment {
                                 if (playlistRef != null) {
                                     if (mSong != null) {
                                         binder.addSongToPlaylist(mSong.getRef(), playlistRef, mSong.getProvider());
-                                    } else {
+                                    } else if (mAlbum != null) {
                                         Iterator<String> songs = mAlbum.songs();
                                         while (songs.hasNext()) {
                                             binder.addSongToPlaylist(songs.next(), playlistRef, mAlbum.getProvider());
+                                        }
+                                    } else if (mPlaylist != null) {
+                                        Iterator<String> songs = mPlaylist.songs();
+                                        while (songs.hasNext()) {
+                                            // TODO: This might cause issues if we add a playlist
+                                            // from a multi-provider playlist to another one
+                                            binder.addSongToPlaylist(songs.next(), playlistRef, mPlaylist.getProvider());
                                         }
                                     }
                                 }

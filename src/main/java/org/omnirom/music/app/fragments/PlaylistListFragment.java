@@ -18,11 +18,15 @@ package org.omnirom.music.app.fragments;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,9 +34,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
+import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
+import com.h6ah4i.android.widget.advrecyclerview.decoration.ItemShadowDecorator;
+import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
+
+import org.json.JSONException;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.adapters.PlaylistGridAdapter;
 import org.omnirom.music.app.adapters.PlaylistListAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.model.Album;
@@ -56,6 +68,11 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     private static final String TAG = "PlaylistListFragment";
 
     private PlaylistListAdapter mAdapter;
+    private PlaylistGridAdapter mGridAdapter;
+    private LinearLayoutManager mLayoutManager;
+    private RecyclerView mRecyclerView;
+    private RecyclerViewDragDropManager mRecyclerViewDragDropManager;
+    private RecyclerView.Adapter mWrappedAdapter;
     private Handler mHandler;
     private boolean mIsStandalone;
     private final ArrayList<Playlist> mPlaylistsUpdated = new ArrayList<Playlist>();
@@ -65,15 +82,28 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
         public void run() {
             boolean didChange = false;
             synchronized (mPlaylistsUpdated) {
-                for (Playlist p : mPlaylistsUpdated) {
-                    didChange = mAdapter.addItemUnique(p) || didChange;
+                if (mAdapter != null) {
+                    didChange = mAdapter.addAllUnique(mPlaylistsUpdated);
+                }
+                if (mGridAdapter != null) {
+                    didChange = mGridAdapter.addAllUnique(mPlaylistsUpdated) || didChange;
                 }
 
                 mPlaylistsUpdated.clear();
             }
 
             if (didChange) {
-                mAdapter.notifyDataSetChanged();
+                if (mAdapter != null && getActivity() != null) {
+                    try {
+                        mAdapter.sortList(getActivity().getApplicationContext());
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Unable to sort playlists list");
+                    }
+                    mAdapter.notifyDataSetChanged();
+                }
+                if (mGridAdapter != null) {
+                    mGridAdapter.notifyDataSetChanged();
+                }
             }
         }
     };
@@ -118,29 +148,77 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_playlist, container, false);
-        GridView playlistLayout = (GridView) root.findViewById(R.id.gvPlaylists);
-        playlistLayout.setAdapter(mAdapter);
-
-        // Setup the click listener
-        playlistLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MainActivity act = (MainActivity) getActivity();
-                PlaylistListAdapter.ViewHolder tag = (PlaylistListAdapter.ViewHolder) view.getTag();
-                Intent intent = PlaylistActivity.craftIntent(act, mAdapter.getItem(position),
-                        ((MaterialTransitionDrawable) tag.ivCover.getDrawable()).getFinalDrawable().getBitmap());
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                            tag.ivCover, "itemImage");
-                    act.startActivity(intent, opt.toBundle());
-                } else {
-                    act.startActivity(intent);
-                }
-            }
-        });
+        if (root instanceof GridView) {
+            // We're in landscape, and thus have a GridView
+            mGridAdapter = new PlaylistGridAdapter(root.getContext().getApplicationContext());
+            mAdapter = null;
+        } else {
+            // We're in portrait with the recycler view
+            mAdapter = new PlaylistListAdapter();
+            mGridAdapter = null;
+        }
 
         return root;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // If mAdapter isn't null, we're in portrait with the draggable list view.
+        if (mAdapter != null) {
+            mRecyclerView = (RecyclerView) getView().findViewById(R.id.rvPlaylists);
+            mLayoutManager = new LinearLayoutManager(getActivity());
+
+            // drag & drop manager
+            mRecyclerViewDragDropManager = new RecyclerViewDragDropManager();
+        /*mRecyclerViewDragDropManager.setDraggingItemShadowDrawable(
+                (NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z3));*/
+
+            //adapter
+
+            mWrappedAdapter = mRecyclerViewDragDropManager.createWrappedAdapter(mAdapter);      // wrap for dragging
+
+            final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
+
+            mRecyclerView.setLayoutManager(mLayoutManager);
+            mRecyclerView.setAdapter(mWrappedAdapter);  // requires *wrapped* adapter
+            mRecyclerView.setItemAnimator(animator);
+
+            // additional decorations
+            //noinspection StatementWithEmptyBody
+        /*if (supportsViewElevation()) {
+            // Lollipop or later has native drop shadow feature. ItemShadowDecorator is not required.
+        } else {
+            mRecyclerView.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z1)));
+        }*/
+            mRecyclerView.addItemDecoration(new SimpleListDividerDecorator(getResources().getDrawable(R.drawable.list_divider), true));
+
+            mRecyclerViewDragDropManager.attachRecyclerView(mRecyclerView);
+        } else {
+            // We're in landscape with the grid view
+            GridView root = (GridView) view.findViewById(R.id.gvPlaylists);
+            root.setAdapter(mGridAdapter);
+
+            // Setup the click listener
+            root.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    MainActivity act = (MainActivity) getActivity();
+                    PlaylistGridAdapter.ViewHolder tag = (PlaylistGridAdapter.ViewHolder) view.getTag();
+                    Intent intent = PlaylistActivity.craftIntent(act, mGridAdapter.getItem(position),
+                            ((MaterialTransitionDrawable) tag.ivCover.getDrawable()).getFinalDrawable().getBitmap());
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                                tag.ivCover, "itemImage");
+                        act.startActivity(intent, opt.toBundle());
+                    } else {
+                        act.startActivity(intent);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -173,7 +251,20 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mAdapter.addAllUnique(playlists);
+                        if (mAdapter != null) {
+                            mAdapter.addAllUnique(playlists);
+                            try {
+                                mAdapter.sortList(getActivity().getApplicationContext());
+                            } catch (JSONException e) {
+                                Log.e(TAG, "Unable to sort playlists list");
+                            }
+                            mAdapter.notifyDataSetChanged();
+                        }
+
+                        if (mGridAdapter != null) {
+                            mGridAdapter.addAllUnique(playlists);
+                            mGridAdapter.notifyDataSetChanged();
+                        }
                     }
                 });
             }

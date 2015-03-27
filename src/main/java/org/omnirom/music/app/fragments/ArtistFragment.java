@@ -428,10 +428,11 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mHeroImage = hero;
         mBackgroundColor = extras.getInt(ArtistActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
         final String artistRef = extras.getString(ArtistActivity.EXTRA_ARTIST);
-        mArtist = ProviderAggregator.getDefault().retrieveArtist(artistRef, null);
+        final ProviderIdentifier provider = extras.getParcelable(ArtistActivity.EXTRA_PROVIDER);
+        mArtist = ProviderAggregator.getDefault().retrieveArtist(artistRef, provider);
 
         if (mArtist == null) {
-            Log.e(TAG, "No artist found in cache for " + artistRef + "!");
+            Log.e(TAG, "No cache entry or provider hit for " + artistRef + "!");
             throw new IllegalStateException("Artist is null in ArtistFragment arguments!");
         }
 
@@ -535,10 +536,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 }
                 pager.requestLayout();
 
-                if (i == FRAGMENT_ID_BIOGRAPHY) {
-                    mArtistInfoFragment.notifyActive();
-                } else if (i == FRAGMENT_ID_SIMILAR) {
-                    mArtistSimilarFragment.notifyActive();
+                boolean hasRosetta = ProviderAggregator.getDefault().getRosettaStonePrefix().size() > 0;
+
+                if (hasRosetta) {
+                    if (i == FRAGMENT_ID_BIOGRAPHY) {
+                        mArtistInfoFragment.notifyActive();
+                    } else if (i == FRAGMENT_ID_SIMILAR) {
+                        mArtistSimilarFragment.notifyActive();
+                    }
+                } else {
+                    if (i == FRAGMENT_ID_SIMILAR) {
+                        // This is actually BIOGRAPHY if rosetta is not available
+                        mArtistInfoFragment.notifyActive();
+                    }
                 }
             }
 
@@ -880,6 +890,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 mRootView.setVisibility(View.GONE);
             }
 
+
+            return mRootView;
+        }
+
+        @Override
+        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+
             // Load recommendation and albums for the first
             mHandler.post(new Runnable() {
                 @Override
@@ -888,8 +906,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     loadAlbums(true);
                 }
             });
-
-            return mRootView;
         }
 
         public void notifySizeLimit() {
@@ -973,9 +989,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         /**
          * Load the recommended track
          */
-        private void loadRecommendation() {
-            if (mRecommendationLoaded || mParent == null) {
-                // Already loaded or parent not loaded yet
+        private synchronized void loadRecommendation() {
+            if (mRecommendationLoaded || mParent == null || mRootView == null) {
+                // Already loaded or parent not loaded yet or view not loaded yet
                 return;
             }
 
@@ -1471,8 +1487,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             public void onItemClick(RecyclerView parent, View view, int position, long id) {
                 final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
                 final Context ctx = getActivity();
-                String artistRef = mAdapter.getItem(tag.position).getRef();
-                Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artistRef, tag.itemColor);
+                Artist artist = mAdapter.getItem(tag.position);
+                Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artist.getRef(),
+                        artist.getProvider(), tag.itemColor);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     AlbumArtImageView ivCover = tag.ivCover;
@@ -1509,8 +1526,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         public void notifyActive() {
             if (!mSimilarLoaded) {
                 if (ProviderAggregator.getDefault().isOfflineMode()) {
-                    mOfflineView.setVisibility(View.VISIBLE);
-                    mArtistsSpinner.setVisibility(View.GONE);
+                    if (mOfflineView != null) mOfflineView.setVisibility(View.VISIBLE);
+                    if (mArtistsSpinner != null) mArtistsSpinner.setVisibility(View.GONE);
                 } else {
                     mOfflineView.setVisibility(View.GONE);
                     mArtistsSpinner.setVisibility(View.VISIBLE);

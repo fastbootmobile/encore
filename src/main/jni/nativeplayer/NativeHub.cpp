@@ -25,7 +25,7 @@
 
 // -------------------------------------------------------------------------------------
 NativeHub::NativeHub(void* userdata) : m_pSink(nullptr), m_pLastProviderSocket(nullptr),
-        m_iSampleRate(44100), m_iChannels(2), m_pUserData(userdata) {
+        m_iSampleRate(44100), m_iChannels(2), m_pUserData(userdata), m_iBuffersInDSP(0) {
 }
 // -------------------------------------------------------------------------------------
 NativeHub::~NativeHub() {
@@ -123,25 +123,33 @@ SocketHost* NativeHub::findSocketByName(const std::string& name) {
 void NativeHub::writeAudioToDsp(int chain_index, const uint8_t* data, const uint32_t len) {
     std::lock_guard<std::recursive_mutex> lock(m_ChainMutex);
 
-    bool success = false;
-    auto iter = m_DSPChain.begin();
-    std::advance(iter, chain_index);
+    // Before even writing to DSP, we check if the sink has free space so that we don't
+    // process it worthlessly (and avoid glitches because Biquad filters dislike having
+    // unwanted data).
+    if (m_pSink && m_pSink->getFreeBuffersCount() < len + m_iBuffersInDSP) {
+        writeAudioResponse(0);
+    } else {
+        bool success = false;
+        auto iter = m_DSPChain.begin();
+        std::advance(iter, chain_index);
 
-    while (iter != m_DSPChain.end() && !success) {
-        std::string name = (*iter);
-        SocketHost* next_socket = m_DSPSockets[name];
+        while (iter != m_DSPChain.end() && !success) {
+            std::string name = (*iter);
+            SocketHost* next_socket = m_DSPSockets[name];
 
-        if (next_socket->writeAudioData(data, len, false) == -1) {
-            // Some error occurred while writing to this DSP, forward to the next valid one
-            ++iter;
-        } else {
-            success = true;
+            if (next_socket->writeAudioData(data, len, false) == -1) {
+                // Some error occurred while writing to this DSP, forward to the next valid one
+                ++iter;
+            } else {
+                success = true;
+                m_iBuffersInDSP += len;
+            }
         }
-    }
 
-    // If we're weren't successful at feeding a DSP plugin, feed the sink directly
-    if (!success) {
-        writeAudioToSink(data, len);
+        // If we're weren't successful at feeding a DSP plugin, feed the sink directly
+        if (!success) {
+            writeAudioToSink(data, len);
+        }
     }
 }
 // -------------------------------------------------------------------------------------
@@ -193,6 +201,17 @@ void NativeHub::onFormatInfo(SocketCommon* socket, const int32_t sample_rate,
     if (m_pSink) {
         m_pSink->setAudioFormat(sample_rate, 16, channels);
     }
+
+    // Notify DSP plugins of format info
+    for (auto it = m_DSPChain.begin(); it != m_DSPChain.end(); ++it) {
+        SocketCommon* socket = m_DSPSockets[*it];
+        if (m_pSink) {
+            socket->writeFormatInfo(m_pSink->getChannels(), m_pSink->getSampleRate());
+        } else {
+            // Default values
+            socket->writeFormatInfo(m_iChannels, m_iSampleRate);
+        }
+    }
 }
 // -------------------------------------------------------------------------------------
 void NativeHub::onAudioData(SocketCommon* socket, const uint8_t* data, const uint32_t len) {
@@ -206,6 +225,7 @@ void NativeHub::onAudioData(SocketCommon* socket, const uint8_t* data, const uin
             // Audio from a DSP plugin, route it to the next element (or to the sink if no more)
             int index = std::distance(m_DSPChain.begin(),
                     std::find(m_DSPChain.begin(), m_DSPChain.end(), socket->getSocketName()));
+            m_iBuffersInDSP -= len;
             if (index < m_DSPChain.size() - 1) {
                 writeAudioToDsp(index + 1, data, len);
             } else {

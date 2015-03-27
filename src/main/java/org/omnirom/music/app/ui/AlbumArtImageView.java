@@ -154,6 +154,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
     /**
      * Sets the listener that will be called when the art is loaded
+     *
      * @param listener The listener that will be called
      */
     public void setOnArtLoadedListener(OnArtLoadedListener listener) {
@@ -164,6 +165,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
      * When the AlbumArtImageView is in crossfade mode, the album art won't go through the default
      * placeholder state before moving into the next album art, but will crossfade to the next
      * art directly
+     *
      * @param crossfade true to enable crossfade mode
      */
     public void setCrossfade(boolean crossfade) {
@@ -196,10 +198,10 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     }
 
     private void loadArtImpl(final BoundEntity ent) {
-        if (ent == null
-                || (mRequestedEntity != null
-                && !mCurrentIsDefault
-                && ent.getRef().equals(mRequestedEntity.getRef()))) {
+        if (ent == null ||
+                (mRequestedEntity != null
+                        && !mCurrentIsDefault
+                        && ent.getRef().equals(mRequestedEntity.getRef()))) {
             // Nothing to do, we are displaying the proper thing already
             return;
         }
@@ -240,7 +242,8 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
     @Override
     public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
-        if (DEBUG) Log.d(TAG, "onArtLoaded: mCurrentBitmap=" + mCurrentBitmap + " ; output=" + output);
+        if (DEBUG)
+            Log.d(TAG, "onArtLoaded: mCurrentBitmap=" + mCurrentBitmap + " ; output=" + output);
 
         if (request != mRequestedEntity) {
             if (DEBUG) Log.d(TAG, "onArtLoaded: Too late for " + request.getRef());

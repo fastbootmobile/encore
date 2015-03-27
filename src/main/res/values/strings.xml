@@ -172,6 +172,7 @@
     <string name="thumbs_up_description">Like this song</string>
     <string name="previous">Previous</string>
     <string name="repeat">Repeat</string>
+    <string name="shuffle">Shuffle</string>
     <string name="section_history">History</string>
     <string name="drive_mode">Drive mode</string>
     <string name="title_activity_drive_mode">Drive Mode</string>
@@ -182,5 +183,16 @@
     <string name="bt_autoconnect_device_name_title">Bluetooth device name</string>
     <string name="bt_autoconnect_enable_summary">Run actions when a specific Bluetooth device is connected</string>
     <string name="bt_autoconnect_enable_title">Bluetooth automatic actions</string>
+    <string name="title_activity_welcome">Welcome</string>
+    <string name="welcome_step2_title">Got your sources?</string>
+    <string name="welcome_step2_body">Music is played from your favorite services via plug-ins. Browse and install the ones you want!</string>
+    <string name="browse">Browse</string>
+    <string name="welcome_step1_title">Welcome to OmniMusic!</string>
+    <string name="welcome_step1_body">Get ready for a new way of listening to music on the go!</string>
+    <string name="welcome_step4_title">You\'re all set!</string>
+    <string name="welcome_finish">Let\'s rock!</string>
+    <string name="welcome_step3_body">You may configure your account and other settings for the following plugins:</string>
+    <string name="welcome_step3_title">Configure your plugins</string>
+    <string name="toast_song_no_album">This song has no attached album</string>
 
 </resources>

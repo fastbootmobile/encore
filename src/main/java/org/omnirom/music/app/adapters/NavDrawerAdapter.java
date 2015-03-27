@@ -15,6 +15,7 @@
 
 package org.omnirom.music.app.adapters;
 
+import android.annotation.TargetApi;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -188,10 +189,12 @@ public class NavDrawerAdapter extends BaseAdapter {
             // Special actions
             case MainActivity.SECTION_NOW_PLAYING:
                 tag.tvText.setText(R.string.title_activity_playback_queue);
+                setCompoundCompat(tag.tvText, 0);
                 break;
 
             case MainActivity.SECTION_DRIVE_MODE:
                 tag.tvText.setText(R.string.drive_mode);
+                setCompoundCompat(tag.tvText, 0);
                 break;
 
         }
@@ -199,8 +202,17 @@ public class NavDrawerAdapter extends BaseAdapter {
         return view;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setCompoundCompat(@NonNull TextView text, @DrawableRes int id) {
-        Drawable drawable = text.getResources().getDrawable(id);
+        Drawable drawable = null;
+
+        if (id > 0) {
+            if (Utils.hasLollipop()) {
+                drawable = text.getResources().getDrawable(id, null);
+            } else {
+                drawable = text.getResources().getDrawable(id);
+            }
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             text.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);

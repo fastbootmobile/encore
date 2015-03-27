@@ -17,6 +17,7 @@ package org.omnirom.music.app.fragments;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -260,7 +261,11 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         });
         mPlayFab.setImageDrawable(mFabDrawable);
 
-        mIvHero.setImageBitmap(mHeroImage);
+        if (mHeroImage != null) {
+            mIvHero.setImageBitmap(mHeroImage);
+        } else {
+            mIvHero.setImageResource(R.drawable.album_placeholder);
+        }
 
         // Set the header view and adapter
         mListView.addParallaxedHeaderView(headerView);
@@ -333,7 +338,9 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
      * @param extras The extras contained in the Intent that started the parent activity
      */
     public void setArguments(Bitmap hero, Bundle extras) {
-        mHeroImage = hero.copy(hero.getConfig(), false);
+        if (hero != null) {
+            mHeroImage = hero.copy(hero.getConfig(), false);
+        }
         mBackgroundColor = extras.getInt(AlbumActivity.EXTRA_BACKGROUND_COLOR, 0xFF333333);
 
         String albumRef = extras.getString(AlbumActivity.EXTRA_ALBUM);
@@ -343,7 +350,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         if (mAlbum == null) {
             Log.e(TAG, "Album isn't in cache and provider returned null!");
-        } else {
+        } else if (mHeroImage != null) {
             // Prepare the palette to colorize the FAB
             Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
                 @Override

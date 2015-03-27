@@ -17,6 +17,7 @@ package org.omnirom.music.framework;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
@@ -41,26 +42,31 @@ public class PlaybackProxy {
     private static Handler sHandler;
     private static final List<IPlaybackCallback> sPendingCallbacks = new ArrayList<>();
 
-    private static final int MSG_PLAY           = 1;
-    private static final int MSG_PAUSE          = 2;
-    private static final int MSG_STOP           = 3;
-    private static final int MSG_PLAY_SONG      = 4;
-    private static final int MSG_PLAY_AT_INDEX  = 5;
-    private static final int MSG_CLEAR_QUEUE    = 6;
-    private static final int MSG_QUEUE_SONG     = 7;
-    private static final int MSG_QUEUE_ALBUM    = 8;
-    private static final int MSG_ADD_CALLBACK   = 9;
-    private static final int MSG_REMOVE_CALLBACK= 10;
-    private static final int MSG_PLAY_ALBUM     = 11;
-    private static final int MSG_SEEK           = 12;
-    private static final int MSG_SET_DSP_CHAIN  = 13;
-    private static final int MSG_NEXT           = 14;
-    private static final int MSG_PREVIOUS       = 15;
-    private static final int MSG_SET_REPEAT_MODE= 16;
-    private static final int MSG_PLAY_PLAYLIST  = 17;
-    private static final int MSG_QUEUE_PLAYLIST = 18;
+    private static final int MSG_PLAY               = 1;
+    private static final int MSG_PAUSE              = 2;
+    private static final int MSG_STOP               = 3;
+    private static final int MSG_PLAY_SONG          = 4;
+    private static final int MSG_PLAY_AT_INDEX      = 5;
+    private static final int MSG_CLEAR_QUEUE        = 6;
+    private static final int MSG_QUEUE_SONG         = 7;
+    private static final int MSG_QUEUE_ALBUM        = 8;
+    private static final int MSG_ADD_CALLBACK       = 9;
+    private static final int MSG_REMOVE_CALLBACK    = 10;
+    private static final int MSG_PLAY_ALBUM         = 11;
+    private static final int MSG_SEEK               = 12;
+    private static final int MSG_SET_DSP_CHAIN      = 13;
+    private static final int MSG_NEXT               = 14;
+    private static final int MSG_PREVIOUS           = 15;
+    private static final int MSG_SET_REPEAT_MODE    = 16;
+    private static final int MSG_PLAY_PLAYLIST      = 17;
+    private static final int MSG_QUEUE_PLAYLIST     = 18;
+    private static final int MSG_SET_SHUFFLE_MODE   = 19;
 
     private static class PlaybackProxyHandler extends Handler {
+        public PlaybackProxyHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             try {
@@ -121,6 +127,10 @@ public class PlaybackProxy {
                         getPlayback().setRepeatMode((Boolean) msg.obj);
                         break;
 
+                    case MSG_SET_SHUFFLE_MODE:
+                        getPlayback().setShuffleMode((Boolean) msg.obj);
+                        break;
+
                     case MSG_PLAY_PLAYLIST:
                         getPlayback().playPlaylist((Playlist) msg.obj);
                         break;
@@ -157,7 +167,7 @@ public class PlaybackProxy {
     static {
         HandlerThread thread = new HandlerThread("PlaybackProxy");
         thread.start();
-        sHandler = new PlaybackProxyHandler();
+        sHandler = new PlaybackProxyHandler(thread.getLooper());
     }
 
     private static IPlaybackService getPlayback(boolean connectIfNull) throws RemoteException {
@@ -316,6 +326,18 @@ public class PlaybackProxy {
 
     public static void setRepeatMode(boolean repeat) {
         Message.obtain(sHandler, MSG_SET_REPEAT_MODE, repeat).sendToTarget();
+    }
+
+    public static boolean isShuffleMode() {
+        try {
+            return getPlayback().isShuffleMode();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    public static void setShuffleMode(boolean shuffle) {
+        Message.obtain(sHandler, MSG_SET_SHUFFLE_MODE, shuffle).sendToTarget();
     }
 
     public static void playPlaylist(Playlist p) {

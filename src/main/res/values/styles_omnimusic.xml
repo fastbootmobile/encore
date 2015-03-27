@@ -40,6 +40,7 @@
     </style>
 
     <style name="OmniMusic.Spec.BorderlessButton" parent="@android:style/Widget.Holo.Button.Borderless.Small">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:textColor">@color/primary_dark</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-medium</item>

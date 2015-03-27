@@ -57,8 +57,6 @@ public class MainActivity extends AppActivity
     public static final int SECTION_NOW_PLAYING= 7;
     public static final int SECTION_DRIVE_MODE = 8;
 
-    public static final int SECTION_DSP_EFFECTS= -1;
-
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -95,35 +93,42 @@ public class MainActivity extends AppActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        if (!WelcomeActivity.hasDoneWelcomeWizard(this)) {
+            Intent intent = new Intent(this, WelcomeActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            setContentView(R.layout.activity_main);
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
+            mToolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(mToolbar);
 
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+            mNavigationDrawerFragment = (NavigationDrawerFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+            mTitle = getTitle();
+
+            // Set up the drawer.
+            mNavigationDrawerFragment.setUp(
+                    R.id.navigation_drawer,
+                    (DrawerLayout) findViewById(R.id.drawer_layout));
 
 
-        // Setup the playing bar click listener
-        mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
-        mPlayingBarLayout.setWrapped(true, false);
+            // Setup the playing bar click listener
+            mPlayingBarLayout = (PlayingBarView) findViewById(R.id.playingBarLayout);
+            mPlayingBarLayout.setWrapped(true, false);
 
-        // Setup Cast button
-        mCastModule = new CastModule(getApplicationContext());
+            // Setup Cast button
+            mCastModule = new CastModule(getApplicationContext());
 
-        // Look for un-configured plugins in a second
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                lookForUnconfiguredProviders();
-            }
-        }, 1000);
+            // Look for un-configured plugins in a second
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    lookForUnconfiguredProviders();
+                }
+            }, 1000);
+        }
     }
 
     public Toolbar getToolbar() {
@@ -219,20 +224,6 @@ public class MainActivity extends AppActivity
                 Log.w(TAG, "Configured provider is null!");
             }
         }
-
-        // Reload the current fragment for layout changes
-        final int activeSection = mCurrentFragmentIndex + 1;
-
-        if (activeSection != SECTION_MY_SONGS
-                && activeSection != SECTION_NOW_PLAYING
-                && activeSection != SECTION_DRIVE_MODE) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    onNavigationDrawerItemSelected(mCurrentFragmentIndex);
-                }
-            }, 200);
-        }
     }
 
     @Override
@@ -273,23 +264,13 @@ public class MainActivity extends AppActivity
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        mOrientation = newConfig.orientation;
-
-        // Reload the current fragment for layout changes
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                onNavigationDrawerItemSelected(mCurrentFragmentIndex);
-            }
-        }, 200);
+        if (mOrientation != newConfig.orientation) {
+            mOrientation = newConfig.orientation;
+        }
     }
 
     @Override
     public boolean onNavigationDrawerItemSelected(int position) {
-        if (mCurrentFragmentIndex == position) {
-            return false;
-        }
-
         // update the main content by replacing fragments
         boolean result = true;
         try {
@@ -377,9 +358,6 @@ public class MainActivity extends AppActivity
                 break;
             case SECTION_RECOGNITION:
                 mTitle = getString(R.string.title_section_recognition);
-                break;
-            case SECTION_DSP_EFFECTS:
-                mTitle = getString(R.string.settings_dsp_config_title);
                 break;
             case SECTION_HISTORY:
                 mTitle = getString(R.string.section_history);
@@ -470,7 +448,9 @@ public class MainActivity extends AppActivity
                 break;
 
             case R.id.action_sound_effects:
-                showFragment(new DspProvidersFragment(), true, "-1_DSPProv");
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                intent.putExtra("DSP", true);
+                startActivity(intent);
                 break;
 
             case R.id.action_offline_mode:

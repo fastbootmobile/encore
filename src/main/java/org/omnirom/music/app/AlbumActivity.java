@@ -198,6 +198,7 @@ public class AlbumActivity extends AppActivity {
         } else if (id == R.id.menu_more_from_artist) {
             String artistRef = mActiveFragment.getArtist();
             Intent intent = ArtistActivity.craftIntent(this, null, artistRef,
+                    mActiveFragment.getAlbum().getProvider(),
                     getResources().getColor(R.color.default_album_art_background));
             startActivity(intent);
         } else if (id == android.R.id.home) {

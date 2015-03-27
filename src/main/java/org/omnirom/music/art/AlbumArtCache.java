@@ -181,8 +181,8 @@ public class AlbumArtCache {
             // Provider can't provide an art for this song, get from MusicBrainz
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
-            final Artist artist = aggregator.retrieveArtist(song.getArtist(), id);
-            final Album album = aggregator.retrieveAlbum(song.getAlbum(), id);
+            final Artist artist = song.getArtist() != null ? aggregator.retrieveArtist(song.getArtist(), id) : null;
+            final Album album = song.getAlbum() != null ? aggregator.retrieveAlbum(song.getAlbum(), id) : null;
 
             // If we have both the artist and the album name, use that for album art
             boolean hasAlbum = (album != null && album.getName() != null && !album.getName().isEmpty());
@@ -384,7 +384,7 @@ public class AlbumArtCache {
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON Error while getting image from Google Images", e);
                 } catch (IOException e) {
-                    Log.e(TAG, "IO error while getting image from Google Images", e);
+                    Log.e(TAG, "IO error while getting image from Google Images (" + e.getMessage() + ")");
                 }
 
             }

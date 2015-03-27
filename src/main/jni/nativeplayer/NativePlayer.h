@@ -52,6 +52,9 @@ class NativePlayer : public INativeSink {
     // Returns the number of samples in the buffer (not yet enqueued for playback)
     int32_t getBufferedCount() const;
 
+    // Returns the number of free samples in the buffer
+    int32_t getFreeBuffersCount() const;
+
     // Returns the number of stutters/dropouts (buffer underflows) since last flush (or start if
     // none)
     int32_t getUnderflowCount() const;

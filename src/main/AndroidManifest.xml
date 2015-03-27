@@ -38,14 +38,14 @@
     <!-- Main application declaration -->
     <application
         android:name=".OmniMusic"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:supportsRtl="true"
         android:allowTaskReparenting="true"
         android:hardwareAccelerated="true"
-        android:taskAffinity="org.omnirom.music.task"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
         android:persistent="true"
         android:process=":main"
+        android:supportsRtl="true"
+        android:taskAffinity="org.omnirom.music.task"
         android:theme="@style/AppTheme" >
 
         <!-- GMS for Chromecast -->
@@ -85,23 +85,24 @@
         </receiver>
 
         <!-- Receiver for Bluetooth actions -->
-        <receiver android:name="org.omnirom.music.receivers.BluetoothReceiver">
+        <receiver android:name="org.omnirom.music.receivers.BluetoothReceiver" >
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
             </intent-filter>
         </receiver>
 
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:configChanges="orientation"
             android:label="@string/app_name"
             android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.APP_MUSIC" />
             </intent-filter>
@@ -170,12 +171,17 @@
         <activity
             android:name=".DriveModeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:launchMode="singleTask"
             android:label="@string/title_activity_drive_mode"
+            android:launchMode="singleTask"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/OmniMusic.FullscreenTheme" >
         </activity>
 
+        <!-- Welcome Wizard Activity -->
+        <activity
+            android:name=".WelcomeActivity"
+            android:label="@string/title_activity_welcome" >
+        </activity>
     </application>
 
 </manifest>

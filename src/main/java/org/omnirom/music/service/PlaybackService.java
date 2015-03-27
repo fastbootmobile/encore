@@ -51,6 +51,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.receivers.RemoteControlReceiver;
+import org.omnirom.music.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -72,7 +73,9 @@ public class PlaybackService extends Service
     public static final int STATE_PAUSING   = 4;
 
     private static final String SERVICE_SHARED_PREFS = "PlaybackServicePrefs";
+    private static final String QUEUE_SHARED_PREFS = "PlaybackQueueMemory";
     private static final String PREF_KEY_REPEAT = "repeatMode";
+    private static final String PREF_KEY_SHUFFLE = "shuffleMode";
 
     public static final String ACTION_COMMAND = "command";
     public static final String EXTRA_COMMAND_NAME = "command_name";
@@ -127,12 +130,14 @@ public class PlaybackService extends Service
     private ProviderIdentifier mCurrentPlayingProvider;
     private boolean mHasAudioFocus;
     private boolean mRepeatMode;
+    private boolean mShuffleMode;
     private Prefetcher mPrefetcher;
     private IRemoteMetadataManager mRemoteMetadata;
     private PowerManager.WakeLock mWakeLock;
     private boolean mIsForeground;
     private ListenLogger mListenLogger;
     private PacManReceiver mPacManReceiver;
+    private boolean mCurrentTrackLoaded;
 
     private Runnable mStartPlaybackImplRunnable = new Runnable() {
         @Override
@@ -255,6 +260,23 @@ public class PlaybackService extends Service
         // Restore preferences
         SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
         mRepeatMode = prefs.getBoolean(PREF_KEY_REPEAT, false);
+        mShuffleMode = prefs.getBoolean(PREF_KEY_SHUFFLE, false);
+
+        // TODO: Use callbacks
+        // Restore playback queue after one second - we have multiple things to wait here:
+        //  - The callbacks of the main app's UI
+        //  - The providers connecting
+        //  - The providers ready to send us data
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                SharedPreferences queuePrefs = getSharedPreferences(QUEUE_SHARED_PREFS, MODE_PRIVATE);
+                mPlaybackQueue.restore(queuePrefs);
+                mCurrentTrack = queuePrefs.getInt("current", -1);
+                mCurrentTrackLoaded = false;
+                mNotification.setHasNext(mPlaybackQueue.size() > 1 || (mPlaybackQueue.size() > 0 && mRepeatMode));
+            }
+        }, 1000);
     }
 
     /**
@@ -292,9 +314,10 @@ public class PlaybackService extends Service
 
         PluginsLookup.getDefault().tearDown(mNativeHub);
 
-        // Release all currently playing songs
-        mPlaybackQueue.clear();
-        mCurrentTrack = -1;
+        // Store the playback queue
+        SharedPreferences queuePrefs = getSharedPreferences(QUEUE_SHARED_PREFS, MODE_PRIVATE);
+        mPlaybackQueue.save(queuePrefs.edit());
+        queuePrefs.edit().putInt("current", mCurrentTrack).apply();
 
         // Shutdown DSP chain
         mNativeHub.onStop();
@@ -478,7 +501,6 @@ public class PlaybackService extends Service
                     AudioManager.AUDIOFOCUS_GAIN);
 
             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                mHasAudioFocus = true;
                 am.registerMediaButtonEventReceiver(RemoteControlReceiver.getComponentName(this));
 
                 // Notify the remote metadata that we're getting active
@@ -496,6 +518,8 @@ public class PlaybackService extends Service
                 intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
                 intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
                 sendBroadcast(intent);
+
+                mHasAudioFocus = true;
             } else {
                 Log.e(TAG, "Audio focus request denied: " + result);
             }
@@ -507,17 +531,25 @@ public class PlaybackService extends Service
      */
     private synchronized void abandonAudioFocus() {
         if (mHasAudioFocus) {
+            // Release the audio focus
             final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             am.abandonAudioFocus(this);
             unregisterReceiver(mAudioNoisyReceiver);
-            mHasAudioFocus = false;
+
+            // Release our CPU wakelock
             mWakeLock.release();
 
+            // Notify the remote metadata that we're getting down
+            mRemoteMetadata.setActive(false);
+
+            // Release the Audio effects session for system audio FX
             final Intent audioEffectsIntent = new Intent(
                     AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
             audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
             audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
             sendBroadcast(audioEffectsIntent);
+
+            mHasAudioFocus = false;
         }
     }
 
@@ -570,6 +602,7 @@ public class PlaybackService extends Service
                         if (!next.isLoaded()) {
                             // Track not loaded yet, delay until track info arrived
                             mCurrentTrackWaitLoading = true;
+                            mCurrentTrackLoaded = false;
                             Log.w(TAG, "Track not yet loaded: " + next.getRef() + ", delaying");
                         } else if (!next.isAvailable()) {
                             // Track is not available, skip to the next one
@@ -589,6 +622,8 @@ public class PlaybackService extends Service
                             } catch (IllegalStateException e) {
                                 Log.e(TAG, "Illegal State from provider", e);
                             }
+
+                            mCurrentTrackLoaded = true;
 
                             mListenLogger.addEntry(next);
 
@@ -640,7 +675,16 @@ public class PlaybackService extends Service
      */
     void nextImpl() {
         boolean hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
-        if (mPlaybackQueue.size() > 0 && hasNext) {
+        if (mPlaybackQueue.size() > 1 && mShuffleMode) {
+            // Shuffle mode is enabled, play any track but not the one we just played
+            int previousTrack = mCurrentTrack;
+            while (previousTrack == mCurrentTrack) {
+                mCurrentTrack = Utils.getRandom(mPlaybackQueue.size());
+            }
+            mHandler.removeCallbacks(mStartPlaybackRunnable);
+            mHandler.post(mStartPlaybackRunnable);
+            mNotification.setHasNext(true);
+        } else if (mPlaybackQueue.size() > 0 && hasNext) {
             mCurrentTrack++;
             mHandler.removeCallbacks(mStartPlaybackRunnable);
             mHandler.post(mStartPlaybackRunnable);
@@ -669,13 +713,22 @@ public class PlaybackService extends Service
      * Restarts the current song or goes to the previous one
      */
     void previousImpl() {
-        boolean shouldRestart = (getCurrentTrackPositionImpl() > 4000 || mCurrentTrack == 0);
+        boolean shouldRestart = (getCurrentTrackPositionImpl() > 4000 || (!mRepeatMode && mCurrentTrack == 0))
+                && mCurrentTrackLoaded;
         if (shouldRestart) {
             // Restart playback
             seekImpl(0);
         } else {
             // Go to the previous track
             mCurrentTrack--;
+            if (mCurrentTrack < 0) {
+                if (mRepeatMode) {
+                    mCurrentTrack = mPlaybackQueue.size() - 1;
+                } else {
+                    mCurrentTrack = 0;
+                }
+            }
+
             mHandler.removeCallbacks(mStartPlaybackRunnable);
             mHandler.post(mStartPlaybackRunnable);
         }
@@ -738,10 +791,15 @@ public class PlaybackService extends Service
     }
 
     void playImpl() {
+        if (mState == STATE_PLAYING || mState == STATE_BUFFERING) {
+            // We are already playing, don't do anything
+            return;
+        }
+
         new Thread() {
             public void run() {
                 final Song currentSong = getCurrentSong();
-                if (currentSong != null) {
+                if (currentSong != null && mCurrentTrackLoaded) {
                     ProviderConnection conn = PluginsLookup.getDefault().getProvider(currentSong.getProvider());
                     if (conn != null) {
                         IMusicProvider provider = conn.getBinder();
@@ -771,6 +829,7 @@ public class PlaybackService extends Service
                 } else if (mPlaybackQueue.size() > 0) {
                     mHandler.removeCallbacks(mStartPlaybackRunnable);
                     mHandler.post(mStartPlaybackRunnable);
+                    mIsResuming = false;
                 }
             }
         }.start();
@@ -815,7 +874,7 @@ public class PlaybackService extends Service
     void seekImpl(final long timeMs) {
         final Song currentSong = getCurrentSong();
         boolean success = false;
-        if (currentSong != null) {
+        if (currentSong != null && mCurrentTrackLoaded) {
             ProviderIdentifier id = currentSong.getProvider();
             ProviderConnection conn = PluginsLookup.getDefault().getProvider(id);
             if (conn != null) {
@@ -827,6 +886,8 @@ public class PlaybackService extends Service
                         mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot seek to time", e);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Provider thrown exception while seeking", e);
                     }
                 }
             }
@@ -1025,6 +1086,20 @@ public class PlaybackService extends Service
         }
 
         @Override
+        public void setShuffleMode(boolean shuffle) throws RemoteException {
+            mShuffleMode = shuffle;
+            SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(PREF_KEY_SHUFFLE, shuffle);
+            editor.apply();
+        }
+
+        @Override
+        public boolean isShuffleMode() throws RemoteException {
+            return mShuffleMode;
+        }
+
+        @Override
         public void clearPlaybackQueue() throws RemoteException {
             mPlaybackQueue.clear();
         }
@@ -1034,7 +1109,8 @@ public class PlaybackService extends Service
     public void onSongUpdate(List<Song> s) {
         final Song currentSong = getCurrentSong();
 
-        if (s.contains(currentSong) && currentSong.isLoaded()) {
+        if (currentSong != null && s.contains(currentSong) && currentSong.isLoaded()
+                && mCurrentTrackLoaded) {
             if (mCurrentTrackWaitLoading) {
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
@@ -1154,17 +1230,28 @@ public class PlaybackService extends Service
 
         @Override
         public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
-            if (mPlaybackQueue.size() > 0 && mCurrentTrack < mPlaybackQueue.size() - 1) {
-                // Move to the next track
+            // We restart the queue in an handler. In the case of the Spotify provider, the
+            // endOfTrack callback locks the main API thread, leading to a dead lock if we
+            // try to play a track here while still being in the callstack of the endOfTrack
+            // callback.
+
+            if (mPlaybackQueue.size() > 1 && mShuffleMode) {
+                // Shuffle mode is enabled, play any track but not the one we just played
+                int previousTrack = mCurrentTrack;
+                while (previousTrack == mCurrentTrack) {
+                    mCurrentTrack = Utils.getRandom(mPlaybackQueue.size());
+                }
+
+                mHandler.removeCallbacks(mStartPlaybackRunnable);
+                mHandler.post(mStartPlaybackRunnable);
+            } else if (mPlaybackQueue.size() > 0 && mCurrentTrack < mPlaybackQueue.size() - 1) {
+                // Regular sequential mode, not at the end, move to the next track
                 mCurrentTrack++;
 
-                // We restart the queue in an handler. In the case of the Spotify provider, the
-                // endOfTrack callback locks the main API thread, leading to a dead lock if we
-                // try to play a track here while still being in the callstack of the endOfTrack
-                // callback.
                 mHandler.removeCallbacks(mStartPlaybackRunnable);
                 mHandler.post(mStartPlaybackRunnable);
             } else if (mPlaybackQueue.size() > 0 && mCurrentTrack == mPlaybackQueue.size() - 1) {
+                // Regular sequential mode, at the end of the queue
                 if (mRepeatMode) {
                     // We're repeating, go back to the first track and play it
                     mCurrentTrack = 0;

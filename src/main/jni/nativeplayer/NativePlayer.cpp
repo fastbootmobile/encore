@@ -248,8 +248,8 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
             free(m_pPlayingBuffer);
         }
 
-        m_iBufferMinPlayback = sample_rate * channels / 4;
-        m_iBufferMaxSize = sample_rate * channels;
+        m_iBufferMinPlayback = sample_rate * channels / 40;
+        m_iBufferMaxSize = sample_rate * channels / 2;
 
         switch (sample_rate) {
             // Crappy quality starts here v
@@ -409,6 +409,10 @@ int32_t NativePlayer::getBufferedCount() const {
     return m_iActiveBufferIndex;
 }
 // -------------------------------------------------------------------------------------
+int32_t NativePlayer::getFreeBuffersCount() const {
+    return m_iBufferMaxSize - m_iActiveBufferIndex;
+}
+// -------------------------------------------------------------------------------------
 int32_t NativePlayer::getUnderflowCount() const {
     return m_iUnderflowCount;
 }
@@ -465,7 +469,7 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
             }
         } else {
             // No more buffers to play, we pause the playback and wait for buffers in enqueue
-            p->setPlayState(SL_PLAYSTATE_PAUSED);
+            // p->setPlayState(SL_PLAYSTATE_PAUSED);
             p->m_iUnderflowCount++;
             ALOGW("Buffer underrun");
 

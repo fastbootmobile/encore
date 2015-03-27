@@ -32,9 +32,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:gravity="center_vertical"
@@ -42,7 +40,9 @@
         android:paddingEnd="8dp"
         android:paddingLeft="72dp"
         android:paddingRight="8dp"
-        android:paddingStart="72dp">
+        android:paddingStart="72dp"
+        android:layout_toLeftOf="@+id/ivOverflow"
+        android:layout_toStartOf="@+id/ivOverflow">
 
 
         <TextView
@@ -61,6 +61,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical" />
+
     </LinearLayout>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivOverflow"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_more_vert_dark"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground"/>
 
 </RelativeLayout>

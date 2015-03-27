@@ -8,8 +8,8 @@
 
     <org.omnirom.music.app.ui.AlbumArtImageView
         android:id="@+id/ivAlbumArt"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="start|center_vertical"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
@@ -201,10 +201,11 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:fontFamily="sans-serif-condensed"
+        android:fontFamily="sans-serif-medium"
         fontPath="fonts/RobotoCondensed-Regular.ttf"
         android:textColor="@color/white"
         android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"/>
+        android:layout_marginRight="8dp"
+        />
 
 </RelativeLayout>

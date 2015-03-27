@@ -5,6 +5,7 @@ package org.omnirom.music.app.fragments;
 import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.os.Handler;
 import android.support.v4.app.ListFragment;
 import android.content.DialogInterface;
@@ -41,7 +42,6 @@ public class DspProvidersFragment extends ListFragment {
 
     private DspAdapter mAdapter;
     private Handler mHandler;
-    private float mStoredMATop = -1;
 
     private DspAdapter.ClickListener mClickListener = new DspAdapter.ClickListener() {
         @Override
@@ -123,26 +123,6 @@ public class DspProvidersFragment extends ListFragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if (activity instanceof MainActivity) {
-            MainActivity ma = (MainActivity) activity;
-            ma.onSectionAttached(MainActivity.SECTION_DSP_EFFECTS);
-            mStoredMATop = ma.getContentShadowTop();
-            ma.setContentShadowTop(0);
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if (mStoredMATop >= 0) {
-            MainActivity ma = (MainActivity) getActivity();
-            ma.setContentShadowTop(mStoredMATop);
-        }
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         ListView lv = (ListView) view.findViewById(android.R.id.list);
@@ -181,6 +161,9 @@ public class DspProvidersFragment extends ListFragment {
             } catch (SecurityException e) {
                 Utils.shortToast(getActivity(), R.string.plugin_error);
                 Log.e(TAG, "Unable to start configuration activity. Is it exported in the manifest?", e);
+            } catch (ActivityNotFoundException e) {
+                Utils.shortToast(getActivity(), R.string.plugin_error);
+                Log.e(TAG, "Unable to start configuration activity, as the activity wasn't found", e);
             }
         } else {
             Utils.shortToast(getActivity(), R.string.no_settings_dsp);

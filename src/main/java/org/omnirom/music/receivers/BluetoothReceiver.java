@@ -75,6 +75,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(intent.getAction())) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 handleDeviceConnected(context, prefs, device);
+            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(intent.getAction())) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                handleDeviceDisconnected(context, prefs, device);
             }
         }
     }
@@ -83,13 +86,11 @@ public class BluetoothReceiver extends BroadcastReceiver {
                                        BluetoothDevice device) {
         String autoconnectName = prefs.getString(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME, null);
 
-        if (device.getName().equals(autoconnectName)) {
+        if (autoconnectName != null && device.getName() != null
+                && device.getName().equals(autoconnectName)) {
             // Our autoconnect device plugged in, launch the desired action
             Set<String> actionFlagsStr = prefs.getStringSet(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ACTION, null);
-            int actionFlags = 0;
-            for (String flag : actionFlagsStr) {
-                actionFlags += Integer.parseInt(flag);
-            }
+            int actionFlags = buildActionFlags(actionFlagsStr);
 
             if ((actionFlags & BT_AUTOCONNECT_ACTION_OPEN_DRIVE) != 0) {
                 // Open Drive Mode activity
@@ -101,7 +102,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
 
             if ((actionFlags & BT_AUTOCONNECT_ACTION_PLAY_QUEUE) != 0) {
                 // Plugins can take a couple seconds to be ready (e.g. Spotify can only play
-                // music 2 seconds after getting connected). We hit up PlaybackProxy to get
+                // music a few seconds after getting connected). We hit up PlaybackProxy to get
                 // the PlaybackService and the plugins system up (in case the app was off),
                 // then we actually request playback.
                 PlaybackProxy.getState();
@@ -115,5 +116,33 @@ public class BluetoothReceiver extends BroadcastReceiver {
                 }, 2000);
             }
         }
+    }
+
+    private void handleDeviceDisconnected(Context context, SharedPreferences prefs,
+                                          BluetoothDevice device) {
+        String autoconnectName = prefs.getString(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME, null);
+
+        if (autoconnectName != null && device.getName() != null
+                && device.getName().equals(autoconnectName)) {
+            Set<String> actionFlagsStr = prefs.getStringSet(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ACTION, null);
+            int actionFlags = buildActionFlags(actionFlagsStr);
+
+            // When autoconnect is enabled, and if "Open Drive Mode" was checked, we close the
+            // drive mode activity when the device has disconnected. The "AUDIO_BECOMING_NOISY"
+            // intent will stop the playback anyway when the A2DP device is disconnected.
+            if ((actionFlags & BT_AUTOCONNECT_ACTION_OPEN_DRIVE) != 0) {
+                Intent finish = new Intent(DriveModeActivity.ACTION_FINISH);
+                context.sendBroadcast(finish);
+            }
+        }
+    }
+
+    private int buildActionFlags(Set<String> flags) {
+        int actionFlags = 0;
+        for (String flag : flags) {
+            actionFlags += Integer.parseInt(flag);
+        }
+
+        return actionFlags;
     }
 }

@@ -48,9 +48,11 @@ public class PlaylistChooserFragment extends DialogFragment {
 
     private static final String KEY_SONG = "song";
     private static final String KEY_ALBUM = "album";
+    private static final String KEY_PLAYLIST = "playlist";
 
     private Song mSong;
     private Album mAlbum;
+    private Playlist mPlaylist;
 
     /**
      * Creates the fragment in the perspective of adding a song to a playlist
@@ -78,6 +80,19 @@ public class PlaylistChooserFragment extends DialogFragment {
         return fragment;
     }
 
+    /**
+     * Creates the fragment in the perspective of appending a playlist to another one
+     * @param playlist The playlist that should be appended to the selection
+     * @return The fragment generated
+     */
+    public static PlaylistChooserFragment newInstance(Playlist playlist) {
+        PlaylistChooserFragment fragment = new PlaylistChooserFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(KEY_PLAYLIST, playlist);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
@@ -95,8 +110,11 @@ public class PlaylistChooserFragment extends DialogFragment {
         } else if (args.containsKey(KEY_ALBUM)) {
             mAlbum = args.getParcelable(KEY_ALBUM);
             mAlbum = aggregator.retrieveAlbum(mAlbum.getRef(), mAlbum.getProvider());
+        } else if (args.containsKey(KEY_PLAYLIST)) {
+            mPlaylist = args.getParcelable(KEY_PLAYLIST);
+            mPlaylist = aggregator.retrievePlaylist(mPlaylist.getRef(), mPlaylist.getProvider());
         } else {
-            throw new IllegalArgumentException("Neither song or album parameters were found");
+            throw new IllegalArgumentException("No song, album or playlist parameters were found");
         }
     }
 
@@ -106,11 +124,20 @@ public class PlaylistChooserFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
+        // Get and sort the playlists available
         List<Playlist> playlistList = aggregator.getAllPlaylists();
         Collections.sort(playlistList, new Comparator<Playlist>() {
             @Override
             public int compare(Playlist lhs, Playlist rhs) {
-                return lhs.getName().compareTo(rhs.getName());
+                if (lhs.getName() != null && rhs.getName() != null) {
+                    return lhs.getName().compareTo(rhs.getName());
+                } else if (lhs.getName() == null && rhs.getName() == null) {
+                    return 0;
+                } else if (lhs.getName() == null) {
+                    return 1;
+                } else {
+                    return -1;
+                }
             }
         });
 
@@ -119,9 +146,22 @@ public class PlaylistChooserFragment extends DialogFragment {
         final List<Playlist> playlistChoices = new ArrayList<Playlist>();
         final ProviderConnection mppp = PluginsLookup.getDefault().getMultiProviderPlaylistProvider();
 
+        // Decide what entity we are using
+        BoundEntity ent;
+        if (mSong != null) {
+            ent = mSong;
+        } else if (mAlbum != null) {
+            ent = mAlbum;
+        } else if (mPlaylist != null) {
+            ent = mPlaylist;
+        } else {
+            throw new RuntimeException("No entity attached for source checking");
+        }
+
         for (Playlist playlist : playlistList) {
             ProviderIdentifier providerIdentifier = playlist.getProvider();
-            BoundEntity ent = (mSong != null ? mSong : mAlbum);
+
+            // Allow adding to a playlist from the same provider, or from the MultiProvider
             if (ent.getProvider().equals(providerIdentifier)
                     || mppp.getIdentifier().equals(providerIdentifier)) {
                 String decoration = "";
@@ -135,13 +175,22 @@ public class PlaylistChooserFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) {
+                            NewPlaylistFragment fragment;
+                            String ref;
                             if (mSong != null) {
-                                NewPlaylistFragment fragment = NewPlaylistFragment.newInstance(mSong);
-                                fragment.show(getFragmentManager(), mSong.getRef() + "-newplaylist");
+                                fragment = NewPlaylistFragment.newInstance(mSong);
+                                ref = mSong.getRef();
+                            } else if (mAlbum != null) {
+                                fragment = NewPlaylistFragment.newInstance(mAlbum);
+                                ref = mAlbum.getRef();
+                            } else if (mPlaylist != null) {
+                                fragment = NewPlaylistFragment.newInstance(mPlaylist);
+                                ref = mPlaylist.getRef();
                             } else {
-                                NewPlaylistFragment fragment = NewPlaylistFragment.newInstance(mAlbum);
-                                fragment.show(getFragmentManager(), mAlbum.getRef() + "-newplaylist");
+                                throw new RuntimeException("Shouldn't be here");
                             }
+
+                            fragment.show(getFragmentManager(), ref + "-newplaylist");
                         } else {
                             final Playlist playlistChosen = playlistChoices.get(which - 1);
                             ProviderIdentifier playlistChosenId =
@@ -150,10 +199,17 @@ public class PlaylistChooserFragment extends DialogFragment {
                                 final IMusicProvider provider = PluginsLookup.getDefault().getProvider(playlistChosenId).getBinder();
                                 if (mSong != null) {
                                     provider.addSongToPlaylist(mSong.getRef(), playlistChosen.getRef(), mSong.getProvider());
-                                } else {
+                                } else if (mAlbum != null) {
                                     Iterator<String> songs = mAlbum.songs();
                                     while (songs.hasNext()) {
                                         provider.addSongToPlaylist(songs.next(), playlistChosen.getRef(), mAlbum.getProvider());
+                                    }
+                                } else if (mPlaylist != null) {
+                                    Iterator<String> songs = mPlaylist.songs();
+                                    while (songs.hasNext()) {
+                                        // TODO: This might cause issues if we add a playlist
+                                        // from a multi-provider playlist to another one
+                                        provider.addSongToPlaylist(songs.next(), playlistChosen.getRef(), mPlaylist.getProvider());
                                     }
                                 }
                             } catch (Exception e) {

@@ -116,7 +116,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     @Override
-    public List<Song> getSongs() throws RemoteException {
+    public List<Song> getSongs(int offset, int limit) throws RemoteException {
         return null;
     }
 

@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -409,6 +410,7 @@ public class Utils {
 
                     case R.id.menu_open_artist:
                         Intent intent = ArtistActivity.craftIntent(context, null, song.getArtist(),
+                                song.getProvider(),
                                 context.getResources().getColor(R.color.default_album_art_background));
                         context.startActivity(intent);
                         break;
@@ -736,5 +738,9 @@ public class Utils {
             }
         });
         animator.start();
+    }
+
+    public static int getRandom(int maxExcluded) {
+        return new Random().nextInt(maxExcluded);
     }
 }
