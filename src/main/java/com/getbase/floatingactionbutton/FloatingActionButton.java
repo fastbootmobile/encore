@@ -78,6 +78,10 @@ public class FloatingActionButton extends ImageButton {
     updateBackground();
   }
 
+  public int getNormalColor() {
+    return mColorNormal;
+  }
+
   public void setNormalColor(int color) {
     mColorNormal = color;
     updateBackground();

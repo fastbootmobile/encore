@@ -249,15 +249,8 @@ public class PlayPauseDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
         canvas.save();
-        /*if (getBounds().width() > 0 && getBounds().height() > 0) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {*/
-                canvas.translate((getBounds().width() - mWidth) / 2, (getBounds().height() - mHeight) / 2);
-            /*} else {
-                canvas.translate((getBounds().width() - mWidth) / 2, 0);
-            }
-        } else {
-            invalidateSelf();
-        }*/
+
+        canvas.translate((getBounds().width() - mWidth) / 2, (getBounds().height() - mHeight) / 2);
 
         canvas.translate(0, -mYOffset);
 

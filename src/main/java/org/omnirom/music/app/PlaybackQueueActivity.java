@@ -478,6 +478,7 @@ public class PlaybackQueueActivity extends AppActivity {
 
             if (!mHandler.hasMessages(MSG_UPDATE_QUEUE)) {
                 mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
+                mHandler.sendEmptyMessageDelayed(MSG_UPDATE_QUEUE, 500);
             }
         }
 

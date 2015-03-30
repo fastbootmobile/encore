@@ -17,7 +17,6 @@ package org.omnirom.music.app.fragments;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,16 +27,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.ui.CircularPathAnimation;
 import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.adapters.SongsListAdapter;
 import org.omnirom.music.app.ui.ParallaxScrollListView;
@@ -71,6 +73,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private Handler mHandler;
     private Bitmap mHeroImage;
     private PlayPauseDrawable mFabDrawable;
+    private PlayPauseDrawable mBarDrawable;
     private int mBackgroundColor;
     private FloatingActionButton mPlayFab;
     private ParallaxScrollListView mListView;
@@ -80,22 +83,32 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private ImageView mIvHero;
     private TextView mTvAlbumName;
     private boolean mDidHaveMore = true;
+    private RelativeLayout mBarLayout;
+    private ImageView mBarPlay;
+    private ImageView mBarNext;
+    private ImageView mBarPrevious;
+    private TextView mBarTitle;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
-        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
+        public void onSongStarted(final boolean buffering, final Song s) throws RemoteException {
             if (mAdapter.contains(s)) {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         mAdapter.notifyDataSetChanged();
+                        mBarTitle.setText(s.getTitle());
+
                         if (buffering) {
                             mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                            mFabDrawable.setBuffering(true);
                         } else {
                             mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                            mFabDrawable.setBuffering(false);
                         }
+
+                        mFabDrawable.setBuffering(buffering);
+
+                        mBarDrawable.setBuffering(buffering);
+                        mBarDrawable.setShape(mFabDrawable.getRequestedShape());
                     }
                 });
             }
@@ -105,6 +118,8 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         public void onPlaybackResume() throws RemoteException {
             mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
             mFabDrawable.setBuffering(false);
+            mBarDrawable.setShape(mFabDrawable.getRequestedShape());
+            mBarDrawable.setBuffering(false);
         }
     };
 
@@ -188,10 +203,75 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
         mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_album_view, container, false);
         assert mRootView != null;
 
+        setupList();
+
+        setupHeader(inflater);
+
+        // Start loading songs in another thread
+        loadSongs();
+
+        return mRootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ProviderAggregator.getDefault().addUpdateCallback(this);
+        PlaybackProxy.addCallback(mPlaybackCallback);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        ProviderAggregator.getDefault().removeUpdateCallback(this);
+        PlaybackProxy.removeCallback(mPlaybackCallback);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (mHeroImage != null) {
+            mHeroImage.recycle();
+            mHeroImage = null;
+        }
+    }
+
+    private void setupList() {
         // Setup the contents list view
         mListView = (ParallaxScrollListView) mRootView.findViewById(R.id.lvAlbumContents);
         mAdapter = new SongsListAdapter(false);
+        mListView.setAdapter(mAdapter);
 
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                // We substract the header view
+                position = position - 1;
+                final Song song = mAdapter.getItem(position);
+
+                if (Utils.canPlaySong(song)) {
+                    // Play the song (ie. queue the album and play at the selected index)
+                    PlaybackProxy.clearQueue();
+                    PlaybackProxy.queueAlbum(mAlbum, false);
+                    PlaybackProxy.playAtIndex(position);
+
+                    mFabDrawable.setBuffering(true);
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+
+                    mBarDrawable.setBuffering(true);
+                    mBarDrawable.setShape(mFabDrawable.getRequestedShape());
+
+                    mFabShouldResume = true;
+                }
+            }
+        });
+    }
+
+    private void setupHeader(LayoutInflater inflater) {
         // Load the header
         View headerView = inflater.inflate(R.layout.songs_list_view_header, mListView, false);
         mIvHero = (ImageView) headerView.findViewById(R.id.ivHero);
@@ -243,6 +323,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     if (mFabShouldResume) {
                         PlaybackProxy.play();
                         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                        mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     } else {
                         PlaybackProxy.playAlbum(mAlbum);
                     }
@@ -250,6 +331,12 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     mFabShouldResume = true;
                     PlaybackProxy.pause();
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                }
+
+                if (Utils.hasLollipop()) {
+                    // No Lollipop, no cool animation!
+                    showMaterialReelBar();
                 }
             }
         });
@@ -269,63 +356,102 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
 
         // Set the header view and adapter
         mListView.addParallaxedHeaderView(headerView);
-        mListView.setAdapter(mAdapter);
 
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                // We substract the header view
-                position = position - 1;
-                final Song song = mAdapter.getItem(position);
-
-                if (Utils.canPlaySong(song)) {
-                    // Play the song (ie. queue the album and play at the selected index)
-                    PlaybackProxy.clearQueue();
-                    PlaybackProxy.queueAlbum(mAlbum, false);
-                    PlaybackProxy.playAtIndex(position);
-
-                    mFabDrawable.setBuffering(true);
-                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                    mFabShouldResume = true;
-                }
-            }
-        });
 
         AlphaAnimation anim = new AlphaAnimation(0.f, 1.f);
         anim.setDuration(200);
         mListView.setLayoutAnimation(new LayoutAnimationController(anim));
 
-        // Start loading songs in another thread
-        loadSongs();
-
-        return mRootView;
+        setupMaterialReelBar();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        ProviderAggregator.getDefault().addUpdateCallback(this);
-        PlaybackProxy.addCallback(mPlaybackCallback);
+    private void setupMaterialReelBar() {
+        // Material reel
+        mBarLayout = (RelativeLayout) mRootView.findViewById(R.id.layoutBar);
+        mBarPlay = (ImageView) mRootView.findViewById(R.id.btnBarPlay);
+        mBarNext = (ImageView) mRootView.findViewById(R.id.btnBarNext);
+        mBarPrevious = (ImageView) mRootView.findViewById(R.id.btnBarPrevious);
+        mBarTitle = (TextView) mRootView.findViewById(R.id.tvBarTitle);
+
+        mBarDrawable = new PlayPauseDrawable(getResources(), 1);
+        mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+        mBarDrawable.setYOffset(-6);
+        mBarDrawable.setColor(0xFFFFFFFF);
+
+        mBarPlay.setImageDrawable(mBarDrawable);
+
+        mBarPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mBarDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
+                    if (mFabShouldResume) {
+                        PlaybackProxy.play();
+                        mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    } else {
+                        PlaybackProxy.playAlbum(mAlbum);
+                    }
+                } else {
+                    mFabShouldResume = true;
+                    PlaybackProxy.pause();
+                    mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                }
+            }
+        });
+        mBarNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PlaybackProxy.next();
+            }
+        });
+        mBarPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PlaybackProxy.previous();
+            }
+        });
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        ProviderAggregator.getDefault().removeUpdateCallback(this);
-        PlaybackProxy.removeCallback(mPlaybackCallback);
-    }
+    private void showMaterialReelBar() {
+        mBarLayout.setVisibility(View.VISIBLE);
+        mBarLayout.setAlpha(0);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final int DP = getResources().getDimensionPixelSize(R.dimen.one_dp);
 
-        if (mHeroImage != null) {
-            mHeroImage.recycle();
-            mHeroImage = null;
-        }
+                CircularPathAnimation anim = new CircularPathAnimation(0, -128 * DP, 0, 128 * DP);
+                anim.setDuration(400);
+                anim.setInterpolator(new AccelerateDecelerateInterpolator());
+                anim.setFillAfter(true);
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mBarLayout.setAlpha(1.0f);
+                        mBarLayout.setBackgroundColor(mPlayFab.getNormalColor());
+                        Utils.animateHeadingReveal(mBarLayout, mBarLayout.getMeasuredWidth() / 2,
+                                (int) (mBarLayout.getMeasuredHeight() / 1.25f));
+
+                        mPlayFab.animate().setStartDelay(30)
+                                .alpha(0).scaleX(0.5f).scaleY(0.5f).setDuration(150).start();
+
+                        mBarPlay.setAlpha(0f);
+
+                        mBarNext.setAlpha(0f);
+                        mBarNext.setTranslationX(-8 * DP);
+                        mBarPrevious.setAlpha(0f);
+                        mBarPrevious.setTranslationX(8 * DP);
+
+                        mBarPlay.animate().alpha(1).setDuration(100).start();
+                        mBarNext.animate().alpha(1).translationX(0).setDuration(250).start();
+                        mBarPrevious.animate().alpha(1).translationX(0).setDuration(250).start();
+                    }
+                }, 300);
+
+                mPlayFab.startAnimation(anim);
+            }
+        });
     }
 
     public ImageView getHeroImageView() {

@@ -1,9 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    tools:context="org.omnirom.music.app.ArtistActivity.InnerFragment">
+                xmlns:tools="http://schemas.android.com/tools"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:context="org.omnirom.music.app.ArtistActivity.InnerFragment">
 
     <org.omnirom.music.app.ui.TopCropImageView
         android:id="@+id/ivHero"
@@ -15,6 +15,60 @@
         android:transitionName="itemImage"
         android:scaleType="centerInside"
         />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        android:layout_below="@+id/tvAlbumName"
+        android:id="@+id/layoutBar"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnBarPlay"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            style="@style/OmniMusic.Spec.BorderlessButton"
+            android:layout_below="@+id/tvBarTitle"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnBarPrevious"
+            android:src="@drawable/ic_previous_white"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btnBarPlay"
+            android:layout_toStartOf="@+id/btnBarPlay"
+            style="@style/OmniMusic.Spec.BorderlessButton"
+            android:layout_alignTop="@+id/btnBarPlay"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnBarNext"
+            android:src="@drawable/ic_next_white"
+            android:layout_toRightOf="@+id/btnBarPlay"
+            android:layout_toEndOf="@+id/btnBarPlay"
+            android:layout_centerVertical="true"
+            style="@style/OmniMusic.Spec.BorderlessButton"
+            android:layout_alignTop="@+id/btnBarPlay"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvBarTitle"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
+    </RelativeLayout>
+
 
     <TextView
         android:id="@+id/tvAlbumName"
@@ -67,7 +121,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
-        android:indeterminate="true" />
+        android:indeterminate="true"/>
 
     <ImageView
         android:layout_width="24dp"
@@ -80,7 +134,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:scaleType="centerInside"
-        android:contentDescription="@string/app_name" />
+        android:contentDescription="@string/app_name"/>
 
     <com.dd.CircularProgressButton
         android:id="@+id/cpbOffline"
@@ -102,6 +156,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"/>
+
 
 </RelativeLayout>

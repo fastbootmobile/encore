@@ -586,7 +586,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mFabDrawable.setYOffset(6);
 
         final Song currentTrack = PlaybackProxy.getCurrentTrack();
-        if (currentTrack != null && currentTrack.getArtist().equals(mArtist.getRef())) {
+        if (currentTrack != null && currentTrack.getArtist() != null
+                && currentTrack.getArtist().equals(mArtist.getRef())) {
             int state = PlaybackProxy.getState();
             if (state == PlaybackService.STATE_PLAYING) {
                 mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
