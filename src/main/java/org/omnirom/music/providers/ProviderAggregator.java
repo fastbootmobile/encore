@@ -830,7 +830,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onSongUpdate(ProviderIdentifier provider, final Song s) throws RemoteException {
         if (s == null) {
-            Log.w(TAG, "Provider returned a null song");
+            Log.w(TAG, "Provider " + provider.mName + "sent in a null songUpdate");
             return;
         }
 
