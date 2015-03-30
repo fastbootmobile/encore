@@ -67,7 +67,34 @@ public class ListenLogger {
             jsonRoot.put(KEY_PROVIDER, song.getProvider().serialize());
         } catch (JSONException ignore) {}
 
+
         entries.add(jsonRoot.toString());
+
+        // Remove old entries
+        final long now = new Date().getTime();
+        final long oneSec = 1000L;
+        final long oneMin = oneSec * 60;
+        final long oneHour = oneMin * 60;
+        final long oneDay = oneHour * 24;
+        final long oneMonth = oneDay * 31;
+
+        Set<String> removal = new TreeSet<>();
+        for (String entry : entries) {
+            try {
+                JSONObject obj = new JSONObject(entry);
+                long timestamp = obj.getLong(KEY_TIMESTAMP);
+                if (now - timestamp > oneMonth) {
+                    removal.add(entry);
+                }
+            } catch (JSONException e) {
+                Log.w(TAG, "Cannot parse JSON", e);
+            }
+        }
+
+        for (String entry : removal) {
+            entries.remove(entry);
+        }
+
         editor.putStringSet(PREF_HISTORY_ENTRIES, entries);
         editor.apply();
     }
