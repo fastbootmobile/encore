@@ -62,6 +62,7 @@ public class AlbumActivity extends AppActivity {
     private Bitmap mHero;
     private Handler mHandler;
     private Toolbar mToolbar;
+    private boolean mBackPending = false;
 
     /**
      * Creates a proper intent to open this activity
@@ -212,15 +213,19 @@ public class AlbumActivity extends AppActivity {
     @Override
     public void onBackPressed() {
         if (Utils.hasLollipop()) {
-            mActiveFragment.notifyReturnTransition();
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        AlbumActivity.super.onBackPressed();
-                    } catch (IllegalStateException ignored) { }
-                }
-            }, BACK_DELAY);
+            if (!mBackPending) {
+                mBackPending = true;
+                mActiveFragment.notifyReturnTransition();
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            AlbumActivity.super.onBackPressed();
+                        } catch (IllegalStateException ignored) {
+                        }
+                    }
+                }, BACK_DELAY);
+            }
         } else {
             super.onBackPressed();
         }

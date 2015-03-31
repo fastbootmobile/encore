@@ -59,6 +59,7 @@ public class ArtistActivity extends AppActivity {
     private ArtistFragment mActiveFragment;
     private Handler mHandler;
     private Toolbar mToolbar;
+    private boolean mBackPending = false;
 
     /**
      * Creates a proper intent to open this activity
@@ -230,23 +231,28 @@ public class ArtistActivity extends AppActivity {
     @Override
     public void onBackPressed() {
         if (Utils.hasLollipop()) {
-            /*
-             * Lollipop workaround: Transitions use hardware GPU layers, which means they are
-             * GPU textures with a max size (for 99% devices) of 4096x4096. To avoid crashes,
-             * we temporarily limit the size of the fragment (by either setting a max height
-             * or by setting the visibility to Gone)
-             */
-            mActiveFragment.notifySizeLimit();
-            mActiveFragment.scrollToTop();
-            mActiveFragment.notifyClosing();
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        ArtistActivity.super.onBackPressed();
-                    } catch (IllegalStateException ignored) { }
-                }
-            }, BACK_DELAY);
+            if (!mBackPending) {
+                mBackPending = true;
+
+                /*
+                 * Lollipop workaround: Transitions use hardware GPU layers, which means they are
+                 * GPU textures with a max size (for 99% devices) of 4096x4096. To avoid crashes,
+                 * we temporarily limit the size of the fragment (by either setting a max height
+                 * or by setting the visibility to Gone)
+                 */
+                mActiveFragment.notifySizeLimit();
+                mActiveFragment.scrollToTop();
+                mActiveFragment.notifyClosing();
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ArtistActivity.super.onBackPressed();
+                        } catch (IllegalStateException ignored) {
+                        }
+                    }
+                }, BACK_DELAY);
+            }
         } else {
             super.onBackPressed();
         }

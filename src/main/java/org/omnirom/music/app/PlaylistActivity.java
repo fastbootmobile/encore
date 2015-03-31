@@ -52,6 +52,7 @@ public class PlaylistActivity extends AppActivity {
     private PlaylistViewFragment mActiveFragment;
     private Handler mHandler = new Handler();
     private Toolbar mToolbar;
+    private boolean mBackPending = false;
 
     /**
      * Creates an intent starting this activity with the provided parameters
@@ -135,15 +136,19 @@ public class PlaylistActivity extends AppActivity {
     @Override
     public void onBackPressed() {
         if (Utils.hasLollipop()) {
-            mActiveFragment.notifyReturnTransition();
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        PlaylistActivity.super.onBackPressed();
-                    } catch (IllegalStateException ignored) { }
-                }
-            }, BACK_DELAY);
+            if (!mBackPending) {
+                mBackPending = true;
+                mActiveFragment.notifyReturnTransition();
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            PlaylistActivity.super.onBackPressed();
+                        } catch (IllegalStateException ignored) {
+                        }
+                    }
+                }, BACK_DELAY);
+            }
         } else {
             super.onBackPressed();
         }
