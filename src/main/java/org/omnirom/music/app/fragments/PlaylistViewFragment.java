@@ -571,7 +571,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
             String ref = songsRef.next();
             Song song = aggregator.retrieveSong(ref, mPlaylist.getProvider());
             for (Artist artist : a) {
-                if (artist.getRef().equals(song.getArtist())) {
+                if (song != null && artist.getRef().equals(song.getArtist())) {
                     hasPlaylist = true;
                     break;
                 }

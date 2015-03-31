@@ -309,7 +309,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 if (binder != null) {
                     try {
                         output = binder.getSong(ref);
-                        onSongUpdate(provider, output);
+                        if (output != null) {
+                            onSongUpdate(provider, output);
+                        }
                     } catch (DeadObjectException e) {
                         Log.e(TAG, "Provider died while retrieving song");
                         return null;
@@ -323,6 +325,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             } else {
                 Log.e(TAG, "Unknown provider identifier: " + provider);
             }
+        }
+
+        if (output == null && provider != null) {
+            Log.d(TAG, "Unable to get song " + ref + " from " + provider.mName);
         }
 
         return output;
@@ -830,7 +836,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     @Override
     public void onSongUpdate(ProviderIdentifier provider, final Song s) throws RemoteException {
         if (s == null) {
-            Log.w(TAG, "Provider " + provider.mName + "sent in a null songUpdate");
+            Log.w(TAG, "Provider " + provider.mName + " sent in a null songUpdate");
             return;
         }
 
