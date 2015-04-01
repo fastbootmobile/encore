@@ -143,12 +143,11 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         // Update fields
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         if (mCurrentSong != null) {
-            final Artist artist = aggregator.retrieveArtist(mCurrentSong.getArtist(), mCurrentSong.getProvider());
-
-            final Album album = aggregator.retrieveAlbum(mCurrentSong.getAlbum(),
-                    mCurrentSong.getProvider());
-
             if (mCurrentSong.isLoaded()) {
+                final Artist artist = aggregator.retrieveArtist(mCurrentSong.getArtist(), mCurrentSong.getProvider());
+                final Album album = aggregator.retrieveAlbum(mCurrentSong.getAlbum(),
+                        mCurrentSong.getProvider());
+
                 // Song title
                 mBaseTemplate.setTextViewText(R.id.tvNotifLineOne, mCurrentSong.getTitle());
                 mExpandedTemplate.setTextViewText(R.id.tvNotifLineOne, mCurrentSong.getTitle());
@@ -157,11 +156,16 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
                     // Artist name
                     mBaseTemplate.setTextViewText(R.id.tvNotifLineTwo, artist.getName());
                     mExpandedTemplate.setTextViewText(R.id.tvNotifLineTwo, artist.getName());
+                } else {
+                    mBaseTemplate.setTextViewText(R.id.tvNotifLineTwo, null);
+                    mExpandedTemplate.setTextViewText(R.id.tvNotifLineTwo, null);
                 }
 
                 if (album != null && album.getName() != null && !album.getName().isEmpty()) {
                     // Album name
                     mExpandedTemplate.setTextViewText(R.id.tvNotifLineThree, album.getName());
+                } else {
+                    mExpandedTemplate.setTextViewText(R.id.tvNotifLineThree, null);
                 }
             } else {
                 mBuilder.setContentTitle(getString(R.string.loading));
