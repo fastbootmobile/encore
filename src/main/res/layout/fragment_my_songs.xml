@@ -1,20 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<android.support.v4.view.ViewPager
-    android:id="@+id/pager"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_width="match_parent">
 
-        <android.support.v4.view.PagerTabStrip
-            android:id="@+id/pager_title_strip"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@color/primary"
-            android:gravity="center_vertical"
-            android:textAppearance="@style/OmniMusic.Spec.ViewPager"
-            android:textColor="@color/white"/>
+    <com.ogaclejapan.smarttablayout.SmartTabLayout
+        android:id="@+id/pager_title_strip"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@color/primary"
+        app:stl_indicatorAlwaysInCenter="true"
+        app:stl_indicatorInFront="false"
+        app:stl_indicatorInterpolation="smart"
+        app:stl_indicatorColor="@color/white"
+        app:stl_indicatorThickness="4dp"
+        app:stl_indicatorCornerRadius="2dp"
+        app:stl_underlineColor="#4D000000"
+        app:stl_underlineThickness="1dp"
+        app:stl_dividerColor="#4DFFFFFF"
+        app:stl_dividerThickness="1dp"
+        app:stl_defaultTabTextAllCaps="true"
+        app:stl_defaultTabTextColor="#FCFFFFFF"
+        app:stl_defaultTabTextSize="12sp"
+        app:stl_defaultTabTextHorizontalPadding="16dp"
+        app:stl_defaultTabTextMinWidth="0dp"
+        app:stl_distributeEvenly="false"/>
 
-</android.support.v4.view.ViewPager>
 
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+</LinearLayout>

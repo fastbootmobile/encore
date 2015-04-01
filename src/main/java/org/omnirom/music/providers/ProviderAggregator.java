@@ -1014,6 +1014,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             return;
         }
 
+        Log.d(TAG, "Got new search results for '" + searchResult.getQuery()
+                + "' from " + searchResult.getIdentifier().mName);
+
         final String query = searchResult.getQuery();
 
         if (!mCachedSearches.containsKey(query)) {
