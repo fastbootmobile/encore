@@ -35,7 +35,6 @@ import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -292,8 +291,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     public Song retrieveSong(final String ref, final ProviderIdentifier provider) {
         if (ref == null) {
-            Log.e(TAG, "Requesting NULL Ref song! Check stacktrace to find the cause");
-            Log.e(TAG, Arrays.toString(Thread.currentThread().getStackTrace()));
+            // Force get stack trace
+            try {
+                throw new RuntimeException();
+            } catch (RuntimeException e) {
+                Log.e(TAG, "retrieveSong called with a null reference", e);
+            }
             return null;
         }
 
@@ -343,8 +346,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     public Artist retrieveArtist(final String ref, final ProviderIdentifier provider) {
         if (ref == null) {
-            Log.e(TAG, "Requesting NULL Ref artist! Check stacktrace to find the cause");
-            Log.e(TAG, Arrays.toString(Thread.currentThread().getStackTrace()));
+            // Force get stack trace
+            try {
+                throw new RuntimeException();
+            } catch (RuntimeException e) {
+                Log.e(TAG, "retrieveArtist called with a null reference", e);
+            }
             return null;
         }
 
@@ -382,8 +389,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     public Album retrieveAlbum(final String ref, final ProviderIdentifier provider) {
         if (ref == null) {
-            Log.e(TAG, "Requesting NULL Ref album! Check stacktrace to find the cause");
-            Log.e(TAG, Arrays.toString(Thread.currentThread().getStackTrace()));
+            // Force get stack trace
+            try {
+                throw new RuntimeException();
+            } catch (RuntimeException e) {
+                Log.e(TAG, "retrieveAlbum called with a null reference", e);
+            }
             return null;
         }
 
@@ -420,8 +431,12 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      */
     public Playlist retrievePlaylist(final String ref, final ProviderIdentifier provider) {
         if (ref == null) {
-            Log.e(TAG, "Requesting NULL Ref playlist! Check stacktrace to find the cause");
-            Log.e(TAG, Arrays.toString(Thread.currentThread().getStackTrace()));
+            // Force get stack trace
+            try {
+                throw new RuntimeException();
+            } catch (RuntimeException e) {
+                Log.e(TAG, "retrievePlaylist called with a null reference", e);
+            }
             return null;
         }
 

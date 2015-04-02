@@ -25,7 +25,23 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="#80000000"/>
+        android:background="#80000000"
+        android:visibility="visible"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/tvCurrentTime"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:fontFamily="sans-serif-medium"
+        fontPath="fonts/Roboto-Medium.ttf"
+        android:textColor="@color/white"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        />
 
     <TextView
         android:id="@+id/tvTitle"
@@ -33,17 +49,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="end"
-        android:fontFamily="sans-serif-medium"
-        fontPath="fonts/Roboto-Medium.ttf"
+        android:fontFamily="sans-serif-condensed"
+        fontPath="fonts/RobotoCondensed-Regular.ttf"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/white"
+        android:textColor="#ffffff"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
         android:layout_marginLeft="48dp"
         android:layout_marginTop="32dp"
-        android:layout_marginRight="48dp"/>
+        android:layout_marginRight="48dp"
+        />
 
     <TextView
         android:id="@+id/tvArtist"
@@ -57,9 +74,12 @@
         android:ellipsize="end"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:fontFamily="sans-serif-condensed"
+        fontPath="fonts/RobotoCondensed-Regular.ttf"
         android:textColor="@color/white"
         android:layout_alignRight="@+id/tvTitle"
-        android:layout_alignEnd="@+id/tvTitle"/>
+        android:layout_alignEnd="@+id/tvTitle"
+        />
 
     <TextView
         android:id="@+id/tvAlbum"
@@ -76,19 +96,8 @@
         fontPath="fonts/Roboto-Medium.ttf"
         android:singleLine="true"
         android:textAllCaps="true"
-        android:textColor="@color/white"/>
-
-    <SeekBar
-        android:id="@+id/sbSeek"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:layout_below="@+id/tvAlbum"
-        android:layout_marginTop="8dp"
-        android:layout_toRightOf="@+id/tvTimeElapsed"
-        android:layout_toEndOf="@+id/tvTimeElapsed"
-        android:layout_toLeftOf="@+id/tvTimeTotal"
-        android:layout_toStartOf="@+id/tvTimeTotal"/>
+        android:textColor="@color/white"
+        />
 
     <LinearLayout
         android:id="@+id/llButtons"
@@ -98,17 +107,20 @@
         android:longClickable="false"
         android:orientation="horizontal"
         android:padding="8dp"
-        android:background="#DD333333"
+        android:background="#AA333333"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:elevation="8dp">
+        android:elevation="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp">
 
         <ImageView
             android:id="@+id/btnPrevious"
             android:layout_width="@dimen/drive_button_size"
             android:layout_height="@dimen/drive_button_size"
-            android:layout_margin="4dp"
+            android:layout_margin="8dp"
             android:background="@drawable/circle_outline"
             android:clickable="true"
             android:padding="16dp"
@@ -119,7 +131,7 @@
             android:id="@+id/btnVoice"
             android:layout_width="@dimen/drive_button_size"
             android:layout_height="@dimen/drive_button_size"
-            android:layout_margin="4dp"
+            android:layout_margin="8dp"
             android:background="@drawable/circle_outline"
             android:clickable="true"
             android:padding="16dp"
@@ -130,7 +142,7 @@
             android:id="@+id/btnPlayPause"
             android:layout_width="@dimen/drive_button_size"
             android:layout_height="@dimen/drive_button_size"
-            android:layout_margin="4dp"
+            android:layout_margin="8dp"
             android:background="@drawable/circle_outline"
             android:clickable="true"
             android:padding="16dp"
@@ -141,7 +153,7 @@
             android:id="@+id/btnMaps"
             android:layout_width="@dimen/drive_button_size"
             android:layout_height="@dimen/drive_button_size"
-            android:layout_margin="4dp"
+            android:layout_margin="8dp"
             android:background="@drawable/circle_outline"
             android:clickable="true"
             android:padding="16dp"
@@ -152,7 +164,7 @@
             android:id="@+id/btnNext"
             android:layout_width="@dimen/drive_button_size"
             android:layout_height="@dimen/drive_button_size"
-            android:layout_margin="4dp"
+            android:layout_margin="8dp"
             android:background="@drawable/circle_outline"
             android:clickable="true"
             android:padding="16dp"
@@ -160,29 +172,19 @@
             android:contentDescription="@string/next"/>
     </LinearLayout>
 
-    <TextView
-        android:layout_width="48dp"
+    <SeekBar
+        android:id="@+id/sbSeek"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/tvTimeElapsed"
-        android:layout_alignBottom="@+id/sbSeek"
-        android:gravity="center_vertical|end|right"
-        android:textColor="@color/white"
-        android:layout_alignTop="@+id/sbSeek"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
-
-    <TextView
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/tvTimeTotal"
-        android:layout_alignBottom="@+id/sbSeek"
-        android:layout_alignTop="@+id/sbSeek"
-        android:gravity="center_vertical"
-        android:textColor="@color/white"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
+        android:visibility="invisible"
+        android:progress="50"
+        android:padding="0dp"
+        android:layout_above="@+id/llButtons"
+        android:layout_marginBottom="-16dp"
+        android:elevation="12dp"
+        android:layout_alignRight="@+id/llButtons"
+        android:layout_alignLeft="@+id/llButtons"
+        android:secondaryProgress="100"/>
 
     <ProgressBar
         android:layout_width="wrap_content"
@@ -193,19 +195,5 @@
         android:layout_toLeftOf="@+id/tvArtist"
         android:layout_toStartOf="@+id/tvArtist"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/tvCurrentTime"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:fontFamily="sans-serif-medium"
-        fontPath="fonts/RobotoCondensed-Regular.ttf"
-        android:textColor="@color/white"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
-        />
 
 </RelativeLayout>

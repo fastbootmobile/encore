@@ -144,9 +144,12 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         if (mCurrentSong != null) {
             if (mCurrentSong.isLoaded()) {
-                final Artist artist = aggregator.retrieveArtist(mCurrentSong.getArtist(), mCurrentSong.getProvider());
-                final Album album = aggregator.retrieveAlbum(mCurrentSong.getAlbum(),
-                        mCurrentSong.getProvider());
+                final Artist artist = mCurrentSong.getArtist() != null ?
+                        aggregator.retrieveArtist(mCurrentSong.getArtist(), mCurrentSong.getProvider())
+                        : null;
+                final Album album = mCurrentSong.getAlbum() != null ?
+                        aggregator.retrieveAlbum(mCurrentSong.getAlbum(), mCurrentSong.getProvider())
+                        : null;
 
                 // Song title
                 mBaseTemplate.setTextViewText(R.id.tvNotifLineOne, mCurrentSong.getTitle());

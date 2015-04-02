@@ -87,8 +87,6 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private TextView mTvTitle;
     private TextView mTvArtist;
     private TextView mTvAlbum;
-    private TextView mTvTimeElapsed;
-    private TextView mTvTimeTotal;
     private TextView mTvCurrentTime;
     private AlbumArtImageView mIvAlbumArt;
     private SeekBar mSeek;
@@ -230,8 +228,6 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         mTvTitle = (TextView) findViewById(R.id.tvTitle);
         mTvArtist = (TextView) findViewById(R.id.tvArtist);
         mTvAlbum = (TextView) findViewById(R.id.tvAlbum);
-        mTvTimeElapsed = (TextView) findViewById(R.id.tvTimeElapsed);
-        mTvTimeTotal = (TextView) findViewById(R.id.tvTimeTotal);
         mTvCurrentTime = (TextView) findViewById(R.id.tvCurrentTime);
         mIvAlbumArt = (AlbumArtImageView) findViewById(R.id.ivAlbumArt);
         mSeek = (SeekBar) findViewById(R.id.sbSeek);
@@ -308,31 +304,41 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             mTvTitle.setText(currentTrack.getTitle());
-            Artist artist = aggregator.retrieveArtist(currentTrack.getArtist(), currentTrack.getProvider());
 
-            if (artist != null && artist.getName() != null && !artist.getName().isEmpty()) {
-                mTvArtist.setText(artist.getName());
+            if (currentTrack.getArtist() != null) {
+                Artist artist = aggregator.retrieveArtist(currentTrack.getArtist(), currentTrack.getProvider());
+
+                if (artist != null && artist.getName() != null && !artist.getName().isEmpty()) {
+                    mTvArtist.setText(artist.getName());
+                } else if (artist != null && !artist.isLoaded()) {
+                    mTvArtist.setText(R.string.loading);
+                } else {
+                    mTvArtist.setText(null);
+                }
             } else {
-                mTvArtist.setText(R.string.loading);
+                mTvArtist.setText(null);
             }
 
-            Album album = aggregator.retrieveAlbum(currentTrack.getAlbum(), currentTrack.getProvider());
+            if (currentTrack.getAlbum() != null) {
+                Album album = aggregator.retrieveAlbum(currentTrack.getAlbum(), currentTrack.getProvider());
 
-            if (album != null && album.getName() != null && !album.getName().isEmpty()) {
-                mTvAlbum.setText(album.getName());
+                if (album != null && album.getName() != null && !album.getName().isEmpty()) {
+                    mTvAlbum.setText(album.getName());
+                } else if (album != null && !album.isLoaded()) {
+                    mTvAlbum.setText(R.string.loading);
+                } else {
+                    mTvAlbum.setText(null);
+                }
             } else {
-                mTvAlbum.setText(R.string.loading);
+                mTvAlbum.setText(null);
             }
-
 
             mIvAlbumArt.loadArtForSong(currentTrack);
             mSeek.setMax(currentTrack.getDuration());
-            mTvTimeTotal.setText(Utils.formatTrackLength(currentTrack.getDuration()));
         } else if (currentTrack != null) {
             mTvTitle.setText(R.string.loading);
             mTvArtist.setText(null);
             mIvAlbumArt.setDefaultArt();
-            mTvTimeTotal.setText("-:--");
         } else {
             // TODO: No song playing
         }
@@ -346,7 +352,6 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
 
             mSeek.setProgress(elapsedMs);
             mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
-            mTvTimeElapsed.setText(Utils.formatTrackLength(elapsedMs));
             mSeek.setVisibility(View.VISIBLE);
         } else {
             mSeek.setVisibility(View.INVISIBLE);

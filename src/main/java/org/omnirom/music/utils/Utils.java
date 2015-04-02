@@ -442,10 +442,13 @@ public class Utils {
         PopupMenu popupMenu = new PopupMenu(context, parent);
         popupMenu.inflate(R.menu.queue_overflow);
         if (song.getAlbum() == null) {
+            Log.d(TAG, "No album information, removing album options");
+
             // This song has no album information, hide the entries
             Menu menu = popupMenu.getMenu();
             for (int i = 0; i < menu.size(); ++i) {
                 if (menu.getItem(i).getItemId() == R.id.menu_add_album_to_queue) {
+                    Log.d(TAG, "Found ADD ALBUM TO QUEUE");
                     menu.removeItem(i);
                     break;
                 }
