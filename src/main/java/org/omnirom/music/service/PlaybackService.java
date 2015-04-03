@@ -990,6 +990,15 @@ public class PlaybackService extends Service
         }
 
         @Override
+        public void playNext(Song s) throws RemoteException {
+            if (mCurrentTrack >= 0) {
+                mPlaybackQueue.add(mCurrentTrack + 1, s);
+            } else {
+                mPlaybackQueue.add(0, s);
+            }
+        }
+
+        @Override
         public void pause() throws RemoteException {
             pauseImpl();
         }

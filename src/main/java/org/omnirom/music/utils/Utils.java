@@ -408,6 +408,10 @@ public class Utils {
                         PlaybackProxy.playSong(song);
                         break;
 
+                    case R.id.menu_play_next:
+                        PlaybackProxy.playNext(song);
+                        break;
+
                     case R.id.menu_open_artist:
                         Intent intent = ArtistActivity.craftIntent(context, null, song.getArtist(),
                                 song.getProvider(),

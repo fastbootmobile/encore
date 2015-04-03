@@ -55,6 +55,12 @@ interface IPlaybackService {
     void queueAlbum(in Album p, boolean top);
 
     /**
+     * Queues the song after the currently playing song
+     * @param s The song to queue
+     */
+    void playNext(in Song s);
+
+    /**
      * Pauses the playback
      */
     void pause();

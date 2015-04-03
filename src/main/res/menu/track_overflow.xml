@@ -5,6 +5,10 @@
     <item
         android:id="@+id/menu_play_now"
         android:title="@string/play_now" />
+
+    <item
+        android:id="@+id/menu_play_next"
+        android:title="@string/play_next" />
     <item
         android:id="@+id/menu_open_artist"
         android:title="@string/menu_open_artist_page" />

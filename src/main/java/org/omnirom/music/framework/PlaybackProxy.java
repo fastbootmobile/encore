@@ -61,6 +61,7 @@ public class PlaybackProxy {
     private static final int MSG_PLAY_PLAYLIST      = 17;
     private static final int MSG_QUEUE_PLAYLIST     = 18;
     private static final int MSG_SET_SHUFFLE_MODE   = 19;
+    private static final int MSG_PLAY_NEXT          = 20;
 
     private static class PlaybackProxyHandler extends Handler {
         public PlaybackProxyHandler(Looper looper) {
@@ -105,6 +106,10 @@ public class PlaybackProxy {
 
                     case MSG_PLAY_ALBUM:
                         getPlayback().playAlbum((Album) msg.obj);
+                        break;
+
+                    case MSG_PLAY_NEXT:
+                        getPlayback().playNext((Song) msg.obj);
                         break;
 
                     case MSG_SEEK:
@@ -234,6 +239,10 @@ public class PlaybackProxy {
 
     public static void queueAlbum(Album album, boolean top) {
         Message.obtain(sHandler, MSG_QUEUE_ALBUM, top ? 1 : 0, 0, album).sendToTarget();
+    }
+
+    public static void playNext(Song song) {
+        Message.obtain(sHandler, MSG_PLAY_NEXT, song).sendToTarget();
     }
 
     public static int getState() {
