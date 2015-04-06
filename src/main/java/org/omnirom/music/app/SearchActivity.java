@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -29,6 +30,7 @@ import android.widget.SearchView;
 
 import org.omnirom.music.app.fragments.SearchFragment;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.SearchSuggestionProvider;
 
 /**
  * Activity allowing display of search results through
@@ -95,15 +97,19 @@ public class SearchActivity extends AppActivity {
 
     private void handleIntent(final Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            final String query = intent.getStringExtra(SearchManager.QUERY).trim();
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    String query = intent.getStringExtra(SearchManager.QUERY).trim();
                     mActiveFragment.resetResults();
                     mActiveFragment.setArguments(query);
                     ProviderAggregator.getDefault().startSearch(query);
                 }
             }, 200);
+
+            SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+                    SearchSuggestionProvider.AUTHORITY, SearchSuggestionProvider.MODE);
+            suggestions.saveRecentQuery(query, null);
         }
     }
 }

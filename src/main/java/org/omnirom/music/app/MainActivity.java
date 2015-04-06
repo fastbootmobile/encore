@@ -48,12 +48,12 @@ public class MainActivity extends AppActivity
     private static final String TAG = "MainActivity";
 
     public static final int SECTION_LISTEN_NOW = 1;
-    public static final int SECTION_MY_SONGS   = 2;
-    public static final int SECTION_PLAYLISTS  = 3;
-    public static final int SECTION_AUTOMIX    = 4;
-    public static final int SECTION_RECOGNITION= 5;
-    public static final int SECTION_HISTORY    = 6;
-    public static final int SECTION_NOW_PLAYING= 7;
+    public static final int SECTION_MY_SONGS = 2;
+    public static final int SECTION_PLAYLISTS = 3;
+    public static final int SECTION_AUTOMIX = 4;
+    public static final int SECTION_RECOGNITION = 5;
+    public static final int SECTION_HISTORY = 6;
+    public static final int SECTION_NOW_PLAYING = 7;
     public static final int SECTION_DRIVE_MODE = 8;
 
     /**
@@ -281,7 +281,7 @@ public class MainActivity extends AppActivity
                 mCurrentFragmentIndex = position;
             }
 
-            final String fragmentTag = ""+position+"_"+mOrientation;
+            final String fragmentTag = "" + position + "_" + mOrientation;
 
             Fragment newFrag = null;
             switch (position + 1) {
@@ -460,5 +460,4 @@ public class MainActivity extends AppActivity
         }
         return super.onOptionsItemSelected(item);
     }
-
 }

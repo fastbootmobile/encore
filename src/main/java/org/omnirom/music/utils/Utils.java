@@ -377,23 +377,13 @@ public class Utils {
         if (song.getArtist() == null) {
             // This song has no artist information, hide the entry
             Menu menu = popupMenu.getMenu();
-            for (int i = 0; i < menu.size(); ++i) {
-                if (menu.getItem(i).getItemId() == R.id.menu_open_artist) {
-                    menu.removeItem(i);
-                    break;
-                }
-            }
+            menu.removeItem(R.id.menu_open_artist);
         }
 
         if (song.getAlbum() == null) {
             // This song has no album information, hide the entry
             Menu menu = popupMenu.getMenu();
-            for (int i = 0; i < menu.size(); ++i) {
-                if (menu.getItem(i).getItemId() == R.id.menu_add_album_to_queue) {
-                    menu.removeItem(i);
-                    break;
-                }
-            }
+            menu.removeItem(R.id.menu_add_album_to_queue);
         }
 
         popupMenu.show();
@@ -450,20 +440,8 @@ public class Utils {
 
             // This song has no album information, hide the entries
             Menu menu = popupMenu.getMenu();
-            for (int i = 0; i < menu.size(); ++i) {
-                if (menu.getItem(i).getItemId() == R.id.menu_add_album_to_queue) {
-                    Log.d(TAG, "Found ADD ALBUM TO QUEUE");
-                    menu.removeItem(i);
-                    break;
-                }
-            }
-
-            for (int i = 0; i < menu.size(); ++i) {
-                if (menu.getItem(i).getItemId() == R.id.menu_open_album) {
-                    menu.removeItem(i);
-                    break;
-                }
-            }
+            menu.removeItem(R.id.menu_add_album_to_queue);
+            menu.removeItem(R.id.menu_open_album);
         }
 
         popupMenu.show();

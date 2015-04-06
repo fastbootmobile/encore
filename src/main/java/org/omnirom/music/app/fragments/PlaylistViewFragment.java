@@ -17,6 +17,8 @@ package org.omnirom.music.app.fragments;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -250,7 +252,6 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         }
 
 
-
         Bitmap hero = Utils.dequeueBitmap(PlaylistActivity.BITMAP_PLAYLIST_HERO);
         mIvHero.setImageBitmap(hero);
 
@@ -351,14 +352,46 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 Log.e(TAG, "Cannot remove duplicates", e);
             }
             return true;
+        } else if (item.getItemId() == R.id.menu_remove_playlist) {
+            removePlaylistDialog();
+            return true;
         }
 
         return false;
     }
 
+    private void removePlaylistDialog() {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.remove_playlist_dialog_title)
+                .setMessage(getString(R.string.remove_playlist_dialog_msg, mPlaylist.getName()))
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ProviderConnection conn = PluginsLookup.getDefault().getProvider(mPlaylist.getProvider());
+                        if (conn != null) {
+                            IMusicProvider provider = conn.getBinder();
+                            if (provider != null) {
+                                try {
+                                    provider.deletePlaylist(mPlaylist.getRef());
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Cannot remove playlist", e);
+                                }
+                            }
+                        }
+                        getActivity().finish();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
+    }
+
     private void updateFabStatus() {
         final int state = PlaybackProxy.getState();
-        switch (state){
+        switch (state) {
             case PlaybackService.STATE_PAUSED:
             case PlaybackService.STATE_STOPPED:
                 mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);

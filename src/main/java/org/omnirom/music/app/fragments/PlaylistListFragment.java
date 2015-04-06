@@ -18,7 +18,6 @@ package org.omnirom.music.app.fragments;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
-import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,7 +35,6 @@ import android.widget.GridView;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.decoration.ItemShadowDecorator;
 import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 

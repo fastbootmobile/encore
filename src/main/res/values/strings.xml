@@ -195,5 +195,7 @@
     <string name="welcome_step3_title">Configure your plugins</string>
     <string name="toast_song_no_album">This song has no attached album</string>
     <string name="play_next">Play next</string>
-
+    <string name="remove_playlist">Remove playlist</string>
+    <string name="remove_playlist_dialog_title">Remove playlist?</string>
+    <string name="remove_playlist_dialog_msg">This will remove playlist %s.</string>
 </resources>

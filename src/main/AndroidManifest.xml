@@ -92,6 +92,12 @@
             </intent-filter>
         </receiver>
 
+        <!-- Search suggestions and history -->
+        <provider
+            android:authorities="org.omnirom.music.providers.SearchSuggestionProvider"
+            android:name="org.omnirom.music.providers.SearchSuggestionProvider"
+            android:exported="false"/>
+
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
