@@ -14,18 +14,17 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.MediaRouteActionProvider;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.williammora.snackbar.Snackbar;
 
 import org.omnirom.music.app.fragments.AutomixFragment;
-import org.omnirom.music.app.fragments.DspProvidersFragment;
 import org.omnirom.music.app.fragments.HistoryFragment;
 import org.omnirom.music.app.fragments.ListenNowFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
@@ -33,8 +32,8 @@ import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.RecognitionFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
-import org.omnirom.music.cast.CastModule;
 import org.omnirom.music.art.ImageCache;
+import org.omnirom.music.cast.CastModule;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -84,6 +83,8 @@ public class MainActivity extends AppActivity
     private int mOrientation;
 
     private Toolbar mToolbar;
+
+    private SearchView mSearchView;
 
 
     public MainActivity() {
@@ -187,7 +188,9 @@ public class MainActivity extends AppActivity
 
     @Override
     public void onBackPressed() {
-        if (!mPlayingBarLayout.isWrapped()) {
+        if (!mSearchView.isIconified()) {
+            mSearchView.setIconified(true);
+        } else if (!mPlayingBarLayout.isWrapped()) {
             mPlayingBarLayout.setWrapped(true);
         } else {
             if (mCurrentFragmentIndex < 0) {
@@ -408,10 +411,8 @@ public class MainActivity extends AppActivity
             getMenuInflater().inflate(R.menu.main, menu);
             SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
-            SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
-                    .getActionView();
-            searchView.setSearchableInfo(searchManager
-                    .getSearchableInfo(getComponentName()));
+            mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+            mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
             // Setup cast button on 4.2+
             MenuItem castMenu = menu.findItem(R.id.action_cast);
