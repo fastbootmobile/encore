@@ -170,11 +170,8 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
             // drag & drop manager
             mRecyclerViewDragDropManager = new RecyclerViewDragDropManager();
-        /*mRecyclerViewDragDropManager.setDraggingItemShadowDrawable(
-                (NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z3));*/
 
             //adapter
-
             mWrappedAdapter = mRecyclerViewDragDropManager.createWrappedAdapter(mAdapter);      // wrap for dragging
 
             final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
@@ -184,12 +181,6 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
             mRecyclerView.setItemAnimator(animator);
 
             // additional decorations
-            //noinspection StatementWithEmptyBody
-        /*if (supportsViewElevation()) {
-            // Lollipop or later has native drop shadow feature. ItemShadowDecorator is not required.
-        } else {
-            mRecyclerView.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z1)));
-        }*/
             mRecyclerView.addItemDecoration(new SimpleListDividerDecorator(getResources().getDrawable(R.drawable.list_divider), true));
 
             mRecyclerViewDragDropManager.attachRecyclerView(mRecyclerView);

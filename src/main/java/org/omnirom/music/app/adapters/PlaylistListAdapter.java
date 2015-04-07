@@ -23,7 +23,6 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +57,8 @@ import java.util.Map;
  */
 public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>
         implements DraggableItemAdapter<PlaylistListAdapter.ViewHolder> {
+    private static final int VIEW_TYPE_HEADER = 1;
+    private static final int VIEW_TYPE_REGULAR = 2;
 
     private List<Playlist> mPlaylists;
     private PlaylistOrderer mOrderer;
@@ -150,98 +151,117 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
 
     @Override
     public long getItemId(int position) {
-        return mPlaylists.get(position).getRef().hashCode();
+        return mPlaylists.get(position - 1).getRef().hashCode();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return 1;
+        if (position == 0) {
+            return VIEW_TYPE_HEADER;
+        } else {
+            return VIEW_TYPE_REGULAR;
+        }
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        final View root = inflater.inflate(R.layout.item_playlist_list, parent, false);
-        ensureOrderer(parent.getContext());
-        return new ViewHolder(root);
+        if (viewType == VIEW_TYPE_REGULAR) {
+            final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            final View root = inflater.inflate(R.layout.item_playlist_list, parent, false);
+            ensureOrderer(parent.getContext());
+            return new ViewHolder(root);
+        } else if (viewType == VIEW_TYPE_HEADER) {
+            final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            final View root = inflater.inflate(R.layout.item_playlist_list, parent, false);
+            ensureOrderer(parent.getContext());
+            return new ViewHolder(root);
+        }
+
+        return null; // Should not happen
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final Playlist item = mPlaylists.get(position);
-        holder.tvPlaylistName.setText(item.getName());
-        holder.ivCover.loadArtForPlaylist(item);
+        final int itemViewType = getItemViewType(position);
 
-        if (item.isLoaded() || item.getSongsCount() > 0) {
-            holder.tvPlaylistDesc.setText(holder.tvPlaylistDesc.getContext().getString(R.string.xx_songs,
-                    item.getSongsCount()));
+        if (itemViewType == VIEW_TYPE_HEADER) {
 
-            holder.ivOfflineStatus.setVisibility(View.VISIBLE);
+        } else if (itemViewType == VIEW_TYPE_REGULAR) {
+            final Playlist item = mPlaylists.get(position);
+            holder.tvPlaylistName.setText(item.getName());
+            holder.ivCover.loadArtForPlaylist(item);
 
-            switch (item.getOfflineStatus()) {
-                case BoundEntity.OFFLINE_STATUS_NO:
-                    holder.ivOfflineStatus.setVisibility(View.GONE);
-                    break;
+            if (item.isLoaded() || item.getSongsCount() > 0) {
+                holder.tvPlaylistDesc.setText(holder.tvPlaylistDesc.getContext().getString(R.string.xx_songs,
+                        item.getSongsCount()));
 
-                case BoundEntity.OFFLINE_STATUS_DOWNLOADING:
-                    holder.ivOfflineStatus.setImageResource(R.drawable.ic_sync_in_progress);
-                    break;
+                holder.ivOfflineStatus.setVisibility(View.VISIBLE);
 
-                case BoundEntity.OFFLINE_STATUS_ERROR:
-                    holder.ivOfflineStatus.setImageResource(R.drawable.ic_sync_problem);
-                    break;
+                switch (item.getOfflineStatus()) {
+                    case BoundEntity.OFFLINE_STATUS_NO:
+                        holder.ivOfflineStatus.setVisibility(View.GONE);
+                        break;
 
-                case BoundEntity.OFFLINE_STATUS_PENDING:
-                    holder.ivOfflineStatus.setImageResource(R.drawable.ic_track_download_pending);
-                    break;
+                    case BoundEntity.OFFLINE_STATUS_DOWNLOADING:
+                        holder.ivOfflineStatus.setImageResource(R.drawable.ic_sync_in_progress);
+                        break;
 
-                case BoundEntity.OFFLINE_STATUS_READY:
-                    holder.ivOfflineStatus.setImageResource(R.drawable.ic_track_downloaded);
-                    break;
-            }
-        } else {
-            holder.tvPlaylistDesc.setText(null);
-            holder.ivOfflineStatus.setVisibility(View.GONE);
-        }
+                    case BoundEntity.OFFLINE_STATUS_ERROR:
+                        holder.ivOfflineStatus.setImageResource(R.drawable.ic_sync_problem);
+                        break;
 
-        final int dragState = holder.getDragStateFlags();
+                    case BoundEntity.OFFLINE_STATUS_PENDING:
+                        holder.ivOfflineStatus.setImageResource(R.drawable.ic_track_download_pending);
+                        break;
 
-        if (((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0)) {
-            int bgColor = 0;
-
-            if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
-                bgColor = 0xFFDDDDDD;
-            } else if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_DRAGGING) != 0) {
-                bgColor = 0xFFAAAAAA;
-            }
-
-            if (bgColor != 0) {
-                holder.container.setBackgroundColor(bgColor);
+                    case BoundEntity.OFFLINE_STATUS_READY:
+                        holder.ivOfflineStatus.setImageResource(R.drawable.ic_track_downloaded);
+                        break;
+                }
             } else {
-                int[] attrs = new int[]{android.R.attr.selectableItemBackground /* index 0 */};
-                TypedArray ta = holder.container.getContext().obtainStyledAttributes(attrs);
-                Drawable drawableFromTheme = ta.getDrawable(0 /* index */);
-                ta.recycle();
-                holder.container.setBackground(drawableFromTheme);
+                holder.tvPlaylistDesc.setText(null);
+                holder.ivOfflineStatus.setVisibility(View.GONE);
             }
-        }
 
-        holder.container.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Context ctx = v.getContext();
-                Intent intent = PlaylistActivity.craftIntent(ctx, item,
-                        ((MaterialTransitionDrawable) holder.ivCover.getDrawable()).getFinalDrawable().getBitmap());
+            final int dragState = holder.getDragStateFlags();
 
-                if (Utils.hasLollipop()) {
-                    ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ctx,
-                            holder.ivCover, "itemImage");
-                    ctx.startActivity(intent, opt.toBundle());
+            if (((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0)) {
+                int bgColor = 0;
+
+                if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
+                    bgColor = 0xFFDDDDDD;
+                } else if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_DRAGGING) != 0) {
+                    bgColor = 0xFFAAAAAA;
+                }
+
+                if (bgColor != 0) {
+                    holder.container.setBackgroundColor(bgColor);
                 } else {
-                    ctx.startActivity(intent);
+                    int[] attrs = new int[]{android.R.attr.selectableItemBackground /* index 0 */};
+                    TypedArray ta = holder.container.getContext().obtainStyledAttributes(attrs);
+                    Drawable drawableFromTheme = ta.getDrawable(0 /* index */);
+                    ta.recycle();
+                    holder.container.setBackground(drawableFromTheme);
                 }
             }
-        });
+
+            holder.container.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Context ctx = v.getContext();
+                    Intent intent = PlaylistActivity.craftIntent(ctx, item,
+                            ((MaterialTransitionDrawable) holder.ivCover.getDrawable()).getFinalDrawable().getBitmap());
+
+                    if (Utils.hasLollipop()) {
+                        ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ctx,
+                                holder.ivCover, "itemImage");
+                        ctx.startActivity(intent, opt.toBundle());
+                    } else {
+                        ctx.startActivity(intent);
+                    }
+                }
+            });
+        }
     }
 
     @Override
