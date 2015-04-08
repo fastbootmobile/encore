@@ -67,6 +67,19 @@ public class PlaylistActivity extends AppActivity {
         return intent;
     }
 
+    /**
+     * Creates an intent starting this activity with the provided parameters
+     * @param context The active context
+     * @param playlistRef The reference of the playlist to watch
+     * @return An intent to start this activity
+     */
+    public static Intent craftIntent(Context context, String playlistRef, Bitmap hero) {
+        Intent intent = new Intent(context, PlaylistActivity.class);
+        intent.putExtra(PlaylistViewFragment.KEY_PLAYLIST, playlistRef);
+        Utils.queueBitmap(BITMAP_PLAYLIST_HERO, hero);
+        return intent;
+    }
+
     @Override
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void onCreate(Bundle savedInstance) {

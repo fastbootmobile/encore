@@ -39,6 +39,7 @@ import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
+import org.omnirom.music.framework.AutoPlaylistHelper;
 import org.omnirom.music.framework.PlaylistOrderer;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
@@ -66,7 +67,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
     static class PlaylistSort implements Comparator<Playlist> {
         private Map<String, Integer> mOrder;
 
-        public PlaylistSort(Map<String,Integer> order) {
+        public PlaylistSort(Map<String, Integer> order) {
             mOrder = order;
         }
 
@@ -151,7 +152,11 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
 
     @Override
     public long getItemId(int position) {
-        return mPlaylists.get(position - 1).getRef().hashCode();
+        if (position == 0) {
+            return -1;
+        } else {
+            return mPlaylists.get(position - 1).getRef().hashCode();
+        }
     }
 
     @Override
@@ -172,9 +177,9 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
             return new ViewHolder(root);
         } else if (viewType == VIEW_TYPE_HEADER) {
             final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            final View root = inflater.inflate(R.layout.item_playlist_list, parent, false);
+            final View root = inflater.inflate(R.layout.item_special_playlists, parent, false);
             ensureOrderer(parent.getContext());
-            return new ViewHolder(root);
+            return new SpecialViewHolder(root);
         }
 
         return null; // Should not happen
@@ -185,7 +190,16 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
         final int itemViewType = getItemViewType(position);
 
         if (itemViewType == VIEW_TYPE_HEADER) {
-
+            SpecialViewHolder specialHolder = (SpecialViewHolder) holder;
+            specialHolder.cardFavorites.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Context ctx = v.getContext();
+                    Intent intent = PlaylistActivity.craftIntent(ctx, AutoPlaylistHelper.REF_SPECIAL_FAVORITES,
+                            null);
+                    ctx.startActivity(intent);
+                }
+            });
         } else if (itemViewType == VIEW_TYPE_REGULAR) {
             final Playlist item = mPlaylists.get(position);
             holder.tvPlaylistName.setText(item.getName());
@@ -324,4 +338,14 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
         }
     }
 
+    public static class SpecialViewHolder extends ViewHolder {
+        private TextView cardMostPlayed;
+        private TextView cardFavorites;
+
+        public SpecialViewHolder(View v) {
+            super(v);
+            cardMostPlayed = (TextView) v.findViewById(R.id.cardMostPlayed);
+            cardFavorites = (TextView) v.findViewById(R.id.cardFavorites);
+        }
+    }
 }

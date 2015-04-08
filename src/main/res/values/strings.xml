@@ -198,4 +198,6 @@
     <string name="remove_playlist">Remove playlist</string>
     <string name="remove_playlist_dialog_title">Remove playlist?</string>
     <string name="remove_playlist_dialog_msg">This will remove playlist %s.</string>
+    <string name="favorites">Favorites</string>
+    <string name="most_played">Most played</string>
 </resources>

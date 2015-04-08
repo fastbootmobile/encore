@@ -45,6 +45,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.framework.AutoPlaylistHelper;
 import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
@@ -77,8 +78,8 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class PlaylistViewFragment extends Fragment implements ILocalCallback {
-
     private static final String TAG = "PlaylistViewFragment";
+
     public static final String KEY_PLAYLIST = "playlist";
 
     private PlaylistAdapter mAdapter;
@@ -157,13 +158,20 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         }
 
         // Get the playlist from the arguments, from the instantiation, and from the cache
-        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        String playlistRef = args.getString(KEY_PLAYLIST);
-        mPlaylist = aggregator.retrievePlaylist(playlistRef, null);
+        final String playlistRef = args.getString(KEY_PLAYLIST);
+
+        if (AutoPlaylistHelper.REF_SPECIAL_FAVORITES.equals(playlistRef)) {
+            mPlaylist = AutoPlaylistHelper.getFavoritesPlaylist(getActivity());
+        } else if (AutoPlaylistHelper.REF_SPECIAL_MOST_PLAYED.equals(playlistRef)) {
+
+        } else {
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+            mPlaylist = aggregator.retrievePlaylist(playlistRef, null);
+        }
 
         if (mPlaylist == null) {
             Log.e(TAG, "Playlist is null (not in cache, aborting)");
-            // TODO: Wait for playlist to be loaded
+            // TODO: Wait for playlist to be loaded, eventually
             Activity act = getActivity();
             if (act != null) {
                 act.finish();
@@ -253,7 +261,11 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
 
         Bitmap hero = Utils.dequeueBitmap(PlaylistActivity.BITMAP_PLAYLIST_HERO);
-        mIvHero.setImageBitmap(hero);
+        if (hero == null) {
+            mIvHero.setImageResource(R.drawable.album_placeholder);
+        } else {
+            mIvHero.setImageBitmap(hero);
+        }
 
         mPlayFab = (FloatingActionButton) headerView.findViewById(R.id.fabPlay);
 
