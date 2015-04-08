@@ -200,6 +200,16 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
                     ctx.startActivity(intent);
                 }
             });
+
+            specialHolder.cardMostPlayed.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Context ctx = v.getContext();
+                    Intent intent = PlaylistActivity.craftIntent(ctx, AutoPlaylistHelper.REF_SPECIAL_MOST_PLAYED,
+                            null);
+                    ctx.startActivity(intent);
+                }
+            });
         } else if (itemViewType == VIEW_TYPE_REGULAR) {
             final Playlist item = mPlaylists.get(position);
             holder.tvPlaylistName.setText(item.getName());

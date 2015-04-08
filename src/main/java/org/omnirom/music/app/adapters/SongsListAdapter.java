@@ -212,11 +212,15 @@ public class SongsListAdapter extends BaseAdapter {
                 tag.ivAlbumArt.loadArtForSong(song);
             }
 
-            Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
-            if (artist != null) {
-                tag.tvArtist.setText(artist.getName());
+            if (song.getArtist() == null) {
+                tag.tvArtist.setText(null);
             } else {
-                tag.tvArtist.setText("...");
+                Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
+                if (artist != null) {
+                    tag.tvArtist.setText(artist.getName());
+                } else {
+                    tag.tvArtist.setText("...");
+                }
             }
         } else {
             tag.tvTitle.setText("...");

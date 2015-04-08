@@ -883,7 +883,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             if (!wasLoaded && cached.isLoaded()) {
                 // Match the album with the artist
                 Artist artist = mCache.getArtist(s.getArtist());
-                if (artist == null) {
+                if (artist == null && s.getArtist() != null) {
                     artist = retrieveArtist(s.getArtist(), provider);
                 }
 

@@ -45,14 +45,13 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.framework.AutoPlaylistHelper;
-import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.app.ui.PlaylistListView;
+import org.omnirom.music.art.RecyclingBitmapDrawable;
+import org.omnirom.music.framework.AutoPlaylistHelper;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
@@ -66,10 +65,12 @@ import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
+import org.omnirom.music.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 
 /**
@@ -93,6 +94,7 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     private RecyclingBitmapDrawable mLogoBitmap;
     private ImageView mIvHero;
     private TextView mTvPlaylistName;
+    private boolean mIsSpecialPlaylist;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -162,11 +164,14 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
         if (AutoPlaylistHelper.REF_SPECIAL_FAVORITES.equals(playlistRef)) {
             mPlaylist = AutoPlaylistHelper.getFavoritesPlaylist(getActivity());
+            mIsSpecialPlaylist = true;
         } else if (AutoPlaylistHelper.REF_SPECIAL_MOST_PLAYED.equals(playlistRef)) {
-
+            mPlaylist = AutoPlaylistHelper.getMostPlayedPlaylist(getActivity());
+            mIsSpecialPlaylist = true;
         } else {
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             mPlaylist = aggregator.retrievePlaylist(playlistRef, null);
+            mIsSpecialPlaylist = false;
         }
 
         if (mPlaylist == null) {
@@ -347,12 +352,21 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.playlist, menu);
+
+        if (mIsSpecialPlaylist) {
+            // Remove some options not applicable to the special playlist mode
+            menu.removeItem(R.id.menu_remove_duplicates);
+            menu.removeItem(R.id.menu_remove_playlist);
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_play_now) {
             playNow();
+            return true;
+        } else if (item.getItemId() == R.id.menu_play_next) {
+            playNext();
             return true;
         } else if (item.getItemId() == R.id.menu_add_to_queue) {
             PlaybackProxy.queuePlaylist(mPlaylist, false);
@@ -437,6 +451,20 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         PlaybackProxy.playPlaylist(mPlaylist);
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
         mFabDrawable.setBuffering(true);
+    }
+
+    private void playNext() {
+        // playNext adds elements after the current playing one. If we want to play the playlist
+        // in the proper order, we need to put it backwards.
+        ListIterator<String> it = mPlaylist.songsList().listIterator();
+        while (it.hasNext()) {
+            it.next();
+        }
+
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        while (it.hasPrevious()) {
+            PlaybackProxy.playNext(aggregator.retrieveSong(it.previous(), mPlaylist.getProvider()));
+        }
     }
 
     private void removeDuplicates() throws RemoteException {

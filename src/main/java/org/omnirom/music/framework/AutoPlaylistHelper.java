@@ -19,9 +19,15 @@ import android.content.Context;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * This class generates automatic playlists from the listen logger
@@ -49,8 +55,9 @@ public class AutoPlaylistHelper {
 
         for (ListenLogger.LogEntry like : likes) {
             // Ensure the songs are cached as they're coming from multiple providers
-            aggregator.retrieveSong(like.getReference(), like.getIdentifier());
-            playlist.addSong(like.getReference());
+            if (aggregator.retrieveSong(like.getReference(), like.getIdentifier()) != null) {
+                playlist.addSong(like.getReference());
+            }
         }
 
         return playlist;
@@ -67,18 +74,63 @@ public class AutoPlaylistHelper {
 
         List<ListenLogger.LogEntry> likes = logger.getEntries();
 
-        Playlist playlist = new Playlist(REF_SPECIAL_FAVORITES);
-        playlist.setName(ctx.getString(R.string.favorites));
+        Playlist playlist = new Playlist(REF_SPECIAL_MOST_PLAYED);
+        playlist.setName(ctx.getString(R.string.most_played));
         playlist.setOfflineCapable(false);
         playlist.setOfflineStatus(Playlist.OFFLINE_STATUS_NO);
         playlist.setIsLoaded(true);
 
+        HashMap<String, Integer> occurrences = new HashMap<>();
         for (ListenLogger.LogEntry like : likes) {
+            final String ref = like.getReference();
+
             // Ensure the songs are cached as they're coming from multiple providers
-            aggregator.retrieveSong(like.getReference(), like.getIdentifier());
-            playlist.addSong(like.getReference());
+            Song song = aggregator.retrieveSong(ref, like.getIdentifier());
+
+            // A null song indicates either the song has gone unavailable or the provider has been
+            // removed. We should not add it.
+            if (song != null) {
+                if (occurrences.containsKey(like.getReference())) {
+                    occurrences.put(ref, occurrences.get(ref) + 1);
+                } else {
+                    occurrences.put(ref, 1);
+                }
+            }
+        }
+
+        int number = 0;
+        TreeMap<String, Integer> sortedSongs = new TreeMap<>(new ValueComparator(occurrences));
+        sortedSongs.putAll(occurrences);
+
+        Set<String> references = sortedSongs.keySet();
+        for (String ref : references) {
+            if (ref != null) {
+                playlist.addSong(ref);
+                ++number;
+
+                if (number == 100) {
+                    break;
+                }
+            }
         }
 
         return playlist;
+    }
+
+    private static class ValueComparator implements Comparator<String> {
+        private Map<String, Integer> mBase;
+
+        public ValueComparator(Map<String, Integer> base) {
+            mBase = base;
+        }
+
+        // Note: this comparator imposes orderings that are inconsistent with equals.
+        public int compare(String a, String b) {
+            if (mBase.get(a) >= mBase.get(b)) {
+                return -1;
+            } else {
+                return 1;
+            } // returning 0 would merge keys
+        }
     }
 }

@@ -5,6 +5,10 @@
         android:title="@string/play_now" />
 
     <item
+        android:id="@+id/menu_play_next"
+        android:title="@string/play_next" />
+
+    <item
         android:id="@+id/menu_add_to_queue"
         android:title="@string/add_to_queue" />
 
