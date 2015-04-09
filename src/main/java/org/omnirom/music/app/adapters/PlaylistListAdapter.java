@@ -63,6 +63,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
 
     private List<Playlist> mPlaylists;
     private PlaylistOrderer mOrderer;
+    private ItemDraggableRange mDragRange;
 
     static class PlaylistSort implements Comparator<Playlist> {
         private Map<String, Integer> mOrder;
@@ -321,8 +322,10 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
 
     @Override
     public ItemDraggableRange onGetItemDraggableRange(ViewHolder holder) {
-        // no drag-sortable range specified
-        return null;
+        if (mDragRange == null) {
+            mDragRange = new ItemDraggableRange(1, getItemCount() - 1);
+        }
+        return mDragRange;
     }
 
 
