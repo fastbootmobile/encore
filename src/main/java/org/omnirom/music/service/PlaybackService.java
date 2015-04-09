@@ -760,6 +760,8 @@ public class PlaybackService extends Service
                     }
                 }
             }.start();
+
+            mNativeSink.flushSamples();
         }
     }
 
