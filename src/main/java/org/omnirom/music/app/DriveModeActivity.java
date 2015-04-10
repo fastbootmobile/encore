@@ -27,6 +27,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -37,10 +39,6 @@ import android.widget.TextView;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
-import org.omnirom.music.utils.Utils;
-import org.omnirom.music.voice.VoiceActionHelper;
-import org.omnirom.music.voice.VoiceCommander;
-import org.omnirom.music.voice.VoiceRecognizer;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
@@ -52,6 +50,10 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.NavHeadService;
 import org.omnirom.music.service.PlaybackService;
+import org.omnirom.music.utils.Utils;
+import org.omnirom.music.voice.VoiceActionHelper;
+import org.omnirom.music.voice.VoiceCommander;
+import org.omnirom.music.voice.VoiceRecognizer;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
@@ -63,7 +65,8 @@ import java.util.List;
 /**
  *
  */
-public class DriveModeActivity extends AppActivity implements ILocalCallback, View.OnClickListener, SeekBar.OnSeekBarChangeListener {
+public class DriveModeActivity extends AppActivity implements ILocalCallback,
+        View.OnClickListener, SeekBar.OnSeekBarChangeListener, GestureDetector.OnGestureListener {
     private static final String TAG = "DriveModeActivity";
 
     public static final String ACTION_FINISH = "org.omnirom.music.action.FINISH_DRIVE_MODE";
@@ -94,6 +97,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     private VoiceRecognizer mVoiceRecognizer;
     private VoiceCommander mVoiceCommander;
     private VoiceActionHelper mVoiceHelper;
+    private GestureDetector mDetector;
 
     private BroadcastReceiver mBroadcastRcv = new BroadcastReceiver() {
         @Override
@@ -139,6 +143,8 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+
+        mDetector = new GestureDetector(this,this);
 
         mHandler = new DriveHandler(new WeakReference<>(this));
         mPlaybackCallback = new DrivePlaybackCallback();
@@ -434,6 +440,12 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         stopService(new Intent(this, NavHeadService.class));
     }
 
+    private void startMaps() {
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW);
+        mapIntent.setPackage("com.google.android.apps.maps");
+        startActivity(mapIntent);
+    }
+
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
@@ -468,9 +480,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
         } else if (v == mSkipButton) {
             PlaybackProxy.next();
         } else if (v == mMapsButton) {
-            Intent mapIntent = new Intent(Intent.ACTION_VIEW);
-            mapIntent.setPackage("com.google.android.apps.maps");
-            startActivity(mapIntent);
+            startMaps();
         } else if (v == mVoiceButton) {
             setVoiceEmphasis(true, false);
             mVoiceRecognizer.startListening();
@@ -570,4 +580,61 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback, Vi
     public void onStopTrackingTouch(SeekBar seekBar) {
 
     }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        this.mDetector.onTouchEvent(event);
+
+        return super.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return true;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        int state = PlaybackProxy.getState();
+        if (state == PlaybackService.STATE_BUFFERING || state == PlaybackService.STATE_PLAYING) {
+            PlaybackProxy.pause();
+        } else {
+            PlaybackProxy.play();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        return true;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        if (Math.abs(velocityY) > Math.abs(velocityX)) {
+            // Vertical gesture
+            if (velocityY < -400) {
+                startMaps();
+            }
+        } else {
+            // Horizontal gesture
+            if (velocityX < -500) {
+                PlaybackProxy.previous();
+            } else if (velocityX > 500) {
+                PlaybackProxy.next();
+            }
+        }
+        return true;
+    }
+
 }
