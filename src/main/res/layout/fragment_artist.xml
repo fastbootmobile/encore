@@ -72,6 +72,7 @@
 
         <org.omnirom.music.app.ui.WrapContentHeightViewPager
             android:id="@+id/pagerArtist"
+            android:transitionGroup="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignEnd="@+id/ivHero"
