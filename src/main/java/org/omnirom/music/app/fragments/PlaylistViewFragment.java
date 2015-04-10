@@ -24,7 +24,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -78,7 +77,7 @@ import java.util.ListIterator;
  * Use the {@link org.omnirom.music.app.fragments.PlaylistViewFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PlaylistViewFragment extends Fragment implements ILocalCallback {
+public class PlaylistViewFragment extends MaterialReelBaseFragment implements ILocalCallback {
     private static final String TAG = "PlaylistViewFragment";
 
     public static final String KEY_PLAYLIST = "playlist";
@@ -98,13 +97,17 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
-        public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
+        public void onSongStarted(final boolean buffering, final Song s) throws RemoteException {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mAdapter.notifyDataSetChanged();
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     mFabDrawable.setBuffering(buffering);
+
+                    setReelBarTitle(s.getTitle());
+                    mBarDrawable.setBuffering(buffering);
+                    mBarDrawable.setShape(mFabDrawable.getRequestedShape());
                 }
             });
         }
@@ -116,6 +119,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 public void run() {
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     mFabDrawable.setBuffering(false);
+                    mBarDrawable.setBuffering(false);
+                    mBarDrawable.setShape(mFabDrawable.getRequestedShape());
                 }
             });
         }
@@ -127,8 +132,28 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                 public void run() {
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                     mFabDrawable.setBuffering(false);
+                    mBarDrawable.setBuffering(false);
+                    mBarDrawable.setShape(mFabDrawable.getRequestedShape());
                 }
             });
+        }
+    };
+
+    private View.OnClickListener mReelFabClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mBarDrawable.getCurrentShape() == PlayPauseDrawable.SHAPE_PLAY) {
+                if (mFabShouldResume) {
+                    PlaybackProxy.play();
+                    mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                } else {
+                    PlaybackProxy.playPlaylist(mPlaylist);
+                }
+            } else {
+                mFabShouldResume = true;
+                PlaybackProxy.pause();
+                mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+            }
         }
     };
 
@@ -321,6 +346,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
                     mFabShouldResume = true;
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     mFabDrawable.setBuffering(true);
+
+                    showMaterialReelBar(mPlayFab);
                 }
             }
         });
@@ -329,6 +356,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         AlphaAnimation anim = new AlphaAnimation(0.f, 1.f);
         anim.setDuration(200);
         mListViewContents.setLayoutAnimation(new LayoutAnimationController(anim));
+
+        setupMaterialReelBar(root, mReelFabClickListener);
 
         return root;
     }
@@ -451,6 +480,8 @@ public class PlaylistViewFragment extends Fragment implements ILocalCallback {
         PlaybackProxy.playPlaylist(mPlaylist);
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
         mFabDrawable.setBuffering(true);
+
+        showMaterialReelBar(mPlayFab);
     }
 
     private void playNext() {
