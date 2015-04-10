@@ -88,6 +88,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     private ImageView mBarNext;
     private ImageView mBarPrevious;
     private TextView mBarTitle;
+    private boolean mMaterialBarVisible = false;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -98,12 +99,7 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     public void run() {
                         mAdapter.notifyDataSetChanged();
                         mBarTitle.setText(s.getTitle());
-
-                        if (buffering) {
-                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                        } else {
-                            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                        }
+                        mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
 
                         mFabDrawable.setBuffering(buffering);
 
@@ -260,12 +256,14 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
                     PlaybackProxy.playAtIndex(position);
 
                     mFabDrawable.setBuffering(true);
-                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
 
                     mBarDrawable.setBuffering(true);
                     mBarDrawable.setShape(mFabDrawable.getRequestedShape());
 
                     mFabShouldResume = true;
+
+                    showMaterialReelBar();
                 }
             }
         });
@@ -412,6 +410,11 @@ public class AlbumViewFragment extends Fragment implements ILocalCallback {
     }
 
     private void showMaterialReelBar() {
+        if (mMaterialBarVisible) {
+            return;
+        }
+
+        mMaterialBarVisible = true;
         mBarLayout.setVisibility(View.VISIBLE);
         mBarLayout.setAlpha(0);
 
