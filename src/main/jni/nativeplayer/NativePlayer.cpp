@@ -25,15 +25,15 @@
 #include "Glue.h"
 #include "../libresample/resample.h"
 
-
+#define MAX_BUFFER_SIZE 44100
 #define LOG_TAG "OM-NativePlayer"
 
 // -------------------------------------------------------------------------------------
 NativePlayer::NativePlayer() : m_pEngineObj(nullptr), m_pEngine(nullptr),
         m_pOutputMixObj(nullptr), m_pPlayerObj(nullptr), m_pPlayer(nullptr), m_pPlayerVol(nullptr),
         m_pBufferQueue(nullptr), m_iSampleRate(-1), m_iChannels(-1), m_iSampleFormat(-1),
-        m_iWrittenSamples(0), m_iUnderflowCount(0), m_pActiveBuffer(nullptr),
-        m_pPlayingBuffer(nullptr), m_iActiveBufferIndex(0), m_fVolume(1.0f),
+        m_iWrittenSamples(0), m_iUnderflowCount(0),
+        m_pPlayingBuffer(nullptr), m_iActiveBuffersTotalSize(0), m_fVolume(1.0f),
         m_pNativeHub(nullptr), m_bUseResampler(false), m_LastBuffersCheckUfCount(0) {
 }
 // -------------------------------------------------------------------------------------
@@ -58,6 +58,17 @@ NativePlayer::~NativePlayer() {
         m_pEngineObj = nullptr;
         m_pEngine = nullptr;
     }
+
+    // Release the buffers
+    for (auto it = m_ActiveBuffers.begin(); it != m_ActiveBuffers.end(); ++it) {
+        delete *it;
+    }
+    m_ActiveBuffers.clear();
+
+    for (auto it = m_IdleBuffers.begin(); it != m_IdleBuffers.end(); ++it) {
+        delete *it;
+    }
+    m_IdleBuffers.clear();
 
     ALOGD("Released NativePlayer...");
 }
@@ -241,15 +252,17 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
                 return false;
         }
 
-        if (m_pActiveBuffer) {
-            free(m_pActiveBuffer);
+        for (auto it = m_ActiveBuffers.begin(); it != m_ActiveBuffers.end(); ++it) {
+            delete (*it);
         }
+        m_ActiveBuffers.clear();
+
         if (m_pPlayingBuffer) {
             free(m_pPlayingBuffer);
         }
 
-        m_iBufferMinPlayback = sample_rate * channels / 20;
-        m_iBufferMaxSize = m_iBufferMinPlayback * 10;
+        m_iBufferMinPlayback = sample_rate * channels / 12;
+        m_iBufferMaxSize = m_iBufferMinPlayback * 4;
 
         switch (sample_rate) {
             // Crappy quality starts here v
@@ -279,8 +292,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
         m_LastBuffersCheckTime = std::chrono::system_clock::now();
         m_LastBuffersCheckUfCount = m_iUnderflowCount;
 
-        m_pActiveBuffer = reinterpret_cast<uint8_t*>(malloc(m_iBufferMaxSize));
-        m_pPlayingBuffer = reinterpret_cast<uint8_t*>(malloc(m_iBufferMaxSize));
+        m_pPlayingBuffer = new uint8_t[MAX_BUFFER_SIZE];
 
         // Seems valid, let's apply them
         m_iChannels = channels;
@@ -305,15 +317,15 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
     SLAndroidSimpleBufferQueueState qstate;
     (*m_pBufferQueue)->GetState(m_pBufferQueue, &qstate);
 
-    int32_t buffers_available = m_iBufferMaxSize - m_iActiveBufferIndex;
+    int32_t buffers_available = m_iBufferMaxSize - m_iActiveBuffersTotalSize;
 
     // Start playing when we have at least a few samples
     SLuint32 playerState;
     (*m_pPlayer)->GetPlayState(m_pPlayer, &playerState);
 
-    if (playerState != SL_PLAYSTATE_PLAYING && m_iActiveBufferIndex >= m_iBufferMinPlayback) {
+    if (playerState != SL_PLAYSTATE_PLAYING && m_iActiveBuffersTotalSize >= m_iBufferMinPlayback) {
         // set the player's state to playing
-        // ALOGD("Bufferred %d/%d bytes, resuming", m_iActiveBufferIndex, m_iBufferMaxSize);
+        // ALOGD("Bufferred %d/%d bytes, resuming", m_iActiveBuffersTotalSize, m_iBufferMaxSize);
         setPlayState(SL_PLAYSTATE_PLAYING);
     }
 
@@ -377,40 +389,51 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
         }
     }
 
-    if (buffers_available >= len) {
+    if (len > buffers_available) {
+        // Buffers full
+        ALOGD("Buffers full, returning 0");
+        return 0;
+    } else if (len < MAX_BUFFER_SIZE) {
         // If there's room for a buffer
-        if (qstate.count == 0) {
-            // We have no buffer pending, enqueue it directly
-            SLresult result = (*m_pBufferQueue)->Enqueue(m_pBufferQueue, data, len);
-            // ALOGE("Enqueued directly %d bytes", len);
-            m_iWrittenSamples += len;
-            if (m_pNativeHub) {
-                om_NativeHub_onAudioMirrorWritten(m_pNativeHub,
-                    reinterpret_cast<const uint8_t*>(data), len);
-            }
+        if (qstate.count == 0 && m_ActiveBuffers.size() == 0) {
+                // We have no buffer pending, enqueue it directly
+                SLresult result = (*m_pBufferQueue)->Enqueue(m_pBufferQueue, data, len);
+                // ALOGE("Enqueued directly %d bytes", len);
+                m_iWrittenSamples += len;
+                if (m_pNativeHub) {
+                    om_NativeHub_onAudioMirrorWritten(m_pNativeHub,
+                        reinterpret_cast<const uint8_t*>(data), len);
+                }
         } else {
             // Queue in our internal buffer queue, and enqueue to the sink in the buffer callback
-            memcpy(&(m_pActiveBuffer[m_iActiveBufferIndex]), data, len);
-            m_iActiveBufferIndex += len;
-            // ALOGE("Bufferred %d/%d", m_iActiveBufferIndex, m_iBufferMaxSize);
+            AudioBuffer* buffer;
+            if (m_IdleBuffers.size() > 0) {
+                buffer = m_IdleBuffers.front();
+                m_IdleBuffers.pop_front();
+            } else {
+                buffer = new AudioBuffer(MAX_BUFFER_SIZE);
+                // ALOGD("Created a new buffer %p, ActiveBuffers=%u", buffer, m_ActiveBuffers.size());
+            }
+            memcpy(buffer->pBuffer, data, len);
+            buffer->iLength = len;
+            m_iActiveBuffersTotalSize += len;
+            m_ActiveBuffers.push_back(buffer);
+            // ALOGE("Bufferred %d/%d - filled buffer %p", m_iActiveBuffersTotalSize, m_iBufferMaxSize, buffer);
         }
 
         return len;
-    } else if (len > m_iBufferMaxSize) {
+    } else {
         ALOGE("RECEIVED BUFFER IS LARGER THAN MAX BUFFER SIZE; DROPPING %d bytes", len);
         return len;
-    } else {
-        // Buffers full, retry later
-        return 0;
     }
 }
 // -------------------------------------------------------------------------------------
 int32_t NativePlayer::getBufferedCount() const {
-    return m_iActiveBufferIndex;
+    return m_iActiveBuffersTotalSize;
 }
 // -------------------------------------------------------------------------------------
 int32_t NativePlayer::getFreeBuffersCount() const {
-    return m_iBufferMaxSize - m_iActiveBufferIndex;
+    return m_iBufferMaxSize - m_iActiveBuffersTotalSize;
 }
 // -------------------------------------------------------------------------------------
 int32_t NativePlayer::getUnderflowCount() const {
@@ -427,9 +450,14 @@ void NativePlayer::flush() {
     m_iWrittenSamples = 0;
     m_iUnderflowCount = 0;
     m_LastBuffersCheckUfCount = 0;
-    m_iActiveBufferIndex = 0;
+    m_iActiveBuffersTotalSize = 0;
+    for (auto it = m_ActiveBuffers.begin(); it != m_ActiveBuffers.end(); ++it) {
+        m_IdleBuffers.push_back(*it);
+    }
+    m_ActiveBuffers.clear();
+
     setPlayState(SL_PLAYSTATE_PAUSED);
-    ALOGI("Flushed");
+    ALOGI("Flushed - Idle buffers: %lu", m_IdleBuffers.size());
 }
 // -------------------------------------------------------------------------------------
 void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* context) {
@@ -447,22 +475,29 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
 
     if (qstate.count == 0) {
         // If we have audio buffers to play, play them
-        if (p->m_iActiveBufferIndex > 0) {
-            memcpy(p->m_pPlayingBuffer, p->m_pActiveBuffer, p->m_iActiveBufferIndex);
+        if (p->m_ActiveBuffers.size() > 0) {
+            AudioBuffer* buffer = p->m_ActiveBuffers.front();
+            p->m_ActiveBuffers.pop_front();
+
+            // ALOGE("Dequeued buffer %p", buffer);
+
+            memcpy(p->m_pPlayingBuffer, buffer->pBuffer, buffer->iLength);
 
             result = (*p->m_pBufferQueue)->Enqueue(p->m_pBufferQueue, p->m_pPlayingBuffer,
-                    p->m_iActiveBufferIndex);
-
-            // ALOGE("Enqueued %d bytes", p->m_iActiveBufferIndex);
+                    buffer->iLength);
 
             if (result == SL_RESULT_SUCCESS) {
                 if (p->m_pNativeHub) {
                     om_NativeHub_onAudioMirrorWritten(p->m_pNativeHub,
                         reinterpret_cast<const uint8_t*>(p->m_pPlayingBuffer),
-                        p->m_iActiveBufferIndex);
+                        buffer->iLength);
                 }
-                p->m_iWrittenSamples += p->m_iActiveBufferIndex;
-                p->m_iActiveBufferIndex = 0;
+                p->m_iWrittenSamples += buffer->iLength;
+                p->m_iActiveBuffersTotalSize -= buffer->iLength;
+
+                // ALOGE("Enqueued %d bytes, active total size=%d", buffer->iLength, p->m_iActiveBuffersTotalSize);
+
+                p->m_IdleBuffers.push_back(buffer);
             } else {
                 ALOGW("Enqueue via callback failed (%d), will retry", result);
                 p->setPlayState(SL_PLAYSTATE_PAUSED);
@@ -473,30 +508,25 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
             p->m_iUnderflowCount++;
             ALOGW("Buffer underrun");
 
-            // If we've got at least two underruns in less than 10 seconds, raise the min buffers
+            // If we've got at least three underruns in less than 10 seconds, raise the min buffers
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
             int len_ms = std::chrono::duration_cast<std::chrono::milliseconds>
                     (now - p->m_LastBuffersCheckTime).count();
 
-            if (p->m_iUnderflowCount - p->m_LastBuffersCheckUfCount > 2) {
+            if (p->m_iUnderflowCount - p->m_LastBuffersCheckUfCount > 3) {
                 if (len_ms < 10000) {
                     // We raise the min buffer size, max 2 seconds
-                    p->m_iBufferMinPlayback = std::min(p->m_iBufferMinPlayback + 2048,
+                    p->m_iBufferMinPlayback = std::min(p->m_iBufferMinPlayback + 1024,
                         p->m_iSampleRate * p->m_iChannels * 2);
-                    p->m_iBufferMaxSize = std::max<uint32_t>(p->m_iSampleRate * p->m_iChannels * 2,
-                            p->m_iBufferMinPlayback * 10);
-
-                    free(p->m_pActiveBuffer);
-                    free(p->m_pPlayingBuffer);
-
-                    p->m_pActiveBuffer = reinterpret_cast<uint8_t*>(malloc(p->m_iBufferMaxSize));
-                    p->m_pPlayingBuffer = reinterpret_cast<uint8_t*>(malloc(p->m_iBufferMaxSize));
+                    p->m_iBufferMaxSize = std::min<uint32_t>(p->m_iSampleRate * p->m_iChannels * 2,
+                            p->m_iBufferMinPlayback * 4);
 
                     ALOGD("Raising min buffer size to %d", p->m_iBufferMinPlayback);
                 }
                 p->m_LastBuffersCheckUfCount = p->m_iUnderflowCount.load();
-                p->m_LastBuffersCheckTime = now;
             }
+
+            p->m_LastBuffersCheckTime = now;
         }
     }
 

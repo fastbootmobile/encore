@@ -24,8 +24,20 @@
 #include <mutex>
 #include "INativeSink.h"
 
-// Maximum number of buffered samples (a second at 44100Hz)
-#define BUFFER_MAX_COUNT 44100
+class AudioBuffer {
+ public:
+    AudioBuffer(int size) {
+        pBuffer = new uint8_t[size];
+        iLength = 0;
+    }
+
+    ~AudioBuffer() {
+      delete[] pBuffer;
+    }
+
+    uint8_t* pBuffer;
+    int iLength;
+};
 
 class NativeHub;
 class NativePlayer : public INativeSink {
@@ -97,9 +109,10 @@ class NativePlayer : public INativeSink {
     std::atomic<int32_t> m_iUnderflowCount;
     std::atomic<float> m_fVolume;
 
-    uint8_t* m_pActiveBuffer;
+    std::list<AudioBuffer*> m_ActiveBuffers;
+    std::list<AudioBuffer*> m_IdleBuffers;
     uint8_t* m_pPlayingBuffer;
-    uint32_t m_iActiveBufferIndex;
+    uint32_t m_iActiveBuffersTotalSize;
     uint32_t m_iBufferMinPlayback;
     uint32_t m_iBufferMaxSize;
 

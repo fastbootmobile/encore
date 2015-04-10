@@ -25,7 +25,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationManagerCompat;
@@ -53,6 +55,7 @@ import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.receivers.RemoteControlReceiver;
 import org.omnirom.music.utils.Utils;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -138,26 +141,71 @@ public class PlaybackService extends Service
     private ListenLogger mListenLogger;
     private PacManReceiver mPacManReceiver;
     private boolean mCurrentTrackLoaded;
+    private HandlerThread mCommandsHandlerThread;
+    private CommandHandler mCommandsHandler;
 
-    private Runnable mStartPlaybackImplRunnable = new Runnable() {
-        @Override
-        public void run() {
-            startPlayingQueue();
+    private static class CommandHandler extends Handler {
+        private WeakReference<PlaybackService> mService;
+        private static final int MSG_START_PLAYBACK = 1;
+        private static final int MSG_PAUSE_PROVIDER = 2;
+        private static final int MSG_RESUME_PLAYBACK = 3;
+        private static final int MSG_FLUSH_BUFFERS = 4;
+
+        public CommandHandler(PlaybackService service, HandlerThread looper) {
+            super(looper.getLooper());
+            mService = new WeakReference<>(service);
         }
-    };
 
-    private Runnable mStartPlaybackRunnable = new Runnable() {
         @Override
-        public void run() {
-            new Thread(mStartPlaybackImplRunnable).start();
-        }
-    };
+        public void handleMessage(Message msg) {
+            final PlaybackService service = mService.get();
 
+            if (service == null) {
+                Log.w(TAG, "Service reference is null, dropping handler message");
+                return;
+            }
+
+            final PluginsLookup plugins = PluginsLookup.getDefault();
+            IMusicProvider provider;
+
+            switch (msg.what) {
+                case MSG_START_PLAYBACK:
+                    service.startPlayingQueue();
+                    break;
+
+                case MSG_PAUSE_PROVIDER:
+                    provider = plugins.getProvider((ProviderIdentifier.fromSerialized((String) msg.obj))).getBinder();
+                    try {
+                        if (provider != null) {
+                            provider.pause();
+                        } else {
+                            Log.e(TAG, "Provider is null! Has it crashed?");
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot pause the track!", e);
+                    }
+                    break;
+
+                case MSG_RESUME_PLAYBACK:
+                    service.playImplLocked();
+                    break;
+
+                case MSG_FLUSH_BUFFERS:
+                    service.mNativeSink.flushSamples();
+                    break;
+            }
+        }
+    }
 
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<>();
         mPrefetcher = new Prefetcher(this);
+        mHandler = new Handler();
+        mCommandsHandlerThread = new HandlerThread("PlaybackServiceCommandsHandler");
+        mCommandsHandlerThread.start();
+
+        mCommandsHandler = new CommandHandler(this, mCommandsHandlerThread);
     }
 
     /**
@@ -166,7 +214,6 @@ public class PlaybackService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
-        mHandler = new Handler();
         mListenLogger = new ListenLogger(this);
 
         // Register package manager to receive updates
@@ -582,6 +629,9 @@ public class PlaybackService extends Service
                 mCurrentPlayingProvider = null;
             }
 
+            // Clear up the sink buffers
+            mCommandsHandler.sendEmptyMessageDelayed(CommandHandler.MSG_FLUSH_BUFFERS, 10);
+
             if (providerId != null) {
                 ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerId);
                 if (connection != null) {
@@ -671,6 +721,15 @@ public class PlaybackService extends Service
     }
 
     /**
+     * Requests the playback to start, if a request hasn't been posted already
+     */
+    private void requestStartPlayback() {
+        if (!mCommandsHandler.hasMessages(CommandHandler.MSG_START_PLAYBACK)) {
+            mCommandsHandler.sendEmptyMessage(CommandHandler.MSG_START_PLAYBACK);
+        }
+    }
+
+    /**
      * Moves to the next track
      */
     void nextImpl() {
@@ -681,21 +740,19 @@ public class PlaybackService extends Service
             while (previousTrack == mCurrentTrack) {
                 mCurrentTrack = Utils.getRandom(mPlaybackQueue.size());
             }
-            mHandler.removeCallbacks(mStartPlaybackRunnable);
-            mHandler.post(mStartPlaybackRunnable);
+
+            requestStartPlayback();
             mNotification.setHasNext(true);
         } else if (mPlaybackQueue.size() > 0 && hasNext) {
             mCurrentTrack++;
-            mHandler.removeCallbacks(mStartPlaybackRunnable);
-            mHandler.post(mStartPlaybackRunnable);
+            requestStartPlayback();
 
             hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
             hasNext = hasNext || (mPlaybackQueue.size() > 0 && mRepeatMode);
             mNotification.setHasNext(hasNext);
         } else if (mRepeatMode && mPlaybackQueue.size() > 0) {
             mCurrentTrack = 0;
-            mHandler.removeCallbacks(mStartPlaybackRunnable);
-            mHandler.post(mStartPlaybackRunnable);
+            requestStartPlayback();
             mNotification.setHasNext(true);
         }
 
@@ -729,8 +786,7 @@ public class PlaybackService extends Service
                 }
             }
 
-            mHandler.removeCallbacks(mStartPlaybackRunnable);
-            mHandler.post(mStartPlaybackRunnable);
+            requestStartPlayback();
         }
     }
 
@@ -740,27 +796,13 @@ public class PlaybackService extends Service
     void pauseImpl() {
         final Song currentSong = getCurrentSong();
         if (currentSong != null) {
-            // TODO: Refactor that with a threaded Handler that handles messages
-            final ProviderIdentifier identifier = currentSong.getProvider();
-            mState = STATE_PAUSING;
             Log.d(TAG, "onSongPaused: Pausing...");
 
-            new Thread() {
-                public void run() {
-                    IMusicProvider provider = PluginsLookup.getDefault().getProvider(identifier).getBinder();
-                    try {
-                        if (provider != null) {
-                            provider.pause();
-                        } else {
-                            Log.e(TAG, "Provider is null! Has it crashed?");
-                            // TODO: Should we notify pause?
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot pause the track!", e);
-                    }
-                }
-            }.start();
+            mState = STATE_PAUSING;
+            final ProviderIdentifier identifier = currentSong.getProvider();
+            mCommandsHandler.obtainMessage(CommandHandler.MSG_PAUSE_PROVIDER, identifier.serialize()).sendToTarget();
 
+            // TODO: Do a real pause
             mNativeSink.flushSamples();
         }
     }
@@ -792,49 +834,48 @@ public class PlaybackService extends Service
         stopSelf();
     }
 
-    void playImpl() {
+    synchronized void playImpl() {
         if (mState == STATE_PLAYING || mState == STATE_BUFFERING) {
             // We are already playing, don't do anything
             return;
         }
 
-        new Thread() {
-            public void run() {
-                final Song currentSong = getCurrentSong();
-                if (currentSong != null && mCurrentTrackLoaded) {
-                    ProviderConnection conn = PluginsLookup.getDefault().getProvider(currentSong.getProvider());
-                    if (conn != null) {
-                        IMusicProvider provider = conn.getBinder();
-                        if (provider != null) {
-                            try {
-                                provider.resume();
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Cannot resume", e);
-                            }
-                            mIsResuming = true;
-                            mState = STATE_BUFFERING;
+        mCommandsHandler.sendEmptyMessage(CommandHandler.MSG_RESUME_PLAYBACK);
+    }
 
-                            for (IPlaybackCallback cb : mCallbacks) {
-                                try {
-                                    cb.onSongStarted(true, currentSong);
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Cannot call playback callback for song start event", e);
-                                }
-                            }
+    private void playImplLocked() {
+        final Song currentSong = getCurrentSong();
+        if (currentSong != null && mCurrentTrackLoaded) {
+            ProviderConnection conn = PluginsLookup.getDefault().getProvider(currentSong.getProvider());
+            if (conn != null) {
+                IMusicProvider provider = conn.getBinder();
+                if (provider != null) {
+                    try {
+                        provider.resume();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot resume", e);
+                    }
+                    mIsResuming = true;
+                    mState = STATE_BUFFERING;
 
-                            requestAudioFocus();
-                            mNotification.setPlayPauseAction(false);
-                        } else {
-                            Log.e(TAG, "Provider is null! Can't resume.");
+                    for (IPlaybackCallback cb : mCallbacks) {
+                        try {
+                            cb.onSongStarted(true, currentSong);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot call playback callback for song start event", e);
                         }
                     }
-                } else if (mPlaybackQueue.size() > 0) {
-                    mHandler.removeCallbacks(mStartPlaybackRunnable);
-                    mHandler.post(mStartPlaybackRunnable);
-                    mIsResuming = false;
+
+                    requestAudioFocus();
+                    mNotification.setPlayPauseAction(false);
+                } else {
+                    Log.e(TAG, "Provider is null! Can't resume.");
                 }
             }
-        }.start();
+        } else if (mPlaybackQueue.size() > 0) {
+            requestStartPlayback();
+            mIsResuming = false;
+        }
     }
 
     /**
@@ -844,8 +885,7 @@ public class PlaybackService extends Service
     private void playAtIndexImpl(int index) {
         Log.d(TAG, "Playing track " + (index + 1) + "/" + mPlaybackQueue.size() + " (this=" + this + ")");
         mCurrentTrack = index;
-        mHandler.removeCallbacks(mStartPlaybackRunnable);
-        mHandler.post(mStartPlaybackRunnable);
+        requestStartPlayback();
     }
 
     /**
@@ -934,8 +974,7 @@ public class PlaybackService extends Service
             mCurrentTrack = 0;
             mPlaybackQueue.clear();
             queuePlaylist(p, false);
-            mHandler.removeCallbacks(mStartPlaybackRunnable);
-            mHandler.post(mStartPlaybackRunnable);
+            requestStartPlayback();
         }
 
         @Override
@@ -944,8 +983,7 @@ public class PlaybackService extends Service
             mCurrentTrack = 0;
             mPlaybackQueue.clear();
             queueSong(s, true);
-            mHandler.removeCallbacks(mStartPlaybackRunnable);
-            mHandler.post(mStartPlaybackRunnable);
+            requestStartPlayback();
         }
 
         @Override
@@ -954,8 +992,7 @@ public class PlaybackService extends Service
             mCurrentTrack = 0;
             mPlaybackQueue.clear();
             queueAlbum(a, false);
-            mHandler.removeCallbacks(mStartPlaybackRunnable);
-            mHandler.post(mStartPlaybackRunnable);
+            requestStartPlayback();
         }
 
         @Override
@@ -1123,8 +1160,7 @@ public class PlaybackService extends Service
         if (currentSong != null && s.contains(currentSong) && currentSong.isLoaded()
                 && mCurrentTrackLoaded) {
             if (mCurrentTrackWaitLoading) {
-                mHandler.removeCallbacks(mStartPlaybackRunnable);
-                mHandler.post(mStartPlaybackRunnable);
+                requestStartPlayback();
             }
 
             mRemoteMetadata.setCurrentSong(currentSong, getNextTrack() != null);
@@ -1217,7 +1253,7 @@ public class PlaybackService extends Service
         @Override
         public void onSongPaused(ProviderIdentifier provider) throws RemoteException {
             final Song currentSong = getCurrentSong();
-            if (currentSong.getProvider().equals(provider) && !mIsStopping) {
+            if (currentSong != null && currentSong.getProvider().equals(provider) && !mIsStopping) {
                 mState = STATE_PAUSED;
                 mPauseLastTick = System.currentTimeMillis();
 
@@ -1253,21 +1289,18 @@ public class PlaybackService extends Service
                     mCurrentTrack = Utils.getRandom(mPlaybackQueue.size());
                 }
 
-                mHandler.removeCallbacks(mStartPlaybackRunnable);
-                mHandler.post(mStartPlaybackRunnable);
+                requestStartPlayback();
             } else if (mPlaybackQueue.size() > 0 && mCurrentTrack < mPlaybackQueue.size() - 1) {
                 // Regular sequential mode, not at the end, move to the next track
                 mCurrentTrack++;
 
-                mHandler.removeCallbacks(mStartPlaybackRunnable);
-                mHandler.post(mStartPlaybackRunnable);
+                requestStartPlayback();
             } else if (mPlaybackQueue.size() > 0 && mCurrentTrack == mPlaybackQueue.size() - 1) {
                 // Regular sequential mode, at the end of the queue
                 if (mRepeatMode) {
                     // We're repeating, go back to the first track and play it
                     mCurrentTrack = 0;
-                    mHandler.removeCallbacks(mStartPlaybackRunnable);
-                    mHandler.post(mStartPlaybackRunnable);
+                    requestStartPlayback();
                 } else {
                     // Not repeating and at the end of the playlist, stop
                     mBinder.stop();

@@ -119,10 +119,16 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
 
         @Override
         public void onPlaybackResume() throws RemoteException {
-            mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-            mFabDrawable.setBuffering(false);
-            mBarDrawable.setShape(mFabDrawable.getRequestedShape());
-            mBarDrawable.setBuffering(false);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setBuffering(false);
+                    mBarDrawable.setShape(mFabDrawable.getRequestedShape());
+                    mBarDrawable.setBuffering(false);
+                }
+            });
+
         }
     };
 
