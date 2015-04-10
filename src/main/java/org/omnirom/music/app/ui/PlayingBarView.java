@@ -30,7 +30,6 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -49,7 +48,6 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaybackQueueActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.utils.Utils;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -61,6 +59,7 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
+import org.omnirom.music.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -86,7 +85,8 @@ public class PlayingBarView extends RelativeLayout {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_UPDATE_QUEUE:
-                    mParent.get().mProgressDrawable.setMax(PlaybackProxy.getCurrentTrackLength());
+                    final int trackLength = PlaybackProxy.getCurrentTrackLength();
+                    mParent.get().mProgressDrawable.setMax(trackLength);
                     mParent.get().updatePlayingQueue();
                     break;
 
@@ -114,12 +114,7 @@ public class PlayingBarView extends RelativeLayout {
             }
 
             if (contains) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        updatePlayingQueue();
-                    }
-                });
+                mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
             }
         }
 
@@ -149,12 +144,7 @@ public class PlayingBarView extends RelativeLayout {
             }
 
             if (contains) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        updatePlayingQueue();
-                    }
-                });
+                mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
 
             }
         }
