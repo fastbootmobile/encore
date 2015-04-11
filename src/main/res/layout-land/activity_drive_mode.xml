@@ -51,15 +51,15 @@
         android:ellipsize="end"
         android:fontFamily="sans-serif-condensed"
         fontPath="fonts/RobotoCondensed-Regular.ttf"
-        android:singleLine="false"
+        android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#ffffff"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="24dp"
+        android:layout_marginLeft="48dp"
         android:layout_marginTop="32dp"
-        android:layout_marginRight="24dp"
+        android:layout_marginRight="48dp"
         />
 
     <TextView
@@ -72,7 +72,7 @@
         android:layout_below="@+id/tvTitle"
         android:alpha="0.9"
         android:ellipsize="end"
-        android:singleLine="false"
+        android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:fontFamily="sans-serif-condensed"
         fontPath="fonts/RobotoCondensed-Regular.ttf"
@@ -94,18 +94,19 @@
         android:ellipsize="end"
         android:fontFamily="sans-serif-medium"
         fontPath="fonts/Roboto-Medium.ttf"
-        android:singleLine="false"
+        android:singleLine="true"
         android:textAllCaps="true"
         android:textColor="@color/white"
         />
 
     <LinearLayout
         android:id="@+id/llButtons"
-        android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
         android:gravity="center_vertical|center_horizontal"
+        android:longClickable="false"
+        android:orientation="horizontal"
+        android:padding="8dp"
         android:background="#AA333333"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
@@ -115,75 +116,60 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp">
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical|center_horizontal"
-            android:longClickable="false"
-            android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/btnPrevious"
+            android:layout_width="@dimen/drive_button_size"
+            android:layout_height="@dimen/drive_button_size"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_outline"
+            android:clickable="true"
+            android:padding="16dp"
+            android:src="@drawable/ic_drive_previous"
+            android:contentDescription="@string/previous" />
 
-            <ImageView
-                android:id="@+id/btnPrevious"
-                android:layout_width="@dimen/drive_button_size"
-                android:layout_height="@dimen/drive_button_size"
-                android:layout_margin="8dp"
-                android:background="@drawable/circle_outline"
-                android:clickable="true"
-                android:padding="16dp"
-                android:src="@drawable/ic_drive_previous"
-                android:contentDescription="@string/previous"/>
+        <ImageView
+            android:id="@+id/btnVoice"
+            android:layout_width="@dimen/drive_button_size"
+            android:layout_height="@dimen/drive_button_size"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_outline"
+            android:clickable="true"
+            android:padding="16dp"
+            android:src="@drawable/ic_drive_mic"
+            android:contentDescription="@string/drive_mode" />
 
-            <ImageView
-                android:id="@+id/btnPlayPause"
-                android:layout_width="@dimen/drive_button_size"
-                android:layout_height="@dimen/drive_button_size"
-                android:layout_margin="8dp"
-                android:background="@drawable/circle_outline"
-                android:clickable="true"
-                android:padding="16dp"
-                android:contentDescription="@string/play"
-                android:scaleType="centerInside"/>
+        <ImageView
+            android:id="@+id/btnPlayPause"
+            android:layout_width="@dimen/drive_button_size"
+            android:layout_height="@dimen/drive_button_size"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_outline"
+            android:clickable="true"
+            android:padding="16dp"
+            android:contentDescription="@string/play"
+            android:scaleType="centerInside"/>
 
-            <ImageView
-                android:id="@+id/btnNext"
-                android:layout_width="@dimen/drive_button_size"
-                android:layout_height="@dimen/drive_button_size"
-                android:layout_margin="8dp"
-                android:background="@drawable/circle_outline"
-                android:clickable="true"
-                android:padding="16dp"
-                android:src="@drawable/ic_drive_next"
-                android:contentDescription="@string/next"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical|center_horizontal"
-            android:longClickable="false"
-            android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/btnMaps"
+            android:layout_width="@dimen/drive_button_size"
+            android:layout_height="@dimen/drive_button_size"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_outline"
+            android:clickable="true"
+            android:padding="16dp"
+            android:src="@drawable/ic_drive_maps"
+            android:contentDescription="@string/thumbs_up_description" />
 
-            <ImageView
-                android:id="@+id/btnVoice"
-                android:layout_width="@dimen/drive_button_size"
-                android:layout_height="@dimen/drive_button_size"
-                android:layout_margin="8dp"
-                android:background="@drawable/circle_outline"
-                android:clickable="true"
-                android:padding="16dp"
-                android:src="@drawable/ic_drive_mic"
-                android:contentDescription="@string/drive_mode"/>
-
-            <ImageView
-                android:id="@+id/btnMaps"
-                android:layout_width="@dimen/drive_button_size"
-                android:layout_height="@dimen/drive_button_size"
-                android:layout_margin="8dp"
-                android:background="@drawable/circle_outline"
-                android:clickable="true"
-                android:padding="16dp"
-                android:src="@drawable/ic_drive_maps"
-                android:contentDescription="@string/thumbs_up_description"/>
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/btnNext"
+            android:layout_width="@dimen/drive_button_size"
+            android:layout_height="@dimen/drive_button_size"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_outline"
+            android:clickable="true"
+            android:padding="16dp"
+            android:src="@drawable/ic_drive_next"
+            android:contentDescription="@string/next"/>
     </LinearLayout>
 
     <SeekBar
@@ -209,6 +195,7 @@
         android:layout_toLeftOf="@+id/tvArtist"
         android:layout_toStartOf="@+id/tvArtist"/>
 
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -223,6 +210,5 @@
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground"
         android:onClick="onClickClose"/>
-
-
+    
 </RelativeLayout>

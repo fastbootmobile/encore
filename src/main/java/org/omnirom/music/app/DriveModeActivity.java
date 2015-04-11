@@ -446,6 +446,10 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
         startActivity(mapIntent);
     }
 
+    public void onClickClose(View v) {
+        finish();
+    }
+
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
