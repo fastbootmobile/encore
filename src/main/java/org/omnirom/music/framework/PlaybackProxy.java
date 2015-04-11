@@ -62,6 +62,7 @@ public class PlaybackProxy {
     private static final int MSG_QUEUE_PLAYLIST     = 18;
     private static final int MSG_SET_SHUFFLE_MODE   = 19;
     private static final int MSG_PLAY_NEXT          = 20;
+    private static final int MSG_SLEEP_TIMER        = 21;
 
     private static class PlaybackProxyHandler extends Handler {
         public PlaybackProxyHandler(Looper looper) {
@@ -161,6 +162,10 @@ public class PlaybackProxy {
                         if (service != null) {
                             service.removeCallback((IPlaybackCallback) msg.obj);
                         }
+                        break;
+
+                    case MSG_SLEEP_TIMER:
+                        getPlayback().setSleepTimer((Long) msg.obj);
                         break;
                 }
             } catch (RemoteException e) {
@@ -355,5 +360,17 @@ public class PlaybackProxy {
 
     public static void queuePlaylist(Playlist p, boolean top) {
         Message.obtain(sHandler, MSG_QUEUE_PLAYLIST, top ? 1 : 0, 0, p).sendToTarget();
+    }
+
+    public static void setSleepTimer(long uptime) {
+        Message.obtain(sHandler, MSG_SLEEP_TIMER, uptime).sendToTarget();
+    }
+
+    public static long getSleepTimerEndTime() {
+        try {
+            return getPlayback().getSleepTimerEndTime();
+        } catch (RemoteException e) {
+            return -1;
+        }
     }
 }

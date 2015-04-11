@@ -161,6 +161,7 @@ public class PlayingBarView extends RelativeLayout {
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
         public void onSongStarted(final boolean buffering, Song s) throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
             mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
             mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
         }

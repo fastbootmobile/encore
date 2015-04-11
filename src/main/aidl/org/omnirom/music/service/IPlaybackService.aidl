@@ -167,4 +167,16 @@ interface IPlaybackService {
      * Clears the playback queue
      */
     void clearPlaybackQueue();
+
+    /**
+     * Sets the timeout (sleep timer) to stop playback
+     * @param uptime The point (in SystemClock.uptimeMillis() spacetime) at which the playback
+     * should stop.
+     */
+    void setSleepTimer(long uptime);
+
+    /**
+     * Returns the time (in SystemClock.uptimeMillis() spacetime) at which the playback should stop
+     */
+    long getSleepTimerEndTime();
 }

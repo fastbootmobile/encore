@@ -1,13 +1,17 @@
 package org.omnirom.music.app;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
+import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -20,6 +24,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.williammora.snackbar.Snackbar;
@@ -34,6 +39,7 @@ import org.omnirom.music.app.fragments.RecognitionFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
 import org.omnirom.music.art.ImageCache;
 import org.omnirom.music.cast.CastModule;
+import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
@@ -43,7 +49,7 @@ import org.omnirom.music.utils.Utils;
 import java.util.List;
 
 public class MainActivity extends AppActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, TimePickerDialog.OnTimeSetListener {
 
     private static final String TAG = "MainActivity";
 
@@ -85,7 +91,6 @@ public class MainActivity extends AppActivity
     private Toolbar mToolbar;
 
     private SearchView mSearchView;
-
 
     public MainActivity() {
         mHandler = new Handler();
@@ -454,10 +459,71 @@ public class MainActivity extends AppActivity
                 startActivity(intent);
                 break;
 
+            case R.id.action_sleep_timer:
+                showSleepTimerDialog();
+                break;
+
             case R.id.action_offline_mode:
                 toggleOfflineMode();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showSleepTimerDialog() {
+        final long timerTimeout = PlaybackProxy.getSleepTimerEndTime();
+
+        if (timerTimeout > 0) {
+            long seconds = timerTimeout / 1000L;
+            long hours = (long) Math.floor(((double) seconds) / 3600.0);
+            long minutes = seconds / 60 - hours * 60;
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setMessage(getString(R.string.sleep_timer_dialog_message, hours, minutes))
+                    .setPositiveButton(R.string.dialog_buttton_continue, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton(R.string.stop, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            PlaybackProxy.setSleepTimer(-1);
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNeutralButton(R.string.change, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+
+                            long seconds = timerTimeout / 1000L;
+                            long hours = (long) Math.floor(((double) seconds) / 3600.0);
+                            long minutes = seconds / 60 - hours * 60;
+                            showSleepTimerPicker((int) hours, (int) minutes);
+                        }
+                    });
+            builder.show();
+        } else {
+            showSleepTimerPicker();;
+        }
+    }
+
+    private void showSleepTimerPicker() {
+        TimePickerDialog dlg = new TimePickerDialog(this, this, 0, 0, true);
+        dlg.show();
+    }
+
+    private void showSleepTimerPicker(int hour, int minute) {
+        TimePickerDialog dlg = new TimePickerDialog(this, this, hour, minute, true);
+        dlg.show();
+    }
+
+    @Override
+    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+        long delay = (hourOfDay * 3600L + minute * 60L) * 1000L;
+        PlaybackProxy.setSleepTimer(SystemClock.uptimeMillis() + delay);
+        Toast.makeText(this, getString(R.string.sleep_timer_confirm_toast, hourOfDay, minute), Toast.LENGTH_LONG).show();
     }
 }

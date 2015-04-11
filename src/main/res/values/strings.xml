@@ -200,4 +200,10 @@
     <string name="remove_playlist_dialog_msg">This will remove playlist %s.</string>
     <string name="favorites">Favorites</string>
     <string name="most_played">Most played</string>
+    <string name="sleep_timer">Sleep timer</string>
+    <string name="sleep_timer_confirm_toast">Music will stop in %1$d hour(s) and %2$d minute(s)</string>
+    <string name="sleep_timer_disabled_toast">Music will stop in %1$d hour(s) and %2$d minute(s)</string>
+    <string name="sleep_timer_dialog_message">The current timer will stop music in %1$d hour(s) and %2$d minute(s)</string>
+    <string name="dialog_buttton_continue">Continue</string>
+    <string name="change">Change</string>
 </resources>

@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
@@ -143,6 +144,7 @@ public class PlaybackService extends Service
     private boolean mCurrentTrackLoaded;
     private HandlerThread mCommandsHandlerThread;
     private CommandHandler mCommandsHandler;
+    private long mSleepTimerUptime = -1;
 
     private static class CommandHandler extends Handler {
         private WeakReference<PlaybackService> mService;
@@ -604,6 +606,14 @@ public class PlaybackService extends Service
      * Starts playing the current playback queue
      */
     private void startPlayingQueue() {
+        // Check sleep timer
+        if (mSleepTimerUptime > 0 && SystemClock.uptimeMillis() >= mSleepTimerUptime) {
+            Log.d(TAG, "Stopping playback because of sleep timer");
+            mSleepTimerUptime = -1;
+            stopImpl();
+            return;
+        }
+
         if (mPlaybackQueue.size() > 0) {
             // mCurrentTrack in this context is the track that is going to be played
             if (mCurrentTrack < 0) {
@@ -630,7 +640,7 @@ public class PlaybackService extends Service
             }
 
             // Clear up the sink buffers
-            mCommandsHandler.sendEmptyMessageDelayed(CommandHandler.MSG_FLUSH_BUFFERS, 10);
+            mCommandsHandler.sendEmptyMessage(CommandHandler.MSG_FLUSH_BUFFERS);
 
             if (providerId != null) {
                 ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerId);
@@ -1150,6 +1160,16 @@ public class PlaybackService extends Service
         @Override
         public void clearPlaybackQueue() throws RemoteException {
             mPlaybackQueue.clear();
+        }
+
+        @Override
+        public void setSleepTimer(long uptime) throws RemoteException {
+            mSleepTimerUptime = uptime;
+        }
+
+        @Override
+        public long getSleepTimerEndTime() throws RemoteException {
+            return mSleepTimerUptime;
         }
     };
 
