@@ -32,6 +32,7 @@ import com.williammora.snackbar.Snackbar;
 import org.omnirom.music.app.fragments.AutomixFragment;
 import org.omnirom.music.app.fragments.HistoryFragment;
 import org.omnirom.music.app.fragments.ListenNowFragment;
+import org.omnirom.music.app.fragments.LyricsFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
@@ -59,8 +60,9 @@ public class MainActivity extends AppActivity
     public static final int SECTION_AUTOMIX = 4;
     public static final int SECTION_RECOGNITION = 5;
     public static final int SECTION_HISTORY = 6;
-    public static final int SECTION_NOW_PLAYING = 7;
-    public static final int SECTION_DRIVE_MODE = 8;
+    public static final int SECTION_LYRICS = 7;
+    public static final int SECTION_NOW_PLAYING = 8;
+    public static final int SECTION_DRIVE_MODE = 9;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -308,6 +310,9 @@ public class MainActivity extends AppActivity
                 case SECTION_HISTORY:
                     newFrag = HistoryFragment.newInstance();
                     break;
+                case SECTION_LYRICS:
+                    newFrag = LyricsFragment.newInstance();
+                    break;
                 case SECTION_NOW_PLAYING:
                     startActivity(new Intent(this, PlaybackQueueActivity.class));
                     break;
@@ -369,6 +374,9 @@ public class MainActivity extends AppActivity
                 break;
             case SECTION_HISTORY:
                 mTitle = getString(R.string.section_history);
+                break;
+            case SECTION_LYRICS:
+                mTitle = getString(R.string.section_lyrics);
                 break;
         }
     }

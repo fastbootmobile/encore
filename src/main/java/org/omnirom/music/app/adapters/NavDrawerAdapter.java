@@ -35,7 +35,7 @@ import org.omnirom.music.utils.Utils;
  * Adapter for the side-bar navigation drawer
  */
 public class NavDrawerAdapter extends BaseAdapter {
-    private static final int REGULAR_COUNT = 6;
+    private static final int REGULAR_COUNT = 7;
     private static final int SPECIAL_COUNT = 2;
 
     private int mActiveEntry = 0;
@@ -183,6 +183,15 @@ public class NavDrawerAdapter extends BaseAdapter {
                     setCompoundCompat(tag.tvText, R.drawable.ic_nav_history_active);
                 } else {
                     setCompoundCompat(tag.tvText, R.drawable.ic_nav_history);
+                }
+                break;
+
+            case MainActivity.SECTION_LYRICS:
+                tag.tvText.setText(R.string.section_lyrics);
+                if (i == mActiveEntry) {
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_lyrics_active);
+                } else {
+                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_lyrics);
                 }
                 break;
 

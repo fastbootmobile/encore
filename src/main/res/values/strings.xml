@@ -206,4 +206,6 @@
     <string name="sleep_timer_dialog_message">The current timer will stop music in %1$d hour(s) and %2$d minute(s)</string>
     <string name="dialog_buttton_continue">Continue</string>
     <string name="change">Change</string>
+    <string name="section_lyrics">Lyrics</string>
+    <string name="lyrics_not_found">No lyrics found for this song!</string>
 </resources>

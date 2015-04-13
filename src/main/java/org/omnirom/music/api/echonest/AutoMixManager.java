@@ -268,6 +268,7 @@ public class AutoMixManager extends BasePlaybackCallback {
                         Utils.shortToast(mContext, R.string.bucket_track_failure);
                     }
                 });
+                mCurrentPlayingBucket = null;
             } else {
                 Song s = getSongFromRef(trackRef);
 
