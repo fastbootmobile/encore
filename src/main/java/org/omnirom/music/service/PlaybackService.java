@@ -641,6 +641,7 @@ public class PlaybackService extends Service
 
             // Clear up the sink buffers
             mCommandsHandler.sendEmptyMessage(CommandHandler.MSG_FLUSH_BUFFERS);
+            mNativeSink.setPaused(false);
 
             if (providerId != null) {
                 ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerId);
@@ -812,8 +813,7 @@ public class PlaybackService extends Service
             final ProviderIdentifier identifier = currentSong.getProvider();
             mCommandsHandler.obtainMessage(CommandHandler.MSG_PAUSE_PROVIDER, identifier.serialize()).sendToTarget();
 
-            // TODO: Do a real pause
-            mNativeSink.flushSamples();
+            mNativeSink.setPaused(true);
         }
     }
 
@@ -857,6 +857,8 @@ public class PlaybackService extends Service
         final Song currentSong = getCurrentSong();
         if (currentSong != null && mCurrentTrackLoaded) {
             ProviderConnection conn = PluginsLookup.getDefault().getProvider(currentSong.getProvider());
+            mNativeSink.setPaused(false);
+
             if (conn != null) {
                 IMusicProvider provider = conn.getBinder();
                 if (provider != null) {
@@ -924,6 +926,10 @@ public class PlaybackService extends Service
     }
 
     void seekImpl(final long timeMs) {
+        // First, unpause if paused
+        mNativeSink.setPaused(false);
+
+        // Then seek on the provider
         final Song currentSong = getCurrentSong();
         boolean success = false;
         if (currentSong != null && mCurrentTrackLoaded) {

@@ -24,7 +24,7 @@ public interface AudioSink {
      * Releases the audio sink and all its allocated resources. The audio sink may not be reused
      * then, until a new one is allocated.
      */
-    public void release();
+    void release();
 
     /**
      * Setups the audio sink with the provided sample rate and channels
@@ -32,7 +32,7 @@ public interface AudioSink {
      * @param channels The number of channels, generally 1 for mono and 2 for stereo
      * @return true if everything went fine
      */
-    public boolean setup(int samplerate, int channels);
+    boolean setup(int samplerate, int channels);
 
     /**
      * Writes audio frames to this sink
@@ -40,30 +40,36 @@ public interface AudioSink {
      * @param numframes Number of frames
      * @return The number of bytes actually written
      */
-    public int write(byte[] frames, int numframes);
+    int write(byte[] frames, int numframes);
 
     /**
      * Returns the number of samples written since the last call to flushSamples() has been made
      * (or since the first written sample).
      * @return A number of short samples written
      */
-    public long getWrittenSamples();
+    long getWrittenSamples();
 
     /**
      * Returns the number of dropouts/stutters (buffer underflow) that occurred since the last flush
      * @return Number of dropouts
      */
-    public int getDropouts();
+    int getDropouts();
 
     /**
      * Clears the pending audio data and reset the written samples counter
      */
-    public void flushSamples();
+    void flushSamples();
 
     /**
      * Returns a buffer of samples containing the most recent data that has been written to (drawable
      * by) the sink to calculate the current RMS audio level.
      * @return A short array of samples
      */
-    public short[] getRmsSamples();
+    short[] getRmsSamples();
+
+    /**
+     * Sets whether or not the playback should be paused
+     * @param pause true to pause, false to resume
+     */
+    void setPaused(boolean pause);
 }

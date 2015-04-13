@@ -40,6 +40,8 @@ static JNINativeMethod gMethodsNativePlayer[] = {
             reinterpret_cast<void*>(om_NativePlayer_getTotalWrittenSamples)},
     {"nativeFlush", "()V",
             reinterpret_cast<void*>(om_NativePlayer_flush)},
+    {"nativeSetPaused", "(Z)V",
+            reinterpret_cast<void*>(om_NativePlayer_setPaused)},
     {"nativeShutdown", "()V",
             reinterpret_cast<void*>(om_NativePlayer_shutdown)},
 };

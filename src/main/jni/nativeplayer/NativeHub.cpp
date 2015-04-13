@@ -126,7 +126,8 @@ void NativeHub::writeAudioToDsp(int chain_index, const uint8_t* data, const uint
     // Before even writing to DSP, we check if the sink has free space so that we don't
     // process it worthlessly (and avoid glitches because Biquad filters dislike having
     // unwanted data).
-    if (m_pSink && m_pSink->getFreeBuffersCount() < len + m_iBuffersInDSP) {
+    uint32_t free_buffers = (uint32_t) m_pSink->getFreeBuffersCount() - (uint32_t) m_iBuffersInDSP;
+    if (m_pSink && free_buffers < len) {
         writeAudioResponse(0);
     } else {
         bool success = false;

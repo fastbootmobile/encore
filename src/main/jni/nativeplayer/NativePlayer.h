@@ -86,6 +86,9 @@ class NativePlayer : public INativeSink {
     // Sets the active volume
     void setVolume(float volume);
 
+   // Pauses or resume the playback
+    void setPaused(bool pause);
+
  private:
     bool createAudioPlayer();
     void setPlayState(SLuint32 state);
@@ -111,7 +114,7 @@ class NativePlayer : public INativeSink {
 
     std::list<AudioBuffer*> m_ActiveBuffers;
     std::list<AudioBuffer*> m_IdleBuffers;
-    uint8_t* m_pPlayingBuffer;
+    AudioBuffer* m_pPlayingBuffer;
     uint32_t m_iActiveBuffersTotalSize;
     uint32_t m_iBufferMinPlayback;
     uint32_t m_iBufferMaxSize;
@@ -124,6 +127,7 @@ class NativePlayer : public INativeSink {
 
     bool m_bUseResampler;
     float m_fResampleRatio;
+    bool m_bPaused;
 };
 
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_NATIVEPLAYER_H_

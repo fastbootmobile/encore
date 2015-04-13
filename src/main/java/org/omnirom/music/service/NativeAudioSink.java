@@ -65,4 +65,9 @@ public class NativeAudioSink implements AudioSink {
     public short[] getRmsSamples() {
         return new short[0];
     }
+
+    @Override
+    public void setPaused(boolean pause) {
+        mPlayer.setPaused(pause);
+    }
 }

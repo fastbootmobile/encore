@@ -122,3 +122,8 @@ void om_NativePlayer_flush(JNIEnv* env, jobject thiz) {
     player->flush();
 }
 // -------------------------------------------------------------------------------------
+void om_NativePlayer_setPaused(JNIEnv* env, jobject thiz, jboolean pause) {
+    NativePlayer* player = get_layer_from_object(env, thiz);
+    player->setPaused(pause);
+}
+// -------------------------------------------------------------------------------------

@@ -53,6 +53,9 @@ class INativeSink {
 
     // Sets the active volume
     virtual void setVolume(float volume) = 0;
+
+    // Pauses or resume the playback
+    virtual void setPaused(bool pause) = 0;
 };
 
 

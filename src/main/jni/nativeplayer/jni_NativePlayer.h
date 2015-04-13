@@ -53,4 +53,7 @@ jint om_NativePlayer_getUnderflowCount(JNIEnv* env, jobject thiz);
 // NativePlayer.nativeFlush ==> NativePlayer::flush
 void om_NativePlayer_flush(JNIEnv* env, jobject thiz);
 
+// NativePlayer.nativeSetPaused ==> NativePlayer::setPaused
+void om_NativePlayer_setPaused(JNIEnv* env, jobject thiz, jboolean pause);
+
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_JNI_NATIVEPLAYER_H_

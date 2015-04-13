@@ -85,6 +85,12 @@ public class NativePlayer {
     }
 
     /**
+     * Sets the playback to a paused state
+     * @param pause true to pause, false to resume
+     */
+    public void setPaused(boolean pause) { nativeSetPaused(pause); }
+
+    /**
      * Releases resources and cleans up the player
      */
     public void shutdown() {
@@ -99,5 +105,6 @@ public class NativePlayer {
     private native int nativeGetUnderflowCount();
     private native long nativeGetTotalWrittenSamples();
     private native void nativeFlush();
+    private native void nativeSetPaused(boolean pause);
     private native void nativeShutdown();
 }
