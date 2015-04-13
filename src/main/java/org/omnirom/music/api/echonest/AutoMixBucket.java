@@ -335,6 +335,18 @@ public class AutoMixBucket {
     }
 
     /**
+     * Notifies the system that the user disliked this song and don't want it again
+     * @throws EchoNestException
+     */
+    public void notifyDislike() throws EchoNestException {
+        try {
+            mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.ban_song, "last");
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot feedback dislike", e);
+        }
+    }
+
+    /**
      * Notifies the system that the user skipped the current song so he might not like it
      */
     public void notifySkip() throws EchoNestException {

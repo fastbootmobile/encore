@@ -40,6 +40,7 @@ public class ListenLogger {
     private static final String PREFS = "ListenLogger";
     private static final String PREF_HISTORY_ENTRIES = "history_entries";
     private static final String PREF_LIKED_ENTRIES = "liked_entries";
+    private static final String PREF_DISLIKED_ENTRIES = "disliked_entries";
 
     private static final String KEY_TIMESTAMP = "timestamp";
     private static final String KEY_SONG_REF = "song_ref";
@@ -130,8 +131,20 @@ public class ListenLogger {
      * @param song The song to add
      */
     public void addLike(Song song) {
+        addLikingImpl(song, PREF_LIKED_ENTRIES);
+    }
+
+    /**
+     * Adds, if not already, a song to the list of disliked songs.
+     * @param song The song to add
+     */
+    public void addDislike(Song song) {
+        addLikingImpl(song, PREF_DISLIKED_ENTRIES);
+    }
+
+    private void addLikingImpl(Song song, String entrySet) {
         SharedPreferences.Editor editor = mPrefs.edit();
-        Set<String> entries = new TreeSet<>(mPrefs.getStringSet(PREF_LIKED_ENTRIES, new TreeSet<String>()));
+        Set<String> entries = new TreeSet<>(mPrefs.getStringSet(entrySet, new TreeSet<String>()));
 
         JSONObject jsonRoot = new JSONObject();
         try {
@@ -141,7 +154,7 @@ public class ListenLogger {
 
         entries.add(jsonRoot.toString());
 
-        editor.putStringSet(PREF_LIKED_ENTRIES, entries);
+        editor.putStringSet(entrySet, entries);
         editor.apply();
     }
 
@@ -150,8 +163,20 @@ public class ListenLogger {
      * @param song The song to remove
      */
     public void removeLike(Song song) {
+        removeLikingImpl(song, PREF_LIKED_ENTRIES);
+    }
+
+    /**
+     * Removes a song from the list of disliked songs
+     * @param song The song to remove
+     */
+    public void removeDislike(Song song) {
+        removeLikingImpl(song, PREF_DISLIKED_ENTRIES);
+    }
+
+    private void removeLikingImpl(Song song, String entrySet) {
         SharedPreferences.Editor editor = mPrefs.edit();
-        Set<String> entries = new TreeSet<>(mPrefs.getStringSet(PREF_LIKED_ENTRIES, new TreeSet<String>()));
+        Set<String> entries = new TreeSet<>(mPrefs.getStringSet(entrySet, new TreeSet<String>()));
 
         JSONObject jsonRoot = new JSONObject();
         try {
@@ -160,7 +185,7 @@ public class ListenLogger {
         } catch (JSONException ignore) {}
 
         entries.remove(jsonRoot.toString());
-        editor.putStringSet(PREF_LIKED_ENTRIES, entries);
+        editor.putStringSet(entrySet, entries);
         editor.apply();
     }
 
@@ -168,7 +193,18 @@ public class ListenLogger {
      * @return a list of all the liked entries
      */
     public List<LogEntry> getLikedEntries() {
-        Set<String> entries = mPrefs.getStringSet(PREF_LIKED_ENTRIES, null);
+        return getLikingEntriesImpl(PREF_LIKED_ENTRIES);
+    }
+    /**
+     * @return a list of all the disliked entries
+     */
+    public List<LogEntry> getDislikedEntries() {
+        return getLikingEntriesImpl(PREF_DISLIKED_ENTRIES);
+    }
+
+
+    public List<LogEntry> getLikingEntriesImpl(String entrySet) {
+        Set<String> entries = mPrefs.getStringSet(entrySet, null);
         List<LogEntry> output = new ArrayList<>();
         if (entries != null) {
             for (String entry : entries) {
@@ -187,13 +223,27 @@ public class ListenLogger {
         return output;
     }
 
+
     /**
      * Returns whether or not the song reference provided is in the list of liked songs or not
      * @param ref The reference of the song
      * @return true if the song is liked
      */
     public boolean isLiked(String ref) {
-        Set<String> entries = mPrefs.getStringSet(PREF_LIKED_ENTRIES, null);
+        return getLikingImpl(ref, PREF_LIKED_ENTRIES);
+    }
+
+    /**
+     * Returns whether or not the song reference provided is in the list of disliked songs or not
+     * @param ref The reference of the song
+     * @return true if the song is disliked
+     */
+    public boolean isDisliked(String ref) {
+        return getLikingImpl(ref, PREF_DISLIKED_ENTRIES);
+    }
+
+    private boolean getLikingImpl(String ref, String entrySet) {
+        Set<String> entries = mPrefs.getStringSet(entrySet, null);
         if (entries != null) {
             for (String entry : entries) {
                 try {

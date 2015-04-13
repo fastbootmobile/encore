@@ -52,6 +52,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
     private View.OnClickListener mRepeatClickListener;
     private View.OnClickListener mShuffleClickListener;
     private View.OnClickListener mLikeClickListener;
+    private View.OnClickListener mDislikeClickListener;
     private View.OnClickListener mOverflowClickListener;
     private View.OnClickListener mAlbumArtCLickListener;
     private SeekBar.OnSeekBarChangeListener mSeekListener;
@@ -62,6 +63,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                                 SeekBar.OnSeekBarChangeListener seekListener,
                                 View.OnClickListener repeatClickListener,
                                 View.OnClickListener likeClickListener,
+                                View.OnClickListener dislikeClickListener,
                                 View.OnClickListener albumArtClickListener,
                                 View.OnClickListener shuffleClickListener) {
         mPlayFabClickListener = playFabClickListener;
@@ -70,6 +72,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
         mSeekListener = seekListener;
         mRepeatClickListener = repeatClickListener;
         mLikeClickListener = likeClickListener;
+        mDislikeClickListener = dislikeClickListener;
         mAlbumArtCLickListener = albumArtClickListener;
         mShuffleClickListener = shuffleClickListener;
         mOverflowClickListener = new View.OnClickListener() {
@@ -182,6 +185,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                 }
                 tag.btnOverflow.setTag(tag);
                 tag.btnThumbs.setTag(tag);
+                tag.btnThumbsDown.setTag(tag);
 
                 // Play FAB drawable
                 tag.fabPlay.setFixupInset(false);
@@ -198,6 +202,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                 tag.sbSeek.setOnSeekBarChangeListener(mSeekListener);
                 tag.btnRepeat.setOnClickListener(mRepeatClickListener);
                 tag.btnThumbs.setOnClickListener(mLikeClickListener);
+                tag.btnThumbsDown.setOnClickListener(mDislikeClickListener);
                 tag.btnOverflow.setOnClickListener(mOverflowClickListener);
                 tag.btnShuffle.setOnClickListener(mShuffleClickListener);
             }
@@ -218,6 +223,12 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             tag.btnThumbs.setImageResource(R.drawable.ic_thumbs_up);
         } else if (tag.btnThumbs != null) {
             tag.btnThumbs.setImageResource(R.drawable.ic_thumbs_up_gray);
+        }
+
+        if (tag.btnThumbsDown != null && mListenLogger.isDisliked(item.getRef())) {
+            tag.btnThumbsDown.setImageResource(R.drawable.ic_thumb_down);
+        } else if (tag.btnThumbsDown != null) {
+            tag.btnThumbsDown.setImageResource(R.drawable.ic_thumb_down_gray);
         }
 
         if (item.isLoaded()) {

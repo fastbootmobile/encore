@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AlbumArtHelper {
     private static final String TAG = "AlbumArtHelper";
 
-    private static final int CORE_POOL_SIZE = 4;
-    private static final int MAXIMUM_POOL_SIZE = 8;
+    private static final int CORE_POOL_SIZE = 2;
+    private static final int MAXIMUM_POOL_SIZE = 4;
     private static final int KEEP_ALIVE = 5;
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
@@ -53,7 +53,7 @@ public class AlbumArtHelper {
             TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
 
     public interface AlbumArtListener {
-        public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request);
+        void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request);
     }
 
     public static class BackgroundResult {

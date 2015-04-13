@@ -258,6 +258,7 @@ public class PlaybackQueueActivity extends AppActivity {
         private SeekBar.OnSeekBarChangeListener mSeekListener;
         private View.OnClickListener mRepeatClickListener;
         private View.OnClickListener mLikeClickListener;
+        private View.OnClickListener mDislikeClickListener;
         private View.OnClickListener mAlbumArtClickListener;
         private View.OnClickListener mShuffleClickListener;
 
@@ -407,6 +408,33 @@ public class PlaybackQueueActivity extends AppActivity {
                 }
             };
 
+            mDislikeClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ListenLogger logger = new ListenLogger(getActivity());
+                    PlaybackQueueAdapter.ViewHolder tag = (PlaybackQueueAdapter.ViewHolder) v.getTag();
+                    boolean isDisliked = logger.isDisliked(tag.song.getRef());
+
+                    if (isDisliked) {
+                        logger.removeDislike(tag.song);
+                        ((ImageView) v).setImageResource(R.drawable.ic_thumb_down_gray);
+                    } else {
+                        logger.addDislike(tag.song);
+
+                        AutoMixBucket bucket = AutoMixManager.getDefault().getCurrentPlayingBucket();
+                        if (bucket != null) {
+                            try {
+                                bucket.notifyDislike();
+                            } catch (EchoNestException e) {
+                                Log.e(TAG, "Unable to notify dislike event to EchoNest");
+                            }
+                        }
+
+                        ((ImageView) v).setImageResource(R.drawable.ic_thumb_down);
+                    }
+                }
+            };
+
             mAlbumArtClickListener = new View.OnClickListener() {
                 @Override
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -459,7 +487,7 @@ public class PlaybackQueueActivity extends AppActivity {
 
             mAdapter = new PlaybackQueueAdapter(mPlayFabClickListener, mNextClickListener,
                     mPreviousClickListener, mSeekListener, mRepeatClickListener,
-                    mLikeClickListener, mAlbumArtClickListener, mShuffleClickListener);
+                    mLikeClickListener, mDislikeClickListener, mAlbumArtClickListener, mShuffleClickListener);
 
             if (mListView != null) {
                 mListView.setAdapter(mAdapter);
