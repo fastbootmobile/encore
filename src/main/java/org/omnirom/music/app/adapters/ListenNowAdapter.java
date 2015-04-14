@@ -28,7 +28,6 @@ import org.lucasr.twowayview.widget.StaggeredGridLayoutManager;
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
@@ -38,10 +37,10 @@ import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by Guigui on 22/08/2014.
@@ -248,7 +247,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
 
         holder.llRoot.setAlpha(0.0f);
         holder.llRoot.animate().alpha(1).setDuration(300)
-                .setStartDelay((long) (new Random().nextFloat() * 300.0f)).setInterpolator(new DecelerateInterpolator(1.5f)).start();
+                .setInterpolator(new DecelerateInterpolator(1.5f)).start();
 
         return holder;
     }
