@@ -122,7 +122,7 @@ public class PlaylistArtBuilder {
 
     private synchronized void makePlaylistComposite() {
         if (mPlaylistComposite == null) {
-            mPlaylistComposite = Bitmap.createBitmap(800, 800, Bitmap.Config.ARGB_8888);
+            mPlaylistComposite = Bitmap.createBitmap(600, 600, Bitmap.Config.ARGB_8888);
         }
 
         if (mPlaylistPaint == null) {

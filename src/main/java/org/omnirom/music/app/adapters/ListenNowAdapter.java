@@ -20,6 +20,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -40,6 +41,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Guigui on 22/08/2014.
@@ -243,6 +245,10 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         // Setup album art listener
         holder.ivCover.setOnArtLoadedListener(mAlbumArtListener);
         holder.llRoot.setOnClickListener(mItemClickListener);
+
+        holder.llRoot.setAlpha(0.0f);
+        holder.llRoot.animate().alpha(1).setDuration(300)
+                .setStartDelay((long) (new Random().nextFloat() * 300.0f)).setInterpolator(new DecelerateInterpolator(1.5f)).start();
 
         return holder;
     }

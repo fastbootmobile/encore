@@ -19,12 +19,12 @@ import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.TransactionTooLargeException;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -61,6 +61,8 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
 
     private ArtistsAdapter mAdapter;
     private Handler mHandler;
+    private boolean mAdapterSet;
+    private TwoWayView mArtistLayout;
 
     private final ItemClickSupport.OnItemClickListener mItemClickListener = new ItemClickSupport.OnItemClickListener() {
         @Override
@@ -109,45 +111,16 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_artists, container, false);
-        TwoWayView artistLayout = (TwoWayView) root.findViewById(R.id.twvArtists);
-        artistLayout.setAdapter(mAdapter);
+        mArtistLayout = (TwoWayView) root.findViewById(R.id.twvArtists);
 
         final Drawable divider = getResources().getDrawable(R.drawable.divider);
-        artistLayout.addItemDecoration(new DividerItemDecoration(divider));
+        mArtistLayout.addItemDecoration(new DividerItemDecoration(divider));
 
-        final ItemClickSupport itemClick = ItemClickSupport.addTo(artistLayout);
+        final ItemClickSupport itemClick = ItemClickSupport.addTo(mArtistLayout);
         itemClick.setOnItemClickListener(mItemClickListener);
 
-        new Thread() {
-            public void run() {
-                List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-                final List<Artist> artists = new ArrayList<Artist>();
-                for (ProviderConnection providerConnection : providers) {
-                    try {
-                        IMusicProvider provider = providerConnection.getBinder();
-                        if (provider != null) {
-                            List<Artist> providerArtists = provider.getArtists();
-                            if (providerArtists != null) {
-                                artists.addAll(providerArtists);
-                            }
-                        }
-                    } catch (DeadObjectException e) {
-                        Log.e(TAG, "Provider died while getting artists");
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Cannot get artists from a provider", e);
-                    }
-                }
-
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.addAllUnique(artists);
-                        mAdapter.notifyDataSetChanged();
-                    }
-                });
-
-            }
-        }.start();
+        // Get artists
+        new GetArtistsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         return root;
     }
@@ -216,5 +189,42 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onSearchResult(List<SearchResult> searchResult) {
+    }
+
+    private class GetArtistsTask extends AsyncTask<Void, Void, List<Artist>> {
+
+        @Override
+        protected List<Artist> doInBackground(Void... params) {
+            List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+            final List<Artist> artists = new ArrayList<Artist>();
+            for (ProviderConnection providerConnection : providers) {
+                try {
+                    IMusicProvider provider = providerConnection.getBinder();
+                    if (provider != null) {
+                        List<Artist> providerArtists = provider.getArtists();
+                        if (providerArtists != null) {
+                            artists.addAll(providerArtists);
+                        }
+                    }
+                } catch (DeadObjectException e) {
+                    Log.e(TAG, "Provider died while getting artists");
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Cannot get artists from a provider", e);
+                }
+            }
+
+            return artists;
+        }
+
+        @Override
+        protected void onPostExecute(List<Artist> artists) {
+            mAdapter.addAllUnique(artists);
+            if (mAdapterSet) {
+                mAdapter.notifyDataSetChanged();
+            } else {
+                mAdapterSet = true;
+                mArtistLayout.setAdapter(mAdapter);
+            }
+        }
     }
 }

@@ -19,6 +19,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -127,7 +128,9 @@ public class AlbumArtCache {
         boolean result = false;
 
         if (cache.hasInMemory(key) || cache.hasOnDisk(key)) {
+            Trace.beginSection("IMAGE_DECODING_" + key);
             listener.onArtLoaded(ent, cache.get(res, key));
+            Trace.endSection();
             result = true;
         } else {
             try {

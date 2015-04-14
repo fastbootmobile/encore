@@ -56,7 +56,7 @@ public class MySongsFragment extends Fragment {
 
         mSongsAdapter = new MySongsAdapter(getResources(), getChildFragmentManager());
         mViewPager = (ViewPager) root.findViewById(R.id.pager);
-        mViewPager.setOffscreenPageLimit(4);
+        mViewPager.setOffscreenPageLimit(1);
         mViewPager.setAdapter(mSongsAdapter);
 
         mTabStrip = (SmartTabLayout) root.findViewById(R.id.pager_title_strip);

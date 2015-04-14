@@ -16,20 +16,20 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
+import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
 
 import org.lucasr.twowayview.TwoWayView;
 import org.lucasr.twowayview.widget.DividerItemDecoration;
@@ -91,7 +91,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             // If we don't have any playlists, retry in a short time and display either No Music
             // or Loading... depending on the number of tries, waiting for providers to start
             if (playlists.size() <= 0) {
-                mTxtNoMusic.setVisibility(View.VISIBLE);
+                mTxtNoMusic.animate().setDuration(400).scaleX(1.0f).scaleY(1.0f).alpha(1.0f).start();
                 if (mWarmUpCount < 2) {
                     mTxtNoMusic.setText(R.string.loading);
                 } else {
@@ -104,7 +104,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 mHandler.postDelayed(this, 1000);
                 return;
             } else {
-                mTxtNoMusic.setVisibility(View.GONE);
+                mTxtNoMusic.animate().setDuration(400).scaleX(1.3f).scaleY(1.3f).alpha(0.0f).start();
                 mFoundAnything = true;
             }
 
@@ -299,7 +299,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         twvRoot.setAdapter(sAdapter);
         final Drawable divider = getResources().getDrawable(R.drawable.divider);
         twvRoot.addItemDecoration(new DividerItemDecoration(divider));
-        twvRoot.setItemAnimator(new DefaultItemAnimator());
+        twvRoot.setItemAnimator(new RefactoredDefaultItemAnimator());
 
         return root;
     }

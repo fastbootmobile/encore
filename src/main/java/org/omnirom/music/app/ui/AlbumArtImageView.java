@@ -42,6 +42,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     private static final boolean DEBUG = false;
     private static final int DELAY_BEFORE_START = 90;
 
+    private static BitmapDrawable sDefaultBitmap;
+    private static final Object sDefaultBitmapLock = new Object();
+
     private Handler mHandler;
     private OnArtLoadedListener mOnArtLoadedListener;
     private AlbumArtTask mTask;
@@ -84,7 +87,14 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     }
 
     private BitmapDrawable getDefaultBitmap() {
-        return (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder);
+        synchronized (sDefaultBitmapLock) {
+            if (sDefaultBitmap == null) {
+                sDefaultBitmap = (BitmapDrawable) getContext().getApplicationContext()
+                        .getResources().getDrawable(R.drawable.album_placeholder);
+            }
+        }
+
+        return sDefaultBitmap;
     }
 
 
