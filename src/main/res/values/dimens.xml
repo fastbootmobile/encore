@@ -60,4 +60,7 @@
     <dimen name="notif_action_button">42dp</dimen>
     <dimen name="drive_button_size">100dp</dimen>
     <dimen name="nav_head_size">64dp</dimen>
+
+    <dimen name="button_size">80dp</dimen>
+
 </resources>

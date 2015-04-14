@@ -21,8 +21,6 @@ import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -36,14 +34,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.PlaybackQueueActivity;
@@ -59,11 +54,12 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
-import org.omnirom.music.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import mbanje.kurt.fabbutton.FabButton;
 
 /**
  * ViewGroup for the sticky bottom playing bar
@@ -71,8 +67,8 @@ import java.util.List;
 public class PlayingBarView extends RelativeLayout {
     private static final String TAG = "PlayingBarView";
 
-    // Delay after which the seek bar is updated (10Hz)
-    private static final int SEEK_BAR_UPDATE_DELAY = 1000 / 10;
+    // Delay after which the seek bar is updated (5Hz)
+    private static final int SEEK_BAR_UPDATE_DELAY = 1000 / 5;
 
     private static class PlayingBarHandler extends Handler {
         private WeakReference<PlayingBarView> mParent;
@@ -86,7 +82,8 @@ public class PlayingBarView extends RelativeLayout {
             switch (msg.what) {
                 case MSG_UPDATE_QUEUE:
                     final int trackLength = PlaybackProxy.getCurrentTrackLength();
-                    mParent.get().mProgressDrawable.setMax(trackLength);
+                    mParent.get().mPlayFab.setMaxProgress(trackLength);
+                    mParent.get().mPlayFab.setEnabled(true);
                     mParent.get().updatePlayingQueue();
                     break;
 
@@ -216,9 +213,8 @@ public class PlayingBarView extends RelativeLayout {
 
     private boolean mIsPlaying;
     private LinearLayout mTracksLayout;
-    private ImageButton mPlayFab;
+    private FabButton mPlayFab;
     private PlayPauseDrawable mPlayFabDrawable;
-    private CircularProgressDrawable mProgressDrawable;
     private List<Song> mLastQueue;
     private PlayingBarHandler mHandler;
     private int mAnimationDuration;
@@ -281,26 +277,13 @@ public class PlayingBarView extends RelativeLayout {
         super.onAttachedToWindow();
 
         // Set FAB info
-        mPlayFab = (FloatingActionButton) findViewById(R.id.fabPlayBarButton);
-
-        mProgressDrawable = new CircularProgressDrawable();
-        mProgressDrawable.setValue(0);
-        mProgressDrawable.setColor(getResources().getColor(R.color.white));
-        mProgressDrawable.setAlpha(120);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mProgressDrawable.setPadding(Utils.dpToPx(getResources(), 1));
-        } else {
-            mProgressDrawable.setPadding(Utils.dpToPx(getResources(), 12));
-        }
+        mPlayFab = (FabButton) findViewById(R.id.fabPlayBarButton);
 
         mPlayFabDrawable = new PlayPauseDrawable(getResources(), 0.70f);
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         mPlayFabDrawable.setYOffset(6);
 
-        LayerDrawable drawable = new LayerDrawable(new Drawable[]{
-                mProgressDrawable, mPlayFabDrawable
-        });
-        mPlayFab.setImageDrawable(drawable);
+        mPlayFab.setIconDrawable(mPlayFabDrawable);
         mPlayFab.setVisibility(View.GONE);
 
         mPlayFab.setOnTouchListener(new OnTouchListener() {
@@ -322,8 +305,9 @@ public class PlayingBarView extends RelativeLayout {
                         // We're dragging the play button, start seek mode
                         mPlayInSeekMode = true;
                         mSeekValue = Math.max(0,
-                                Math.min(-deltaStart * 500.0f, mProgressDrawable.getMax()));
-                        mProgressDrawable.setValue(mSeekValue);
+                                Math.min(-deltaStart * 500.0f, mPlayFab.getMaxProgress()));
+                        mPlayFab.showProgress(true);
+                        mPlayFab.setProgress(mSeekValue);
                     }
                     result = true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
@@ -380,16 +364,18 @@ public class PlayingBarView extends RelativeLayout {
                 || state == PlaybackService.STATE_PAUSING
                 || state == PlaybackService.STATE_PAUSED) {
             if (!mPlayInSeekMode) {
-                mProgressDrawable.setValue(PlaybackProxy.getCurrentTrackPosition());
+                mPlayFab.showProgress(true);
+                mPlayFab.setProgress(PlaybackProxy.getCurrentTrackPosition());
             }
 
             // Restart ourselves
             mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
         } else if (state == PlaybackService.STATE_BUFFERING) {
-            mProgressDrawable.setValue(0);
+            mPlayFab.setProgress(0);
+            mPlayFab.setIndeterminate(true);
+            mPlayFab.showProgress(true);
         } else {
-            mProgressDrawable.setMax(1);
-            mProgressDrawable.setValue(1);
+            mPlayFab.showProgress(false);
         }
     }
 
@@ -566,20 +552,21 @@ public class PlayingBarView extends RelativeLayout {
             case PlaybackService.STATE_PAUSED:
             case PlaybackService.STATE_STOPPED:
                 mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                mPlayFabDrawable.setBuffering(false);
+                mPlayFab.showProgress(false);
                 mIsPlaying = false;
                 break;
 
             case PlaybackService.STATE_BUFFERING:
             case PlaybackService.STATE_PAUSING:
                 mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                mPlayFabDrawable.setBuffering(true);
+                mPlayFab.showProgress(true);
+                mPlayFab.setIndeterminate(true);
                 mIsPlaying = true;
                 break;
 
             case PlaybackService.STATE_PLAYING:
                 mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                mPlayFabDrawable.setBuffering(false);
+                mPlayFab.setIndeterminate(false);
                 mIsPlaying = true;
                 break;
         }

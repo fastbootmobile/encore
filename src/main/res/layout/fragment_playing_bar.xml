@@ -3,7 +3,7 @@
 <org.omnirom.music.app.ui.PlayingBarView
     android:id="@+id/playingBarLayout"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true">
@@ -22,21 +22,27 @@
 
     </LinearLayout>
 
-    <com.getbase.floatingactionbutton.FloatingActionButton
+    <mbanje.kurt.fabbutton.FabButton
         android:id="@+id/fabPlayBarButton"
 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        fab:fab_colorNormal="@color/primary"
-        fab:fab_colorPressed="@color/primary_light"
-        fab:fab_size="mini"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
 
         android:layout_above="@+id/tvArtist"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
 
-        android:elevation="12dp"
-
         android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp" />
+        android:layout_marginRight="16dp"
+
+        android:color="@color/primary"
+        android:visibility="visible"
+        android:indeterminate="false"
+        android:max="100"
+        android:elevation="12dp"
+        app:fbb_autoStart="true"
+        app:fbb_progressColor="@color/primary_light"
+        app:fbb_showEndBitmap="false"
+        app:fbb_hideProgressOnComplete="false"
+        />
 </org.omnirom.music.app.ui.PlayingBarView>
