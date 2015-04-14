@@ -19,7 +19,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.RemoteException;
-import android.os.Trace;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -29,7 +28,6 @@ import org.omnirom.music.api.freebase.FreeBaseClient;
 import org.omnirom.music.api.gimages.GoogleImagesClient;
 import org.omnirom.music.api.musicbrainz.AlbumInfo;
 import org.omnirom.music.api.musicbrainz.MusicBrainzClient;
-import org.omnirom.music.utils.Utils;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -41,6 +39,7 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -128,9 +127,7 @@ public class AlbumArtCache {
         boolean result = false;
 
         if (cache.hasInMemory(key) || cache.hasOnDisk(key)) {
-            Trace.beginSection("IMAGE_DECODING_" + key);
             listener.onArtLoaded(ent, cache.get(res, key));
-            Trace.endSection();
             result = true;
         } else {
             try {

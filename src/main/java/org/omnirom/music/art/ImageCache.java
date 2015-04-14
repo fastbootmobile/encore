@@ -278,7 +278,7 @@ public class ImageCache {
     }
 
     /**
-     * Stores the image as WEBP in the cache
+     * Stores the image as JPEG in the cache
      * @param key The key of the image to put
      * @param bmp The bitmap to put (or null to put the default art)
      */
@@ -289,7 +289,7 @@ public class ImageCache {
     }
 
     /**
-     * Stores the image as WEBP in the cache
+     * Stores the image as JPEG in the cache
      * @param key The key of the image to put
      * @param bmp The bitmap to put (or null to put the default art)
      */
@@ -298,10 +298,10 @@ public class ImageCache {
     }
 
     /**
-     * Stores the image as either WEBP or PNG in the cache
+     * Stores the image as either JPEG or PNG in the cache
      * @param key The key of the image to put
      * @param bmp The bitmap to put (or null to put the default art)
-     * @param asPNG True to store as PNG, false to store as WEBP
+     * @param asPNG True to store as PNG, false to store as JPEG
      */
     public RecyclingBitmapDrawable put(final Resources res, final String key, Bitmap bmp, final boolean asPNG) {
         RecyclingBitmapDrawable rcb = new RecyclingBitmapDrawable(res, bmp);
@@ -310,10 +310,10 @@ public class ImageCache {
     }
 
     /**
-     * Stores the image as either WEBP or PNG in the cache
+     * Stores the image as either JPEG or PNG in the cache
      * @param key The key of the image to put
      * @param bmp The bitmap to put (or null to put the default art)
-     * @param asPNG True to store as PNG, false to store as WEBP
+     * @param asPNG True to store as PNG, false to store as JPEG
      */
     public void put(final Resources res, final String key, RecyclingBitmapDrawable bmp, final boolean asPNG) {
         boolean isDefaultArt = false;
@@ -349,7 +349,7 @@ public class ImageCache {
                     Log.d(TAG, "Rescaled to " + sWidth + "x" + sHeight);
                 }
 
-                bitmap.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.WEBP, 90, out);
+                bitmap.compress(asPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, 90, out);
                 out.close();
 
                 if (shouldRecycle) {
