@@ -91,7 +91,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             // If we don't have any playlists, retry in a short time and display either No Music
             // or Loading... depending on the number of tries, waiting for providers to start
             if (playlists.size() <= 0) {
-                mTxtNoMusic.animate().setDuration(400).scaleX(1.0f).scaleY(1.0f).alpha(1.0f).start();
+                mTxtNoMusic.animate().setDuration(400).translationX(0).alpha(1.0f).start();
                 if (mWarmUpCount < 2) {
                     mTxtNoMusic.setText(R.string.loading);
                 } else {
@@ -104,7 +104,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 mHandler.postDelayed(this, 1000);
                 return;
             } else {
-                mTxtNoMusic.animate().setDuration(400).scaleX(1.3f).scaleY(1.3f).alpha(0.0f).start();
+                mTxtNoMusic.animate().setDuration(400).translationX(100).alpha(0.0f).start();
                 mFoundAnything = true;
             }
 
@@ -294,6 +294,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
         if (sAdapter.getItemCount() > 0) {
             mTxtNoMusic.setVisibility(View.GONE);
+        } else {
+            mTxtNoMusic.setTranslationX(-100);
+            mTxtNoMusic.setAlpha(0.0f);
         }
 
         twvRoot.setAdapter(sAdapter);

@@ -156,7 +156,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
         if (position == 0) {
             return -1;
         } else {
-            return mPlaylists.get(position - 1).getRef().hashCode();
+            return mPlaylists.get(position).getRef().hashCode();
         }
     }
 
@@ -300,12 +300,12 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
             return;
         }
 
-        Playlist p = mPlaylists.remove(fromPosition);
+        Playlist p = mPlaylists.remove(fromPosition); // Offset the header items
         mPlaylists.add(toPosition, p);
         ensureOrderer(null);
         mOrderer.setOrder(mPlaylists);
 
-        notifyItemMoved(fromPosition, toPosition);
+        //notifyItemMoved(fromPosition - 1, toPosition - 1);
     }
 
     @Override
@@ -323,7 +323,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
     @Override
     public ItemDraggableRange onGetItemDraggableRange(ViewHolder holder) {
         if (mDragRange == null) {
-            mDragRange = new ItemDraggableRange(1, getItemCount() - 1);
+            new ItemDraggableRange(1, getItemCount() + 1);
         }
         return mDragRange;
     }

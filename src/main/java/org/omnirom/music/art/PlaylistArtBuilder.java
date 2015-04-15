@@ -120,13 +120,17 @@ public class PlaylistArtBuilder {
     }
 
 
-    private synchronized void makePlaylistComposite() {
+    private void makePlaylistComposite() {
         if (mPlaylistComposite == null) {
             mPlaylistComposite = Bitmap.createBitmap(600, 600, Bitmap.Config.ARGB_8888);
         }
 
         if (mPlaylistPaint == null) {
             mPlaylistPaint = new Paint();
+        }
+
+        if (mPlaylistSource == null) {
+            mPlaylistSource = new ArrayList<>();
         }
 
         Canvas canvas = new Canvas(mPlaylistComposite);
