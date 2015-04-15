@@ -323,7 +323,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
     @Override
     public ItemDraggableRange onGetItemDraggableRange(ViewHolder holder) {
         if (mDragRange == null) {
-            new ItemDraggableRange(1, getItemCount() + 1);
+            mDragRange = new ItemDraggableRange(1, getItemCount() + 1);
         }
         return mDragRange;
     }

@@ -49,6 +49,9 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
 
     private static final String TAG = "ListenNowAdapter";
 
+    private static final int ITEM_TYPE_ENTRY = 1;
+    private static final int ITEM_TYPE_HEADER = 2;
+
     /**
      * ViewHolder that holds references to the views
      */
@@ -188,6 +191,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
     /**
      * The list of entries to show
      */
+    private List<ListenNowEntry> mRecentEntries = new ArrayList<>();
     private List<ListenNowEntry> mEntries = new ArrayList<ListenNowEntry>();
 
     private Handler mHandler;
@@ -233,6 +237,11 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
 
     private void playSong(Song s) {
         PlaybackProxy.playSong(s);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return super.getItemViewType(position);
     }
 
     @Override

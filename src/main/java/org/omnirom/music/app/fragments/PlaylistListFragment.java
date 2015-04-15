@@ -18,9 +18,11 @@ package org.omnirom.music.app.fragments;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Process;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -234,30 +236,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     }
 
     private void updatePlaylists() {
-        new Thread() {
-            public void run() {
-                final List<Playlist> playlists = ProviderAggregator.getDefault().getAllPlaylists();
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mAdapter != null) {
-                            mAdapter.addAllUnique(playlists);
-                            try {
-                                mAdapter.sortList(getActivity().getApplicationContext());
-                            } catch (JSONException e) {
-                                Log.e(TAG, "Unable to sort playlists list");
-                            }
-                            mAdapter.notifyDataSetChanged();
-                        }
-
-                        if (mGridAdapter != null) {
-                            mGridAdapter.addAllUnique(playlists);
-                            mGridAdapter.notifyDataSetChanged();
-                        }
-                    }
-                });
-            }
-        }.start();
+        new GetPlaylistsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -304,5 +283,31 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onSearchResult(List<SearchResult> searchResult) {
+    }
+
+    private class GetPlaylistsTask extends AsyncTask<Void, Void, List<Playlist>> {
+        @Override
+        protected List<Playlist> doInBackground(Void... params) {
+            Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            return ProviderAggregator.getDefault().getAllPlaylists();
+        }
+
+        @Override
+        protected void onPostExecute(List<Playlist> playlists) {
+            if (mAdapter != null) {
+                mAdapter.addAllUnique(playlists);
+                try {
+                    mAdapter.sortList(getActivity().getApplicationContext());
+                } catch (JSONException e) {
+                    Log.e(TAG, "Unable to sort playlists list");
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+
+            if (mGridAdapter != null) {
+                mGridAdapter.addAllUnique(playlists);
+                mGridAdapter.notifyDataSetChanged();
+            }
+        }
     }
 }
