@@ -61,6 +61,6 @@
     <dimen name="drive_button_size">100dp</dimen>
     <dimen name="nav_head_size">64dp</dimen>
 
-    <dimen name="button_size">80dp</dimen>
+    <dimen name="playbar_button_size">50dp</dimen>
 
 </resources>

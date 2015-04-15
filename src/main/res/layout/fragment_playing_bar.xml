@@ -25,8 +25,8 @@
     <mbanje.kurt.fabbutton.FabButton
         android:id="@+id/fabPlayBarButton"
 
-        android:layout_width="@dimen/fab_size_normal"
-        android:layout_height="@dimen/fab_size_normal"
+        android:layout_width="@dimen/playbar_button_size"
+        android:layout_height="@dimen/playbar_button_size"
 
         android:layout_above="@+id/tvArtist"
         android:layout_alignParentEnd="true"
@@ -41,7 +41,7 @@
         android:max="100"
         android:elevation="12dp"
         app:fbb_autoStart="true"
-        app:fbb_progressColor="@color/primary_light"
+        app:fbb_progressColor="@color/primary_dark"
         app:fbb_showEndBitmap="false"
         app:fbb_hideProgressOnComplete="false"
         />
