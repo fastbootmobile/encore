@@ -52,7 +52,7 @@ public class AlbumArtCache {
     private static final String TAG = "AlbumArtCachev2";
     private static final AlbumArtCache INSTANCE = new AlbumArtCache();
 
-    private final List<BoundEntity> mRunningQueries = new ArrayList<BoundEntity>();
+    private final List<BoundEntity> mRunningQueries = new ArrayList<>();
 
     /**
      * The art is not in the cache

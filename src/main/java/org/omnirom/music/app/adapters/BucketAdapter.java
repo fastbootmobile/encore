@@ -16,7 +16,6 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,11 +28,7 @@ import android.widget.TextView;
 
 import org.omnirom.music.api.echonest.AutoMixBucket;
 import org.omnirom.music.api.echonest.AutoMixManager;
-import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.app.fragments.PlaylistChooserFragment;
-import org.omnirom.music.framework.PlaybackProxy;
-import org.omnirom.music.providers.ProviderAggregator;
 
 import java.util.List;
 

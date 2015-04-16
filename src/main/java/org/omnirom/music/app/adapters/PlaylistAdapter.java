@@ -47,8 +47,8 @@ public class PlaylistAdapter extends SongsListAdapter {
      */
     public PlaylistAdapter() {
         super(true);
-        mVisible = new ArrayList<Integer>();
-        mIds = new ArrayList<Integer>();
+        mVisible = new ArrayList<>();
+        mIds = new ArrayList<>();
     }
 
     /**

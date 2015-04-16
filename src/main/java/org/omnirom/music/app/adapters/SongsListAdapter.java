@@ -91,7 +91,7 @@ public class SongsListAdapter extends BaseAdapter {
      * @param showAlbumArt Whether or not to show album art in front of each item
      */
     public SongsListAdapter(boolean showAlbumArt) {
-        mSongs = new ArrayList<Song>();
+        mSongs = new ArrayList<>();
         mShowAlbumArt = showAlbumArt;
     }
 

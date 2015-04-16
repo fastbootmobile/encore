@@ -69,7 +69,7 @@ public class SettingsProvidersFragment extends ListFragment {
 
         // Get providers, filter out our MultiProvider playlist provider
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-        List<ProviderConnection> filteredProviders = new ArrayList<ProviderConnection>();
+        List<ProviderConnection> filteredProviders = new ArrayList<>();
         for (ProviderConnection p : providers) {
             if (!p.getServiceName().equals("org.omnirom.music.providers.MultiProviderPlaylistProvider")) {
                 filteredProviders.add(p);

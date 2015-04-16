@@ -75,7 +75,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     private RecyclerView.Adapter mWrappedAdapter;
     private Handler mHandler;
     private boolean mIsStandalone;
-    private final ArrayList<Playlist> mPlaylistsUpdated = new ArrayList<Playlist>();
+    private final ArrayList<Playlist> mPlaylistsUpdated = new ArrayList<>();
 
     private Runnable mUpdateListRunnable = new Runnable() {
         @Override

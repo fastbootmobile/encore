@@ -4,11 +4,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:horizontalSpacing="4dp"
+    android:horizontalSpacing="@dimen/grid_padding"
     android:numColumns="@integer/main_grids_column_count"
-    android:paddingLeft="4dp"
-    android:paddingRight="4dp"
-    android:paddingTop="4dp"
+    android:paddingLeft="@dimen/grid_padding"
+    android:paddingRight="@dimen/grid_padding"
+    android:paddingTop="@dimen/grid_padding"
     android:paddingBottom="@dimen/playing_bar_height"
     android:clipToPadding="false"
-    android:verticalSpacing="4dp"/>
+    android:verticalSpacing="@dimen/grid_padding"/>

@@ -523,7 +523,7 @@ public class PlaybackQueueActivity extends AppActivity {
         }
 
         public void updateQueueLayout() {
-            final List<Song> songs = new ArrayList<Song>(PlaybackProxy.getCurrentPlaybackQueue());
+            final List<Song> songs = new ArrayList<>(PlaybackProxy.getCurrentPlaybackQueue());
             mAdapter.setPlaybackQueue(songs);
 
             final int trackIndex = PlaybackProxy.getCurrentTrackIndex();

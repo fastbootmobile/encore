@@ -46,7 +46,7 @@ public class DSPProcessor {
      */
     public DSPProcessor(PlaybackService pbs) {
         mPlaybackService = pbs;
-        mDSPChain = new ArrayList<ProviderIdentifier>();
+        mDSPChain = new ArrayList<>();
     }
 
     /**
@@ -65,11 +65,11 @@ public class DSPProcessor {
      */
     public void setActiveChain(Context ctx, List<ProviderIdentifier> chain, NativeHub hub) {
         // We make a copy to avoid any external modification
-        mDSPChain = new ArrayList<ProviderIdentifier>(chain);
+        mDSPChain = new ArrayList<>(chain);
 
         // Save it
         SharedPreferences prefs = ctx.getSharedPreferences(PREFS_DSP_CHAIN, 0);
-        Set<String> identifiers = new TreeSet<String>();
+        Set<String> identifiers = new TreeSet<>();
 
         for (ProviderIdentifier identifier : chain) {
             identifiers.add(identifier.serialize());

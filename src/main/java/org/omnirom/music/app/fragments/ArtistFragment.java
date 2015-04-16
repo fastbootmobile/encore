@@ -772,8 +772,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private boolean mRecommendationLoaded = false;
         private View mRootView;
         private static ArtistFragment mParent;
-        private HashMap<Song, View> mSongToViewMap = new HashMap<Song, View>();
-        private HashMap<String, View> mAlbumToViewMap = new HashMap<String, View>();
+        private HashMap<Song, View> mSongToViewMap = new HashMap<>();
+        private HashMap<String, View> mAlbumToViewMap = new HashMap<>();
         private View mPreviousSongGroup;
         private View mPreviousAlbumGroup;
         private TextView mOfflineView;
@@ -1114,8 +1114,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             final LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);
             llAlbums.removeAllViews();
 
-            Iterator<String> albumIt = new ArrayList<String>(mParent.getArtist().getAlbums()).iterator();
-            List<Album> albums = new ArrayList<Album>();
+            Iterator<String> albumIt = new ArrayList<>(mParent.getArtist().getAlbums()).iterator();
+            List<Album> albums = new ArrayList<>();
 
 
             if (aggregator.isOfflineMode() && !albumIt.hasNext()) {
@@ -1160,7 +1160,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     holder.album = album;
                     llAlbums.addView(viewRoot);
                 } else {
-                    viewRoot = inflater.inflate(R.layout.expanded_albums_group, llAlbums, false);
+                    viewRoot = inflater.inflate(R.layout.exp_group_albums, llAlbums, false);
                     llAlbums.addView(viewRoot);
 
                     holder = new AlbumViewHolder(viewRoot);
@@ -1237,7 +1237,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     continue;
                 }
 
-                View itemRoot = inflater.inflate(R.layout.expanded_albums_item, container, false);
+                View itemRoot = inflater.inflate(R.layout.exp_item_albums, container, false);
                 container.addView(itemRoot);
                 itemRoot.setTag(song);
 
@@ -1509,7 +1509,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         public ArtistSimilarFragment() {
             mAdapter = new ArtistsAdapter();
             mHandler = new Handler();
-            mSimilarArtists = new ArrayList<Artist>();
+            mSimilarArtists = new ArrayList<>();
         }
 
         /**

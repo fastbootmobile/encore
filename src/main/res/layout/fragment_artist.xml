@@ -25,14 +25,14 @@
             android:transitionName="artistName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#BB333333"
+            android:background="@color/default_translucent_black_overlay"
             android:gravity="top|start"
-            android:paddingBottom="64dp"
-            android:paddingEnd="8dp"
-            android:paddingLeft="24dp"
-            android:paddingRight="8dp"
-            android:paddingStart="24dp"
-            android:paddingTop="16dp"
+            android:paddingTop="@dimen/entview_head_padding_top"
+            android:paddingBottom="@dimen/artist_head_padding_bottom"
+            android:paddingRight="@dimen/entview_head_padding_right"
+            android:paddingEnd="@dimen/entview_head_padding_right"
+            android:paddingLeft="@dimen/entview_head_padding_left"
+            android:paddingStart="@dimen/entview_head_padding_left"
             android:textColor="@color/white"
             android:layout_above="@+id/pagerArtist"
             android:layout_alignParentRight="true"
@@ -42,17 +42,17 @@
 
         <ImageView
             android:id="@+id/ivSourceLogo"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="@dimen/detail_source_logo_size"
+            android:layout_height="@dimen/detail_source_logo_size"
             android:layout_alignEnd="@+id/tvArtist"
             android:layout_alignRight="@+id/tvArtist"
             android:layout_alignTop="@+id/tvArtist"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginEnd="@dimen/detail_source_logo_margin"
+            android:layout_marginStart="@dimen/detail_source_logo_margin"
             android:contentDescription="@string/app_name"
             android:scaleType="centerInside"
             android:layout_alignBottom="@+id/tvArtist"
-            android:layout_marginBottom="48dp"/>
+            android:layout_marginBottom="@dimen/artist_head_source_margin_bottom"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabPlay"
@@ -63,12 +63,12 @@
             app:fab_colorNormal="@color/primary"
             app:fab_colorPressed="@color/primary_light"
 
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginRight="@dimen/entview_head_fab_margin_right"
+            android:layout_marginEnd="@dimen/entview_head_fab_margin_right"
             android:layout_above="@+id/pagerArtist"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginBottom="72dp"/>
+            android:layout_marginBottom="@dimen/artist_head_fab_margin_bottom"/>
 
         <org.omnirom.music.app.ui.WrapContentHeightViewPager
             android:id="@+id/pagerArtist"
@@ -88,7 +88,7 @@
             <android.support.v4.view.PagerTabStrip
                 android:id="@+id/pagerArtistStrip"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="@dimen/artist_head_tabstrip_height"
                 android:layout_gravity="top"
                 android:textAppearance="@style/OmniMusic.Spec.ViewPager"
                 android:gravity="center_vertical"

@@ -3,19 +3,18 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
                                     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="220dp"
-    app:cardCornerRadius="2dp"
-    android:layout_margin="4dp">
+    android:layout_height="@dimen/playbackqueue_current_height"
+    app:cardCornerRadius="@dimen/card_radius"
+    android:layout_margin="@dimen/playbackqueue_current_margin">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!--  -->
         <org.omnirom.music.app.ui.AlbumArtImageView
             android:id="@+id/ivAlbumArt"
-            android:layout_width="64dp"
-            android:layout_height="140dp"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/playbackqueue_current_art_height"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:scaleType="centerCrop"
@@ -31,8 +30,11 @@
             android:layout_alignParentStart="true"
             android:background="@drawable/gradient_overlay_playbar_current"
             android:id="@+id/linearLayout"
-            android:paddingLeft="8dp"
-            android:paddingTop="12dp"
+            android:paddingLeft="@dimen/playbackqueue_current_metadata_padleft"
+            android:paddingStart="@dimen/playbackqueue_current_metadata_padleft"
+            android:paddingRight="0dp"
+            android:paddingEnd="0dp"
+            android:paddingTop="@dimen/playbackqueue_current_metadata_padtop"
             >
 
             <LinearLayout
@@ -52,10 +54,9 @@
                 <TextView
                     android:id="@+id/tvArtist"
                     style="@style/FontSubhead"
-                    android:textColor="@color/white"
+                    android:textColor="@color/text_detail_emphasize"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:alpha="0.7"
                     android:layout_marginBottom="8dp"/>
             </LinearLayout>
 
@@ -70,7 +71,7 @@
                 android:scaleType="centerCrop"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/more"
-                android:padding="4dp"/>
+                android:padding="@dimen/playbackqueue_current_overflow_padding"/>
 
         </LinearLayout>
 
@@ -98,8 +99,8 @@
             android:layout_alignParentRight="true">
 
             <ImageView
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="@dimen/playbackqueue_current_button_size"
+                android:layout_height="@dimen/playbackqueue_current_button_size"
                 android:layout_gravity="center_vertical"
                 android:id="@+id/btnShuffle"
                 android:src="@drawable/ic_shuffle_gray"
@@ -109,8 +110,8 @@
                 style="@style/OmniMusic.Spec.BorderlessButton"/>
 
             <ImageView
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="@dimen/playbackqueue_current_button_size"
+                android:layout_height="@dimen/playbackqueue_current_button_size"
                 android:layout_gravity="center_vertical"
                 android:id="@+id/btnRepeat"
                 android:src="@drawable/ic_replay_gray"
@@ -120,14 +121,14 @@
                 style="@style/OmniMusic.Spec.BorderlessButton"/>
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/playbackqueue_current_button_size"
+                android:layout_height="@dimen/playbackqueue_current_button_size"
                 android:layout_gravity="center_vertical"
                 android:id="@+id/btnPrevious"
                 android:clickable="true"
                 android:src="@drawable/ic_skip_previous"
                 android:contentDescription="@string/previous"
-                android:layout_marginLeft="8dp"
+                android:layout_marginLeft="@dimen/playbackqueue_current_button_margin"
                 style="@style/OmniMusic.Spec.BorderlessButton"/>
 
             <com.getbase.floatingactionbutton.FloatingActionButton
@@ -142,7 +143,7 @@
 
             <ImageView
                 android:id="@+id/btnForward"
-                android:layout_width="48dp"
+                android:layout_width="@dimen/playbackqueue_current_button_size"
                 android:layout_height="48dp"
                 android:layout_gravity="center_vertical"
                 android:adjustViewBounds="true"
@@ -150,12 +151,12 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_skip_next"
                 android:contentDescription="@string/forward"
-                android:layout_marginRight="8dp"
+                android:layout_marginRight="@dimen/playbackqueue_current_button_margin"
                 style="@style/OmniMusic.Spec.BorderlessButton"/>
 
             <ImageView
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="@dimen/playbackqueue_current_button_size"
+                android:layout_height="@dimen/playbackqueue_current_button_size"
                 android:layout_gravity="center_vertical"
                 android:id="@+id/btnThumbs"
                 android:src="@drawable/ic_thumbs_up_gray"
@@ -165,8 +166,8 @@
                 style="@style/OmniMusic.Spec.BorderlessButton"/>
 
             <ImageView
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="@dimen/playbackqueue_current_button_size"
+                android:layout_height="@dimen/playbackqueue_current_button_size"
                 android:layout_gravity="center_vertical"
                 android:id="@+id/btnThumbsDown"
                 android:src="@drawable/ic_thumb_down_gray"

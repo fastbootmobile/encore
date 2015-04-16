@@ -16,8 +16,7 @@
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
         app:layoutManager="StaggeredGridLayoutManager"
-        app:numColumns="2"
-        app:numRows="300" />
+        app:numColumns="2" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -28,7 +27,7 @@
         android:textStyle="italic"
         android:text="@string/loading"
         android:gravity="center_horizontal"
-        android:padding="24dp"
-        android:textColor="#333333" />
+        android:padding="@dimen/activity_horizontal_margin"
+        android:textColor="@color/text_regular" />
 
 </FrameLayout>

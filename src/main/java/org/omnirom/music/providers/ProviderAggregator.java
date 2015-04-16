@@ -55,23 +55,23 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private final List<ProviderConnection> mProviders;
     private ProviderCache mCache;
     private Handler mHandler;
-    private final List<Song> mPostedUpdateSongs = new ArrayList<Song>();
-    private final List<Album> mPostedUpdateAlbums = new ArrayList<Album>();
-    private final List<Artist> mPostedUpdateArtists = new ArrayList<Artist>();
-    private final List<Playlist> mPostedUpdatePlaylists = new ArrayList<Playlist>();
-    private List<String> mRosettaStonePrefix = new ArrayList<String>();
-    private Map<String, ProviderIdentifier> mRosettaStoneMap = new HashMap<String, ProviderIdentifier>();
+    private final List<Song> mPostedUpdateSongs = new ArrayList<>();
+    private final List<Album> mPostedUpdateAlbums = new ArrayList<>();
+    private final List<Artist> mPostedUpdateArtists = new ArrayList<>();
+    private final List<Playlist> mPostedUpdatePlaylists = new ArrayList<>();
+    private List<String> mRosettaStonePrefix = new ArrayList<>();
+    private Map<String, ProviderIdentifier> mRosettaStoneMap = new HashMap<>();
     private ThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(4);
     private Context mContext;
     private boolean mIsOfflineMode = false;
-    private List<OfflineModeListener> mOfflineModeListeners = new ArrayList<OfflineModeListener>();
+    private List<OfflineModeListener> mOfflineModeListeners = new ArrayList<>();
 
     private Runnable mPostSongsRunnable = new Runnable() {
         @Override
         public void run() {
             synchronized (mPostedUpdateSongs) {
                 for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onSongUpdate(new ArrayList<Song>(mPostedUpdateSongs));
+                    cb.onSongUpdate(new ArrayList<>(mPostedUpdateSongs));
                 }
                 mPostedUpdateSongs.clear();
             }
@@ -83,7 +83,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         public void run() {
             synchronized (mPostedUpdateAlbums) {
                 for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onAlbumUpdate(new ArrayList<Album>(mPostedUpdateAlbums));
+                    cb.onAlbumUpdate(new ArrayList<>(mPostedUpdateAlbums));
                 }
                 mPostedUpdateAlbums.clear();
             }
@@ -95,7 +95,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         public void run() {
             synchronized (mPostedUpdateArtists) {
                 for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onArtistUpdate(new ArrayList<Artist>(mPostedUpdateArtists));
+                    cb.onArtistUpdate(new ArrayList<>(mPostedUpdateArtists));
                 }
                 mPostedUpdateArtists.clear();
             }
@@ -107,7 +107,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         public void run() {
             synchronized (mPostedUpdatePlaylists) {
                 for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onPlaylistUpdate(new ArrayList<Playlist>(mPostedUpdatePlaylists));
+                    cb.onPlaylistUpdate(new ArrayList<>(mPostedUpdatePlaylists));
                 }
                 mPostedUpdatePlaylists.clear();
             }

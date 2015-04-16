@@ -16,8 +16,8 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             style="@style/FontButton"
             android:layout_gravity="center_vertical|end"
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginRight="@dimen/playbackqueue_item_margin"
+            android:layout_marginEnd="@dimen/playbackqueue_item_margin"
             android:textColor="@color/grey"/>
 
 </FrameLayout>

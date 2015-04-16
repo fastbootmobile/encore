@@ -179,7 +179,7 @@ public abstract class BaseLayoutManager extends TwoWayLayoutManager {
         if (Build.VERSION.SDK_INT >= 14) {
             itemLanes = mItemEntries.clone();
         } else {
-            itemLanes = new SparseArray<ItemEntry>();
+            itemLanes = new SparseArray<>();
 
             for (int i = 0; i < mItemEntries.size(); i++) {
                 itemLanes.put(mItemEntries.keyAt(i), mItemEntries.valueAt(i));
@@ -263,7 +263,7 @@ public abstract class BaseLayoutManager extends TwoWayLayoutManager {
         mLanes = new Lanes(this, getLaneCount());
 
         if (mItemEntries == null) {
-            mItemEntries = new SparseArray<ItemEntry>(10);
+            mItemEntries = new SparseArray<>(10);
         } else {
             mItemEntries.clear();
         }
@@ -540,7 +540,7 @@ public abstract class BaseLayoutManager extends TwoWayLayoutManager {
 
             final int itemEntriesCount = in.readInt();
             if (itemEntriesCount > 0) {
-                itemEntries = new SparseArray<ItemEntry>(itemEntriesCount);
+                itemEntries = new SparseArray<>(itemEntriesCount);
                 for (int i = 0; i < itemEntriesCount; i++) {
                     final int key = in.readInt();
                     final ItemEntry value = in.readParcelable(getClass().getClassLoader());

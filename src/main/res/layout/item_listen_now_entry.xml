@@ -48,6 +48,6 @@
             android:layout_marginRight="@dimen/tile_text_padding"
             android:gravity="start|top"
             android:textColor="@color/white"
-            android:paddingTop="4dp" />
+            android:paddingTop="@dimen/card_text_secondline_padding_top" />
     </LinearLayout>
 </LinearLayout>

@@ -2,7 +2,8 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="@dimen/search_header_padding">
 
     <TextView
         android:layout_width="wrap_content"
@@ -11,6 +12,6 @@
         android:layout_gravity="start"
         fontPath="fonts/Roboto-Medium.ttf"
         android:fontFamily="sans-serif-medium"
-        android:alpha="0.6" />
+        android:textColor="@color/text_detail" />
 
 </LinearLayout>

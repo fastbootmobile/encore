@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:weightSum="1">
 
-    <include layout="@layout/offline" />
+    <include layout="@layout/part_offline" />
 
     <TextView
         android:id="@+id/textView"
@@ -17,16 +17,19 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
-        android:padding="8dp"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
         android:text="@string/recognition_howto"
-        android:textColor="#333333"
+        android:textColor="@color/text_regular"
         />
 
     <org.omnirom.music.app.ui.AnimatedMicButton
         android:id="@+id/btnStartRec"
         android:background="@null"
-        android:layout_width="156dp"
-        android:layout_height="156dp"
+        android:layout_width="@dimen/recognition_button_size"
+        android:layout_height="@dimen/recognition_button_size"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true" />
 
@@ -37,12 +40,11 @@
         android:layout_below="@+id/btnStartRec"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
-        android:layout_margin="18dp"
+        android:layout_margin="@dimen/activity_vertical_margin"
         android:text="@string/recognition_failed"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#555555"
+        android:textColor="@color/text_regular"
         android:textIsSelectable="false"
-        android:textStyle="italic"
         android:visibility="gone"/>
 
     <TextView
@@ -89,13 +91,13 @@
 
     <ImageView
         android:id="@+id/ivRecognitionArt"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="@dimen/recognition_art_size"
+        android:layout_height="@dimen/recognition_art_size"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/btnStartRec"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginEnd="@dimen/activity_vertical_margin"
+        android:layout_marginRight="@dimen/activity_vertical_margin"
         android:adjustViewBounds="true"
         android:contentDescription="@string/title_section_recognition"/>
 

@@ -7,13 +7,13 @@
 
     <ImageView
         android:id="@+id/ivPoweredEchoNest"
-        android:layout_width="100dp"
-        android:layout_height="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/lvBuckets"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/lvBuckets"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:contentDescription="@string/automix"
         android:scaleType="fitCenter"
         android:src="@drawable/powered_by_echonest"/>
@@ -36,7 +36,7 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:textStyle="italic"
-        android:padding="8dp"/>
+        android:padding="@dimen/activity_horizontal_margin"/>
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/fabCreateMenu"
@@ -47,9 +47,9 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
 
-        android:layout_marginBottom="24dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
 
         app:fab_addButtonColorNormal="@color/primary"
         app:fab_addButtonColorPressed="@color/primary_dark"

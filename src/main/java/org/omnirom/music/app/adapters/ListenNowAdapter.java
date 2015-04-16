@@ -217,7 +217,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
      * The list of entries to show
      */
     private List<ListenNowEntry> mRecentEntries = new ArrayList<>();
-    private List<ListenNowEntry> mEntries = new ArrayList<ListenNowEntry>();
+    private List<ListenNowEntry> mEntries = new ArrayList<>();
 
     private Handler mHandler;
 
@@ -326,7 +326,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             return holder;
         } else {
-            final View view = inflater.inflate(R.layout.listen_now_entry, viewGroup, false);
+            final View view = inflater.inflate(R.layout.item_listen_now_entry, viewGroup, false);
             final EntryViewHolder holder = new EntryViewHolder(view);
 
             // Setup album art listener
@@ -348,9 +348,9 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (viewType == ITEM_TYPE_HEADER) {
             final HeaderViewHolder holder = (HeaderViewHolder) holderBase;
             if (i == 0) {
-                holder.tvHeader.setText("Recent activity");
+                holder.tvHeader.setText(R.string.recently_listened_to);
             } else {
-                holder.tvHeader.setText("How about listening to...");
+                holder.tvHeader.setText(R.string.listen_now_suggestions_header);
             }
 
             // Update span status

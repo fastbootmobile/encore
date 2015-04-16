@@ -10,7 +10,7 @@
         android:layout_height="@dimen/shadow_height"
         android:background="@drawable/shadow" />
 
-    <include layout="@layout/offline" />
+    <include layout="@layout/part_offline" />
 
     <ProgressBar
         android:layout_width="wrap_content"

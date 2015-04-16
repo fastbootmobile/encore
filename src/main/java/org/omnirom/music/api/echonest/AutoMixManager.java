@@ -96,7 +96,7 @@ public class AutoMixManager extends BasePlaybackCallback {
      */
     public void initialize(Context ctx) {
         mContext = ctx;
-        mBuckets = new ArrayList<AutoMixBucket>();
+        mBuckets = new ArrayList<>();
         readBucketsFromPrefs();
         mHandler = new Handler();
     }

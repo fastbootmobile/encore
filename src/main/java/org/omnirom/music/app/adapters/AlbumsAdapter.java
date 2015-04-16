@@ -139,7 +139,7 @@ public class AlbumsAdapter extends BaseAdapter {
      * Default constructor
      */
     public AlbumsAdapter(Resources res) {
-        mAlbums = new ArrayList<Album>();
+        mAlbums = new ArrayList<>();
         mHandler = new Handler();
         mDefaultArtColor = res.getColor(R.color.default_album_art_background);
     }

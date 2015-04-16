@@ -1,7 +1,9 @@
 <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/gvPlaylists"
+          xmlns:tools="http://schemas.android.com/tools"
+          android:id="@+id/gvPlaylists"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:horizontalSpacing="4dp"
     android:numColumns="@integer/main_grids_column_count"
-    android:verticalSpacing="4dp" />
+    android:verticalSpacing="4dp"
+          tools:ignore="InconsistentLayout"/>

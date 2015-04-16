@@ -3,7 +3,7 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="#dd342d">
+              android:background="@color/welcome_background">
 
     <ImageView
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/ivIllustration"
-        android:src="@drawable/welcome_illus_3"
+        android:src="@drawable/welcome_illus_1"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"/>
@@ -30,27 +30,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/welcome_step3_title"
+        android:text="@string/welcome_step1_title"
         android:id="@+id/tvTitle"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:textColor="@color/white"
-        android:textSize="42sp"
+        android:textSize="@dimen/welcome_title_font"
         android:fontFamily="sans-serif-medium"
-        android:layout_margin="32dp"/>
+        android:layout_margin="@dimen/welcome_title_margin"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/welcome_step3_body"
+        android:text="@string/welcome_step1_body"
         android:id="@+id/tvExplanation"
+        android:layout_below="@+id/ivIllustration"
         android:textColor="@color/white"
-        android:textSize="18sp"
-        android:layout_alignTop="@+id/ivIllustration"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="32dp"
-        android:layout_marginRight="32dp"/>
+        android:textSize="@dimen/welcome_body_font"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="@dimen/welcome_body_margin"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -62,21 +62,7 @@
         android:layout_alignParentEnd="true"
         style="@style/OmniMusic.Spec.BorderlessButton"
         android:textColor="@color/white"
-        android:layout_marginRight="32dp"
-        android:layout_marginBottom="32dp"
-        android:textSize="16sp"/>
-
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/lvProviders"
-        android:layout_below="@+id/tvExplanation"
-        android:layout_above="@+id/btnNext"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="32dp"
-        android:layout_marginRight="32dp"
-        android:divider="@color/white"
-        android:dividerHeight="1dp"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginRight="@dimen/welcome_button_margin"
+        android:layout_marginBottom="@dimen/welcome_button_margin"
+        android:textSize="@dimen/welcome_button_font"/>
 </RelativeLayout>

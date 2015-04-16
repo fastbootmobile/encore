@@ -141,9 +141,9 @@ public class PlaylistChooserFragment extends DialogFragment {
             }
         });
 
-        List<String> choices = new ArrayList<String>();
+        List<String> choices = new ArrayList<>();
         choices.add(getString(R.string.new_playlist));
-        final List<Playlist> playlistChoices = new ArrayList<Playlist>();
+        final List<Playlist> playlistChoices = new ArrayList<>();
         final ProviderConnection mppp = PluginsLookup.getDefault().getMultiProviderPlaylistProvider();
 
         // Decide what entity we are using

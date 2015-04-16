@@ -191,7 +191,7 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
                 loadingBar.setVisibility(View.GONE);
                 mListView.setVisibility(View.GONE);
                 mOfflineView = LayoutInflater.from(getActivity())
-                        .inflate(R.layout.offline, (ViewGroup) mRootView.getParent().getParent())
+                        .inflate(R.layout.part_offline, (ViewGroup) mRootView.getParent().getParent())
                         .findViewById(R.id.tvErrorMessage);
             } else {
                 // No song loaded, show the loading spinner and hide the play FAB
@@ -294,7 +294,7 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
 
     private void setupHeader(LayoutInflater inflater) {
         // Load the header
-        View headerView = inflater.inflate(R.layout.songs_list_view_header, mListView, false);
+        View headerView = inflater.inflate(R.layout.header_listview_songs, mListView, false);
         mIvHero = (ImageView) headerView.findViewById(R.id.ivHero);
         mTvAlbumName = (TextView) headerView.findViewById(R.id.tvAlbumName);
         mTvAlbumName.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
@@ -410,7 +410,7 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
             Log.e(TAG, "Album isn't in cache and provider returned null!");
         } else if (mHeroImage != null) {
             // Prepare the palette to colorize the FAB
-            Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
+            Palette.generateAsync(mHeroImage, new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(final Palette palette) {
                     final Palette.Swatch normalColor = palette.getDarkMutedSwatch();

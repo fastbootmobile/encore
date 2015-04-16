@@ -117,7 +117,7 @@ public class SongsFragment extends Fragment {
         @Override
         protected List<Song> doInBackground(Void... params) {
             List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-            final List<Song> songsToAdd = new ArrayList<Song>();
+            final List<Song> songsToAdd = new ArrayList<>();
             for (ProviderConnection providerConnection : providers) {
                 try {
                     IMusicProvider provider = providerConnection.getBinder();

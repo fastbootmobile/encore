@@ -6,7 +6,6 @@
     android:layout_height="wrap_content"
     android:background="@color/default_album_art_background"
     android:measureWithLargestChild="false"
-    android:stateListAnimator="@anim/button_raise"
     android:orientation="vertical">
 
     <!--  -->

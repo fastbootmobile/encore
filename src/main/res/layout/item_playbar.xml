@@ -27,8 +27,8 @@
         android:layout_alignTop="@+id/ivAlbumArt"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp">
+        android:layout_marginStart="@dimen/playbackqueue_item_margin"
+        android:layout_marginLeft="@dimen/playbackqueue_item_margin">
 
         <TextView
             android:id="@+id/tvTitle"
@@ -37,13 +37,13 @@
             fontPath="fonts/Roboto-Medium.ttf"
             android:fontFamily="sans-serif-medium"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#333333" />
+            android:textColor="@color/text_regular" />
 
         <TextView
             android:id="@+id/tvArtist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="0.7"
+            android:textColor="@color/text_detail"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
 

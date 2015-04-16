@@ -3,7 +3,6 @@ package org.omnirom.music.app.fragments;
 
 
 import android.animation.LayoutTransition;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.os.Handler;
@@ -20,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.adapters.DspAdapter;

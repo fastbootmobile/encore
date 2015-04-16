@@ -24,6 +24,6 @@
         android:text="@string/loading"
         android:gravity="center_horizontal"
         android:padding="24dp"
-        android:textColor="#333333" />
+        android:textColor="@color/text_regular" />
 
 </FrameLayout>

@@ -128,7 +128,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
      * Default constructor
      */
     public ArtistsAdapter() {
-        mArtists = new ArrayList<Artist>();
+        mArtists = new ArrayList<>();
         mHandler = new Handler();
         mComparator = new Comparator<Artist>() {
             @Override

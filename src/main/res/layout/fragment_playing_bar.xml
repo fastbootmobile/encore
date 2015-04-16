@@ -13,10 +13,10 @@
         android:id="@+id/playBarTracksLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:layout_marginRight="12dp"
-        android:layout_marginLeft="12dp"
-        android:elevation="12dp"
+        android:layout_marginTop="@dimen/playing_bar_margin_top"
+        android:layout_marginRight="@dimen/playing_bar_margin_sides"
+        android:layout_marginLeft="@dimen/playing_bar_margin_sides"
+        android:elevation="@dimen/playing_bar_elevation"
         android:background="@color/white"
         android:orientation="vertical">
 
@@ -25,21 +25,21 @@
     <mbanje.kurt.fabbutton.FabButton
         android:id="@+id/fabPlayBarButton"
 
-        android:layout_width="@dimen/playbar_button_size"
-        android:layout_height="@dimen/playbar_button_size"
+        android:layout_width="@dimen/playing_bar_fab_size"
+        android:layout_height="@dimen/playing_bar_fab_size"
 
         android:layout_above="@+id/tvArtist"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
 
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginEnd="@dimen/playing_bar_fab_margin"
+        android:layout_marginRight="@dimen/playing_bar_fab_margin"
 
         android:color="@color/primary"
         android:visibility="visible"
         android:indeterminate="false"
         android:max="100"
-        android:elevation="12dp"
+        android:elevation="13dp"
         app:fbb_autoStart="true"
         app:fbb_progressColor="@color/primary_dark"
         app:fbb_showEndBitmap="false"

@@ -2,7 +2,6 @@
 <resources>
 
     <color name="black">#000000</color>
-    <color name="black_overlay">#66000000</color>
 
     <!-- Red 500 -->
     <color name="primary">#e51c23</color>
@@ -17,21 +16,21 @@
     <!-- Red 100 -->
     <color name="primary_light">#f9bdbb</color>
 
+    <!-- Welcome -->
+    <color name="welcome_background">#dd342d</color>
+
     <!-- Standard colors -->
     <color name="apptheme_color">@color/primary</color>
     <color name="apptheme_color_pressed">@color/primary_dark</color>
     <color name="white">#ffffff</color>
     <color name="separator">#dddddd</color>
-    <color name="navdrawer_separator">#eaeaea</color>
     <color name="default_fragment_background">@color/background_material_light</color>
     <color name="selected_item_background">#DDDDDD</color>
 
-    <!-- Playbar -->
-    <color name="play_bar_background">#bbffffff</color>
-    <color name="play_bar_pressed">#bbcc0000</color>
-
     <!-- Default lists/grids colors -->
     <color name="default_album_art_background">#333333</color>
+
+    <color name="default_translucent_black_overlay">#BB333333</color>
 
     <!-- Buttons -->
     <!-- Grey 600 -->
@@ -50,4 +49,7 @@
     <color name="blue_dark">#263238</color>
 
     <color name="snackbar_background">#ff323232</color>
+
+    <color name="my_songs_strip_indicator_color">#4D000000</color>
+    <color name="my_songs_strip_divider_color">#4DFFFFFF</color>
 </resources>

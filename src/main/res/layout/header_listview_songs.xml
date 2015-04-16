@@ -8,7 +8,7 @@
     <org.omnirom.music.app.ui.TopCropImageView
         android:id="@+id/ivHero"
         android:layout_width="match_parent"
-        android:layout_height="210dp"
+        android:layout_height="@dimen/songs_list_hero_height"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:contentDescription="@string/albums"
@@ -32,8 +32,8 @@
             android:layout_centerHorizontal="true"
             style="@style/OmniMusic.Spec.BorderlessButton"
             android:layout_below="@+id/tvBarTitle"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"/>
+            android:layout_marginLeft="@dimen/songs_reel_play_margin"
+            android:layout_marginRight="@dimen/songs_reel_play_margin"/>
 
         <ImageView
             android:layout_width="wrap_content"
@@ -71,25 +71,25 @@
 
 
     <TextView
+        style="@style/FontHeadline"
         android:id="@+id/tvAlbumName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/ivHero"
         android:layout_alignStart="@+id/ivHero"
-        android:background="#BB333333"
+        android:background="@color/default_translucent_black_overlay"
         android:transitionName="albumName"
         fontPath="fonts/Roboto-Medium.ttf"
         android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical|start"
         android:singleLine="true"
-        android:paddingBottom="16dp"
-        android:paddingEnd="8dp"
-        android:paddingLeft="24dp"
-        android:paddingRight="8dp"
-        android:paddingStart="24dp"
-        android:paddingTop="16dp"
+        android:paddingLeft="@dimen/entview_head_padding_left"
+        android:paddingStart="@dimen/entview_head_padding_left"
+        android:paddingRight="@dimen/entview_head_padding_right"
+        android:paddingEnd="@dimen/entview_head_padding_right"
+        android:paddingTop="@dimen/entview_head_padding_top"
+        android:paddingBottom="@dimen/entview_head_padding_bottom"
         android:textColor="@color/white"
-        android:textSize="22sp"
         android:layout_alignBottom="@+id/ivHero"
         android:layout_toStartOf="@+id/ivSourceLogo"
         android:ellipsize="end"
@@ -106,12 +106,12 @@
         app:fab_size="normal"
 
         android:scaleType="centerInside"
-        android:layout_marginEnd="16dp"
+        android:layout_marginRight="@dimen/entview_head_fab_margin_right"
+        android:layout_marginEnd="@dimen/entview_head_fab_margin_right"
+        android:layout_marginBottom="@dimen/entview_head_fab_margin_bottom"
         android:layout_alignBottom="@+id/tvAlbumName"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="24dp"/>
+        android:layout_alignParentEnd="true" />
 
 
     <ProgressBar
@@ -124,24 +124,24 @@
         android:indeterminate="true"/>
 
     <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="@dimen/detail_source_logo_size"
+        android:layout_height="@dimen/detail_source_logo_size"
         android:id="@+id/ivSourceLogo"
         android:layout_alignTop="@+id/tvAlbumName"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignBottom="@+id/tvAlbumName"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="@dimen/detail_source_logo_margin"
+        android:layout_marginRight="@dimen/detail_source_logo_margin"
         android:scaleType="centerInside"
         android:contentDescription="@string/app_name"/>
 
     <com.dd.CircularProgressButton
         android:id="@+id/cpbOffline"
-        android:layout_width="128dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/playlist_offline_button_width"
+        android:layout_height="@dimen/playlist_offline_button_height"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="@dimen/playlist_offline_button_text"
         android:gravity="center"
         app:cpb_cornerRadius="48dp"
         app:cpb_iconComplete="@drawable/ic_file_download"
@@ -154,9 +154,9 @@
         android:layout_above="@+id/tvAlbumName"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginLeft="@dimen/playlist_offline_button_margin"
+        android:layout_marginStart="@dimen/playlist_offline_button_margin"
+        android:layout_marginBottom="@dimen/playlist_offline_button_margin"/>
 
 
 </RelativeLayout>

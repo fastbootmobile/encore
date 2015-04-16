@@ -15,22 +15,16 @@
 
 package org.omnirom.music.receivers;
 
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.util.Log;
-import android.view.KeyEvent;
 
 import org.omnirom.music.app.DriveModeActivity;
-import org.omnirom.music.app.SettingsActivity;
 import org.omnirom.music.framework.PlaybackProxy;
-import org.omnirom.music.service.PlaybackService;
 import org.omnirom.music.utils.SettingsKeys;
 
 import java.util.Set;

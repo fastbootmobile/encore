@@ -24,11 +24,11 @@
 
         <org.omnirom.music.app.ui.AlbumArtImageView
             android:id="@+id/ivAlbumArt"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/playlist_view_art_size"
+            android:layout_height="@dimen/playlist_view_art_size"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="4dp"
-            android:layout_marginStart="4dp"
+            android:layout_marginLeft="@dimen/playlist_view_art_margin"
+            android:layout_marginStart="@dimen/playlist_view_art_margin"
             android:src="@drawable/album_placeholder" />
 
         <TextView

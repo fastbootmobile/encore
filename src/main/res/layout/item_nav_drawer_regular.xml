@@ -5,6 +5,5 @@
     android:layout_height="@dimen/list_item_height"
     android:drawablePadding="8dp"
     android:gravity="center_vertical"
-    android:drawableStart="@drawable/ic_nav_automix"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp" />
+    android:paddingLeft="@dimen/nav_drawer_item_padding"
+    android:paddingRight="@dimen/nav_drawer_item_padding" />

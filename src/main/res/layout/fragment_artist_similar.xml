@@ -15,17 +15,17 @@
     <ProgressBar
         android:id="@+id/pbSimilarArtists"
         android:layout_width="wrap_content"
-        android:layout_height="320dp"
+        android:layout_height="@dimen/artist_similar_loading_height"
         android:layout_gravity="center"
         android:layout_marginTop="@dimen/activity_vertical_margin" />
 
-    <include layout="@layout/offline" />
+    <include layout="@layout/part_offline" />
 
     <org.lucasr.twowayview.TwoWayView
         android:id="@+id/twvSimilarArtists"
-        android:layout_margin="2dp"
+        android:layout_margin="@dimen/grid_padding"
         android:layout_width="match_parent"
-        android:layout_height="720dp"
+        android:layout_height="@dimen/artist_similar_height"
         app:layoutManager="GridLayoutManager"
         app:numColumns="@integer/main_grids_column_count"
         app:numRows="4"

@@ -17,12 +17,9 @@ package org.omnirom.music.app.fragments;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
 import android.support.v4.app.Fragment;
@@ -35,7 +32,6 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.art.AlbumArtCache;
 import org.omnirom.music.utils.SettingsKeys;
 
-import java.util.Collection;
 import java.util.Set;
 
 /**

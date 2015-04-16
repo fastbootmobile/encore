@@ -26,12 +26,12 @@ public class ProviderCache {
      * Default constructor
      */
     public ProviderCache() {
-        mPlaylists = new HashMap<String, Playlist>();
-        mSongs = new HashMap<String, Song>();
-        mRefProvider = new HashMap<String, ProviderIdentifier>();
-        mAlbums = new HashMap<String, Album>();
-        mArtists = new HashMap<String, Artist>();
-        mMultiProviderPlaylists = new ArrayList<Playlist>();
+        mPlaylists = new HashMap<>();
+        mSongs = new HashMap<>();
+        mRefProvider = new HashMap<>();
+        mAlbums = new HashMap<>();
+        mArtists = new HashMap<>();
+        mMultiProviderPlaylists = new ArrayList<>();
     }
 
     /**
@@ -40,7 +40,7 @@ public class ProviderCache {
     public void purgeCacheForProvider(ProviderIdentifier id) {
         // Playlists
         Set<Map.Entry<String, Playlist>> playlists = mPlaylists.entrySet();
-        List<String> keysToRemove = new ArrayList<String>();
+        List<String> keysToRemove = new ArrayList<>();
 
         for (Map.Entry<String, Playlist> item : playlists) {
             if (item.getValue().getProvider().equals(id)) {
@@ -123,7 +123,7 @@ public class ProviderCache {
 
     public List<Playlist> getAllPlaylists() {
         synchronized (mPlaylists) {
-            return new ArrayList<Playlist>(mPlaylists.values());
+            return new ArrayList<>(mPlaylists.values());
         }
     }
 
@@ -132,18 +132,18 @@ public class ProviderCache {
     }
 
     public List<Song> getAllSongs() {
-        return new ArrayList<Song>(mSongs.values());
+        return new ArrayList<>(mSongs.values());
     }
 
     public List<Artist> getAllArtists() {
         synchronized (mArtists) {
-            return new ArrayList<Artist>(mArtists.values());
+            return new ArrayList<>(mArtists.values());
         }
     }
 
     public List<Album> getAllAlbums() {
         synchronized (mAlbums) {
-            return new ArrayList<Album>(mAlbums.values());
+            return new ArrayList<>(mAlbums.values());
         }
     }
 

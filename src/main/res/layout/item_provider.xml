@@ -8,8 +8,8 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/dsp_item_provider_size"
+        android:layout_height="@dimen/dsp_item_provider_size"
         android:id="@+id/ivProviderLogo"
         android:scaleType="centerInside"
         android:layout_alignParentStart="true"
@@ -27,8 +27,8 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/ivProviderLogo"
         android:layout_toRightOf="@+id/ivProviderLogo"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="@dimen/dsp_item_provider_margin"
+        android:layout_marginLeft="@dimen/dsp_item_provider_margin"
         android:layout_alignBottom="@+id/ivProviderLogo"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"

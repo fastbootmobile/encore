@@ -39,8 +39,8 @@ public class MusicBrainzClient {
     private static final String COVER_EP = "http://coverartarchive.org/release/";
 
     private static final Map<Pair<String, String>, AlbumInfo[]> mAlbumInfoCache
-            = new HashMap<Pair<String, String>, AlbumInfo[]>();
-    private static final Map<String, String> mAlbumArtCache = new HashMap<String, String>();
+            = new HashMap<>();
+    private static final Map<String, String> mAlbumArtCache = new HashMap<>();
 
     /**
      * Retrieves the album information from MusicBrainz. This method is synchronous and must be

@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvHeader"
-        android:textSize="22sp"
+        android:textSize="@dimen/listen_now_header_text_size"
         fontPath="fonts/Roboto-MediumItalic.ttf"
-        android:padding="8dp"/>
+        android:padding="@dimen/listen_now_header_padding"/>
 </FrameLayout>

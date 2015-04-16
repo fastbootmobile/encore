@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="@dimen/list_group_item_height"
-    android:clickable="true"
-    android:paddingBottom="8dp"
-    android:background="?android:attr/selectableItemBackground">
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/list_group_item_height"
+                android:clickable="true"
+                android:paddingBottom="8dp"
+                android:background="?android:attr/selectableItemBackground">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
+    <include
+        layout="@layout/divider"
         android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
         android:visibility="invisible"
-        android:background="#DDDDDD"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"/>
 
     <org.omnirom.music.app.ui.AlbumArtImageView
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="@dimen/artist_album_list_cover_size"
+        android:layout_height="@dimen/artist_album_list_cover_size"
+        android:layout_marginTop="@dimen/artist_album_list_item_margin"
         android:id="@+id/ivCover"
-        android:src="@drawable/album_placeholder"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"/>
 
     <LinearLayout
         android:orientation="vertical"
@@ -38,11 +37,10 @@
         android:layout_toLeftOf="@+id/ivPlayAlbum"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:paddingStart="72dp"
-        android:paddingLeft="72dp"
+        android:paddingStart="@dimen/artist_album_list_item_text_padding"
+        android:paddingLeft="@dimen/artist_album_list_item_text_padding"
         android:paddingRight="0dp"
         android:paddingEnd="0dp">
-
 
         <TextView
             android:layout_width="match_parent"
@@ -52,7 +50,7 @@
             style="?android:attr/textAppearanceMedium"
             android:maxLines="1"
             android:singleLine="true"
-            android:ellipsize="end" />
+            android:ellipsize="end"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -60,18 +58,19 @@
             android:id="@+id/tvAlbumYear"
             android:layout_gravity="center_vertical"
             style="?android:attr/textAppearanceMedium"
-            android:alpha="0.6" />
+            android:alpha="0.6"/>
+
     </LinearLayout>
 
     <org.omnirom.music.app.ui.SquareImageView
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/artist_album_list_item_play_size"
+        android:layout_height="@dimen/artist_album_list_item_play_size"
         android:id="@+id/ivPlayAlbum"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
         android:scaleType="centerInside"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true" />
+        android:layout_centerVertical="true"/>
 
 </RelativeLayout>

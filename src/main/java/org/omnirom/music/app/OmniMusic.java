@@ -17,13 +17,8 @@ package org.omnirom.music.app;
 
 import android.app.Application;
 import android.net.http.HttpResponseCache;
-import android.os.Build;
 import android.util.Log;
 
-import com.joshdholtz.sentry.Sentry;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.art.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;

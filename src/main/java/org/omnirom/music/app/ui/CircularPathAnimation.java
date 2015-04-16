@@ -16,7 +16,6 @@
 package org.omnirom.music.app.ui;
 
 import android.graphics.PointF;
-import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 

@@ -98,7 +98,7 @@ public class DspAdapter extends BaseAdapter {
      * @param list The list of ProviderIdentifier corresponding to DSPs to display
      */
     public DspAdapter(List<ProviderIdentifier> list) {
-        mProviders = new ArrayList<DSPConnection>();
+        mProviders = new ArrayList<>();
         for (ProviderIdentifier id : list) {
             mProviders.add(PluginsLookup.getDefault().getDSP(id));
         }

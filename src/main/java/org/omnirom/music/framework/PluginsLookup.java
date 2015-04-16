@@ -335,7 +335,7 @@ public class PluginsLookup {
         PackageManager pm = mContext.getPackageManager();
         assert(pm != null);
 
-        List<HashMap<String, String>> services = new ArrayList<HashMap<String, String>>();
+        List<HashMap<String, String>> services = new ArrayList<>();
 
         // We query the PackageManager for all services implementing this intent
         List<ResolveInfo> list = pm.queryIntentServices(intent,
@@ -345,7 +345,7 @@ public class PluginsLookup {
             ServiceInfo sinfo = info.serviceInfo;
 
             if (sinfo != null) {
-                HashMap<String, String> item = new HashMap<String, String>();
+                HashMap<String, String> item = new HashMap<>();
                 item.put(DATA_PACKAGE, sinfo.packageName);
                 item.put(DATA_SERVICE, sinfo.name);
 

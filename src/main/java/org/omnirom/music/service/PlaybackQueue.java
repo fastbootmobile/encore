@@ -26,8 +26,6 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Handles the playback of a list of songs

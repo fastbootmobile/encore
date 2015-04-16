@@ -226,7 +226,7 @@ public class Snackbar extends SnackbarLayout {
 
     private FrameLayout.LayoutParams init(Activity parent) {
         SnackbarLayout layout = (SnackbarLayout) LayoutInflater.from(parent)
-                .inflate(R.layout.snackbar, this, true);
+                .inflate(R.layout.widget_snackbar, this, true);
 
         float scale = getResources().getDisplayMetrics().density;
 

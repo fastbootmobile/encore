@@ -49,8 +49,8 @@ public class Suggestor {
      * @return A list of songs
      */
     public List<Song> buildArtistRadio(Artist artist) {
-        final List<Song> output = new ArrayList<Song>();
-        final List<Song> allSongs = new ArrayList<Song>();
+        final List<Song> output = new ArrayList<>();
+        final List<Song> allSongs = new ArrayList<>();
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
 

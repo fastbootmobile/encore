@@ -3,7 +3,7 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="#dd342d">
+              android:background="@color/welcome_background">
 
     <ImageView
         android:layout_width="match_parent"
@@ -36,9 +36,9 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:textColor="@color/white"
-        android:textSize="42sp"
+        android:textSize="@dimen/welcome_title_font"
         android:fontFamily="sans-serif-medium"
-        android:layout_margin="32dp"/>
+        android:layout_margin="@dimen/welcome_title_margin"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -47,10 +47,10 @@
         android:id="@+id/tvExplanation"
         android:layout_below="@+id/ivIllustration"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="@dimen/welcome_body_font"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_margin="16dp"/>
+        android:layout_margin="@dimen/welcome_body_margin"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -62,9 +62,9 @@
         android:layout_alignParentEnd="true"
         style="@style/OmniMusic.Spec.BorderlessButton"
         android:textColor="@color/white"
-        android:layout_marginRight="32dp"
-        android:layout_marginBottom="32dp"
-        android:textSize="16sp"/>
+        android:layout_marginRight="@dimen/welcome_button_margin"
+        android:layout_marginBottom="@dimen/welcome_button_margin"
+        android:textSize="@dimen/welcome_button_font"/>
 
     <Button
         style="@style/OmniMusic.Spec.BorderlessButton"
@@ -73,9 +73,9 @@
         android:text="@string/browse"
         android:id="@+id/btnBrowse"
         android:textColor="@color/white"
-        android:textSize="16sp"
+        android:textSize="@dimen/welcome_button_font"
         android:layout_alignBottom="@+id/btnNext"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="32dp"/>
+        android:layout_marginLeft="@dimen/welcome_button_margin"/>
 </RelativeLayout>

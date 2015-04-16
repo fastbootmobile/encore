@@ -59,11 +59,11 @@ public class EchoNest {
     private static final boolean DEBUG = false;
 
     private EchoNestAPI mEchoNest;
-    private static final Map<String, Artist> sArtistSearchCache = new HashMap<String, Artist>();
-    private static final Map<Artist, Biography> sArtistBiographyCache = new HashMap<Artist, Biography>();
-    private static final Map<Artist, Map<String, String>> sArtistUrlsCache = new HashMap<Artist, Map<String, String>>();
-    private static final Map<Artist, List<Artist>> sArtistSimilarCache = new HashMap<Artist, List<Artist>>();
-    private static final Map<Artist, Map<String, String>> sArtistForeignIDs = new HashMap<Artist, Map<String, String>>();
+    private static final Map<String, Artist> sArtistSearchCache = new HashMap<>();
+    private static final Map<Artist, Biography> sArtistBiographyCache = new HashMap<>();
+    private static final Map<Artist, Map<String, String>> sArtistUrlsCache = new HashMap<>();
+    private static final Map<Artist, List<Artist>> sArtistSimilarCache = new HashMap<>();
+    private static final Map<Artist, Map<String, String>> sArtistForeignIDs = new HashMap<>();
 
     /**
      * Initializes an EchoNest API client with the EchoNest API key
@@ -253,7 +253,7 @@ public class EchoNest {
                 synchronized (sArtistForeignIDs) {
                     linksMap = sArtistForeignIDs.get(similar);
                     if (linksMap == null) {
-                        linksMap = new HashMap<String, String>();
+                        linksMap = new HashMap<>();
                         sArtistForeignIDs.put(similar, linksMap);
                     }
                 }
@@ -437,7 +437,7 @@ public class EchoNest {
 
         // Send the query and get the playlist
         com.echonest.api.v4.Playlist playlist = mEchoNest.createStaticPlaylist(p);
-        List<String> songs = new ArrayList<String>();
+        List<String> songs = new ArrayList<>();
 
         List<com.echonest.api.v4.Song> enSongs = playlist.getSongs();
         for (com.echonest.api.v4.Song song : enSongs) {
@@ -475,7 +475,7 @@ public class EchoNest {
 
         // For each playlist
         int tracksCount = 0;
-        List<String> knownTracks = new ArrayList<String>();
+        List<String> knownTracks = new ArrayList<>();
         for (Playlist p : playlists) {
             // For each song of each playlist
             Iterator<String> songIt = p.songs();

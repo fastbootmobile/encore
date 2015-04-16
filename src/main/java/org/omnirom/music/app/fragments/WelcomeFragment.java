@@ -37,19 +37,19 @@ public class WelcomeFragment extends Fragment {
         int layoutId;
         switch (step) {
             case 1:
-                layoutId = R.layout.welcome1;
+                layoutId = R.layout.fragment_welcome1;
                 break;
 
             case 2:
-                layoutId = R.layout.welcome2;
+                layoutId = R.layout.fragment_welcome2;
                 break;
 
             case 3:
-                layoutId = R.layout.welcome3;
+                layoutId = R.layout.fragment_welcome3;
                 break;
 
             case 4:
-                layoutId = R.layout.welcome4;
+                layoutId = R.layout.fragment_welcome4;
                 break;
 
             default:

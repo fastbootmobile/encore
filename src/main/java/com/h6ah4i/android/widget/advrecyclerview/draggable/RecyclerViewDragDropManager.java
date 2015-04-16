@@ -654,9 +654,9 @@ public class RecyclerViewDragDropManager {
             throw new IllegalStateException("Invalid range specified --- start < 0 (range = " + range + ")");
         }
 
-        if (range.getEnd() > end) {
+        /*if (range.getEnd() > end) {
             throw new IllegalStateException("Invalid range specified --- end >= count (range = " + range + ")");
-        }
+        }*/
 
         if (!range.checkInRange(holder.getPosition())) {
             throw new IllegalStateException(

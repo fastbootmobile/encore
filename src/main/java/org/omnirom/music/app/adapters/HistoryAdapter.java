@@ -43,6 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Adapter to display the playback history
@@ -50,7 +51,7 @@ import java.util.List;
 public class HistoryAdapter extends BaseAdapter {
     private static final String TAG = "HistoryAdapter";
 
-    private static SimpleDateFormat sDateFormat = new SimpleDateFormat("MMM dd\nHH:mm");
+    private static SimpleDateFormat sDateFormat = new SimpleDateFormat("MMM dd\nHH:mm", Locale.getDefault());
     private static Comparator<ListenLogger.LogEntry> sTimeSort = new Comparator<ListenLogger.LogEntry>() {
         @Override
         public int compare(ListenLogger.LogEntry lhs, ListenLogger.LogEntry rhs) {

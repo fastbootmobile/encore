@@ -2,15 +2,15 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/list_item_height"
     android:orientation="vertical"
-    android:paddingStart="16dp"
-    android:paddingLeft="16dp"
+    android:paddingStart="@dimen/nav_drawer_item_padding"
+    android:paddingLeft="@dimen/nav_drawer_item_padding"
     android:paddingEnd="56dp"
     android:paddingRight="56dp">
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:id="@+id/navdrawer_divider"
-        android:background="#DDDDDD"
+        android:background="@color/separator"
         />
     <TextView
         android:id="@android:id/text1"

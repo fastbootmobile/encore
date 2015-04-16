@@ -93,13 +93,13 @@ public class NavDrawerAdapter extends BaseAdapter {
             LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
 
             if (getItemViewType(i) == 1) {
-                view = inflater.inflate(R.layout.nav_drawer_regular_item, viewGroup, false);
+                view = inflater.inflate(R.layout.item_nav_drawer_regular, viewGroup, false);
 
                 tag = new ViewHolder();
                 tag.tvText = (TextView) view.findViewById(android.R.id.text1);
                 view.setTag(tag);
             } else {
-                view = inflater.inflate(R.layout.nav_drawer_special_item, viewGroup, false);
+                view = inflater.inflate(R.layout.item_nav_drawer_special, viewGroup, false);
 
                 tag = new ViewHolder();
                 tag.tvText = (TextView) view.findViewById(android.R.id.text1);

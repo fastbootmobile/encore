@@ -282,7 +282,7 @@ public class Utils {
      * @return A reference to the main artist, or null if none
      */
     public static String getMainArtist(Album a) {
-        HashMap<String, Integer> occurrences = new HashMap<String, Integer>();
+        HashMap<String, Integer> occurrences = new HashMap<>();
         Iterator<String> it = a.songs();
 
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
@@ -331,7 +331,7 @@ public class Utils {
      * @return A reference to the main artist, or null if none
      */
     public static String getMainArtist(Playlist p) {
-        HashMap<String, Integer> occurrences = new HashMap<String, Integer>();
+        HashMap<String, Integer> occurrences = new HashMap<>();
         Iterator<String> it = p.songs();
 
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();

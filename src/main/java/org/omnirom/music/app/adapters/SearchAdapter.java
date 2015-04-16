@@ -29,7 +29,6 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.ArtistActivity;
@@ -658,7 +657,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
         if (playlist != null && (playlist.isLoaded() || playlist.getName() != null)) {
             tag.tvTitle.setText(playlist.getName());
-            tag.tvSubtitle.setText(res.getString(R.string.xx_songs, playlist.getSongsCount()));
+            tag.tvSubtitle.setText(res.getQuantityString(R.plurals.xx_songs, playlist.getSongsCount()));
             tag.content = playlist;
             tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), playlist);
             tag.ivSource.setImageDrawable(tag.sourceLogo);

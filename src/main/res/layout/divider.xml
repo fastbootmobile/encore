@@ -3,8 +3,7 @@
 <View xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools"
       android:layout_width="match_parent"
-    android:layout_height="1dp"
-    android:background="#FFDDDDDD"
+    android:layout_height="@dimen/divider_height"
+    android:background="@color/separator"
     tools:ignore="Overdraw">
-
 </View>

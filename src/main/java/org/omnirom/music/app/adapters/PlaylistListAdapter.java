@@ -217,8 +217,8 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
             holder.ivCover.loadArtForPlaylist(item);
 
             if (item.isLoaded() || item.getSongsCount() > 0) {
-                holder.tvPlaylistDesc.setText(holder.tvPlaylistDesc.getContext().getString(R.string.xx_songs,
-                        item.getSongsCount()));
+                holder.tvPlaylistDesc.setText(holder.tvPlaylistDesc.getContext().getResources().getQuantityString(R.plurals.xx_songs,
+                        item.getSongsCount(), item.getSongsCount()));
 
                 holder.ivOfflineStatus.setVisibility(View.VISIBLE);
 

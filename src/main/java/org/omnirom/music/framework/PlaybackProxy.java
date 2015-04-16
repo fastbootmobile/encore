@@ -278,7 +278,7 @@ public class PlaybackProxy {
         try {
             return getPlayback().getCurrentPlaybackQueue();
         } catch (RemoteException e) {
-            return new ArrayList<Song>();
+            return new ArrayList<>();
         }
     }
 
@@ -322,7 +322,7 @@ public class PlaybackProxy {
         try {
             return getPlayback().getDSPChain();
         } catch (RemoteException e) {
-            return new ArrayList<ProviderIdentifier>();
+            return new ArrayList<>();
         }
     }
 

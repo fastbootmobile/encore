@@ -196,7 +196,7 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
         @Override
         protected List<Artist> doInBackground(Void... params) {
             List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-            final List<Artist> artists = new ArrayList<Artist>();
+            final List<Artist> artists = new ArrayList<>();
             for (ProviderConnection providerConnection : providers) {
                 try {
                     IMusicProvider provider = providerConnection.getBinder();

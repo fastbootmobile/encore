@@ -28,7 +28,7 @@
         <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:id="@+id/cardArtistSuggestion"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="@dimen/artist_suggestion_card_height"
             android:elevation="@dimen/card_elevation"
             card_view:cardCornerRadius="@dimen/cardview_default_radius">
 
@@ -38,7 +38,7 @@
 
                 <org.omnirom.music.app.ui.AlbumArtImageView
                     android:id="@+id/ivArtistSuggestionCover"
-                    android:layout_width="64dp"
+                    android:layout_width="@dimen/artist_suggestion_card_height"
                     android:layout_height="match_parent"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentLeft="true"
@@ -53,9 +53,9 @@
                     android:layout_height="wrap_content"
                     android:layout_toEndOf="@id/ivArtistSuggestionCover"
                     android:layout_toRightOf="@id/ivArtistSuggestionCover"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginLeft="@dimen/artist_suggestion_text_padding"
+                    android:layout_marginStart="@dimen/artist_suggestion_text_padding"
+                    android:layout_marginTop="@dimen/artist_suggestion_text_padding"
                     android:singleLine="true"
                     android:ellipsize="end"
                     android:layout_toLeftOf="@+id/btnArtistSuggestionPlay"
@@ -67,21 +67,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/tvArtistSuggestionTitle"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="@dimen/artist_suggestion_text_padding"
+                    android:layout_marginStart="@dimen/artist_suggestion_text_padding"
                     android:layout_toEndOf="@id/ivArtistSuggestionCover"
                     android:layout_toRightOf="@id/ivArtistSuggestionCover"
-                    android:alpha="0.6"
+                    android:textColor="@color/text_detail"
                     android:layout_toLeftOf="@+id/btnArtistSuggestionPlay"
                     android:layout_toStartOf="@+id/btnArtistSuggestionPlay" />
 
                 <Button
                     android:id="@+id/btnArtistSuggestionPlay"
                     style="@style/OmniMusic.Spec.BorderlessButton"
-                    android:layout_width="72dp"
-                    android:layout_height="36dp"
-                    android:layout_marginRight="4dp"
-                    android:layout_marginEnd="4dp"
+                    android:layout_width="@dimen/artist_suggestion_button_width"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="@dimen/artist_suggestion_button_margin"
+                    android:layout_marginEnd="@dimen/artist_suggestion_button_margin"
                     android:text="@string/start_radio"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentRight="true"
@@ -97,7 +97,7 @@
             android:id="@+id/tvHeaderAlbums"
             android:layout_marginLeft="0dp"
             android:layout_marginRight="0dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/artist_tracks_header_margin_top"
             android:text="@string/albums" />
 
         <ProgressBar
@@ -107,7 +107,7 @@
             android:layout_gravity="center_horizontal"
             android:indeterminate="true" />
 
-        <include layout="@layout/offline" />
+        <include layout="@layout/part_offline" />
 
         <LinearLayout
             android:id="@+id/llAlbums"

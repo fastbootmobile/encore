@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="@dimen/bucket_item_margin_left"
         android:visibility="invisible"
         android:id="@+id/pbBucketSpinner" />
 
@@ -23,13 +23,13 @@
         android:maxLines="1"
         android:singleLine="true"
         android:ellipsize="end"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="@dimen/bucket_item_margin_left"
+        android:layout_marginLeft="@dimen/bucket_item_margin_left"
         android:gravity="center_vertical"
         android:layout_weight="1" />
 
     <org.omnirom.music.app.ui.SquareImageView
-        android:layout_width="48dp"
+        android:layout_width="@dimen/bucket_item_overflow_size"
         android:layout_height="match_parent"
         android:id="@+id/ivOverflow"
         android:src="@drawable/ic_more_vert_dark"

@@ -224,7 +224,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         mListViewContents = (PlaylistListView) root.findViewById(R.id.lvPlaylistContents);
 
         // Setup the parallaxed header
-        View headerView = inflater.inflate(R.layout.songs_list_view_header, mListViewContents, false);
+        View headerView = inflater.inflate(R.layout.header_listview_songs, mListViewContents, false);
         mListViewContents.addParallaxedHeaderView(headerView);
 
         mAdapter = new PlaylistAdapter();
@@ -501,7 +501,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
     private void removeDuplicates() throws RemoteException {
         // Process each track and look for the same track
         Iterator<String> songsIt = mPlaylist.songs();
-        List<String> knownTracks = new ArrayList<String>();
+        List<String> knownTracks = new ArrayList<>();
 
         // Only process if the provider is up
         ProviderConnection conn = PluginsLookup.getDefault().getProvider(mPlaylist.getProvider());
