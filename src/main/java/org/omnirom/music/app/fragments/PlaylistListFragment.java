@@ -167,7 +167,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
         // If mAdapter isn't null, we're in portrait with the draggable list view.
         if (mAdapter != null) {
-            mRecyclerView = (RecyclerView) getView().findViewById(R.id.rvPlaylists);
+            mRecyclerView = (RecyclerView) view.findViewById(R.id.rvPlaylists);
             mLayoutManager = new LinearLayoutManager(getActivity());
 
             // drag & drop manager

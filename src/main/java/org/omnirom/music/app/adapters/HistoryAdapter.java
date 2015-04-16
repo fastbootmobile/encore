@@ -161,8 +161,9 @@ public class HistoryAdapter extends BaseAdapter {
      * Sorts the provided list by time, most recent first
      * @param list The list to sort
      */
-    public static void sortByTime(List<ListenLogger.LogEntry> list) {
+    public static List<ListenLogger.LogEntry> sortByTime(List<ListenLogger.LogEntry> list) {
         Collections.sort(list, sTimeSort);
+        return list;
     }
 
     private static class ViewHolder {

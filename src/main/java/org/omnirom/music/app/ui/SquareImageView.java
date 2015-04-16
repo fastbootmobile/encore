@@ -25,6 +25,8 @@ import android.widget.ImageView;
  */
 public class SquareImageView extends ImageView {
 
+    private boolean mDisableSquared = false;
+
     public SquareImageView(Context context) {
         super(context);
     }
@@ -37,17 +39,23 @@ public class SquareImageView extends ImageView {
         super(context, attrs, defStyle);
     }
 
+    public void setForceDisableSquared(boolean disable) {
+        mDisableSquared = disable;
+    }
+
     @SuppressWarnings("SuspiciousNameCombination")
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        // Only set a square size if we're not defining an exact size
-        ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        if (layoutParams.width == ViewGroup.LayoutParams.MATCH_PARENT
-            || layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT) {
-            int width = getMeasuredWidth();
-            setMeasuredDimension(width, width);
+        if (!mDisableSquared) {
+            // Only set a square size if we're not defining an exact size
+            ViewGroup.LayoutParams layoutParams = getLayoutParams();
+            if (layoutParams.width == ViewGroup.LayoutParams.MATCH_PARENT
+                    || layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                int width = getMeasuredWidth();
+                setMeasuredDimension(width, width);
+            }
         }
     }
 

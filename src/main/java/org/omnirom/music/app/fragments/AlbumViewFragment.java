@@ -216,14 +216,20 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
         mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_album_view, container, false);
         assert mRootView != null;
 
+        return mRootView;
+
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         setupList();
 
-        setupHeader(inflater);
+        setupHeader(LayoutInflater.from(view.getContext()));
 
         // Start loading songs in another thread
         loadSongs();
-
-        return mRootView;
     }
 
     @Override
@@ -377,7 +383,7 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
         anim.setDuration(200);
         mListView.setLayoutAnimation(new LayoutAnimationController(anim));
 
-        setupMaterialReelBar(mRootView, mReelFabClickListener);
+        setupMaterialReelBar(headerView, mReelFabClickListener);
     }
 
     public ImageView getHeroImageView() {

@@ -35,7 +35,9 @@ import org.lucasr.twowayview.TwoWayView;
 import org.lucasr.twowayview.widget.DividerItemDecoration;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.adapters.HistoryAdapter;
 import org.omnirom.music.app.adapters.ListenNowAdapter;
+import org.omnirom.music.framework.ListenLogger;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -65,6 +67,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
     private static final ListenNowAdapter sAdapter = new ListenNowAdapter();
     private static boolean sWarmUp = false;
+
+    private static final int TYPE_ARTIST = 0;
+    private static final int TYPE_ALBUM = 1;
+    private static final int TYPE_SONG = 2;
+
+    private static final int MAX_SUGGESTIONS = 21;
+    private static final int MAX_RECENTS = 4;
 
     private Handler mHandler;
     private TextView mTxtNoMusic;
@@ -116,11 +125,11 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             // playlist) with a fixed layout:
             // - One big entry
             // - Six small entries
-            // A total of 21 entries
+            // A total of MAX_SUGGESTIONS entries
 
             final Random random = new Random(SystemClock.uptimeMillis());
             final long startTime = SystemClock.uptimeMillis();
-            for (int i = 0; i < 21; i++) {
+            for (int i = 0; i < MAX_SUGGESTIONS; i++) {
                 // Watchdog timer
                 if (SystemClock.uptimeMillis() - startTime > 1000) {
                     break;
@@ -176,8 +185,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 }
 
                 // Let's see if this song has the type of entity we're looking for
-                if ((type == 0 && track.getArtist() == null) // artist
-                        || (type == 1 && track.getAlbum() == null)) {
+                if ((type == TYPE_ARTIST && track.getArtist() == null)
+                        || (type == TYPE_ALBUM && track.getAlbum() == null)) {
                     i--;
                     continue;
                 }
@@ -188,12 +197,12 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 // And we make the entry!
                 BoundEntity entity;
                 switch (type) {
-                    case 0: // Artist
+                    case TYPE_ARTIST:
                         String artistRef = track.getArtist();
                         entity = aggregator.retrieveArtist(artistRef, track.getProvider());
                         break;
 
-                    case 1: // Album
+                    case TYPE_ALBUM:
                         String albumRef = track.getAlbum();
                         entity = aggregator.retrieveAlbum(albumRef, track.getProvider());
                         ProviderConnection pc = PluginsLookup.getDefault()
@@ -210,7 +219,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         }
                         break;
 
-                    case 2: // Song
+                    case TYPE_SONG: // UNUSED
                         entity = track;
                         break;
 
@@ -218,6 +227,14 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         Log.e(TAG, "Unexpected entry type " + type);
                         entity = null;
                         break;
+                }
+
+                if (type == TYPE_ARTIST && ((Artist) entity).getName() == null) {
+                    i--;
+                    continue;
+                } else if (type == TYPE_ALBUM && ((Album) entity).getName() == null) {
+                    i--;
+                    continue;
                 }
 
                 if (entity != null && usedReferences.contains(entity.getRef())) {
@@ -234,6 +251,65 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 } else {
                     // Something bad happened while getting this entity, try something else
                     i--;
+                }
+            }
+
+            // Generate 4 recent entries
+            ListenLogger logger = new ListenLogger(getActivity());
+            List<ListenLogger.LogEntry> entries = HistoryAdapter.sortByTime(logger.getEntries());
+            List<String> knownReferences = new ArrayList<>();
+
+            int countRecent = 0;
+            for (ListenLogger.LogEntry entry : entries) {
+                // Skip known elements
+                if (knownReferences.contains(entry.getReference())) {
+                    continue;
+                }
+
+                final Song song = aggregator.retrieveSong(entry.getReference(), entry.getIdentifier());
+
+                // Keep only fully-featured elements
+                if (song == null || song.getArtist() == null || song.getAlbum() == null) {
+                    continue;
+                }
+
+                // Skip known elements (again)
+                if (knownReferences.contains(song.getAlbum()) ||
+                        knownReferences.contains(song.getArtist())) {
+                    continue;
+                }
+
+                int type = random.nextInt(2);
+                BoundEntity entity;
+                switch (type) {
+                    case TYPE_ARTIST:
+                        entity = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
+                        break;
+
+                    case TYPE_ALBUM:
+                        entity = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
+                        break;
+
+                    default:
+                        throw new RuntimeException("Should not happen");
+                }
+
+
+                // Store the references
+                knownReferences.add(song.getRef());
+                knownReferences.add(song.getAlbum());
+                knownReferences.add(song.getArtist());
+
+                // Create the item
+                ListenNowAdapter.ListenNowEntry card = new ListenNowAdapter.ListenNowEntry(ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_SMALL,
+                        entity);
+                sAdapter.addRecentEntry(card);
+                sAdapter.notifyItemInserted(sAdapter.getItemCount() - 1);
+
+                countRecent++;
+
+                if (countRecent == 4) {
+                    break;
                 }
             }
         }
@@ -263,7 +339,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         super.onCreate(savedInstanceState);
         mHandler = new Handler();
 
-        if (sAdapter.getItemCount() == 0) {
+        if (sAdapter.getItemCount() == 2) {
             // Generate entries
             if (!sWarmUp) {
                 mHandler.removeCallbacks(mGenerateEntries);
@@ -292,7 +368,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         TwoWayView twvRoot = (TwoWayView) root.findViewById(R.id.twvRoot);
         mTxtNoMusic = (TextView) root.findViewById(R.id.txtNoMusic);
 
-        if (sAdapter.getItemCount() > 0) {
+        if (sAdapter.getItemCount() > 2) {
             mTxtNoMusic.setVisibility(View.GONE);
         } else {
             mTxtNoMusic.setTranslationX(-100);

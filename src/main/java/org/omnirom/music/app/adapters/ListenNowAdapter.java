@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Fastboot Mobile, LLC.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, see <http://www.gnu.org/licenses>.
+ */
+
 package org.omnirom.music.app.adapters;
 
 import android.annotation.TargetApi;
@@ -21,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -45,17 +61,17 @@ import java.util.List;
 /**
  * Created by Guigui on 22/08/2014.
  */
-public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.ViewHolder> {
+public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final String TAG = "ListenNowAdapter";
 
-    private static final int ITEM_TYPE_ENTRY = 1;
-    private static final int ITEM_TYPE_HEADER = 2;
+    private static final int ITEM_TYPE_ENTRY = 1000;
+    private static final int ITEM_TYPE_HEADER = 2000;
 
     /**
      * ViewHolder that holds references to the views
      */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class EntryViewHolder extends RecyclerView.ViewHolder {
         public final LinearLayout llRoot;
         public final TextView tvTitle;
         public final TextView tvSubTitle;
@@ -63,7 +79,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         public int backColor;
         public BoundEntity entity;
 
-        public ViewHolder(View itemView) {
+        public EntryViewHolder(View itemView) {
             super(itemView);
             llRoot = (LinearLayout) itemView.findViewById(R.id.llRoot);
             tvTitle = (TextView) itemView.findViewById(R.id.tvTitle);
@@ -77,12 +93,24 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         }
     }
 
+    public static class HeaderViewHolder extends RecyclerView.ViewHolder {
+        public final FrameLayout flRoot;
+        public final TextView tvHeader;
+
+        public HeaderViewHolder(View itemView) {
+            super(itemView);
+            flRoot = (FrameLayout) itemView.findViewById(R.id.flRoot);
+            tvHeader = (TextView) itemView.findViewById(R.id.tvHeader);
+        }
+    }
+
     /**
      * Entry representing the contents and the way the grid entry in Listen Now should be displayed
      */
     public static class ListenNowEntry {
         public static final int ENTRY_SIZE_LARGE = 0;
         public static final int ENTRY_SIZE_MEDIUM = 1;
+        public static final int ENTRY_SIZE_SMALL = 2;
 
         /**
          * The size of the ListenNow entry. One of ListenNowEntry.ENTRY_SIZE_...
@@ -124,7 +152,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                final ViewHolder holder = (ViewHolder) view.getTag();
+                                final EntryViewHolder holder = (EntryViewHolder) view.getTag();
                                 holder.backColor = item.getRgb();
                                 Utils.setViewBackground(holder.llRoot, transition);
                                 transition.startTransition(500);
@@ -141,12 +169,9 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         @Override
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         public void onClick(View view) {
-            final ViewHolder holder = (ViewHolder) view.getTag();
-            final int pos = holder.getPosition();
-            final ListenNowEntry entry = mEntries.get(pos);
+            final EntryViewHolder holder = (EntryViewHolder) view.getTag();
 
             // Get hero image and background color
-
             MaterialTransitionDrawable draw = (MaterialTransitionDrawable) holder.ivCover.getDrawable();
             final Bitmap hero = draw.getFinalDrawable().getBitmap();
             final int backColor = holder.backColor;
@@ -155,8 +180,8 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
             final AlbumArtImageView ivCover = holder.ivCover;
 
             final Context ctx = holder.llRoot.getContext();
-            if (entry.entity instanceof Album) {
-                Album album = (Album) entry.entity;
+            if (holder.entity instanceof Album) {
+                Album album = (Album) holder.entity;
                 intent = AlbumActivity.craftIntent(ctx, hero, album.getRef(), album.getProvider(),
                         backColor);
 
@@ -164,8 +189,8 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                     opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),
                             new Pair<View, String>(ivCover, "itemImage"));
                 }
-            } else if (entry.entity instanceof Artist) {
-                Artist artist = (Artist) entry.entity;
+            } else if (holder.entity instanceof Artist) {
+                Artist artist = (Artist) holder.entity;
                 intent = ArtistActivity.craftIntent(ctx, hero, artist.getRef(),
                         artist.getProvider(), backColor);
 
@@ -173,8 +198,8 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
                     opt = ActivityOptions.makeSceneTransitionAnimation((Activity) ivCover.getContext(),
                             new Pair<View, String>(ivCover, "itemImage"));
                 }
-            } else if (entry.entity instanceof Song) {
-                Song song = (Song) entry.entity;
+            } else if (holder.entity instanceof Song) {
+                Song song = (Song) holder.entity;
                 playSong(song);
             }
 
@@ -198,24 +223,34 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
 
     public ListenNowAdapter() {
         mHandler = new Handler();
+        setHasStableIds(true);
     }
 
     /**
      * Remove all entries
      */
     public void clearEntries() {
+        mRecentEntries.clear();
         mEntries.clear();
         notifyDataSetChanged();
     }
 
     /**
-     * Add an entry to the list
-     *
-     * @param entry
+     * Add an entry to the suggestions list
+     * @param entry The entry
      */
     public void addEntry(ListenNowEntry entry) {
         mEntries.add(entry);
         notifyItemInserted(mEntries.size() - 1);
+    }
+
+    /**
+     * Adds a recent entry to the list of recent activity
+     * @param entry The entry
+     */
+    public void addRecentEntry(ListenNowEntry entry) {
+        mRecentEntries.add(entry);
+        notifyItemInserted(mRecentEntries.size());
     }
 
     /**
@@ -224,7 +259,14 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
      * @return The position of the item containing the provided entity, or -1 if not found
      */
     public int contains(BoundEntity entity) {
-        int i = 0;
+        int i = 1;
+        for (ListenNowEntry entry : mRecentEntries) {
+            if (entry.entity.equals(entity)) {
+                return i;
+            }
+            ++i;
+        }
+        ++i;
         for (ListenNowEntry entry : mEntries) {
             if (entry.entity.equals(entity)) {
                 return i;
@@ -239,103 +281,173 @@ public class ListenNowAdapter extends RecyclerView.Adapter<ListenNowAdapter.View
         PlaybackProxy.playSong(s);
     }
 
+
     @Override
     public int getItemViewType(int position) {
-        return super.getItemViewType(position);
-    }
-
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        final LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-        final View view = inflater.inflate(R.layout.listen_now_entry, viewGroup, false);
-        final ViewHolder holder = new ViewHolder(view);
-
-        // Setup album art listener
-        holder.ivCover.setOnArtLoadedListener(mAlbumArtListener);
-        holder.llRoot.setOnClickListener(mItemClickListener);
-
-        holder.llRoot.setAlpha(0.0f);
-        holder.llRoot.animate().alpha(1).setDuration(300)
-                .setInterpolator(new DecelerateInterpolator(1.5f)).start();
-
-        return holder;
-    }
-
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int i) {
-        final ListenNowEntry entry = mEntries.get(i);
-
-        // Update span status
-        final StaggeredGridLayoutManager.LayoutParams lp =
-                (StaggeredGridLayoutManager.LayoutParams) holder.llRoot.getLayoutParams();
-
-        int span = 1;
-        switch (entry.entrySize) {
-            case ListenNowEntry.ENTRY_SIZE_MEDIUM:
-                span = 1;
-                holder.llRoot.setOrientation(LinearLayout.VERTICAL);
-                break;
-
-            case ListenNowEntry.ENTRY_SIZE_LARGE:
-                span = 2;
-                holder.llRoot.setOrientation(LinearLayout.HORIZONTAL);
-                break;
-        }
-
-        lp.span = span;
-        holder.llRoot.setLayoutParams(lp);
-
-        final Resources res = holder.llRoot.getResources();
-
-        if (!entry.entity.equals(holder.entity)) {
-            // Reset root color
-            final int defaultColor = res.getColor(R.color.default_album_art_background);
-            holder.llRoot.setBackgroundColor(defaultColor);
-            holder.backColor = defaultColor;
-        }
-
-        // Update entry contents
-        if (entry.entity instanceof Playlist) {
-            Playlist playlist = (Playlist) entry.entity;
-            int count = playlist.getSongsCount();
-            holder.tvTitle.setText(playlist.getName());
-            holder.tvSubTitle.setText(res.getQuantityString(R.plurals.songs_count, count, count));
-            holder.ivCover.loadArtForPlaylist(playlist);
-        } else if (entry.entity instanceof Artist) {
-            Artist artist = (Artist) entry.entity;
-            holder.tvTitle.setText(artist.getName());
-            holder.tvSubTitle.setText(null);
-            holder.ivCover.loadArtForArtist(artist);
-        } else if (entry.entity instanceof Album) {
-            Album album = (Album) entry.entity;
-            holder.tvTitle.setText(album.getName());
-            String artistRef = Utils.getMainArtist(album);
-            if (artistRef != null) {
-                Artist artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, album.getProvider());
-                if (artist != null) {
-                    holder.tvSubTitle.setText(artist.getName());
-                } else {
-                    holder.tvSubTitle.setText("...");
-                }
-            } else {
-                holder.tvSubTitle.setText(null);
-            }
-            holder.ivCover.loadArtForAlbum(album);
-        } else if (entry.entity instanceof Song) {
-            Song song = (Song) entry.entity;
-            holder.tvTitle.setText(song.getTitle());
-            holder.tvSubTitle.setText(song.getArtist());
-            holder.ivCover.loadArtForSong(song);
+        if (position == 0) {
+            // Recent activity header
+            return ITEM_TYPE_HEADER;
+        } else if (position > 0 && position <= mRecentEntries.size()) {
+            // Recent activity item
+            return ITEM_TYPE_ENTRY;
+        } else if (position == mRecentEntries.size() + 1) {
+            // Suggestions header
+            return ITEM_TYPE_HEADER;
         } else {
-            Log.e(TAG, "Unsupported entity type: " + entry.entity);
+            // Suggestion item
+            return ITEM_TYPE_ENTRY;
         }
+    }
 
-        holder.entity = entry.entity;
+    @Override
+    public long getItemId(int position) {
+        if (position == 0) {
+            // Recent activity header
+            return 0;
+        } else if (position > 0 && position <= mRecentEntries.size()) {
+            return mRecentEntries.get(position - 1).entity.getRef().hashCode();
+        } else if (position == mRecentEntries.size() + 1) {
+            return 1;
+        } else {
+            return mEntries.get(position - 2 - mRecentEntries.size()).entity.getRef().hashCode();
+        }
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, final int viewType) {
+        final LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
+
+        if (viewType == ITEM_TYPE_HEADER) {
+            final View view = inflater.inflate(R.layout.item_listen_now_header, viewGroup, false);
+            final HeaderViewHolder holder = new HeaderViewHolder(view);
+
+            holder.flRoot.setAlpha(0);
+            holder.flRoot.animate().alpha(1.0f).start();
+
+            return holder;
+        } else {
+            final View view = inflater.inflate(R.layout.listen_now_entry, viewGroup, false);
+            final EntryViewHolder holder = new EntryViewHolder(view);
+
+            // Setup album art listener
+            holder.ivCover.setOnArtLoadedListener(mAlbumArtListener);
+            holder.llRoot.setOnClickListener(mItemClickListener);
+
+            holder.llRoot.setAlpha(0.0f);
+            holder.llRoot.animate().alpha(1).setDuration(300)
+                    .setInterpolator(new DecelerateInterpolator(1.5f)).start();
+
+            return holder;
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holderBase, int i) {
+        final int viewType = getItemViewType(i);
+
+        if (viewType == ITEM_TYPE_HEADER) {
+            final HeaderViewHolder holder = (HeaderViewHolder) holderBase;
+            if (i == 0) {
+                holder.tvHeader.setText("Recent activity");
+            } else {
+                holder.tvHeader.setText("How about listening to...");
+            }
+
+            // Update span status
+            final StaggeredGridLayoutManager.LayoutParams lp =
+                    (StaggeredGridLayoutManager.LayoutParams) holder.flRoot.getLayoutParams();
+            lp.span = 2;
+            holder.flRoot.setLayoutParams(lp);
+        } else if (viewType == ITEM_TYPE_ENTRY) {
+            final EntryViewHolder holder = (EntryViewHolder) holderBase;
+            final ListenNowEntry entry = (i > 0 && i <= mRecentEntries.size()) ? mRecentEntries.get(i - 1)
+                    : mEntries.get(i - 2 - mRecentEntries.size());
+
+            // Update span status
+            final StaggeredGridLayoutManager.LayoutParams lp =
+                    (StaggeredGridLayoutManager.LayoutParams) holder.llRoot.getLayoutParams();
+
+            int span = 1;
+            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            switch (entry.entrySize) {
+                case ListenNowEntry.ENTRY_SIZE_SMALL:
+                    span = 1;
+                    holder.llRoot.setOrientation(LinearLayout.VERTICAL);
+                    height = Utils.dpToPx(Resources.getSystem(), 64);
+                    break;
+
+                case ListenNowEntry.ENTRY_SIZE_MEDIUM:
+                    span = 1;
+                    holder.llRoot.setOrientation(LinearLayout.VERTICAL);
+                    break;
+
+                case ListenNowEntry.ENTRY_SIZE_LARGE:
+                    span = 2;
+                    holder.llRoot.setOrientation(LinearLayout.HORIZONTAL);
+                    break;
+            }
+
+            lp.span = span;
+            holder.llRoot.setLayoutParams(lp);
+
+            // Limit cover art size on small cards
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.ivCover.getLayoutParams();
+            params.height = height;
+            holder.ivCover.setForceDisableSquared(height != ViewGroup.LayoutParams.WRAP_CONTENT);
+            holder.ivCover.setLayoutParams(params);
+
+            final Resources res = holder.llRoot.getResources();
+
+            if (!entry.entity.equals(holder.entity)) {
+                // Reset root color
+                final int defaultColor = res.getColor(R.color.default_album_art_background);
+                holder.llRoot.setBackgroundColor(defaultColor);
+                holder.backColor = defaultColor;
+            }
+
+            // Update entry contents
+            if (entry.entity instanceof Playlist) {
+                Playlist playlist = (Playlist) entry.entity;
+                int count = playlist.getSongsCount();
+                holder.tvTitle.setText(playlist.getName());
+                holder.tvSubTitle.setText(res.getQuantityString(R.plurals.songs_count, count, count));
+                holder.ivCover.loadArtForPlaylist(playlist);
+            } else if (entry.entity instanceof Artist) {
+                Artist artist = (Artist) entry.entity;
+                holder.tvTitle.setText(artist.getName());
+                holder.tvSubTitle.setText(null);
+                holder.ivCover.loadArtForArtist(artist);
+            } else if (entry.entity instanceof Album) {
+                Album album = (Album) entry.entity;
+                holder.tvTitle.setText(album.getName());
+                String artistRef = Utils.getMainArtist(album);
+                if (artistRef != null) {
+                    Artist artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, album.getProvider());
+                    if (artist != null) {
+                        holder.tvSubTitle.setText(artist.getName());
+                    } else {
+                        holder.tvSubTitle.setText("...");
+                    }
+                } else {
+                    holder.tvSubTitle.setText(null);
+                }
+                holder.ivCover.loadArtForAlbum(album);
+            } else if (entry.entity instanceof Song) {
+                Song song = (Song) entry.entity;
+                holder.tvTitle.setText(song.getTitle());
+                holder.tvSubTitle.setText(song.getArtist());
+                holder.ivCover.loadArtForSong(song);
+            } else {
+                Log.e(TAG, "Unsupported entity type: " + entry.entity);
+            }
+
+            holder.entity = entry.entity;
+        }
     }
 
     @Override
     public int getItemCount() {
-        return mEntries.size();
+        return mRecentEntries.size() + mEntries.size() + 2;
     }
 
 }
