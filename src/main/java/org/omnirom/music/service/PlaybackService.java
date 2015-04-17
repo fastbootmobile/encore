@@ -100,6 +100,9 @@ public class PlaybackService extends Service
                     Log.e(TAG, "Cannot notify playback queue changed", e);
                 }
             }
+
+            // Save the queue as well
+            savePlaybackQueue();
         }
     };
 
@@ -364,9 +367,7 @@ public class PlaybackService extends Service
         PluginsLookup.getDefault().tearDown(mNativeHub);
 
         // Store the playback queue
-        SharedPreferences queuePrefs = getSharedPreferences(QUEUE_SHARED_PREFS, MODE_PRIVATE);
-        mPlaybackQueue.save(queuePrefs.edit());
-        queuePrefs.edit().putInt("current", mCurrentTrack).apply();
+        savePlaybackQueue();
 
         // Shutdown DSP chain
         mNativeHub.onStop();
@@ -514,6 +515,15 @@ public class PlaybackService extends Service
 
     public PlaybackQueue getQueue() {
         return mPlaybackQueue;
+    }
+
+    /**
+     * Saves the playback queue in the local storage
+     */
+    private void savePlaybackQueue() {
+        SharedPreferences queuePrefs = getSharedPreferences(QUEUE_SHARED_PREFS, MODE_PRIVATE);
+        mPlaybackQueue.save(queuePrefs.edit());
+        queuePrefs.edit().putInt("current", mCurrentTrack).apply();
     }
 
     /**
@@ -1274,6 +1284,9 @@ public class PlaybackService extends Service
                     }
                 }
             }
+
+            // Save the queue as we started playing a new song (maybe)
+            savePlaybackQueue();
         }
 
         @Override
