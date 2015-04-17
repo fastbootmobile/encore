@@ -28,6 +28,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.ui.CircularPathAnimation;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
+import org.omnirom.music.app.ui.ReverseAnimator;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.utils.Utils;
 
@@ -38,6 +39,7 @@ public class MaterialReelBaseFragment extends Fragment {
     private ImageView mBarNext;
     private ImageView mBarPrevious;
     private TextView mBarTitle;
+    private float mSourceDeltaX;
     protected boolean mMaterialBarVisible = false;
     protected PlayPauseDrawable mBarDrawable;
 
@@ -88,8 +90,10 @@ public class MaterialReelBaseFragment extends Fragment {
             @Override
             public void run() {
                 final int DP = getResources().getDimensionPixelSize(R.dimen.one_dp);
+                mSourceDeltaX = ((mBarLayout.getMeasuredWidth() / 2) - playFab.getLeft())
+                        - playFab.getMeasuredWidth() / 2;
 
-                CircularPathAnimation anim = new CircularPathAnimation(0, -128 * DP, 0, 128 * DP);
+                CircularPathAnimation anim = new CircularPathAnimation(0, mSourceDeltaX, 0, 125 * DP);
                 anim.setDuration(400);
                 anim.setInterpolator(new AccelerateDecelerateInterpolator());
                 anim.setFillAfter(true);
@@ -102,23 +106,90 @@ public class MaterialReelBaseFragment extends Fragment {
                         Utils.animateHeadingReveal(mBarLayout, mBarLayout.getMeasuredWidth() / 2,
                                 (int) (mBarLayout.getMeasuredHeight() / 1.25f));
 
-                        playFab.animate().setStartDelay(30)
+                        playFab.animate().setStartDelay(80)
                                 .alpha(0).scaleX(0.5f).scaleY(0.5f).setDuration(150).start();
 
                         mBarPlay.setAlpha(0f);
 
                         mBarNext.setAlpha(0f);
-                        mBarNext.setTranslationX(-8 * DP);
+                        mBarNext.setTranslationX(-16 * DP);
+                        mBarNext.setScaleX(0);
+                        mBarNext.setScaleY(0);
                         mBarPrevious.setAlpha(0f);
-                        mBarPrevious.setTranslationX(8 * DP);
+                        mBarPrevious.setTranslationX(16 * DP);
+                        mBarPrevious.setScaleX(0);
+                        mBarPrevious.setScaleY(0);
 
                         mBarPlay.animate().alpha(1).setDuration(100).start();
-                        mBarNext.animate().alpha(1).translationX(0).setDuration(250).start();
-                        mBarPrevious.animate().alpha(1).translationX(0).setDuration(250).start();
+                        mBarNext.animate().alpha(1).scaleX(1).scaleY(1)
+                                .translationX(0).setDuration(250).start();
+                        mBarPrevious.animate().alpha(1).translationX(0).scaleX(1).scaleY(1)
+                                .setDuration(250).start();
                     }
                 }, 300);
 
                 playFab.startAnimation(anim);
+            }
+        });
+    }
+
+    protected void hideMaterialReelBar(final FloatingActionButton playFab) {
+        if (!mMaterialBarVisible) {
+            return;
+        }
+
+        mMaterialBarVisible = false;
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final int DP = getResources().getDimensionPixelSize(R.dimen.one_dp);
+
+                Utils.animateHeadingHiding(mBarLayout, mBarLayout.getMeasuredWidth() / 2,
+                        (int) (mBarLayout.getMeasuredHeight() / 1.25f));
+                mBarLayout.setAlpha(1.0f);
+
+                mBarPlay.setAlpha(1f);
+
+                mBarNext.setAlpha(1f);
+                mBarNext.setTranslationX(0);
+                mBarNext.setScaleX(1);
+                mBarNext.setScaleY(1);
+                mBarPrevious.setAlpha(1f);
+                mBarPrevious.setTranslationX(0);
+                mBarPrevious.setScaleX(1);
+                mBarPrevious.setScaleY(1);
+
+                mBarPlay.animate().alpha(0).setDuration(100).start();
+                mBarNext.animate().alpha(0).scaleX(0).scaleY(0)
+                        .translationX(16 * DP).setDuration(250).start();
+                mBarPrevious.animate().alpha(0).translationX(-16 * DP).scaleX(0).scaleY(0)
+                        .setDuration(250).start();
+
+
+                playFab.animate().setStartDelay(150)
+                        .alpha(1).scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        CircularPathAnimation anim = new CircularPathAnimation(0, mSourceDeltaX, 0, 125 * DP);
+                        anim.setDuration(400);
+                        anim.setInterpolator(new ReverseAnimator(new AccelerateDecelerateInterpolator()));
+                        anim.setFillAfter(true);
+
+
+                        playFab.startAnimation(anim);
+                    }
+                }, 150);
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mBarLayout.setVisibility(View.GONE);
+                    }
+                }, 500);
+
             }
         });
     }

@@ -88,13 +88,16 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
                 if (mFabShouldResume) {
                     PlaybackProxy.play();
                     mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                 } else {
                     PlaybackProxy.playAlbum(mAlbum);
                 }
             } else {
                 mFabShouldResume = true;
                 PlaybackProxy.pause();
+                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                 mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                hideMaterialReelBar(mPlayFab);
             }
         }
     };
@@ -350,16 +353,17 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
                     } else {
                         PlaybackProxy.playAlbum(mAlbum);
                     }
+
+                    if (Utils.hasLollipop()) {
+                        // No Lollipop, no cool animation!
+                        showMaterialReelBar(mPlayFab);
+                    }
                 } else {
                     mFabShouldResume = true;
                     PlaybackProxy.pause();
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
                     mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                }
-
-                if (Utils.hasLollipop()) {
-                    // No Lollipop, no cool animation!
-                    showMaterialReelBar(mPlayFab);
+                    hideMaterialReelBar(mPlayFab);
                 }
             }
         });
@@ -509,7 +513,7 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
     @Override
     public void onSongUpdate(List<Song> s) {
         for (Song song : s) {
-            if (song.isLoaded() && song.getAlbum().equals(mAlbum.getRef())) {
+            if (song != null && song.isLoaded() && song.getAlbum().equals(mAlbum.getRef())) {
                 loadSongs();
                 break;
             }

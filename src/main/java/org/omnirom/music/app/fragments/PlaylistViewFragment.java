@@ -146,6 +146,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                 if (mFabShouldResume) {
                     PlaybackProxy.play();
                     mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                 } else {
                     PlaybackProxy.playPlaylist(mPlaylist);
                 }
@@ -153,6 +154,8 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                 mFabShouldResume = true;
                 PlaybackProxy.pause();
                 mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                hideMaterialReelBar(mPlayFab);
             }
         }
     };
@@ -321,6 +324,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                     } else {
                         playNow();
                     }
+                    showMaterialReelBar(mPlayFab);
                 } else {
                     mFabShouldResume = true;
                     PlaybackProxy.pause();

@@ -700,6 +700,11 @@ public class Utils {
     public static void animateHeadingHiding(final View view) {
         final int cx = view.getMeasuredWidth() / 5;
         final int cy = view.getMeasuredHeight() / 2;
+        animateHeadingHiding(view, cx, cy);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void animateHeadingHiding(final View view, final int cx, final int cy) {
         final int radius = Utils.getEnclosingCircleRadius(view, cx, cy);
         animateCircleReveal(view, cx, cy, radius, 0);
     }
