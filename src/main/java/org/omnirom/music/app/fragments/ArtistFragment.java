@@ -59,16 +59,17 @@ import org.lucasr.twowayview.widget.DividerItemDecoration;
 import org.omnirom.music.api.echonest.EchoNest;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
-import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
 import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.ObservableScrollView;
 import org.omnirom.music.app.ui.ParallaxScrollView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.app.ui.WrapContentHeightViewPager;
+import org.omnirom.music.art.AlbumArtHelper;
+import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
-import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.Suggestor;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -83,6 +84,7 @@ import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
+import org.omnirom.music.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,6 +120,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private FloatingActionButton mFabPlay;
     private RecyclingBitmapDrawable mLogoBitmap;
     private boolean mSizeIsLimited;
+    private ImageView mHeroImageView;
 
     private Runnable mUpdateAlbumsRunnable = new Runnable() {
         @Override
@@ -437,8 +440,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
 
         // Prepare the palette to colorize the FAB
-        if (hero != null && !hero.isRecycled()) {
-            Palette.generateAsync(hero, new Palette.PaletteAsyncListener() {
+        if (mHeroImage != null) {
+            generateHeroPalette();
+        }
+    }
+
+    private void generateHeroPalette() {
+        if (mHeroImage != null && !mHeroImage.isRecycled()) {
+            Palette.generateAsync(mHeroImage, new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(final Palette palette) {
                     final Palette.Swatch normalColor = palette.getDarkMutedSwatch();
@@ -489,8 +498,29 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mRootView = (ParallaxScrollView) inflater.inflate(R.layout.fragment_artist, container, false);
 
         // Set the hero image and artist from arguments
-        ImageView heroImage = (ImageView) mRootView.findViewById(R.id.ivHero);
-        heroImage.setImageBitmap(mHeroImage);
+        mHeroImageView = (ImageView) mRootView.findViewById(R.id.ivHero);
+        if (mHeroImage != null) {
+            mHeroImageView.setImageBitmap(mHeroImage);
+        } else {
+            // Display placeholder and try to get the real art
+            mHeroImageView.setImageResource(R.drawable.album_placeholder);
+            AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
+                @Override
+                public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
+                    if (output != null) {
+                        mHeroImage = output.getBitmap();
+                        MaterialTransitionDrawable mtd = new MaterialTransitionDrawable(
+                                (BitmapDrawable) getResources().getDrawable(R.drawable.ic_cloud_offline),
+                                (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
+                        mtd.transitionTo(output);
+
+                        mHeroImageView.setImageDrawable(mtd);
+                        generateHeroPalette();
+                    }
+                }
+            }, mArtist, false);
+        }
+
 
         final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
         tvArtist.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);

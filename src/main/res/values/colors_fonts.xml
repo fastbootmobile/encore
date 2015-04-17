@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="text_regular">#535353</color>
-    <color name="text_detail">#6f6f6f</color>
+    <color name="text_detail">#8f8f8f</color>
     <color name="text_detail_emphasize">#b7b7b7</color>
     <color name="text_action">@color/apptheme_color</color>
     <color name="card_title">#666666</color>

@@ -39,11 +39,13 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.SongsListAdapter;
 import org.omnirom.music.app.ui.ParallaxScrollListView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
+import org.omnirom.music.art.AlbumArtHelper;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
@@ -408,29 +410,46 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
 
         if (mAlbum == null) {
             Log.e(TAG, "Album isn't in cache and provider returned null!");
-        } else if (mHeroImage != null) {
-            // Prepare the palette to colorize the FAB
-            Palette.generateAsync(mHeroImage, new Palette.PaletteAsyncListener() {
-                @Override
-                public void onGenerated(final Palette palette) {
-                    final Palette.Swatch normalColor = palette.getDarkMutedSwatch();
-                    final Palette.Swatch pressedColor = palette.getDarkVibrantSwatch();
-                    if (normalColor != null && mRootView != null) {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mPlayFab.setNormalColor(normalColor.getRgb());
-                                if (pressedColor != null) {
-                                    mPlayFab.setPressedColor(pressedColor.getRgb());
-                                } else {
-                                    mPlayFab.setPressedColor(normalColor.getRgb());
-                                }
-                            }
-                        });
+        } else {
+            if (mHeroImage != null) {
+                // Prepare the palette to colorize the FAB
+                generateHeroPalette();
+            } else {
+                AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
+                    @Override
+                    public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
+                        if (output != null) {
+                            mHeroImage = output.getBitmap().copy(output.getBitmap().getConfig(), false);
+                            mIvHero.setImageBitmap(output.getBitmap());
+                            generateHeroPalette();
+                        }
                     }
-                }
-            });
+                }, mAlbum, false);
+            }
         }
+    }
+
+    private void generateHeroPalette() {
+        Palette.generateAsync(mHeroImage, new Palette.PaletteAsyncListener() {
+            @Override
+            public void onGenerated(final Palette palette) {
+                final Palette.Swatch normalColor = palette.getDarkMutedSwatch();
+                final Palette.Swatch pressedColor = palette.getDarkVibrantSwatch();
+                if (normalColor != null && mRootView != null) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mPlayFab.setNormalColor(normalColor.getRgb());
+                            if (pressedColor != null) {
+                                mPlayFab.setPressedColor(pressedColor.getRgb());
+                            } else {
+                                mPlayFab.setPressedColor(normalColor.getRgb());
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
 
     public void notifyReturnTransition() {

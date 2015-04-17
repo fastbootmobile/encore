@@ -20,7 +20,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -107,10 +106,6 @@ public class ArtistActivity extends AppActivity {
             fm.beginTransaction()
                     .add(R.id.container, mActiveFragment, TAG_FRAGMENT)
                     .commit();
-        }
-
-        if (mHero == null) {
-            mHero = ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap();
         }
 
         mActiveFragment.notifySizeLimit();
@@ -239,6 +234,8 @@ public class ArtistActivity extends AppActivity {
                  * GPU textures with a max size (for 99% devices) of 4096x4096. To avoid crashes,
                  * we temporarily limit the size of the fragment (by either setting a max height
                  * or by setting the visibility to Gone)
+                 * TODO: This has been fixed in final 5.0 release using transitionGroup parameter
+                 *       Need to check if this is still needed
                  */
                 mActiveFragment.notifySizeLimit();
                 mActiveFragment.scrollToTop();

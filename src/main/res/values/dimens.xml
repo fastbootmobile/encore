@@ -35,7 +35,7 @@
 
     <!-- General Entities Views -->
     <dimen name="entview_head_padding_left">24dp</dimen>
-    <dimen name="entview_head_padding_right">8dp</dimen>
+    <dimen name="entview_head_padding_right">40dp</dimen>
     <dimen name="entview_head_padding_top">16dp</dimen>
     <dimen name="entview_head_padding_bottom">16dp</dimen>
     <dimen name="entview_head_fab_margin_right">16dp</dimen>
