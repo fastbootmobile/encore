@@ -1,0 +1,14 @@
+-- Generated using Roman Nurik's Android Asset Studio --
+
+                       COLOR    TRANSLUCENCY     SIZE    PADDING
+Navigation Drawer:
+  Active icon:        #F44336       100%         16dp      4dp
+  Inactive icon:      #000000       54%          16dp      4dp
+
+Playback Queue:
+  Next/prev icon:     #F44336       100%         24dp      4dp
+  Action active icon: #F44336       100%         24dp      4dp
+  Action off icon:    #000000       54%          24dp      4dp
+
+Settings:
+  DSP trash icon:     #000000       54%          18dp      4dp

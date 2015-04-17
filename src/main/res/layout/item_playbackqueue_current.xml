@@ -129,7 +129,8 @@
                 android:src="@drawable/ic_skip_previous"
                 android:contentDescription="@string/previous"
                 android:layout_marginLeft="@dimen/playbackqueue_current_button_margin"
-                style="@style/OmniMusic.Spec.BorderlessButton"/>
+                style="@style/OmniMusic.Spec.BorderlessButton"
+                android:scaleType="center"/>
 
             <com.getbase.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabPlay"
@@ -148,11 +149,11 @@
                 android:layout_gravity="center_vertical"
                 android:adjustViewBounds="true"
                 android:clickable="true"
-                android:scaleType="centerInside"
                 android:src="@drawable/ic_skip_next"
                 android:contentDescription="@string/forward"
                 android:layout_marginRight="@dimen/playbackqueue_current_button_margin"
-                style="@style/OmniMusic.Spec.BorderlessButton"/>
+                style="@style/OmniMusic.Spec.BorderlessButton"
+                android:scaleType="center"/>
 
             <ImageView
                 android:layout_width="@dimen/playbackqueue_current_button_size"
@@ -160,7 +161,7 @@
                 android:layout_gravity="center_vertical"
                 android:id="@+id/btnThumbs"
                 android:src="@drawable/ic_thumbs_up_gray"
-                android:scaleType="centerInside"
+                android:scaleType="center"
                 android:clickable="true"
                 android:contentDescription="@string/thumbs_up_description"
                 style="@style/OmniMusic.Spec.BorderlessButton"/>
@@ -171,7 +172,7 @@
                 android:layout_gravity="center_vertical"
                 android:id="@+id/btnThumbsDown"
                 android:src="@drawable/ic_thumb_down_gray"
-                android:scaleType="centerInside"
+                android:scaleType="center"
                 android:clickable="true"
                 android:contentDescription="@string/thumbs_up_description"
                 style="@style/OmniMusic.Spec.BorderlessButton"/>

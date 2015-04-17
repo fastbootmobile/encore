@@ -92,6 +92,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
     private CircularProgressButton mOfflineBtn;
     private RecyclingBitmapDrawable mLogoBitmap;
     private ImageView mIvHero;
+    private ImageView mIvSource;
     private TextView mTvPlaylistName;
     private boolean mIsSpecialPlaylist;
 
@@ -275,23 +276,6 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         }, 500);
 
         mTvPlaylistName.setText(mPlaylist.getName());
-        if (Utils.hasLollipop()) {
-            mTvPlaylistName.setVisibility(View.INVISIBLE);
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                public void run() {
-                    if (mTvPlaylistName.isAttachedToWindow()) {
-                        Utils.animateHeadingReveal(mTvPlaylistName);
-                    }
-                }
-            }, 500);
-        } else {
-            mTvPlaylistName.setVisibility(View.VISIBLE);
-            mTvPlaylistName.setAlpha(0.0f);
-            mTvPlaylistName.animate().alpha(1.0f).setDuration(AlbumActivity.BACK_DELAY).start();
-        }
-
 
         Bitmap hero = Utils.dequeueBitmap(PlaylistActivity.BITMAP_PLAYLIST_HERO);
         if (hero == null) {
@@ -303,9 +287,9 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         mPlayFab = (FloatingActionButton) headerView.findViewById(R.id.fabPlay);
 
         // Set source logo
-        ImageView ivSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
+        mIvSource = (ImageView) headerView.findViewById(R.id.ivSourceLogo);
         mLogoBitmap = PluginsLookup.getDefault().getCachedLogo(getResources(), mPlaylist);
-        ivSource.setImageDrawable(mLogoBitmap);
+        mIvSource.setImageDrawable(mLogoBitmap);
 
         // Set the FAB animated drawable
         mFabDrawable = new PlayPauseDrawable(getResources(), 1);
@@ -362,6 +346,27 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         mListViewContents.setLayoutAnimation(new LayoutAnimationController(anim));
 
         setupMaterialReelBar(root, mReelFabClickListener);
+
+        // Setup the opening animations
+        if (Utils.hasLollipop()) {
+            mTvPlaylistName.setVisibility(View.INVISIBLE);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                public void run() {
+                    if (mTvPlaylistName.isAttachedToWindow()) {
+                        Utils.animateHeadingReveal(mTvPlaylistName);
+                    }
+                }
+            }, 500);
+        } else {
+            mTvPlaylistName.setVisibility(View.VISIBLE);
+            mTvPlaylistName.setAlpha(0.0f);
+            mTvPlaylistName.animate().alpha(1.0f).setDuration(AlbumActivity.BACK_DELAY).start();
+        }
+
+        mIvSource.setAlpha(0.0f);
+        mIvSource.animate().alpha(1).setDuration(200).start();
 
         return root;
     }
@@ -473,6 +478,10 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
     public void notifyReturnTransition() {
         if (Utils.hasLollipop()) {
             Utils.animateHeadingHiding(mTvPlaylistName);
+            Utils.animateScale(mPlayFab, true, false);
+
+            mIvSource.setAlpha(0.0f);
+            mIvSource.animate().alpha(1).setDuration(200).start();
         }
     }
 

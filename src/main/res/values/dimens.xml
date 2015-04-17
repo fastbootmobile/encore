@@ -109,7 +109,7 @@
     <dimen name="bucket_item_overflow_size">48dp</dimen>
 
     <!-- DSP & Providers -->
-    <dimen name="dsp_item_provider_size">48dp</dimen>
+    <dimen name="dsp_item_provider_size">56dp</dimen>
     <dimen name="dsp_item_provider_margin">8dp</dimen>
 
     <!-- Search -->

@@ -2,8 +2,7 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
+                android:paddingBottom="8dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -18,7 +17,8 @@
         android:layout_marginLeft="0dp"
         android:layout_alignParentTop="true"
         android:layout_marginTop="0dp"
-        android:contentDescription="@string/loading" />
+        android:contentDescription="@string/loading"
+        android:layout_centerVertical="true"/>
 
     <LinearLayout
         android:orientation="vertical"
@@ -31,7 +31,8 @@
         android:layout_marginLeft="@dimen/dsp_item_provider_margin"
         android:layout_alignBottom="@+id/ivProviderLogo"
         android:gravity="center_vertical"
-        android:id="@+id/linearLayout">
+        android:id="@+id/linearLayout"
+        android:layout_centerVertical="true">
 
         <TextView
             android:layout_width="wrap_content"
@@ -52,18 +53,20 @@
         android:id="@+id/btnDelete"
         android:src="@drawable/ic_delete"
         android:scaleType="centerCrop"
-        android:layout_toStartOf="@+id/btnDown"
-        android:layout_toLeftOf="@+id/btnDown"
-        android:background="?android:attr/selectableItemBackground"
         android:padding="@dimen/dsp_item_provider_margin"
         android:clickable="true"
-        android:contentDescription="@string/remove" />
+        android:contentDescription="@string/remove"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/btnDown"
+        android:layout_toStartOf="@+id/btnDown"
+        style="@style/OmniMusic.Spec.BorderlessButton"
+        android:adjustViewBounds="true"/>
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btnUp"
-        android:src="@drawable/ic_raise"
+        android:src="@drawable/ic_arrow_up"
         android:scaleType="centerCrop"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
@@ -71,13 +74,16 @@
         android:background="?android:attr/selectableItemBackground"
         android:padding="@dimen/dsp_item_provider_margin"
         android:clickable="true"
-        android:contentDescription="@string/raise" />
+        android:contentDescription="@string/raise"
+        android:layout_marginRight="@dimen/dsp_item_provider_margin"
+        style="@style/OmniMusic.Spec.BorderlessButton"
+        android:adjustViewBounds="true"/>
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btnDown"
-        android:src="@drawable/ic_reduce"
+        android:src="@drawable/ic_arrow_down"
         android:scaleType="centerCrop"
         android:layout_toStartOf="@+id/btnUp"
         android:layout_toLeftOf="@+id/btnUp"
@@ -85,6 +91,8 @@
         android:background="?android:attr/selectableItemBackground"
         android:padding="@dimen/dsp_item_provider_margin"
         android:clickable="true"
-        android:contentDescription="@string/lower"/>
+        android:contentDescription="@string/lower"
+        style="@style/OmniMusic.Spec.BorderlessButton"
+        android:adjustViewBounds="true"/>
 
 </RelativeLayout>

@@ -4,17 +4,17 @@
     <color name="black">#000000</color>
 
     <!-- Red 500 -->
-    <color name="primary">#e51c23</color>
-    <color name="primary_translucent">#50e51c23</color>
+    <color name="primary">#F44336</color>
+    <color name="primary_translucent">#50F44336</color>
 
     <!-- Red 700 -->
-    <color name="primary_dark">#d01716</color>
+    <color name="primary_dark">#B71C1C</color>
 
-    <!-- Deep Orange A200 -->
-    <color name="accent">#ff6e40</color>
+    <!-- Deep Orange A400 -->
+    <color name="accent">#FF3D00</color>
 
     <!-- Red 100 -->
-    <color name="primary_light">#f9bdbb</color>
+    <color name="primary_light">#FFCDD2</color>
 
     <!-- Welcome -->
     <color name="welcome_background">#dd342d</color>
