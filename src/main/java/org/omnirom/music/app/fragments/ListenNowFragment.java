@@ -229,7 +229,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         break;
                 }
 
-                if (type == TYPE_ARTIST && ((Artist) entity).getName() == null) {
+                if (entity == null) {
+                    i--;
+                } else if (type == TYPE_ARTIST && ((Artist) entity).getName() == null) {
                     i--;
                     continue;
                 } else if (type == TYPE_ALBUM && ((Album) entity).getName() == null) {

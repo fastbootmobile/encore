@@ -315,9 +315,9 @@ public class AlbumArtCache {
                         listener.onArtLoaded(listenerRef, rcb);
                     }
                 } catch (IOException e) {
-                    Log.e(TAG, "Error while downloading album art", e);
+                    Log.e(TAG, "Error while downloading album art");
                 } catch (RateLimitException e) {
-                    Log.e(TAG, "Rate limited while downloading album art", e);
+                    Log.e(TAG, "Rate limited while downloading album art");
                 }
             } else {
                 ImageCache.getDefault().put(res, getEntityArtKey(listenerRef), (RecyclingBitmapDrawable) null);

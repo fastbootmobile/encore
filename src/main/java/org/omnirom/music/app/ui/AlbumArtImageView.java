@@ -232,7 +232,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
                 mSkipTransition = true;
             }
             setDefaultArt();
-            mRunnable.run(true);
+            mRunnable.run(false);
         } else {
             setDefaultArt();
             //mHandler.postDelayed(mRunnable, DELAY_BEFORE_START);
@@ -284,7 +284,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     }
 
     public interface OnArtLoadedListener {
-        public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable);
+        void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable);
     }
 
     private class TaskRunnable implements Runnable {

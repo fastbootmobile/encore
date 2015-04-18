@@ -1612,15 +1612,16 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     for (com.echonest.api.v4.Artist similar : similars) {
                         if (rosettaPreferred != null) {
                             String ref = echoNest.getArtistForeignID(similar, rosettaPreferred);
-                            Artist artist = ProviderAggregator.getDefault().retrieveArtist(ref, rosettaProvider);
-                            if (artist != null) {
-                                mAdapter.addItemUnique(artist);
-                                mSimilarArtists.add(artist);
-                                mAdapter.notifyItemInserted(mSimilarArtists.size() - 1);
-                            } else {
-                                Log.e(TAG, "Null artist for similar");
-                            }
-                        }
+                            if (ref != null) {
+                                Artist artist = ProviderAggregator.getDefault().retrieveArtist(ref, rosettaProvider);
+                                if (artist != null) {
+                                    mAdapter.addItemUnique(artist);
+                                    mSimilarArtists.add(artist);
+                                    mAdapter.notifyItemInserted(mSimilarArtists.size() - 1);
+                                } else {
+                                    Log.e(TAG, "Null artist for similar");
+                                }
+                            }                        }
                     }
 
                     mHandler.post(new Runnable() {
