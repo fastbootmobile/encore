@@ -262,7 +262,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         if (artist.isLoaded() || (artist.getName() != null && !artist.getName().isEmpty())) {
             tag.tvTitle.setText(artist.getName());
         } else {
-            tag.tvTitle.setText("...");
+            tag.tvTitle.setText(null);
         }
 
         // Load the artist art

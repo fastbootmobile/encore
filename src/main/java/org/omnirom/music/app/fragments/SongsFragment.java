@@ -51,6 +51,8 @@ public class SongsFragment extends Fragment {
 
     private SongsListAdapter mSongsListAdapter;
     private Handler mHandler;
+    private boolean mAdapterSet = false;
+    private ListView mListView;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -90,14 +92,13 @@ public class SongsFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_songs, container, false);
         assert root != null;
-        ListView songsList = (ListView) root.findViewById(R.id.songsList);
+        mListView = (ListView) root.findViewById(R.id.songsList);
 
         mSongsListAdapter = new SongsListAdapter(true);
-        songsList.setAdapter(mSongsListAdapter);
 
         new GetAllSongsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        songsList.setOnItemClickListener(mItemClickListener);
+        mListView.setOnItemClickListener(mItemClickListener);
         return root;
     }
 
@@ -174,7 +175,12 @@ public class SongsFragment extends Fragment {
         protected void onPostExecute(List<Song> songs) {
             mSongsListAdapter.putAll(songs);
             mSongsListAdapter.sortAll();
-            mSongsListAdapter.notifyDataSetChanged();
+
+            if (mAdapterSet) {
+                mSongsListAdapter.notifyDataSetChanged();
+            } else {
+                mListView.setAdapter(mSongsListAdapter);
+            }
         }
     }
 }

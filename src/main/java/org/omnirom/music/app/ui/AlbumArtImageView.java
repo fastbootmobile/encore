@@ -87,6 +87,10 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         return (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder);
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
 
     private void freeMemory(boolean removeRequestedEntity) {
         if (mCurrentBitmap != null) {
@@ -227,12 +231,13 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         mRunnable = new TaskRunnable(ent);
 
         // When we're crossfading, we're assuming we want the image directly
-        if (mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY) {
+        if (mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY
+                || cacheStatus == AlbumArtCache.CACHE_STATUS_DISK) {
             if (cacheStatus != AlbumArtCache.CACHE_STATUS_UNAVAILABLE) {
                 mSkipTransition = true;
             }
             setDefaultArt();
-            mRunnable.run(false);
+            mRunnable.run(true);
         } else {
             setDefaultArt();
             //mHandler.postDelayed(mRunnable, DELAY_BEFORE_START);

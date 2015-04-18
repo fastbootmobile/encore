@@ -44,7 +44,7 @@ public class MaterialTransitionDrawable extends Drawable {
     public MaterialTransitionDrawable(BitmapDrawable offlineDrawable, BitmapDrawable base) {
         this(offlineDrawable);
         mBaseDrawable = base;
-        invalidateSelf();
+        //invalidateSelf();
     }
 
     public MaterialTransitionDrawable(BitmapDrawable offlineDrawable) {

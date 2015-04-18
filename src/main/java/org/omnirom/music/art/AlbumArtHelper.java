@@ -48,9 +48,15 @@ public class AlbumArtHelper {
     };
     private static final BlockingQueue<Runnable> sPoolWorkQueue =
             new LinkedBlockingQueue<>(32);
+    private static final BlockingQueue<Runnable> sPriorityPoolWorkQueue =
+            new LinkedBlockingQueue<>(16);
+
     static final Executor ART_POOL_EXECUTOR
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
             TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
+    static final Executor PRIORITY_ART_POOL_EXECUTOR
+            = new ThreadPoolExecutor(CORE_POOL_SIZE / 2, MAXIMUM_POOL_SIZE / 2, KEEP_ALIVE,
+            TimeUnit.SECONDS, sPriorityPoolWorkQueue, sThreadFactory);
 
     public interface AlbumArtListener {
         void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request);
@@ -66,21 +72,25 @@ public class AlbumArtHelper {
                                                 BoundEntity request, boolean immediate) {
         AlbumArtTask task = new AlbumArtTask(res, listener);
 
-        if (!immediate) {
-            // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the predefined
-            // pool, as the custom one causes the app to just crash without any kind of error message
-            // for no reason (at least in the emulator).
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the predefined
+        // pool, as the custom one causes the app to just crash without any kind of error message
+        // for no reason (at least in the emulator).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            if (immediate) {
+                if (sPriorityPoolWorkQueue.remainingCapacity() == 0) {
+                    // Release a previous work to free up space in the queue
+                    sPriorityPoolWorkQueue.remove(sPriorityPoolWorkQueue.iterator().next());
+                }
+                task.executeOnExecutor(PRIORITY_ART_POOL_EXECUTOR, request);
+            } else {
                 if (sPoolWorkQueue.remainingCapacity() == 0) {
                     // Release a previous work to free up space in the queue
                     sPoolWorkQueue.remove(sPoolWorkQueue.iterator().next());
                 }
                 task.executeOnExecutor(ART_POOL_EXECUTOR, request);
-            } else {
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
             }
         } else {
-            task.execute(request);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
         }
 
         return task;

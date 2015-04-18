@@ -207,10 +207,6 @@ public class PlaybackService extends Service
         mCallbacks = new ArrayList<>();
         mPrefetcher = new Prefetcher(this);
         mHandler = new Handler();
-        mCommandsHandlerThread = new HandlerThread("PlaybackServiceCommandsHandler");
-        mCommandsHandlerThread.start();
-
-        mCommandsHandler = new CommandHandler(this, mCommandsHandlerThread);
     }
 
     /**
@@ -220,6 +216,11 @@ public class PlaybackService extends Service
     public void onCreate() {
         super.onCreate();
         mListenLogger = new ListenLogger(this);
+
+        mCommandsHandlerThread = new HandlerThread("PlaybackServiceCommandsHandler");
+        mCommandsHandlerThread.start();
+
+        mCommandsHandler = new CommandHandler(this, mCommandsHandlerThread);
 
         // Register package manager to receive updates
         mPacManReceiver = new PacManReceiver();
@@ -372,6 +373,8 @@ public class PlaybackService extends Service
         // Shutdown DSP chain
         mNativeHub.onStop();
         mNativeSink.release();
+
+        mCommandsHandlerThread.interrupt();
 
         super.onDestroy();
     }

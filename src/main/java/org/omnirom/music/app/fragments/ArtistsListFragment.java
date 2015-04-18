@@ -213,12 +213,13 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
                 }
             }
 
+            mAdapter.addAllUnique(artists);
             return artists;
         }
 
         @Override
         protected void onPostExecute(List<Artist> artists) {
-            mAdapter.addAllUnique(artists);
+
             if (mAdapterSet) {
                 mAdapter.notifyDataSetChanged();
             } else {

@@ -28,13 +28,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -183,6 +183,8 @@ public class SongsListAdapter extends BaseAdapter {
             holder.ivOffline = (ImageView) root.findViewById(R.id.ivOffline);
             holder.vCurrentIndicator = root.findViewById(R.id.currentSongIndicator);
             holder.vRoot = (ViewGroup) root;
+
+            holder.vRoot.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
             if (mShowAlbumArt) {
                 // Fixup some style stuff

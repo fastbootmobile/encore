@@ -18,6 +18,7 @@ package org.omnirom.music.app.fragments;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,7 +50,9 @@ import java.util.List;
  */
 public class AlbumsFragment extends Fragment implements ILocalCallback, ProviderAggregator.OfflineModeListener {
     private AlbumsAdapter mAdapter;
+    private GridView mGridView;
     private Handler mHandler;
+    private boolean mAdapterSet = false;
 
     /**
      * Use this factory method to create a new instance of
@@ -87,15 +90,13 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View root = inflater.inflate(R.layout.fragment_albums, container, false);
-        final GridView albumLayout = (GridView) root.findViewById(R.id.gvAlbums);
-        albumLayout.setAdapter(mAdapter);
+        mGridView = (GridView) root.findViewById(R.id.gvAlbums);
 
-        final List<Album> allAlbums = ProviderAggregator.getDefault().getCache().getAllAlbums();
-        mAdapter.addAllUnique(allAlbums);
-        mAdapter.notifyDataSetChanged();
+        // Get the albums
+        new GetAlbumsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         // Setup the click listener
-        albumLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 AlbumsAdapter.ViewHolder tag = (AlbumsAdapter.ViewHolder) view.getTag();
@@ -196,5 +197,25 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
                 mAdapter.notifyDataSetChanged();
             }
         });
+    }
+
+    private class GetAlbumsTask extends AsyncTask<Void, Void, List<Album>> {
+
+        @Override
+        protected List<Album> doInBackground(Void... params) {
+            return ProviderAggregator.getDefault().getCache().getAllAlbums();
+        }
+
+        @Override
+        protected void onPostExecute(List<Album> albums) {
+            mAdapter.addAllUnique(albums);
+            mAdapter.notifyDataSetChanged();
+
+            if (mAdapterSet) {
+                mAdapter.notifyDataSetChanged();
+            } else {
+                mGridView.setAdapter(mAdapter);
+            }
+        }
     }
 }
