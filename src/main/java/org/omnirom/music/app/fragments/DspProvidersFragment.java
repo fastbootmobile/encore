@@ -2,30 +2,27 @@ package org.omnirom.music.app.fragments;
 
 
 
-import android.animation.LayoutTransition;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.os.Handler;
-import android.support.v4.app.ListFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 
 import org.omnirom.music.app.R;
-import org.omnirom.music.utils.Utils;
 import org.omnirom.music.app.adapters.DspAdapter;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
+import org.omnirom.music.utils.Utils;
 
 import java.util.List;
 
@@ -118,14 +115,6 @@ public class DspProvidersFragment extends ListFragment {
         mHandler = new Handler();
 
         updateDspChain();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        ListView lv = (ListView) view.findViewById(android.R.id.list);
-        lv.setLayoutTransition(new LayoutTransition());
-        return view;
     }
 
     @Override

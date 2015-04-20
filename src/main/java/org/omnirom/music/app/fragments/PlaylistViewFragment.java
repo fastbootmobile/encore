@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -66,6 +67,7 @@ import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
 import org.omnirom.music.utils.Utils;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -82,6 +84,9 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
     public static final String KEY_PLAYLIST = "playlist";
 
+    private static final int UPDATE_OFFLINE_STATUS = 1;
+    private static final int UPDATE_DATA_SET = 2;
+
     private PlaylistAdapter mAdapter;
     private Playlist mPlaylist;
     private PlaylistListView mListViewContents;
@@ -95,6 +100,29 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
     private ImageView mIvSource;
     private TextView mTvPlaylistName;
     private boolean mIsSpecialPlaylist;
+
+    private static class PlaylistViewHandler extends Handler {
+        private WeakReference<PlaylistViewFragment> mParent;
+
+        public PlaylistViewHandler(PlaylistViewFragment parent) {
+            mParent = new WeakReference<>(parent);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            PlaylistViewFragment parent = mParent.get();
+
+            if (parent == null) {
+                return;
+            }
+
+            if (msg.what == UPDATE_OFFLINE_STATUS) {
+                parent.updateOfflineStatus();
+            } else if (msg.what == UPDATE_DATA_SET) {
+                parent.mAdapter.notifyDataSetChanged();
+            }
+        }
+    }
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -181,7 +209,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mHandler = new Handler();
+        mHandler = new PlaylistViewHandler(this);
 
         Bundle args = getArguments();
         if (args == null) {
@@ -268,13 +296,8 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                 }
             }
         });
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                updateOfflineStatus();
-            }
-        }, 500);
 
+        mHandler.sendEmptyMessageDelayed(UPDATE_OFFLINE_STATUS, 300);
         mTvPlaylistName.setText(mPlaylist.getName());
 
         Bitmap hero = Utils.dequeueBitmap(PlaylistActivity.BITMAP_PLAYLIST_HERO);
@@ -553,8 +576,6 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final int offlineStatus = mPlaylist.getOfflineStatus();
 
-        Log.e(TAG, "Playlist " + mPlaylist.getRef() + " offline=" + offlineStatus);
-
         switch (offlineStatus) {
             case BoundEntity.OFFLINE_STATUS_NO:
                 mOfflineBtn.setProgress(0);
@@ -647,13 +668,12 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
         // It does, update the list then
         if (hasPlaylist) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateOfflineStatus();
-                    mAdapter.notifyDataSetChanged();
-                }
-            });
+            if (!mHandler.hasMessages(UPDATE_DATA_SET)) {
+                mHandler.sendEmptyMessage(UPDATE_DATA_SET);
+            }
+            if (!mHandler.hasMessages(UPDATE_OFFLINE_STATUS)) {
+                mHandler.sendEmptyMessage(UPDATE_OFFLINE_STATUS);
+            }
         }
     }
 
@@ -665,16 +685,12 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
     public void onPlaylistUpdate(final List<Playlist> p) {
         // If the currently watched playlist is updated, update me
         if (p.contains(mPlaylist)) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateOfflineStatus();
-
-                    // Make sure we're using the new/cached entity
-                    mAdapter.setPlaylist(p.get(p.indexOf(mPlaylist)));
-                    mAdapter.notifyDataSetChanged();
-                }
-            });
+            if (!mHandler.hasMessages(UPDATE_DATA_SET)) {
+                mHandler.sendEmptyMessage(UPDATE_DATA_SET);
+            }
+            if (!mHandler.hasMessages(UPDATE_OFFLINE_STATUS)) {
+                mHandler.sendEmptyMessage(UPDATE_OFFLINE_STATUS);
+            }
         }
     }
 
@@ -701,12 +717,9 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
         // It does, update the list then
         if (hasPlaylist) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mAdapter.notifyDataSetChanged();
-                }
-            });
+            if (!mHandler.hasMessages(UPDATE_OFFLINE_STATUS)) {
+                mHandler.sendEmptyMessage(UPDATE_OFFLINE_STATUS);
+            }
         }
     }
 
