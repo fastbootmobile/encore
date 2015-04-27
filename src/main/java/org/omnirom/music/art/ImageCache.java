@@ -219,9 +219,8 @@ public class ImageCache {
                 BitmapFactory.Options opts = new BitmapFactory.Options();
                 ImageUtils.addInBitmapOptions(opts, this);
 
-
                 try {
-                    Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey);
+                    Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey, opts);
                     if (bmp != null) {
                         item = new RecyclingBitmapDrawable(res, bmp);
 
