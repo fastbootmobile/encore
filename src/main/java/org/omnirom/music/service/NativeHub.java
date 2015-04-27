@@ -28,6 +28,7 @@ public class NativeHub {
     private static final String TAG = "NativeHub";
 
     static {
+        System.loadLibrary("c++_shared");
         System.loadLibrary("protobuf");
         System.loadLibrary("nativeplayerjni");
     }
