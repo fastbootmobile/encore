@@ -219,7 +219,10 @@ void NativeHub::onAudioData(SocketCommon* socket, const uint8_t* data, const uin
     std::lock_guard<std::recursive_mutex> lock(m_ChainMutex);
     bool is_dsp = (m_ProviderSockets[socket->getSocketName()] == nullptr);
 
-    // ALOGE("onAudioData(%d bytes)", len);
+    if (is_dsp && m_DSPSockets[socket->getSocketName()] == nullptr) {
+        // Drop sample, don't know where it comes from
+        return;
+    }
 
     if (len > 0) {
         if (is_dsp) {
@@ -250,6 +253,7 @@ void NativeHub::onAudioData(SocketCommon* socket, const uint8_t* data, const uin
         // Length = 0 means flush!
         if (m_pSink) {
             m_pSink->flush();
+            m_iBuffersInDSP = 0;
         }
         writeAudioResponse(0);
     }

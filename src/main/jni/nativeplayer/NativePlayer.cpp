@@ -454,7 +454,7 @@ int64_t NativePlayer::getTotalWrittenSamples() const {
 // -------------------------------------------------------------------------------------
 void NativePlayer::flush() {
     std::lock_guard<std::mutex> lock(m_QueueMutex);
-    (*m_pBufferQueue)->Clear(m_pBufferQueue);
+    // (*m_pBufferQueue)->Clear(m_pBufferQueue);
     m_iWrittenSamples = 0;
     m_iUnderflowCount = 0;
     m_LastBuffersCheckUfCount = 0;
