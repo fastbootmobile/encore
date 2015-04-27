@@ -652,8 +652,13 @@ public class PlaybackService extends Service
                 mCurrentPlayingProvider = null;
             }
 
-            // Clear up the sink buffers
-            mCommandsHandler.sendEmptyMessage(CommandHandler.MSG_FLUSH_BUFFERS);
+            // Clear up the sink buffers if we were paused (otherwise we'll cut the end of the
+            // previous song)
+            if (mState == STATE_PAUSED || mState == STATE_PAUSING || mState == STATE_STOPPED) {
+                mCommandsHandler.sendEmptyMessage(CommandHandler.MSG_FLUSH_BUFFERS);
+            }
+
+            // Unpause the sink as well in any case
             mNativeSink.setPaused(false);
 
             if (providerId != null) {
