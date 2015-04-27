@@ -103,6 +103,7 @@ public class MaterialReelBaseFragment extends Fragment {
                     public void run() {
                         mBarLayout.setAlpha(1.0f);
                         mBarLayout.setBackgroundColor(playFab.getNormalColor());
+
                         Utils.animateHeadingReveal(mBarLayout, mBarLayout.getMeasuredWidth() / 2,
                                 (int) (mBarLayout.getMeasuredHeight() / 1.25f));
 

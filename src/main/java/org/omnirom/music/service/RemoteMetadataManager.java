@@ -34,6 +34,7 @@ import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.receivers.RemoteControlReceiver;
 import org.omnirom.music.utils.AvrcpUtils;
+import org.omnirom.music.utils.Utils;
 
 /**
  * Remote Metadata manager for pre-Lollipop devices
@@ -128,9 +129,11 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
         metadata.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, song.getDuration());
 
         // Ensure the defined bitmap is still valid
-        Bitmap check = metadata.getBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK, null);
-        if (check != null && check.isRecycled()) {
-            metadata.putBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK, null);
+        if (Utils.hasKitKat()) {
+            Bitmap check = metadata.getBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK, null);
+            if (check != null && check.isRecycled()) {
+                metadata.putBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK, null);
+            }
         }
 
         metadata.apply();

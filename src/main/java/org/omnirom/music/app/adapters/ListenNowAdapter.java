@@ -123,6 +123,10 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         public BoundEntity entity;
 
         public ListenNowEntry(int entrySize, BoundEntity entity) {
+            if (entity == null) {
+                throw new IllegalArgumentException("Entity cannot be null");
+            }
+
             this.entrySize = entrySize;
             this.entity = entity;
         }
@@ -305,11 +309,25 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             // Recent activity header
             return 0;
         } else if (position > 0 && position <= mRecentEntries.size()) {
-            return mRecentEntries.get(position - 1).entity.getRef().hashCode();
+            if (mRecentEntries.size() > position - 1) {
+                BoundEntity ent = mRecentEntries.get(position - 1).entity;
+                if (ent != null) {
+                    return ent.getRef().hashCode();
+                } else {
+                    return -1;
+                }
+            } else {
+                return -1;
+            }
         } else if (position == mRecentEntries.size() + 1) {
             return 1;
         } else {
-            return mEntries.get(position - 2 - mRecentEntries.size()).entity.getRef().hashCode();
+            BoundEntity ent = mEntries.get(position - 2 - mRecentEntries.size()).entity;
+            if (ent != null) {
+                return ent.getRef().hashCode();
+            } else {
+                return -1;
+            }
         }
     }
 

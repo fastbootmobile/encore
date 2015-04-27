@@ -79,6 +79,16 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     private TextView mTxtNoMusic;
     private int mWarmUpCount = 0;
     private boolean mFoundAnything;
+    private List<Integer> mUpdateItems;
+
+    private final Runnable mUpdateItemsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            for (int item : mUpdateItems) {
+                sAdapter.notifyItemChanged(item);
+            }
+        }
+    };
 
     /**
      * Runnable responsible of generating the entries to put in the grid
@@ -296,6 +306,11 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         throw new RuntimeException("Should not happen");
                 }
 
+                if (entity == null) {
+                    // Entity cannot be null, something went wrong, try again with something else
+                    continue;
+                }
+
 
                 // Store the references
                 knownReferences.add(song.getRef());
@@ -331,6 +346,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     public ListenNowFragment() {
         // Required empty public constructor
+        mUpdateItems = new ArrayList<>();
     }
 
     /**
@@ -419,18 +435,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onSongUpdate(final List<Song> s) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                int hasThisSong;
-                for (Song song : s) {
-                    hasThisSong = sAdapter.contains(song);
-                    if (hasThisSong >= 0) {
-                        sAdapter.notifyItemChanged(hasThisSong);
-                    }
-                }
+        int hasThisSong;
+        for (Song song : s) {
+            hasThisSong = sAdapter.contains(song);
+            if (hasThisSong >= 0) {
+                requestNotifyItemChanged(hasThisSong);
             }
-        });
+        }
     }
 
     /**
@@ -438,18 +449,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onAlbumUpdate(final List<Album> a) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                int hasThisAlbum;
-                for (Album album : a) {
-                    hasThisAlbum = sAdapter.contains(album);
-                    if (hasThisAlbum >= 0) {
-                        sAdapter.notifyItemChanged(hasThisAlbum);
-                    }
-                }
+        int hasThisAlbum;
+        for (Album album : a) {
+            hasThisAlbum = sAdapter.contains(album);
+            if (hasThisAlbum >= 0) {
+                requestNotifyItemChanged(hasThisAlbum);
             }
-        });
+        }
     }
 
     /**
@@ -468,18 +474,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onArtistUpdate(final List<Artist> a) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                int hasThisArtist;
-                for (Artist artist : a) {
-                    hasThisArtist = sAdapter.contains(artist);
-                    if (hasThisArtist >= 0) {
-                        sAdapter.notifyItemChanged(hasThisArtist);
-                    }
-                }
+        int hasThisArtist;
+        for (Artist artist : a) {
+            hasThisArtist = sAdapter.contains(artist);
+            if (hasThisArtist >= 0) {
+                requestNotifyItemChanged(hasThisArtist);
             }
-        });
+        }
     }
 
     /**
@@ -488,8 +489,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     @Override
     public void onProviderConnected(IMusicProvider provider) {
         if (sWarmUp && sAdapter.getItemCount() < 2) {
-            mHandler.removeCallbacks(mGenerateEntries);
-            mHandler.post(mGenerateEntries);
+            requestGenerateEntries();
         }
     }
 
@@ -498,5 +498,19 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onSearchResult(List<SearchResult> searchResult) {
+    }
+
+    private void requestGenerateEntries() {
+        mHandler.removeCallbacks(mGenerateEntries);
+        mHandler.postDelayed(mGenerateEntries, 200);
+    }
+
+    private void requestNotifyItemChanged(int item) {
+        if (!mUpdateItems.contains(item)) {
+            mUpdateItems.add(item);
+
+            mHandler.removeCallbacks(mUpdateItemsRunnable);
+            mHandler.postDelayed(mUpdateItemsRunnable, 500);
+        }
     }
 }

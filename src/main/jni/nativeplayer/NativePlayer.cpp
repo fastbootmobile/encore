@@ -271,7 +271,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
         }
 
         m_iBufferMinPlayback = sample_rate * channels / 8;
-        m_iBufferMaxSize = m_iBufferMinPlayback * 8;
+        m_iBufferMaxSize = m_iBufferMinPlayback * 16;
 
         switch (sample_rate) {
             // Crappy quality starts here v
@@ -535,7 +535,7 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
                     p->m_iBufferMinPlayback = std::min(p->m_iBufferMinPlayback + 1024,
                         p->m_iSampleRate * p->m_iChannels * 2);
                     p->m_iBufferMaxSize = std::min<uint32_t>(p->m_iSampleRate * p->m_iChannels * 2,
-                            p->m_iBufferMinPlayback * 8);
+                            p->m_iBufferMinPlayback * 16);
 
                     ALOGD("Raising buffers: min=%d max=%d", p->m_iBufferMinPlayback, p->m_iBufferMaxSize);
                 }

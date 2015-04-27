@@ -268,7 +268,6 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
         // Setup the contents list view
         mListView = (ParallaxScrollListView) mRootView.findViewById(R.id.lvAlbumContents);
         mAdapter = new SongsListAdapter(false);
-        mListView.setAdapter(mAdapter);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -291,7 +290,10 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
 
                     mFabShouldResume = true;
 
-                    showMaterialReelBar(mPlayFab);
+                    if (Utils.hasLollipop()) {
+                        // No candy, no animation!
+                        showMaterialReelBar(mPlayFab);
+                    }
                 }
             }
         });
@@ -383,7 +385,7 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
 
         // Set the header view and adapter
         mListView.addParallaxedHeaderView(headerView);
-
+        mListView.setAdapter(mAdapter);
 
         AlphaAnimation anim = new AlphaAnimation(0.f, 1.f);
         anim.setDuration(200);

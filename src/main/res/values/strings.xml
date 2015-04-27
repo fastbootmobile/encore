@@ -79,13 +79,13 @@
     <string name="automix">Automix</string>
     <string name="general">General</string>
     <string name="other">Other</string>
-    <string name="settings_provider_config_summary">Enable, disable, and configure the installed music providers plug-ins</string>
+    <string name="settings_provider_config_summary">Configure the installed music providers plug-ins</string>
     <string name="settings_provider_config_title">Music providers</string>
     <string name="settings_dsp_config_summary">Enable, disable, and configure the installed sound processing plug-ins to use in your effects chain</string>
     <string name="settings_dsp_config_title">Sound processing plugins</string>
     <string name="settings_taste_learning_summary">Send anonymous information to help better determine songs I\'m likely to like</string>
     <string name="settings_taste_learning_title">Learn my taste</string>
-    <string name="settings_album_art_summary">Beautify the navigation by download appropriate album art</string>
+    <string name="settings_album_art_summary">Beautify the navigation by downloading appropriate album art</string>
     <string name="settings_album_art_title">Download album art</string>
     <string name="settings_wifi_stream_only_summary">Automatically enable offline mode when leaving Wi-Fi network</string>
     <string name="settings_wifi_stream_only_title">Wi-Fi streaming only</string>
@@ -102,7 +102,7 @@
     <string name="bucket_settings_invalid">These settings couldn\'t generate a valid bucket, or a network error occurred.</string>
     <string name="automix_minimal_settings_error">Choose at least a style or mood, or enable taste profile.</string>
     <string name="bucket_creating_dialog">Creating bucket (this may take a few seconds)…</string>
-    <string name="playlist_creating_dialog">Creating automic playlist (this may take a few seconds)…</string>
+    <string name="playlist_creating_dialog">Creating automix playlist (this may take a few seconds)…</string>
     <string name="automix_bucket_name_error">Please enter a name for this bucket</string>
     <string name="bucket_history">History</string>
     <string name="bucket_edit">Edit</string>
@@ -150,7 +150,7 @@
     </plurals>
 
     <string name="no_music_hint">You don\'t have any music. Configure a provider in the Settings, or copy music on your device via USB!</string>
-    <string name="recognition_howto">Point your phone at a speaker, or sing a song, and press the button below. Once you\'re done, or after a few seconds, tap it again to recognize what song that was.</string>
+    <string name="recognition_howto">Point your device at a speaker, or sing a song, and press the button below. Once you\'re done, or after a few seconds, tap it again to recognize what song that was.</string>
     <string name="recognition_failed">Oops, we couldn\'t recognize what we heard!</string>
     <string name="more">More</string>
     <string name="songs">Songs</string>
@@ -204,12 +204,12 @@
     <string name="play_next">Play next</string>
     <string name="remove_playlist">Remove playlist</string>
     <string name="remove_playlist_dialog_title">Remove playlist?</string>
-    <string name="remove_playlist_dialog_msg">This will remove playlist %s.</string>
+    <string name="remove_playlist_dialog_msg">This will permanently remove playlist %s.</string>
     <string name="favorites">Favorites</string>
     <string name="most_played">Most played</string>
     <string name="sleep_timer">Sleep timer</string>
     <string name="sleep_timer_confirm_toast">Music will stop in %1$d hour(s) and %2$d minute(s)</string>
-    <string name="sleep_timer_disabled_toast">Music will stop in %1$d hour(s) and %2$d minute(s)</string>
+    <string name="sleep_timer_disabled_toast">Music won\'t stop</string>
     <string name="sleep_timer_dialog_message">The current timer will stop music in %1$d hour(s) and %2$d minute(s)</string>
     <string name="dialog_buttton_continue">Continue</string>
     <string name="change">Change</string>

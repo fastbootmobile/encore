@@ -331,7 +331,10 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                     } else {
                         playNow();
                     }
-                    showMaterialReelBar(mPlayFab);
+
+                    if (Utils.hasLollipop()) {
+                        showMaterialReelBar(mPlayFab);
+                    }
                 } else {
                     mFabShouldResume = true;
                     PlaybackProxy.pause();
@@ -358,7 +361,9 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                     mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
                     mFabDrawable.setBuffering(true);
 
-                    showMaterialReelBar(mPlayFab);
+                    if (Utils.hasLollipop()) {
+                        showMaterialReelBar(mPlayFab);
+                    }
                 }
             }
         });
@@ -517,7 +522,9 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         mFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
         mFabDrawable.setBuffering(true);
 
-        showMaterialReelBar(mPlayFab);
+        if (Utils.hasLollipop()) {
+            showMaterialReelBar(mPlayFab);
+        }
     }
 
     private void playNext() {

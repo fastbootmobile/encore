@@ -45,7 +45,6 @@ public class ImageCache {
     private static final ImageCache INSTANCE = new ImageCache();
 
     private static final boolean USE_MEMORY_CACHE = true;
-    private static final int MEMORY_CACHE_SIZE = 1024 * 20; // 20 MB
 
     private final ArrayList<String> mEntries;
     private File mCacheDir;
@@ -66,6 +65,8 @@ public class ImageCache {
      */
     public ImageCache() {
         mEntries = new ArrayList<>();
+        final int memoryCacheSize = (int) (Runtime.getRuntime().maxMemory() / 1024 / 3);
+        Log.d(TAG, "Maximum image cache memory: " + memoryCacheSize + " KB (maxMemory=" + (Runtime.getRuntime().maxMemory() / 1024) + "KB)");
 
         // We create a set of reusable bitmaps that can be
         // populated into the inBitmap field of BitmapFactory.Options. Note that the set is
@@ -81,7 +82,7 @@ public class ImageCache {
 
 
         if (USE_MEMORY_CACHE) {
-            mMemoryCache = new LruCache<String, RecyclingBitmapDrawable>(MEMORY_CACHE_SIZE) {
+            mMemoryCache = new LruCache<String, RecyclingBitmapDrawable>(memoryCacheSize) {
                 @Override
                 protected int sizeOf(String key, RecyclingBitmapDrawable value) {
                     final int bitmapSize = ImageUtils.getBitmapSize(value) / 1024;

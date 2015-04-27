@@ -498,6 +498,7 @@ public class MainActivity extends AppActivity
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             PlaybackProxy.setSleepTimer(-1);
+                            Toast.makeText(MainActivity.this, R.string.sleep_timer_disabled_toast, Toast.LENGTH_SHORT).show();
                             dialog.dismiss();
                         }
                     })
