@@ -460,7 +460,11 @@ void NativePlayer::flush() {
     m_LastBuffersCheckUfCount = 0;
     m_iActiveBuffersTotalSize = 0;
     for (auto it = m_ActiveBuffers.begin(); it != m_ActiveBuffers.end(); ++it) {
-        m_IdleBuffers.push_back(*it);
+        if (m_IdleBuffers.size() > 5) {
+            delete *it;
+        } else {
+            m_IdleBuffers.push_back(*it);
+        }
     }
     m_ActiveBuffers.clear();
 
