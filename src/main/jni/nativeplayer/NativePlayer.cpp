@@ -271,7 +271,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
         }
 
         m_iBufferMinPlayback = sample_rate * channels / 8;
-        m_iBufferMaxSize = m_iBufferMinPlayback * 16;
+        m_iBufferMaxSize = m_iBufferMinPlayback * 12;
 
         switch (sample_rate) {
             // Crappy quality starts here v
@@ -524,6 +524,9 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
             p->m_iUnderflowCount++;
             ALOGW("Buffer underrun");
 
+            // We raise the max buffered data when hitting an underrun
+            p->m_iBufferMaxSize += 1024;
+
             // If we've got at least three underruns in less than 10 seconds, raise the min buffers
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
             int len_ms = std::chrono::duration_cast<std::chrono::milliseconds>
@@ -534,8 +537,6 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
                     // We raise the min buffer size, max 2 seconds
                     p->m_iBufferMinPlayback = std::min(p->m_iBufferMinPlayback + 1024,
                         p->m_iSampleRate * p->m_iChannels * 2);
-                    p->m_iBufferMaxSize = std::min<uint32_t>(p->m_iSampleRate * p->m_iChannels * 2,
-                            p->m_iBufferMinPlayback * 16);
 
                     ALOGD("Raising buffers: min=%d max=%d", p->m_iBufferMinPlayback, p->m_iBufferMaxSize);
                 }
