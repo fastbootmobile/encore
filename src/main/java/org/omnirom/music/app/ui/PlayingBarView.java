@@ -268,7 +268,7 @@ public class PlayingBarView extends RelativeLayout {
                     mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
                 }
             }
-        }, 200);
+        }, 1000);
 
     }
 
