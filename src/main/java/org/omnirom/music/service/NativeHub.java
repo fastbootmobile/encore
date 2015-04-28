@@ -34,7 +34,7 @@ public class NativeHub {
     }
 
     private WSStreamer mStreamer;
-    private boolean mIsStreamerUp;
+    private OnSampleWrittenListener mWrittenListener;
 
     // Used in native code
     private long mHandle;
@@ -114,9 +114,22 @@ public class NativeHub {
      */
     public void setDucking(boolean duck) { nativeSetDucking(duck); }
 
+    /**
+     * Sets the listener that will be called when samples are written to the sink
+     * @param listener The listener to use
+     */
+    public void setOnAudioWrittenListener(OnSampleWrittenListener listener) {
+        mWrittenListener = listener;
+    }
+
     // Called from native code
     public void onAudioMirrorWritten(int len) {
         mStreamer.write(mAudioMirrorBuffer, len);
+
+        // We use audio mirroring writing for tracking track elapsed time
+        if (mWrittenListener != null) {
+            mWrittenListener.onSampleWritten(mAudioMirrorBuffer, len);
+        }
     }
 
     // Native methods
@@ -127,4 +140,9 @@ public class NativeHub {
     private native void nativeReleaseHostSocket(String name);
     private native void nativeSetSinkPointer(long handle);
     private native void nativeSetDucking(boolean duck);
+
+
+    public interface OnSampleWrittenListener {
+        void onSampleWritten(byte[] bytes, int len);
+    }
 }

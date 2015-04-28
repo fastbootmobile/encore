@@ -142,7 +142,6 @@ public class PlayingBarView extends RelativeLayout {
 
             if (contains) {
                 mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
-
             }
         }
 
@@ -171,6 +170,7 @@ public class PlayingBarView extends RelativeLayout {
         @Override
         public void onPlaybackResume() throws RemoteException {
             mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
         }
 
         @Override

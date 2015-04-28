@@ -66,7 +66,7 @@ import java.util.List;
  */
 public class PlaybackService extends Service
         implements PluginsLookup.ConnectionListener, ILocalCallback,
-        AudioManager.OnAudioFocusChangeListener {
+        AudioManager.OnAudioFocusChangeListener, NativeHub.OnSampleWrittenListener {
 
     private static final String TAG = "PlaybackService";
 
@@ -128,7 +128,7 @@ public class PlaybackService extends Service
     private List<IPlaybackCallback> mCallbacks;
     private ServiceNotification mNotification;
     private int mCurrentTrack = -1;
-    private long mCurrentTrackStartTime;
+    private long mCurrentTrackElapsedMs;
     private long mPauseLastTick;
     private int mState = STATE_STOPPED;
     private boolean mIsResuming;
@@ -248,6 +248,7 @@ public class PlaybackService extends Service
         mNativeHub = new NativeHub();
         mNativeSink = new NativeAudioSink();
         mNativeHub.setSinkPointer(mNativeSink.getPlayer().getHandle());
+        mNativeHub.setOnAudioWrittenListener(this);
         mNativeHub.onStart();
 
         mDSPProcessor = new DSPProcessor(this);
@@ -931,16 +932,7 @@ public class PlaybackService extends Service
     }
 
     public int getCurrentTrackPositionImpl() {
-        if (mState == STATE_PAUSED) {
-            // When we are paused, we delay the track start time for as long as we are paused
-            // so that the song position actually pauses too. This is more a hack (hey, we
-            // mimic the official Spotify app bug!), and ideally we should calculate the elapsed
-            // time by counting the frames that are fed to the AudioSink.
-            mCurrentTrackStartTime += (System.currentTimeMillis() - mPauseLastTick);
-            mPauseLastTick = System.currentTimeMillis();
-        }
-
-        return (int) (System.currentTimeMillis() - mCurrentTrackStartTime);
+        return (int) mCurrentTrackElapsedMs;
     }
 
     void seekImpl(final long timeMs) {
@@ -959,7 +951,7 @@ public class PlaybackService extends Service
                     try {
                         provider.seek(timeMs);
                         success = true;
-                        mCurrentTrackStartTime = System.currentTimeMillis() - timeMs;
+                        mCurrentTrackElapsedMs = timeMs;
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot seek to time", e);
                     } catch (Exception e) {
@@ -1091,6 +1083,7 @@ public class PlaybackService extends Service
             if (currentSong != null) {
                 return currentSong.getDuration();
             } else {
+                Log.e(TAG, "getCurrentTrackLength: returning -1 as current song is null");
                 return -1;
             }
         }
@@ -1245,10 +1238,11 @@ public class PlaybackService extends Service
         @Override
         public void onSongPlaying(ProviderIdentifier provider) {
             boolean wasPaused = mIsResuming;
-            if (!wasPaused) {
-                mCurrentTrackStartTime = System.currentTimeMillis();
-            } else {
+            if (wasPaused) {
                 mIsResuming = false;
+            } else {
+                Log.e(TAG, "onSongPlaying: resetting current track elapsed ms");
+                mCurrentTrackElapsedMs = 0;
             }
 
             mState = STATE_PLAYING;
@@ -1271,7 +1265,7 @@ public class PlaybackService extends Service
                 }
             }
 
-            Log.d(TAG, "onSongStarted: Playing...");
+            Log.d(TAG, "onSongPlaying: Playing...");
 
             mNotification.setPlayPauseAction(false);
             mRemoteMetadata.notifyPlaying(0);
@@ -1318,7 +1312,7 @@ public class PlaybackService extends Service
                 Log.d(TAG, "onSongPaused: Paused...");
 
                 mNotification.setPlayPauseAction(true);
-                mRemoteMetadata.notifyPaused((System.currentTimeMillis() - mCurrentTrackStartTime));
+                mRemoteMetadata.notifyPaused(getCurrentTrackPositionImpl());
             }
         }
 
@@ -1389,4 +1383,10 @@ public class PlaybackService extends Service
         }
     }
 
+
+    @Override
+    public void onSampleWritten(byte[] bytes, int len) {
+        // TODO: Don't assume 44.1kHz stereo
+        mCurrentTrackElapsedMs += len * 1000 / 88200;
+    }
 }
