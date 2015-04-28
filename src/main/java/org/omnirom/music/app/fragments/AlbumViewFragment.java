@@ -515,7 +515,7 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
     @Override
     public void onSongUpdate(List<Song> s) {
         for (Song song : s) {
-            if (song != null && song.isLoaded() && song.getAlbum().equals(mAlbum.getRef())) {
+            if (song != null && song.isLoaded() && song.getAlbum() != null && song.getAlbum().equals(mAlbum.getRef())) {
                 loadSongs();
                 break;
             }
