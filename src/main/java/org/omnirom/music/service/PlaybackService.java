@@ -1083,7 +1083,6 @@ public class PlaybackService extends Service
             if (currentSong != null) {
                 return currentSong.getDuration();
             } else {
-                Log.e(TAG, "getCurrentTrackLength: returning -1 as current song is null");
                 return -1;
             }
         }
@@ -1241,7 +1240,6 @@ public class PlaybackService extends Service
             if (wasPaused) {
                 mIsResuming = false;
             } else {
-                Log.e(TAG, "onSongPlaying: resetting current track elapsed ms");
                 mCurrentTrackElapsedMs = 0;
             }
 
