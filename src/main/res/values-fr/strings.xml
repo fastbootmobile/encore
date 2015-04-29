@@ -207,7 +207,7 @@
     <string name="remove_playlist_dialog_msg">Vous allez supprimer définitivement la playlist \'%s\'.</string>
     <string name="favorites">Favoris</string>
     <string name="most_played">Les plus écoutés</string>
-    <string name="sleep_timer">Chrono-dodo</string>
+    <string name="sleep_timer">Minuterie</string>
     <string name="sleep_timer_confirm_toast">La musique s\'arrêtera dans %1$d heure(s) et %2$d minute(s)</string>
     <string name="sleep_timer_disabled_toast">La musique ne s\'arrêtera plus</string>
     <string name="sleep_timer_dialog_message">Le chrono actuel arrêtera la musique dans %1$d heure(s) et %2$d minute(s)</string>
