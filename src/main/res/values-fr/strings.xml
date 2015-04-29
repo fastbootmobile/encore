@@ -139,13 +139,13 @@
     <string name="feedback">Feedback</string>
 
     <plurals name="songs_count">
-        <item quantity="zero">No songs</item>
-        <item quantity="one">One song</item>
-        <item quantity="other">%d songs</item>
+        <item quantity="zero">Aucun titre</item>
+        <item quantity="one">Un titre</item>
+        <item quantity="other">%d titres</item>
     </plurals>
     <plurals name="albums_count">
-        <item quantity="zero">No albums</item>
-        <item quantity="one">One album</item>
+        <item quantity="zero">Aucun album</item>
+        <item quantity="one">Un album</item>
         <item quantity="other">%d albums</item>
     </plurals>
 
@@ -155,9 +155,9 @@
     <string name="more">Plus</string>
     <string name="songs">Titres</string>
     <plurals name="xx_songs">
-        <item quantity="one">%d song</item>
-        <item quantity="zero">%d songs</item>
-        <item quantity="other">%d songs</item>
+        <item quantity="one">%d titre</item>
+        <item quantity="zero">%d titres</item>
+        <item quantity="other">%d titres</item>
     </plurals>
     <string name="plugin_not_configured_snackbar">L\'extension \'%s\' n\'est pas configurée</string>
     <string name="configure">Configurer</string>

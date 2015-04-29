@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="voice_play_words">
+        <item>lire</item>       <!-- Lire l'Artiste Coldplay -->
+        <item>écouter</item>    <!-- Ecouter la chanson Californication -->
+        <item>lancer</item>     <!-- Lancer la playliste Starred -->
+        <item>jouer</item>      <!-- Jouer la playliste favoris -->
+    </string-array>
+
+    <string-array name="voice_play_playlist_words">
+        <item>playlist</item>
+        <item>play list</item>
+        <item>play-list</item>
+        <item>playliste</item>
+        <item>liste</item>
+    </string-array>
+
+    <string-array name="voice_play_artist_words">
+        <item>artiste</item>
+        <item>artistes</item>
+        <item>auteur</item>
+        <item>auteurs</item>
+    </string-array>
+
+    <string-array name="voice_play_album_words">
+        <item>album</item>
+        <item>single</item>
+        <item>release</item>
+    </string-array>
+
+    <string-array name="voice_play_track_words">
+        <item>piste</item>
+        <item>titre</item>
+        <item>chanson</item>
+        <item>musique</item>
+    </string-array>
+
+    <string-array name="voice_play_source_words">
+        <item>de</item>           <!-- Lire Justin Bieber de Spotify -->
+        <item>sur</item>          <!-- Lance Starred sur Spotify -->
+    </string-array>
+
+    <string-array name="voice_pause_words">
+        <item>pause</item>          <!-- Pause -->
+    </string-array>
+
+    <string-array name="voice_jump_words">
+        <item>sauter à la piste</item>      <!-- Sauter à la piste 10 -->
+        <item>aller à la piste</item>
+    </string-array>
+
+    <string-array name="voice_next_words">
+        <item>suivant</item>
+        <item>suivante</item>
+        <item>sauter</item>
+    </string-array>
+
+    <string-array name="voice_previous_words">
+        <item>rembobiner</item>
+        <item>précedent</item>
+    </string-array>
+
+    <string-array name="voice_time_seconds">
+        <item>secondes</item>                <!-- Rewind 10 seconds -->
+        <item>seconde</item>
+    </string-array>
+
+    <string-array name="voice_time_minutes">
+        <item>minute</item>
+        <item>minutes</item>                <!-- Skip 2 minutes -->
+    </string-array>
+
+    <string-array name="voice_google_words">
+        <item>google</item>                     <!-- Google what's the weather -->
+        <item>rechercher sur Internet</item>         <!-- Search the web for australopithecus -->
+        <item>rechercher sur le Web</item>
+    </string-array>
+</resources>
