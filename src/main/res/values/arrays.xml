@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="bluetooth_autoconnect_actions_entries">
-        <item>Open Drive Mode</item>
-        <item>Start Playing Queue</item>
+        <item>@string/bluetooth_action_drive_mode</item>
+        <item>@string/bluetooth_action_play_queue</item>
     </string-array>
 
     <string-array name="bluetooth_autoconnect_actions_values">

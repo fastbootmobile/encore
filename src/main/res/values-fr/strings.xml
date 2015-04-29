@@ -217,4 +217,6 @@
     <string name="lyrics_not_found">Les paroles n\'ont pas été trouvées !</string>
     <string name="close_x">X</string>
     <string name="listen_now_suggestions_header">Pourquoi ne pas écouter…</string>
+    <string name="bluetooth_action_drive_mode">Ouvrir le mode voiture</string>
+    <string name="bluetooth_action_play_queue">Lancer la file d\'écoute</string>
 </resources>

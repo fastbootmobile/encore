@@ -217,4 +217,7 @@
     <string name="lyrics_not_found">No lyrics found for this song!</string>
     <string name="close_x">X</string>
     <string name="listen_now_suggestions_header">How about listening to…</string>
+
+    <string name="bluetooth_action_drive_mode">Open Drive Mode</string>
+    <string name="bluetooth_action_play_queue">Start Playing Queue</string>
 </resources>

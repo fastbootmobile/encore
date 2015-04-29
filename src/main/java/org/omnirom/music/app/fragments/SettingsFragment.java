@@ -98,33 +98,6 @@ public class SettingsFragment extends PreferenceFragment {
                 btNameList.setDefaultValue(currentPreferred);
             }
         }
-/*
-        btNameList.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                getPrefs().edit().putString(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_NAME,
-                        (String) newValue).commit();
-                return true;
-            }
-        });
-
-        findPreference(KEY_BT_AUTOCONNECT_ENABLE).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                getPrefs().edit().putBoolean(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ENABLE,
-                        ((CheckBoxPreference) preference).isChecked()).commit();
-                return true;
-            }
-        });
-
-        findPreference(KEY_BT_AUTOCONNECT_ACTIONS).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                getPrefs().edit().putInt(SettingsKeys.KEY_BLUETOOTH_AUTOCONNECT_ACTION,
-                        sum(((MultiSelectListPreference) preference).getValues())).commit();
-                return true;
-            }
-        });*/
     }
 
     @Override
