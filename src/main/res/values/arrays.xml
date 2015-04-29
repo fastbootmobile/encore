@@ -5,7 +5,7 @@
         <item>@string/bluetooth_action_play_queue</item>
     </string-array>
 
-    <string-array name="bluetooth_autoconnect_actions_values">
+    <string-array name="bluetooth_autoconnect_actions_values" translatable="false">
         <item>1</item>
         <item>2</item>
     </string-array>
