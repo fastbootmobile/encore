@@ -219,4 +219,6 @@
     <string name="listen_now_suggestions_header">Pourquoi ne pas écouter…</string>
     <string name="bluetooth_action_drive_mode">Ouvrir le mode voiture</string>
     <string name="bluetooth_action_play_queue">Lancer la file d\'écoute</string>
+    <string name="rename_playlist">Renommer la playlist</string>
+    <string name="listen_now_no_providers">Vous n\'avez pas de sources! Recherchez \'OmniMusic Provider\' sur le Play Store</string>
 </resources>

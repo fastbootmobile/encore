@@ -113,6 +113,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 mTxtNoMusic.animate().setDuration(400).translationX(0).alpha(1.0f).start();
                 if (mWarmUpCount < 2) {
                     mTxtNoMusic.setText(R.string.loading);
+                } else if (PluginsLookup.getDefault().getAvailableProviders().size() == 0) {
+                    mTxtNoMusic.setText(R.string.listen_now_no_providers);
+                    mFoundAnything = false;
                 } else {
                     mTxtNoMusic.setText(R.string.no_music_hint);
                     mFoundAnything = false;
