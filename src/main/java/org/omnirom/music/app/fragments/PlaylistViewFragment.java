@@ -121,6 +121,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                 parent.updateOfflineStatus();
             } else if (msg.what == UPDATE_DATA_SET) {
                 parent.mAdapter.notifyDataSetChanged();
+                parent.mTvPlaylistName.setText(parent.mPlaylist.getName());
             }
         }
     }
