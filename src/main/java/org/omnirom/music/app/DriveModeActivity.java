@@ -144,6 +144,9 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 
+        // Allow for BluetoothReceiver to kill the activity on BT disconnect
+        registerReceiver(mBroadcastRcv, new IntentFilter(ACTION_FINISH));
+
         mDetector = new GestureDetector(this,this);
 
         mHandler = new DriveHandler(new WeakReference<>(this));
@@ -412,8 +415,6 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
             // Start NavHead for easy going back into Drive mode
             startService(new Intent(this, NavHeadService.class));
         }
-
-        unregisterReceiver(mBroadcastRcv);
     }
 
     @Override
@@ -421,14 +422,12 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
         super.onDestroy();
         // Hide NavHead as we're getting back into the app
         stopService(new Intent(this, NavHeadService.class));
+        unregisterReceiver(mBroadcastRcv);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        // Allow for BluetoothReceiver to kill the activity on BT disconnect
-        registerReceiver(mBroadcastRcv, new IntentFilter(ACTION_FINISH));
 
         ProviderAggregator.getDefault().addUpdateCallback(this);
         PlaybackProxy.addCallback(mPlaybackCallback);
