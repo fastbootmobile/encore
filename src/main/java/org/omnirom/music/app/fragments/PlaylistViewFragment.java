@@ -627,11 +627,11 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
         if (mPlaylist.isLoaded() && mPlaylist.isOfflineCapable()) {
             if (mOfflineBtn.getAlpha() != 1) {
-                mOfflineBtn.animate().alpha(1.0f).setDuration(300).start();
+                mOfflineBtn.animate().alpha(1.0f).setStartDelay(500).setDuration(300).start();
             }
         } else {
             if (mOfflineBtn.getAlpha() != 0) {
-                mOfflineBtn.animate().alpha(0.0f).setDuration(300).start();
+                mOfflineBtn.animate().alpha(0.0f).setStartDelay(500).setDuration(300).start();
             }
         }
     }

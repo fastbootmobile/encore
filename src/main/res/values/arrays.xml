@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="bluetooth_autoconnect_actions_entries">
+    <string-array name="bluetooth_autoconnect_actions_entries" translatable="false">
         <item>@string/bluetooth_action_drive_mode</item>
         <item>@string/bluetooth_action_play_queue</item>
     </string-array>

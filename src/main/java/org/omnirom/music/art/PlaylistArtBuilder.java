@@ -165,19 +165,21 @@ public class PlaylistArtBuilder {
             }
         } else {
             for (int i = 0; i < 4; ++i) {
-                RecyclingBitmapDrawable item = mPlaylistSource.get(i);
-                Bitmap itemBmp = item.getBitmap();
+                if (mPlaylistSource.size() > i) {
+                    RecyclingBitmapDrawable item = mPlaylistSource.get(i);
+                    Bitmap itemBmp = item.getBitmap();
 
-                int row = (int) Math.floor(i / 2);
-                int col = (i % 2);
+                    int row = (int) Math.floor(i / 2);
+                    int col = (i % 2);
 
-                Rect src = new Rect(0, 0, itemBmp.getWidth(), itemBmp.getHeight());
-                Rect dst = new Rect(col * compositeWidth / 2,
-                        row * compositeHeight / 2,
-                        col * compositeWidth / 2 + compositeWidth / 2,
-                        row * compositeHeight / 2 + compositeHeight / 2);
+                    Rect src = new Rect(0, 0, itemBmp.getWidth(), itemBmp.getHeight());
+                    Rect dst = new Rect(col * compositeWidth / 2,
+                            row * compositeHeight / 2,
+                            col * compositeWidth / 2 + compositeWidth / 2,
+                            row * compositeHeight / 2 + compositeHeight / 2);
 
-                canvas.drawBitmap(itemBmp, src, dst, mPlaylistPaint);
+                    canvas.drawBitmap(itemBmp, src, dst, mPlaylistPaint);
+                }
             }
         }
 

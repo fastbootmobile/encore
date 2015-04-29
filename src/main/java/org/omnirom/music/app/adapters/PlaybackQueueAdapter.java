@@ -248,6 +248,12 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             tag.ivAlbumArt.setDefaultArt();
         }
 
+        if (!item.isAvailable()) {
+            tag.vRoot.setAlpha(0.5f);
+        } else {
+            tag.vRoot.setAlpha(1.0f);
+        }
+
         return convertView;
     }
 
