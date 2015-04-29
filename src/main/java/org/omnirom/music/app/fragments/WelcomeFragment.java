@@ -144,6 +144,11 @@ public class WelcomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        // Update the list of plugins
+        PluginsLookup.getDefault().requestUpdatePlugins();
+
+        // If we were configuring a provider, update it
         if (mConfiguringProvider != null) {
             IMusicProvider provider = mConfiguringProvider.getBinder();
             if (provider != null) {
