@@ -218,6 +218,11 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     @Override
+    public boolean renamePlaylist(String playlistRef, String title) throws RemoteException {
+        return mMultiProviderDatabaseHelper.renamePlaylist(playlistRef, title);
+    }
+
+    @Override
     public boolean deleteSongFromPlaylist(int songPosition, String playlistRef) throws RemoteException {
         return mMultiProviderDatabaseHelper.deleteSongFromPlaylist(songPosition, playlistRef);
     }

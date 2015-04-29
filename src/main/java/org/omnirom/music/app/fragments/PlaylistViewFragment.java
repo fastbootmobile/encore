@@ -35,6 +35,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -423,6 +424,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
             // Remove some options not applicable to the special playlist mode
             menu.removeItem(R.id.menu_remove_duplicates);
             menu.removeItem(R.id.menu_remove_playlist);
+            menu.removeItem(R.id.menu_rename_playlist);
         }
     }
 
@@ -447,9 +449,46 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         } else if (item.getItemId() == R.id.menu_remove_playlist) {
             removePlaylistDialog();
             return true;
+        } else if (item.getItemId() == R.id.menu_rename_playlist) {
+            renamePlaylistDialog();
+            return true;
         }
 
         return false;
+    }
+
+    private void renamePlaylistDialog() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+
+        // Set an EditText view to get user input
+        final EditText input = new EditText(getActivity());
+        input.setText(mPlaylist.getName());
+        alert.setView(input);
+
+        alert.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String value = input.getText().toString();
+                ProviderConnection conn = PluginsLookup.getDefault().getProvider(mPlaylist.getProvider());
+                if (conn != null) {
+                    IMusicProvider provider = conn.getBinder();
+                    if (provider != null) {
+                        try {
+                            provider.renamePlaylist(mPlaylist.getRef(), value);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot rename playlist", e);
+                        }
+                    }
+                }
+            }
+        });
+
+        alert.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Canceled.
+            }
+        });
+
+        alert.show();
     }
 
     private void removePlaylistDialog() {

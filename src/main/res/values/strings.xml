@@ -220,4 +220,5 @@
 
     <string name="bluetooth_action_drive_mode">Open Drive Mode</string>
     <string name="bluetooth_action_play_queue">Start Playing Queue</string>
+    <string name="rename_playlist">Rename playlist</string>
 </resources>

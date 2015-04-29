@@ -207,6 +207,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         mPlaylists.put(pl.getRef(), pl);
         mPlayListRefID.put(pl.getRef(), playlist_id);
         mCallback.playlistUpdated(pl);
+        db.close();
 
         return pl.getRef();
     }
@@ -231,6 +232,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
             mSongRefID.put(playlistref + ":" + songref, song_id);
             mCallback.playlistUpdated(p);
             mRefProviderId.put(songref, providerIdentifier);
+            db.close();
             return true;
         } else {
             Log.e(TAG, "Cannot add song to playlist: Ref doesn't exist in PlaylistRefID");
@@ -247,6 +249,20 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
             db.delete(TABLE_SONGS, KEY_PLAYLIST_ID + " = ?",
                     new String[]{String.valueOf(playlist_id)});
             mPlaylists.remove(playlistref);
+            db.close();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean renamePlaylist(String playlistRef, String title) {
+        if (mPlayListRefID.containsKey(playlistRef)) {
+            long playlist_id = mPlayListRefID.get(playlistRef);
+            SQLiteDatabase db = getWritableDatabase();
+            ContentValues cv = new ContentValues(1);
+            cv.put(KEY_PLAYLIST_NAME, title);
+            db.update(TABLE_PLAYLIST, cv, KEY_PLAYLIST_ID + " = ?", new String[]{String.valueOf(playlist_id)});
+            db.close();
             return true;
         }
         return false;
@@ -261,6 +277,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
                     new String[]{String.valueOf(song_id)});
             mPlaylists.get(playlistRef).songsList().remove(songPosition);
             mCallback.playlistUpdated(mPlaylists.get(playlistRef));
+            db.close();
         }
         return false;
     }
@@ -279,13 +296,13 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
             mPlaylists.get(playlistRef).songsList().set(oldPosition, newRef);
             mPlaylists.get(playlistRef).songsList().set(newPosition, oldRef);
             mCallback.playlistUpdated(mPlaylists.get(playlistRef));
+            db.close();
             return true;
         }
         return false;//not supported yet
     }
 
     public void startSearch(final String query) {
-        Log.d(TAG, "searching for " + query);
         if (mSearchResult != null && mSearchResult.getQuery().hashCode() != query.hashCode() || mSearchResult == null) {
             mSearchResult = new SearchResult(query);
             final String regex = ".*" + query + ".*";
@@ -317,8 +334,6 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
 
             };
             searchThread.start();
-            //searchThread.run();
-
         }
 
     }

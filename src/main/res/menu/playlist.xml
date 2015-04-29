@@ -17,7 +17,12 @@
         android:title="@string/menu_remove_duplicates" />
 
     <item
+        android:id="@+id/menu_rename_playlist"
+        android:title="@string/rename_playlist" />
+
+    <item
         android:id="@+id/menu_remove_playlist"
         android:title="@string/remove_playlist" />
+
 
 </menu>
