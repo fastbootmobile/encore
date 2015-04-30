@@ -139,7 +139,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             final Resources res = view.getResources();
 
             if (drawable != null && drawable.getBitmap() != null) {
-                Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+                Palette.from(drawable.getBitmap()).generate(new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
                         final Palette.Swatch item = palette.getDarkVibrantSwatch();

@@ -263,7 +263,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 return;
             }
 
-            Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+            Palette.from(drawable.getBitmap()).generate(new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(Palette palette) {
                     Palette.Swatch vibrant = palette.getVibrantSwatch();
@@ -447,7 +447,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
     private void generateHeroPalette() {
         if (mHeroImage != null && !mHeroImage.isRecycled()) {
-            Palette.generateAsync(mHeroImage, new Palette.PaletteAsyncListener() {
+            Palette.from(mHeroImage).generate(new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(final Palette palette) {
                     final Palette.Swatch normalColor = palette.getDarkMutedSwatch();

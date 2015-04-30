@@ -436,7 +436,7 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
     }
 
     private void generateHeroPalette() {
-        Palette.generateAsync(mHeroImage, new Palette.PaletteAsyncListener() {
+        Palette.from(mHeroImage).generate(new Palette.PaletteAsyncListener() {
             @Override
             public void onGenerated(final Palette palette) {
                 final Palette.Swatch normalColor = palette.getDarkMutedSwatch();

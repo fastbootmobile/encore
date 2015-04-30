@@ -78,7 +78,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         public void onArtLoaded(final AlbumArtImageView view, final BitmapDrawable drawable) {
             final Resources res = view.getResources();
 
-            Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+            Palette.from(drawable.getBitmap()).generate(new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(Palette palette) {
                     final int defaultColor = res.getColor(R.color.default_album_art_background);

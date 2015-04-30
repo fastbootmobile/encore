@@ -123,7 +123,7 @@ public class PlaybackQueueActivity extends AppActivity {
             public void onClick(View view) {
                 Bitmap hero = ((MaterialTransitionDrawable) ((ImageView) view).getDrawable())
                         .getFinalDrawable().getBitmap();
-                Palette palette = Palette.generate(hero);
+                Palette palette = Palette.from(hero).generate();
 
                 Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
                 Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();

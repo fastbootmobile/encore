@@ -54,7 +54,7 @@ public class AlbumsAdapter extends BaseAdapter {
     private AlbumArtImageView.OnArtLoadedListener mArtListener = new AlbumArtImageView.OnArtLoadedListener() {
         @Override
         public void onArtLoaded(final AlbumArtImageView view, final BitmapDrawable drawable) {
-            Palette.generateAsync(drawable.getBitmap(), new Palette.PaletteAsyncListener() {
+            Palette.from(drawable.getBitmap()).generate(new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(final Palette palette) {
                     final Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
