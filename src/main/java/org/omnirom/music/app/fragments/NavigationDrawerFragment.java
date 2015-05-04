@@ -226,7 +226,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void selectItem(final int position, boolean switchToFragment) {
         // Don't select special actions
-        if (mCurrentSelectedPosition + 1 < MainActivity.SECTION_NOW_PLAYING) {
+        if (position + 1 < MainActivity.SECTION_NOW_PLAYING) {
             mCurrentSelectedPosition = position;
 
             if (mDrawerListView != null) {
