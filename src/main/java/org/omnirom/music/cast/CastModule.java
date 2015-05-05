@@ -273,7 +273,7 @@ public class CastModule extends MediaRouter.Callback {
             String status = Cast.CastApi.getApplicationStatus(mApiClient);
             Log.d(TAG, "onApplicationStatusChanged; status=" + status);
 
-            if (mShouldStart) {
+            if (mShouldStart && mApiClient.isConnected()) {
                 Cast.CastApi.launchApplication(mApiClient, CAST_APP_ID, true)
                         .setResultCallback(new ApplicationConnectionResultCallback("LaunchApp"));
                 mShouldStart = false;
