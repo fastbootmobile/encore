@@ -3,6 +3,7 @@ package org.omnirom.music.app;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.app.TimePickerDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -173,6 +174,11 @@ public class MainActivity extends AppActivity
                             Log.e(TAG, "Cannot start: Is your activity not exported?");
                             Toast.makeText(MainActivity.this,
                                     "Cannot start: Make sure you set 'exported=true' flag on your settings activity.",
+                                    Toast.LENGTH_LONG).show();
+                        } catch (ActivityNotFoundException e) {
+                            Log.e(TAG, "Cannot start: Unknown activity");
+                            Toast.makeText(MainActivity.this,
+                                    "Cannot start: The settings activity hasn't been found in the package.",
                                     Toast.LENGTH_LONG).show();
                         }
                     }

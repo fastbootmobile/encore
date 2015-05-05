@@ -15,6 +15,7 @@
 
 package org.omnirom.music.app.fragments;
 
+import android.content.ActivityNotFoundException;
 import android.os.RemoteException;
 import android.support.v4.app.ListFragment;
 import android.content.Intent;
@@ -89,9 +90,14 @@ public class SettingsProvidersFragment extends ListFragment {
             try {
                 startActivity(i);
             } catch (SecurityException e) {
-                Log.e(TAG, "Cannot start: Is your activity not exported?");
+                Log.e(TAG, "Cannot start: Is your activity not exported?", e);
                 Toast.makeText(getActivity(),
                         "Cannot start: Make sure you set 'exported=true' flag on your settings activity.",
+                        Toast.LENGTH_LONG).show();
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "Cannot start: Settings activity not found in the package", e);
+                Toast.makeText(getActivity(),
+                        "Cannot start: Make sure your activity name is correct in the manifest.",
                         Toast.LENGTH_LONG).show();
             }
         } else {
