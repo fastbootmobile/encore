@@ -488,8 +488,8 @@ public class PlaybackService extends Service
                                     if (restorePosition > 0) {
                                         binder.seek(getCurrentTrackPositionImpl());
                                     }
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Cannot restore state");
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Cannot restore state", e);
                                 }
                             }
                         }, 2000);
@@ -1065,7 +1065,10 @@ public class PlaybackService extends Service
 
         @Override
         public void pause() throws RemoteException {
+            // User-requested pause, so abandon audio focus to avoid resume if something else
+            // grabs and release playback while we were just paused.
             pauseImpl();
+            abandonAudioFocus();
         }
 
         @Override
