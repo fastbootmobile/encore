@@ -8,26 +8,36 @@
 
     <string-array name="voice_play_playlist_words">
         <item>playlist</item>
+        <item>the playlist</item>
         <item>play list</item>
+        <item>the play list</item>
         <item>play-list</item>
+        <item>the play-list</item>
     </string-array>
 
     <string-array name="voice_play_artist_words">
         <item>artist</item>
+        <item>the artist</item>
         <item>artists</item>
         <item>author</item>
     </string-array>
 
     <string-array name="voice_play_album_words">
         <item>album</item>
+        <item>the album</item>
         <item>single</item>
+        <item>the single</item>
         <item>release</item>
+        <item>the release</item>
     </string-array>
 
     <string-array name="voice_play_track_words">
         <item>song</item>
+        <item>the song</item>
         <item>track</item>
+        <item>the track</item>
         <item>title</item>
+        <item>the title</item>
     </string-array>
 
     <string-array name="voice_play_source_words">
