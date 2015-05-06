@@ -771,10 +771,12 @@ public class PlaybackService extends Service
                 mCurrentTrack = Utils.getRandom(mPlaybackQueue.size());
             }
 
+            mNativeSink.flushSamples();
             requestStartPlayback();
             mNotification.setHasNext(true);
         } else if (mPlaybackQueue.size() > 0 && hasNext) {
             mCurrentTrack++;
+            mNativeSink.flushSamples();
             requestStartPlayback();
 
             hasNext = mCurrentTrack < mPlaybackQueue.size() - 1;
@@ -782,6 +784,7 @@ public class PlaybackService extends Service
             mNotification.setHasNext(hasNext);
         } else if (mRepeatMode && mPlaybackQueue.size() > 0) {
             mCurrentTrack = 0;
+            mNativeSink.flushSamples();
             requestStartPlayback();
             mNotification.setHasNext(true);
         }
@@ -804,6 +807,7 @@ public class PlaybackService extends Service
                 && mCurrentTrackLoaded;
         if (shouldRestart) {
             // Restart playback
+            mNativeSink.flushSamples();
             seekImpl(0);
         } else {
             // Go to the previous track
@@ -816,6 +820,7 @@ public class PlaybackService extends Service
                 }
             }
 
+            mNativeSink.flushSamples();
             requestStartPlayback();
         }
     }
