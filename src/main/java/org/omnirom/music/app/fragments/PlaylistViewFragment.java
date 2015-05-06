@@ -408,6 +408,9 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         ProviderAggregator.getDefault().addUpdateCallback(PlaylistViewFragment.this);
         PlaybackProxy.addCallback(mPlaybackCallback);
         updateFabStatus();
+
+        // Current track might have changed, so update it
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
