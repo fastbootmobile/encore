@@ -22,16 +22,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.ImageView;
 
 import org.omnirom.music.app.DriveModeActivity;
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.ui.AlbumArtImageView;
+import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.model.Song;
 
 public class NavHeadService extends Service {
     private static final String TAG = "NavHeadService";
@@ -40,9 +44,22 @@ public class NavHeadService extends Service {
     private static final String PREF_HEAD_Y = "head_y_";
 
     private WindowManager mWindowManager;
-    private ImageView mHeadView;
+    private AlbumArtImageView mHeadView;
     private WindowManager.LayoutParams mHeadLayoutParams;
-
+    private Handler mHandler;
+    private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
+        @Override
+        public void onSongStarted(boolean buffering, final Song s) throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mHeadView != null) {
+                        mHeadView.loadArtForSong(s);
+                    }
+                }
+            });
+        }
+    };
 
     public NavHeadService() {
     }
@@ -58,8 +75,10 @@ public class NavHeadService extends Service {
     public void onCreate() {
         super.onCreate();
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        mHandler = new Handler();
         createHead();
         loadHeadPosition();
+        PlaybackProxy.addCallback(mPlaybackCallback);
     }
 
     @Override
@@ -71,6 +90,7 @@ public class NavHeadService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        PlaybackProxy.removeCallback(mPlaybackCallback);
         if (mHeadView != null) {
             mHeadView.animate().scaleX(0.5f).scaleY(0.5f).alpha(0.0f).setDuration(500)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
@@ -99,8 +119,12 @@ public class NavHeadService extends Service {
     }
 
     private void createHead() {
-        mHeadView = new ImageView(this);
-        mHeadView.setImageResource(R.drawable.album_placeholder);
+        mHeadView = new AlbumArtImageView(this);
+        mHeadView.setCrossfade(true);
+        Song currentSong = PlaybackProxy.getCurrentTrack();
+        if (currentSong != null) {
+            mHeadView.loadArtForSong(currentSong);
+        }
         mHeadView.setScaleX(0.5f);
         mHeadView.setScaleY(0.5f);
         mHeadView.setAlpha(0.0f);
