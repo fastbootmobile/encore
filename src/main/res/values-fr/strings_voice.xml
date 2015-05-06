@@ -9,30 +9,44 @@
 
     <string-array name="voice_play_playlist_words">
         <item>playlist</item>
+        <item>la playlist</item>
         <item>play list</item>
+        <item>la play list</item>
         <item>play-list</item>
+        <item>la play-list</item>
         <item>playliste</item>
+        <item>la playliste</item>
         <item>liste</item>
+        <item>la liste</item>
     </string-array>
 
     <string-array name="voice_play_artist_words">
         <item>artiste</item>
+        <item>l\'artiste</item>
         <item>artistes</item>
         <item>auteur</item>
+        <item>l\'auteur</item>
         <item>auteurs</item>
     </string-array>
 
     <string-array name="voice_play_album_words">
         <item>album</item>
+        <item>l\'album</item>
         <item>single</item>
+        <item>le single</item>
         <item>release</item>
+        <item>la release</item>
     </string-array>
 
     <string-array name="voice_play_track_words">
         <item>piste</item>
+        <item>la piste</item>
         <item>titre</item>
+        <item>le titre</item>
         <item>chanson</item>
+        <item>la chanson</item>
         <item>musique</item>
+        <item>la musique</item>
     </string-array>
 
     <string-array name="voice_play_source_words">
