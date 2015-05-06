@@ -57,7 +57,7 @@ int JNI_NativeHub_SetupFields(JNIEnv* env) {
         return -1;
     }
 
-    method_NativeHub_onAudioMirrorWritten = env->GetMethodID(clazz, "onAudioMirrorWritten", "(I)V");
+    method_NativeHub_onAudioMirrorWritten = env->GetMethodID(clazz, "onAudioMirrorWritten", "(III)V");
     if (method_NativeHub_onAudioMirrorWritten == NULL) {
         ALOGE("Can't find NativeHub.onAudioMirrorWritten");
         return -1;
@@ -135,7 +135,8 @@ void om_NativeHub_setDucking(JNIEnv* env, jobject thiz, jboolean duck) {
     hub->setDucking(duck);
 }
 // -------------------------------------------------------------------------------------
-void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint len) {
+void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint len,
+        jint sampleRate, jint channels) {
     JNIEnv* env;
     bool release_jni = JNI_GetEnv(&env);
     jobject thiz = (jobject) hub->getUserData();
@@ -147,7 +148,7 @@ void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint
     env->DeleteLocalRef(audioMirrorBufferObj);
 
     // Notify Java new bytes are available
-    env->CallVoidMethod(thiz, method_NativeHub_onAudioMirrorWritten, len);
+    env->CallVoidMethod(thiz, method_NativeHub_onAudioMirrorWritten, len, sampleRate, channels);
 
     if (release_jni) {
         JNI_ReleaseEnv();

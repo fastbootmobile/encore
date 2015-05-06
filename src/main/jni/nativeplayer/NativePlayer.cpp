@@ -410,7 +410,7 @@ uint32_t NativePlayer::enqueue(const void* data, uint32_t len) {
                 m_iWrittenSamples += len;
                 if (m_pNativeHub) {
                     om_NativeHub_onAudioMirrorWritten(m_pNativeHub,
-                        reinterpret_cast<const uint8_t*>(data), len);
+                        reinterpret_cast<const uint8_t*>(data), len, m_iSampleRate, m_iChannels);
                 }
         } else {
             // Queue in our internal buffer queue, and enqueue to the sink in the buffer callback
@@ -508,7 +508,7 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
                 if (p->m_pNativeHub) {
                     om_NativeHub_onAudioMirrorWritten(p->m_pNativeHub,
                         reinterpret_cast<const uint8_t*>(buffer->pBuffer),
-                        buffer->iLength);
+                        buffer->iLength, p->m_iSampleRate, p->m_iChannels);
                 }
                 p->m_iWrittenSamples += buffer->iLength;
 

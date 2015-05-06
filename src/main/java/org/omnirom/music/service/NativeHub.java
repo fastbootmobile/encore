@@ -123,12 +123,12 @@ public class NativeHub {
     }
 
     // Called from native code
-    public void onAudioMirrorWritten(int len) {
+    public void onAudioMirrorWritten(int len, int sampleRate, int channels) {
         mStreamer.write(mAudioMirrorBuffer, len);
 
         // We use audio mirroring writing for tracking track elapsed time
         if (mWrittenListener != null) {
-            mWrittenListener.onSampleWritten(mAudioMirrorBuffer, len);
+            mWrittenListener.onSampleWritten(mAudioMirrorBuffer, len, sampleRate, channels);
         }
     }
 
@@ -143,6 +143,6 @@ public class NativeHub {
 
 
     public interface OnSampleWrittenListener {
-        void onSampleWritten(byte[] bytes, int len);
+        void onSampleWritten(byte[] bytes, int len, int sampleRate, int channels);
     }
 }

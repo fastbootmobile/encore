@@ -53,6 +53,7 @@ void om_NativeHub_setDucking(JNIEnv* env, jobject thiz, jboolean duck);
 // Called from native code to Java
 // -----------------------------------------
 
-void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint len);
+void om_NativeHub_onAudioMirrorWritten(NativeHub* hub, const uint8_t* data, jint len,
+        jint sampleRate, jint channels);
 
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_JNI_NATIVEHUB_H_

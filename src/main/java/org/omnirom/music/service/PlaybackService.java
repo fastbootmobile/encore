@@ -1391,10 +1391,9 @@ public class PlaybackService extends Service
 
 
     @Override
-    public void onSampleWritten(byte[] bytes, int len) {
-        // TODO: Don't assume 44.1kHz stereo
-        len = len / 2; // first, we want the number of samples
-        len = len / 2; // then, we count "mono"
-        mCurrentTrackElapsedMs += len * 1000 / 44100;
+    public void onSampleWritten(byte[] bytes, int len, int sampleRate, int channels) {
+        len = len / 2; // first, we want the number of samples, and we assume 16 bits audio
+        len = len / channels; // then, we count "mono"
+        mCurrentTrackElapsedMs += len * 1000 / sampleRate;
     }
 }
