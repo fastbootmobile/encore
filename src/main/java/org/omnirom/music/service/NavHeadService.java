@@ -121,10 +121,6 @@ public class NavHeadService extends Service {
     private void createHead() {
         mHeadView = new AlbumArtImageView(this);
         mHeadView.setCrossfade(true);
-        Song currentSong = PlaybackProxy.getCurrentTrack();
-        if (currentSong != null) {
-            mHeadView.loadArtForSong(currentSong);
-        }
         mHeadView.setScaleX(0.5f);
         mHeadView.setScaleY(0.5f);
         mHeadView.setAlpha(0.0f);
@@ -187,6 +183,12 @@ public class NavHeadService extends Service {
                 startActivity(intent);
             }
         });
+
+        // Assign initial album art
+        Song currentSong = PlaybackProxy.getCurrentTrack();
+        if (currentSong != null) {
+            mHeadView.loadArtForSong(currentSong);
+        }
     }
 
     private void loadHeadPosition() {
