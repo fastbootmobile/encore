@@ -222,4 +222,5 @@
     <string name="bluetooth_action_play_queue">Start Playing Queue</string>
     <string name="rename_playlist">Rename playlist</string>
     <string name="listen_now_no_providers">You don\'t have any providers! Search for \'OmniMusic Provider\' on the Play Store</string>
+    <string name="title_activity_drive_tutorial">DriveTutorialActivity</string>
 </resources>

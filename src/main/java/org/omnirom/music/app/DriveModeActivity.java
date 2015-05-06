@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -77,7 +78,11 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
     private static final int MSG_UPDATE_TIME = 3;
     private static final int MSG_HIDE_SYSTEM_UI = 4;
 
+    private static final String PREFS_DRIVE_MODE = "drive_mode";
+    private static final String PREF_ONBOARDING_DONE = "onboarding_is_done";
+
     private boolean mBackPressed = false;
+    private boolean mPausedForOnboarding = false;
     private DriveHandler mHandler;
     private DrivePlaybackCallback mPlaybackCallback;
     private View mDecorView;
@@ -256,6 +261,13 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
         mHandler.sendEmptyMessage(MSG_UPDATE_PLAYBACK_STATUS);
         mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, DELAY_SEEKBAR_UPDATE);
         mHandler.sendEmptyMessage(MSG_UPDATE_TIME);
+
+        SharedPreferences prefs = getSharedPreferences(PREFS_DRIVE_MODE, 0);
+        if (!prefs.getBoolean(PREF_ONBOARDING_DONE, false)) {
+            mPausedForOnboarding = true;
+            prefs.edit().putBoolean(PREF_ONBOARDING_DONE, true).apply();
+            startActivity(new Intent(this, DriveTutorialActivity.class));
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -410,7 +422,7 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
         PlaybackProxy.removeCallback(mPlaybackCallback);
 
         final int state = PlaybackProxy.getState();
-        if (!mBackPressed && state != PlaybackService.STATE_PAUSED
+        if (!mBackPressed && !mPausedForOnboarding && state != PlaybackService.STATE_PAUSED
                 && state != PlaybackService.STATE_STOPPED) {
             // Start NavHead for easy going back into Drive mode
             startService(new Intent(this, NavHeadService.class));

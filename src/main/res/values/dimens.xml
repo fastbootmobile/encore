@@ -142,5 +142,4 @@
     <!-- Offline bubbly -->
     <dimen name="offline_bubble_margin_bottom">48dp</dimen>
     <dimen name="offline_bubble_margin_top">16dp</dimen>
-
 </resources>

@@ -94,9 +94,9 @@
 
         <!-- Search suggestions and history -->
         <provider
-            android:authorities="org.omnirom.music.providers.SearchSuggestionProvider"
             android:name="org.omnirom.music.providers.SearchSuggestionProvider"
-            android:exported="false"/>
+            android:authorities="org.omnirom.music.providers.SearchSuggestionProvider"
+            android:exported="false" />
 
         <!-- Main Activity -->
         <activity
@@ -185,6 +185,12 @@
         <activity
             android:name=".WelcomeActivity"
             android:label="@string/title_activity_welcome" >
+        </activity>
+
+        <!-- Drive Mode Tutorial Activity -->
+        <activity
+            android:name=".DriveTutorialActivity"
+            android:label="@string/title_activity_drive_tutorial" >
         </activity>
     </application>
 
