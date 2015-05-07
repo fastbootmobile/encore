@@ -230,7 +230,11 @@ public class ImageCache {
                             mMemoryCache.put(cleanKey + '_' + reqSz, item);
                         }
                     } else {
-                        // TODO: The stored bitmap is corrupted, evict it
+                        mEntries.remove(cleanKey);
+                        File f = new File(filePath);
+                        if (!f.delete()) {
+                            Log.e(TAG, "Cannot delete corrupted art at " + filePath);
+                        }
                     }
                 } catch (OutOfMemoryError e) {
                     Log.e(TAG, "OutOfMemory when decoding input file", e);
