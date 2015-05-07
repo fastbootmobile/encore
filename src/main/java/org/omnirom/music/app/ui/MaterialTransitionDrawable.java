@@ -215,7 +215,7 @@ public class MaterialTransitionDrawable extends Drawable {
 
         canvas.save();
 
-        float scaling = Math.min(targetWidth / baseWidth, targetHeight / baseHeight);
+        float scaling = Math.max(targetWidth / baseWidth, targetHeight / baseHeight);
 
         final float scaledBaseWidth = scaling * baseWidth;
         final float scaledBaseHeight = scaling * baseHeight;
