@@ -220,7 +220,7 @@ public class PlaylistArtBuilder {
         for (int i = 0; i < mNumComposite; ++i) {
             String entry = playlist.songsList().get(i);
             Song song = aggregator.retrieveSong(entry, playlist.getProvider());
-            mCompositeTasks.add(AlbumArtHelper.retrieveAlbumArt(res, mCompositeListener, song, false));
+            mCompositeTasks.add(AlbumArtHelper.retrieveAlbumArt(res, mCompositeListener, song, 600, false));
             mCompositeRequests.add(song);
         }
 

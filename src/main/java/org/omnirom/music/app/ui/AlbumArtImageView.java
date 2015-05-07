@@ -231,8 +231,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         mRunnable = new TaskRunnable(ent);
 
         // When we're crossfading, we're assuming we want the image directly
-        if (mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY
-                || cacheStatus == AlbumArtCache.CACHE_STATUS_DISK) {
+        if ((mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY
+                || cacheStatus == AlbumArtCache.CACHE_STATUS_DISK)
+                && Math.max(getMeasuredHeight(), getMeasuredWidth()) > 0) {
             if (cacheStatus != AlbumArtCache.CACHE_STATUS_UNAVAILABLE) {
                 mSkipTransition = true;
             }
@@ -308,8 +309,9 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         @Override
         public void run() {
             if (mRequestedEntity != null && mEntity != null && mRequestedEntity.equals(mEntity)) {
+                int size = Math.max(getMeasuredHeight(), getMeasuredWidth());
                 mTask = AlbumArtHelper.retrieveAlbumArt(getContext().getApplicationContext().getResources(),
-                        AlbumArtImageView.this, mEntity, mImmediate);
+                        AlbumArtImageView.this, mEntity, size, mImmediate);
             }
         }
 

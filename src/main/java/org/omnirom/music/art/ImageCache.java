@@ -98,9 +98,7 @@ public class ImageCache {
 
                     oldBitmap.setIsCached(false);
 
-                    synchronized (mReusableBitmaps) {
-                        mReusableBitmaps.add(new SoftReference<>(oldBitmap.getBitmap()));
-                    }
+                    mReusableBitmaps.add(new SoftReference<>(oldBitmap.getBitmap()));
                 }
             };
         } else {
@@ -160,9 +158,7 @@ public class ImageCache {
                 mMemoryCache.evictAll();
             }
         }
-        synchronized (mReusableBitmaps) {
-            mReusableBitmaps.clear();
-        }
+        mReusableBitmaps.clear();
     }
 
     /**
@@ -196,7 +192,7 @@ public class ImageCache {
      * @param key The key of the image to get
      * @return A bitmap corresponding to the key, or null if it's not in the cache
      */
-    public RecyclingBitmapDrawable get(final Resources res , final String key) {
+    public RecyclingBitmapDrawable get(final Resources res , final String key, final int reqSz) {
         if (key == null) {
             return null;
         }
@@ -212,20 +208,26 @@ public class ImageCache {
             RecyclingBitmapDrawable item;
             synchronized (mMemoryCache) {
                 // Check if we have it in memory
-                item = USE_MEMORY_CACHE ? mMemoryCache.get(cleanKey) : null;
+                item = USE_MEMORY_CACHE ? mMemoryCache.get(cleanKey + '_' + reqSz) : null;
             }
 
             if (item == null) {
+                final String filePath = mCacheDir.getAbsolutePath() + "/" + cleanKey;
+
                 BitmapFactory.Options opts = new BitmapFactory.Options();
-                ImageUtils.addInBitmapOptions(opts, this);
+                opts.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(filePath, opts);
+
+                opts.inJustDecodeBounds = false;
+                ImageUtils.addInBitmapOptions(opts, this, reqSz, opts.outWidth, opts.outHeight);
 
                 try {
-                    Bitmap bmp = BitmapFactory.decodeFile(mCacheDir.getAbsolutePath() + "/" + cleanKey, opts);
+                    Bitmap bmp = BitmapFactory.decodeFile(filePath, opts);
                     if (bmp != null) {
                         item = new RecyclingBitmapDrawable(res, bmp);
 
                         if (USE_MEMORY_CACHE) {
-                            mMemoryCache.put(cleanKey, item);
+                            mMemoryCache.put(cleanKey + '_' + reqSz, item);
                         }
                     } else {
                         // TODO: The stored bitmap is corrupted, evict it
@@ -250,26 +252,24 @@ public class ImageCache {
         Bitmap bitmap = null;
 
         if (mReusableBitmaps != null && !mReusableBitmaps.isEmpty()) {
-            synchronized (mReusableBitmaps) {
-                final Iterator<SoftReference<Bitmap>> iterator = mReusableBitmaps.iterator();
-                Bitmap item;
+            final Iterator<SoftReference<Bitmap>> iterator = mReusableBitmaps.iterator();
+            Bitmap item;
 
-                while (iterator.hasNext()) {
-                    item = iterator.next().get();
+            while (iterator.hasNext()) {
+                item = iterator.next().get();
 
-                    if (null != item && item.isMutable()) {
-                        // Check to see it the item can be used for inBitmap
-                        if (ImageUtils.canUseForInBitmap(item, options)) {
-                            bitmap = item;
+                if (null != item && item.isMutable()) {
+                    // Check to see it the item can be used for inBitmap
+                    if (ImageUtils.canUseForInBitmap(item, options)) {
+                        bitmap = item;
 
-                            // Remove from reusable set so it can't be used again
-                            iterator.remove();
-                            break;
-                        }
-                    } else {
-                        // Remove from the set if the reference has been cleared.
+                        // Remove from reusable set so it can't be used again
                         iterator.remove();
+                        break;
                     }
+                } else {
+                    // Remove from the set if the reference has been cleared.
+                    iterator.remove();
                 }
             }
         }

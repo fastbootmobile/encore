@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,6 +51,7 @@ import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.app.ui.PlaylistListView;
+import org.omnirom.music.art.AlbumArtHelper;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.AutoPlaylistHelper;
 import org.omnirom.music.framework.PlaybackProxy;
@@ -307,6 +310,9 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
             mIvHero.setImageResource(R.drawable.album_placeholder);
         } else {
             mIvHero.setImageBitmap(hero);
+
+            // Request the higher resolution
+            loadArt();
         }
 
         mPlayFab = (FloatingActionButton) headerView.findViewById(R.id.fabPlay);
@@ -558,6 +564,32 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
     public ImageView getHeroImageView() {
         return mIvHero;
+    }
+
+    private void loadArt() {
+        new Thread() {
+            public void run() {
+                AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
+                    @Override
+                    public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
+                        final TransitionDrawable transition = new TransitionDrawable(new Drawable[] {
+                                mIvHero.getDrawable(),
+                                output
+                        });
+
+                        // Make sure the transition happens after the activity animation is done,
+                        // otherwise weird sliding occurs.
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mIvHero.setImageDrawable(transition);
+                                transition.startTransition(500);
+                            }
+                        }, 600);
+                    }
+                }, mPlaylist, -1, false);
+            }
+        }.start();
     }
 
     private void playNow() {

@@ -69,8 +69,8 @@ public class AlbumArtHelper {
     }
 
     public static AlbumArtTask retrieveAlbumArt(Resources res, AlbumArtListener listener,
-                                                BoundEntity request, boolean immediate) {
-        AlbumArtTask task = new AlbumArtTask(res, listener);
+                                                BoundEntity request, int size, boolean immediate) {
+        AlbumArtTask task = new AlbumArtTask(res, listener, size);
 
         // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the predefined
         // pool, as the custom one causes the app to just crash without any kind of error message

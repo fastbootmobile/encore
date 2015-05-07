@@ -420,7 +420,7 @@ public class PluginsLookup {
     }
 
     public RecyclingBitmapDrawable getCachedLogo(final Resources res, ProviderIdentifier id, String ref) {
-        RecyclingBitmapDrawable output = ImageCache.getDefault().get(res, ref);
+        RecyclingBitmapDrawable output = ImageCache.getDefault().get(res, ref, 500);
         if (output == null && id != null) {
             try {
                 IMusicProvider binder = getProvider(id).getBinder();

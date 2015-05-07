@@ -9,8 +9,8 @@
 
     <ImageView
         android:id="@+id/ivAlbumArt"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
+        android:layout_width="@dimen/notification_expanded_art_size"
+        android:layout_height="@dimen/notification_expanded_art_size"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"

@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -501,24 +502,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mHeroImageView = (ImageView) mRootView.findViewById(R.id.ivHero);
         if (mHeroImage != null) {
             mHeroImageView.setImageBitmap(mHeroImage);
+
+            // The hero image that comes from a transition might be low in quality, so load
+            // the higher quality and fade it in
+            loadArt(false);
         } else {
             // Display placeholder and try to get the real art
             mHeroImageView.setImageResource(R.drawable.album_placeholder);
-            AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
-                @Override
-                public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
-                    if (output != null) {
-                        mHeroImage = output.getBitmap();
-                        MaterialTransitionDrawable mtd = new MaterialTransitionDrawable(
-                                (BitmapDrawable) getResources().getDrawable(R.drawable.ic_cloud_offline),
-                                (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
-                        mtd.transitionTo(output);
-
-                        mHeroImageView.setImageDrawable(mtd);
-                        generateHeroPalette();
-                    }
-                }
-            }, mArtist, false);
+            loadArt(true);
         }
 
 
@@ -721,6 +712,43 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
      */
     public Artist getArtist() {
         return mArtist;
+    }
+
+    private void loadArt(final boolean materialTransition) {
+        AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
+            @Override
+            public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
+                if (output != null) {
+                    mHeroImage = output.getBitmap();
+
+                    if (materialTransition) {
+                        MaterialTransitionDrawable mtd = new MaterialTransitionDrawable(
+                                (BitmapDrawable) getResources().getDrawable(R.drawable.ic_cloud_offline),
+                                (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
+                        mtd.transitionTo(output);
+
+                        mHeroImageView.setImageDrawable(mtd);
+                    } else {
+                        final TransitionDrawable transition = new TransitionDrawable(new Drawable[] {
+                                mHeroImageView.getDrawable(),
+                                output
+                        });
+
+                        // Make sure the transition happens after the activity animation is done,
+                        // otherwise weird sliding occurs.
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mHeroImageView.setImageDrawable(transition);
+                                transition.startTransition(500);
+                            }
+                        }, 600);
+                    }
+
+                    generateHeroPalette();
+                }
+            }
+        }, mArtist, -1, false);
     }
 
     /**

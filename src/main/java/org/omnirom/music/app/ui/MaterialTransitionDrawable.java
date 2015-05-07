@@ -192,11 +192,11 @@ public class MaterialTransitionDrawable extends Drawable {
                 canvas.drawColor(0x00888888 | ((alpha & 0xFF) << 24));
 
                 mPaint.setAlpha(alpha * 255 / 160);
+
                 canvas.drawBitmap(mOfflineDrawable.getBitmap(),
                         getBounds().centerX() - mOfflineDrawable.getIntrinsicWidth() / 2,
                         getBounds().centerY() - mOfflineDrawable.getIntrinsicHeight() / 2,
                         mPaint);
-                mOfflineDrawable.draw(canvas);
 
                 if (alpha != 160) {
                     invalidateSelf();

@@ -39,6 +39,7 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
     private Handler mHandler;
     private RecyclingBitmapDrawable mArtBitmap;
     private Resources mResources;
+    private int mRequestedSize;
     private AlbumArtCache.IAlbumArtCacheListener mCacheListener = new AlbumArtCache.IAlbumArtCacheListener() {
         @Override
         public void onArtLoaded(BoundEntity ent, RecyclingBitmapDrawable result) {
@@ -52,10 +53,11 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
         }
     };
 
-    AlbumArtTask(Resources res, AlbumArtHelper.AlbumArtListener listener) {
+    AlbumArtTask(Resources res, AlbumArtHelper.AlbumArtListener listener, int requestedSize) {
         mListener = listener;
         mHandler = new Handler(Looper.getMainLooper());
         mResources = res;
+        mRequestedSize = requestedSize;
     }
 
     @Override
@@ -89,7 +91,8 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
 
             // Get from the cache
             synchronized (this) {
-                if (AlbumArtCache.getDefault().getArt(mResources, mEntity, mCacheListener)) {
+                if (AlbumArtCache.getDefault().getArt(mResources, mEntity,
+                        mRequestedSize,mCacheListener)) {
                     // Wait for the result
                     if (mArtBitmap == null) {
                         try {
@@ -135,7 +138,7 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        AlbumArtTask task = new AlbumArtTask(mResources, mListener);
+                        AlbumArtTask task = new AlbumArtTask(mResources, mListener, mRequestedSize);
                         try {
                             task.executeOnExecutor(AlbumArtHelper.ART_POOL_EXECUTOR, result.request);
                         } catch (RejectedExecutionException e) {

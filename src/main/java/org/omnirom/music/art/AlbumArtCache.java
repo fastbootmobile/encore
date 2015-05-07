@@ -42,6 +42,7 @@ import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.utils.Utils;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,13 +122,14 @@ public class AlbumArtCache {
      * Returns the art associated with the entity
      * @param ent The entity
      */
-    public boolean getArt(final Resources res, BoundEntity ent, IAlbumArtCacheListener listener) {
+    public boolean getArt(final Resources res, BoundEntity ent, final int requestedSize,
+                          IAlbumArtCacheListener listener) {
         final String key = getEntityArtKey(ent);
         final ImageCache cache = ImageCache.getDefault();
         boolean result = false;
 
         if (cache.hasInMemory(key) || cache.hasOnDisk(key)) {
-            listener.onArtLoaded(ent, cache.get(res, key));
+            listener.onArtLoaded(ent, cache.get(res, key, requestedSize));
             result = true;
         } else {
             try {
@@ -400,8 +402,9 @@ public class AlbumArtCache {
                         RecyclingBitmapDrawable rcb = ImageCache.getDefault().put(res, getEntityArtKey(artist), image);
                         listener.onArtLoaded(artist, rcb);
                     }
+                } catch (InterruptedIOException ignore) {
                 } catch (IOException e) {
-                    Log.e(TAG, "IO exception while downloading image", e);
+                    Log.e(TAG, "Failed to download album art image");
                 } catch (RateLimitException e) {
                     Log.w(TAG, "Rate limited while getting image");
                 }

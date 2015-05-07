@@ -17,6 +17,9 @@ package org.omnirom.music.app.fragments;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,6 +40,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.SongsListAdapter;
+import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.ParallaxScrollListView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.art.AlbumArtHelper;
@@ -233,6 +237,16 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
 
         setupHeader(LayoutInflater.from(view.getContext()));
 
+        if (mHeroImage != null) {
+            // Prepare the palette to colorize the FAB
+            generateHeroPalette();
+
+            // Load high-resolution art
+            loadArt(false);
+        } else {
+            loadArt(true);
+        }
+
         // Start loading songs in another thread
         loadSongs();
     }
@@ -416,23 +430,44 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
 
         if (mAlbum == null) {
             Log.e(TAG, "Album isn't in cache and provider returned null!");
-        } else {
-            if (mHeroImage != null) {
-                // Prepare the palette to colorize the FAB
-                generateHeroPalette();
-            } else {
-                AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
-                    @Override
-                    public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
-                        if (output != null) {
-                            mHeroImage = output.getBitmap().copy(output.getBitmap().getConfig(), false);
-                            mIvHero.setImageBitmap(output.getBitmap());
-                            generateHeroPalette();
-                        }
-                    }
-                }, mAlbum, false);
-            }
         }
+    }
+
+    private void loadArt(final boolean materialTransition) {
+        AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
+            @Override
+            public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
+                if (output != null) {
+                    mHeroImage = output.getBitmap();
+
+                    if (materialTransition) {
+                        MaterialTransitionDrawable mtd = new MaterialTransitionDrawable(
+                                (BitmapDrawable) getResources().getDrawable(R.drawable.ic_cloud_offline),
+                                (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
+                        mtd.transitionTo(output);
+
+                        mIvHero.setImageDrawable(mtd);
+                    } else {
+                        final TransitionDrawable transition = new TransitionDrawable(new Drawable[] {
+                                mIvHero.getDrawable(),
+                                output
+                        });
+
+                        // Make sure the transition happens after the activity animation is done,
+                        // otherwise weird sliding occurs.
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mIvHero.setImageDrawable(transition);
+                                transition.startTransition(500);
+                            }
+                        }, 600);
+                    }
+
+                    generateHeroPalette();
+                }
+            }
+        }, mAlbum, -1, false);
     }
 
     private void generateHeroPalette() {

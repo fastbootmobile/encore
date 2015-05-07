@@ -65,4 +65,5 @@
         android:layout_marginRight="@dimen/welcome_button_margin"
         android:layout_marginBottom="@dimen/welcome_button_margin"
         android:textSize="@dimen/welcome_button_font"/>
+
 </RelativeLayout>
