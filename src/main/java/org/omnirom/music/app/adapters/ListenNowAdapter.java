@@ -392,16 +392,19 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     span = 1;
                     holder.llRoot.setOrientation(LinearLayout.VERTICAL);
                     height = Utils.dpToPx(Resources.getSystem(), 64);
+                    holder.tvSubTitle.setVisibility(View.GONE);
                     break;
 
                 case ListenNowEntry.ENTRY_SIZE_MEDIUM:
                     span = 1;
                     holder.llRoot.setOrientation(LinearLayout.VERTICAL);
+                    holder.tvSubTitle.setVisibility(View.VISIBLE);
                     break;
 
                 case ListenNowEntry.ENTRY_SIZE_LARGE:
                     span = 2;
                     holder.llRoot.setOrientation(LinearLayout.HORIZONTAL);
+                    holder.tvSubTitle.setVisibility(View.VISIBLE);
                     break;
             }
 

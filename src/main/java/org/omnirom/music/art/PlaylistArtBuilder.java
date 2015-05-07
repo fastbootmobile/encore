@@ -21,6 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
@@ -49,6 +50,8 @@ public class PlaylistArtBuilder {
     private List<BoundEntity> mCompositeRequests;
     private int mNumComposite;
     private Handler mHandler;
+    private Handler mMainHandler;
+    private HandlerThread mHandlerThread;
     private IArtCallback mCallback;
     private boolean mDone;
 
@@ -98,7 +101,11 @@ public class PlaylistArtBuilder {
     };
 
     public PlaylistArtBuilder() {
-        mHandler = new Handler(Looper.getMainLooper());
+        mMainHandler = new Handler(Looper.getMainLooper());
+
+        mHandlerThread = new HandlerThread("PlaylistArtBuilder");
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
     }
 
     public void freeMemory() {
@@ -117,6 +124,7 @@ public class PlaylistArtBuilder {
             mCompositeTasks.clear();
             mCompositeTasks = null;
         }
+        mHandlerThread.interrupt();
     }
 
 

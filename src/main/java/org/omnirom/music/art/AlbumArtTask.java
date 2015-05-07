@@ -62,7 +62,7 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
 
     @Override
     protected AlbumArtHelper.BackgroundResult doInBackground(BoundEntity... params) {
-        android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
         mEntity = params[0];
 
         // Wait here if work is paused and the task is not cancelled

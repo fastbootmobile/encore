@@ -16,12 +16,8 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.DeadObjectException;
-import android.os.Handler;
-import android.os.RemoteException;
-import android.os.TransactionTooLargeException;
+import android.os.*;
+import android.os.Process;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -117,6 +113,8 @@ public class SongsFragment extends Fragment {
     private class GetAllSongsTask extends AsyncTask<Void, Void, List<Song>> {
         @Override
         protected List<Song> doInBackground(Void... params) {
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
             List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
             final List<Song> songsToAdd = new ArrayList<>();
             for (ProviderConnection providerConnection : providers) {
