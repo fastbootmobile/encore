@@ -231,17 +231,23 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         mRunnable = new TaskRunnable(ent);
 
         // When we're crossfading, we're assuming we want the image directly
-        if ((mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY
-                || cacheStatus == AlbumArtCache.CACHE_STATUS_DISK)
-                && Math.max(getMeasuredHeight(), getMeasuredWidth()) > 0) {
+        if (!mCrossfade) {
+            setDefaultArt();
+        }
+
+        if (mCrossfade || cacheStatus == AlbumArtCache.CACHE_STATUS_MEMORY
+                || cacheStatus == AlbumArtCache.CACHE_STATUS_DISK) {
             if (cacheStatus != AlbumArtCache.CACHE_STATUS_UNAVAILABLE) {
                 mSkipTransition = true;
             }
-            setDefaultArt();
-            mRunnable.run(true);
+
+            if (Math.max(getMeasuredHeight(), getMeasuredWidth()) > 0) {
+                mRunnable.run(true);
+            } else {
+                mRunnable.setImmediate(true);
+                mHandler.post(mRunnable);
+            }
         } else {
-            setDefaultArt();
-            //mHandler.postDelayed(mRunnable, DELAY_BEFORE_START);
             mHandler.post(mRunnable);
         }
     }
@@ -299,6 +305,10 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
 
         public TaskRunnable(BoundEntity ent) {
             mEntity = ent;
+        }
+
+        public void setImmediate(boolean immediate) {
+            mImmediate = immediate;
         }
 
         public void run(boolean immediate) {
