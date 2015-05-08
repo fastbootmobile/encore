@@ -36,7 +36,7 @@ import org.omnirom.music.utils.Utils;
  */
 public class NavDrawerAdapter extends BaseAdapter {
     private static final int REGULAR_COUNT = 7;
-    private static final int SPECIAL_COUNT = 2;
+    private static final int SPECIAL_COUNT = 3;
 
     private int mActiveEntry = 0;
 
@@ -203,6 +203,11 @@ public class NavDrawerAdapter extends BaseAdapter {
 
             case MainActivity.SECTION_DRIVE_MODE:
                 tag.tvText.setText(R.string.drive_mode);
+                setCompoundCompat(tag.tvText, 0);
+                break;
+
+            case MainActivity.SECTION_SETTINGS:
+                tag.tvText.setText(R.string.settings);
                 setCompoundCompat(tag.tvText, 0);
                 break;
 

@@ -64,6 +64,7 @@ public class MainActivity extends AppActivity
     public static final int SECTION_LYRICS = 7;
     public static final int SECTION_NOW_PLAYING = 8;
     public static final int SECTION_DRIVE_MODE = 9;
+    public static final int SECTION_SETTINGS = 10;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -325,6 +326,9 @@ public class MainActivity extends AppActivity
                 case SECTION_DRIVE_MODE:
                     startActivity(new Intent(this, DriveModeActivity.class));
                     break;
+                case SECTION_SETTINGS:
+                    startActivity(new Intent(this, SettingsActivity.class));
+                    break;
             }
 
             if (newFrag != null) {
@@ -463,16 +467,6 @@ public class MainActivity extends AppActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_settings:
-                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-                break;
-
-            case R.id.action_sound_effects:
-                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                intent.putExtra("DSP", true);
-                startActivity(intent);
-                break;
-
             case R.id.action_sleep_timer:
                 showSleepTimerDialog();
                 break;
