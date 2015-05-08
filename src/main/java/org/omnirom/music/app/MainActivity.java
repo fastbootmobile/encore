@@ -116,7 +116,9 @@ public class MainActivity extends AppActivity
 
             mNavigationDrawerFragment = (NavigationDrawerFragment)
                     getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-            mTitle = getTitle();
+            if (mTitle == null) {
+                mTitle = getTitle();
+            }
 
             // Set up the drawer.
             mNavigationDrawerFragment.setUp(
