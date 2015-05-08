@@ -48,7 +48,7 @@ public class LyricsFragment extends Fragment {
 
     private TextView mTvLyrics;
     private ProgressBar mPbLoading;
-    private String mLyrics;
+    private ChartLyricsClient.LyricsResponse mLyrics;
     private Song mCurrentSong;
     private Handler mHandler = new Handler();
 
@@ -76,10 +76,7 @@ public class LyricsFragment extends Fragment {
         mTvLyrics = (TextView) root.findViewById(R.id.tvLyrics);
         mPbLoading = (ProgressBar) root.findViewById(R.id.pbLoading);
 
-        mCurrentSong = PlaybackProxy.getCurrentTrack();
-        if (mCurrentSong != null) {
-            getLyrics(mCurrentSong);
-        }
+        updateLyrics();
 
         return root;
     }
@@ -99,12 +96,20 @@ public class LyricsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         PlaybackProxy.addCallback(mPlaybackCallback);
+        updateLyrics();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         PlaybackProxy.removeCallback(mPlaybackCallback);
+    }
+
+    private void updateLyrics() {
+        mCurrentSong = PlaybackProxy.getCurrentTrack();
+        if (mCurrentSong != null) {
+            getLyrics(mCurrentSong);
+        }
     }
 
     private void getLyrics(final Song song) {
@@ -116,7 +121,7 @@ public class LyricsFragment extends Fragment {
         });
     }
 
-    private class GetLyricsTask extends AsyncTask<Song, Void, String> {
+    private class GetLyricsTask extends AsyncTask<Song, Void, ChartLyricsClient.LyricsResponse> {
         private Song mSong;
 
         @Override
@@ -126,11 +131,11 @@ public class LyricsFragment extends Fragment {
         }
 
         @Override
-        protected String doInBackground(Song... params) {
+        protected ChartLyricsClient.LyricsResponse doInBackground(Song... params) {
             mSong = params[0];
             Artist artist = ProviderAggregator.getDefault().retrieveArtist(mSong.getArtist(), mSong.getProvider());
 
-            String lyrics = null;
+            ChartLyricsClient.LyricsResponse lyrics = null;
             try {
                 lyrics = ChartLyricsClient.getSongLyrics(artist.getName(), mSong.getTitle());
             } catch (IOException e) {
@@ -157,17 +162,37 @@ public class LyricsFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(ChartLyricsClient.LyricsResponse s) {
             mLyrics = s;
 
             if (mTvLyrics != null && mSong.equals(mCurrentSong) && !isCancelled()) {
                 mTvLyrics.setVisibility(View.VISIBLE);
                 mPbLoading.setVisibility(View.GONE);
 
-                if (s == null) {
+                if (s == null || s.lyrics == null) {
                     mTvLyrics.setText(R.string.lyrics_not_found);
                 } else {
-                    mTvLyrics.setText(s);
+                    StringBuilder result = new StringBuilder();
+                    if (s.title != null) {
+                        result.append(s.title);
+                        result.append("\n");
+                    }
+
+                    if (s.artist != null) {
+                        result.append(s.artist);
+                        result.append("\n");
+                    }
+
+                    if (s.artist != null || s.title != null) {
+                        // Add some padding if we had artist or title
+                        result.append("\n\n");
+                    }
+
+                    if (s.lyrics != null) {
+                        result.append(s.lyrics);
+                    }
+
+                    mTvLyrics.setText(result.toString());
                 }
             }
         }
