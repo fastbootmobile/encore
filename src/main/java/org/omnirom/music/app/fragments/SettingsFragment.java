@@ -17,6 +17,7 @@ package org.omnirom.music.app.fragments;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -29,6 +30,7 @@ import android.support.v4.preference.PreferenceFragment;
 import android.widget.Toast;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.app.WelcomeActivity;
 import org.omnirom.music.art.AlbumArtCache;
 import org.omnirom.music.utils.SettingsKeys;
 
@@ -41,6 +43,7 @@ public class SettingsFragment extends PreferenceFragment {
     private static final String KEY_LIST_PROVIDERS_CONFIG = "list_providers_config";
     private static final String KEY_LIST_DSP_CONFIG = "list_dsp_config";
     private static final String KEY_CLEAR_CACHES = "pref_clear_caches";
+    private static final String KEY_OPEN_SETUP_WIZARD = "pref_open_setup_wizard";
     /**
      * Use this factory method to create a new instance of
      * this fragment
@@ -108,6 +111,9 @@ public class SettingsFragment extends PreferenceFragment {
             case KEY_CLEAR_CACHES:
                 AlbumArtCache.getDefault().clear();
                 Toast.makeText(getActivity(), getString(R.string.cache_cleared), Toast.LENGTH_SHORT).show();
+                break;
+            case KEY_OPEN_SETUP_WIZARD:
+                startActivity(new Intent(getActivity(), WelcomeActivity.class));
                 break;
             case KEY_LIST_DSP_CONFIG: {
                 Fragment f = new DspProvidersFragment();

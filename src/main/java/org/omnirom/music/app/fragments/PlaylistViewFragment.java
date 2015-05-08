@@ -572,20 +572,27 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                 AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
                     @Override
                     public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
-                        final TransitionDrawable transition = new TransitionDrawable(new Drawable[] {
-                                mIvHero.getDrawable(),
-                                output
-                        });
-
-                        // Make sure the transition happens after the activity animation is done,
-                        // otherwise weird sliding occurs.
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mIvHero.setImageDrawable(transition);
-                                transition.startTransition(500);
+                        if (output != null) {
+                            Drawable originalDrawable = mIvHero.getDrawable();
+                            if (originalDrawable == null) {
+                                originalDrawable = getResources().getDrawable(R.drawable.album_placeholder);
                             }
-                        }, 600);
+
+                            final TransitionDrawable transition = new TransitionDrawable(new Drawable[]{
+                                    originalDrawable,
+                                    output
+                            });
+
+                            // Make sure the transition happens after the activity animation is done,
+                            // otherwise weird sliding occurs.
+                            mHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mIvHero.setImageDrawable(transition);
+                                    transition.startTransition(500);
+                                }
+                            }, 600);
+                        }
                     }
                 }, mPlaylist, -1, false);
             }

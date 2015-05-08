@@ -221,4 +221,5 @@
     <string name="bluetooth_action_play_queue">Lancer la file d\'écoute</string>
     <string name="rename_playlist">Renommer la playlist</string>
     <string name="listen_now_no_providers">Vous n\'avez pas de sources! Recherchez \'OmniMusic Provider\' sur le Play Store</string>
+    <string name="settings_setup_wizard">Relancer l\'assistant de configuration</string>
 </resources>

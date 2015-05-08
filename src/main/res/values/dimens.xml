@@ -24,9 +24,9 @@
     <dimen name="detail_source_logo_margin">8dp</dimen>
 
     <!-- Welcome screens -->
-    <dimen name="welcome_title_font">42sp</dimen>
+    <dimen name="welcome_title_font">38sp</dimen>
     <dimen name="welcome_title_margin">32dp</dimen>
-    <dimen name="welcome_body_font">18sp</dimen>
+    <dimen name="welcome_body_font">16sp</dimen>
     <dimen name="welcome_body_margin">32dp</dimen>
     <dimen name="welcome_button_font">16sp</dimen>
     <dimen name="welcome_button_margin">32dp</dimen>

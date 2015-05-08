@@ -66,6 +66,10 @@
             android:title="@string/pref_clear_caches_title"
             android:summary="@string/pref_clear_caches_summary" />
 
+        <Preference
+            android:key="pref_open_setup_wizard"
+            android:title="@string/settings_setup_wizard" />
+
         <PreferenceScreen
             android:summary="@string/settings_licenses_summary"
             android:title="@string/settings_licenses_title">
