@@ -291,7 +291,7 @@ public class MainActivity extends AppActivity
         // update the main content by replacing fragments
         boolean result = true;
         try {
-            if (position + 1 != SECTION_DRIVE_MODE && position + 1 != SECTION_NOW_PLAYING) {
+            if (position + 1 < SECTION_DRIVE_MODE) {
                 mCurrentFragmentIndex = position;
             }
 
