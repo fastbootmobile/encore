@@ -1,10 +1,12 @@
 package org.omnirom.music.app.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.LayoutRes;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -79,6 +81,12 @@ public class WelcomeFragment extends Fragment {
         mLayoutId = id;
     }
 
+    private void finishWizard() {
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        startActivity(intent);
+        getActivity().finish();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,9 +101,7 @@ public class WelcomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (mStep == LAST_STEP) {
-                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                    startActivity(intent);
-                    getActivity().finish();
+                    finishWizard();
                 } else {
                     WelcomeActivity act = (WelcomeActivity) getActivity();
                     act.showStep(mStep + 1);
@@ -111,7 +117,32 @@ public class WelcomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Step specifics
-        if (mStep == 3) {
+        if (mStep == 2) {
+            View root = getView();
+            if (root != null) {
+                root.findViewById(R.id.btnSkip).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                        dialog.setTitle(R.string.welcome_skip_dialog_title);
+                        dialog.setMessage(R.string.welcome_skip_dialog_body);
+                        dialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finishWizard();
+                            }
+                        });
+                        dialog.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.show();
+                    }
+                });
+            }
+        } else if (mStep == 3) {
             // Step 3: Configure plugins
             ListView lv = (ListView) view.findViewById(R.id.lvProviders);
             List<ProviderConnection> allProvs = PluginsLookup.getDefault().getAvailableProviders();

@@ -74,8 +74,18 @@
         android:id="@+id/btnBrowse"
         android:textColor="@color/white"
         android:textSize="@dimen/welcome_button_font"
-        android:layout_alignBottom="@+id/btnNext"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="@dimen/welcome_button_margin"/>
+        android:layout_alignTop="@+id/btnNext"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        style="@style/OmniMusic.Spec.BorderlessButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_skip"
+        android:id="@+id/btnSkip"
+        android:textColor="@color/white"
+        android:textSize="@dimen/welcome_button_font"
+        android:layout_alignBottom="@+id/btnBrowse"
+        android:layout_alignLeft="@+id/tvExplanation"
+        android:layout_alignStart="@+id/tvExplanation"/>
 </RelativeLayout>
