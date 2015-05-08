@@ -18,6 +18,7 @@ package org.omnirom.music.app.adapters;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.omnirom.music.app.R;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderConnection;
 
 import java.util.List;
@@ -36,6 +38,7 @@ import java.util.List;
 public class ProvidersAdapter extends BaseAdapter {
 
     private class ViewHolder {
+        ViewGroup vRoot;
         TextView tvProviderName;
         TextView tvProviderAuthor;
         ImageView ivProviderIcon;
@@ -43,6 +46,7 @@ public class ProvidersAdapter extends BaseAdapter {
 
     private List<ProviderConnection> mProviders;
     private boolean mWhite = false;
+    private boolean mWashOutConfigure = false;
 
     public ProvidersAdapter(List<ProviderConnection> list) {
         mProviders = list;
@@ -52,8 +56,21 @@ public class ProvidersAdapter extends BaseAdapter {
         mProviders.add(connection);
     }
 
+    /**
+     * Sets whether or not to display the text in white
+     * @param white true to set the text to white, false otherwise
+     */
     public void setWhite(boolean white) {
         mWhite = white;
+    }
+
+    /**
+     * Sets whether or not the configured providers should be less visible than the non-configured
+     * providers in the list.
+     * @param washout True to fade out, false otherwise
+     */
+    public void setWashOutConfigure(boolean washout) {
+        mWashOutConfigure = washout;
     }
 
     /**
@@ -92,6 +109,7 @@ public class ProvidersAdapter extends BaseAdapter {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.item_provider, viewGroup, false);
             tag = new ViewHolder();
+            tag.vRoot = (ViewGroup) view;
             tag.tvProviderAuthor = (TextView) view.findViewById(R.id.tvProviderAuthor);
             tag.tvProviderName = (TextView) view.findViewById(R.id.tvProviderName);
             tag.ivProviderIcon = (ImageView) view.findViewById(R.id.ivProviderLogo);
@@ -115,6 +133,17 @@ public class ProvidersAdapter extends BaseAdapter {
         } catch (PackageManager.NameNotFoundException e) {
             // set default icon
             tag.ivProviderIcon.setImageResource(R.mipmap.ic_launcher);
+        }
+
+        IMusicProvider binder = provider.getBinder();
+        try {
+            if (mWashOutConfigure && binder != null && binder.isSetup()) {
+                tag.vRoot.setAlpha(0.5f);
+            } else {
+                tag.vRoot.setAlpha(1.0f);
+            }
+        } catch (RemoteException ignore) {
+            tag.vRoot.setAlpha(1.0f);
         }
 
         return view;

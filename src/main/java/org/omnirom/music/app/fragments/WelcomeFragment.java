@@ -66,6 +66,7 @@ public class WelcomeFragment extends Fragment {
     private int mLayoutId;
     private int mStep;
     private ProviderConnection mConfiguringProvider;
+    private ProvidersAdapter mStep3Adapter;
 
     public WelcomeFragment() {
     }
@@ -123,9 +124,10 @@ public class WelcomeFragment extends Fragment {
                 }
             }
 
-            ProvidersAdapter adapter = new ProvidersAdapter(provs);
-            adapter.setWhite(true);
-            lv.setAdapter(adapter);
+            mStep3Adapter = new ProvidersAdapter(provs);
+            mStep3Adapter.setWhite(true);
+            mStep3Adapter.setWashOutConfigure(true);
+            lv.setAdapter(mStep3Adapter);
 
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -164,6 +166,10 @@ public class WelcomeFragment extends Fragment {
             }
 
             mConfiguringProvider = null;
+        }
+
+        if (mStep3Adapter != null) {
+            mStep3Adapter.notifyDataSetChanged();
         }
     }
 }
