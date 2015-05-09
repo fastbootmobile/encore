@@ -583,7 +583,7 @@ public class Utils {
     public static boolean isAlbumAvailableOffline(Album a) {
         if (a == null) {
             return false;
-        } else if (a.getSongsCount() <= 0) {
+        } else if (a.songs().hasNext()) {
             return false;
         } else {
             Iterator<String> songIt = a.songs();

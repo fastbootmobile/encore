@@ -43,6 +43,7 @@ import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -203,7 +204,15 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
 
         @Override
         protected List<Album> doInBackground(Void... params) {
-            return ProviderAggregator.getDefault().getCache().getAllAlbums();
+            List<Album> outputList = new ArrayList<>();
+            List<Album> cachedAlbums = ProviderAggregator.getDefault().getCache().getAllAlbums();
+
+            for (Album album : cachedAlbums) {
+                outputList.add(ProviderAggregator.getDefault().retrieveAlbum(album.getRef(),
+                        album.getProvider()));
+            }
+
+            return outputList;
         }
 
         @Override
