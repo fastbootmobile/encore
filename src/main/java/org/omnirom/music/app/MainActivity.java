@@ -249,7 +249,7 @@ public class MainActivity extends AppActivity
             }
         }
 
-        onSectionAttached(mCurrentFragmentIndex);
+        onSectionAttached(mCurrentFragmentIndex + 1);
         restoreActionBar();
     }
 
@@ -294,6 +294,9 @@ public class MainActivity extends AppActivity
         if (mOrientation != newConfig.orientation) {
             mOrientation = newConfig.orientation;
         }
+
+        onSectionAttached(mCurrentFragmentIndex + 1);
+        restoreActionBar();
     }
 
     @Override
