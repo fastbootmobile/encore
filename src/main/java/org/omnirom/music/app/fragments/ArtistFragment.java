@@ -1167,6 +1167,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 fetchAlbums();
             }
 
+            if (isDetached() || mRootView != null) {
+                return;
+            }
+
             // Check if we're offline, and if we have nothing to show, then show the offline error
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
             final LinearLayout llAlbums = (LinearLayout) mRootView.findViewById(R.id.llAlbums);

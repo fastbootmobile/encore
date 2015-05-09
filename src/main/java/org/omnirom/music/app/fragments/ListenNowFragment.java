@@ -125,7 +125,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
                 mHandler.postDelayed(this, 1000);
                 return;
-            } else {
+            } else if (mTxtNoMusic != null) {
                 mTxtNoMusic.animate().setDuration(400).translationX(100).alpha(0.0f).start();
                 mFoundAnything = true;
             }
