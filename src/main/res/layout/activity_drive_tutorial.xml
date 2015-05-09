@@ -6,7 +6,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/welcome_background"
         tools:context="org.omnirom.music.app.DriveTutorialActivity">
 
@@ -32,7 +32,7 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
-            android:text="Drive Mode Tips &amp; Tricks"
+            android:text="@string/drive_tutorial_title"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white"
             android:textSize="@dimen/welcome_title_font"/>
@@ -49,7 +49,7 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
-            android:text="Gestures"
+            android:text="@string/drive_tutorial_header_gestures"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white"/>
 
@@ -65,7 +65,7 @@
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
-            android:text="Swipe left or right to go to the previous or next track.\nTap the screen to pause or resume playback.\nSwipe up to go to Maps."
+            android:text="@string/drive_tutorial_body_gestures"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/white"/>
 
@@ -90,7 +90,7 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
-            android:text="Voice Command"
+            android:text="@string/drive_tutorial_header_voice"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white"/>
 
@@ -107,7 +107,7 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
-            android:text="Tap the Voice button and say a command:\n... Play artist Red Hot Chili Peppers\n... Start playlist Starred\n... Google What&apos;s the weather"
+            android:text="@string/drive_tutorial_body_voice"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/white"/>
 
@@ -120,7 +120,7 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
-            android:text="Navigation Head"
+            android:text="@string/drive_tutorial_header_navhead"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white"
             android:layout_alignParentBottom="false"
@@ -136,7 +136,7 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
-            android:text="When pressing the Maps button, a floating album art will appear, allowing you to quickly switch back to OmniMusic&apos;s Drive Mode. This floating art can be moved around the screen."
+            android:text="@string/drive_tutorial_body_navhead"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/white"
             android:layout_alignParentTop="false"
@@ -150,7 +150,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Got it!"
+            android:text="@string/drive_tutorial_button"
             android:id="@+id/btnFinish"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
