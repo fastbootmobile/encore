@@ -190,7 +190,7 @@
         <!-- Drive Mode Tutorial Activity -->
         <activity
             android:name=".DriveTutorialActivity"
-            android:label="@string/title_activity_drive_tutorial" >
+            android:label="@string/title_activity_drive_mode" >
         </activity>
     </application>
 
