@@ -225,4 +225,12 @@
     <string name="welcome_skip">Ignorer</string>
     <string name="welcome_skip_dialog_title">Ignorer la configuration ?</string>
     <string name="welcome_skip_dialog_body">Etes-vous sûr de vouloir ignorer la configuration des extensions ?</string>
+    <string name="drive_tutorial_title"><![CDATA[Trucs & Astuces]]></string>
+    <string name="drive_tutorial_header_gestures">Mouvements</string>
+    <string name="drive_tutorial_body_gestures">Glissez à gauche ou à droite pour changer de piste.\nTapez l\'écran pour mettre en pause ou reprendre la lecture.\nGlissez vers le haut pour ouvrir Maps.</string>
+    <string name="drive_tutorial_header_voice">Commandes Vocales</string>
+    <string name="drive_tutorial_body_voice">Tapez le bouton Voix et énoncez une commande:\n… Lire l\'artiste Red Hot Chili Peppers\n… Lancer la playlist Starred\n… Google Quelle est la météo</string>
+    <string name="drive_tutorial_header_navhead">Navigation Head</string>
+    <string name="drive_tutorial_body_navhead">En appuyant sur le bouton Maps, une pochette flottante apparaîtra, vous permettant de revenir rapidement au mode Voiture. Cette pochette flottante peut être déplacée sur l\'écran.</string>
+    <string name="drive_tutorial_button">J\'ai compris !</string>
 </resources>
