@@ -96,6 +96,12 @@ public class WelcomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        if (mLayoutId <= 0) {
+            // Happened once, couldn't reproduce, so let's do a dumb fallback here
+            setStep(1);
+            setLayoutId(R.layout.fragment_welcome1);
+        }
+
         View root = inflater.inflate(mLayoutId, container, false);
         root.findViewById(R.id.btnNext).setOnClickListener(new View.OnClickListener() {
             @Override

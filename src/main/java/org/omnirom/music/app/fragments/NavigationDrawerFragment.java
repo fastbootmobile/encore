@@ -241,26 +241,24 @@ public class NavigationDrawerFragment extends Fragment {
             if (mDrawerLayout != null) {
                 mDrawerLayout.closeDrawer(mFragmentContainerView);
             }
-            if (mCallbacks != null) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mCallbacks.onNavigationDrawerItemSelected(position)) {
-                            if (mPreviousItem != null) {
-                                mPreviousItem.setTypeface(sUnselectedTypeface);
-                            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mCallbacks != null
+                            && mCallbacks.onNavigationDrawerItemSelected(position)) {
+                        if (mPreviousItem != null) {
+                            mPreviousItem.setTypeface(sUnselectedTypeface);
+                        }
 
-                            View view = mDrawerListView.getChildAt(mCurrentSelectedPosition);
-                            if (view != null) {
-                                TextView tv = (TextView) view.findViewById(android.R.id.text1);
-                                tv.setTypeface(sSelectedTypeface);
-                                mPreviousItem = tv;
-                            }
+                        View view = mDrawerListView.getChildAt(mCurrentSelectedPosition);
+                        if (view != null) {
+                            TextView tv = (TextView) view.findViewById(android.R.id.text1);
+                            tv.setTypeface(sSelectedTypeface);
+                            mPreviousItem = tv;
                         }
                     }
-                });
-
-            }
+                }
+            });
         }
     }
 
