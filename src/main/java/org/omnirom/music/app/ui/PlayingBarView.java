@@ -664,6 +664,10 @@ public class PlayingBarView extends RelativeLayout {
     }
 
     public boolean isVisible() {
-        return mTracksLayout.getVisibility() == View.VISIBLE;
+        if (mTracksLayout != null) {
+            return mTracksLayout.getVisibility() == View.VISIBLE;
+        } else {
+            return false;
+        }
     }
 }

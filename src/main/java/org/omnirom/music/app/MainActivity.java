@@ -78,8 +78,6 @@ public class MainActivity extends AppActivity
 
     private PlayingBarView mPlayingBarLayout;
 
-    private boolean mRestoreBarOnBack;
-
     private CastModule mCastModule;
 
     private Handler mHandler;
@@ -117,7 +115,7 @@ public class MainActivity extends AppActivity
             mNavigationDrawerFragment = (NavigationDrawerFragment)
                     getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
             if (mTitle == null) {
-                mTitle = getTitle();
+                onSectionAttached(mCurrentFragmentIndex);
             }
 
             // Set up the drawer.
@@ -208,8 +206,10 @@ public class MainActivity extends AppActivity
             mSearchView.setIconified(true);
         } else if (!mPlayingBarLayout.isWrapped()) {
             mPlayingBarLayout.setWrapped(true);
+        } else if (mNavigationDrawerFragment.isDrawerOpen()) {
+            mNavigationDrawerFragment.closeDrawer();
         } else {
-            if (mCurrentFragmentIndex < 0) {
+            /*if (mCurrentFragmentIndex < 0) {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -217,8 +217,13 @@ public class MainActivity extends AppActivity
                         restoreActionBar();
                     }
                 });
-            }
+            }*/
             super.onBackPressed();
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                mNavigationDrawerFragment.selectItem(SECTION_LISTEN_NOW - 1);
+                onSectionAttached(SECTION_LISTEN_NOW);
+            }
+            restoreActionBar();
         }
     }
 
@@ -243,6 +248,9 @@ public class MainActivity extends AppActivity
                 Log.w(TAG, "Configured provider is null!");
             }
         }
+
+        onSectionAttached(mCurrentFragmentIndex);
+        restoreActionBar();
     }
 
     @Override
@@ -292,6 +300,10 @@ public class MainActivity extends AppActivity
     public boolean onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         boolean result = true;
+        if (mCurrentFragmentIndex == position) {
+            return false;
+        }
+
         try {
             if (position + 1 < SECTION_DRIVE_MODE) {
                 mCurrentFragmentIndex = position;
@@ -334,7 +346,7 @@ public class MainActivity extends AppActivity
             }
 
             if (newFrag != null) {
-                showFragment(newFrag, false, fragmentTag);
+                showFragment(newFrag, position +1 != SECTION_LISTEN_NOW, fragmentTag);
                 result = true;
             } else {
                 result = false;
@@ -349,11 +361,8 @@ public class MainActivity extends AppActivity
     public void showFragment(Fragment f, boolean addToStack, String tag) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.getBackStackEntryCount() > 0 && !addToStack) {
+        if (fragmentManager.getBackStackEntryCount() > 0) {
             fragmentManager.popBackStack();
-            if (mRestoreBarOnBack) {
-                mRestoreBarOnBack = false;
-            }
         }
 
         FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -404,15 +413,6 @@ public class MainActivity extends AppActivity
                     setContentShadowTop(pxTop);
                 }
             });
-        }
-    }
-
-    public float getContentShadowTop() {
-        View actionBarShadow = findViewById(R.id.action_bar_shadow);
-        if (actionBarShadow != null) {
-            return actionBarShadow.getTranslationY();
-        } else {
-            return 0;
         }
     }
 
@@ -517,7 +517,7 @@ public class MainActivity extends AppActivity
                     });
             builder.show();
         } else {
-            showSleepTimerPicker();;
+            showSleepTimerPicker();
         }
     }
 
