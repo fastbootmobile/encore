@@ -1161,13 +1161,19 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
          *
          * @param request Whether or not to fetch albums from the provider
          */
-        private void loadAlbums(boolean request) {
+        private void loadAlbums(final boolean request) {
             if (request) {
                 // Make sure we loaded all the albums for that artist
                 fetchAlbums();
             }
 
-            if (isDetached() || mRootView != null) {
+            if (mRootView == null) {
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadAlbums(request);
+                    }
+                }, 200);
                 return;
             }
 
