@@ -5,7 +5,7 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="64dp">
 
     <ImageView
         android:layout_width="@dimen/dsp_item_provider_size"
@@ -20,31 +20,38 @@
         android:layout_marginTop="0dp"
         android:contentDescription="@string/loading" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivChecked"
+        android:src="@drawable/ic_action_check"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"/>
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/ivProviderLogo"
-        android:layout_toRightOf="@+id/ivProviderLogo"
-        android:layout_marginStart="@dimen/dsp_item_provider_margin"
-        android:layout_marginLeft="@dimen/dsp_item_provider_margin"
         android:layout_alignBottom="@+id/ivProviderLogo"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:layout_toLeftOf="@+id/ivChecked"
+        android:layout_toRightOf="@+id/ivProviderLogo"
+        android:layout_toEndOf="@+id/ivProviderLogo">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tvProviderName"
             style="@style/FontSubhead"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="4dp"
+            android:text="name"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/tvProviderAuthor" />
+            android:id="@+id/tvProviderAuthor"
+            android:text="author"/>
     </LinearLayout>
 
 </RelativeLayout>

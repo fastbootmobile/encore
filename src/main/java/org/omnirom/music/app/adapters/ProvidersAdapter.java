@@ -42,6 +42,7 @@ public class ProvidersAdapter extends BaseAdapter {
         TextView tvProviderName;
         TextView tvProviderAuthor;
         ImageView ivProviderIcon;
+        ImageView ivChecked;
     }
 
     private List<ProviderConnection> mProviders;
@@ -113,6 +114,7 @@ public class ProvidersAdapter extends BaseAdapter {
             tag.tvProviderAuthor = (TextView) view.findViewById(R.id.tvProviderAuthor);
             tag.tvProviderName = (TextView) view.findViewById(R.id.tvProviderName);
             tag.ivProviderIcon = (ImageView) view.findViewById(R.id.ivProviderLogo);
+            tag.ivChecked = (ImageView) view.findViewById(R.id.ivChecked);
             view.setTag(tag);
 
             if (mWhite) {
@@ -138,12 +140,12 @@ public class ProvidersAdapter extends BaseAdapter {
         IMusicProvider binder = provider.getBinder();
         try {
             if (mWashOutConfigure && binder != null && binder.isSetup()) {
-                tag.vRoot.setAlpha(0.5f);
+                tag.ivChecked.setVisibility(View.VISIBLE);
             } else {
-                tag.vRoot.setAlpha(1.0f);
+                tag.ivChecked.setVisibility(View.GONE);
             }
         } catch (RemoteException ignore) {
-            tag.vRoot.setAlpha(1.0f);
+            tag.ivChecked.setVisibility(View.GONE);
         }
 
         return view;
