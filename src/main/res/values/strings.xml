@@ -223,7 +223,7 @@
     <string name="rename_playlist">Rename playlist</string>
     <string name="listen_now_no_providers">You don\'t have any providers! Search for \'OmniMusic Provider\' on the Play Store</string>
     <string name="settings_setup_wizard">Open the initial setup wizard</string>
-    <string name="welcome_skip">Ignore</string>
+    <string name="welcome_skip">Skip\nWizard</string>
     <string name="welcome_skip_dialog_title">Skip plug-ins setup?</string>
     <string name="welcome_skip_dialog_body">Are you sure you want to skip plug-ins setup?</string>
     <string name="drive_tutorial_title"><![CDATA[Drive Mode Tips & Tricks]]></string>
