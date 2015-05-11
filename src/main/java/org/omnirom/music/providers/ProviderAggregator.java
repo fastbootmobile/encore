@@ -582,6 +582,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         // This may perfectly happen if the provider died.
                     }
                 }
+
+                mCache.purgeCacheForProvider(provider.getIdentifier());
             }
         });
     }
