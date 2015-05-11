@@ -168,13 +168,18 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
      * {@inheritDoc}
      */
     @Override
-    public void onArtistUpdate(List<Artist> artists) {
-        for (Artist a : artists) {
-            int index = mAdapter.indexOf(a);
-            if (index >= 0) {
-                mAdapter.notifyItemChanged(index);
+    public void onArtistUpdate(final List<Artist> artists) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (Artist a : artists) {
+                    int index = mAdapter.indexOf(a);
+                    if (index >= 0) {
+                        mAdapter.notifyItemChanged(index);
+                    }
+                }
             }
-        }
+        });
     }
 
     /**

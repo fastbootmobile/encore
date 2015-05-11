@@ -155,7 +155,12 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
     public void onAlbumUpdate(final List<Album> a) {
         // AddAllUnique only adds loaded entities
         if (mAdapter.addAllUnique(a)) {
-            mAdapter.notifyDataSetChanged();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.notifyDataSetChanged();
+                }
+            });
         }
     }
 
