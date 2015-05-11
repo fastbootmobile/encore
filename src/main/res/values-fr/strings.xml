@@ -81,8 +81,8 @@
     <string name="other">Autre</string>
     <string name="settings_provider_config_summary">Configurer les extensions de sources installées</string>
     <string name="settings_provider_config_title">Sources de musique</string>
-    <string name="settings_dsp_config_summary">Activez et configurez les extensions d\'effets audio</string>
-    <string name="settings_dsp_config_title">Extensions d\'effets audio</string>
+    <string name="settings_dsp_config_summary">Gérez et configurez les extensions d\'effets audio</string>
+    <string name="settings_dsp_config_title">Effets audio</string>
     <string name="settings_taste_learning_summary">Envoyer des informations anonymes pour mieux déterminer les titres que j\'aime</string>
     <string name="settings_taste_learning_title">Apprendre mon profil musical</string>
     <string name="settings_album_art_summary">Jolifier la navigation en téléchargeant les pochettes d\'album</string>
