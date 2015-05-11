@@ -52,6 +52,7 @@ import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -101,8 +102,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             final List<Playlist> playlists = aggregator.getAllPlaylists();
             final List<String> chosenSongs = new ArrayList<>();
             final List<String> usedReferences = new ArrayList<>();
-
-            int totalSongsCount = 0;
+            final List<String> availableReferences = new ArrayList<>();
 
             sWarmUp = true;
             sAdapter.clearEntries();
@@ -131,11 +131,49 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             }
 
             for (Playlist p : playlists) {
-                totalSongsCount += p.getSongsCount();
+                Iterator<String> it = p.songs();
+                while (it.hasNext()) {
+                    String ref = it.next();
+                    if (!availableReferences.contains(ref)) {
+                        availableReferences.add(ref);
+                    }
+                }
             }
 
-            // We use a random algorithm (picking random tracks and albums and artists from
-            // playlist) with a fixed layout:
+            if (availableReferences.size() < 10) {
+                // We don't have much in playlists! Use all the library
+                List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+
+                for (ProviderConnection provider : providers) {
+                    IMusicProvider binder = provider.getBinder();
+                    if (binder != null) {
+                        int limit = 50;
+                        int offset = 0;
+                        boolean goAhead = true;
+                        try {
+                            while (goAhead) {
+                                List<Song> songs = binder.getSongs(offset, limit);
+                                if (songs.size() < limit) {
+                                    goAhead = false;
+                                }
+                                offset += songs.size();
+
+                                for (Song song : songs) {
+                                    if (!availableReferences.contains(song.getRef())) {
+                                        availableReferences.add(song.getRef());
+                                    }
+                                }
+                            }
+                        } catch (RemoteException ignore) {
+                        }
+                    }
+                }
+            }
+
+            // TODO: What if we have only Spotify and no playlists?
+
+            // We use a random algorithm (picking random tracks and albums and artists with
+            // a fixed layout:
             // - One big entry
             // - Six small entries
             // A total of MAX_SUGGESTIONS entries
@@ -149,12 +187,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 }
 
                 // Make sure we haven't reached all our accessible data
-                if (chosenSongs.size() >= totalSongsCount) {
-                    break;
-                }
-
-                // Make sure we still have playlists
-                if (playlists.size() <= 0) {
+                if (availableReferences.size() <= 0) {
                     break;
                 }
 

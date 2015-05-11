@@ -288,45 +288,68 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) {
-            // Recent activity header
-            return ITEM_TYPE_HEADER;
-        } else if (position > 0 && position <= mRecentEntries.size()) {
-            // Recent activity item
-            return ITEM_TYPE_ENTRY;
-        } else if (position == mRecentEntries.size() + 1) {
-            // Suggestions header
-            return ITEM_TYPE_HEADER;
+        // If we have recent entries...
+        if (mRecentEntries.size() > 0) {
+            if (position == 0) {
+                // Recent activity header
+                return ITEM_TYPE_HEADER;
+            } else if (position > 0 && position <= mRecentEntries.size()) {
+                // Recent activity item
+                return ITEM_TYPE_ENTRY;
+            } else if (position == mRecentEntries.size() + 1) {
+                // Suggestions header
+                return ITEM_TYPE_HEADER;
+            } else {
+                // Suggestion item
+                return ITEM_TYPE_ENTRY;
+            }
         } else {
-            // Suggestion item
-            return ITEM_TYPE_ENTRY;
+            if (position == 0) {
+                // Suggestions header
+                return ITEM_TYPE_HEADER;
+            } else {
+                return ITEM_TYPE_ENTRY;
+            }
         }
     }
 
     @Override
     public long getItemId(int position) {
-        if (position == 0) {
-            // Recent activity header
-            return 0;
-        } else if (position > 0 && position <= mRecentEntries.size()) {
-            if (mRecentEntries.size() > position - 1) {
-                BoundEntity ent = mRecentEntries.get(position - 1).entity;
+        if (mRecentEntries.size() > 0) {
+            if (position == 0) {
+                // Recent activity header
+                return 0;
+            } else if (position > 0 && position <= mRecentEntries.size()) {
+                if (mRecentEntries.size() > position - 1) {
+                    BoundEntity ent = mRecentEntries.get(position - 1).entity;
+                    if (ent != null) {
+                        return ent.getRef().hashCode();
+                    } else {
+                        return -1;
+                    }
+                } else {
+                    return -1;
+                }
+            } else if (position == mRecentEntries.size() + 1) {
+                return 1;
+            } else {
+                BoundEntity ent = mEntries.get(position - 2 - mRecentEntries.size()).entity;
                 if (ent != null) {
                     return ent.getRef().hashCode();
                 } else {
                     return -1;
                 }
-            } else {
-                return -1;
             }
-        } else if (position == mRecentEntries.size() + 1) {
-            return 1;
         } else {
-            BoundEntity ent = mEntries.get(position - 2 - mRecentEntries.size()).entity;
-            if (ent != null) {
-                return ent.getRef().hashCode();
+            if (position == 0) {
+                return 1;
             } else {
-                return -1;
+                BoundEntity ent = mEntries.get(position - 1).entity;
+                if (ent != null) {
+                    return ent.getRef().hashCode();
+                } else {
+                    return -1;
+                }
             }
         }
     }
@@ -365,7 +388,7 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         if (viewType == ITEM_TYPE_HEADER) {
             final HeaderViewHolder holder = (HeaderViewHolder) holderBase;
-            if (i == 0) {
+            if (i == 0 && mRecentEntries.size() > 0) {
                 holder.tvHeader.setText(R.string.recently_listened_to);
             } else {
                 holder.tvHeader.setText(R.string.listen_now_suggestions_header);
@@ -468,7 +491,11 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemCount() {
-        return mRecentEntries.size() + mEntries.size() + 2;
+        if (mRecentEntries.size() > 0) {
+            return mRecentEntries.size() + mEntries.size() + 2;
+        } else {
+            return mEntries.size() + 1;
+        }
     }
 
 }
