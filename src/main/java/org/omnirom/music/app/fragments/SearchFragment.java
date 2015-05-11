@@ -320,7 +320,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
         for (Artist artist : a) {
             if (mAdapter.contains(artist)) {
-                mAdapter.notifyDataSetChanged();
+                mHandler.removeMessages(MSG_DATASET_CHANGED);
+                mHandler.sendEmptyMessage(MSG_DATASET_CHANGED);
                 return;
             }
         }
