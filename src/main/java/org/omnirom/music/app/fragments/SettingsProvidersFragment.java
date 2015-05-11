@@ -22,6 +22,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -67,6 +70,7 @@ public class SettingsProvidersFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         // Get providers, filter out our MultiProvider playlist provider
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
@@ -77,7 +81,6 @@ public class SettingsProvidersFragment extends ListFragment {
             }
         }
         setListAdapter(new ProvidersAdapter(filteredProviders));
-
     }
 
     @Override
@@ -119,6 +122,24 @@ public class SettingsProvidersFragment extends ListFragment {
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot login newly setup provider", e);
             }
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.provider_settings, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_download_provider:
+                return true;
+
+            default:
+                return false;
         }
     }
 }

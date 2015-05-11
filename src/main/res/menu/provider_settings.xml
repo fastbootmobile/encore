@@ -4,15 +4,9 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_download_effect"
+        android:id="@+id/menu_download_provider"
         android:icon="@drawable/ic_ab_cloud_download"
-        android:title="@string/download_effects"
-        app:showAsAction="ifRoom"/>
-
-    <item
-        android:id="@+id/menu_add_effect"
-        android:icon="@drawable/ic_ab_add"
-        android:title="@string/add_effect"
+        android:title="@string/download_providers"
         app:showAsAction="ifRoom"/>
 
 </menu>

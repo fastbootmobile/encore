@@ -118,6 +118,12 @@ public class DspProvidersFragment extends ListFragment {
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setEmptyText("Sound effects plugins allows you to enhance your sound experience (via bass boosting, equalizer, etc). Tap '+' to add an installed plugin to the chain, or tap the cloud icon to discover more effects.");
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         menu.clear();

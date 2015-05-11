@@ -107,29 +107,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             sWarmUp = true;
             sAdapter.clearEntries();
 
-            // If we don't have any playlists, retry in a short time and display either No Music
-            // or Loading... depending on the number of tries, waiting for providers to start
-            if (playlists.size() <= 0) {
-                mTxtNoMusic.animate().setDuration(400).translationX(0).alpha(1.0f).start();
-                if (mWarmUpCount < 2) {
-                    mTxtNoMusic.setText(R.string.loading);
-                } else if (PluginsLookup.getDefault().getAvailableProviders().size() == 0) {
-                    mTxtNoMusic.setText(R.string.listen_now_no_providers);
-                    mFoundAnything = false;
-                } else {
-                    mTxtNoMusic.setText(R.string.no_music_hint);
-                    mFoundAnything = false;
-                }
-
-                mWarmUpCount++;
-
-                mHandler.postDelayed(this, 1000);
-                return;
-            } else if (mTxtNoMusic != null) {
-                mTxtNoMusic.animate().setDuration(400).translationX(100).alpha(0.0f).start();
-                mFoundAnything = true;
-            }
-
             for (Playlist p : playlists) {
                 Iterator<String> it = p.songs();
                 while (it.hasNext()) {
@@ -171,6 +148,29 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             }
 
             // TODO: What if we have only Spotify and no playlists?
+
+            // If we don't have any playlists, retry in a short time and display either No Music
+            // or Loading... depending on the number of tries, waiting for providers to start
+            if (availableReferences.size() <= 0) {
+                mTxtNoMusic.animate().setDuration(400).translationX(0).alpha(1.0f).start();
+                if (mWarmUpCount < 2) {
+                    mTxtNoMusic.setText(R.string.loading);
+                } else if (PluginsLookup.getDefault().getAvailableProviders().size() == 0) {
+                    mTxtNoMusic.setText(R.string.listen_now_no_providers);
+                    mFoundAnything = false;
+                } else {
+                    mTxtNoMusic.setText(R.string.no_music_hint);
+                    mFoundAnything = false;
+                }
+
+                mWarmUpCount++;
+
+                mHandler.postDelayed(this, 1000);
+                return;
+            } else if (mTxtNoMusic != null) {
+                mTxtNoMusic.animate().setDuration(400).translationX(100).alpha(0.0f).start();
+                mFoundAnything = true;
+            }
 
             // We use a random algorithm (picking random tracks and albums and artists with
             // a fixed layout:
