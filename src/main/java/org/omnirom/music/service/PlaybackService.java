@@ -129,7 +129,6 @@ public class PlaybackService extends Service
     private ServiceNotification mNotification;
     private int mCurrentTrack = -1;
     private long mCurrentTrackElapsedMs;
-    private long mPauseLastTick;
     private int mState = STATE_STOPPED;
     private boolean mIsResuming;
     private boolean mIsStopping;
@@ -1302,7 +1301,6 @@ public class PlaybackService extends Service
             final Song currentSong = getCurrentSong();
             if (currentSong != null && currentSong.getProvider().equals(provider) && !mIsStopping) {
                 mState = STATE_PAUSED;
-                mPauseLastTick = System.currentTimeMillis();
 
                 for (IPlaybackCallback cb : mCallbacks) {
                     try {
