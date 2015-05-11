@@ -54,4 +54,17 @@
             android:text="author"/>
     </LinearLayout>
 
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivDelete"
+        android:src="@drawable/ic_delete"
+        android:scaleType="centerInside"
+        style="@style/OmniMusic.Spec.BorderlessButton"
+        android:clickable="true"
+        android:focusable="false"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
 </RelativeLayout>

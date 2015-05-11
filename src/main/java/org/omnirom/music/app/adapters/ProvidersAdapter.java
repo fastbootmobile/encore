@@ -16,8 +16,10 @@
 package org.omnirom.music.app.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +45,8 @@ public class ProvidersAdapter extends BaseAdapter {
         TextView tvProviderAuthor;
         ImageView ivProviderIcon;
         ImageView ivChecked;
+        ImageView ivDelete;
+        ProviderConnection provider;
     }
 
     private List<ProviderConnection> mProviders;
@@ -115,12 +119,27 @@ public class ProvidersAdapter extends BaseAdapter {
             tag.tvProviderName = (TextView) view.findViewById(R.id.tvProviderName);
             tag.ivProviderIcon = (ImageView) view.findViewById(R.id.ivProviderLogo);
             tag.ivChecked = (ImageView) view.findViewById(R.id.ivChecked);
+            tag.ivDelete = (ImageView) view.findViewById(R.id.ivDelete);
+
+            tag.ivDelete.setTag(tag);
             view.setTag(tag);
 
             if (mWhite) {
                 tag.tvProviderName.setTextColor(0xFFFFFFFF);
                 tag.tvProviderAuthor.setTextColor(0xFFFFFFFF);
+                tag.ivDelete.setVisibility(View.GONE);
             }
+
+            tag.ivDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ViewHolder tag = (ViewHolder) v.getTag();
+                    Uri packageUri = Uri.parse("package:" + tag.provider.getPackage());
+                    Intent uninstallIntent =
+                            new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
+                    v.getContext().startActivity(uninstallIntent);
+                }
+            });
         } else {
             tag = (ViewHolder) view.getTag();
         }
@@ -128,6 +147,13 @@ public class ProvidersAdapter extends BaseAdapter {
         ProviderConnection provider = getItem(i);
         tag.tvProviderName.setText(provider.getProviderName());
         tag.tvProviderAuthor.setText(provider.getAuthorName());
+        tag.provider = provider;
+
+        if (mWhite || provider.getPackage().equals("org.omnirom.music.app")) {
+            tag.ivDelete.setVisibility(View.GONE);
+        } else {
+            tag.ivDelete.setVisibility(View.VISIBLE);
+        }
 
         try {
             Drawable icon = context.getPackageManager().getApplicationIcon(provider.getPackage());

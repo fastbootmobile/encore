@@ -33,6 +33,7 @@ import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemA
 
 import org.lucasr.twowayview.TwoWayView;
 import org.lucasr.twowayview.widget.DividerItemDecoration;
+import org.omnirom.music.api.common.Pair;
 import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.HistoryAdapter;
@@ -102,7 +103,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             final List<Playlist> playlists = aggregator.getAllPlaylists();
             final List<String> chosenSongs = new ArrayList<>();
             final List<String> usedReferences = new ArrayList<>();
-            final List<String> availableReferences = new ArrayList<>();
+            final List<Pair<String, ProviderIdentifier>> availableReferences = new ArrayList<>();
 
             sWarmUp = true;
             sAdapter.clearEntries();
@@ -111,8 +112,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 Iterator<String> it = p.songs();
                 while (it.hasNext()) {
                     String ref = it.next();
-                    if (!availableReferences.contains(ref)) {
-                        availableReferences.add(ref);
+                    Pair<String, ProviderIdentifier> pair = Pair.create(ref, p.getProvider());
+                    if (!availableReferences.contains(pair)) {
+                        availableReferences.add(pair);
                     }
                 }
             }
@@ -136,8 +138,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                                 offset += songs.size();
 
                                 for (Song song : songs) {
-                                    if (!availableReferences.contains(song.getRef())) {
-                                        availableReferences.add(song.getRef());
+                                    Pair<String, ProviderIdentifier> pair = Pair.create(song.getRef(), song.getProvider());
+                                    if (!availableReferences.contains(pair)) {
+                                        availableReferences.add(pair);
                                     }
                                 }
                             }
@@ -182,7 +185,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             final long startTime = SystemClock.uptimeMillis();
             for (int i = 0; i < MAX_SUGGESTIONS; i++) {
                 // Watchdog timer
-                if (SystemClock.uptimeMillis() - startTime > 1000) {
+                if (SystemClock.uptimeMillis() - startTime > 3000) {
                     break;
                 }
 
@@ -193,34 +196,22 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
                 // First, we determine the entity we want to show
                 int type = random.nextInt(2);
-                int playlistId = random.nextInt(playlists.size());
+                int trackId = random.nextInt(availableReferences.size());
+                Pair<String, ProviderIdentifier> trackPair = availableReferences.get(trackId);
 
-                Playlist playlist = playlists.get(playlistId);
-                if (playlist.getSongsCount() <= 0) {
-                    // Playlist is empty, skip to next one
-                    i--;
-                    continue;
-                }
-
-                int trackId = random.nextInt(playlist.getSongsCount());
-                final ProviderIdentifier provider = playlist.getProvider();
+                final ProviderIdentifier provider = trackPair.second;
                 if (provider == null) {
-                    Log.e(TAG, "Playlist has no identifier!");
+                    Log.e(TAG, "Track has no identifier!");
                     continue;
                 }
 
-                String trackRef = playlist.songsList().get(trackId);
+                String trackRef = trackPair.first;
                 if (chosenSongs.contains(trackRef)) {
                     // We already picked that song
                     i--;
                     continue;
                 } else {
                     chosenSongs.add(trackRef);
-
-                    // Remove the playlist from our selection if we picked all the songs from it
-                    if (chosenSongs.containsAll(playlist.songsList())) {
-                        playlists.remove(playlist);
-                    }
                 }
 
                 Song track = aggregator.retrieveSong(trackRef, provider);
@@ -455,6 +446,11 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     public void onResume() {
         super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
+
+        if (!mFoundAnything || sAdapter.getItemCount() < 3) {
+            mHandler.removeCallbacks(mGenerateEntries);
+            mHandler.post(mGenerateEntries);
+        }
     }
 
     /**
@@ -499,7 +495,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
-        if (!mFoundAnything || sAdapter.getItemCount() == 0) {
+        if (!mFoundAnything || sAdapter.getItemCount() < 3) {
             mHandler.removeCallbacks(mGenerateEntries);
             mHandler.post(mGenerateEntries);
         }
