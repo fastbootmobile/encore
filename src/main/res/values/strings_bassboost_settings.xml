@@ -1,0 +1,12 @@
+<resources>
+    <!-- Strings related to Settings -->
+    <string name="pref_header_effect_settings">Effect settings</string>
+
+    <string name="center_frequency_title">Frequency</string>
+    <string name="center_frequency_summary">Frequency at which the low-pass filter will stop</string>
+
+    <string name="gain_title">Strength</string>
+    <string name="gain_summary">The gain/intensity of the effect</string>
+
+
+</resources>

@@ -77,6 +77,44 @@
             android:exported="false" >
         </service>
 
+        <!-- Local Provider Service -->
+        <service
+            android:name="org.omnirom.music.providers.localprovider.PluginService"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="org.omnirom.music.action.PICK_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.omnirom.music.metadata.PROVIDER_NAME"
+                android:value="Local music" />
+
+            <meta-data
+                android:name="org.omnirom.music.metadata.PROVIDER_AUTHOR"
+                android:value="The OmniROM Project" />
+        </service>
+
+        <!-- Bass Boost Plugin -->
+        <service
+            android:name="org.omnirom.music.providers.bassboost.PluginService"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="org.omnirom.music.action.PICK_DSP_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.omnirom.music.metadata.PROVIDER_NAME"
+                android:value="Bass Boost" />
+            <meta-data
+                android:name="org.omnirom.music.metadata.PROVIDER_AUTHOR"
+                android:value="The OmniROM Project" />
+
+            <meta-data
+                android:name="org.omnirom.music.metadata.CONFIG_CLASS"
+                android:value="org.omnirom.music.providers.bassboost.SettingsActivity" />
+        </service>
+
         <!-- Receiver for the media buttons -->
         <receiver android:name="org.omnirom.music.receivers.RemoteControlReceiver" >
             <intent-filter android:priority="1000" >
@@ -192,6 +230,10 @@
             android:name=".DriveTutorialActivity"
             android:label="@string/title_activity_drive_mode" >
         </activity>
+
+        <!-- Bass Boost Plugin Settings Activity -->
+        <activity android:name="org.omnirom.music.providers.bassboost.SettingsActivity"
+                  android:label="@string/sound_effects" />
     </application>
 
 </manifest>

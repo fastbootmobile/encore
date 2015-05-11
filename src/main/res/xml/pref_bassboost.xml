@@ -1,0 +1,23 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="center_frequency"
+        android:title="@string/center_frequency_title"
+        android:summary="@string/center_frequency_summary"
+        android:defaultValue="55"
+        android:entries="@array/center_frequencies_entries"
+        android:entryValues="@array/center_frequencies_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+    <ListPreference
+        android:key="gain"
+        android:title="@string/gain_title"
+        android:summary="@string/gain_summary"
+        android:defaultValue="3"
+        android:entries="@array/gain_entries"
+        android:entryValues="@array/gain_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+</PreferenceScreen>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="center_frequencies_entries" translatable="false">
+        <item>40 Hz</item>
+        <item>45 Hz</item>
+        <item>50 Hz</item>
+        <item>55 Hz</item>
+        <item>60 Hz</item>
+        <item>65 Hz</item>
+        <item>70 Hz</item>
+        <item>75 Hz</item>
+        <item>80 Hz</item>
+        <item>85 Hz</item>
+        <item>90 Hz</item>
+        <item>95 Hz</item>
+        <item>100 Hz</item>
+    </string-array>
+
+    <string-array name="center_frequencies_values" translatable="false">
+        <item>40</item>
+        <item>45</item>
+        <item>50</item>
+        <item>55</item>
+        <item>60</item>
+        <item>65</item>
+        <item>70</item>
+        <item>75</item>
+        <item>80</item>
+        <item>85</item>
+        <item>90</item>
+        <item>95</item>
+        <item>100</item>
+    </string-array>
+
+    <string-array name="gain_entries" translatable="false">
+        <item>1dB</item>
+        <item>2dB</item>
+        <item>3dB</item>
+        <item>5dB</item>
+    </string-array>
+
+    <string-array name="gain_values" translatable="false">
+        <item>0</item>
+        <item>250</item>
+        <item>500</item>
+        <item>1000</item>
+    </string-array>
+</resources>
