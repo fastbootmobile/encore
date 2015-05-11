@@ -233,4 +233,7 @@
     <string name="drive_tutorial_header_navhead">Navigation Head</string>
     <string name="drive_tutorial_body_navhead">En appuyant sur le bouton Maps, une pochette flottante apparaîtra, vous permettant de revenir rapidement au mode Voiture. Cette pochette flottante peut être déplacée sur l\'écran.</string>
     <string name="drive_tutorial_button">J\'ai compris !</string>
+    <string name="toast_playlist_track_add_success">Ajouté %1$d titre(s) à %2$s</string>
+    <string name="toast_playlist_track_add_partial">Ajouté %1$d des %2$d titre(s) à %3$s</string>
+    <string name="toast_playlist_track_add_error">Impossible d\'ajouter les titres à %1$s</string>
 </resources>

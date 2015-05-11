@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.PluginsLookup;
@@ -197,23 +198,49 @@ public class PlaylistChooserFragment extends DialogFragment {
                                     aggregator.getCache().getRefProvider(playlistChosen.getRef());
                             try {
                                 final IMusicProvider provider = PluginsLookup.getDefault().getProvider(playlistChosenId).getBinder();
+
+                                int totalCount = 0;
+                                int successCount = 0;
+
                                 if (mSong != null) {
-                                    provider.addSongToPlaylist(mSong.getRef(), playlistChosen.getRef(), mSong.getProvider());
+                                    ++totalCount;
+                                    if (provider.addSongToPlaylist(mSong.getRef(), playlistChosen.getRef(), mSong.getProvider())) {
+                                        ++successCount;
+                                    }
                                 } else if (mAlbum != null) {
                                     Iterator<String> songs = mAlbum.songs();
                                     while (songs.hasNext()) {
-                                        provider.addSongToPlaylist(songs.next(), playlistChosen.getRef(), mAlbum.getProvider());
+                                        if (provider.addSongToPlaylist(songs.next(), playlistChosen.getRef(), mAlbum.getProvider())) {
+                                            ++successCount;
+                                        }
+                                        ++totalCount;
                                     }
                                 } else if (mPlaylist != null) {
                                     Iterator<String> songs = mPlaylist.songs();
                                     while (songs.hasNext()) {
                                         // TODO: This might cause issues if we add a playlist
                                         // from a multi-provider playlist to another one
-                                        provider.addSongToPlaylist(songs.next(), playlistChosen.getRef(), mPlaylist.getProvider());
+                                        ++totalCount;
+                                        if (provider.addSongToPlaylist(songs.next(), playlistChosen.getRef(), mPlaylist.getProvider())) {
+                                            ++successCount;
+                                        }
                                     }
+                                }
+
+                                if (totalCount == successCount) {
+                                    Toast.makeText(getActivity(), getString(R.string.toast_playlist_track_add_success,
+                                            successCount, playlistChosen.getName()), Toast.LENGTH_SHORT).show();
+                                } else if (successCount > 0) {
+                                    Toast.makeText(getActivity(), getString(R.string.toast_playlist_track_add_partial,
+                                            successCount, totalCount, playlistChosen.getName()), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getActivity(), getString(R.string.toast_playlist_track_add_error,
+                                            playlistChosen.getName()), Toast.LENGTH_SHORT).show();
                                 }
                             } catch (Exception e) {
                                 Log.e(TAG, "Unable to add to playlist", e);
+                                Toast.makeText(getActivity(), getString(R.string.toast_playlist_track_add_error,
+                                        playlistChosen.getName()), Toast.LENGTH_SHORT).show();
                             }
                         }
                     }

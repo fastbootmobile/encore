@@ -230,8 +230,11 @@
     <string name="drive_tutorial_header_gestures">Gestures</string>
     <string name="drive_tutorial_body_gestures">Swipe left or right to go to the previous or next track.\nTap the screen to pause or resume playback.\nSwipe up to go to Maps.</string>
     <string name="drive_tutorial_header_voice">Voice Command</string>
-    <string name="drive_tutorial_body_voice">Tap the Voice button and say a command:\n... Play artist Red Hot Chili Peppers\n... Start playlist Starred\n... Google What\'s the weather</string>
+    <string name="drive_tutorial_body_voice">Tap the Voice button and say a command:\n… Play artist Red Hot Chili Peppers\n… Start playlist Starred\n… Google What\'s the weather</string>
     <string name="drive_tutorial_header_navhead">Navigation Head</string>
     <string name="drive_tutorial_body_navhead">When pressing the Maps button, a floating album art will appear, allowing you to quickly switch back to OmniMusic\'s Drive Mode. This floating art can be moved around the screen.</string>
     <string name="drive_tutorial_button">Got it!</string>
+    <string name="toast_playlist_track_add_success">Successfully added %1$d track(s) to %2$s</string>
+    <string name="toast_playlist_track_add_partial">Added %1$d track(s) out of %2$d to %3$s</string>
+    <string name="toast_playlist_track_add_error">Couldn\'t add track(s) to %1$s</string>
 </resources>
