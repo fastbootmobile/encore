@@ -57,7 +57,7 @@ public class WelcomeActivity extends AppActivity {
         ft.replace(R.id.container, frag, "F" + step);
         ft.commit();
 
-        if (step == 4) {
+        if (step == 2) {
             setDoneWelcomeWizard(this);
         }
     }
