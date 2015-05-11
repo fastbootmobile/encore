@@ -20,6 +20,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.DeadObjectException;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.util.Log;
@@ -54,7 +55,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private List<ILocalCallback> mUpdateCallbacks;
     private final List<ProviderConnection> mProviders;
     private ProviderCache mCache;
-    private Handler mHandler;
+    private Handler mMainHandler;
+    private HandlerThread mBackHandlerThread;
+    private Handler mBackHandler;
     private final List<Song> mPostedUpdateSongs = new ArrayList<>();
     private final List<Album> mPostedUpdateAlbums = new ArrayList<>();
     private final List<Artist> mPostedUpdateArtists = new ArrayList<>();
@@ -190,22 +193,21 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         mUpdateCallbacks = new ArrayList<>();
         mProviders = new ArrayList<>();
         mCache = new ProviderCache();
-        mHandler = new Handler();
+        mMainHandler = new Handler();
         mCachedSearches = new HashMap<>();
+        mBackHandlerThread = new HandlerThread("ProviderAggregator");
+        mBackHandlerThread.start();
+        mBackHandler = new Handler(mBackHandlerThread.getLooper());
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        mBackHandlerThread.interrupt();
+        super.finalize();
     }
 
     public void setContext(Context ctx) {
         mContext = ctx;
-    }
-
-    /**
-     * Posts the provided runnable to this class' Handler, and make sure
-     *
-     * @param r The runnable
-     */
-    private void postOnce(Runnable r) {
-        mHandler.removeCallbacks(r);
-        mHandler.post(r);
     }
 
     /**
@@ -567,7 +569,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @param provider The providers to remove
      */
     public void unregisterProvider(final ProviderConnection provider) {
-        mHandler.post(new Runnable() {
+        mBackHandler.post(new Runnable() {
             @Override
             public void run() {
                 synchronized (mProviders) {
@@ -593,7 +595,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     public void notifyOfflineMode(final boolean isEnabled) {
         mIsOfflineMode = isEnabled;
 
-        mHandler.post(new Runnable() {
+        mBackHandler.post(new Runnable() {
             @Override
             public void run() {
                 synchronized (mProviders) {
@@ -682,35 +684,35 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     public void postSongForUpdate(Song s) {
-        mHandler.removeCallbacks(mPostSongsRunnable);
+        mBackHandler.removeCallbacks(mPostSongsRunnable);
         synchronized (mPostedUpdateSongs) {
             mPostedUpdateSongs.add(s);
         }
-        mHandler.postDelayed(mPostSongsRunnable, PROPAGATION_DELAY);
+        mBackHandler.postDelayed(mPostSongsRunnable, PROPAGATION_DELAY);
     }
 
     public void postAlbumForUpdate(Album a) {
-        mHandler.removeCallbacks(mPostAlbumsRunnable);
+        mBackHandler.removeCallbacks(mPostAlbumsRunnable);
         synchronized (mPostedUpdateAlbums) {
             mPostedUpdateAlbums.add(a);
         }
-        mHandler.postDelayed(mPostAlbumsRunnable, PROPAGATION_DELAY);
+        mBackHandler.postDelayed(mPostAlbumsRunnable, PROPAGATION_DELAY);
     }
 
     public void postArtistForUpdate(Artist a) {
-        mHandler.removeCallbacks(mPostArtistsRunnable);
+        mBackHandler.removeCallbacks(mPostArtistsRunnable);
         synchronized (mPostedUpdateArtists) {
             mPostedUpdateArtists.add(a);
         }
-        mHandler.postDelayed(mPostArtistsRunnable, PROPAGATION_DELAY);
+        mBackHandler.postDelayed(mPostArtistsRunnable, PROPAGATION_DELAY);
     }
 
     public void postPlaylistForUpdate(Playlist p) {
-        mHandler.removeCallbacks(mPostPlaylistsRunnable);
+        mBackHandler.removeCallbacks(mPostPlaylistsRunnable);
         synchronized (mPostedUpdatePlaylists) {
             mPostedUpdatePlaylists.add(p);
         }
-        mHandler.postDelayed(mPostPlaylistsRunnable, PROPAGATION_DELAY);
+        mBackHandler.postDelayed(mPostPlaylistsRunnable, PROPAGATION_DELAY);
     }
 
     public List<String> getRosettaStonePrefix() {
@@ -748,7 +750,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         if (success) {
             new Thread(mUpdatePlaylistsRunnable).start();
         } else {
-            mHandler.post(new Runnable() {
+            mMainHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     Toast.makeText(mContext, mContext.getString(R.string.cannot_login, provider.mName),

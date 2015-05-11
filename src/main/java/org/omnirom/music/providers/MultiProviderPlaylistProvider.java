@@ -243,12 +243,7 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     }
 
     private void removeCallback(final IProviderCallback cb) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
 
-            }
-        });
     }
 
     MultiProviderDatabaseHelper.LocalCallback mLocalCallback = new MultiProviderDatabaseHelper.LocalCallback() {

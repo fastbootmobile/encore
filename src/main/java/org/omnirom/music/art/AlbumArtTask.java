@@ -135,10 +135,10 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
 
         if (!isCancelled()) {
             if (result != null && result.retry) {
+                final AlbumArtTask task = new AlbumArtTask(mResources, mListener, mRequestedSize);
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        AlbumArtTask task = new AlbumArtTask(mResources, mListener, mRequestedSize);
                         try {
                             task.executeOnExecutor(AlbumArtHelper.ART_POOL_EXECUTOR, result.request);
                         } catch (RejectedExecutionException e) {
