@@ -61,6 +61,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     private static final String TAG = "SearchFragment";
 
     private static final int MSG_UPDATE_RESULTS = 1;
+    private static final int MSG_DATASET_CHANGED = 2;
 
     private SearchAdapter mAdapter;
     private Handler mHandler;
@@ -78,6 +79,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         public void handleMessage(Message msg) {
             if (msg.what == MSG_UPDATE_RESULTS) {
                 mParent.get().updateSearchResults();
+            } else if (msg.what == MSG_DATASET_CHANGED) {
+                mParent.get().mAdapter.notifyDataSetChanged();
             }
         }
     }
@@ -266,9 +269,14 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onSongUpdate(List<Song> s) {
+        if (mAdapter == null) {
+            return;
+        }
+
         for (Song song : s) {
             if (mAdapter.contains(song)) {
-                mAdapter.notifyDataSetChanged();
+                mHandler.removeMessages(MSG_DATASET_CHANGED);
+                mHandler.sendEmptyMessage(MSG_DATASET_CHANGED);
                 return;
             }
         }
@@ -276,9 +284,14 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onAlbumUpdate(List<Album> a) {
+        if (mAdapter == null) {
+            return;
+        }
+
         for (Album album : a) {
             if (mAdapter.contains(album)) {
-                mAdapter.notifyDataSetChanged();
+                mHandler.removeMessages(MSG_DATASET_CHANGED);
+                mHandler.sendEmptyMessage(MSG_DATASET_CHANGED);
                 return;
             }
         }
@@ -286,9 +299,14 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
+        if (mAdapter == null) {
+            return;
+        }
+
         for (Playlist playlist : p) {
             if (mAdapter.contains(playlist)) {
-                mAdapter.notifyDataSetChanged();
+                mHandler.removeMessages(MSG_DATASET_CHANGED);
+                mHandler.sendEmptyMessage(MSG_DATASET_CHANGED);
                 return;
             }
         }
@@ -296,6 +314,10 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onArtistUpdate(List<Artist> a) {
+        if (mAdapter == null) {
+            return;
+        }
+
         for (Artist artist : a) {
             if (mAdapter.contains(artist)) {
                 mAdapter.notifyDataSetChanged();
