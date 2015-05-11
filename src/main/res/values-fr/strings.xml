@@ -236,4 +236,6 @@
     <string name="toast_playlist_track_add_success">Ajouté %1$d titre(s) à %2$s</string>
     <string name="toast_playlist_track_add_partial">Ajouté %1$d des %2$d titre(s) à %3$s</string>
     <string name="toast_playlist_track_add_error">Impossible d\'ajouter les titres à %1$s</string>
+    <string name="download_effects">Télécharger de nouveaux effets</string>
+    <string name="download_providers">Télécharger de nouvelles sources</string>
 </resources>
