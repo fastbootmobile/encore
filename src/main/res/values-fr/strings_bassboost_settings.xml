@@ -1,0 +1,12 @@
+<resources>
+    <!-- Strings related to Settings -->
+    <string name="pref_header_effect_settings">Paramètres de l\'effet</string>
+
+    <string name="center_frequency_title">Fréquence</string>
+    <string name="center_frequency_summary">Fréquence d\'arrêt du filtre passe-bas</string>
+
+    <string name="gain_title">Intensité</string>
+    <string name="gain_summary">Le gain/intensité de l\'effet</string>
+
+
+</resources>

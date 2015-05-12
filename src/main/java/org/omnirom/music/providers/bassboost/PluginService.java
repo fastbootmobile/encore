@@ -47,13 +47,13 @@ public class PluginService extends Service implements SharedPreferences.OnShared
 
 
             for (int i = 0; i < numShorts; i += 2) {
-                int inL = mSamplesBuffer[i] * 100;
-                int inR = mSamplesBuffer[i + 1] * 100;
+                int inL = mSamplesBuffer[i];
+                int inR = mSamplesBuffer[i + 1];
 
-                int boost = mFilterL.process((inL + inR) / 2);
+                int boost = mFilterL.process(inL + inR);
 
-                mSamplesBuffer[i] = BiQuadFilter.clamp16(boost / 100);
-                mSamplesBuffer[i + 1] = BiQuadFilter.clamp16(boost / 100);
+                mSamplesBuffer[i] = BiQuadFilter.clamp16(inL + boost);
+                mSamplesBuffer[i + 1] = BiQuadFilter.clamp16(inR + boost);
             }
 
             // push it back
