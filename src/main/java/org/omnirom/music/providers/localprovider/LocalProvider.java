@@ -1013,8 +1013,8 @@ public class LocalProvider {
                             // Input decoding
                             int inIndex = -2;
                             try {
-                                // Try to dequeue an output buffer (timeout 5ms)
-                                inIndex = mDecoder.dequeueInputBuffer(5000);
+                                // Try to dequeue an output buffer (timeout 1ms)
+                                inIndex = mDecoder.dequeueInputBuffer(1000);
                             } catch (IllegalStateException ignored) {
                             }
 
@@ -1050,8 +1050,8 @@ public class LocalProvider {
                                 outIndex = MediaCodec.INFO_TRY_AGAIN_LATER;
                             } else {
                                 try {
-                                    // Try to dequeue an output buffer (timeout 5ms)
-                                    outIndex = mDecoder.dequeueOutputBuffer(mInfo, 5000);
+                                    // Try to dequeue an output buffer (timeout 1ms)
+                                    outIndex = mDecoder.dequeueOutputBuffer(mInfo, 1000);
                                 } catch (IllegalStateException ignored) {
                                 }
                             }

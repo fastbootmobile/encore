@@ -10,7 +10,6 @@ import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 
 import org.omnirom.music.app.R;
@@ -38,7 +37,6 @@ import omnimusic.Plugin;
 public class PluginService extends Service implements AudioSocket.ISocketCallback {
     private static final String TAG = "OmniMusic-LocalService";
     public static final String LOGO_REF = "LOCAL_PROVIDER";
-    private static final int MIN_BUFFER_BEFORE_SEND = 0;
 
 
     Handler mHandler = new Handler();
@@ -168,12 +166,10 @@ public class PluginService extends Service implements AudioSocket.ISocketCallbac
                     mWriteAudioThread.notifyAll();
                 }
 
-                long time = SystemClock.uptimeMillis();
-
                 if (mAudioWritten == -1) {
-                    // Wait 150ms for a reply
+                    // Wait 100ms for a reply
                     try {
-                        mAudioWrittenLock.wait(150);
+                        mAudioWrittenLock.wait(100);
                     } catch (InterruptedException e) {
                         Log.e(TAG, "Interrupted while waiting for audio written response");
                     }
