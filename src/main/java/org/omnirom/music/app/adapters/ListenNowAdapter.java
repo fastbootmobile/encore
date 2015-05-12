@@ -400,9 +400,10 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             lp.span = 2;
             holder.flRoot.setLayoutParams(lp);
         } else if (viewType == ITEM_TYPE_ENTRY) {
+            final int decay = (mRecentEntries.size() == 0 ? 1 : 2);
             final EntryViewHolder holder = (EntryViewHolder) holderBase;
             final ListenNowEntry entry = (i > 0 && i <= mRecentEntries.size()) ? mRecentEntries.get(i - 1)
-                    : mEntries.get(i - 2 - mRecentEntries.size());
+                    : mEntries.get(i - decay - mRecentEntries.size());
 
             // Update span status
             final StaggeredGridLayoutManager.LayoutParams lp =

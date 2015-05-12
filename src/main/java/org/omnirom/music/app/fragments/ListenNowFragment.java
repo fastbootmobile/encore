@@ -82,6 +82,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     private int mWarmUpCount = 0;
     private boolean mFoundAnything;
     private List<Integer> mUpdateItems;
+    private boolean mIsGenerating = false;
 
     private final Runnable mUpdateItemsRunnable = new Runnable() {
         @Override
@@ -98,6 +99,10 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     private final Runnable mGenerateEntries = new Runnable() {
         @Override
         public void run() {
+            if (mIsGenerating) return;
+
+            mIsGenerating = true;
+
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             final List<Playlist> playlists = aggregator.getAllPlaylists();
@@ -106,7 +111,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             final List<Pair<String, ProviderIdentifier>> availableReferences = new ArrayList<>();
 
             sWarmUp = true;
-            sAdapter.clearEntries();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    sAdapter.clearEntries();
+
+                }
+            });
 
             for (Playlist p : playlists) {
                 Iterator<String> it = p.songs();
@@ -161,23 +172,40 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             // If we don't have any playlists, retry in a short time and display either No Music
             // or Loading... depending on the number of tries, waiting for providers to start
             if (availableReferences.size() <= 0) {
-                mTxtNoMusic.animate().setDuration(400).translationX(0).alpha(1.0f).start();
-                if (mWarmUpCount < 2) {
-                    mTxtNoMusic.setText(R.string.loading);
-                } else if (PluginsLookup.getDefault().getAvailableProviders().size() == 0) {
-                    mTxtNoMusic.setText(R.string.listen_now_no_providers);
-                    mFoundAnything = false;
-                } else {
-                    mTxtNoMusic.setText(R.string.no_music_hint);
-                    mFoundAnything = false;
-                }
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTxtNoMusic.animate().setDuration(400).translationX(0).alpha(1.0f).start();
+                        if (mWarmUpCount < 2) {
+                            mTxtNoMusic.setText(R.string.loading);
+                        } else if (PluginsLookup.getDefault().getAvailableProviders().size() == 0) {
+                            mTxtNoMusic.setText(R.string.listen_now_no_providers);
+                            mFoundAnything = false;
+                        } else {
+                            mTxtNoMusic.setText(R.string.no_music_hint);
+                            mFoundAnything = false;
+                        }
 
-                mWarmUpCount++;
+                        mWarmUpCount++;
+                    }
+                });
 
-                mHandler.postDelayed(this, 1000);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        new Thread(mGenerateEntries).start();
+                    }
+                }, 1000);
+
+                mIsGenerating = false;
                 return;
             } else if (mTxtNoMusic != null) {
-                mTxtNoMusic.animate().setDuration(400).translationX(100).alpha(0.0f).start();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTxtNoMusic.animate().setDuration(400).translationX(100).alpha(0.0f).start();
+                    }
+                });
                 mFoundAnything = true;
             }
 
@@ -191,7 +219,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             final long startTime = SystemClock.uptimeMillis();
             for (int i = 0; i < MAX_SUGGESTIONS; i++) {
                 // Watchdog timer
-                if (SystemClock.uptimeMillis() - startTime > 3000) {
+                if (SystemClock.uptimeMillis() - startTime > 1000) {
                     break;
                 }
 
@@ -238,7 +266,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 boolean isLarge = ((i % 7) == 0);
 
                 // And we make the entry!
-                BoundEntity entity;
+                final BoundEntity entity;
                 switch (type) {
                     case TYPE_ARTIST:
                         String artistRef = track.getArtist();
@@ -286,12 +314,17 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     // Already shown that
                     i--;
                 } else if (entity != null) {
-                    ListenNowAdapter.ListenNowEntry entry = new ListenNowAdapter.ListenNowEntry(
+                    final ListenNowAdapter.ListenNowEntry entry = new ListenNowAdapter.ListenNowEntry(
                             isLarge ? ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_LARGE
                                     : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
                             entity);
-                    sAdapter.addEntry(entry);
-                    sAdapter.notifyItemInserted(sAdapter.getItemCount() - 1);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            sAdapter.addEntry(entry);
+                        }
+                    });
+
                     usedReferences.add(entity.getRef());
                 } else {
                     // Something bad happened while getting this entity, try something else
@@ -351,10 +384,16 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 knownReferences.add(song.getArtist());
 
                 // Create the item
-                ListenNowAdapter.ListenNowEntry card = new ListenNowAdapter.ListenNowEntry(ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_SMALL,
+                final ListenNowAdapter.ListenNowEntry card =
+                        new ListenNowAdapter.ListenNowEntry(ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_SMALL,
                         entity);
-                sAdapter.addRecentEntry(card);
-                sAdapter.notifyItemInserted(sAdapter.getItemCount() - 1);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        sAdapter.addRecentEntry(card);
+                    }
+                });
+
 
                 countRecent++;
 
@@ -362,6 +401,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     break;
                 }
             }
+
+            mIsGenerating = false;
         }
     };
 
@@ -390,16 +431,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         super.onCreate(savedInstanceState);
         mHandler = new Handler();
 
-        if (sAdapter.getItemCount() == 2) {
-            // Generate entries
-            if (!sWarmUp) {
-                mHandler.removeCallbacks(mGenerateEntries);
-                mHandler.postDelayed(mGenerateEntries, 500);
-            } else {
-                mHandler.removeCallbacks(mGenerateEntries);
-                mHandler.post(mGenerateEntries);
-            }
-        }
+        // Generate entries
+        new Thread(mGenerateEntries).start();
     }
 
     @Override
@@ -454,8 +487,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         ProviderAggregator.getDefault().addUpdateCallback(this);
 
         if (!mFoundAnything || sAdapter.getItemCount() < 3) {
-            mHandler.removeCallbacks(mGenerateEntries);
-            mHandler.post(mGenerateEntries);
+            new Thread(mGenerateEntries).start();
         }
     }
 
