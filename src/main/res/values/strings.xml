@@ -239,4 +239,5 @@
     <string name="toast_playlist_track_add_error">Couldn\'t add track(s) to %1$s.</string>
     <string name="download_effects">Download new effects</string>
     <string name="download_providers">Download new providers</string>
+    <string name="lyrics_placeholder">Play a song and get its lyrics here!</string>
 </resources>

@@ -238,4 +238,5 @@
     <string name="toast_playlist_track_add_error">Impossible d\'ajouter les titres à %1$s</string>
     <string name="download_effects">Télécharger de nouveaux effets</string>
     <string name="download_providers">Télécharger de nouvelles sources</string>
+    <string name="lyrics_placeholder">Lancez la lecture d\'un titre pour voir ses paroles ici !</string>
 </resources>
