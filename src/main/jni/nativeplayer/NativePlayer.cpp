@@ -253,25 +253,29 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
                 return false;
         }
 
-        // Clear up all existing buffers
-        for (auto it = m_ActiveBuffers.begin(); it != m_ActiveBuffers.end(); ++it) {
-            delete (*it);
-        }
-        m_ActiveBuffers.clear();
+        {
+            std::lock_guard<std::mutex> lock(m_QueueMutex);
 
-        for (auto it = m_IdleBuffers.begin(); it != m_IdleBuffers.end(); ++it) {
-            delete (*it);
-        }
-        m_IdleBuffers.clear();
+            // Clear up all existing buffers
+            for (auto it = m_ActiveBuffers.begin(); it != m_ActiveBuffers.end(); ++it) {
+                delete (*it);
+            }
+            m_ActiveBuffers.clear();
 
-        if (m_pPlayingBuffer) {
-            // TODO: We should check that OpenSL isn't actually playing it
-            delete m_pPlayingBuffer;
-            m_pPlayingBuffer = nullptr;
-        }
+            for (auto it = m_IdleBuffers.begin(); it != m_IdleBuffers.end(); ++it) {
+                delete (*it);
+            }
+            m_IdleBuffers.clear();
 
-        m_iBufferMinPlayback = sample_rate * channels / 8;
-        m_iBufferMaxSize = m_iBufferMinPlayback * 12;
+            if (m_pPlayingBuffer) {
+                // TODO: We should check that OpenSL isn't actually playing it
+                delete m_pPlayingBuffer;
+                m_pPlayingBuffer = nullptr;
+            }
+
+            m_iBufferMinPlayback = sample_rate * channels / 8;
+            m_iBufferMaxSize = m_iBufferMinPlayback * 12;
+        }
 
         switch (sample_rate) {
             // Crappy quality starts here v
@@ -307,6 +311,7 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
         m_iSampleFormat = sample_format;
 
         // Update the player engine
+        // TODO: Shouldn't we clean previous OpenSL engine here?
         return createAudioPlayer();
     } else {
         // Everything is set already
