@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.omnirom.music.app" >
+<manifest package="org.omnirom.music.app"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Permission needed for EchoNest / MusicBrainz (album art, automix, etc). -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <!-- Permission needed to check whether or not the device is offline -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <!-- Permission needed for WebCasting/ChromeCasting -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 
     <!-- Permission needed to cache data -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <!-- Permission needed for recognition -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <!-- Permission for Media Session notification and remote control -->
-    <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+    <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL"/>
 
     <!-- Audio playback wake lock -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <!-- Global effects session ID -->
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
     <!-- Drive Mode bypass lockscreen -->
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
 
     <!-- Navigation Head (Drive Mode) -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <!-- Bluetooth Automated Actions -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
 
     <!-- Main application declaration -->
     <application
@@ -46,87 +46,89 @@
         android:process=":main"
         android:supportsRtl="true"
         android:taskAffinity="org.omnirom.music.task"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
 
         <!-- GMS for Chromecast -->
         <meta-data
             android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+            android:value="@integer/google_play_services_version"/>
 
         <!-- Search info -->
         <meta-data
             android:name="android.app.default_searchable"
-            android:value=".SearchActivity" />
+            android:value=".SearchActivity"/>
 
         <!-- Playback Service -->
         <service
             android:name="org.omnirom.music.service.PlaybackService"
             android:enabled="true"
             android:exported="false"
-            android:stopWithTask="false" />
+            android:stopWithTask="false"/>
 
         <!-- Notification Intent Service -->
         <service
             android:name="org.omnirom.music.service.NotifActionService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- Navigation Head Service -->
         <service
             android:name="org.omnirom.music.service.NavHeadService"
             android:enabled="true"
-            android:exported="false" >
+            android:exported="false">
         </service>
 
         <!-- Local Provider Service -->
         <service
             android:name="org.omnirom.music.providers.localprovider.PluginService"
-            android:exported="true" >
+            android:exported="true"
+            android:process=":localprovider">
             <intent-filter>
-                <action android:name="org.omnirom.music.action.PICK_PROVIDER" />
+                <action android:name="org.omnirom.music.action.PICK_PROVIDER"/>
             </intent-filter>
 
             <meta-data
                 android:name="org.omnirom.music.metadata.PROVIDER_NAME"
-                android:value="Local music" />
+                android:value="Local music"/>
 
             <meta-data
                 android:name="org.omnirom.music.metadata.PROVIDER_AUTHOR"
-                android:value="The OmniROM Project" />
+                android:value="The OmniROM Project"/>
         </service>
 
         <!-- Bass Boost Plugin -->
         <service
             android:name="org.omnirom.music.providers.bassboost.PluginService"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="true"
+            android:process=":bassboost">
             <intent-filter>
-                <action android:name="org.omnirom.music.action.PICK_DSP_PROVIDER" />
+                <action android:name="org.omnirom.music.action.PICK_DSP_PROVIDER"/>
             </intent-filter>
 
             <meta-data
                 android:name="org.omnirom.music.metadata.PROVIDER_NAME"
-                android:value="Bass Boost" />
+                android:value="Bass Boost"/>
             <meta-data
                 android:name="org.omnirom.music.metadata.PROVIDER_AUTHOR"
-                android:value="The OmniROM Project" />
+                android:value="The OmniROM Project"/>
 
             <meta-data
                 android:name="org.omnirom.music.metadata.CONFIG_CLASS"
-                android:value="org.omnirom.music.providers.bassboost.SettingsActivity" />
+                android:value="org.omnirom.music.providers.bassboost.SettingsActivity"/>
         </service>
 
         <!-- Receiver for the media buttons -->
-        <receiver android:name="org.omnirom.music.receivers.RemoteControlReceiver" >
-            <intent-filter android:priority="1000" >
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
+        <receiver android:name="org.omnirom.music.receivers.RemoteControlReceiver">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MEDIA_BUTTON"/>
             </intent-filter>
         </receiver>
 
         <!-- Receiver for Bluetooth actions -->
-        <receiver android:name="org.omnirom.music.receivers.BluetoothReceiver" >
+        <receiver android:name="org.omnirom.music.receivers.BluetoothReceiver">
             <intent-filter>
-                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED"/>
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED"/>
             </intent-filter>
         </receiver>
 
@@ -134,35 +136,35 @@
         <provider
             android:name="org.omnirom.music.providers.SearchSuggestionProvider"
             android:authorities="org.omnirom.music.providers.SearchSuggestionProvider"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.MUSIC_PLAYER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MUSIC_PLAYER"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.APP_MUSIC" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.APP_MUSIC"/>
             </intent-filter>
         </activity>
 
         <!-- Search Activity -->
         <activity
             android:name=".SearchActivity"
-            android:label="@string/search_hint" >
+            android:label="@string/search_hint">
             <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
+                <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
 
             <meta-data
                 android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
+                android:resource="@xml/searchable"/>
         </activity>
 
         <!-- Artist Activity -->
@@ -170,7 +172,7 @@
             android:name=".ArtistActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
+            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails">
         </activity>
 
         <!-- Playlist Activity -->
@@ -178,7 +180,7 @@
             android:name=".PlaylistActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails" >
+            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails">
         </activity>
 
         <!-- Album Activity -->
@@ -186,14 +188,14 @@
             android:name=".AlbumActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
-            android:theme="@style/AppTheme.TransparentNavBar.AlbumDetails" >
+            android:theme="@style/AppTheme.TransparentNavBar.AlbumDetails">
         </activity>
 
         <!-- Now Playing Activity -->
         <activity
             android:name=".PlaybackQueueActivity"
             android:icon="@drawable/ic_launcher_white"
-            android:label="@string/title_activity_playback_queue" >
+            android:label="@string/title_activity_playback_queue">
         </activity>
 
         <!-- Settings Activity -->
@@ -201,14 +203,14 @@
             android:name=".SettingsActivity"
             android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_settings"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask">
         </activity>
 
         <!-- Automix Creation Activity -->
         <activity
             android:name=".AutomixCreateActivity"
             android:label="@string/title_activity_automix_create_static"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask">
         </activity>
 
         <!-- Drive Mode Activity -->
@@ -216,24 +218,26 @@
             android:name=".DriveModeActivity"
             android:label="@string/title_activity_drive_mode"
             android:launchMode="singleTask"
-            android:theme="@style/OmniMusic.FullscreenTheme" >
+            android:theme="@style/OmniMusic.FullscreenTheme">
         </activity>
 
         <!-- Welcome Wizard Activity -->
         <activity
             android:name=".WelcomeActivity"
-            android:label="@string/title_activity_welcome" >
+            android:label="@string/title_activity_welcome">
         </activity>
 
         <!-- Drive Mode Tutorial Activity -->
         <activity
             android:name=".DriveTutorialActivity"
-            android:label="@string/title_activity_drive_mode" >
+            android:label="@string/title_activity_drive_mode">
         </activity>
 
         <!-- Bass Boost Plugin Settings Activity -->
-        <activity android:name="org.omnirom.music.providers.bassboost.SettingsActivity"
-                  android:label="@string/sound_effects" />
+        <activity
+            android:name="org.omnirom.music.providers.bassboost.SettingsActivity"
+            android:label="@string/sound_effects"
+            android:process=":bassboost"/>
     </application>
 
 </manifest>
