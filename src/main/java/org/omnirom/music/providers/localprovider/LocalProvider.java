@@ -900,6 +900,7 @@ public class LocalProvider {
                 mDecoder.release();
             }
             getCurrentDecoder();
+            mPendingOutIndex = -1;
         }
 
         mPaused = false;
@@ -908,7 +909,9 @@ public class LocalProvider {
         // we resume the decoder thread
         synchronized (mAudioPushRunnable) {
             mAudioPushRunnable.notify();
+            mPendingOutIndex = -1;
         }
+
 
         mCallback.songPlaying();
 
@@ -1014,7 +1017,7 @@ public class LocalProvider {
                             int inIndex = -2;
                             try {
                                 // Try to dequeue an output buffer (timeout 1ms)
-                                inIndex = mDecoder.dequeueInputBuffer(1000);
+                                inIndex = mDecoder.dequeueInputBuffer(10000);
                             } catch (IllegalStateException ignored) {
                             }
 
@@ -1051,7 +1054,7 @@ public class LocalProvider {
                             } else {
                                 try {
                                     // Try to dequeue an output buffer (timeout 1ms)
-                                    outIndex = mDecoder.dequeueOutputBuffer(mInfo, 1000);
+                                    outIndex = mDecoder.dequeueOutputBuffer(mInfo, 10000);
                                 } catch (IllegalStateException ignored) {
                                 }
                             }
