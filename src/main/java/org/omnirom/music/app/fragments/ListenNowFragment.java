@@ -132,9 +132,15 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         try {
                             while (goAhead) {
                                 List<Song> songs = binder.getSongs(offset, limit);
+                                if (songs == null) {
+                                    goAhead = false;
+                                    continue;
+                                }
+
                                 if (songs.size() < limit) {
                                     goAhead = false;
                                 }
+
                                 offset += songs.size();
 
                                 for (Song song : songs) {
