@@ -183,7 +183,7 @@
     <string name="section_history">Historique</string>
     <string name="drive_mode">Mode voiture</string>
     <string name="title_activity_drive_mode">Mode Voiture</string>
-    <string name="automix_no_buckets">Les playlistes dynamiques apparaîtront ici. Créez-en !</string>
+    <string name="automix_no_buckets">Automix vous permet de créer des playlists ou des pots dynamiques de titres basés sur divers paramètres. Appuyez sur le + pour démarrer.</string>
     <string name="settings_bluetooth">Bluetooth</string>
     <string name="bt_autoconnect_action_summary">Choisir les actions à réaliser lors de la connexion</string>
     <string name="bt_autoconnect_action_title">Actions</string>

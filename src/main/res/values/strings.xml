@@ -183,7 +183,7 @@
     <string name="section_history">History</string>
     <string name="drive_mode">Drive mode</string>
     <string name="title_activity_drive_mode">Drive Mode</string>
-    <string name="automix_no_buckets">The dynamic playlists you create will appear here. Go ahead!</string>
+    <string name="automix_no_buckets">Automix allows you to create either playlists or dynamic buckets of tracks based on various settings. Press the + button to get started.</string>
     <string name="settings_bluetooth">Bluetooth</string>
     <string name="bt_autoconnect_action_summary">Select to actions to perform when the device is connected.</string>
     <string name="bt_autoconnect_action_title">Actions</string>
