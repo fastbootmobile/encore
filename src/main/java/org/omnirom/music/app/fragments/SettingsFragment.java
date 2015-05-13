@@ -15,8 +15,10 @@
 
 package org.omnirom.music.app.fragments;
 
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.preference.PreferenceFragment;
+import android.webkit.WebView;
 import android.widget.Toast;
 
 import org.omnirom.music.app.R;
@@ -44,6 +47,7 @@ public class SettingsFragment extends PreferenceFragment {
     private static final String KEY_LIST_DSP_CONFIG = "list_dsp_config";
     private static final String KEY_CLEAR_CACHES = "pref_clear_caches";
     private static final String KEY_OPEN_SETUP_WIZARD = "pref_open_setup_wizard";
+    private static final String KEY_LICENSES = "pref_licenses";
     /**
      * Use this factory method to create a new instance of
      * this fragment
@@ -112,13 +116,15 @@ public class SettingsFragment extends PreferenceFragment {
         }
 
         switch (prefKey) {
-            case KEY_CLEAR_CACHES:
+            case KEY_CLEAR_CACHES: {
                 AlbumArtCache.getDefault().clear();
                 Toast.makeText(getActivity(), getString(R.string.cache_cleared), Toast.LENGTH_SHORT).show();
-                break;
-            case KEY_OPEN_SETUP_WIZARD:
+                return true;
+            }
+            case KEY_OPEN_SETUP_WIZARD: {
                 startActivity(new Intent(getActivity(), WelcomeActivity.class));
-                break;
+                return true;
+            }
             case KEY_LIST_DSP_CONFIG: {
                 Fragment f = new DspProvidersFragment();
                 openFragment(f);
@@ -127,6 +133,10 @@ public class SettingsFragment extends PreferenceFragment {
             case KEY_LIST_PROVIDERS_CONFIG: {
                 Fragment f = new SettingsProvidersFragment();
                 openFragment(f);
+                return true;
+            }
+            case KEY_LICENSES: {
+                openLicenses();
                 return true;
             }
         }
@@ -141,5 +151,26 @@ public class SettingsFragment extends PreferenceFragment {
         ft.addToBackStack(f.toString());
         ft.replace(R.id.container, f);
         ft.commit();
+    }
+
+    private void openLicenses() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        String text =getString(R.string.licenses);
+        text = "<pre>" + text + "</pre>";
+        text = text.replaceAll("\n", "<br />");
+
+        WebView view = new WebView(getActivity());
+        view.loadData(text, "text/html", "UTF-8");
+
+        builder.setView(view);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
     }
 }

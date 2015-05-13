@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="licenses" translatable="false"><![CDATA[
+License file for OmniMusic and its libraries.<br>
+<br>
+===================================================================================================<br>
+== OmniMusic<br>
+===================================================================================================<br>
+<br>
+  Copyright &copy; 2014 Fastboot Mobile, LLC.<br>
+<br>
+This program is free software; you can redistribute it and/or modify it under the terms of the<br>
+GNU General Public License as published by the Free Software Foundation; either version 3 of<br>
+the License, or (at your option) any later version.<br>
+<br>
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;<br>
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See<br>
+the GNU General Public License for more details.<br>
+<br>
+You should have received a copy of the GNU General Public License along with this program;<br>
+if not, see &lt;http://www.gnu.org/licenses&gt;.<br>
+<br>
+===================================================================================================<br>
+== android-support-v4-preferencefragment<br>
+===================================================================================================<br>
+<<br/>
+Licensed under the Apache License, Version 2.0 (the "License");<br>
+you may not use this file except in compliance with the License.<br>
+You may obtain a copy of the License at<br>
+<br>
+ http://www.apache.org/licenses/LICENSE-2.0<br>
+<br>
+Unless required by applicable law or agreed to in writing, software<br>
+distributed under the License is distributed on an "AS IS" BASIS,<br>
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br>
+See the License for the specific language governing permissions and<br>
+limitations under the License.<br>
+<br>
+===================================================================================================<br>
+== Circular Progress Button<br>
+===================================================================================================<br>
+<br>
+The MIT License (MIT)<br>
+<br>
+Copyright &copy; 2014 Danylyk Dmytro<br>
+<br>
+Permission is hereby granted, free of charge, to any person<br>
+obtaining a copy of this software and associated documentation files<br>
+(the "Software"), to deal in the Software without restriction,<br>
+including without limitation the rights to use, copy, modify, merge,<br>
+publish, distribute, sublicense, and/or sell copies of the Software,<br>
+and to permit persons to whom the Software is furnished to do so,<br>
+subject to the following conditions:<br>
+<br>
+The above copyright notice and this permission notice shall be<br>
+included in all copies or substantial portions of the Software.<br>
+<br>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,<br>
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF<br>
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.<br>
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY<br>
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,<br>
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE<br>
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br>
+<br>
+===================================================================================================<br>
+== TwoWayView<br>
+===================================================================================================<br>
+<br>
+Copyright &copy; 2013 Lucas Rocha<br>
+<br>
+TwoWayView\'s code is based on bits and pieces of Android\'s<br>
+AbsListView, Listview, and StaggeredGridView.<br>
+<br>
+Copyright &copy; 2012 The Android Open Source Project<br>
+<br>
+Licensed under the Apache License, Version 2.0 (the "License");<br>
+you may not use this file except in compliance with the License.<br>
+You may obtain a copy of the License at<br>
+<br>
+   http://www.apache.org/licenses/LICENSE-2.0<br>
+<br>
+Unless required by applicable law or agreed to in writing, software<br>
+distributed under the License is distributed on an "AS IS" BASIS,<br>
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br>
+See the License for the specific language governing permissions and<br>
+limitations under the License.<br>
+<br>
+===================================================================================================<br>
+== protobuf<br>
+===================================================================================================<br>
+<br>
+Copyright 2008, Google Inc.<br>
+All rights reserved.<br>
+<br>
+Redistribution and use in source and binary forms, with or without<br>
+modification, are permitted provided that the following conditions are<br>
+met:<br>
+<br>
+    * Redistributions of source code must retain the above copyright<br>
+notice, this list of conditions and the following disclaimer.<br>
+    * Redistributions in binary form must reproduce the above<br>
+copyright notice, this list of conditions and the following disclaimer<br>
+in the documentation and/or other materials provided with the<br>
+distribution.<br>
+    * Neither the name of Google Inc. nor the names of its<br>
+contributors may be used to endorse or promote products derived from<br>
+this software without specific prior written permission.<br>
+<br>
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS<br>
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT<br>
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR<br>
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT<br>
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,<br>
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT<br>
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,<br>
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY<br>
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT<br>
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE<br>
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.<br>
+<br>
+Code generated by the Protocol Buffer compiler is owned by the owner<br>
+of the input file used when generating it.  This code is not<br>
+standalone and requires a support library to be linked with it.  This<br>
+support library is itself covered by the above license.<br>
+<br>
+===================================================================================================<br>
+== Java-WebSocket<br>
+===================================================================================================<br>
+<br>
+ Copyright &copy; 2010-2012 Nathan Rajlich<br>
+<br>
+ Permission is hereby granted, free of charge, to any person<br>
+ obtaining a copy of this software and associated documentation<br>
+ files (the "Software"), to deal in the Software without<br>
+ restriction, including without limitation the rights to use,<br>
+ copy, modify, merge, publish, distribute, sublicense, and/or sell<br>
+ copies of the Software, and to permit persons to whom the<br>
+ Software is furnished to do so, subject to the following<br>
+ conditions:<br>
+<br>
+ The above copyright notice and this permission notice shall be<br>
+ included in all copies or substantial portions of the Software.<br>
+<br>
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,<br>
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES<br>
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND<br>
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT<br>
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,<br>
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING<br>
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR<br>
+ OTHER DEALINGS IN THE SOFTWARE.<br>
+<br>
+<br>
+===================================================================================================<br>
+== json-simple<br>
+===================================================================================================<br>
+<br>
+ Copyright &copy; 2012 Yidong Fang, Chris Nokleberg, Dave Hughes<br>
+<br>
+Licensed under the Apache License, Version 2.0 (the "License");<br>
+you may not use this file except in compliance with the License.<br>
+You may obtain a copy of the License at<br>
+<br>
+   http://www.apache.org/licenses/LICENSE-2.0<br>
+<br>
+Unless required by applicable law or agreed to in writing, software<br>
+distributed under the License is distributed on an "AS IS" BASIS,<br>
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br>
+See the License for the specific language governing permissions and<br>
+limitations under the License.<br>
+<br>
+===================================================================================================<br>
+== FloatingActionButton<br>
+===================================================================================================<br>
+<br>
+Copyright &copy; 2014 Jerzy Chalupski<br>
+<br>
+Licensed under the Apache License, Version 2.0 (the "License");<br>
+you may not use this file except in compliance with the License.<br>
+You may obtain a copy of the License at<br>
+<br>
+     http://www.apache.org/licenses/LICENSE-2.0<br>
+<br>
+Unless required by applicable law or agreed to in writing, software<br>
+distributed under the License is distributed on an "AS IS" BASIS,<br>
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br>
+See the License for the specific language governing permissions and<br>
+limitations under the License.<br>
+<br>
+===================================================================================================<br>
+== Snackbar<br>
+===================================================================================================<br>
+<br>
+The MIT License (MIT)<br>
+<br>
+Copyright &copy; 2014 William Mora<br>
+<br>
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated<br>
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation<br>
+the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,<br>
+and to permit persons to whom the Software is furnished to do so, subject to the following conditions:<br>
+<br>
+The above copyright notice and this permission notice shall be included in all copies or substantial portions<br>
+of the Software.<br>
+<br>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED<br>
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE<br>
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,<br>
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br>
+<br>
+===================================================================================================<br>
+== AdvRecyclerView<br>
+===================================================================================================<br>
+<br>
+Copyright &copy; 2015 Haruki Hasegawa<br>
+<br>
+Licensed under the Apache License, Version 2.0 (the "License");<br>
+you may not use this file except in compliance with the License.<br>
+You may obtain a copy of the License at<br>
+<br>
+    http://www.apache.org/licenses/LICENSE-2.0<br>
+<br>
+Unless required by applicable law or agreed to in writing, software<br>
+distributed under the License is distributed on an "AS IS" BASIS,<br>
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br>
+See the License for the specific language governing permissions and<br>
+limitations under the License.<br>
+<br>
+===================================================================================================<br>
+== SmartTabLayout<br>
+===================================================================================================<br>
+<br>
+Copyright &copy; 2015 ogaclejapan<br>
+Copyright &copy; 2013 The Android Open Source Project<br>
+<br>
+Licensed under the Apache License, Version 2.0 (the "License");<br>
+you may not use this file except in compliance with the License.<br>
+You may obtain a copy of the License at<br>
+<br>
+http://www.apache.org/licenses/LICENSE-2.0<br>
+<br>
+Unless required by applicable law or agreed to in writing, software<br>
+distributed under the License is distributed on an "AS IS" BASIS,<br>
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br>
+See the License for the specific language governing permissions and<br>
+limitations under the License.<br>
+<br>
+===================================================================================================<br>
+== FabButton<br>
+===================================================================================================<br>
+<br>
+The MIT License (MIT)<br>
+<br>
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and<br>
+associated documentation files (the "Software"), to deal in the Software without restriction,<br>
+including without limitation the rights to use, copy, modify, merge, publish, distribute,<br>
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is<br>
+furnished to do so, subject to the following conditions:<br>
+<br>
+The above copyright notice and this permission notice shall be included in all copies or<br>
+substantial portions of the Software.<br>
+<br>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING<br>
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND<br>
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,<br>
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,<br>
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    ]]></string>
+</resources>

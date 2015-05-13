@@ -70,15 +70,10 @@
             android:key="pref_open_setup_wizard"
             android:title="@string/settings_setup_wizard" />
 
-        <PreferenceScreen
+        <Preference
+            android:key="pref_licenses"
             android:summary="@string/settings_licenses_summary"
-            android:title="@string/settings_licenses_title">
-
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="http://www.android.com" />
-
-        </PreferenceScreen>
+            android:title="@string/settings_licenses_title" />
 
     </PreferenceCategory>
 
