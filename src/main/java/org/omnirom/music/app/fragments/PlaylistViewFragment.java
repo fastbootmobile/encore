@@ -417,6 +417,10 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
         // Current track might have changed, so update it
         mAdapter.notifyDataSetChanged();
+        Song currentSong = PlaybackProxy.getCurrentTrack();
+        if (currentSong != null) {
+            setReelBarTitle(currentSong.getTitle());
+        }
     }
 
     @Override

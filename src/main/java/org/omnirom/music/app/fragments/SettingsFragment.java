@@ -110,7 +110,7 @@ public class SettingsFragment extends PreferenceFragment {
         if (prefKey == null) {
             return false;
         }
-        
+
         switch (prefKey) {
             case KEY_CLEAR_CACHES:
                 AlbumArtCache.getDefault().clear();

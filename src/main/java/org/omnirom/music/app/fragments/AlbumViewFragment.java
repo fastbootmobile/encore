@@ -256,6 +256,13 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
         super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
         PlaybackProxy.addCallback(mPlaybackCallback);
+
+        // Current track might have changed, so update it
+        mAdapter.notifyDataSetChanged();
+        Song currentSong = PlaybackProxy.getCurrentTrack();
+        if (currentSong != null) {
+            setReelBarTitle(currentSong.getTitle());
+        }
     }
 
     @Override
