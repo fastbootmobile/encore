@@ -239,4 +239,5 @@
     <string name="download_effects">Télécharger de nouveaux effets</string>
     <string name="download_providers">Télécharger de nouvelles sources</string>
     <string name="lyrics_placeholder">Lancez la lecture d\'un titre pour voir ses paroles ici !</string>
+    <string name="bass_boost_settings_title">Paramètres Bass Boost</string>
 </resources>

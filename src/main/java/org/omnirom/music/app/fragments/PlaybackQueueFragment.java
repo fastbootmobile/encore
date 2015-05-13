@@ -43,6 +43,7 @@ import com.echonest.api.v4.EchoNestException;
 import org.omnirom.music.api.echonest.AutoMixBucket;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.app.AlbumActivity;
+import org.omnirom.music.app.MainActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.PlaybackQueueAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
@@ -450,7 +451,15 @@ public class PlaybackQueueFragment extends Fragment {
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
+
+        if (activity instanceof MainActivity) {
+            MainActivity mainActivity = (MainActivity) activity;
+            mainActivity.onSectionAttached(MainActivity.SECTION_LYRICS);
+            mainActivity.setContentShadowTop(0);
+        }
     }
+
+
 
     @Override
     public void onResume() {
