@@ -175,14 +175,23 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mTxtNoMusic.animate().setDuration(400).translationX(0).alpha(1.0f).start();
+                        if (mTxtNoMusic != null) {
+                            mTxtNoMusic.animate().setDuration(400).translationX(0).alpha(1.0f).start();
+                        }
+
                         if (mWarmUpCount < 2) {
-                            mTxtNoMusic.setText(R.string.loading);
+                            if (mTxtNoMusic != null) {
+                                mTxtNoMusic.setText(R.string.loading);
+                            }
                         } else if (PluginsLookup.getDefault().getAvailableProviders().size() == 0) {
-                            mTxtNoMusic.setText(R.string.listen_now_no_providers);
+                            if (mTxtNoMusic != null) {
+                                mTxtNoMusic.setText(R.string.listen_now_no_providers);
+                            }
                             mFoundAnything = false;
                         } else {
-                            mTxtNoMusic.setText(R.string.no_music_hint);
+                            if (mTxtNoMusic != null) {
+                                mTxtNoMusic.setText(R.string.no_music_hint);
+                            }
                             mFoundAnything = false;
                         }
 
@@ -199,11 +208,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
                 mIsGenerating = false;
                 return;
-            } else if (mTxtNoMusic != null) {
+            } else {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mTxtNoMusic.animate().setDuration(400).translationX(100).alpha(0.0f).start();
+                        if (mTxtNoMusic != null) {
+                            mTxtNoMusic.animate().setDuration(400).translationX(100).alpha(0.0f).start();
+                        }
                     }
                 });
                 mFoundAnything = true;
