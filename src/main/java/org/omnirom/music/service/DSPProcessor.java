@@ -118,8 +118,11 @@ public class DSPProcessor {
             for (String id : identifiers) {
                 ProviderIdentifier identifier = ProviderIdentifier.fromSerialized(id);
                 if (identifier != null) {
-                    mDSPChain.add(identifier);
-                    plugins.getDSP(identifier).bindService();
+                    DSPConnection connection = plugins.getDSP(identifier);
+                    if (connection != null) {
+                        mDSPChain.add(identifier);
+                        connection.bindService();
+                    }
                 } else {
                     Log.e(TAG, "Cannot restore from serialized string " + id);
                 }
