@@ -107,6 +107,10 @@ public class SettingsFragment extends PreferenceFragment {
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         final String prefKey = preference.getKey();
 
+        if (prefKey == null) {
+            return false;
+        }
+        
         switch (prefKey) {
             case KEY_CLEAR_CACHES:
                 AlbumArtCache.getDefault().clear();
