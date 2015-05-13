@@ -36,6 +36,7 @@ import org.omnirom.music.app.fragments.ListenNowFragment;
 import org.omnirom.music.app.fragments.LyricsFragment;
 import org.omnirom.music.app.fragments.MySongsFragment;
 import org.omnirom.music.app.fragments.NavigationDrawerFragment;
+import org.omnirom.music.app.fragments.PlaybackQueueFragment;
 import org.omnirom.music.app.fragments.PlaylistListFragment;
 import org.omnirom.music.app.fragments.RecognitionFragment;
 import org.omnirom.music.app.ui.PlayingBarView;
@@ -63,6 +64,7 @@ public class MainActivity extends AppActivity
     public static final int SECTION_HISTORY = 6;
     public static final int SECTION_LYRICS = 7;
     public static final int SECTION_NOW_PLAYING = 8;
+
     public static final int SECTION_DRIVE_MODE = 9;
     public static final int SECTION_SETTINGS = 10;
 
@@ -209,15 +211,6 @@ public class MainActivity extends AppActivity
         } else if (mNavigationDrawerFragment.isDrawerOpen()) {
             mNavigationDrawerFragment.closeDrawer();
         } else {
-            /*if (mCurrentFragmentIndex < 0) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCurrentFragmentIndex = 0;
-                        restoreActionBar();
-                    }
-                });
-            }*/
             super.onBackPressed();
             if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 mNavigationDrawerFragment.selectItem(SECTION_LISTEN_NOW - 1);
@@ -338,7 +331,7 @@ public class MainActivity extends AppActivity
                     newFrag = LyricsFragment.newInstance();
                     break;
                 case SECTION_NOW_PLAYING:
-                    startActivity(new Intent(this, PlaybackQueueActivity.class));
+                    newFrag = PlaybackQueueFragment.newInstance();
                     break;
                 case SECTION_DRIVE_MODE:
                     startActivity(new Intent(this, DriveModeActivity.class));
@@ -401,6 +394,9 @@ public class MainActivity extends AppActivity
                 break;
             case SECTION_LYRICS:
                 mTitle = getString(R.string.section_lyrics);
+                break;
+            case SECTION_NOW_PLAYING:
+                mTitle = getString(R.string.title_activity_playback_queue);
                 break;
         }
     }
