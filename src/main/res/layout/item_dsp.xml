@@ -27,11 +27,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/ivProviderLogo"
+        android:layout_alignBottom="@+id/ivProviderLogo"
         android:layout_toRightOf="@+id/ivProviderLogo"
+        android:layout_toLeftOf="@+id/btnDelete"
         android:layout_marginStart="@dimen/dsp_item_provider_margin"
         android:layout_marginLeft="@dimen/dsp_item_provider_margin"
-        android:layout_alignBottom="@+id/ivProviderLogo"
         android:gravity="center_vertical"
         android:id="@+id/linearLayout"
         android:layout_centerVertical="true">
@@ -41,6 +41,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/tvProviderName"
             style="@style/FontSubhead"
+            android:singleLine="true"
             android:layout_marginBottom="4dp"/>
 
         <TextView
