@@ -107,10 +107,11 @@ public class LyricsFragment extends Fragment {
 
     private void updateLyrics() {
         mCurrentSong = PlaybackProxy.getCurrentTrack();
-        if (mCurrentSong != null) {
+        if (mCurrentSong != null && mCurrentSong.getArtist() != null) {
             getLyrics(mCurrentSong);
         } else {
             mTvLyrics.setText(R.string.lyrics_placeholder);
+            mPbLoading.setVisibility(View.GONE);
         }
     }
 
@@ -138,26 +139,28 @@ public class LyricsFragment extends Fragment {
             Artist artist = ProviderAggregator.getDefault().retrieveArtist(mSong.getArtist(), mSong.getProvider());
 
             ChartLyricsClient.LyricsResponse lyrics = null;
-            try {
-                lyrics = ChartLyricsClient.getSongLyrics(artist.getName(), mSong.getTitle());
-            } catch (IOException e) {
-                if (e.getMessage().contains("Connection reset by peer")) {
-                    // ChartLyrics API resets connection to throttle fetching. Retry every few
-                    // seconds until we get them.
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mSong.equals(mCurrentSong)) {
-                                getLyrics(mSong);
+            if (artist != null) {
+                try {
+                    lyrics = ChartLyricsClient.getSongLyrics(artist.getName(), mSong.getTitle());
+                } catch (IOException e) {
+                    if (e.getMessage().contains("Connection reset by peer")) {
+                        // ChartLyrics API resets connection to throttle fetching. Retry every few
+                        // seconds until we get them.
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mSong.equals(mCurrentSong)) {
+                                    getLyrics(mSong);
+                                }
                             }
-                        }
-                    }, 3000);
-                    cancel(true);
-                } else {
+                        }, 3000);
+                        cancel(true);
+                    } else {
+                        Log.e(TAG, "Cannot get lyrics", e);
+                    }
+                } catch (RateLimitException e) {
                     Log.e(TAG, "Cannot get lyrics", e);
                 }
-            } catch (RateLimitException e) {
-                Log.e(TAG, "Cannot get lyrics", e);
             }
 
             return lyrics;
