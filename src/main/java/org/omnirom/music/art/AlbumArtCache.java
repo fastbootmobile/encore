@@ -371,11 +371,11 @@ public class AlbumArtCache {
             try {
                 url = FreeBaseClient.getArtistImageUrl(artist.getName());
             } catch (JSONException e) {
-                Log.e(TAG, "JSON error while getting image from FreeBase", e);
+                Log.e(TAG, "JSON error while getting image from FreeBase");
             } catch (RateLimitException e) {
                 Log.w(TAG, "Rate limit hit while getting image from FreeBase");
             } catch (IOException e) {
-                Log.e(TAG, "IO error while getting image from FreeBase", e);
+                Log.e(TAG, "IO error while getting image from FreeBase");
             }
 
             if (url == null) {
@@ -384,7 +384,7 @@ public class AlbumArtCache {
                 } catch (RateLimitException e) {
                     Log.w(TAG, "Rate limit hit while getting image from Google Images");
                 } catch (JSONException e) {
-                    Log.e(TAG, "JSON Error while getting image from Google Images", e);
+                    Log.e(TAG, "JSON Error while getting image from Google Images");
                 } catch (IOException e) {
                     Log.e(TAG, "IO error while getting image from Google Images (" + e.getMessage() + ")");
                 }
