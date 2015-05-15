@@ -241,4 +241,5 @@
     <string name="download_providers">Download new providers</string>
     <string name="lyrics_placeholder">Play a song and get its lyrics here!</string>
     <string name="bass_boost_settings_title">Bass boost settings</string>
+    <string name="automix_delete_confirm">Are you sure you want to remove this Automix bucket?</string>
 </resources>

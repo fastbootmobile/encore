@@ -15,7 +15,9 @@
 
 package org.omnirom.music.app.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -118,8 +120,7 @@ public class BucketAdapter extends BaseAdapter {
                                 break;
 
                             case R.id.menu_delete:
-                                AutoMixManager.getDefault().destroyBucket(bucket);
-                                notifyDataSetChanged();
+                                confirmDelete(v.getContext(), bucket);
                                 break;
 
                             default:
@@ -132,5 +133,26 @@ public class BucketAdapter extends BaseAdapter {
         });
 
         return view;
+    }
+
+    private void confirmDelete(final Context ctx, final AutoMixBucket bucket) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+
+        builder.setMessage(R.string.automix_delete_confirm);
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                AutoMixManager.getDefault().destroyBucket(bucket);
+                notifyDataSetChanged();
+            }
+        });
+        builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
     }
 }
