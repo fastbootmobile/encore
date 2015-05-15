@@ -530,35 +530,40 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      *
      * @param provider The providers that connected
      */
-    public void registerProvider(ProviderConnection provider) {
-        synchronized (mProviders) {
-            mProviders.add(provider);
-        }
+    public void registerProvider(final ProviderConnection provider) {
+        mBackHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mProviders) {
+                    mProviders.add(provider);
+                }
 
-        try {
-            // Register this class as callback
-            provider.getBinder().registerCallback(this);
+                try {
+                    // Register this class as callback
+                    provider.getBinder().registerCallback(ProviderAggregator.this);
 
-            // Add all rosetta prefixes and map it to this provider
-            List<String> rosettaPrefixes = provider.getBinder().getSupportedRosettaPrefix();
+                    // Add all rosetta prefixes and map it to this provider
+                    List<String> rosettaPrefixes = provider.getBinder().getSupportedRosettaPrefix();
 
-            if (rosettaPrefixes != null) {
-                for (String prefix : rosettaPrefixes) {
-                    mRosettaStoneMap.put(prefix, provider.getIdentifier());
-                    if (!mRosettaStonePrefix.contains(prefix)) {
-                        mRosettaStonePrefix.add(prefix);
+                    if (rosettaPrefixes != null) {
+                        for (String prefix : rosettaPrefixes) {
+                            mRosettaStoneMap.put(prefix, provider.getIdentifier());
+                            if (!mRosettaStonePrefix.contains(prefix)) {
+                                mRosettaStonePrefix.add(prefix);
+                            }
+                        }
                     }
+
+                    // Notify subclasses of the new provider
+                    for (ILocalCallback cb : mUpdateCallbacks) {
+                        cb.onProviderConnected(provider.getBinder());
+                    }
+                } catch (RemoteException e) {
+                    // Maybe the service died already?
+                    Log.e(TAG, "Unable to register as a callback", e);
                 }
             }
-
-            // Notify subclasses of the new provider
-            for (ILocalCallback cb : mUpdateCallbacks) {
-                cb.onProviderConnected(provider.getBinder());
-            }
-        } catch (RemoteException e) {
-            // Maybe the service died already?
-            Log.e(TAG, "Unable to register as a callback", e);
-        }
+        });
     }
 
     /**
@@ -966,12 +971,14 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
                 if (song != null && song.isLoaded()) {
                     String artistRef = song.getArtist();
-                    Artist artist = retrieveArtist(artistRef, song.getProvider());
+                    if (artistRef != null) {
+                        Artist artist = retrieveArtist(artistRef, song.getProvider());
 
-                    if (artist != null) {
-                        artist.addAlbum(a.getRef());
-                    } else {
-                        if (DEBUG) Log.e(TAG, "Artist is null!");
+                        if (artist != null) {
+                            artist.addAlbum(a.getRef());
+                        } else {
+                            if (DEBUG) Log.e(TAG, "Artist is null!");
+                        }
                     }
                 } else {
                     if (DEBUG) Log.e(TAG, "Song is null!");

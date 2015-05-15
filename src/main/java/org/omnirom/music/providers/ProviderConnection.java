@@ -19,6 +19,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.DeadObjectException;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -29,6 +30,9 @@ import org.omnirom.music.service.NativeHub;
  */
 public class ProviderConnection extends AbstractProviderConnection implements AudioHostSocket.AudioHostSocketListener {
     private static final String TAG = "ProviderConnection";
+
+    // Don't ship with this set to false
+    private static final boolean ALLOW_BINDER_ON_UI_THREAD = true;
 
     private IMusicProvider mBinder;
 
@@ -67,7 +71,25 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
         super.unbindService(hub);
     }
 
+    /**
+     * This is the same as getBinder(true)
+     * @return The binder of the provider
+     */
     public IMusicProvider getBinder() {
+        return getBinder(true);
+    }
+
+    /**
+     * Returns the binder for this provider
+     * @param willCall If true, indicates calls will be made to this provider, allowing checking
+     *                 if the binder will be used in the main thread
+     * @return The binder of the provider
+     */
+    public IMusicProvider getBinder(boolean willCall) {
+        if (!ALLOW_BINDER_ON_UI_THREAD && willCall &&
+                Thread.currentThread().equals(Looper.getMainLooper().getThread())) {
+            throw new RuntimeException("Binder call on UI thread");
+        }
         return mBinder;
     }
 

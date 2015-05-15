@@ -32,6 +32,7 @@ import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.utils.Utils;
@@ -114,6 +115,7 @@ public class SongsFragment extends Fragment {
         @Override
         protected List<Song> doInBackground(Void... params) {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
             final List<Song> songsToAdd = new ArrayList<>();
@@ -136,6 +138,14 @@ public class SongsFragment extends Fragment {
                                 for (Song song : songs) {
                                     if (song != null) {
                                         songsToAdd.add(song);
+
+                                        // Pre-fetch artist and album information
+                                        if (song.getArtist() != null) {
+                                            aggregator.retrieveArtist(song.getArtist(), song.getProvider());
+                                        }
+                                        if (song.getAlbum() != null) {
+                                            aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
+                                        }
                                     }
                                 }
 

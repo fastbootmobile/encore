@@ -259,7 +259,7 @@ public class PlaybackService extends Service
 
         List<ProviderConnection> connections = PluginsLookup.getDefault().getAvailableProviders();
         for (ProviderConnection conn : connections) {
-            if (conn.getBinder() != null) {
+            if (conn.getBinder(false) != null) {
                 assignProviderAudioSocket(conn);
             } else {
                 Log.w(TAG, "Cannot assign audio socket to " + conn.getIdentifier() + ", binder is null");
@@ -273,9 +273,9 @@ public class PlaybackService extends Service
         List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
         for (ProviderConnection pc : providers) {
             try {
-                if (pc.getBinder() != null) {
-                    Log.e(TAG, "RegisterCallback: Setup");
-                    pc.getBinder().registerCallback(mProviderCallback);
+                IMusicProvider binder = pc.getBinder(false);
+                if (binder != null) {
+                    binder.registerCallback(mProviderCallback);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot register callback", e);
@@ -457,7 +457,7 @@ public class PlaybackService extends Service
             try {
                 Log.e(TAG, "RegisterCallback: service "
                         + connection.getIdentifier().mName + " connected");
-                final IMusicProvider binder = ((ProviderConnection) connection).getBinder();
+                final IMusicProvider binder = ((ProviderConnection) connection).getBinder(false);
 
                 if (binder != null) {
                     binder.registerCallback(mProviderCallback);
