@@ -144,7 +144,7 @@ public class HistoryAdapter extends BaseAdapter {
                 Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
                 if (artist != null && artist.getName() != null && !artist.getName().isEmpty()) {
                     tag.tvArtist.setText(artist.getName());
-                } else {
+                } else if (artist != null) {
                     tag.tvArtist.setText(R.string.loading);
                 }
             } else {
