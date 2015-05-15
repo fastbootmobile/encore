@@ -51,6 +51,7 @@ public class LyricsFragment extends Fragment {
     private ChartLyricsClient.LyricsResponse mLyrics;
     private Song mCurrentSong;
     private Handler mHandler = new Handler();
+    private AsyncTask mLyricsTask;
 
     private BasePlaybackCallback mPlaybackCallback = new BasePlaybackCallback() {
         @Override
@@ -119,7 +120,10 @@ public class LyricsFragment extends Fragment {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                new GetLyricsTask().execute(song);
+                if (mLyricsTask != null) {
+                    mLyricsTask.cancel(true);
+                }
+                mLyricsTask = new GetLyricsTask().execute(song);
             }
         });
     }
@@ -140,26 +144,30 @@ public class LyricsFragment extends Fragment {
 
             ChartLyricsClient.LyricsResponse lyrics = null;
             if (artist != null) {
-                try {
-                    lyrics = ChartLyricsClient.getSongLyrics(artist.getName(), mSong.getTitle());
-                } catch (IOException e) {
-                    if (e.getMessage().contains("Connection reset by peer")) {
-                        // ChartLyrics API resets connection to throttle fetching. Retry every few
-                        // seconds until we get them.
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (mSong.equals(mCurrentSong)) {
-                                    getLyrics(mSong);
-                                }
+                boolean resetByPeer = true;
+
+                while (resetByPeer && !isCancelled()) {
+                    try {
+                        lyrics = ChartLyricsClient.getSongLyrics(artist.getName(), mSong.getTitle());
+                        resetByPeer = false;
+                    } catch (IOException e) {
+                        if (e.getMessage().contains("Connection reset by peer")) {
+                            // ChartLyrics API resets connection to throttle fetching. Retry every few
+                            // seconds until we get them.
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException e1) {
+                                break;
                             }
-                        }, 3000);
-                        cancel(true);
-                    } else {
+                            resetByPeer = true;
+                        } else {
+                            Log.e(TAG, "Cannot get lyrics", e);
+                            resetByPeer = false;
+                        }
+                    } catch (RateLimitException e) {
                         Log.e(TAG, "Cannot get lyrics", e);
+                        resetByPeer = false;
                     }
-                } catch (RateLimitException e) {
-                    Log.e(TAG, "Cannot get lyrics", e);
                 }
             }
 
