@@ -236,7 +236,6 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void clearEntries() {
         mRecentEntries.clear();
         mEntries.clear();
-        notifyDataSetChanged();
     }
 
     /**
@@ -245,14 +244,6 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
      */
     public void addEntry(ListenNowEntry entry) {
         mEntries.add(entry);
-        int insertId = mEntries.size() - 1;
-
-        if (mRecentEntries.size() > 0) {
-            // Recent entries + headers
-            notifyItemInserted(1 + mRecentEntries.size() + 1 + insertId);
-        } else {
-            notifyItemInserted(1 + insertId);
-        }
     }
 
     /**
@@ -261,10 +252,6 @@ public class ListenNowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
      */
     public void addRecentEntry(ListenNowEntry entry) {
         mRecentEntries.add(entry);
-        int insertId = mRecentEntries.size() - 1;
-
-        // Header compensation
-        notifyItemInserted(1 + insertId);
     }
 
     /**

@@ -16,9 +16,11 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
@@ -70,6 +72,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     private static final ListenNowAdapter sAdapter = new ListenNowAdapter();
     private static boolean sWarmUp = false;
 
+    private static final int MSG_GENERATE_ENTRIES = 1;
+
     private static final int TYPE_ARTIST = 0;
     private static final int TYPE_ALBUM = 1;
     private static final int TYPE_SONG = 2;
@@ -103,6 +107,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
             mIsGenerating = true;
 
+            final List<ListenNowAdapter.ListenNowEntry> addEntries = new ArrayList<>();
+            final List<ListenNowAdapter.ListenNowEntry> recentAddEntries = new ArrayList<>();
+
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             final List<Playlist> playlists = aggregator.getAllPlaylists();
@@ -111,13 +118,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             final List<Pair<String, ProviderIdentifier>> availableReferences = new ArrayList<>();
 
             sWarmUp = true;
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    sAdapter.clearEntries();
-
-                }
-            });
 
             for (Playlist p : playlists) {
                 Iterator<String> it = p.songs();
@@ -199,12 +199,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     }
                 });
 
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        new Thread(mGenerateEntries).start();
-                    }
-                }, 1000);
+                mHandler.removeMessages(MSG_GENERATE_ENTRIES);
+                mHandler.sendEmptyMessageDelayed(MSG_GENERATE_ENTRIES, 1000);
 
                 mIsGenerating = false;
                 return;
@@ -329,12 +325,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                             isLarge ? ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_LARGE
                                     : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
                             entity);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            sAdapter.addEntry(entry);
-                        }
-                    });
+                    addEntries.add(entry);
 
                     usedReferences.add(entity.getRef());
                 } else {
@@ -344,74 +335,85 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
             }
 
             // Generate 4 recent entries
-            ListenLogger logger = new ListenLogger(getActivity());
-            List<ListenLogger.LogEntry> entries = HistoryAdapter.sortByTime(logger.getEntries());
-            List<String> knownReferences = new ArrayList<>();
+            Context context = getActivity();
+            if (context != null) {
+                ListenLogger logger = new ListenLogger(context);
+                List<ListenLogger.LogEntry> entries = HistoryAdapter.sortByTime(logger.getEntries());
+                List<String> knownReferences = new ArrayList<>();
 
-            int countRecent = 0;
-            for (ListenLogger.LogEntry entry : entries) {
-                // Skip known elements
-                if (knownReferences.contains(entry.getReference())) {
-                    continue;
-                }
-
-                final Song song = aggregator.retrieveSong(entry.getReference(), entry.getIdentifier());
-
-                // Keep only fully-featured elements
-                if (song == null || song.getArtist() == null || song.getAlbum() == null) {
-                    continue;
-                }
-
-                // Skip known elements (again)
-                if (knownReferences.contains(song.getAlbum()) ||
-                        knownReferences.contains(song.getArtist())) {
-                    continue;
-                }
-
-                int type = random.nextInt(2);
-                BoundEntity entity;
-                switch (type) {
-                    case TYPE_ARTIST:
-                        entity = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
-                        break;
-
-                    case TYPE_ALBUM:
-                        entity = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
-                        break;
-
-                    default:
-                        throw new RuntimeException("Should not happen");
-                }
-
-                if (entity == null) {
-                    // Entity cannot be null, something went wrong, try again with something else
-                    continue;
-                }
-
-
-                // Store the references
-                knownReferences.add(song.getRef());
-                knownReferences.add(song.getAlbum());
-                knownReferences.add(song.getArtist());
-
-                // Create the item
-                final ListenNowAdapter.ListenNowEntry card =
-                        new ListenNowAdapter.ListenNowEntry(ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_SMALL,
-                        entity);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        sAdapter.addRecentEntry(card);
+                int countRecent = 0;
+                for (ListenLogger.LogEntry entry : entries) {
+                    // Skip known elements
+                    if (knownReferences.contains(entry.getReference())) {
+                        continue;
                     }
-                });
+
+                    final Song song = aggregator.retrieveSong(entry.getReference(), entry.getIdentifier());
+
+                    // Keep only fully-featured elements
+                    if (song == null || song.getArtist() == null || song.getAlbum() == null) {
+                        continue;
+                    }
+
+                    // Skip known elements (again)
+                    if (knownReferences.contains(song.getAlbum()) ||
+                            knownReferences.contains(song.getArtist())) {
+                        continue;
+                    }
+
+                    int type = random.nextInt(2);
+                    BoundEntity entity;
+                    switch (type) {
+                        case TYPE_ARTIST:
+                            entity = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
+                            break;
+
+                        case TYPE_ALBUM:
+                            entity = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
+                            break;
+
+                        default:
+                            throw new RuntimeException("Should not happen");
+                    }
+
+                    if (entity == null) {
+                        // Entity cannot be null, something went wrong, try again with something else
+                        continue;
+                    }
 
 
-                countRecent++;
+                    // Store the references
+                    knownReferences.add(song.getRef());
+                    knownReferences.add(song.getAlbum());
+                    knownReferences.add(song.getArtist());
 
-                if (countRecent == 4) {
-                    break;
+                    // Create the item
+                    final ListenNowAdapter.ListenNowEntry card =
+                            new ListenNowAdapter.ListenNowEntry(ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_SMALL,
+                                    entity);
+                    recentAddEntries.add(card);
+                    countRecent++;
+
+                    if (countRecent == 4) {
+                        break;
+                    }
                 }
             }
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    sAdapter.clearEntries();
+                    for (ListenNowAdapter.ListenNowEntry addEntry : addEntries) {
+                        sAdapter.addEntry(addEntry);
+                    }
+                    for (ListenNowAdapter.ListenNowEntry addRecentEntry : recentAddEntries) {
+                        sAdapter.addRecentEntry(addRecentEntry);
+                    }
+                    sAdapter.notifyDataSetChanged();
+                }
+            });
+            mHandler.removeMessages(MSG_GENERATE_ENTRIES);
 
             mIsGenerating = false;
         }
@@ -440,15 +442,23 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mHandler = new Handler();
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == MSG_GENERATE_ENTRIES) {
+                    new Thread(mGenerateEntries).start();
+                }
+            }
+        };
 
         // Generate entries
-        new Thread(mGenerateEntries).start();
+        mHandler.removeMessages(MSG_GENERATE_ENTRIES);
+        mHandler.sendEmptyMessage(MSG_GENERATE_ENTRIES);
     }
 
     @Override
     public void onDestroy() {
-        mHandler.removeCallbacks(mGenerateEntries);
+        mHandler.removeMessages(MSG_GENERATE_ENTRIES);
         super.onDestroy();
     }
 
@@ -498,7 +508,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         ProviderAggregator.getDefault().addUpdateCallback(this);
 
         if (!mFoundAnything || sAdapter.getItemCount() < 3) {
-            new Thread(mGenerateEntries).start();
+            mHandler.removeMessages(MSG_GENERATE_ENTRIES);
+            mHandler.sendEmptyMessage(MSG_GENERATE_ENTRIES);
         }
     }
 
@@ -545,8 +556,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
         if (!mFoundAnything || sAdapter.getItemCount() < 3) {
-            mHandler.removeCallbacks(mGenerateEntries);
-            mHandler.post(mGenerateEntries);
+            mHandler.removeMessages(MSG_GENERATE_ENTRIES);
+            mHandler.sendEmptyMessage(MSG_GENERATE_ENTRIES);
         }
     }
 
@@ -582,8 +593,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     }
 
     private void requestGenerateEntries() {
-        mHandler.removeCallbacks(mGenerateEntries);
-        mHandler.postDelayed(mGenerateEntries, 200);
+        mHandler.removeMessages(MSG_GENERATE_ENTRIES);
+        mHandler.sendEmptyMessageDelayed(MSG_GENERATE_ENTRIES, 200);
     }
 
     private void requestNotifyItemChanged(int item) {
