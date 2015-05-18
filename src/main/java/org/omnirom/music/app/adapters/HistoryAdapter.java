@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.omnirom.music.app.AlbumActivity;
 import org.omnirom.music.app.R;
@@ -66,21 +67,26 @@ public class HistoryAdapter extends BaseAdapter {
         @Override
         public void onClick(View v) {
             ViewHolder tag = (ViewHolder) v.getTag();
-            FragmentActivity activity = (FragmentActivity) v.getContext();
 
-            MaterialTransitionDrawable mtd = (MaterialTransitionDrawable) tag.ivAlbumArt.getDrawable();
-            Bitmap bitmap = mtd.getFinalDrawable().getBitmap();
+            if (tag.song.getAlbum() != null) {
+                FragmentActivity activity = (FragmentActivity) v.getContext();
 
-            Intent intent = AlbumActivity.craftIntent(activity, bitmap, tag.song.getAlbum(),
-                    tag.song.getProvider(),
-                    v.getResources().getColor(R.color.default_album_art_background));
-            if (Utils.hasLollipop()) {
-                ActivityOptions opts
-                        = ActivityOptions.makeSceneTransitionAnimation(activity, tag.ivAlbumArt,
-                        "itemImage");
-                activity.startActivity(intent, opts.toBundle());
+                MaterialTransitionDrawable mtd = (MaterialTransitionDrawable) tag.ivAlbumArt.getDrawable();
+                Bitmap bitmap = mtd.getFinalDrawable().getBitmap();
+
+                Intent intent = AlbumActivity.craftIntent(activity, bitmap, tag.song.getAlbum(),
+                        tag.song.getProvider(),
+                        v.getResources().getColor(R.color.default_album_art_background));
+                if (Utils.hasLollipop()) {
+                    ActivityOptions opts
+                            = ActivityOptions.makeSceneTransitionAnimation(activity, tag.ivAlbumArt,
+                            "itemImage");
+                    activity.startActivity(intent, opts.toBundle());
+                } else {
+                    v.getContext().startActivity(intent);
+                }
             } else {
-                v.getContext().startActivity(intent);
+                Toast.makeText(v.getContext(), R.string.toast_song_no_album, Toast.LENGTH_SHORT).show();
             }
         }
     };

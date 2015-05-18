@@ -718,7 +718,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
             @Override
             public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
-                if (output != null) {
+                if (output != null && !isDetached()) {
                     mHeroImage = output.getBitmap();
 
                     if (materialTransition) {
@@ -903,26 +903,34 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
                 final Song song = (Song) view.getTag();
-                Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
+                Album album = null;
+                if (song.getAlbum() != null) {
+                    album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
+                }
 
                 if (Utils.canPlaySong(song)) {
-                    // Queue the full album
+                    // Queue the full album, if possible
                     PlaybackProxy.clearQueue();
-                    PlaybackProxy.queueAlbum(album, false);
+                    if (album != null) {
+                        PlaybackProxy.queueAlbum(album, false);
 
-                    // Find the clicked song index and play it
-                    Iterator<String> songs = album.songs();
-                    int i = 0;
-                    while (songs.hasNext()) {
-                        String songRef = songs.next();
-                        if (songRef.equals(song.getRef())) {
-                            break;
-                        } else {
-                            ++i;
+                        // Find the clicked song index and play it
+                        Iterator<String> songs = album.songs();
+                        int i = 0;
+                        while (songs.hasNext()) {
+                            String songRef = songs.next();
+                            if (songRef.equals(song.getRef())) {
+                                break;
+                            } else {
+                                ++i;
+                            }
                         }
-                    }
 
-                    PlaybackProxy.playAtIndex(i);
+                        PlaybackProxy.playAtIndex(i);
+                    } else {
+                        // We have no album information, just play the song
+                        PlaybackProxy.playSong(song);
+                    }
 
                     // Update UI
                     boldPlayingTrack(song);
