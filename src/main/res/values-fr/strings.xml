@@ -241,4 +241,5 @@
     <string name="lyrics_placeholder">Lancez la lecture d\'un titre pour voir ses paroles ici !</string>
     <string name="bass_boost_settings_title">Paramètres Bass Boost</string>
     <string name="automix_delete_confirm">Etes-vous sûr de vouloir supprimer ce pot ?</string>
+    <string name="lyrics_no_artist_error">Le titre en cours n\'a pas d\'informations d\'artiste. Impossible de récupérer les paroles.</string>
 </resources>

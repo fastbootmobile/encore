@@ -110,6 +110,9 @@ public class LyricsFragment extends Fragment {
         mCurrentSong = PlaybackProxy.getCurrentTrack();
         if (mCurrentSong != null && mCurrentSong.getArtist() != null) {
             getLyrics(mCurrentSong);
+        } else if (mCurrentSong != null) {
+            mTvLyrics.setText(R.string.lyrics_no_artist_error);
+            mPbLoading.setVisibility(View.GONE);
         } else {
             mTvLyrics.setText(R.string.lyrics_placeholder);
             mPbLoading.setVisibility(View.GONE);
