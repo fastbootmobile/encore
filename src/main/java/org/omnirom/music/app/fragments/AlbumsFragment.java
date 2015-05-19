@@ -92,6 +92,7 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
         // Inflate the layout for this fragment
         final View root = inflater.inflate(R.layout.fragment_albums, container, false);
         mGridView = (GridView) root.findViewById(R.id.gvAlbums);
+        mGridView.setFastScrollEnabled(true);
 
         // Get the albums
         new GetAlbumsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

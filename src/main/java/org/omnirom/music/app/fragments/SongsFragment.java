@@ -90,6 +90,7 @@ public class SongsFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_songs, container, false);
         assert root != null;
         mListView = (ListView) root.findViewById(R.id.songsList);
+        mListView.setFastScrollEnabled(true);
 
         mSongsListAdapter = new SongsListAdapter(true);
 
