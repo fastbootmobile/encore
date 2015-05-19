@@ -17,11 +17,13 @@ package org.omnirom.music.providers;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.omnirom.music.app.R;
 import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -39,6 +41,7 @@ import java.util.List;
  */
 public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     private static final String TAG = "MultiProviderPlaylist";
+    static final String LOGO_REF = "__OM_MP";
 
     private Handler mHandler = new Handler();
     private HashMap<String, Playlist> mPlaylists;
@@ -323,6 +326,9 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
 
     @Override
     public Bitmap getLogo(String ref) throws RemoteException {
+        if (LOGO_REF.equals(ref)) {
+            return ((BitmapDrawable) mContext.getResources().getDrawable(R.drawable.icon_multiprovider)).getBitmap();
+        }
         return null;
     }
 

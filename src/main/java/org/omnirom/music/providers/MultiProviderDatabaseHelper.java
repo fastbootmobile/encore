@@ -139,6 +139,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
                 pl.setIsLoaded(true);
                 pl.setName(c.getString(colindex_name));
                 pl.setProvider(mProviderIdentifier);
+                pl.setSourceLogo(MultiProviderPlaylistProvider.LOGO_REF);
 
                 // Ensure songs are fetched
                 fetchSongs(pl, playlist_id, mDatabase);
@@ -212,6 +213,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         pl.setName(playlist_name);
         pl.setIsLoaded(true);
         pl.setProvider(mProviderIdentifier);
+        pl.setSourceLogo(MultiProviderPlaylistProvider.LOGO_REF);
 
         mPlaylists.put(pl.getRef(), pl);
         mPlayListRefID.put(pl.getRef(), playlist_id);
