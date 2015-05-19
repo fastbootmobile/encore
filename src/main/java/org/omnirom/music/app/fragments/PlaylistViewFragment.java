@@ -561,8 +561,8 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
             Utils.animateHeadingHiding(mTvPlaylistName);
             Utils.animateScale(mPlayFab, true, false);
 
-            mIvSource.setAlpha(0.0f);
-            mIvSource.animate().alpha(1).setDuration(200).start();
+            mIvSource.setAlpha(1.0f);
+            mIvSource.animate().alpha(0).setDuration(200).start();
         }
     }
 
