@@ -163,6 +163,10 @@ public class PlaybackQueueFragment extends Fragment {
         }
 
         @Override
+        public void onPlaylistRemoved(String ref) {
+        }
+
+        @Override
         public void onArtistUpdate(List<Artist> a) {
             boolean contains = false;
             List<Song> playbackQueue = PlaybackProxy.getCurrentPlaybackQueue();

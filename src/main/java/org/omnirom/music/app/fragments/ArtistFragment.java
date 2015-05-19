@@ -806,6 +806,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
+    public void onPlaylistRemoved(String ref) {
+    }
+
+    @Override
     public void onArtistUpdate(final List<Artist> a) {
         if (a.contains(mArtist)) {
             mHandler.removeCallbacks(mUpdateAlbumsRunnable);

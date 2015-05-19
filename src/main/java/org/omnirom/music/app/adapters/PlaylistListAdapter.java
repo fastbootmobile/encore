@@ -141,6 +141,19 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
         return didChange;
     }
 
+    public void remove(String ref) {
+        for (Playlist playlist : mPlaylists) {
+            if (playlist.getRef().equals(ref)) {
+                mPlaylists.remove(ref);
+                break;
+            }
+        }
+    }
+
+    public void clear() {
+        mPlaylists.clear();
+    }
+
     /**
      * Returns whether or not the adapter contains the provided Playlist
      *

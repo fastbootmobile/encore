@@ -47,12 +47,14 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     private Context mContext;
 
     private final List<IProviderCallback> mCallbacks;
-    private MultiProviderDatabaseHelper mMultiProviderDatabaseHelper;
+    private static MultiProviderDatabaseHelper mMultiProviderDatabaseHelper;
 
     public MultiProviderPlaylistProvider(Context context) {
         mContext = context;
         mPlaylists = new HashMap<>();
-        mMultiProviderDatabaseHelper = new MultiProviderDatabaseHelper(mContext, mLocalCallback);
+        if (mMultiProviderDatabaseHelper == null) {
+            mMultiProviderDatabaseHelper = new MultiProviderDatabaseHelper(mContext.getApplicationContext(), mLocalCallback);
+        }
         mCallbacks = new ArrayList<>();
     }
 
@@ -81,7 +83,12 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
     @Override
     public void unregisterCallback(IProviderCallback cb) throws RemoteException {
         synchronized (mCallbacks) {
-            mCallbacks.remove(cb);
+            for (IProviderCallback callback : mCallbacks) {
+                if (cb.getIdentifier() == callback.getIdentifier()) {
+                    mCallbacks.remove(callback);
+                    break;
+                }
+            }
         }
     }
 
@@ -256,6 +263,26 @@ public class MultiProviderPlaylistProvider extends IMusicProvider.Stub {
                         for (IProviderCallback cb : mCallbacks) {
                             try {
                                 cb.onPlaylistAddedOrUpdated(mProviderIdentifier, playlist);
+                            } catch (DeadObjectException e) {
+                                removeCallback(cb);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "RemoteException when notifying a callback", e);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void playlistRemoved(final String ref) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mCallbacks) {
+                        for (IProviderCallback cb : mCallbacks) {
+                            try {
+                                cb.onPlaylistRemoved(mProviderIdentifier, ref);
                             } catch (DeadObjectException e) {
                                 removeCallback(cb);
                             } catch (RemoteException e) {

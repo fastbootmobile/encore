@@ -127,6 +127,19 @@ public class PlaylistGridAdapter extends BaseAdapter {
         return didChange;
     }
 
+    public void remove(String ref) {
+        for (Playlist playlist : mPlaylists) {
+            if (playlist.getRef().equals(ref)) {
+                mPlaylists.remove(ref);
+                break;
+            }
+        }
+    }
+
+    public void clear() {
+        mPlaylists.clear();
+    }
+
     /**
      * Returns whether or not the adapter contains the provided Playlist
      * @param p The playlist to check

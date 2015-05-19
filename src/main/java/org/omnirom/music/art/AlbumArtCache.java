@@ -263,9 +263,9 @@ public class AlbumArtCache {
             } catch (RateLimitException e) {
                 Log.w(TAG, "Rate limit hit while getting image from Google Images");
             } catch (JSONException e) {
-                Log.e(TAG, "JSON Error while getting image from Google Images", e);
+                Log.e(TAG, "JSON Error while getting image from Google Images");
             } catch (IOException e) {
-                Log.e(TAG, "IO error while getting image from Google Images", e);
+                Log.e(TAG, "IO error while getting image from Google Images");
             }
 
             if (url == null) {
@@ -451,6 +451,8 @@ public class AlbumArtCache {
             builder.start(res, playlist, new IArtCallback.Stub() {
                 @Override
                 public void onArtLoaded(final Bitmap bitmap) throws RemoteException {
+                    if (bitmap == null) return;
+
                     new Thread() {
                         public void run() {
                             RecyclingBitmapDrawable rcb = ImageCache.getDefault().put(res, getEntityArtKey(playlist), bitmap);

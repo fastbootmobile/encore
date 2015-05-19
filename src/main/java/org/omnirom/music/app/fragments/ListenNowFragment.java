@@ -561,6 +561,10 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    @Override
+    public void onPlaylistRemoved(String ref) {
+    }
+
     /**
      * {@inheritDoc}
      */

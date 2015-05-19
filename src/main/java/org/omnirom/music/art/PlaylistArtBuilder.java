@@ -206,6 +206,16 @@ public class PlaylistArtBuilder {
     public void start(Resources res, Playlist playlist, IArtCallback callback) {
         if (DEBUG) Log.d(TAG, "Starting to build playlist art for " + playlist.getName());
 
+        if (playlist.getSongsCount() == 0) {
+            Log.d(TAG, "Playlist " + playlist.getName() + " has no tracks, skipping art building");
+            mDone = true;
+            try {
+                callback.onArtLoaded(null);
+            } catch (RemoteException e) {
+            }
+            return;
+        }
+
         mDone = false;
         mCallback = callback;
 

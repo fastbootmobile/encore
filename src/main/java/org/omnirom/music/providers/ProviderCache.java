@@ -127,6 +127,12 @@ public class ProviderCache {
         }
     }
 
+    public void removePlaylist(String ref) {
+        synchronized (mPlaylists) {
+            mPlaylists.remove(ref);
+        }
+    }
+
     public List<Playlist> getAllMultiProviderPlaylists() {
         return mMultiProviderPlaylists;
     }

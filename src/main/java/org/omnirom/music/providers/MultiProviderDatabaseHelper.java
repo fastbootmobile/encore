@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * Created by h4o on 01/07/2014.
  */
 public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
-    private static final String TAG = "MultiProviderDBeHelper";
+    private static final String TAG = "MultiProviderDBHelper";
     private static final int DATABASE_VERSION = 2;
 
     private static final String DATABASE_NAME = "multiprovider_playlists";
@@ -67,15 +67,16 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     private HashMap<String, Long> mSongRefID;
     private HashMap<String, Playlist> mPlaylists;
     private HashMap<String, ProviderIdentifier> mRefProviderId;
-    private SQLiteDatabase db;
+    private SQLiteDatabase mDatabase;
     private LocalCallback mCallback;
     private SearchResult mSearchResult;
     private ProviderIdentifier mProviderIdentifier;
     private boolean mFetched;
 
     public interface LocalCallback {
-        public void playlistUpdated(final Playlist playlist);
-        public void searchFinished(final SearchResult searchResult);
+        void playlistUpdated(final Playlist playlist);
+        void playlistRemoved(final String ref);
+        void searchFinished(final SearchResult searchResult);
     }
 
     public MultiProviderDatabaseHelper(Context ctx, LocalCallback localCallback) {
@@ -86,8 +87,9 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         mPlayListRefID = new HashMap<>();
         mRefProviderId = new HashMap<>();
         mFetched = false;
+
         try {
-            getWritableDatabase();
+            mDatabase = getWritableDatabase();
         } catch (Exception e) {
             Log.e(TAG, "Cannot get writable database", e);
         }
@@ -96,7 +98,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     public void setIdentifier(ProviderIdentifier providerIdentifier) {
         mProviderIdentifier = providerIdentifier;
         if (!mFetched) {
-            fetchPlaylists(db);
+            fetchPlaylists();
             mFetched = true;
         }
     }
@@ -122,58 +124,68 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    private void fetchPlaylists(SQLiteDatabase database) {
-        Log.d(TAG, "Fetching playlists (identifier=" + mProviderIdentifier + ")");
+    private void fetchPlaylists() {
+        final Cursor c = mDatabase.query(TABLE_PLAYLIST, null, null, null, null, null, null);
 
-        final String query = "SELECT * FROM " + TABLE_PLAYLIST;
+        final int colindex_id = c.getColumnIndex(KEY_ID);
+        final int colindex_name = c.getColumnIndex(KEY_PLAYLIST_NAME);
 
-        Cursor c = database.rawQuery(query, null);
-        int id = c.getColumnIndex(KEY_ID);
-        int playlist_name = c.getColumnIndex(KEY_PLAYLIST_NAME);
         if (c.moveToFirst()) {
             do {
-                long playlist_id = c.getLong(id);
+                final long playlist_id = c.getLong(colindex_id);
+
+                // Create the Omni entity
                 Playlist pl = new Playlist("omni:playlist:" + playlist_id);
                 pl.setIsLoaded(true);
-                pl.setName(c.getString(playlist_name));
+                pl.setName(c.getString(colindex_name));
                 pl.setProvider(mProviderIdentifier);
-                fetchSongs(pl, playlist_id, database);
-                mCallback.playlistUpdated(pl);
+
+                // Ensure songs are fetched
+                fetchSongs(pl, playlist_id, mDatabase);
+
+                // Cache it
                 mPlaylists.put(pl.getRef(), pl);
                 mPlayListRefID.put(pl.getRef(), playlist_id);
+
+                // Notify the app
+                mCallback.playlistUpdated(pl);
             } while (c.moveToNext());
         }
+
         ProviderAggregator.getDefault().getCache().putAllProviderPlaylist(new ArrayList<>(mPlaylists.values()));
+
         c.close();
     }
 
     private void fetchSongs(Playlist playlist, long playlist_id, SQLiteDatabase database) {
-        String query = "SELECT * FROM " + TABLE_SONGS + " WHERE " + KEY_PLAYLIST_ID + " = " + playlist_id + " ORDER BY " + KEY_POSITION;
-        Cursor c = database.rawQuery(query, null);
-        int id = c.getColumnIndex(KEY_ID);
-        int ref = c.getColumnIndex(KEY_SONG_REF);
-        int pck = c.getColumnIndex(KEY_PACKAGE_NAME);
-        int service = c.getColumnIndex(KEY_SERVICE);
-        int provider = c.getColumnIndex(KEY_PROVIDER);
+        Cursor c = database.query(TABLE_SONGS, null, KEY_PLAYLIST_ID + "=?", new String[]{Long.toString(playlist_id)}, null, null, KEY_POSITION);
+
+        final int ci_id = c.getColumnIndex(KEY_ID);
+        final int ci_ref = c.getColumnIndex(KEY_SONG_REF);
+        final int ci_pck = c.getColumnIndex(KEY_PACKAGE_NAME);
+        final int ci_service = c.getColumnIndex(KEY_SERVICE);
+        final int ci_provider = c.getColumnIndex(KEY_PROVIDER);
+
         if (c.moveToFirst()) {
             do {
-                long song_id = c.getLong(id);
-                String song = c.getString(ref);
+                final long song_id = c.getLong(ci_id);
+                String song = c.getString(ci_ref);
+
                 playlist.addSong(song);
-                ProviderIdentifier providerIdentifier = new ProviderIdentifier(c.getString(pck), c.getString(service), c.getString(provider));
+
+                ProviderIdentifier providerIdentifier = new ProviderIdentifier(c.getString(ci_pck), c.getString(ci_service), c.getString(ci_provider));
                 mSongRefID.put(playlist.getRef() + ":" + song, song_id);
                 mRefProviderId.put(song, providerIdentifier);
             } while (c.moveToNext());
         }
+
         c.close();
     }
 
     @Override
     public void onOpen(SQLiteDatabase db) {
-        this.db = db;
-        Log.d(TAG, "database has been opened");
-        if (mProviderIdentifier != null) {
-            fetchPlaylists(db);
+        if (mProviderIdentifier != null && !mFetched) {
+            fetchPlaylists();
             mFetched = true;
         }
     }
@@ -191,65 +203,58 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public String addPlaylist(String playlist_name) {
-        Log.d(TAG, "Creating new playlist '" + playlist_name + "'");
-
-        SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(KEY_PLAYLIST_NAME, playlist_name);
-        long playlist_id = db.insert(TABLE_PLAYLIST, null, cv);
+        long playlist_id = mDatabase.insert(TABLE_PLAYLIST, null, cv);
 
-        Log.e(TAG, "Generated playlist ID: " + playlist_id);
-
+        // Generate the Omni entity
         Playlist pl = new Playlist("omni:playlist:" + playlist_id);
         pl.setName(playlist_name);
         pl.setIsLoaded(true);
         pl.setProvider(mProviderIdentifier);
+
         mPlaylists.put(pl.getRef(), pl);
         mPlayListRefID.put(pl.getRef(), playlist_id);
+
         mCallback.playlistUpdated(pl);
-        db.close();
 
         return pl.getRef();
     }
 
     public boolean addSongToPlaylist(String songref, String playlistref, ProviderIdentifier providerIdentifier) {
-        if (mPlayListRefID.containsKey(playlistref)) {
-            long playlist_id = mPlayListRefID.get(playlistref);
-            Playlist p = mPlaylists.get(playlistref);
-            Log.d(TAG, "playlist contains " + p.getSongsCount());
-            SQLiteDatabase db = this.getWritableDatabase();
-            ContentValues cv = new ContentValues();
-            cv.put(KEY_PLAYLIST_ID, playlist_id);
-            cv.put(KEY_SONG_REF, songref);
-            cv.put(KEY_PACKAGE_NAME, providerIdentifier.mPackage);
-            cv.put(KEY_SERVICE, providerIdentifier.mService);
-            cv.put(KEY_PROVIDER, providerIdentifier.mName);
-            cv.put(KEY_POSITION, mPlaylists.get(playlistref).songsList().size());
-            p.addSong(songref);
-            long song_id = db.insert(TABLE_SONGS, null, cv);
-            Log.d(TAG, "adding song to playlist, song id:" + song_id);
-            Log.d(TAG, "playlist contains now " + p.getSongsCount());
-            mSongRefID.put(playlistref + ":" + songref, song_id);
-            mCallback.playlistUpdated(p);
-            mRefProviderId.put(songref, providerIdentifier);
-            db.close();
-            return true;
-        } else {
-            Log.e(TAG, "Cannot add song to playlist: Ref doesn't exist in PlaylistRefID");
-            return false;
-        }
+        final long playlist_id = Long.parseLong(playlistref.substring(playlistref.lastIndexOf(':') + 1));
+
+        Playlist p = mPlaylists.get(playlistref);
+
+        ContentValues cv = new ContentValues();
+        cv.put(KEY_PLAYLIST_ID, playlist_id);
+        cv.put(KEY_SONG_REF, songref);
+        cv.put(KEY_PACKAGE_NAME, providerIdentifier.mPackage);
+        cv.put(KEY_SERVICE, providerIdentifier.mService);
+        cv.put(KEY_PROVIDER, providerIdentifier.mName);
+        cv.put(KEY_POSITION, mPlaylists.get(playlistref).songsList().size());
+
+        p.addSong(songref);
+
+        final long song_id = mDatabase.insert(TABLE_SONGS, null, cv);
+
+        mSongRefID.put(playlistref + ":" + songref, song_id);
+        mCallback.playlistUpdated(p);
+        mRefProviderId.put(songref, providerIdentifier);
+
+        return true;
     }
 
     public boolean deletePlaylist(String playlistref) {
         if (mPlayListRefID.containsKey(playlistref)) {
             long playlist_id = mPlayListRefID.get(playlistref);
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.delete(TABLE_PLAYLIST, KEY_ID + " = ?",
+            mDatabase.delete(TABLE_PLAYLIST, KEY_ID + " = ?",
                     new String[]{String.valueOf(playlist_id)});
-            db.delete(TABLE_SONGS, KEY_PLAYLIST_ID + " = ?",
+            mDatabase.delete(TABLE_SONGS, KEY_PLAYLIST_ID + " = ?",
                     new String[]{String.valueOf(playlist_id)});
             mPlaylists.remove(playlistref);
-            db.close();
+            mPlayListRefID.remove(playlistref);
+            mCallback.playlistRemoved(playlistref);
             return true;
         }
         return false;
@@ -258,11 +263,9 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     public boolean renamePlaylist(String playlistRef, String title) {
         if (mPlayListRefID.containsKey(playlistRef)) {
             long playlist_id = mPlayListRefID.get(playlistRef);
-            SQLiteDatabase db = getWritableDatabase();
             ContentValues cv = new ContentValues(1);
             cv.put(KEY_PLAYLIST_NAME, title);
-            db.update(TABLE_PLAYLIST, cv, KEY_PLAYLIST_ID + " = ?", new String[]{String.valueOf(playlist_id)});
-            db.close();
+            mDatabase.update(TABLE_PLAYLIST, cv, KEY_PLAYLIST_ID + " = ?", new String[]{String.valueOf(playlist_id)});
             return true;
         }
         return false;
@@ -272,12 +275,10 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         String songRef = mPlaylists.get(playlistRef).songsList().get(songPosition);
         if (mSongRefID.containsKey(playlistRef + ":" + songRef)) {
             long song_id = mSongRefID.get(playlistRef + ":" + songRef);
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.delete(TABLE_SONGS, KEY_ID + " = ?",
+            mDatabase.delete(TABLE_SONGS, KEY_ID + " = ?",
                     new String[]{String.valueOf(song_id)});
             mPlaylists.get(playlistRef).songsList().remove(songPosition);
             mCallback.playlistUpdated(mPlaylists.get(playlistRef));
-            db.close();
         }
         return false;
     }
@@ -286,20 +287,18 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
         String oldSongRef = playlistRef + ":" + mPlaylists.get(playlistRef).songsList().get(oldPosition);
         String newSongRef = playlistRef + ":" + mPlaylists.get(playlistRef).songsList().get(newPosition);
         if (mSongRefID.containsKey(oldSongRef) && mSongRefID.containsKey(newSongRef)) {
-            SQLiteDatabase db = this.getWritableDatabase();
             String query = "UPDATE " + TABLE_SONGS + " SET " + KEY_POSITION + "=" + newPosition + " WHERE " + KEY_ID + " = " + mSongRefID.get(oldSongRef);
-            db.rawQuery(query, null);
+            mDatabase.rawQuery(query, null);
             query = "UPDATE " + TABLE_SONGS + " SET " + KEY_POSITION + "=" + oldPosition + " WHERE " + KEY_ID + " = " + mSongRefID.get(newSongRef);
-            db.rawQuery(query, null);
+            mDatabase.rawQuery(query, null);
             String oldRef = mPlaylists.get(playlistRef).songsList().get(oldPosition);
             String newRef = mPlaylists.get(playlistRef).songsList().get(newPosition);
             mPlaylists.get(playlistRef).songsList().set(oldPosition, newRef);
             mPlaylists.get(playlistRef).songsList().set(newPosition, oldRef);
             mCallback.playlistUpdated(mPlaylists.get(playlistRef));
-            db.close();
             return true;
         }
-        return false;//not supported yet
+        return false;
     }
 
     public void startSearch(final String query) {
@@ -308,8 +307,7 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
             final String regex = ".*" + query + ".*";
             Thread searchThread = new Thread() {
                 public void run() {
-
-                    Log.d(TAG, "starting search thread");
+                    Log.d(TAG, "Searching for '" + query + "'");
                     Pattern p;
                     try {
                         p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -335,8 +333,6 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
             };
             searchThread.start();
         }
-
     }
-
 
 }

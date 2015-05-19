@@ -31,6 +31,12 @@ public interface ILocalCallback {
     void onPlaylistUpdate(List<Playlist> p);
 
     /**
+     * Called when a playlist has been removed
+     * @param ref The reference of the playlist that has been removed
+     */
+    void onPlaylistRemoved(String ref);
+
+    /**
      * Called when artist metadata has been updated
      * @param a The list of artists updated
      */

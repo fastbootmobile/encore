@@ -584,6 +584,10 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
     public void onPlaylistUpdate(List<Playlist> p) {
     }
 
+    @Override
+    public void onPlaylistRemoved(String ref) {
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -313,6 +313,10 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
+    public void onPlaylistRemoved(String ref) {
+    }
+
+    @Override
     public void onArtistUpdate(List<Artist> a) {
         if (mAdapter == null) {
             return;

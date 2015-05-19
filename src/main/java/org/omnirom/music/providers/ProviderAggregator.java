@@ -855,6 +855,23 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     }
 
     /**
+     * Called by the provider if a playlist has been removed from the user playlists container.
+     * @param provider The provider
+     * @param ref The reference of the playlist that has been removed
+     * @throws RemoteException
+     */
+    @Override
+    public void onPlaylistRemoved(ProviderIdentifier provider, String ref) throws RemoteException {
+        if (ref != null) {
+            mCache.removePlaylist(ref);
+        }
+
+        for (ILocalCallback cb : mUpdateCallbacks) {
+            cb.onPlaylistRemoved(ref);
+        }
+    }
+
+    /**
      * Called by the providers when the details of a song have been updated.
      */
     @Override

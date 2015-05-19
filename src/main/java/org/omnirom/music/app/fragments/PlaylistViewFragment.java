@@ -788,6 +788,10 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
     }
 
     @Override
+    public void onPlaylistRemoved(String ref) {
+    }
+
+    @Override
     public void onArtistUpdate(List<Artist> a) {
         // We check if the artists belongs to this playlist
         boolean hasPlaylist = false;

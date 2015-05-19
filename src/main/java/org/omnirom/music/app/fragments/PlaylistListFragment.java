@@ -108,6 +108,18 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
         }
     };
 
+    private Runnable mDataChangedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mGridAdapter != null) {
+                mGridAdapter.notifyDataSetChanged();
+            }
+            if (mAdapter != null) {
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+    };
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -260,6 +272,15 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
+    public void onPlaylistRemoved(String ref) {
+        if (ref != null) {
+            mAdapter.remove(ref);
+            mHandler.removeCallbacks(mUpdateListRunnable);
+            mHandler.post(mUpdateListRunnable);
+        }
+    }
+
+    @Override
     public void onArtistUpdate(List<Artist> a) {
     }
 
@@ -295,6 +316,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
         @Override
         protected void onPostExecute(List<Playlist> playlists) {
             if (mAdapter != null) {
+                mAdapter.clear();
                 mAdapter.addAllUnique(playlists);
                 try {
                     mAdapter.sortList(getActivity().getApplicationContext());
@@ -305,6 +327,7 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
             }
 
             if (mGridAdapter != null) {
+                mGridAdapter.clear();
                 mGridAdapter.addAllUnique(playlists);
                 mGridAdapter.notifyDataSetChanged();
             }

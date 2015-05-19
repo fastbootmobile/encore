@@ -168,6 +168,13 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
      * {@inheritDoc}
      */
     @Override
+    public void onPlaylistRemoved(String ref) {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void onArtistUpdate(final List<Artist> artists) {
         mHandler.post(new Runnable() {
             @Override

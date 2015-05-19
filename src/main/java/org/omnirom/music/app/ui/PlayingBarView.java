@@ -124,6 +124,10 @@ public class PlayingBarView extends RelativeLayout {
         }
 
         @Override
+        public void onPlaylistRemoved(String ref) {
+        }
+
+        @Override
         public void onArtistUpdate(List<Artist> a) {
             boolean contains = false;
             List<Song> playbackQueue = PlaybackProxy.getCurrentPlaybackQueue();
@@ -398,8 +402,12 @@ public class PlayingBarView extends RelativeLayout {
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             for (int i = 0; i < currentIndex; ++i) {
-                queue.remove(0);
-                mLastQueue.remove(0);
+                if (queue.size() > currentIndex) {
+                    queue.remove(0);
+                }
+                if (mLastQueue.size() > currentIndex) {
+                    mLastQueue.remove(0);
+                }
             }
             final int removedCount = currentIndex;
 

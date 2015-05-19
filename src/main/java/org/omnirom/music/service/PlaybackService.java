@@ -1227,6 +1227,10 @@ public class PlaybackService extends Service
     }
 
     @Override
+    public void onPlaylistRemoved(String ref) {
+    }
+
+    @Override
     public void onArtistUpdate(List<Artist> a) {
 
     }

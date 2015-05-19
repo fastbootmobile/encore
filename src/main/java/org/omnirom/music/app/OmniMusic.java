@@ -17,8 +17,13 @@ package org.omnirom.music.app;
 
 import android.app.Application;
 import android.net.http.HttpResponseCache;
+import android.os.Build;
 import android.util.Log;
 
+import com.joshdholtz.sentry.Sentry;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.omnirom.music.api.echonest.AutoMixManager;
 import org.omnirom.music.art.ImageCache;
 import org.omnirom.music.framework.PluginsLookup;
@@ -38,7 +43,7 @@ public class OmniMusic extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-/*
+
         Sentry.setCaptureListener(new Sentry.SentryEventCaptureListener() {
             @Override
             public Sentry.SentryEventBuilder beforeCapture(Sentry.SentryEventBuilder sentryEventBuilder) {
@@ -60,9 +65,9 @@ public class OmniMusic extends Application {
                 return sentryEventBuilder;
             }
         });
-        Sentry.init(this, "http://devops.fastbootmobile.com/",
-                "http://4dc1acbdb1cb423282e2a59f553e1153:9415087b9e1348c3ba4bed44be599f6a@devops.fastbootmobile.com/2");
-*/
+        Sentry.init(this, "https://devops.fastbootmobile.com/",
+                "https://4dc1acbdb1cb423282e2a59f553e1153:9415087b9e1348c3ba4bed44be599f6a@devops.fastbootmobile.com/2");
+
 
         // Setup the plugins system
         ProviderAggregator.getDefault().setContext(getApplicationContext());

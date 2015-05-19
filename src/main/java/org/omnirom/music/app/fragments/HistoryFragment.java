@@ -107,6 +107,10 @@ public class HistoryFragment extends Fragment implements ILocalCallback {
     }
 
     @Override
+    public void onPlaylistRemoved(String ref) {
+    }
+
+    @Override
     public void onArtistUpdate(List<Artist> a) {
         mAdapter.notifyDataSetChanged();
     }

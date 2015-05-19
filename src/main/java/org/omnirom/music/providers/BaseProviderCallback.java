@@ -23,8 +23,6 @@ import org.omnirom.music.model.Genre;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
-import org.omnirom.music.providers.IProviderCallback;
-import org.omnirom.music.providers.ProviderIdentifier;
 
 /**
  * Base empty implementation of {@link org.omnirom.music.providers.IProviderCallback} interface
@@ -45,6 +43,11 @@ public class BaseProviderCallback extends IProviderCallback.Stub {
 
     @Override
     public void onPlaylistAddedOrUpdated(ProviderIdentifier provider, Playlist p) throws RemoteException {
+    }
+
+    @Override
+    public void onPlaylistRemoved(ProviderIdentifier provider, String ref) throws RemoteException {
+
     }
 
     @Override

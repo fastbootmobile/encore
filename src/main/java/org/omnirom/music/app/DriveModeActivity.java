@@ -522,7 +522,10 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
 
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
+    }
 
+    @Override
+    public void onPlaylistRemoved(String ref) {
     }
 
     @Override

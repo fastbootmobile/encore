@@ -170,7 +170,13 @@ public class AlbumsFragment extends Fragment implements ILocalCallback, Provider
      */
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onPlaylistRemoved(String ref) {
     }
 
     /**
