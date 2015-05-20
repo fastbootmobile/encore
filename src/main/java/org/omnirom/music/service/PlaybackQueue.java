@@ -55,6 +55,8 @@ public class PlaybackQueue extends ArrayList<Song> {
     public void save(SharedPreferences.Editor editor) {
         JSONArray array = new JSONArray();
         for (Song song : this) {
+            if (song == null) continue;
+            
             JSONObject object = new JSONObject();
             try {
                 object.put("r", song.getRef());
