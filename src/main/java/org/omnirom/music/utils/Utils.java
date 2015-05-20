@@ -317,7 +317,7 @@ public class Utils {
         // If there's more than 5 tracks in the album and the most occurrences is one, consider
         // there's no major artist in the album and return null.
         if (maxEntry != null &&
-                ((a.getSongsCount() > 5 && maxEntry.getValue() > 1) || a.getSongsCount() < 5)) {
+                ((a.getSongsCount() > 5 && maxEntry.getValue() > 1) || a.getSongsCount() <= 5)) {
             return maxEntry.getKey();
         } else {
             return null;
