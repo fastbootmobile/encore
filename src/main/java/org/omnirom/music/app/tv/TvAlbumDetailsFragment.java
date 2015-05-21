@@ -93,8 +93,6 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
         mSongClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Clicked a track!", Toast.LENGTH_SHORT).show();
-
                 SongRow row = (SongRow) v.getTag();
                 PlaybackProxy.clearQueue();
                 PlaybackProxy.queueAlbum(mAlbum, false);
@@ -207,6 +205,10 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
 
                     mActionPlay.setLabel1(getString(mIsPlaying ? R.string.pause : R.string.play));
                     updateAdapter();
+                } else if (action.getId() == ACTION_QUEUE) {
+                    PlaybackProxy.queueAlbum(mAlbum, false);
+                } else if (action.getId() == ACTION_GO_TO_ARTIST) {
+                    // TODO
                 }
             }
         });
