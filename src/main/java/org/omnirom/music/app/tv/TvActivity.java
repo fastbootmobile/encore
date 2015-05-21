@@ -269,16 +269,16 @@ public class TvActivity extends Activity {
         // Build Recommended Leanback item
         header = new HeaderItem(1, "Recommended for you");
         mRowsAdapter.add(new ListRow(header, recommendedRowAdapter));
-/*
+
         header = new HeaderItem(2, "My Library");
-        mRowsAdapter.add(new ListRow(header, listRowAdapter));
+        mRowsAdapter.add(new ListRow(header, new ArrayObjectAdapter(new CardPresenter())));
 
         header = new HeaderItem(3, "Playlists");
-        mRowsAdapter.add(new ListRow(header, listRowAdapter));
+        mRowsAdapter.add(new ListRow(header, new ArrayObjectAdapter(new CardPresenter())));
 
         header = new HeaderItem(4, "Settings");
-        mRowsAdapter.add(new ListRow(header, listRowAdapter));
-*/
+        mRowsAdapter.add(new ListRow(header, new ArrayObjectAdapter(new CardPresenter())));
+
         mBrowseFragment.setAdapter(mRowsAdapter);
     }
 
