@@ -97,8 +97,6 @@ public class TvActivity extends Activity {
                                       RowPresenter.ViewHolder rowViewHolder, Row row) {
                 if (item instanceof Album) {
                     Album album = (Album) item;
-                    Log.d(TAG, "Opening details of album " + album.getName());
-
                     int color = getResources().getColor(R.color.primary);
                     if (itemViewHolder.view.getTag() != null && itemViewHolder.view.getTag() instanceof Palette) {
                         color = ((Palette) itemViewHolder.view.getTag()).getDarkVibrantColor(color);
@@ -114,7 +112,21 @@ public class TvActivity extends Activity {
                             TvAlbumDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                     startActivity(intent, bundle);
                 } else if (item instanceof Artist) {
-                    // TODO
+                    Artist artist = (Artist) item;
+                    int color = getResources().getColor(R.color.primary);
+                    if (itemViewHolder.view.getTag() != null && itemViewHolder.view.getTag() instanceof Palette) {
+                        color = ((Palette) itemViewHolder.view.getTag()).getDarkVibrantColor(color);
+                    }
+
+                    Intent intent = new Intent(TvActivity.this, TvArtistDetailsActivity.class);
+                    intent.putExtra(TvArtistDetailsActivity.EXTRA_ARTIST, artist);
+                    intent.putExtra(TvArtistDetailsActivity.EXTRA_COLOR, color);
+
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            TvActivity.this,
+                            ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                            TvArtistDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                    startActivity(intent, bundle);
                 }
             }
         });
@@ -124,7 +136,7 @@ public class TvActivity extends Activity {
             public void run() {
                 buildRowsAdapter();
             }
-        }, 2000);
+        }, 1500);
     }
 
     private void buildRowsAdapter() {
@@ -138,7 +150,7 @@ public class TvActivity extends Activity {
         // First row: Recently played (10 items, randomly artist or album)
         ListenLogger logger = new ListenLogger(this);
         List<ListenLogger.LogEntry> logEntries = HistoryAdapter.sortByTime(logger.getEntries());
-        ArrayObjectAdapter logEntriesRowAdapter = new ArrayObjectAdapter(new StringPresenter());
+        ArrayObjectAdapter logEntriesRowAdapter = new ArrayObjectAdapter(new CardPresenter());
         int entriesCount = 0;
 
         for (ListenLogger.LogEntry logEntry : logEntries) {
@@ -161,10 +173,10 @@ public class TvActivity extends Activity {
 
             if (type == TYPE_ALBUM) {
                 Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
-                logEntriesRowAdapter.add(album.getName());
+                logEntriesRowAdapter.add(album);
             } else if (type == TYPE_ARTIST) {
                 Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
-                logEntriesRowAdapter.add(artist.getName());
+                logEntriesRowAdapter.add(artist);
             }
             ++entriesCount;
         }

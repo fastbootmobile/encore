@@ -272,7 +272,11 @@
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
 
-
+        <!-- TV Artist Details Activity -->
+        <activity
+            android:name="org.omnirom.music.app.tv.TvArtistDetailsActivity"
+            android:theme="@style/Theme.OmniMusic.Leanback">
+        </activity>
     </application>
 
 </manifest>

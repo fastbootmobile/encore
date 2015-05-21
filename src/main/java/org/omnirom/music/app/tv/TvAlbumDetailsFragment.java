@@ -14,10 +14,13 @@ import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
 import android.support.v17.leanback.widget.DetailsOverviewRow;
 import android.support.v17.leanback.widget.DetailsOverviewRowPresenter;
+import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnActionClickedListener;
 import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Toast;
@@ -185,7 +188,7 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
         DetailsOverviewRowPresenter detailsPresenter =
                 new DetailsOverviewRowPresenter(new AlbumDetailsPresenter());
         detailsPresenter.setBackgroundColor(mBackgroundColor);
-        detailsPresenter.setStyleLarge(true);
+        detailsPresenter.setStyleLarge(false);
 
         // Hook up transition element.
         detailsPresenter.setSharedElementEnterTransition(getActivity(),
@@ -208,7 +211,17 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
                 } else if (action.getId() == ACTION_QUEUE) {
                     PlaybackProxy.queueAlbum(mAlbum, false);
                 } else if (action.getId() == ACTION_GO_TO_ARTIST) {
-                    // TODO
+                    String artistRef = Utils.getMainArtist(mAlbum);
+                    if (artistRef != null) {
+                        Artist artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, mAlbum.getProvider());
+                        final int color = getResources().getColor(R.color.primary);
+
+                        Intent intent = new Intent(getActivity(), TvArtistDetailsActivity.class);
+                        intent.putExtra(TvArtistDetailsActivity.EXTRA_ARTIST, artist);
+                        intent.putExtra(TvArtistDetailsActivity.EXTRA_COLOR, color);
+
+                        startActivity(intent);
+                    }
                 }
             }
         });
