@@ -52,4 +52,9 @@
 
     <color name="my_songs_strip_indicator_color">#4D000000</color>
     <color name="my_songs_strip_divider_color">#4DFFFFFF</color>
+
+    <color name="leanback_track_background_color">#ff384248</color>
+    <color name="leanback_track_row_separator_highlight_color">#6affffff</color>
+    <color name="leanback_track_main_text_color">#ffeeeeee</color>
+    <color name="leanback_track_secondary_text_color">#80eeeeee</color>
 </resources>

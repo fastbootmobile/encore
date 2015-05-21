@@ -65,8 +65,8 @@ public class OmniMusic extends Application {
                 return sentryEventBuilder;
             }
         });
-        Sentry.init(this, "https://devops.fastbootmobile.com/",
-                "https://4dc1acbdb1cb423282e2a59f553e1153:9415087b9e1348c3ba4bed44be599f6a@devops.fastbootmobile.com/2");
+        Sentry.init(this, "https://sentry.fastboot.mobi/",
+                "https://4dc1acbdb1cb423282e2a59f553e1153:9415087b9e1348c3ba4bed44be599f6a@sentry.fastboot.mobi/2");
 
 
         // Setup the plugins system

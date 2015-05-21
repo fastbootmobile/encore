@@ -143,4 +143,16 @@
     <dimen name="offline_bubble_margin_bottom">48dp</dimen>
     <dimen name="offline_bubble_margin_top">16dp</dimen>
     <dimen name="notification_expanded_art_size">128dp</dimen>
+
+    <!-- TV / Leanback UI -->
+    <dimen name="leanback_track_row_width">960dp</dimen>
+    <dimen name="leanback_track_row_contents_width">614dp</dimen>
+    <dimen name="leanback_track_row_horizontal_margin">132dp</dimen>
+    <dimen name="leanback_track_row_horizontal_padding">32dp</dimen>
+    <dimen name="leanback_track_row_height">48dp</dimen>
+    <dimen name="leanback_track_row_info_width">64dp</dimen>
+    <dimen name="leanback_track_text_size">18sp</dimen>
+    <dimen name="leanback_track_row_title_width">502dp</dimen>
+    <dimen name="leanback_track_row_info_width_with_padding">88dp</dimen>
+    <dimen name="leanback_track_row_icon_size">24dp</dimen>
 </resources>

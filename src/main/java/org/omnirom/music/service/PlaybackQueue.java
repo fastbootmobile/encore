@@ -56,7 +56,7 @@ public class PlaybackQueue extends ArrayList<Song> {
         JSONArray array = new JSONArray();
         for (Song song : this) {
             if (song == null) continue;
-            
+
             JSONObject object = new JSONObject();
             try {
                 object.put("r", song.getRef());

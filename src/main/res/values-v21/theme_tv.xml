@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.OmniMusic.Leanback" parent="Theme.Leanback">
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:windowEnterTransition">@android:transition/fade</item>
+        <item name="android:windowExitTransition">@android:transition/fade</item>
+        <item name="android:windowSharedElementExitTransition">@android:transition/move</item>
+        <item name="android:windowSharedElementEnterTransition">@android:transition/move</item>
+        <!-- Set to display colorPrimary when apps launches -->
+        <item name="android:windowAllowReturnTransitionOverlap">true</item>
+        <item name="android:windowAllowEnterTransitionOverlap">false</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+
+    <style name="Theme.OmniMusic.Leanback.SongRowText">
+        <item name="android:textSize">@dimen/leanback_track_text_size</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Theme.OmniMusic.Leanback.SongRowText.Main" parent="@style/Theme.OmniMusic.Leanback.SongRowText">
+        <item name="android:textColor">@color/leanback_track_main_text_color</item>
+    </style>
+
+    <style name="LeanbackSongRowText.Info" parent="@style/Theme.OmniMusic.Leanback.SongRowText">
+        <item name="android:textColor">@color/leanback_track_secondary_text_color</item>
+    </style>
+</resources>

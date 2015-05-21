@@ -42,6 +42,10 @@ android {
         dev_xplod {
             versionName defaultConfig.versionName + "-dev-xplod-" + getDate()
         }
+        tv {
+            versionName defaultConfig.versionName + "-tv-" + getDate()
+            minSdkVersion 17
+        }
     }
 
     sourceSets.main {
@@ -69,4 +73,5 @@ dependencies {
     compile 'com.android.support:palette-v7:22.1.1'
     compile 'com.android.support:recyclerview-v7:22.1.1'
     compile 'com.android.support:support-v4:22.1.1'
+    compile 'com.android.support:leanback-v17:22.1.1'
 }

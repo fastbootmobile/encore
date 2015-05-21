@@ -243,4 +243,7 @@
     <string name="bass_boost_settings_title">Bass boost settings</string>
     <string name="automix_delete_confirm">Are you sure you want to remove this Automix bucket?</string>
     <string name="lyrics_no_artist_error">The currently playing track has no artist information, therefore we are unable to fetch its lyrics.</string>
+    <string name="album">Album</string>
+    <string name="artist">Artist</string>
+    <string name="queue">Queue</string>
 </resources>

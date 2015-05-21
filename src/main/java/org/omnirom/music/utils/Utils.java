@@ -81,7 +81,7 @@ public class Utils {
      * @param timeMs The time to format, in milliseconds
      * @return A formatted string
      */
-    public static String formatTrackLength(int timeMs) {
+    public static String formatTrackLength(long timeMs) {
         long hours = TimeUnit.MILLISECONDS.toHours(timeMs);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(timeMs) - TimeUnit.HOURS.toMinutes(hours);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(timeMs)

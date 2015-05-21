@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="org.omnirom.music.app"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    package="org.omnirom.music.app"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Needed to allow Gradle builds with minSdkVersion 16 without multiple APKs -->
+    <uses-sdk tools:overrideLibrary="android.support.v17.leanback" />
+
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
     <!-- Permission needed for EchoNest / MusicBrainz (album art, automix, etc). -->
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -237,7 +246,33 @@
         <activity
             android:name="org.omnirom.music.providers.bassboost.SettingsActivity"
             android:label="@string/sound_effects"
-            android:process=":bassboost"/>
+            android:process=":bassboost">
+        </activity>
+
+        <!-- TV Leanback Activity -->
+        <activity
+            android:name="org.omnirom.music.app.tv.TvActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.OmniMusic.Leanback">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- TV Search Activity -->
+        <activity
+            android:name="org.omnirom.music.app.tv.TvSearchActivity"
+            android:theme="@style/Theme.OmniMusic.Leanback">
+        </activity>
+        
+        <!-- TV Album Details Activity -->
+        <activity
+            android:name="org.omnirom.music.app.tv.TvAlbumDetailsActivity"
+            android:theme="@style/Theme.OmniMusic.Leanback">
+        </activity>
+
+
     </application>
 
 </manifest>
