@@ -156,6 +156,20 @@ public class TvActivity extends Activity {
                             startActivity(intent);
                             break;
                     }
+                } else if (item instanceof MyLibraryItem) {
+                    MyLibraryItem libraryItem = (MyLibraryItem) item;
+                    Intent intent = new Intent(TvActivity.this, TvEntityGridActivity.class);
+                    switch (libraryItem.getType()) {
+                        case MyLibraryItem.TYPE_ALBUMS:
+                            intent.putExtra(TvEntityGridActivity.EXTRA_MODE, TvEntityGridActivity.MODE_ALBUM);
+                            break;
+
+                        case MyLibraryItem.TYPE_ARTISTS:
+                            intent.putExtra(TvEntityGridActivity.EXTRA_MODE, TvEntityGridActivity.MODE_ARTIST);
+                            break;
+                    }
+
+                    startActivity(intent);
                 }
             }
         });

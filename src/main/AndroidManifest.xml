@@ -298,6 +298,12 @@
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
 
+        <!-- TV Albums/Artist Grid Activity -->
+        <activity
+            android:name=".tv.TvEntityGridActivity"
+            android:theme="@style/Theme.OmniMusic.Leanback">
+        </activity>
+
         <!-- TV Providers Activity -->
         <activity
             android:name="org.omnirom.music.app.tv.TvProvidersActivity"
