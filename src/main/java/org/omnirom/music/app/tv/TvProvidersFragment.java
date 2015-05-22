@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.framework.PluginsLookup;
+import org.omnirom.music.providers.AbstractProviderConnection;
+import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.utils.Utils;
 
@@ -36,7 +38,7 @@ public class TvProvidersFragment extends RowsFragment {
             @Override
             public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                       RowPresenter.ViewHolder rowViewHolder, Row row) {
-                ProviderConnection connection = (ProviderConnection) item;
+                AbstractProviderConnection connection = (AbstractProviderConnection) item;
                 if (connection.getConfigurationActivity() != null) {
                     Intent i = new Intent();
                     i.setClassName(connection.getPackage(), connection.getConfigurationActivity());
@@ -63,17 +65,23 @@ public class TvProvidersFragment extends RowsFragment {
     private void buildRowsAdapter() {
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
 
-        List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-        List<ProviderConnection> filteredProviders = new ArrayList<>();
-        for (ProviderConnection p : providers) {
-            if (!p.getServiceName().equals("org.omnirom.music.providers.MultiProviderPlaylistProvider")) {
-                filteredProviders.add(p);
+        List<AbstractProviderConnection> filteredProviders = new ArrayList<>();
+
+        if (getActivity().getIntent().hasExtra(TvProvidersActivity.EXTRA_DSP_MODE)) {
+            List<DSPConnection> providers = PluginsLookup.getDefault().getAvailableDSPs();
+            filteredProviders.addAll(providers);
+        } else {
+            List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
+            for (ProviderConnection p : providers) {
+                if (!p.getServiceName().equals("org.omnirom.music.providers.MultiProviderPlaylistProvider")) {
+                    filteredProviders.add(p);
+                }
             }
         }
 
         ArrayObjectAdapter providersAdapter = new ArrayObjectAdapter(new CardPresenter());
         providersAdapter.addAll(0, filteredProviders);
-        HeaderItem header = new HeaderItem(0, "Providers");
+        HeaderItem header = new HeaderItem(0, getString(R.string.settings_provider_config_title));
         mRowsAdapter.add(new ListRow(header, providersAdapter));
 
         setAdapter(mRowsAdapter);

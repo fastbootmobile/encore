@@ -6,6 +6,8 @@ import android.os.Bundle;
 import org.omnirom.music.app.R;
 
 public class TvProvidersActivity extends Activity {
+    public static final String EXTRA_DSP_MODE = "dsp_mode";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

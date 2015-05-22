@@ -149,6 +149,12 @@ public class TvActivity extends Activity {
                         case SettingsItem.ITEM_PROVIDERS:
                             startActivity(new Intent(TvActivity.this, TvProvidersActivity.class));
                             break;
+
+                        case SettingsItem.ITEM_EFFECTS:
+                            Intent intent = new Intent(TvActivity.this, TvProvidersActivity.class);
+                            intent.putExtra(TvProvidersActivity.EXTRA_DSP_MODE, true);
+                            startActivity(intent);
+                            break;
                     }
                 }
             }

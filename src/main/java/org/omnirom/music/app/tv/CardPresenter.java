@@ -18,6 +18,7 @@ import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.utils.Utils;
@@ -113,6 +114,19 @@ public class CardPresenter extends Presenter {
             updateCardBackgroundColor(cardView, cardView.isSelected());
         } else if (item instanceof ProviderConnection) {
             ProviderConnection connection = (ProviderConnection) item;
+            try {
+                Drawable icon = ctx.getPackageManager().getApplicationIcon(connection.getPackage());
+                cardView.setMainImage(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                // set default icon
+                cardView.setMainImage(ctx.getResources().getDrawable(R.mipmap.ic_launcher));
+            }
+            cardView.setTitleText(connection.getProviderName());
+            cardView.setContentText(connection.getAuthorName());
+            cardView.setMainImageScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            cardView.getMainImageView().setBackgroundColor(0xFFFFFFFF);
+        } else if (item instanceof DSPConnection) {
+            DSPConnection connection = (DSPConnection) item;
             try {
                 Drawable icon = ctx.getPackageManager().getApplicationIcon(connection.getPackage());
                 cardView.setMainImage(icon);
