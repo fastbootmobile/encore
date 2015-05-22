@@ -20,6 +20,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
@@ -44,7 +45,9 @@ import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
 import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
@@ -58,17 +61,29 @@ import java.util.Random;
 public class TvActivity extends Activity {
     public static final String TAG = "TvActivity";
 
+    private static final int MSG_NOTIFY_CHANGES = 1;
+
     private ArrayObjectAdapter mRowsAdapter;
     private Handler mHandler;
 
     protected BrowseFragment mBrowseFragment;
+    private ILocalCallback mLocalCallback = new TvLocalCallback();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tv_browsefragment);
 
-        mHandler = new Handler();
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_NOTIFY_CHANGES:
+                        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                        break;
+                }
+            }
+        };
 
         final FragmentManager fragmentManager = getFragmentManager();
         mBrowseFragment = (BrowseFragment) fragmentManager.findFragmentById(
@@ -180,6 +195,31 @@ public class TvActivity extends Activity {
                 buildRowsAdapter();
             }
         }, 1500);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        buildRowsAdapter();
+        mHandler.postDelayed(new Runnable() {
+            public void run() {
+                buildRowsAdapter();
+            }
+        }, 1500);
+
+        ProviderAggregator.getDefault().addUpdateCallback(mLocalCallback);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        ProviderAggregator.getDefault().removeUpdateCallback(mLocalCallback);
+    }
+
+    private void requestAdapterUpdate() {
+        mHandler.removeMessages(MSG_NOTIFY_CHANGES);
+        mHandler.sendEmptyMessage(MSG_NOTIFY_CHANGES);
     }
 
     private void buildRowsAdapter() {
@@ -343,4 +383,40 @@ public class TvActivity extends Activity {
         mBrowseFragment.setAdapter(mRowsAdapter);
     }
 
+    private class TvLocalCallback implements ILocalCallback {
+        @Override
+        public void onSongUpdate(List<Song> s) {
+            requestAdapterUpdate();
+        }
+
+        @Override
+        public void onAlbumUpdate(List<Album> a) {
+            requestAdapterUpdate();
+        }
+
+        @Override
+        public void onPlaylistUpdate(List<Playlist> p) {
+            requestAdapterUpdate();
+        }
+
+        @Override
+        public void onPlaylistRemoved(String ref) {
+
+        }
+
+        @Override
+        public void onArtistUpdate(List<Artist> a) {
+            requestAdapterUpdate();
+        }
+
+        @Override
+        public void onProviderConnected(IMusicProvider provider) {
+            requestAdapterUpdate();
+        }
+
+        @Override
+        public void onSearchResult(List<SearchResult> searchResult) {
+
+        }
+    }
 }

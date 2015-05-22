@@ -29,6 +29,7 @@ import android.view.View;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.art.AlbumArtHelper;
+import org.omnirom.music.art.AlbumArtTask;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.framework.Suggestor;
@@ -62,6 +63,7 @@ public class TvArtistDetailsFragment extends DetailsFragment {
 
     private Action mActionStartRadio;
     private boolean mIsPlaying;
+    private AlbumArtTask mArtTask;
 
 
     @Override
@@ -97,6 +99,14 @@ public class TvArtistDetailsFragment extends DetailsFragment {
         super.onPause();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mArtTask != null) {
+            mArtTask.cancel(true);
+        }
+    }
+
     private void updateAdapter() {
         mAdapter.notifyArrayItemRangeChanged(0, mAdapter.size());
     }
@@ -126,7 +136,7 @@ public class TvArtistDetailsFragment extends DetailsFragment {
 
         mAdapter.add(row);
 
-        AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
+        mArtTask = AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
             @Override
             public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
                 if (output != null) {
@@ -189,7 +199,7 @@ public class TvArtistDetailsFragment extends DetailsFragment {
     }
 
     private void setupFragmentBackground() {
-        AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
+        mArtTask = AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
             @Override
             public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
                 if (output != null) {

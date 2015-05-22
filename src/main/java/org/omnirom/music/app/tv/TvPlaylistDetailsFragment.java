@@ -23,6 +23,7 @@ import android.view.View;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.art.AlbumArtHelper;
+import org.omnirom.music.art.AlbumArtTask;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
 import org.omnirom.music.model.Artist;
@@ -63,6 +64,8 @@ public class TvPlaylistDetailsFragment extends DetailsFragment {
     private Handler mHandler;
     private BasePlaybackCallback mPlaybackCallback;
     private View.OnClickListener mSongClickListener;
+
+    private AlbumArtTask mArtTask;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -132,6 +135,14 @@ public class TvPlaylistDetailsFragment extends DetailsFragment {
     public void onPause() {
         super.onPause();
         PlaybackProxy.removeCallback(mPlaybackCallback);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mArtTask != null) {
+            mArtTask.cancel(true);
+        }
     }
 
     private void updateAdapter() {
@@ -233,10 +244,10 @@ public class TvPlaylistDetailsFragment extends DetailsFragment {
         if (artistRef != null) {
             Artist artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, mPlaylist.getProvider());
 
-            AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
+            mArtTask = AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
                 @Override
                 public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
-                    if (output != null) {
+                    if (output != null && mBackgroundManager.isAttached()) {
                         mBackgroundManager.setDrawable(output);
                     }
                 }

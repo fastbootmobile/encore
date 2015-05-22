@@ -13,6 +13,7 @@ import android.widget.ImageView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.art.AlbumArtHelper;
+import org.omnirom.music.art.AlbumArtTask;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
@@ -32,6 +33,7 @@ public class CardPresenter extends Presenter {
 
     private Context mContext;
     private Drawable mDefaultCardImage;
+    private AlbumArtTask mArtTask;
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
@@ -143,7 +145,7 @@ public class CardPresenter extends Presenter {
         cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
 
         if (item instanceof BoundEntity) {
-            AlbumArtHelper.retrieveAlbumArt(mContext.getResources(), new AlbumArtHelper.AlbumArtListener() {
+            mArtTask = AlbumArtHelper.retrieveAlbumArt(mContext.getResources(), new AlbumArtHelper.AlbumArtListener() {
                 @Override
                 public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
                     if (output != null) {
@@ -163,5 +165,9 @@ public class CardPresenter extends Presenter {
         // Remove references to images so that the garbage collector can free up memory
         cardView.setBadgeImage(null);
         cardView.setMainImage(mDefaultCardImage);
+
+        if (mArtTask != null) {
+            mArtTask.cancel(true);
+        }
     }
 }
