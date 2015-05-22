@@ -127,6 +127,22 @@ public class TvActivity extends Activity {
                             ((ImageCardView) itemViewHolder.view).getMainImageView(),
                             TvArtistDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                     startActivity(intent, bundle);
+                } else if (item instanceof Playlist) {
+                    Playlist playlist = (Playlist) item;
+                    int color = getResources().getColor(R.color.primary);
+                    if (itemViewHolder.view.getTag() != null && itemViewHolder.view.getTag() instanceof Palette) {
+                        color = ((Palette) itemViewHolder.view.getTag()).getDarkVibrantColor(color);
+                    }
+
+                    Intent intent = new Intent(TvActivity.this, TvPlaylistDetailsActivity.class);
+                    intent.putExtra(TvPlaylistDetailsActivity.EXTRA_PLAYLIST, playlist);
+                    intent.putExtra(TvPlaylistDetailsActivity.EXTRA_COLOR, color);
+
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            TvActivity.this,
+                            ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                            TvAlbumDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                    startActivity(intent, bundle);
                 } else if (item instanceof SettingsItem) {
                     SettingsItem sitem = (SettingsItem) item;
                     switch (sitem.getType()) {

@@ -284,6 +284,12 @@
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
 
+        <!-- TV Playlist Details Activity -->
+        <activity
+            android:name="org.omnirom.music.app.tv.TvPlaylistDetailsActivity"
+            android:theme="@style/Theme.OmniMusic.Leanback">
+        </activity>
+
         <!-- TV Providers Activity -->
         <activity
             android:name="org.omnirom.music.app.tv.TvProvidersActivity"
