@@ -127,6 +127,13 @@ public class TvActivity extends Activity {
                             ((ImageCardView) itemViewHolder.view).getMainImageView(),
                             TvArtistDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                     startActivity(intent, bundle);
+                } else if (item instanceof SettingsItem) {
+                    SettingsItem sitem = (SettingsItem) item;
+                    switch (sitem.getType()) {
+                        case SettingsItem.ITEM_PROVIDERS:
+                            startActivity(new Intent(TvActivity.this, TvProvidersActivity.class));
+                            break;
+                    }
                 }
             }
         });

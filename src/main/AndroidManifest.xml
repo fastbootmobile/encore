@@ -5,11 +5,17 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Needed to allow Gradle builds with minSdkVersion 16 without multiple APKs -->
-    <uses-sdk tools:overrideLibrary="android.support.v17.leanback" />
+    <uses-sdk tools:overrideLibrary="android.support.v17.leanback"/>
 
-    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-    <uses-feature android:name="android.software.leanback" android:required="false" />
-    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false"/>
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false"/>
 
     <!-- Permission needed for EchoNest / MusicBrainz (album art, automix, etc). -->
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -255,8 +261,8 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.OmniMusic.Leanback">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
         </activity>
 
@@ -265,7 +271,7 @@
             android:name="org.omnirom.music.app.tv.TvSearchActivity"
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
-        
+
         <!-- TV Album Details Activity -->
         <activity
             android:name="org.omnirom.music.app.tv.TvAlbumDetailsActivity"
@@ -275,6 +281,12 @@
         <!-- TV Artist Details Activity -->
         <activity
             android:name="org.omnirom.music.app.tv.TvArtistDetailsActivity"
+            android:theme="@style/Theme.OmniMusic.Leanback">
+        </activity>
+
+        <!-- TV Providers Activity -->
+        <activity
+            android:name="org.omnirom.music.app.tv.TvProvidersActivity"
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
     </application>

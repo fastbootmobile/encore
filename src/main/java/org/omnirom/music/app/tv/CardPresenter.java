@@ -1,6 +1,7 @@
 package org.omnirom.music.app.tv;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
@@ -8,6 +9,7 @@ import android.support.v4.graphics.ColorUtils;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.art.AlbumArtHelper;
@@ -17,6 +19,7 @@ import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.utils.Utils;
 
 public class CardPresenter extends Presenter {
@@ -108,6 +111,19 @@ public class CardPresenter extends Presenter {
 
             cardView.setMainImage(ctx.getResources().getDrawable(R.drawable.album_placeholder));
             updateCardBackgroundColor(cardView, cardView.isSelected());
+        } else if (item instanceof ProviderConnection) {
+            ProviderConnection connection = (ProviderConnection) item;
+            try {
+                Drawable icon = ctx.getPackageManager().getApplicationIcon(connection.getPackage());
+                cardView.setMainImage(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                // set default icon
+                cardView.setMainImage(ctx.getResources().getDrawable(R.mipmap.ic_launcher));
+            }
+            cardView.setTitleText(connection.getProviderName());
+            cardView.setContentText(connection.getAuthorName());
+            cardView.setMainImageScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            cardView.getMainImageView().setBackgroundColor(0xFFFFFFFF);
         }
 
         cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
