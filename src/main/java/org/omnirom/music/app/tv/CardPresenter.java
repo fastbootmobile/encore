@@ -15,13 +15,14 @@ import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
+import org.omnirom.music.model.Playlist;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.utils.Utils;
 
 public class CardPresenter extends Presenter {
     private static final String TAG = "CardPresenter";
-    private static int CARD_WIDTH = 212;
-    private static int CARD_HEIGHT = 176;
+    private static final int CARD_WIDTH = 212;
+    private static final int CARD_HEIGHT = 176;
     private static int sSelectedBackgroundColor;
     private static int sDefaultBackgroundColor;
 
@@ -70,6 +71,7 @@ public class CardPresenter extends Presenter {
     @Override
     public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
         final ImageCardView cardView = (ImageCardView) viewHolder.view;
+        final Context ctx = viewHolder.view.getContext();
 
         if (item instanceof Artist) {
             Artist artist = (Artist) item;
@@ -87,20 +89,42 @@ public class CardPresenter extends Presenter {
                     cardView.setContentText(artist.getName());
                 }
             }
+        } else if (item instanceof Playlist) {
+            Playlist playlist = (Playlist) item;
+            cardView.setTitleText(playlist.getName());
+            cardView.setContentText(ctx.getResources().getQuantityString(R.plurals.nb_tracks,
+                    playlist.getSongsCount(), playlist.getSongsCount()));
+        } else if (item instanceof MyLibraryItem) {
+            MyLibraryItem libraryItem = (MyLibraryItem) item;
+            switch (libraryItem.getType()) {
+                case MyLibraryItem.TYPE_ALBUMS:
+                    cardView.setTitleText(ctx.getString(R.string.tab_albums));
+                    break;
+
+                case MyLibraryItem.TYPE_ARTISTS:
+                    cardView.setTitleText(ctx.getString(R.string.tab_artists));
+                    break;
+            }
+
+            cardView.setMainImage(ctx.getResources().getDrawable(R.drawable.album_placeholder));
+            updateCardBackgroundColor(cardView, cardView.isSelected());
         }
 
         cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
-        AlbumArtHelper.retrieveAlbumArt(mContext.getResources(), new AlbumArtHelper.AlbumArtListener() {
-            @Override
-            public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
-                if (output != null) {
-                    Palette palette = Palette.from(output.getBitmap()).generate();
-                    cardView.setMainImage(output, true);
-                    cardView.setTag(palette);
-                    updateCardBackgroundColor(cardView, cardView.isSelected());
+
+        if (item instanceof BoundEntity) {
+            AlbumArtHelper.retrieveAlbumArt(mContext.getResources(), new AlbumArtHelper.AlbumArtListener() {
+                @Override
+                public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
+                    if (output != null) {
+                        Palette palette = Palette.from(output.getBitmap()).generate();
+                        cardView.setMainImage(output, true);
+                        cardView.setTag(palette);
+                        updateCardBackgroundColor(cardView, cardView.isSelected());
+                    }
                 }
-            }
-        }, (BoundEntity) item, CARD_WIDTH, false);
+            }, (BoundEntity) item, CARD_WIDTH, false);
+        }
     }
 
     @Override

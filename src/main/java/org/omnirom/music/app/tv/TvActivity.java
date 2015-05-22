@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
+import android.support.v17.leanback.widget.ClassPresenterSelector;
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
@@ -33,7 +34,6 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.view.View;
 
 import org.omnirom.music.api.common.Pair;
@@ -140,7 +140,11 @@ public class TvActivity extends Activity {
     }
 
     private void buildRowsAdapter() {
-        mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
+        ClassPresenterSelector selector = new ClassPresenterSelector();
+        selector.addClassPresenter(ListRow.class, new ListRowPresenter());
+        selector.addClassPresenter(ShadowlessListRow.class, ShadowlessListRow.createPresenter(this));
+
+        mRowsAdapter = new ArrayObjectAdapter(selector);
 
         Random rand = new Random();
         final int TYPE_ALBUM = 0;
@@ -236,7 +240,6 @@ public class TvActivity extends Activity {
         // Randomly generate recommendations
         ArrayObjectAdapter recommendedRowAdapter = new ArrayObjectAdapter(new CardPresenter());
         entriesCount = 0;
-        Log.e(TAG, "Songs refs: " + availableReferences.size());
 
         for (Pair<String, ProviderIdentifier> ref : availableReferences) {
             if (entriesCount == 20) break;
@@ -270,14 +273,29 @@ public class TvActivity extends Activity {
         header = new HeaderItem(1, "Recommended for you");
         mRowsAdapter.add(new ListRow(header, recommendedRowAdapter));
 
-        header = new HeaderItem(2, "My Library");
-        mRowsAdapter.add(new ListRow(header, new ArrayObjectAdapter(new CardPresenter())));
+        // Build My Library item
+        ArrayObjectAdapter libraryAdapter = new ArrayObjectAdapter(new CardPresenter());
+        libraryAdapter.add(new MyLibraryItem(MyLibraryItem.TYPE_ARTISTS));
+        libraryAdapter.add(new MyLibraryItem(MyLibraryItem.TYPE_ALBUMS));
 
-        header = new HeaderItem(3, "Playlists");
-        mRowsAdapter.add(new ListRow(header, new ArrayObjectAdapter(new CardPresenter())));
+        header = new HeaderItem(2, getString(R.string.title_section_my_songs));
+        mRowsAdapter.add(new ListRow(header, libraryAdapter));
 
-        header = new HeaderItem(4, "Settings");
-        mRowsAdapter.add(new ListRow(header, new ArrayObjectAdapter(new CardPresenter())));
+        // Build Playlists items
+        ArrayObjectAdapter playlistsAdapter = new ArrayObjectAdapter(new CardPresenter());
+        playlistsAdapter.addAll(0, playlists);
+
+        header = new HeaderItem(3, getString(R.string.title_section_playlists));
+        mRowsAdapter.add(new ListRow(header, playlistsAdapter));
+
+        // Build Settings items
+        ArrayObjectAdapter settingsAdapter = new ArrayObjectAdapter(new IconPresenter());
+        settingsAdapter.add(new SettingsItem(SettingsItem.ITEM_PROVIDERS));
+        settingsAdapter.add(new SettingsItem(SettingsItem.ITEM_EFFECTS));
+        settingsAdapter.add(new SettingsItem(SettingsItem.ITEM_LICENSES));
+
+        header = new HeaderItem(4, getString(R.string.title_activity_settings));
+        mRowsAdapter.add(new ShadowlessListRow(header, settingsAdapter));
 
         mBrowseFragment.setAdapter(mRowsAdapter);
     }

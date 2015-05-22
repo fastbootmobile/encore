@@ -14,16 +14,12 @@ import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
 import android.support.v17.leanback.widget.DetailsOverviewRow;
 import android.support.v17.leanback.widget.DetailsOverviewRowPresenter;
-import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnActionClickedListener;
 import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.widget.Toast;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.art.AlbumArtHelper;

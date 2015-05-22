@@ -153,7 +153,7 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
                     mBinder.setAudioSocketName(socketName);
                 } catch (DeadObjectException e) {
                     Log.e(TAG, "Provider died while assigning audio socket to " + getProviderName(), e);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
                 }
             }
