@@ -144,6 +144,7 @@ public class CardPresenter extends Presenter {
 
         cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
 
+        cardView.setMainImage(mDefaultCardImage);
         if (item instanceof BoundEntity) {
             mArtTask = AlbumArtHelper.retrieveAlbumArt(mContext.getResources(), new AlbumArtHelper.AlbumArtListener() {
                 @Override
@@ -164,7 +165,7 @@ public class CardPresenter extends Presenter {
         ImageCardView cardView = (ImageCardView) viewHolder.view;
         // Remove references to images so that the garbage collector can free up memory
         cardView.setBadgeImage(null);
-        cardView.setMainImage(mDefaultCardImage);
+        cardView.setMainImage(null);
 
         if (mArtTask != null) {
             mArtTask.cancel(true);

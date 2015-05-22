@@ -79,7 +79,9 @@ public class TvActivity extends Activity {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case MSG_NOTIFY_CHANGES:
-                        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                        if (mRowsAdapter != null) {
+                            mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                        }
                         break;
                 }
             }
