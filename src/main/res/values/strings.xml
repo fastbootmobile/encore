@@ -205,7 +205,7 @@
     <string name="remove_playlist">Remove playlist</string>
     <string name="remove_playlist_dialog_title">Remove playlist?</string>
     <string name="remove_playlist_dialog_msg">This will permanently remove playlist %s.</string>
-    <string name="favorites">Favorites</string>
+    <string name="favorite_songs">Favorite songs</string>
     <string name="most_played">Most played</string>
     <string name="sleep_timer">Sleep timer</string>
     <string name="sleep_timer_confirm_toast">Music will stop in %1$d hour(s) and %2$d minute(s).</string>
@@ -245,5 +245,5 @@
     <string name="lyrics_no_artist_error">The currently playing track has no artist information, therefore we are unable to fetch its lyrics.</string>
     <string name="album">Album</string>
     <string name="artist">Artist</string>
-    <string name="queue">Queue</string>
+    <string name="tv_action_queue">Queue</string>
 </resources>

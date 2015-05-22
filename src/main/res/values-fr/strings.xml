@@ -205,7 +205,7 @@
     <string name="remove_playlist">Supprimer la playlist</string>
     <string name="remove_playlist_dialog_title">Supprimer la playlist ?</string>
     <string name="remove_playlist_dialog_msg">Vous allez supprimer définitivement la playlist \'%s\'.</string>
-    <string name="favorites">Favoris</string>
+    <string name="favorite_songs">Titres favoris</string>
     <string name="most_played">Les plus écoutés</string>
     <string name="sleep_timer">Minuterie</string>
     <string name="sleep_timer_confirm_toast">La musique s\'arrêtera dans %1$d heure(s) et %2$d minute(s)</string>
@@ -242,4 +242,7 @@
     <string name="bass_boost_settings_title">Paramètres Bass Boost</string>
     <string name="automix_delete_confirm">Etes-vous sûr de vouloir supprimer ce pot ?</string>
     <string name="lyrics_no_artist_error">Le titre en cours n\'a pas d\'informations d\'artiste. Impossible de récupérer les paroles.</string>
+    <string name="album">Album</string>
+    <string name="artist">Artiste</string>
+    <string name="tv_action_queue">Mettre en file</string>
 </resources>

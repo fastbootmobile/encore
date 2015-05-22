@@ -48,7 +48,7 @@ public class AutoPlaylistHelper {
         List<ListenLogger.LogEntry> likes = logger.getLikedEntries();
 
         Playlist playlist = new Playlist(REF_SPECIAL_FAVORITES);
-        playlist.setName(ctx.getString(R.string.favorites));
+        playlist.setName(ctx.getString(R.string.favorite_songs));
         playlist.setOfflineCapable(false);
         playlist.setOfflineStatus(Playlist.OFFLINE_STATUS_NO);
         playlist.setIsLoaded(true);

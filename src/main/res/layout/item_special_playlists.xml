@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/favorites"
+            android:text="@string/favorite_songs"
             android:gravity="center_vertical"
             android:drawableLeft="@drawable/ic_playlistitem_star"
             android:id="@+id/cardFavorites"

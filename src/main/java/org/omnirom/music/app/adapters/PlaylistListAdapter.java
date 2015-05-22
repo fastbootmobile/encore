@@ -41,8 +41,10 @@ import org.omnirom.music.app.ui.AlbumArtImageView;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.framework.AutoPlaylistHelper;
 import org.omnirom.music.framework.PlaylistOrderer;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.utils.Utils;
 import org.omnirom.music.utils.ViewUtils;
 
@@ -230,8 +232,12 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
             holder.ivCover.loadArtForPlaylist(item);
 
             if (item.isLoaded() || item.getSongsCount() > 0) {
-                holder.tvPlaylistDesc.setText(holder.tvPlaylistDesc.getContext().getResources().getQuantityString(R.plurals.xx_songs,
-                        item.getSongsCount(), item.getSongsCount()));
+                ProviderConnection provider = PluginsLookup.getDefault().getProvider(item.getProvider());
+                holder.tvPlaylistDesc.setText(
+                        String.format("%s / %s",
+                                holder.tvPlaylistDesc.getContext().getResources().getQuantityString(R.plurals.xx_songs,
+                                        item.getSongsCount(), item.getSongsCount()),
+                                provider.getProviderName()));
 
                 holder.ivOfflineStatus.setVisibility(View.VISIBLE);
 
