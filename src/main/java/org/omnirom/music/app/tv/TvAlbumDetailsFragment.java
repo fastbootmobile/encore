@@ -103,7 +103,7 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
         };
 
         mActionPlay = new Action(ACTION_PLAY, getString(R.string.play));
-        mActionQueue = new Action(ACTION_QUEUE, getString(R.string.queue));
+        mActionQueue = new Action(ACTION_QUEUE, getString(R.string.tv_action_queue));
         mActionGoToArtist = new Action(ACTION_GO_TO_ARTIST, getString(R.string.menu_open_artist_page));
 
         prepareBackgroundManager();
