@@ -200,14 +200,8 @@ public class TvActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        buildRowsAdapter();
-        mHandler.postDelayed(new Runnable() {
-            public void run() {
-                buildRowsAdapter();
-            }
-        }, 1500);
-
         ProviderAggregator.getDefault().addUpdateCallback(mLocalCallback);
+        requestAdapterUpdate();
     }
 
     @Override
