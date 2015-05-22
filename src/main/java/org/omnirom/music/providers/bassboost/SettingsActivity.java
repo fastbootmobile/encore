@@ -1,5 +1,7 @@
 package org.omnirom.music.providers.bassboost;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
@@ -33,6 +35,12 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            // On TV? Start the leanback settings
+            startActivity(new Intent(this, LeanbackSettingsActivity.class));
+            finish();
+        }
+
         getDelegate().installViewFactory();
         getDelegate().onCreate(savedInstanceState);
         super.onCreate(savedInstanceState);

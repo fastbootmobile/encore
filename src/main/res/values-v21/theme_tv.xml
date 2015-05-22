@@ -21,6 +21,9 @@
         <item name="android:textColor">@color/leanback_track_main_text_color</item>
     </style>
 
+    <style name="Theme.OmniMusic.Leanback.GuidedStep" parent="Theme.Leanback.GuidedStep">
+    </style>
+
     <style name="LeanbackSongRowText.Info" parent="@style/Theme.OmniMusic.Leanback.SongRowText">
         <item name="android:textColor">@color/leanback_track_secondary_text_color</item>
     </style>

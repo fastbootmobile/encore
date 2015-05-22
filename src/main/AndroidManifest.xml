@@ -255,6 +255,14 @@
             android:process=":bassboost">
         </activity>
 
+        <!-- Bass Boost Plugin TV Settings Activity -->
+        <activity
+            android:name="org.omnirom.music.providers.bassboost.LeanbackSettingsActivity"
+            android:label="@string/sound_effects"
+            android:theme="@style/Theme.OmniMusic.Leanback"
+            android:process=":bassboost">
+        </activity>
+
         <!-- TV Leanback Activity -->
         <activity
             android:name="org.omnirom.music.app.tv.TvActivity"
