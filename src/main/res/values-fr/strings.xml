@@ -245,4 +245,6 @@
     <string name="album">Album</string>
     <string name="artist">Artiste</string>
     <string name="tv_action_queue">Mettre en file</string>
+    <string name="tv_action_enable">Activer</string>
+    <string name="tv_action_disable">Désactiver</string>
 </resources>

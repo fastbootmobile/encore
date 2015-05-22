@@ -246,4 +246,6 @@
     <string name="album">Album</string>
     <string name="artist">Artist</string>
     <string name="tv_action_queue">Queue</string>
+    <string name="tv_action_enable">Enable</string>
+    <string name="tv_action_disable">Disable</string>
 </resources>
