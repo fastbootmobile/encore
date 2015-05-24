@@ -165,7 +165,7 @@ public class SmartTabLayout extends HorizontalScrollView {
         if (mTabStrip.isIndicatorAlwaysInCenter() && getChildCount() > 0) {
             int left = (w - mTabStrip.getChildMeasuredWidthAt(0)) / 2;
             int right = (w - mTabStrip.getChildMeasuredWidthAt(getChildCount() - 1)) / 2;
-            setPadding(left, getPaddingTop(), right, getPaddingBottom());
+            //setPadding(left, getPaddingTop(), right, getPaddingBottom());
             setClipToPadding(false);
         }
     }
@@ -370,7 +370,7 @@ public class SmartTabLayout extends HorizontalScrollView {
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            int tabStripChildCount = mTabStrip.getChildCount();
+            final int tabStripChildCount = mTabStrip.getChildCount();
             if ((tabStripChildCount == 0) || (position < 0) || (position >= tabStripChildCount)) {
                 return;
             }
@@ -390,6 +390,14 @@ public class SmartTabLayout extends HorizontalScrollView {
             }
 
             scrollToTab(position, extraOffset);
+
+            for (int i = 0; i < tabStripChildCount; ++i) {
+                if (i != position) {
+                    mTabStrip.getChildAt(i).setAlpha(0.6f);
+                } else {
+                    mTabStrip.getChildAt(i).setAlpha(1.0f);
+                }
+            }
 
             if (mViewPagerPageChangeListener != null) {
                 mViewPagerPageChangeListener.onPageScrolled(position, positionOffset,

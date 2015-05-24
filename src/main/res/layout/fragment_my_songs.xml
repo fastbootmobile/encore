@@ -11,6 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/my_songs_strip_height"
         android:background="@color/primary"
+        android:paddingLeft="56dp"
+        android:paddingRight="0dp"
+        android:clipToPadding="false"
         app:stl_indicatorAlwaysInCenter="true"
         app:stl_indicatorInFront="false"
         app:stl_indicatorInterpolation="smart"
@@ -19,13 +22,12 @@
         app:stl_indicatorCornerRadius="@dimen/my_songs_strip_indicator_radius"
         app:stl_underlineColor="@color/my_songs_strip_indicator_color"
         app:stl_underlineThickness="@dimen/divider_height"
-        app:stl_dividerColor="@color/my_songs_strip_divider_color"
-        app:stl_dividerThickness="@dimen/divider_height"
+        app:stl_dividerThickness="0dp"
         app:stl_defaultTabTextAllCaps="true"
         app:stl_defaultTabTextColor="@color/white"
         app:stl_defaultTabTextSize="12sp"
-        app:stl_defaultTabTextHorizontalPadding="16dp"
-        app:stl_defaultTabTextMinWidth="0dp"
+        app:stl_defaultTabTextHorizontalPadding="20dp"
+        app:stl_defaultTabTextMinWidth="80dp"
         app:stl_distributeEvenly="false"/>
 
 
