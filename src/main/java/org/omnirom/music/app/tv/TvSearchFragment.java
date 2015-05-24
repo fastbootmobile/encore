@@ -11,14 +11,34 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.app.SearchFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
+import android.support.v17.leanback.widget.HeaderItem;
+import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.ObjectAdapter;
+import android.support.v17.leanback.widget.OnItemViewClickedListener;
+import android.support.v17.leanback.widget.Presenter;
+import android.support.v17.leanback.widget.Row;
+import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.SpeechRecognitionCallback;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.util.Log;
 
 import org.omnirom.music.app.BuildConfig;
+import org.omnirom.music.app.R;
+import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.model.Album;
+import org.omnirom.music.model.Artist;
+import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
+import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
+import org.omnirom.music.providers.IMusicProvider;
+import org.omnirom.music.providers.ProviderAggregator;
+
+import java.util.List;
 
 public class TvSearchFragment extends SearchFragment
         implements SearchFragment.SearchResultProvider {
@@ -38,6 +58,18 @@ public class TvSearchFragment extends SearchFragment
             loadRows();
         }
     };
+    private final Runnable mUpdateAdapter = new Runnable() {
+        @Override
+        public void run() {
+            final int numSubs = mRowsAdapter.size();
+            for (int i = 0; i < numSubs; ++i) {
+                ListRow row = (ListRow) mRowsAdapter.get(i);
+                ArrayObjectAdapter adapter = (ArrayObjectAdapter) row.getAdapter();
+                adapter.notifyArrayItemRangeChanged(0, adapter.size());
+            }
+        }
+    };
+    private ILocalCallback mCallback = new SearchLocalCallback();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,8 +77,62 @@ public class TvSearchFragment extends SearchFragment
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         setSearchResultProvider(this);
-        //setOnItemClickedListener(getDefaultItemClickedListener());
-        //mDelayedLoad = new SearchRunnable();
+        setOnItemViewClickedListener(new OnItemViewClickedListener() {
+            @Override
+            public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
+                if (item instanceof Album) {
+                    Album album = (Album) item;
+                    int color = getResources().getColor(R.color.primary);
+                    if (itemViewHolder.view.getTag() != null && itemViewHolder.view.getTag() instanceof Palette) {
+                        color = ((Palette) itemViewHolder.view.getTag()).getDarkVibrantColor(color);
+                    }
+
+                    Intent intent = new Intent(getActivity(), TvAlbumDetailsActivity.class);
+                    intent.putExtra(TvAlbumDetailsActivity.EXTRA_ALBUM, album);
+                    intent.putExtra(TvAlbumDetailsActivity.EXTRA_COLOR, color);
+
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            getActivity(),
+                            ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                            TvAlbumDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                    startActivity(intent, bundle);
+                } else if (item instanceof Artist) {
+                    Artist artist = (Artist) item;
+                    int color = getResources().getColor(R.color.primary);
+                    if (itemViewHolder.view.getTag() != null && itemViewHolder.view.getTag() instanceof Palette) {
+                        color = ((Palette) itemViewHolder.view.getTag()).getDarkVibrantColor(color);
+                    }
+
+                    Intent intent = new Intent(getActivity(), TvArtistDetailsActivity.class);
+                    intent.putExtra(TvArtistDetailsActivity.EXTRA_ARTIST, artist);
+                    intent.putExtra(TvArtistDetailsActivity.EXTRA_COLOR, color);
+
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            getActivity(),
+                            ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                            TvArtistDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                    startActivity(intent, bundle);
+                } else if (item instanceof Playlist) {
+                    Playlist playlist = (Playlist) item;
+                    int color = getResources().getColor(R.color.primary);
+                    if (itemViewHolder.view.getTag() != null && itemViewHolder.view.getTag() instanceof Palette) {
+                        color = ((Palette) itemViewHolder.view.getTag()).getDarkVibrantColor(color);
+                    }
+
+                    Intent intent = new Intent(getActivity(), TvPlaylistDetailsActivity.class);
+                    intent.putExtra(TvPlaylistDetailsActivity.EXTRA_PLAYLIST, playlist);
+                    intent.putExtra(TvPlaylistDetailsActivity.EXTRA_COLOR, color);
+
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            getActivity(),
+                            ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                            TvAlbumDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                    startActivity(intent, bundle);
+                } else if (item instanceof Song) {
+                    PlaybackProxy.playSong((Song) item);
+                }
+            }
+        });
 
         if (!hasPermission(Manifest.permission.RECORD_AUDIO)) {
             // SpeechRecognitionCallback is not required and if not provided recognition will be handled
@@ -69,7 +155,14 @@ public class TvSearchFragment extends SearchFragment
     @Override
     public void onPause() {
         mHandler.removeCallbacksAndMessages(null);
+        ProviderAggregator.getDefault().removeUpdateCallback(mCallback);
         super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ProviderAggregator.getDefault().addUpdateCallback(mCallback);
     }
 
     @Override
@@ -132,28 +225,8 @@ public class TvSearchFragment extends SearchFragment
 
             @Override
             protected ListRow doInBackground(String... params) {
-                /*final List<BoundEntity> result = new ArrayList<>();
-                HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
-                for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-                    for (Movie movie : entry.getValue()) {
-                        if (movie.getTitle().toLowerCase(Locale.ENGLISH)
-                                .contains(query.toLowerCase(Locale.ENGLISH))
-                                || movie.getDescription().toLowerCase(Locale.ENGLISH)
-                                .contains(query.toLowerCase(Locale.ENGLISH))) {
-                            result.add(movie);
-                        }
-                    }
-                }
-                ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-                listRowAdapter.addAll(0, result);
-                HeaderItem header = new HeaderItem(getString(R.string.search_results, query));
-                return new ListRow(header, listRowAdapter);*/
+                ProviderAggregator.getDefault().startSearch(query);
                 return null;
-            }
-
-            @Override
-            protected void onPostExecute(ListRow listRow) {
-                //mRowsAdapter.add(listRow);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -173,6 +246,107 @@ public class TvSearchFragment extends SearchFragment
         if (!TextUtils.isEmpty(query) && !query.equals("nil")) {
             mQuery = query;
             mHandler.postDelayed(mDelayedLoad, SEARCH_DELAY_MS);
+        }
+    }
+
+    private class SearchLocalCallback implements ILocalCallback {
+
+        @Override
+        public void onSongUpdate(List<Song> s) {
+            if (mRowsAdapter != null) {
+                mHandler.post(mUpdateAdapter);
+            }
+        }
+
+        @Override
+        public void onAlbumUpdate(List<Album> a) {
+            if (mRowsAdapter != null) {
+                mHandler.post(mUpdateAdapter);
+            }
+        }
+
+        @Override
+        public void onPlaylistUpdate(List<Playlist> p) {
+            if (mRowsAdapter != null) {
+                mHandler.post(mUpdateAdapter);
+            }
+        }
+
+        @Override
+        public void onPlaylistRemoved(String ref) {
+        }
+
+        @Override
+        public void onArtistUpdate(List<Artist> a) {
+            if (mRowsAdapter != null) {
+                mHandler.post(mUpdateAdapter);
+            }
+        }
+
+        @Override
+        public void onProviderConnected(IMusicProvider provider) {
+
+        }
+
+        @Override
+        public void onSearchResult(List<SearchResult> searchResult) {
+            final ArrayObjectAdapter artistRowAdapter = new ArrayObjectAdapter(new CardPresenter());
+            final ArrayObjectAdapter albumRowAdapter = new ArrayObjectAdapter(new CardPresenter());
+            final ArrayObjectAdapter songsRowAdapter = new ArrayObjectAdapter(new CardPresenter());
+            final ArrayObjectAdapter playlistsRowAdapter = new ArrayObjectAdapter(new CardPresenter());
+
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
+            for (SearchResult result : searchResult) {
+                for (String ref : result.getArtistList()) {
+                    Artist artist = aggregator.retrieveArtist(ref, result.getIdentifier());
+                    if (artist != null) {
+                        artistRowAdapter.add(artist);
+                    }
+                }
+
+                for (String ref : result.getAlbumsList()) {
+                    Album album = aggregator.retrieveAlbum(ref, result.getIdentifier());
+                    if (album != null) {
+                        albumRowAdapter.add(album);
+                    }
+                }
+
+                for (String ref : result.getSongsList()) {
+                    Song song = aggregator.retrieveSong(ref, result.getIdentifier());
+                    if (song != null) {
+                        songsRowAdapter.add(song);
+                    }
+                }
+
+                for (String ref : result.getPlaylistList()) {
+                    Playlist playlist = aggregator.retrievePlaylist(ref, result.getIdentifier());
+                    if (playlist != null) {
+                        playlistsRowAdapter.add(playlist);
+                    }
+                }
+            }
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mRowsAdapter.clear();
+
+                    HeaderItem header = new HeaderItem(getString(R.string.artist));
+                    mRowsAdapter.add(new ListRow(header, artistRowAdapter));
+
+                    header = new HeaderItem(getString(R.string.albums));
+                    mRowsAdapter.add(new ListRow(header, albumRowAdapter));
+
+                    header = new HeaderItem(getString(R.string.songs));
+                    mRowsAdapter.add(new ListRow(header, songsRowAdapter));
+
+                    header = new HeaderItem(getString(R.string.tab_playlists));
+                    mRowsAdapter.add(new ListRow(header, playlistsRowAdapter));
+
+                    mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                }
+            });
         }
     }
 }

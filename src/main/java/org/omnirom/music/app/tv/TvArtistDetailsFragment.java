@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.DetailsFragment;
 import android.support.v17.leanback.widget.Action;
@@ -25,6 +26,7 @@ import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 import org.omnirom.music.app.R;
@@ -32,12 +34,18 @@ import org.omnirom.music.art.AlbumArtHelper;
 import org.omnirom.music.art.AlbumArtTask;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.framework.Suggestor;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
+import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.utils.Utils;
 
@@ -54,6 +62,7 @@ public class TvArtistDetailsFragment extends DetailsFragment {
 
     private Artist mArtist;
     private ArrayObjectAdapter mAdapter;
+    private ArrayObjectAdapter mAlbumsAdapter;
     private ClassPresenterSelector mPresenterSelector;
 
     private BackgroundManager mBackgroundManager;
@@ -64,7 +73,8 @@ public class TvArtistDetailsFragment extends DetailsFragment {
     private Action mActionStartRadio;
     private boolean mIsPlaying;
     private AlbumArtTask mArtTask;
-
+    private ArtistLocalCallback mCallback = new ArtistLocalCallback();
+    private Handler mHandler = new Handler();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,6 +84,7 @@ public class TvArtistDetailsFragment extends DetailsFragment {
         prepareBackgroundManager();
 
         mArtist = getActivity().getIntent().getParcelableExtra(TvArtistDetailsActivity.EXTRA_ARTIST);
+        mArtist = ProviderAggregator.getDefault().retrieveArtist(mArtist.getRef(), mArtist.getProvider());
         mBackgroundColor = getActivity().getIntent().getIntExtra(TvArtistDetailsActivity.EXTRA_COLOR, getResources().getColor(R.color.primary));
         if (mArtist != null) {
             setupAdapter();
@@ -92,10 +103,12 @@ public class TvArtistDetailsFragment extends DetailsFragment {
     @Override
     public void onResume() {
         super.onResume();
+        ProviderAggregator.getDefault().addUpdateCallback(mCallback);
     }
 
     @Override
     public void onPause() {
+        ProviderAggregator.getDefault().removeUpdateCallback(mCallback);
         super.onPause();
     }
 
@@ -123,6 +136,18 @@ public class TvArtistDetailsFragment extends DetailsFragment {
         mPresenterSelector = new ClassPresenterSelector();
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
         setAdapter(mAdapter);
+
+        ProviderConnection connection = PluginsLookup.getDefault().getProvider(mArtist.getProvider());
+        if (connection != null) {
+            IMusicProvider binder = connection.getBinder();
+            if (binder != null) {
+                try {
+                    binder.fetchArtistAlbums(mArtist.getRef());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot request album tracks", e);
+                }
+            }
+        }
     }
 
     private void setupDetailsOverviewRow() {
@@ -183,15 +208,21 @@ public class TvArtistDetailsFragment extends DetailsFragment {
     private void setupAlbumListRow() {
         List<String> albums = mArtist.getAlbums();
 
-        ArrayObjectAdapter albumsRowAdapter = new ArrayObjectAdapter(new CardPresenter());
+        if (mAlbumsAdapter == null) {
+            mAlbumsAdapter = new ArrayObjectAdapter(new CardPresenter());
+            mAdapter.add(new ListRow(new HeaderItem(getString(R.string.albums)), mAlbumsAdapter));
+        } else {
+            mAlbumsAdapter.clear();
+        }
+
         for (String albumRef : albums) {
             Album album = ProviderAggregator.getDefault().retrieveAlbum(albumRef, mArtist.getProvider());
             if (album != null) {
-                albumsRowAdapter.add(album);
+                mAlbumsAdapter.add(album);
             }
         }
 
-        mAdapter.add(new ListRow(new HeaderItem(getString(R.string.albums)), albumsRowAdapter));
+
     }
 
     private void setupAlbumListRowPresenter() {
@@ -232,6 +263,57 @@ public class TvArtistDetailsFragment extends DetailsFragment {
                         TvAlbumDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
             }
+        }
+    }
+
+
+    private class ArtistLocalCallback implements ILocalCallback {
+        @Override
+        public void onSongUpdate(List<Song> s) {
+            mHandler.post(new Runnable() {
+                public void run() {
+                    setupAlbumListRow();
+                }
+            });
+
+        }
+
+        @Override
+        public void onAlbumUpdate(List<Album> a) {
+            mHandler.post(new Runnable() {
+                public void run() {
+                    setupAlbumListRow();
+                }
+            });
+        }
+
+        @Override
+        public void onPlaylistUpdate(List<Playlist> p) {
+
+        }
+
+        @Override
+        public void onPlaylistRemoved(String ref) {
+
+        }
+
+        @Override
+        public void onArtistUpdate(List<Artist> a) {
+            mHandler.post(new Runnable() {
+                public void run() {
+                    setupAlbumListRow();
+                }
+            });
+        }
+
+        @Override
+        public void onProviderConnected(IMusicProvider provider) {
+
+        }
+
+        @Override
+        public void onSearchResult(List<SearchResult> searchResult) {
+
         }
     }
 }

@@ -19,21 +19,29 @@ import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnActionClickedListener;
 import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 import org.omnirom.music.app.R;
 import org.omnirom.music.art.AlbumArtHelper;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
+import org.omnirom.music.framework.PluginsLookup;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
+import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.SearchResult;
 import org.omnirom.music.model.Song;
+import org.omnirom.music.providers.ILocalCallback;
+import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
+import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.utils.Utils;
 
 import java.util.Iterator;
+import java.util.List;
 
 public class TvAlbumDetailsFragment extends DetailsFragment {
     private static final String TAG = "AlbumDetailsFragment";
@@ -65,6 +73,7 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
     private Handler mHandler;
     private BasePlaybackCallback mPlaybackCallback;
     private View.OnClickListener mSongClickListener;
+    private AlbumLocalCallback mCallback = new AlbumLocalCallback();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -109,6 +118,7 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
         prepareBackgroundManager();
 
         mAlbum = getActivity().getIntent().getParcelableExtra(TvAlbumDetailsActivity.EXTRA_ALBUM);
+        mAlbum = ProviderAggregator.getDefault().retrieveAlbum(mAlbum.getRef(), mAlbum.getProvider());
         mBackgroundColor = getActivity().getIntent().getIntExtra(TvAlbumDetailsActivity.EXTRA_COLOR, getResources().getColor(R.color.primary));
         if (mAlbum != null) {
             setupAdapter();
@@ -127,6 +137,7 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
     public void onResume() {
         super.onResume();
         PlaybackProxy.addCallback(mPlaybackCallback);
+        ProviderAggregator.getDefault().addUpdateCallback(mCallback);
         mSongRowPresenter.setCurrentSong(PlaybackProxy.getCurrentTrack());
         updateAdapter();
     }
@@ -135,6 +146,7 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
     public void onPause() {
         super.onPause();
         PlaybackProxy.removeCallback(mPlaybackCallback);
+        ProviderAggregator.getDefault().removeUpdateCallback(mCallback);
     }
 
     private void updateAdapter() {
@@ -153,6 +165,18 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
         mPresenterSelector = new ClassPresenterSelector();
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
         setAdapter(mAdapter);
+
+        ProviderConnection connection = PluginsLookup.getDefault().getProvider(mAlbum.getProvider());
+        if (connection != null) {
+            IMusicProvider binder = connection.getBinder();
+            if (binder != null) {
+                try {
+                    binder.fetchAlbumTracks(mAlbum.getRef());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot request album tracks", e);
+                }
+            }
+        }
     }
 
     private void setupDetailsOverviewRow() {
@@ -225,6 +249,7 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
     }
 
     private void setupTrackListRow() {
+        mAdapter.removeItems(1, mAdapter.size() - 1);
         Iterator<String> it = mAlbum.songs();
 
         int index = 0;
@@ -257,6 +282,51 @@ public class TvAlbumDetailsFragment extends DetailsFragment {
                     }
                 }
             }, artist, mMetrics.widthPixels, false);
+        }
+    }
+
+    private class AlbumLocalCallback implements ILocalCallback {
+        @Override
+        public void onSongUpdate(List<Song> s) {
+            mHandler.post(new Runnable() {
+                public void run() {
+                    setupTrackListRow();
+                }
+            });
+        }
+
+        @Override
+        public void onAlbumUpdate(List<Album> a) {
+            mHandler.post(new Runnable() {
+                public void run() {
+                    setupTrackListRow();
+                }
+            });
+        }
+
+        @Override
+        public void onPlaylistUpdate(List<Playlist> p) {
+
+        }
+
+        @Override
+        public void onPlaylistRemoved(String ref) {
+
+        }
+
+        @Override
+        public void onArtistUpdate(List<Artist> a) {
+
+        }
+
+        @Override
+        public void onProviderConnected(IMusicProvider provider) {
+
+        }
+
+        @Override
+        public void onSearchResult(List<SearchResult> searchResult) {
+
         }
     }
 }

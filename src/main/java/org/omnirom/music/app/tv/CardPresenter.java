@@ -19,6 +19,7 @@ import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Artist;
 import org.omnirom.music.model.BoundEntity;
 import org.omnirom.music.model.Playlist;
+import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.DSPConnection;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
@@ -95,6 +96,17 @@ public class CardPresenter extends Presenter {
                     cardView.setContentText(artist.getName());
                 }
             }
+        } else if (item instanceof Song) {
+            Song song = (Song) item;
+            cardView.setTitleText(song.getTitle());
+
+            String artistRef = song.getArtist();
+            if (artistRef != null) {
+                Artist artist = ProviderAggregator.getDefault().retrieveArtist(artistRef, song.getProvider());
+                if (artist != null && artist.getName() != null && !TextUtils.isEmpty(artist.getName())) {
+                    cardView.setContentText(artist.getName());
+                }
+            }
         } else if (item instanceof Playlist) {
             Playlist playlist = (Playlist) item;
             cardView.setTitleText(playlist.getName());
@@ -146,6 +158,11 @@ public class CardPresenter extends Presenter {
 
         cardView.setMainImage(mDefaultCardImage);
         if (item instanceof BoundEntity) {
+            if (mArtTask != null) {
+                // Cancel the previous task if any
+                mArtTask.cancel(true);
+            }
+
             mArtTask = AlbumArtHelper.retrieveAlbumArt(mContext.getResources(), new AlbumArtHelper.AlbumArtListener() {
                 @Override
                 public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
@@ -166,6 +183,8 @@ public class CardPresenter extends Presenter {
         // Remove references to images so that the garbage collector can free up memory
         cardView.setBadgeImage(null);
         cardView.setMainImage(null);
+        cardView.setTag(null);
+        updateCardBackgroundColor(cardView, false);
 
         if (mArtTask != null) {
             mArtTask.cancel(true);

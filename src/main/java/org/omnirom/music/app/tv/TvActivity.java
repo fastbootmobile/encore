@@ -460,21 +460,27 @@ public class TvActivity extends Activity {
     private class TvLocalCallback implements ILocalCallback {
         @Override
         public void onSongUpdate(List<Song> s) {
-            if (mNumSuggestions < 2) {
-                generateRecommendations();
-            } else {
-                requestAdapterUpdate();
+            if (mRowsAdapter != null) {
+                if (mNumSuggestions < 2) {
+                    generateRecommendations();
+                } else {
+                    requestAdapterUpdate();
+                }
             }
         }
 
         @Override
         public void onAlbumUpdate(List<Album> a) {
-            requestAdapterUpdate();
+            if (mRowsAdapter != null) {
+                requestAdapterUpdate();
+            }
         }
 
         @Override
         public void onPlaylistUpdate(List<Playlist> p) {
-            generatePlaylistsRow();
+            if (mRowsAdapter != null) {
+                generatePlaylistsRow();
+            }
         }
 
         @Override
@@ -484,12 +490,16 @@ public class TvActivity extends Activity {
 
         @Override
         public void onArtistUpdate(List<Artist> a) {
-            requestAdapterUpdate();
+            if (mRowsAdapter != null) {
+                requestAdapterUpdate();
+            }
         }
 
         @Override
         public void onProviderConnected(IMusicProvider provider) {
-            requestAdapterUpdate();
+            if (mRowsAdapter != null) {
+                requestAdapterUpdate();
+            }
         }
 
         @Override
