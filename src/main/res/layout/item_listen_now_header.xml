@@ -10,6 +10,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/tvHeader"
         android:textSize="@dimen/listen_now_header_text_size"
-        fontPath="fonts/Roboto-MediumItalic.ttf"
+        fontPath="fonts/Roboto-Italic.ttf"
         android:padding="@dimen/listen_now_header_padding"/>
 </FrameLayout>
