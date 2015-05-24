@@ -63,8 +63,18 @@ public class TvActivity extends Activity {
 
     private static final int MSG_NOTIFY_CHANGES = 1;
 
+    private static final int TYPE_ALBUM = 0;
+    private static final int TYPE_ARTIST = 1;
+
+    private static final int ROW_RECENTS            = 0;
+    private static final int ROW_RECOMMENDATIONS    = 1;
+    private static final int ROW_LIBRARY            = 2;
+    private static final int ROW_PLAYLISTS          = 3;
+    private static final int ROW_SETTINGS           = 4;
+
     private ArrayObjectAdapter mRowsAdapter;
     private Handler mHandler;
+    private int mNumSuggestions;
 
     protected BrowseFragment mBrowseFragment;
     private ILocalCallback mLocalCallback = new TvLocalCallback();
@@ -80,7 +90,7 @@ public class TvActivity extends Activity {
                 switch (msg.what) {
                     case MSG_NOTIFY_CHANGES:
                         if (mRowsAdapter != null) {
-                            mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                            mRowsAdapter.notifyArrayItemRangeChanged(0, 2);
                         }
                         break;
                 }
@@ -203,7 +213,16 @@ public class TvActivity extends Activity {
     protected void onResume() {
         super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(mLocalCallback);
-        requestAdapterUpdate();
+
+        if (mNumSuggestions > 2) {
+            requestAdapterUpdate();
+        } else {
+            mHandler.postDelayed(new Runnable() {
+                public void run() {
+                    buildRowsAdapter();
+                }
+            }, 1500);
+        }
     }
 
     @Override
@@ -225,9 +244,18 @@ public class TvActivity extends Activity {
 
         mRowsAdapter = new ArrayObjectAdapter(selector);
 
-        Random rand = new Random();
-        final int TYPE_ALBUM = 0;
-        final int TYPE_ARTIST = 1;
+        // Generate rows contents
+        generateRecentlyPlayedRow();
+        generateRecommendations();
+        generateMyLibraryRow();
+        generatePlaylistsRow();
+        generateSettingsRow();
+
+        mBrowseFragment.setAdapter(mRowsAdapter);
+    }
+
+    private void generateRecentlyPlayedRow() {
+        final Random rand = new Random();
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
         // First row: Recently played (10 items, randomly artist or album)
@@ -265,8 +293,18 @@ public class TvActivity extends Activity {
         }
 
         // Build Recently Played Leanback item
-        HeaderItem header = new HeaderItem(0, "Recently played");
-        mRowsAdapter.add(new ListRow(header, logEntriesRowAdapter));
+        HeaderItem header = new HeaderItem(ROW_RECENTS, "Recently played");
+        ListRow row = new ListRow(header, logEntriesRowAdapter);
+        if (mRowsAdapter.size() > ROW_RECENTS) {
+            mRowsAdapter.replace(ROW_RECENTS, row);
+        } else {
+            mRowsAdapter.add(row);
+        }
+    }
+
+    private void generateRecommendations() {
+        final Random rand = new Random();
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
         // Get all the available tracks to build Recommendations
         final List<Pair<String, ProviderIdentifier>> availableReferences = new ArrayList<>();
@@ -318,7 +356,7 @@ public class TvActivity extends Activity {
 
         // Randomly generate recommendations
         ArrayObjectAdapter recommendedRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-        entriesCount = 0;
+        int entriesCount = 0;
 
         for (Pair<String, ProviderIdentifier> ref : availableReferences) {
             if (entriesCount == 20) break;
@@ -348,41 +386,85 @@ public class TvActivity extends Activity {
             ++entriesCount;
         }
 
-        // Build Recommended Leanback item
-        header = new HeaderItem(1, "Recommended for you");
-        mRowsAdapter.add(new ListRow(header, recommendedRowAdapter));
+        mNumSuggestions = recommendedRowAdapter.size();
 
+        // Build Recommended Leanback item
+        HeaderItem header = new HeaderItem(ROW_RECOMMENDATIONS, "Recommended for you");
+        ListRow row = new ListRow(header, recommendedRowAdapter);
+        if (mRowsAdapter.size() > ROW_RECOMMENDATIONS) {
+            mRowsAdapter.replace(ROW_RECOMMENDATIONS, row);
+        } else {
+            mRowsAdapter.add(row);
+        }
+    }
+
+    private void generateMyLibraryRow() {
         // Build My Library item
         ArrayObjectAdapter libraryAdapter = new ArrayObjectAdapter(new CardPresenter());
         libraryAdapter.add(new MyLibraryItem(MyLibraryItem.TYPE_ARTISTS));
         libraryAdapter.add(new MyLibraryItem(MyLibraryItem.TYPE_ALBUMS));
 
-        header = new HeaderItem(2, getString(R.string.title_section_my_songs));
-        mRowsAdapter.add(new ListRow(header, libraryAdapter));
+        HeaderItem header = new HeaderItem(ROW_LIBRARY, getString(R.string.title_section_my_songs));
+        ListRow row = new ListRow(header, libraryAdapter);
+        if (mRowsAdapter.size() > ROW_LIBRARY) {
+            mRowsAdapter.replace(ROW_LIBRARY, row);
+        } else {
+            mRowsAdapter.add(row);
+        }
+    }
 
+    private void generatePlaylistsRow() {
         // Build Playlists items
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        final List<Pair<String, ProviderIdentifier>> availableReferences = new ArrayList<>();
+        final List<Playlist> playlists = aggregator.getAllPlaylists();
+        for (Playlist p : playlists) {
+            Iterator<String> it = p.songs();
+            while (it.hasNext()) {
+                String ref = it.next();
+                Pair<String, ProviderIdentifier> pair = Pair.create(ref, p.getProvider());
+                if (!availableReferences.contains(pair)) {
+                    availableReferences.add(pair);
+                }
+            }
+        }
+
         ArrayObjectAdapter playlistsAdapter = new ArrayObjectAdapter(new CardPresenter());
         playlistsAdapter.addAll(0, playlists);
 
-        header = new HeaderItem(3, getString(R.string.title_section_playlists));
-        mRowsAdapter.add(new ListRow(header, playlistsAdapter));
+        HeaderItem header = new HeaderItem(ROW_PLAYLISTS, getString(R.string.title_section_playlists));
+        ListRow row = new ListRow(header, playlistsAdapter);
+        if (mRowsAdapter.size() > ROW_PLAYLISTS) {
+            mRowsAdapter.replace(ROW_PLAYLISTS, row);
+        } else {
+            mRowsAdapter.add(row);
+        }
+    }
 
+    private void generateSettingsRow() {
         // Build Settings items
         ArrayObjectAdapter settingsAdapter = new ArrayObjectAdapter(new IconPresenter());
         settingsAdapter.add(new SettingsItem(SettingsItem.ITEM_PROVIDERS));
         settingsAdapter.add(new SettingsItem(SettingsItem.ITEM_EFFECTS));
         settingsAdapter.add(new SettingsItem(SettingsItem.ITEM_LICENSES));
 
-        header = new HeaderItem(4, getString(R.string.title_activity_settings));
-        mRowsAdapter.add(new ShadowlessListRow(header, settingsAdapter));
-
-        mBrowseFragment.setAdapter(mRowsAdapter);
+        HeaderItem header = new HeaderItem(ROW_SETTINGS, getString(R.string.title_activity_settings));
+        ShadowlessListRow row = new ShadowlessListRow(header, settingsAdapter);
+        if (mRowsAdapter.size() > ROW_SETTINGS) {
+            mRowsAdapter.replace(ROW_SETTINGS, row);
+        } else {
+            mRowsAdapter.add(row);
+        }
     }
 
     private class TvLocalCallback implements ILocalCallback {
         @Override
         public void onSongUpdate(List<Song> s) {
-            requestAdapterUpdate();
+            if (mNumSuggestions < 2) {
+                generateRecommendations();
+            } else {
+                requestAdapterUpdate();
+            }
         }
 
         @Override
@@ -392,7 +474,7 @@ public class TvActivity extends Activity {
 
         @Override
         public void onPlaylistUpdate(List<Playlist> p) {
-            requestAdapterUpdate();
+            generatePlaylistsRow();
         }
 
         @Override
