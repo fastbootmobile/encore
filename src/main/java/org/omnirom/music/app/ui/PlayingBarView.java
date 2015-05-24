@@ -283,7 +283,8 @@ public class PlayingBarView extends RelativeLayout {
         // Set FAB info
         mPlayFab = (FabButton) findViewById(R.id.fabPlayBarButton);
 
-        mPlayFabDrawable = new PlayPauseDrawable(getResources(), 0.90f);
+        mPlayFabDrawable = new PlayPauseDrawable(getResources(), 0.80f);
+        mPlayFabDrawable.setColor(getResources().getColor(R.color.white));
         mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
         mPlayFabDrawable.setYOffset(0);
 

@@ -14,8 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/playing_bar_margin_top"
-        android:layout_marginRight="@dimen/playing_bar_margin_sides"
-        android:layout_marginLeft="@dimen/playing_bar_margin_sides"
         android:elevation="@dimen/playing_bar_elevation"
         android:background="@color/white"
         android:orientation="vertical">
