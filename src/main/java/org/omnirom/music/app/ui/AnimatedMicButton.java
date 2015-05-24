@@ -15,8 +15,8 @@ import android.widget.ImageButton;
 import org.omnirom.music.app.R;
 
 public class AnimatedMicButton extends ImageButton {
-    private float mTargetLevel = 1.0f;
-    private float mCurrentLevel = 1.0f;
+    private float mTargetLevel = 0.0f;
+    private float mCurrentLevel = 0.0f;
     private CircleBounceDrawable mBounceDrawable;
     private LayerDrawable mLayeredOn;
     private LayerDrawable mLayeredOff;

@@ -92,6 +92,7 @@
         android:textColor="@color/white"
         android:layout_alignBottom="@+id/ivHero"
         android:layout_toStartOf="@+id/ivSourceLogo"
+        android:layout_toLeftOf="@+id/ivSourceLogo"
         android:ellipsize="end"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"/>
@@ -134,7 +135,7 @@
         android:layout_marginEnd="@dimen/detail_source_logo_margin"
         android:layout_marginRight="@dimen/detail_source_logo_margin"
         android:scaleType="centerInside"
-        android:contentDescription="@string/app_name"/>
+        android:contentDescription="@string/app_name" />
 
     <com.dd.CircularProgressButton
         android:id="@+id/cpbOffline"
