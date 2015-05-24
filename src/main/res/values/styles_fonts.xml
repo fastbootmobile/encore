@@ -54,7 +54,7 @@
 
     <style name="FontBody1">
         <item name="android:fontFamily">sans-serif-regular</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">#DD000000</item>
     </style>
 
