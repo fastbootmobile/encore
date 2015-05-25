@@ -18,19 +18,26 @@ package org.omnirom.music.app.fragments;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.support.v4.graphics.ColorUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.LayoutAnimationController;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,11 +45,13 @@ import android.widget.TextView;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.omnirom.music.app.AlbumActivity;
+import org.omnirom.music.app.AppActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.SongsListAdapter;
 import org.omnirom.music.app.ui.MaterialTransitionDrawable;
 import org.omnirom.music.app.ui.ParallaxScrollListView;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
+import org.omnirom.music.app.ui.ScrollStatusBarColorListener;
 import org.omnirom.music.art.AlbumArtHelper;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.PlaybackProxy;
@@ -58,8 +67,11 @@ import org.omnirom.music.providers.IMusicProvider;
 import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
+import org.omnirom.music.utils.AlphaForegroundColorSpan;
 import org.omnirom.music.utils.Utils;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -168,6 +180,33 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
             // If we already have some songs, show them
             View loadingBar = findViewById(R.id.pbAlbumLoading);
             mListView.setVisibility(View.VISIBLE);
+            mListView.setOnScrollListener(new ScrollStatusBarColorListener() {
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                    if (view.getChildCount() == 0 || getActivity() == null) {
+                        return;
+                    }
+
+                    final float heroHeight = mIvHero.getMeasuredHeight();
+                    final float scrollY = getScroll(view);
+                    final float toolbarBgAlpha = Math.min(1, scrollY / heroHeight);
+                    final int toolbarAlphaInteger = (((int) (toolbarBgAlpha * 255)) << 24) | 0xFFFFFF;
+                    mColorDrawable.setColor(toolbarAlphaInteger & mBackgroundColor);
+
+                    SpannableString spannableTitle = new SpannableString(mAlbum.getName());
+                    mAlphaSpan.setAlpha(toolbarBgAlpha);
+
+                    ActionBar actionbar = ((AppActivity) getActivity()).getSupportActionBar();
+                    if (actionbar != null) {
+                        actionbar.setBackgroundDrawable(mColorDrawable);
+                        spannableTitle.setSpan(mAlphaSpan, 0, spannableTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        actionbar.setTitle(spannableTitle);
+                        if (Utils.hasLollipop()) {
+                            getActivity().getWindow().setStatusBarColor(toolbarAlphaInteger & ColorUtils.compositeColors(0x80000000, mBackgroundColor));
+                        }
+                    }
+                }
+            });
             if (mAlbum.getSongsCount() > 0) {
                 // If there's not more tracks, hide the loading bar, otherwise keep on displaying it
                 if (loadingBar.getVisibility() == View.VISIBLE) {
@@ -484,6 +523,7 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
                 final Palette.Swatch normalColor = palette.getDarkMutedSwatch();
                 final Palette.Swatch pressedColor = palette.getDarkVibrantSwatch();
                 if (normalColor != null && mRootView != null) {
+                    mBackgroundColor = normalColor.getRgb();
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {

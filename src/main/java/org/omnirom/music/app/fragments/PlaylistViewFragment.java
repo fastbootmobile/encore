@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
@@ -27,6 +28,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.v4.graphics.ColorUtils;
+import android.support.v7.app.ActionBar;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,6 +41,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.LayoutAnimationController;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -46,11 +52,13 @@ import com.dd.CircularProgressButton;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.omnirom.music.app.AlbumActivity;
+import org.omnirom.music.app.AppActivity;
 import org.omnirom.music.app.PlaylistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.PlaylistAdapter;
 import org.omnirom.music.app.ui.PlayPauseDrawable;
 import org.omnirom.music.app.ui.PlaylistListView;
+import org.omnirom.music.app.ui.ScrollStatusBarColorListener;
 import org.omnirom.music.art.AlbumArtHelper;
 import org.omnirom.music.art.RecyclingBitmapDrawable;
 import org.omnirom.music.framework.AutoPlaylistHelper;
@@ -69,10 +77,13 @@ import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.providers.ProviderIdentifier;
 import org.omnirom.music.service.BasePlaybackCallback;
 import org.omnirom.music.service.PlaybackService;
+import org.omnirom.music.utils.AlphaForegroundColorSpan;
 import org.omnirom.music.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -266,6 +277,33 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
         mAdapter = new PlaylistAdapter();
         mListViewContents.setAdapter(mAdapter);
+        mListViewContents.setOnScrollListener(new ScrollStatusBarColorListener() {
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (view.getChildCount() == 0 || getActivity() == null) {
+                    return;
+                }
+
+                final float heroHeight = mIvHero.getMeasuredHeight();
+                final float scrollY = getScroll(view);
+                final float toolbarBgAlpha = Math.min(1, scrollY / heroHeight);
+                final int toolbarAlphaInteger = (((int) (toolbarBgAlpha * 255)) << 24) | 0xFFFFFF;
+                mColorDrawable.setColor(toolbarAlphaInteger & getResources().getColor(R.color.primary));
+
+                SpannableString spannableTitle = new SpannableString(mPlaylist.getName());
+                mAlphaSpan.setAlpha(toolbarBgAlpha);
+
+                ActionBar actionbar = ((AppActivity) getActivity()).getSupportActionBar();
+                if (actionbar != null) {
+                    actionbar.setBackgroundDrawable(mColorDrawable);
+                    spannableTitle.setSpan(mAlphaSpan, 0, spannableTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    actionbar.setTitle(spannableTitle);
+                    if (Utils.hasLollipop()) {
+                        getActivity().getWindow().setStatusBarColor(toolbarAlphaInteger & getResources().getColor(R.color.primary_dark));
+                    }
+                }
+            }
+        });
 
         headerView.findViewById(R.id.pbAlbumLoading).setVisibility(View.GONE);
 

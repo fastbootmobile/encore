@@ -22,7 +22,8 @@
         android:background="@color/primary"
         android:layout_below="@+id/tvAlbumName"
         android:id="@+id/layoutBar"
-        android:visibility="visible">
+        android:visibility="gone"
+        android:elevation="4dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -70,33 +71,6 @@
     </RelativeLayout>
 
 
-    <TextView
-        style="@style/FontHeadline"
-        android:id="@+id/tvAlbumName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/ivHero"
-        android:layout_alignStart="@+id/ivHero"
-        android:background="@color/default_translucent_black_overlay"
-        android:transitionName="albumName"
-        fontPath="fonts/Roboto-Medium.ttf"
-        android:fontFamily="sans-serif-medium"
-        android:gravity="center_vertical|start"
-        android:singleLine="true"
-        android:paddingLeft="@dimen/entview_head_padding_left"
-        android:paddingStart="@dimen/entview_head_padding_left"
-        android:paddingRight="@dimen/entview_head_padding_right"
-        android:paddingEnd="@dimen/entview_head_padding_right"
-        android:paddingTop="@dimen/entview_head_padding_top"
-        android:paddingBottom="@dimen/entview_head_padding_bottom"
-        android:textColor="@color/white"
-        android:layout_alignBottom="@+id/ivHero"
-        android:layout_toStartOf="@+id/ivSourceLogo"
-        android:layout_toLeftOf="@+id/ivSourceLogo"
-        android:ellipsize="end"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
-
     <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabPlay"
         android:layout_width="@dimen/fab_size_normal"
@@ -112,7 +86,36 @@
         android:layout_marginBottom="@dimen/entview_head_fab_margin_bottom"
         android:layout_alignBottom="@+id/tvAlbumName"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:elevation="12dp" />
+
+    <TextView
+        style="@style/FontHeadline"
+        android:id="@+id/tvAlbumName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ivHero"
+        android:layout_alignStart="@+id/ivHero"
+        android:background="@color/text_regular"
+        android:transitionName="albumName"
+        fontPath="fonts/Roboto-Medium.ttf"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical|start"
+        android:singleLine="true"
+        android:paddingLeft="@dimen/entview_head_padding_left"
+        android:paddingStart="@dimen/entview_head_padding_left"
+        android:paddingRight="@dimen/entview_head_padding_right"
+        android:paddingEnd="@dimen/entview_head_padding_right"
+        android:paddingTop="@dimen/entview_head_padding_top"
+        android:paddingBottom="@dimen/entview_head_padding_bottom"
+        android:textColor="@color/white"
+        android:layout_toStartOf="@+id/ivSourceLogo"
+        android:layout_toLeftOf="@+id/ivSourceLogo"
+        android:ellipsize="end"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/ivHero"
+        android:elevation="8dp" />
 
 
     <ProgressBar
@@ -135,7 +138,8 @@
         android:layout_marginEnd="@dimen/detail_source_logo_margin"
         android:layout_marginRight="@dimen/detail_source_logo_margin"
         android:scaleType="centerInside"
-        android:contentDescription="@string/app_name" />
+        android:contentDescription="@string/app_name"
+        android:elevation="9dp" />
 
     <com.dd.CircularProgressButton
         android:id="@+id/cpbOffline"
