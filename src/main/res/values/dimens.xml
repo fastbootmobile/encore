@@ -46,7 +46,7 @@
     <!-- Artist views -->
     <dimen name="artist_head_padding_bottom">64dp</dimen>
     <dimen name="artist_head_source_margin_bottom">48dp</dimen>
-    <dimen name="artist_head_fab_margin_bottom">72dp</dimen>
+    <dimen name="artist_head_fab_margin_bottom">24dp</dimen>
     <dimen name="artist_head_tabstrip_height">48dp</dimen>
 
     <dimen name="artist_album_list_cover_size">56dp</dimen>

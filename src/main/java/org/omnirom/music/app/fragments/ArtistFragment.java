@@ -106,7 +106,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private static final int FRAGMENT_ID_BIOGRAPHY = 2;
     private static final int FRAGMENT_COUNT = 3;
 
-    private static final int ANIMATION_DURATION = 500;
+    private static final int ANIMATION_DURATION = 300;
     private static final DecelerateInterpolator mInterpolator = new DecelerateInterpolator();
 
     private Bitmap mHeroImage;
@@ -271,7 +271,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     Palette.Swatch vibrant = palette.getVibrantSwatch();
 
                     if (vibrant != null && mRootView != null) {
-                        mRootView.setBackgroundColor(0xBBFFFFFF & vibrant.getRgb());
+                        mRootView.setBackgroundColor(vibrant.getRgb());
 
                         float luminance = vibrant.getHsl()[2];
 
@@ -528,14 +528,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
 
         final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
-        tvArtist.setBackgroundColor(0xBBFFFFFF & mBackgroundColor);
+        tvArtist.setBackgroundColor(mBackgroundColor);
         tvArtist.setText(mArtist.getName());
 
         final PagerTabStrip strip = (PagerTabStrip) mRootView.findViewById(R.id.pagerArtistStrip);
         strip.setDrawFullUnderline(false);
         strip.setAlpha(0.0f);
         strip.setTranslationY(-20);
-        strip.animate().alpha(1.0f).setDuration(500).setStartDelay(500).translationY(0).start();
+        strip.animate().alpha(1.0f).setDuration(ANIMATION_DURATION).setStartDelay(500).translationY(0).start();
 
         if (Utils.hasLollipop()) {
             tvArtist.setVisibility(View.INVISIBLE);
@@ -551,13 +551,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }, 500);
         } else {
             tvArtist.setAlpha(0);
-            tvArtist.animate().alpha(1).setDuration(300).setStartDelay(500).start();
+            tvArtist.animate().alpha(1).setDuration(ANIMATION_DURATION).setStartDelay(500).start();
         }
 
         // Setup the subfragments pager
         final WrapContentHeightViewPager pager = (WrapContentHeightViewPager) mRootView.findViewById(R.id.pagerArtist);
         pager.setAdapter(new ViewPagerAdapter(getActivity().getSupportFragmentManager()));
         pager.setOffscreenPageLimit(FRAGMENT_COUNT);
+
 
         pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override

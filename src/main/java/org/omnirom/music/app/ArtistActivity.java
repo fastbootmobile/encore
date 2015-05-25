@@ -108,7 +108,9 @@ public class ArtistActivity extends AppActivity {
                     .commit();
         }
 
-        mActiveFragment.notifySizeLimit();
+        if (Utils.hasLollipop()) {
+            mActiveFragment.notifySizeLimit();
+        }
         mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
@@ -183,14 +185,16 @@ public class ArtistActivity extends AppActivity {
 
                 }
             });
-        } else {
+        }/* else {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    View fab = mActiveFragment.findViewById(R.id.fabPlay);
+                    fab.setVisibility(View.VISIBLE);
                     mActiveFragment.notifySizeUnlimited();
                 }
             });
-        }
+        }*/
 
 
         getWindow().getDecorView().setSystemUiVisibility(
