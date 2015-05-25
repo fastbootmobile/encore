@@ -25,8 +25,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -51,7 +49,6 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.utils.Utils;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 public class MainActivity extends AppActivity
@@ -312,6 +309,8 @@ public class MainActivity extends AppActivity
 
             final String fragmentTag = "" + position + "_" + mOrientation;
 
+            mPlayingBarLayout.animate().alpha(1).setDuration(400).start();
+
             Fragment newFrag = null;
             switch (position + 1) {
                 case SECTION_LISTEN_NOW:
@@ -337,6 +336,7 @@ public class MainActivity extends AppActivity
                     break;
                 case SECTION_NOW_PLAYING:
                     newFrag = PlaybackQueueFragment.newInstance();
+                    mPlayingBarLayout.animate().alpha(0).setDuration(400).start();
                     break;
                 case SECTION_DRIVE_MODE:
                     startActivity(new Intent(this, DriveModeActivity.class));
