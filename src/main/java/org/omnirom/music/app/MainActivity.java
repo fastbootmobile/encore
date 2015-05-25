@@ -25,6 +25,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -49,6 +51,7 @@ import org.omnirom.music.providers.ProviderAggregator;
 import org.omnirom.music.providers.ProviderConnection;
 import org.omnirom.music.utils.Utils;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 public class MainActivity extends AppActivity
@@ -206,6 +209,8 @@ public class MainActivity extends AppActivity
     public void onBackPressed() {
         if (!mSearchView.isIconified()) {
             mSearchView.setIconified(true);
+            //mNavigationDrawerFragment.setDrawerIndicatorEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         } else if (!mPlayingBarLayout.isWrapped()) {
             mPlayingBarLayout.setWrapped(true);
         } else if (mNavigationDrawerFragment.isDrawerOpen()) {
@@ -427,7 +432,7 @@ public class MainActivity extends AppActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
@@ -437,6 +442,31 @@ public class MainActivity extends AppActivity
 
             mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
             mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            mSearchView.setIconifiedByDefault(true);
+            mSearchView.setQueryRefinementEnabled(true);
+            mSearchView.setSubmitButtonEnabled(true);
+
+            mSearchView.setOnSearchClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    menu.findItem(R.id.action_cast).setVisible(false);
+                    mNavigationDrawerFragment.setDrawerIndicatorEnabled(false);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    mSearchView.requestFocus();
+                }
+            });
+            mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+                @Override
+                public boolean onClose() {
+                    if (Utils.hasJellyBeanMR1()) {
+                        menu.findItem(R.id.action_cast).setVisible(true);
+                    }
+
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    mNavigationDrawerFragment.setDrawerIndicatorEnabled(true);
+                    return false;
+                }
+            });
 
             // Setup cast button on 4.2+
             MenuItem castMenu = menu.findItem(R.id.action_cast);
@@ -468,6 +498,9 @@ public class MainActivity extends AppActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
             case R.id.action_sleep_timer:
                 showSleepTimerDialog();
                 break;
