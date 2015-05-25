@@ -247,4 +247,7 @@
     <string name="tv_action_queue">Mettre en file</string>
     <string name="tv_action_enable">Activer</string>
     <string name="tv_action_disable">Désactiver</string>
+    <string name="automix_create_dialog_title">Type de génération</string>
+    <string name="automix_type_static">Playlist statique de 100 pistes</string>
+    <string name="automix_type_dynamic">Pot dynamique avec un nombre de pistes infini</string>
 </resources>

@@ -248,4 +248,7 @@
     <string name="tv_action_queue">Queue</string>
     <string name="tv_action_enable">Enable</string>
     <string name="tv_action_disable">Disable</string>
+    <string name="automix_create_dialog_title">Type of generation</string>
+    <string name="automix_type_static">Static playlist of 100 tracks</string>
+    <string name="automix_type_dynamic">Dynamic bucket with infinite tracks</string>
 </resources>

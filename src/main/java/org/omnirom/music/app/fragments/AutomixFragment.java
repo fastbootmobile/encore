@@ -16,11 +16,16 @@
 package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -48,9 +53,6 @@ public class AutomixFragment extends Fragment {
     private static final String TAG = "AutomixFragment";
 
     private BucketAdapter mAdapter;
-    private FloatingActionsMenu mFabCreateMenu;
-    private ImageButton mFabCreateDynamic;
-    private ImageButton mFabCreateStatic;
     private ProgressBar mProgressToHide;
     private AutoMixManager mAutoMixManager = AutoMixManager.getDefault();
     private TextView mNoBucketTextView;
@@ -66,7 +68,6 @@ public class AutomixFragment extends Fragment {
                     }
                 });
             }
-            updateFabHeight();
         }
     };
 
@@ -84,6 +85,12 @@ public class AutomixFragment extends Fragment {
         return new AutomixFragment();
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -91,30 +98,6 @@ public class AutomixFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_automix, container, false);
-
-        // Setup create FABs
-        mFabCreateMenu = (FloatingActionsMenu) rootView.findViewById(R.id.fabCreateMenu);
-
-        mFabCreateDynamic = (ImageButton) rootView.findViewById(R.id.fabCreateDynamic);
-        mFabCreateDynamic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), AutomixCreateActivity.class);
-                intent.putExtra(AutomixCreateActivity.EXTRA_MODE, AutomixCreateActivity.MODE_DYNAMIC);
-                startActivity(intent);
-            }
-        });
-
-        mFabCreateStatic = (ImageButton) rootView.findViewById(R.id.fabCreateStatic);
-        mFabCreateStatic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), AutomixCreateActivity.class);
-                intent.putExtra(AutomixCreateActivity.EXTRA_MODE, AutomixCreateActivity.MODE_STATIC);
-                startActivity(intent);
-            }
-        });
-
         final ListView lvBuckets = (ListView) rootView.findViewById(R.id.lvBuckets);
         mAdapter = new BucketAdapter();
         lvBuckets.setAdapter(mAdapter);
@@ -142,6 +125,28 @@ public class AutomixFragment extends Fragment {
         mNoBucketTextView = (TextView) rootView.findViewById(R.id.txtNoBucket);
 
         return rootView;
+    }
+
+    private void onPressCreate() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.automix_create_dialog_title)
+                .setItems(new CharSequence[]{getString(R.string.automix_type_static),
+                        getString(R.string.automix_type_dynamic)}, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(getActivity(), AutomixCreateActivity.class);
+                        if (which == 0) {
+                            // Static
+                            intent.putExtra(AutomixCreateActivity.EXTRA_MODE, AutomixCreateActivity.MODE_STATIC);
+
+                        } else {
+                            // Dynamic
+                            intent.putExtra(AutomixCreateActivity.EXTRA_MODE, AutomixCreateActivity.MODE_DYNAMIC);
+                        }
+                        startActivity(intent);
+                    }
+                });
+        builder.show();
     }
 
     /**
@@ -175,6 +180,21 @@ public class AutomixFragment extends Fragment {
         updateBuckets();
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.automix_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_create) {
+            onPressCreate();
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Updates the list of buckets
      */
@@ -187,26 +207,5 @@ public class AutomixFragment extends Fragment {
         } else {
             mNoBucketTextView.setVisibility(View.GONE);
         }
-
-        updateFabHeight();
-    }
-
-    private void updateFabHeight() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // Translate the FAB position to be above the playbar
-                final MainActivity mainActivity = (MainActivity) getActivity();
-                if (mainActivity.isPlayBarVisible()) {
-                    mFabCreateMenu.animate()
-                            .translationY(-getResources().getDimensionPixelSize(R.dimen.playing_bar_height))
-                            .start();
-                } else {
-                    mFabCreateMenu.animate()
-                            .translationY(0)
-                            .start();
-                }
-            }
-        });
     }
 }

@@ -434,59 +434,61 @@ public class MainActivity extends AppActivity
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            if ((mCurrentFragmentIndex + 1) != SECTION_AUTOMIX) {
+                // Only show items in the action bar relevant to this screen
+                // if the drawer is not showing. Otherwise, let the drawer
+                // decide what to show in the action bar.
+                getMenuInflater().inflate(R.menu.main, menu);
+                SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
-            mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-            mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-            mSearchView.setIconifiedByDefault(true);
-            mSearchView.setQueryRefinementEnabled(true);
-            mSearchView.setSubmitButtonEnabled(true);
+                mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+                mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+                mSearchView.setIconifiedByDefault(true);
+                mSearchView.setQueryRefinementEnabled(true);
+                mSearchView.setSubmitButtonEnabled(true);
 
-            mSearchView.setOnSearchClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    menu.findItem(R.id.action_cast).setVisible(false);
-                    mNavigationDrawerFragment.setDrawerIndicatorEnabled(false);
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    mSearchView.requestFocus();
-                }
-            });
-            mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
-                @Override
-                public boolean onClose() {
-                    if (Utils.hasJellyBeanMR1()) {
-                        menu.findItem(R.id.action_cast).setVisible(true);
+                mSearchView.setOnSearchClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        menu.findItem(R.id.action_cast).setVisible(false);
+                        mNavigationDrawerFragment.setDrawerIndicatorEnabled(false);
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                        mSearchView.requestFocus();
                     }
+                });
+                mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+                    @Override
+                    public boolean onClose() {
+                        if (Utils.hasJellyBeanMR1()) {
+                            menu.findItem(R.id.action_cast).setVisible(true);
+                        }
 
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                    mNavigationDrawerFragment.setDrawerIndicatorEnabled(true);
-                    return false;
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                        mNavigationDrawerFragment.setDrawerIndicatorEnabled(true);
+                        return false;
+                    }
+                });
+
+                // Setup cast button on 4.2+
+                MenuItem castMenu = menu.findItem(R.id.action_cast);
+                if (Utils.hasJellyBeanMR1()) {
+                    MediaRouteActionProvider mediaRouteActionProvider =
+                            (MediaRouteActionProvider) MenuItemCompat.getActionProvider(castMenu);
+                    mediaRouteActionProvider.setRouteSelector(mCastModule.getSelector());
+                    castMenu.setVisible(true);
+                } else {
+                    Log.w(TAG, "Api too low to show cast action");
+                    castMenu.setVisible(false);
                 }
-            });
 
-            // Setup cast button on 4.2+
-            MenuItem castMenu = menu.findItem(R.id.action_cast);
-            if (Utils.hasJellyBeanMR1()) {
-                MediaRouteActionProvider mediaRouteActionProvider =
-                        (MediaRouteActionProvider) MenuItemCompat.getActionProvider(castMenu);
-                mediaRouteActionProvider.setRouteSelector(mCastModule.getSelector());
-                castMenu.setVisible(true);
-            } else {
-                Log.w(TAG, "Api too low to show cast action");
-                castMenu.setVisible(false);
-            }
-
-            // Offline mode
-            mOfflineMenuItem = menu.findItem(R.id.action_offline_mode);
-            ProviderAggregator aggregator = ProviderAggregator.getDefault();
-            if (aggregator.hasNetworkConnectivity()) {
-                mOfflineMenuItem.setChecked(aggregator.isOfflineMode());
-            } else {
-                mOfflineMenuItem.setEnabled(false);
+                // Offline mode
+                mOfflineMenuItem = menu.findItem(R.id.action_offline_mode);
+                ProviderAggregator aggregator = ProviderAggregator.getDefault();
+                if (aggregator.hasNetworkConnectivity()) {
+                    mOfflineMenuItem.setChecked(aggregator.isOfflineMode());
+                } else {
+                    mOfflineMenuItem.setEnabled(false);
+                }
             }
 
             restoreActionBar();

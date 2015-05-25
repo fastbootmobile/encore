@@ -38,40 +38,4 @@
         android:textStyle="italic"
         android:padding="@dimen/activity_horizontal_margin"/>
 
-    <com.getbase.floatingactionbutton.FloatingActionsMenu
-        android:id="@+id/fabCreateMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-
-        app:fab_addButtonColorNormal="@color/primary"
-        app:fab_addButtonColorPressed="@color/primary_dark"
-        app:fab_addButtonPlusIconColor="@color/white">
-
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabCreateDynamic"
-            app:fab_colorNormal="@color/white"
-            app:fab_colorPressed="@color/grey"
-            app:fab_icon="@drawable/ic_dynamic_playlist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabCreateStatic"
-            app:fab_colorNormal="@color/white"
-            app:fab_colorPressed="@color/grey"
-            app:fab_icon="@drawable/ic_static_playlist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-    </com.getbase.floatingactionbutton.FloatingActionsMenu>
-
-
 </RelativeLayout>
