@@ -50,7 +50,9 @@
             style="?android:attr/textAppearanceMedium"
             android:maxLines="1"
             android:singleLine="true"
-            android:ellipsize="end"/>
+            android:ellipsize="end"
+            android:textSize="15sp"
+            android:textColor="@color/text_regular" />
 
         <TextView
             android:layout_width="match_parent"
@@ -58,7 +60,9 @@
             android:id="@+id/tvAlbumYear"
             android:layout_gravity="center_vertical"
             style="?android:attr/textAppearanceMedium"
-            android:alpha="0.6"/>
+            android:alpha="0.6"
+            android:textSize="14sp"
+            android:textColor="@color/text_detail" />
 
     </LinearLayout>
 

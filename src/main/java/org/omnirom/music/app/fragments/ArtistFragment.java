@@ -307,17 +307,22 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private boolean mOpen;
         private View mHeaderDivider;
         private View mLastItemDivider;
+        private ParallaxScrollView mRootView;
         private Context mContext;
         private ArtistTracksFragment mTracksFragment;
+        private Handler mHandler;
 
-        public AlbumGroupClickListener(Album a, LinearLayout container, View header,
+        public AlbumGroupClickListener(Album a, ParallaxScrollView rootView,
+                                       LinearLayout container, View header,
                                        ArtistTracksFragment tracksFragment) {
             mAlbum = a;
+            mRootView = rootView;
             mContainer = container;
             mOpen = false;
             mHeader = header;
             mContext = header.getContext();
             mTracksFragment = tracksFragment;
+            mHandler = new Handler();
 
             mHeaderDivider = header.findViewById(R.id.divider);
             mHeaderDivider.setVisibility(View.VISIBLE);
@@ -363,6 +368,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 mItemHost.startAnimation(Utils.animateExpand(mItemHost, true));
                 mHeaderDivider.animate().alpha(1.0f).setDuration(ANIMATION_DURATION)
                         .setInterpolator(mInterpolator).start();
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRootView.smoothScrollBy(0, Utils.dpToPx(mContext.getResources(), 240));
+                    }
+                }, 300);
+
 
                 mOpen = true;
             }
@@ -1250,7 +1263,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     holder.ivPlayAlbum.setTag(holder);
 
                     AlbumGroupClickListener listener =
-                            new AlbumGroupClickListener(album, llAlbums, viewRoot, this);
+                            new AlbumGroupClickListener(album, mParent.mRootView, llAlbums, viewRoot, this);
                     viewRoot.setOnClickListener(listener);
 
                     final PlayPauseDrawable drawable = new PlayPauseDrawable(getResources(), 1);
