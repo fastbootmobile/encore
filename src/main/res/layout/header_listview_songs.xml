@@ -71,24 +71,6 @@
     </RelativeLayout>
 
 
-    <com.getbase.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabPlay"
-        android:layout_width="@dimen/fab_size_normal"
-        android:layout_height="@dimen/fab_size_normal"
-
-        app:fab_colorNormal="@color/primary"
-        app:fab_colorPressed="@color/primary_light"
-        app:fab_size="normal"
-
-        android:scaleType="centerInside"
-        android:layout_marginRight="@dimen/entview_head_fab_margin_right"
-        android:layout_marginEnd="@dimen/entview_head_fab_margin_right"
-        android:layout_marginBottom="@dimen/entview_head_fab_margin_bottom"
-        android:layout_alignBottom="@+id/tvAlbumName"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:elevation="12dp" />
-
     <TextView
         style="@style/FontHeadline"
         android:id="@+id/tvAlbumName"
@@ -118,15 +100,6 @@
         android:elevation="8dp" />
 
 
-    <ProgressBar
-        android:id="@+id/pbAlbumLoading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center"
-        android:indeterminate="true"/>
-
     <ImageView
         android:layout_width="@dimen/detail_source_logo_size"
         android:layout_height="@dimen/detail_source_logo_size"
@@ -140,6 +113,33 @@
         android:scaleType="centerInside"
         android:contentDescription="@string/app_name"
         android:elevation="9dp" />
+
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabPlay"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+
+        app:fab_colorNormal="@color/primary"
+        app:fab_colorPressed="@color/primary_light"
+        app:fab_size="normal"
+
+        android:scaleType="centerInside"
+        android:layout_marginRight="@dimen/entview_head_fab_margin_right"
+        android:layout_marginEnd="@dimen/entview_head_fab_margin_right"
+        android:layout_marginBottom="@dimen/entview_head_fab_margin_bottom"
+        android:layout_alignBottom="@+id/tvAlbumName"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:elevation="12dp" />
+
+    <ProgressBar
+        android:id="@+id/pbAlbumLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:indeterminate="true"/>
 
     <com.dd.CircularProgressButton
         android:id="@+id/cpbOffline"
