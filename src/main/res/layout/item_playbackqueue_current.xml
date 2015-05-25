@@ -102,23 +102,25 @@
                 android:layout_width="@dimen/playbackqueue_current_button_size"
                 android:layout_height="@dimen/playbackqueue_current_button_size"
                 android:layout_gravity="center_vertical"
-                android:id="@+id/btnShuffle"
-                android:src="@drawable/ic_shuffle_gray"
+                android:id="@+id/btnThumbsDown"
+                android:src="@drawable/ic_thumb_down_gray"
                 android:scaleType="centerInside"
                 android:clickable="true"
-                android:contentDescription="@string/shuffle"
-                style="@style/OmniMusic.Spec.BorderlessButton"/>
+                android:contentDescription="@string/thumbs_up_description"
+                style="@style/OmniMusic.Spec.BorderlessButton"
+                android:padding="8dp" />
 
             <ImageView
                 android:layout_width="@dimen/playbackqueue_current_button_size"
                 android:layout_height="@dimen/playbackqueue_current_button_size"
                 android:layout_gravity="center_vertical"
-                android:id="@+id/btnRepeat"
-                android:src="@drawable/ic_replay_gray"
+                android:id="@+id/btnShuffle"
+                android:src="@drawable/ic_shuffle_gray"
                 android:scaleType="centerInside"
                 android:clickable="true"
-                android:contentDescription="@string/repeat"
-                style="@style/OmniMusic.Spec.BorderlessButton"/>
+                android:contentDescription="@string/shuffle"
+                style="@style/OmniMusic.Spec.BorderlessButton"
+                android:padding="8dp" />
 
             <ImageView
                 android:layout_width="@dimen/playbackqueue_current_button_size"
@@ -130,7 +132,8 @@
                 android:contentDescription="@string/previous"
                 android:layout_marginLeft="@dimen/playbackqueue_current_button_margin"
                 style="@style/OmniMusic.Spec.BorderlessButton"
-                android:scaleType="center"/>
+                android:scaleType="centerInside"
+                android:padding="8dp" />
 
             <com.getbase.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabPlay"
@@ -140,7 +143,8 @@
                 android:clickable="true"
                 app:fab_size="mini"
                 app:fab_colorNormal="@color/primary"
-                app:fab_colorPressed="@color/primary_dark"/>
+                app:fab_colorPressed="@color/primary_dark"
+                android:focusable="false" />
 
             <ImageView
                 android:id="@+id/btnForward"
@@ -153,7 +157,20 @@
                 android:contentDescription="@string/forward"
                 android:layout_marginRight="@dimen/playbackqueue_current_button_margin"
                 style="@style/OmniMusic.Spec.BorderlessButton"
-                android:scaleType="center"/>
+                android:scaleType="centerInside"
+                android:padding="10dp" />
+
+            <ImageView
+                android:layout_width="@dimen/playbackqueue_current_button_size"
+                android:layout_height="@dimen/playbackqueue_current_button_size"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/btnRepeat"
+                android:src="@drawable/ic_replay_gray"
+                android:scaleType="centerInside"
+                android:clickable="true"
+                android:contentDescription="@string/repeat"
+                style="@style/OmniMusic.Spec.BorderlessButton"
+                android:padding="8dp" />
 
             <ImageView
                 android:layout_width="@dimen/playbackqueue_current_button_size"
@@ -161,21 +178,11 @@
                 android:layout_gravity="center_vertical"
                 android:id="@+id/btnThumbs"
                 android:src="@drawable/ic_thumbs_up_gray"
-                android:scaleType="center"
+                android:scaleType="centerInside"
                 android:clickable="true"
                 android:contentDescription="@string/thumbs_up_description"
-                style="@style/OmniMusic.Spec.BorderlessButton"/>
-
-            <ImageView
-                android:layout_width="@dimen/playbackqueue_current_button_size"
-                android:layout_height="@dimen/playbackqueue_current_button_size"
-                android:layout_gravity="center_vertical"
-                android:id="@+id/btnThumbsDown"
-                android:src="@drawable/ic_thumb_down_gray"
-                android:scaleType="center"
-                android:clickable="true"
-                android:contentDescription="@string/thumbs_up_description"
-                style="@style/OmniMusic.Spec.BorderlessButton"/>
+                style="@style/OmniMusic.Spec.BorderlessButton"
+                android:padding="8dp" />
 
         </LinearLayout>
 
