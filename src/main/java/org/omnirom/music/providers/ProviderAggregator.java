@@ -161,8 +161,11 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                             }
                         }
 
-                        cacheAlbums(conn, conn.getBinder().getAlbums());
-                        cacheArtists(conn, conn.getBinder().getArtists());
+                        IMusicProvider binder = conn.getBinder();
+                        if (binder != null) {
+                            cacheAlbums(conn, binder.getAlbums());
+                            cacheArtists(conn, binder.getArtists());
+                        }
                     } else if (conn.getBinder() != null) {
                         Log.i(TAG, "Skipping a providers because it is not setup or authenticated" +
                                 " ==> binder=" + conn.getBinder() + " ; isSetup=" +
