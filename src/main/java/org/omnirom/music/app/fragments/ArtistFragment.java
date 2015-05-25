@@ -16,7 +16,6 @@
 package org.omnirom.music.app.fragments;
 
 import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +35,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -58,6 +58,7 @@ import org.lucasr.twowayview.ItemClickSupport;
 import org.lucasr.twowayview.TwoWayView;
 import org.lucasr.twowayview.widget.DividerItemDecoration;
 import org.omnirom.music.api.echonest.EchoNest;
+import org.omnirom.music.app.AppActivity;
 import org.omnirom.music.app.ArtistActivity;
 import org.omnirom.music.app.R;
 import org.omnirom.music.app.adapters.ArtistsAdapter;
@@ -581,7 +582,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mRootView.setOnScrollListener(new ObservableScrollView.ScrollViewListener() {
             @Override
             public void onScroll(ObservableScrollView scrollView, int x, int y, int oldx, int oldy) {
-                final ActionBar ab = getActivity().getActionBar();
+                final ActionBar ab = ((AppActivity) getActivity()).getSupportActionBar();
                 if (ab != null) {
                     if (y >= tvArtist.getTop()) {
                         ab.hide();
