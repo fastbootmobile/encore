@@ -101,7 +101,7 @@
 
     <!-- Songs lists -->
     <dimen name="songs_list_hero_height">210dp</dimen>
-    <dimen name="songs_reel_play_margin">8dp</dimen>
+    <dimen name="songs_reel_play_margin">16dp</dimen>
     <dimen name="songs_reel_title_size">16sp</dimen>
 
     <!-- Automix -->

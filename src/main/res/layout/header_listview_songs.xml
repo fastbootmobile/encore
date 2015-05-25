@@ -22,7 +22,7 @@
         android:background="@color/primary"
         android:layout_below="@+id/tvAlbumName"
         android:id="@+id/layoutBar"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <ImageView
             android:layout_width="wrap_content"
