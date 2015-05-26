@@ -89,7 +89,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
         mBuilder = new NotificationCompat.Builder(mContext);
 
         // Build the core notification
-        mBuilder.setSmallIcon(R.drawable.ic_launcher_white)
+        mBuilder.setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(false)
                 .setOngoing(true)

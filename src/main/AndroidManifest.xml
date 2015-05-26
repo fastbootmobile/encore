@@ -185,7 +185,6 @@
         <!-- Artist Activity -->
         <activity
             android:name=".ArtistActivity"
-            android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
             android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails">
         </activity>
@@ -193,7 +192,6 @@
         <!-- Playlist Activity -->
         <activity
             android:name=".PlaylistActivity"
-            android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
             android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails">
         </activity>
@@ -201,7 +199,6 @@
         <!-- Album Activity -->
         <activity
             android:name=".AlbumActivity"
-            android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_artist"
             android:theme="@style/AppTheme.TransparentNavBar.AlbumDetails">
         </activity>
@@ -209,14 +206,12 @@
         <!-- Now Playing Activity -->
         <activity
             android:name=".PlaybackQueueActivity"
-            android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_playback_queue">
         </activity>
 
         <!-- Settings Activity -->
         <activity
             android:name=".SettingsActivity"
-            android:icon="@drawable/ic_launcher_white"
             android:label="@string/title_activity_settings"
             android:launchMode="singleTask">
         </activity>
