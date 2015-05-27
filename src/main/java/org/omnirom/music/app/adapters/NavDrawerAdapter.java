@@ -74,6 +74,22 @@ public class NavDrawerAdapter extends BaseAdapter {
      * {@inheritDoc}
      */
     @Override
+    public boolean isEnabled(int position) {
+        return position != REGULAR_COUNT;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean areAllItemsEnabled() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public long getItemId(int i) {
         return i;
     }

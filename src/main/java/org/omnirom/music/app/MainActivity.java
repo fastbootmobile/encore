@@ -379,9 +379,6 @@ public class MainActivity extends AppActivity
 
     public void onSectionAttached(int number) {
         switch (number) {
-            case SECTION_LISTEN_NOW:
-                mTitle = getString(R.string.title_section_listen_now);
-                break;
             case SECTION_MY_SONGS:
                 mTitle = getString(R.string.title_section_my_songs);
                 break;
@@ -403,6 +400,12 @@ public class MainActivity extends AppActivity
             case SECTION_NOW_PLAYING:
                 mTitle = getString(R.string.title_activity_playback_queue);
                 break;
+
+            case SECTION_LISTEN_NOW:
+            default:
+                mTitle = getString(R.string.title_section_listen_now);
+                break;
+
         }
     }
 
