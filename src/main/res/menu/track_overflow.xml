@@ -11,6 +11,7 @@
         android:title="@string/play_next" />
     <item
         android:id="@+id/menu_open_artist"
+        android:visible="false"
         android:title="@string/menu_open_artist_page" />
     <item
         android:id="@+id/menu_add_to_queue"
