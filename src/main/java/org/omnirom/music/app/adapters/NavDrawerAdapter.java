@@ -38,6 +38,10 @@ public class NavDrawerAdapter extends BaseAdapter {
     private static final int REGULAR_COUNT = 8;
     private static final int SPECIAL_COUNT = 2;
 
+    private static final int TYPE_REGULAR = 1;
+    private static final int TYPE_DIVIDER = 2;
+    private static final int TYPE_SPECIAL = 3;
+
     private int mActiveEntry = 0;
 
     public static class ViewHolder {
@@ -55,7 +59,7 @@ public class NavDrawerAdapter extends BaseAdapter {
      */
     @Override
     public int getCount() {
-        return REGULAR_COUNT + SPECIAL_COUNT;
+        return REGULAR_COUNT + 1 + SPECIAL_COUNT;
     }
 
     /**
@@ -78,9 +82,15 @@ public class NavDrawerAdapter extends BaseAdapter {
     public int getItemViewType(int position) {
         if (position >= 0 && position < REGULAR_COUNT) {
             return 1;
-        } else {
+        } else if (position == REGULAR_COUNT) {
             return 2;
+        } else {
+            return 3;
         }
+    }
+
+    private boolean isActiveEntry(int position) {
+        return position == mActiveEntry;
     }
 
     /**
@@ -91,29 +101,37 @@ public class NavDrawerAdapter extends BaseAdapter {
         ViewHolder tag;
         if (view == null) {
             LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
+            final int itemViewType = getItemViewType(i);
 
-            if (getItemViewType(i) == 1) {
+            if (itemViewType == TYPE_REGULAR) {
                 view = inflater.inflate(R.layout.item_nav_drawer_regular, viewGroup, false);
 
                 tag = new ViewHolder();
                 tag.tvText = (TextView) view.findViewById(android.R.id.text1);
                 view.setTag(tag);
-            } else {
+            } else if (itemViewType == TYPE_DIVIDER) {
+                view = inflater.inflate(R.layout.item_nav_drawer_divider, viewGroup, false);
+
+                tag = new ViewHolder();
+                tag.tvDivider = view;
+                view.setTag(tag);
+            } else if (itemViewType == TYPE_SPECIAL) {
                 view = inflater.inflate(R.layout.item_nav_drawer_special, viewGroup, false);
 
                 tag = new ViewHolder();
                 tag.tvText = (TextView) view.findViewById(android.R.id.text1);
-                tag.tvDivider = view.findViewById(R.id.navdrawer_divider);
                 view.setTag(tag);
+            } else {
+                throw new RuntimeException("Should not be here");
             }
         } else {
             tag = (ViewHolder) view.getTag();
         }
 
-        if (i == mActiveEntry) {
+        if (isActiveEntry(i)) {
             tag.tvText.setTextColor(tag.tvText.getResources().getColor(R.color.primary));
             view.setBackgroundColor(0xFFEAEAEA);
-        } else {
+        } else if (tag.tvText != null) {
             tag.tvText.setTextColor(tag.tvText.getResources().getColor(R.color.text_regular));
             int[] attrs = new int[] { android.R.attr.selectableItemBackground };
             TypedArray ta = view.getContext().obtainStyledAttributes(attrs);
@@ -123,98 +141,92 @@ public class NavDrawerAdapter extends BaseAdapter {
             Utils.setViewBackground(view, drawableFromTheme);
         }
 
-        if (tag.tvDivider != null) {
-            if (i == REGULAR_COUNT) {
-                tag.tvDivider.setVisibility(View.VISIBLE);
-            } else {
-                tag.tvDivider.setVisibility(View.GONE);
+        if (tag.tvText != null) {
+            switch (i + 1) {
+                case MainActivity.SECTION_LISTEN_NOW:
+                    tag.tvText.setText(R.string.title_section_listen_now);
+                    if (i == mActiveEntry) {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_listen_now_active);
+                    } else {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_listen_now);
+                    }
+                    break;
+
+                case MainActivity.SECTION_MY_SONGS:
+                    tag.tvText.setText(R.string.title_section_my_songs);
+                    if (i == mActiveEntry) {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_library_active);
+                    } else {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_library);
+                    }
+                    break;
+
+                case MainActivity.SECTION_PLAYLISTS:
+                    tag.tvText.setText(R.string.title_section_playlists);
+                    if (i == mActiveEntry) {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_playlist_active);
+                    } else {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_playlist);
+                    }
+                    break;
+
+                case MainActivity.SECTION_AUTOMIX:
+                    tag.tvText.setText(R.string.title_section_automix);
+                    if (i == mActiveEntry) {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_automix_active);
+                    } else {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_automix);
+                    }
+                    break;
+
+                case MainActivity.SECTION_RECOGNITION:
+                    tag.tvText.setText(R.string.title_section_recognition);
+                    if (i == mActiveEntry) {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_recognition_active);
+                    } else {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_recognition);
+                    }
+                    break;
+
+                case MainActivity.SECTION_HISTORY:
+                    tag.tvText.setText(R.string.section_history);
+                    if (i == mActiveEntry) {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_history_active);
+                    } else {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_history);
+                    }
+                    break;
+
+                case MainActivity.SECTION_LYRICS:
+                    tag.tvText.setText(R.string.section_lyrics);
+                    if (i == mActiveEntry) {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_lyrics_active);
+                    } else {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_lyrics);
+                    }
+                    break;
+
+                case MainActivity.SECTION_NOW_PLAYING:
+                    tag.tvText.setText(R.string.title_activity_playback_queue);
+                    if (i == mActiveEntry) {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_nowplaying_active);
+                    } else {
+                        setCompoundCompat(tag.tvText, R.drawable.ic_nav_nowplaying);
+                    }
+                    break;
+
+                // Special actions (offset with divider)
+                case MainActivity.SECTION_DRIVE_MODE+1:
+                    tag.tvText.setText(R.string.drive_mode);
+                    setCompoundCompat(tag.tvText, 0);
+                    break;
+
+                case MainActivity.SECTION_SETTINGS+1:
+                    tag.tvText.setText(R.string.settings);
+                    setCompoundCompat(tag.tvText, 0);
+                    break;
+
             }
-        }
-
-        switch (i+1) {
-            case MainActivity.SECTION_LISTEN_NOW:
-                tag.tvText.setText(R.string.title_section_listen_now);
-                if (i == mActiveEntry) {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_listen_now_active);
-                } else {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_listen_now);
-                }
-                break;
-
-            case MainActivity.SECTION_MY_SONGS:
-                tag.tvText.setText(R.string.title_section_my_songs);
-                if (i == mActiveEntry) {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_library_active);
-                } else {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_library);
-                }
-                break;
-
-            case MainActivity.SECTION_PLAYLISTS:
-                tag.tvText.setText(R.string.title_section_playlists);
-                if (i == mActiveEntry) {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_playlist_active);
-                } else {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_playlist);
-                }
-                break;
-
-            case MainActivity.SECTION_AUTOMIX:
-                tag.tvText.setText(R.string.title_section_automix);
-                if (i == mActiveEntry) {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_automix_active);
-                } else {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_automix);
-                }
-                break;
-
-            case MainActivity.SECTION_RECOGNITION:
-                tag.tvText.setText(R.string.title_section_recognition);
-                if (i == mActiveEntry) {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_recognition_active);
-                } else {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_recognition);
-                }
-                break;
-
-            case MainActivity.SECTION_HISTORY:
-                tag.tvText.setText(R.string.section_history);
-                if (i == mActiveEntry) {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_history_active);
-                } else {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_history);
-                }
-                break;
-
-            case MainActivity.SECTION_LYRICS:
-                tag.tvText.setText(R.string.section_lyrics);
-                if (i == mActiveEntry) {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_lyrics_active);
-                } else {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_lyrics);
-                }
-                break;
-
-            case MainActivity.SECTION_NOW_PLAYING:
-                tag.tvText.setText(R.string.title_activity_playback_queue);
-                if (i == mActiveEntry) {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_nowplaying_active);
-                } else {
-                    setCompoundCompat(tag.tvText, R.drawable.ic_nav_nowplaying);
-                }
-                break;
-
-            // Special actions
-            case MainActivity.SECTION_DRIVE_MODE:
-                tag.tvText.setText(R.string.drive_mode);
-                setCompoundCompat(tag.tvText, 0);
-                break;
-
-            case MainActivity.SECTION_SETTINGS:
-                tag.tvText.setText(R.string.settings);
-                setCompoundCompat(tag.tvText, 0);
-                break;
-
         }
 
         return view;
@@ -232,7 +244,7 @@ public class NavDrawerAdapter extends BaseAdapter {
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (Utils.hasJellyBeanMR1()) {
             text.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
         } else {
             text.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);

@@ -2,12 +2,6 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/navigation_drawer_item_height"
     android:orientation="vertical">
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:id="@+id/navdrawer_divider"
-        android:background="@color/separator"
-        />
     <TextView
         android:id="@android:id/text1"
         style="@style/OmniMusic.NavDrawerAction"

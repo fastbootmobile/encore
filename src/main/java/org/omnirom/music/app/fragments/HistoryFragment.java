@@ -17,6 +17,7 @@ package org.omnirom.music.app.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +46,7 @@ import java.util.List;
  */
 public class HistoryFragment extends Fragment implements ILocalCallback {
     private HistoryAdapter mAdapter;
+    private Handler mHandler = new Handler();
 
     public static HistoryFragment newInstance() {
         return new HistoryFragment();
@@ -95,7 +97,12 @@ public class HistoryFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onSongUpdate(List<Song> s) {
-        mAdapter.notifyDataSetChanged();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -112,7 +119,12 @@ public class HistoryFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onArtistUpdate(List<Artist> a) {
-        mAdapter.notifyDataSetChanged();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override

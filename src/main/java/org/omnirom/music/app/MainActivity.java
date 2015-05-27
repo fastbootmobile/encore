@@ -338,10 +338,10 @@ public class MainActivity extends AppActivity
                     newFrag = PlaybackQueueFragment.newInstance();
                     mPlayingBarLayout.animate().alpha(0).setDuration(400).start();
                     break;
-                case SECTION_DRIVE_MODE:
+                case SECTION_DRIVE_MODE+1: // offset the divider
                     startActivity(new Intent(this, DriveModeActivity.class));
                     break;
-                case SECTION_SETTINGS:
+                case SECTION_SETTINGS+1: // offset the divider
                     startActivity(new Intent(this, SettingsActivity.class));
                     break;
             }
