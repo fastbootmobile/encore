@@ -32,6 +32,7 @@ import com.echonest.api.v4.Params;
 import com.echonest.api.v4.PlaylistParams;
 import com.echonest.api.v4.SongCatalogItem;
 
+import org.omnirom.music.api.common.APIKeys;
 import org.omnirom.music.model.Album;
 import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
@@ -69,21 +70,8 @@ public class EchoNest {
      * Initializes an EchoNest API client with the EchoNest API key
      */
     public EchoNest() {
-        // Read API Key from file (for now), or fallback to the public docs API key
         try {
-            String apiKey;
-            File keyFile = new File(Environment.getExternalStorageDirectory().getPath(),
-                    "echonest.txt");
-            if (keyFile.exists()) {
-                FileInputStream fileInputStream = new FileInputStream(keyFile);
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
-                apiKey = bufferedReader.readLine();
-            } else {
-                // Fallback to docs api key (which is heavily rate limited)
-                apiKey = "FILDTEOIK2HBORODV";
-            }
-
-            mEchoNest = new EchoNestAPI(apiKey);
+            mEchoNest = new EchoNestAPI(APIKeys.KEY_ECHONEST);
             mEchoNest.setTraceRecvs(DEBUG);
             mEchoNest.setTraceSends(DEBUG);
         } catch (FileNotFoundException e) {
