@@ -852,8 +852,8 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
         // It does, update the list then
         if (hasPlaylist) {
-            if (!mHandler.hasMessages(UPDATE_OFFLINE_STATUS)) {
-                mHandler.sendEmptyMessage(UPDATE_OFFLINE_STATUS);
+            if (!mHandler.hasMessages(UPDATE_DATA_SET)) {
+                mHandler.sendEmptyMessage(UPDATE_DATA_SET);
             }
         }
     }
