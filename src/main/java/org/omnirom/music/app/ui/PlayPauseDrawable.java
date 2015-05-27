@@ -60,6 +60,7 @@ public class PlayPauseDrawable extends Drawable {
     private int mHeight;
     private int mPadding;
     private Rect mBufferingRect = new Rect();
+    private final int mTwoDP;
 
     /**
      * Default constructor
@@ -82,6 +83,8 @@ public class PlayPauseDrawable extends Drawable {
         mIconWidth = mIconHeight = (int) (dpToPx(res, 34) * scaleIcon);
         mWidth = mHeight = (int) (dpToPx(res, 48) * scaleOut);
         mPadding = mWidth - mIconWidth;
+
+        mTwoDP = (int) dpToPx(res, 2);
 
         setBounds(0, 0, mWidth, mHeight);
     }
@@ -172,10 +175,10 @@ public class PlayPauseDrawable extends Drawable {
 
         // Make the play triangle, with the "fourth" point at the tip moving towards making a
         // square (they split progressively)
-        mPath.moveTo(mPadding, mPadding);
+        mPath.moveTo(mPadding + mTwoDP * (1.0f - progress), mPadding);
         mPath.lineTo(mWidth - mPadding, (mHeight) / 2 - (mHeight - mPadding * 2) / 2 * progress);
         mPath.lineTo(mWidth - mPadding, (mHeight) / 2 + (mHeight - mPadding * 2) / 2 * progress);
-        mPath.lineTo(mPadding, mHeight - mPadding);
+        mPath.lineTo(mPadding + mTwoDP * (1.0f - progress), mHeight - mPadding);
 
         // Rotate it
         Matrix matrix = new Matrix();
