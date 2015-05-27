@@ -72,7 +72,6 @@
 
 
     <TextView
-        style="@style/FontHeadline"
         android:id="@+id/tvAlbumName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -80,6 +79,7 @@
         android:layout_alignStart="@+id/ivHero"
         android:background="@color/text_regular"
         android:transitionName="albumName"
+        android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
         fontPath="fonts/Roboto-Medium.ttf"
         android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical|start"
