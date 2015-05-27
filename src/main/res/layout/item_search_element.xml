@@ -7,7 +7,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:background="?android:attr/selectableItemBackground">
 
-    <org.omnirom.music.app.ui.AlbumArtImageView
+    <com.fastbootmobile.encore.app.ui.AlbumArtImageView
         android:id="@+id/ivCover"
         android:layout_width="56dp"
         android:layout_height="56dp"

@@ -32,7 +32,7 @@ import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 import java.lang.ref.WeakReference;
 

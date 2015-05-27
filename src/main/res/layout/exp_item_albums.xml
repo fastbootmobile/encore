@@ -46,7 +46,7 @@
         android:contentDescription="@string/downloading"
         android:scaleType="center" />
 
-    <org.omnirom.music.app.ui.SquareImageView
+    <com.fastbootmobile.encore.app.ui.SquareImageView
         android:layout_width="@dimen/artist_album_list_item_play_size"
         android:layout_height="wrap_content"
         android:id="@+id/ivOverflow"

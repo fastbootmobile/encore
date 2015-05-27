@@ -32,7 +32,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 
 /**

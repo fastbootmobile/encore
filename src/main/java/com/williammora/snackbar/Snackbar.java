@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.williammora.snackbar.listeners.SwipeDismissTouchListener;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 /**
  * View that provides quick feedback about an operation in a small popup at the base of the screen

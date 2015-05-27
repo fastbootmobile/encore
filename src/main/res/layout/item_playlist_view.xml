@@ -17,7 +17,7 @@
         android:background="@color/primary"
         android:visibility="invisible" />
 
-    <org.omnirom.music.app.ui.AlbumArtImageView
+    <com.fastbootmobile.encore.app.ui.AlbumArtImageView
         android:id="@+id/ivAlbumArt"
         android:layout_width="@dimen/playlist_view_art_size"
         android:layout_height="@dimen/playlist_view_art_size"

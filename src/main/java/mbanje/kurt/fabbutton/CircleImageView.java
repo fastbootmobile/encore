@@ -39,7 +39,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 
 public class CircleImageView extends ImageView {

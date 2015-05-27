@@ -37,7 +37,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 
 public class ProgressRingView extends View implements FabUtil.OnFabValueCallback {

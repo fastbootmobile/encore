@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ItemDecoration;
 import android.util.AttributeSet;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 /**
  * {@link android.support.v7.widget.RecyclerView.ItemDecoration} that applies a

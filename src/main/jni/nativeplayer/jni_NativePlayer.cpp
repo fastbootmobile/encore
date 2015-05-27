@@ -35,9 +35,9 @@ NativePlayer* get_layer_from_object(JNIEnv* env, jobject javaObject) {
 // -------------------------------------------------------------------------------------
 int JNI_NativePlayer_SetupFields(JNIEnv* env) {
     jclass clazz;
-    clazz = env->FindClass("org/omnirom/music/service/NativePlayer");
+    clazz = env->FindClass("com/fastbootmobile/encore/service/NativePlayer");
     if (clazz == NULL) {
-        ALOGE("Can't find org/omnirom/music/service/NativePlayer");
+        ALOGE("Can't find com/fastbootmobile/encore/service/NativePlayer");
         return -1;
     }
 

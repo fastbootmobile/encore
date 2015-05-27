@@ -4,9 +4,9 @@
                 android:layout_height="match_parent"
                 android:background="@color/black"
                 android:id="@+id/rlDriveRoot"
-                tools:context="org.omnirom.music.app.DriveModeActivity">
+                tools:context="com.fastbootmobile.encore.app.DriveModeActivity">
 
-    <org.omnirom.music.app.ui.AlbumArtImageView
+    <com.fastbootmobile.encore.app.ui.AlbumArtImageView
         android:id="@+id/ivAlbumArt"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">OmniMusic</string>
+    <string name="app_name">Encore</string>
     <string name="search_hint">Search music</string>
     <string name="title_section_listen_now">Listen now</string>
     <string name="title_section_my_songs">My songs</string>
@@ -194,7 +194,7 @@
     <string name="welcome_step2_title">Got your sources?</string>
     <string name="welcome_step2_body">Music is played from your favorite services via plug-ins. Browse and install the ones you want!</string>
     <string name="browse">Browse</string>
-    <string name="welcome_step1_title">Welcome to OmniMusic!</string>
+    <string name="welcome_step1_title">Welcome to Encore!</string>
     <string name="welcome_step1_body">Get ready for a new way of listening to music on the go!</string>
     <string name="welcome_step4_title">You\'re all set!</string>
     <string name="welcome_finish">Let\'s rock!</string>
@@ -221,7 +221,7 @@
     <string name="bluetooth_action_drive_mode">Open Drive Mode</string>
     <string name="bluetooth_action_play_queue">Start Playing Queue</string>
     <string name="rename_playlist">Rename playlist</string>
-    <string name="listen_now_no_providers">You don\'t have any providers! Search for \'OmniMusic Provider\' on the Play Store.</string>
+    <string name="listen_now_no_providers">You don\'t have any providers! Search for \'Encore Provider\' on the Play Store.</string>
     <string name="settings_setup_wizard">Open the initial setup wizard</string>
     <string name="welcome_skip">Skip\nWizard</string>
     <string name="welcome_skip_dialog_title">Skip plug-ins setup?</string>
@@ -232,7 +232,7 @@
     <string name="drive_tutorial_header_voice">Voice Command</string>
     <string name="drive_tutorial_body_voice">Tap the Voice button and say a command:\n… Play artist Red Hot Chili Peppers\n… Start playlist Starred\n… Google What\'s the weather></string>
     <string name="drive_tutorial_header_navhead">Navigation Head</string>
-    <string name="drive_tutorial_body_navhead">When pressing the Maps button, a floating album art will appear, allowing you to quickly switch back to OmniMusic\'s Drive Mode. This floating art can be moved around the screen.</string>
+    <string name="drive_tutorial_body_navhead">When pressing the Maps button, a floating album art will appear, allowing you to quickly switch back to Encore\'s Drive Mode. This floating art can be moved around the screen.</string>
     <string name="drive_tutorial_button">Got it!</string>
     <string name="toast_playlist_track_add_success">Successfully added %1$d track(s) to %2$s.</string>
     <string name="toast_playlist_track_add_partial">Added %1$d track(s) out of %2$d to %3$s.</string>

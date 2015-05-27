@@ -5,7 +5,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.SoundEffectConstants;
 import android.view.View;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 public class ItemClickSupport {
     /**

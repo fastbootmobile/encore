@@ -33,7 +33,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 import java.util.List;
 

@@ -36,7 +36,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <org.omnirom.music.app.ui.AlbumArtImageView
+                <com.fastbootmobile.encore.app.ui.AlbumArtImageView
                     android:id="@+id/ivArtistSuggestionCover"
                     android:layout_width="@dimen/artist_suggestion_card_height"
                     android:layout_height="match_parent"

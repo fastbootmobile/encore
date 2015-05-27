@@ -6,7 +6,7 @@
     android:background="@drawable/playing_bar_item_background"
     android:clickable="true">
 
-    <org.omnirom.music.app.ui.AlbumArtImageView
+    <com.fastbootmobile.encore.app.ui.AlbumArtImageView
         android:id="@+id/ivAlbumArt"
         android:layout_width="@dimen/playing_bar_height"
         android:layout_height="@dimen/playing_bar_height"

@@ -10,7 +10,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 public class AddFloatingActionButton extends FloatingActionButton {
   int mPlusColor;

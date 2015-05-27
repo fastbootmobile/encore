@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/welcome_background"
-        tools:context="org.omnirom.music.app.DriveTutorialActivity">
+        tools:context="com.fastbootmobile.encore.app.DriveTutorialActivity">
 
         <ImageView
             android:id="@+id/ivBackground"

@@ -25,7 +25,7 @@
         android:textColor="@color/text_regular"
         android:textAlignment="center" />
 
-    <org.omnirom.music.app.ui.AnimatedMicButton
+    <com.fastbootmobile.encore.app.ui.AnimatedMicButton
         android:id="@+id/btnStartRec"
         android:background="@null"
         android:layout_width="@dimen/recognition_button_size"

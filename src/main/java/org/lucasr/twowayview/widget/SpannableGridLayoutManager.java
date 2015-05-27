@@ -30,7 +30,7 @@ import android.view.ViewGroup.MarginLayoutParams;
 
 import org.lucasr.twowayview.TwoWayView;
 import org.lucasr.twowayview.widget.Lanes.LaneInfo;
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 public class SpannableGridLayoutManager extends GridLayoutManager {
     private static final String LOGTAG = "SpannableGridLayoutManager";

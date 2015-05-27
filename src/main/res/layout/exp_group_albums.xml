@@ -16,7 +16,7 @@
         android:visibility="invisible"
         android:layout_alignParentTop="true"/>
 
-    <org.omnirom.music.app.ui.AlbumArtImageView
+    <com.fastbootmobile.encore.app.ui.AlbumArtImageView
         android:layout_width="@dimen/artist_album_list_cover_size"
         android:layout_height="@dimen/artist_album_list_cover_size"
         android:layout_marginTop="@dimen/artist_album_list_item_margin"
@@ -66,7 +66,7 @@
 
     </LinearLayout>
 
-    <org.omnirom.music.app.ui.SquareImageView
+    <com.fastbootmobile.encore.app.ui.SquareImageView
         android:layout_width="@dimen/artist_album_list_item_play_size"
         android:layout_height="@dimen/artist_album_list_item_play_size"
         android:id="@+id/ivPlayAlbum"

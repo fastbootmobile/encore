@@ -27,7 +27,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 /**
  * <p>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
-    package="org.omnirom.music.app"
+    package="com.fastbootmobile.encore.app"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -52,7 +52,7 @@
 
     <!-- Main application declaration -->
     <application
-        android:name=".OmniMusic"
+        android:name="com.fastbootmobile.encore.app.OmniMusic"
         android:allowTaskReparenting="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
@@ -60,7 +60,7 @@
         android:persistent="true"
         android:process=":main"
         android:supportsRtl="true"
-        android:taskAffinity="org.omnirom.music.task"
+        android:taskAffinity="com.fastbootmobile.encore.task"
         android:theme="@style/AppTheme">
 
         <!-- GMS for Chromecast -->
@@ -75,72 +75,72 @@
 
         <!-- Playback Service -->
         <service
-            android:name="org.omnirom.music.service.PlaybackService"
+            android:name="com.fastbootmobile.encore.service.PlaybackService"
             android:enabled="true"
             android:exported="false"
             android:stopWithTask="false"/>
 
         <!-- Notification Intent Service -->
         <service
-            android:name="org.omnirom.music.service.NotifActionService"
+            android:name="com.fastbootmobile.encore.service.NotifActionService"
             android:exported="false"/>
 
         <!-- Navigation Head Service -->
         <service
-            android:name="org.omnirom.music.service.NavHeadService"
+            android:name="com.fastbootmobile.encore.service.NavHeadService"
             android:enabled="true"
             android:exported="false">
         </service>
 
         <!-- Local Provider Service -->
         <service
-            android:name="org.omnirom.music.providers.localprovider.PluginService"
+            android:name="com.fastbootmobile.encore.providers.localprovider.PluginService"
             android:exported="true"
             android:process=":localprovider">
             <intent-filter>
-                <action android:name="org.omnirom.music.action.PICK_PROVIDER"/>
+                <action android:name="com.fastbootmobile.encore.action.PICK_PROVIDER"/>
             </intent-filter>
 
             <meta-data
-                android:name="org.omnirom.music.metadata.PROVIDER_NAME"
+                android:name="com.fastbootmobile.encore.metadata.PROVIDER_NAME"
                 android:value="Local music"/>
 
             <meta-data
-                android:name="org.omnirom.music.metadata.PROVIDER_AUTHOR"
+                android:name="com.fastbootmobile.encore.metadata.PROVIDER_AUTHOR"
                 android:value="The OmniROM Project"/>
         </service>
 
         <!-- Bass Boost Plugin -->
         <service
-            android:name="org.omnirom.music.providers.bassboost.PluginService"
+            android:name="com.fastbootmobile.encore.providers.bassboost.PluginService"
             android:enabled="true"
             android:exported="true"
             android:process=":bassboost">
             <intent-filter>
-                <action android:name="org.omnirom.music.action.PICK_DSP_PROVIDER"/>
+                <action android:name="com.fastbootmobile.encore.action.PICK_DSP_PROVIDER"/>
             </intent-filter>
 
             <meta-data
-                android:name="org.omnirom.music.metadata.PROVIDER_NAME"
+                android:name="com.fastbootmobile.encore.metadata.PROVIDER_NAME"
                 android:value="Bass Boost"/>
             <meta-data
-                android:name="org.omnirom.music.metadata.PROVIDER_AUTHOR"
+                android:name="com.fastbootmobile.encore.metadata.PROVIDER_AUTHOR"
                 android:value="The OmniROM Project"/>
 
             <meta-data
-                android:name="org.omnirom.music.metadata.CONFIG_CLASS"
-                android:value="org.omnirom.music.providers.bassboost.SettingsActivity"/>
+                android:name="com.fastbootmobile.encore.metadata.CONFIG_CLASS"
+                android:value="com.fastbootmobile.encore.providers.bassboost.SettingsActivity"/>
         </service>
 
         <!-- Receiver for the media buttons -->
-        <receiver android:name="org.omnirom.music.receivers.RemoteControlReceiver">
+        <receiver android:name="com.fastbootmobile.encore.receivers.RemoteControlReceiver">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.MEDIA_BUTTON"/>
             </intent-filter>
         </receiver>
 
         <!-- Receiver for Bluetooth actions -->
-        <receiver android:name="org.omnirom.music.receivers.BluetoothReceiver">
+        <receiver android:name="com.fastbootmobile.encore.receivers.BluetoothReceiver">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED"/>
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED"/>
@@ -149,13 +149,13 @@
 
         <!-- Search suggestions and history -->
         <provider
-            android:name="org.omnirom.music.providers.SearchSuggestionProvider"
-            android:authorities="org.omnirom.music.providers.SearchSuggestionProvider"
+            android:name="com.fastbootmobile.encore.providers.SearchSuggestionProvider"
+            android:authorities="com.fastbootmobile.encore.providers.SearchSuggestionProvider"
             android:exported="false"/>
 
         <!-- Main Activity -->
         <activity
-            android:name=".MainActivity"
+            android:name="com.fastbootmobile.encore.app.MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
             android:launchMode="singleTask">
@@ -171,7 +171,7 @@
 
         <!-- Search Activity -->
         <activity
-            android:name=".SearchActivity"
+            android:name="com.fastbootmobile.encore.app.SearchActivity"
             android:label="@string/search_hint">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
@@ -184,48 +184,48 @@
 
         <!-- Artist Activity -->
         <activity
-            android:name=".ArtistActivity"
+            android:name="com.fastbootmobile.encore.app.ArtistActivity"
             android:label="@string/title_activity_artist"
             android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails">
         </activity>
 
         <!-- Playlist Activity -->
         <activity
-            android:name=".PlaylistActivity"
+            android:name="com.fastbootmobile.encore.app.PlaylistActivity"
             android:label="@string/title_activity_artist"
             android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails">
         </activity>
 
         <!-- Album Activity -->
         <activity
-            android:name=".AlbumActivity"
+            android:name="com.fastbootmobile.encore.app.AlbumActivity"
             android:label="@string/title_activity_artist"
             android:theme="@style/AppTheme.TransparentNavBar.AlbumDetails">
         </activity>
 
         <!-- Now Playing Activity -->
         <activity
-            android:name=".PlaybackQueueActivity"
+            android:name="com.fastbootmobile.encore.app.PlaybackQueueActivity"
             android:label="@string/title_activity_playback_queue">
         </activity>
 
         <!-- Settings Activity -->
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.fastbootmobile.encore.app.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:launchMode="singleTask">
         </activity>
 
         <!-- Automix Creation Activity -->
         <activity
-            android:name=".AutomixCreateActivity"
+            android:name="com.fastbootmobile.encore.app.AutomixCreateActivity"
             android:label="@string/title_activity_automix_create_static"
             android:launchMode="singleTask">
         </activity>
 
         <!-- Drive Mode Activity -->
         <activity
-            android:name=".DriveModeActivity"
+            android:name="com.fastbootmobile.encore.app.DriveModeActivity"
             android:label="@string/title_activity_drive_mode"
             android:launchMode="singleTask"
             android:theme="@style/OmniMusic.FullscreenTheme">
@@ -233,26 +233,26 @@
 
         <!-- Welcome Wizard Activity -->
         <activity
-            android:name=".WelcomeActivity"
+            android:name="com.fastbootmobile.encore.app.WelcomeActivity"
             android:label="@string/title_activity_welcome">
         </activity>
 
         <!-- Drive Mode Tutorial Activity -->
         <activity
-            android:name=".DriveTutorialActivity"
+            android:name="com.fastbootmobile.encore.app.DriveTutorialActivity"
             android:label="@string/title_activity_drive_mode">
         </activity>
 
         <!-- Bass Boost Plugin Settings Activity -->
         <activity
-            android:name="org.omnirom.music.providers.bassboost.SettingsActivity"
+            android:name="com.fastbootmobile.encore.providers.bassboost.SettingsActivity"
             android:label="@string/sound_effects"
             android:process=":bassboost">
         </activity>
 
         <!-- Bass Boost Plugin TV Settings Activity -->
         <activity
-            android:name="org.omnirom.music.providers.bassboost.LeanbackSettingsActivity"
+            android:name="com.fastbootmobile.encore.providers.bassboost.LeanbackSettingsActivity"
             android:label="@string/sound_effects"
             android:theme="@style/Theme.OmniMusic.Leanback"
             android:process=":bassboost">
@@ -260,7 +260,7 @@
 
         <!-- TV Leanback Activity -->
         <activity
-            android:name="org.omnirom.music.app.tv.TvActivity"
+            android:name="com.fastbootmobile.encore.app.tv.TvActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.OmniMusic.Leanback">
             <intent-filter>
@@ -271,37 +271,37 @@
 
         <!-- TV Search Activity -->
         <activity
-            android:name="org.omnirom.music.app.tv.TvSearchActivity"
+            android:name="com.fastbootmobile.encore.app.tv.TvSearchActivity"
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
 
         <!-- TV Album Details Activity -->
         <activity
-            android:name="org.omnirom.music.app.tv.TvAlbumDetailsActivity"
+            android:name="com.fastbootmobile.encore.app.tv.TvAlbumDetailsActivity"
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
 
         <!-- TV Artist Details Activity -->
         <activity
-            android:name="org.omnirom.music.app.tv.TvArtistDetailsActivity"
+            android:name="com.fastbootmobile.encore.app.tv.TvArtistDetailsActivity"
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
 
         <!-- TV Playlist Details Activity -->
         <activity
-            android:name="org.omnirom.music.app.tv.TvPlaylistDetailsActivity"
+            android:name="com.fastbootmobile.encore.app.tv.TvPlaylistDetailsActivity"
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
 
         <!-- TV Albums/Artist Grid Activity -->
         <activity
-            android:name=".tv.TvEntityGridActivity"
+            android:name="com.fastbootmobile.encore.app.tv.TvEntityGridActivity"
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
 
         <!-- TV Providers Activity -->
         <activity
-            android:name="org.omnirom.music.app.tv.TvProvidersActivity"
+            android:name="com.fastbootmobile.encore.app.tv.TvProvidersActivity"
             android:theme="@style/Theme.OmniMusic.Leanback">
         </activity>
     </application>

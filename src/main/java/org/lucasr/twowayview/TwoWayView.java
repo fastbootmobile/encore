@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import org.lucasr.twowayview.TwoWayLayoutManager.Orientation;
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 import java.lang.reflect.Constructor;
 

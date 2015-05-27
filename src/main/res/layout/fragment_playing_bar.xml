@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<org.omnirom.music.app.ui.PlayingBarView
+<com.fastbootmobile.encore.app.ui.PlayingBarView
     android:id="@+id/playingBarLayout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -43,4 +43,4 @@
         app:fbb_showEndBitmap="false"
         app:fbb_hideProgressOnComplete="false"
         />
-</org.omnirom.music.app.ui.PlayingBarView>
+</com.fastbootmobile.encore.app.ui.PlayingBarView>

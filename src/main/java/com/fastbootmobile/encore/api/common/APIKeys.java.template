@@ -1,0 +1,5 @@
+package com.fastbootmobile.encore.api.common;
+
+public class APIKeys {
+    public static final String KEY_ECHONEST = "<your echonest api key here>";
+}

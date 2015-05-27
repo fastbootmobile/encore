@@ -3,7 +3,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="org.omnirom.music.app.AutomixActivity$PlaceholderFragment">
+                tools:context="com.fastbootmobile.encore.app.AutomixActivity$PlaceholderFragment">
 
     <ImageView
         android:id="@+id/ivPoweredEchoNest"

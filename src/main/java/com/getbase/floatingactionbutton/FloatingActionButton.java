@@ -24,7 +24,7 @@ import android.support.annotation.DimenRes;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 public class FloatingActionButton extends ImageButton {
 

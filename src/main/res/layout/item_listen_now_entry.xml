@@ -9,7 +9,7 @@
     android:orientation="horizontal">
 
     <!-- android:viewName="cover" -->
-    <org.omnirom.music.app.ui.AlbumArtImageView
+    <com.fastbootmobile.encore.app.ui.AlbumArtImageView
         android:id="@+id/ivCover"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

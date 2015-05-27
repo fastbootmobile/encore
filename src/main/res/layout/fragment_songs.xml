@@ -4,7 +4,7 @@
               android:layout_width="match_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical"
-              tools:context="org.omnirom.music.app.fragments.SongsFragment">
+              tools:context="com.fastbootmobile.encore.app.fragments.SongsFragment">
 
     <ListView
         android:id="@+id/songsList"

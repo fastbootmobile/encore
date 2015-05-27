@@ -39,9 +39,9 @@ NativeHub* get_hub_from_object(JNIEnv* env, jobject javaObject) {
 // -------------------------------------------------------------------------------------
 int JNI_NativeHub_SetupFields(JNIEnv* env) {
     jclass clazz;
-    clazz = env->FindClass("org/omnirom/music/service/NativeHub");
+    clazz = env->FindClass("com/fastbootmobile/encore/service/NativeHub");
     if (clazz == NULL) {
-        ALOGE("Can't find org/omnirom/music/service/NativeHub");
+        ALOGE("Can't find com/fastbootmobile/encore/service/NativeHub");
         return -1;
     }
 

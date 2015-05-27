@@ -17,7 +17,7 @@ import android.util.AttributeSet;
 import android.util.StateSet;
 import android.widget.Button;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 public class CircularProgressButton extends Button {
 

@@ -158,7 +158,7 @@ int JNI_RegisterNativePlayer(JNIEnv* env) {
         return -1;
     }
 
-    return JNI_RegisterNativeMethods(env, "org/omnirom/music/service/NativePlayer",
+    return JNI_RegisterNativeMethods(env, "com/fastbootmobile/encore/service/NativePlayer",
             gMethodsNativePlayer, NELEM(gMethodsNativePlayer));
 }
 // -------------------------------------------------------------------------------------
@@ -169,7 +169,7 @@ int JNI_RegisterNativeHub(JNIEnv* env) {
         return -1;
     }
 
-    return JNI_RegisterNativeMethods(env, "org/omnirom/music/service/NativeHub",
+    return JNI_RegisterNativeMethods(env, "com/fastbootmobile/encore/service/NativeHub",
             gMethodsNativeHub, NELEM(gMethodsNativeHub));
 }
 // -------------------------------------------------------------------------------------

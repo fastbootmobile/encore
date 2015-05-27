@@ -24,7 +24,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import org.lucasr.twowayview.widget.Lanes.LaneInfo;
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 public class GridLayoutManager extends BaseLayoutManager {
     private static final String LOGTAG = "GridLayoutManager";

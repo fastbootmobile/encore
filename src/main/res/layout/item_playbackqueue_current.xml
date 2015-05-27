@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <org.omnirom.music.app.ui.AlbumArtImageView
+        <com.fastbootmobile.encore.app.ui.AlbumArtImageView
             android:id="@+id/ivAlbumArt"
             android:layout_width="0dp"
             android:layout_height="@dimen/playbackqueue_current_art_height"

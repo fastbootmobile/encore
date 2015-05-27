@@ -1,4 +1,4 @@
-<org.omnirom.music.app.ui.ParallaxScrollListView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.fastbootmobile.encore.app.ui.ParallaxScrollListView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/lvAlbumContents"
     android:layout_width="match_parent"
     android:layout_height="match_parent"

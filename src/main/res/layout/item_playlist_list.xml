@@ -22,7 +22,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"/>
 
-        <org.omnirom.music.app.ui.AlbumArtImageView
+        <com.fastbootmobile.encore.app.ui.AlbumArtImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:id="@+id/ivCover"

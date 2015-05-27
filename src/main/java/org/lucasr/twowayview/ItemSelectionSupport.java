@@ -12,7 +12,7 @@ import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.Checkable;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 

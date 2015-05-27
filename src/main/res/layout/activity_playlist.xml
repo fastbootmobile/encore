@@ -9,7 +9,7 @@
         android:id="@+id/playlist_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="org.omnirom.music.app.ArtistActivity"
+        tools:context="com.fastbootmobile.encore.app.ArtistActivity"
         tools:ignore="MergeRootFrame" />
 
     <android.support.v7.widget.Toolbar

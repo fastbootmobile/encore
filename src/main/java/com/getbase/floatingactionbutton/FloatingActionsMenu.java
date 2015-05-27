@@ -18,7 +18,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
-import org.omnirom.music.app.R;
+import com.fastbootmobile.encore.app.R;
 
 public class FloatingActionsMenu extends ViewGroup {
   private static final int ANIMATION_DURATION = 300;

@@ -1,5 +1,0 @@
-package org.omnirom.music.api.common;
-
-public class APIKeys {
-    public static final String KEY_ECHONEST = "<your echonest api key here>";
-}

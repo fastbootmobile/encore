@@ -9,7 +9,7 @@
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="org.omnirom.music.app.MainActivity">
+        tools:context="com.fastbootmobile.encore.app.MainActivity">
 
         <!-- As the main content view, the view below consumes the entire
              space available using match_parent in both dimensions. -->
@@ -59,7 +59,7 @@
              the container. -->
         <fragment
             android:id="@+id/navigation_drawer"
-            android:name="org.omnirom.music.app.fragments.NavigationDrawerFragment"
+            android:name="com.fastbootmobile.encore.app.fragments.NavigationDrawerFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="start"

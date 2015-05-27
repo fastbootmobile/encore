@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">OmniMusic</string>
+    <string name="app_name">Encore</string>
     <string name="search_hint">Rechercher</string>
     <string name="title_section_listen_now">Ecouter</string>
     <string name="title_section_my_songs">Ma bibliothèque</string>
@@ -194,7 +194,7 @@
     <string name="welcome_step2_title">Vous avez vos sources ?</string>
     <string name="welcome_step2_body">Les titres peuvent être écoutés depuis vos services favoris via des extensions téléchargeables. Explorez et installez ceux que vous souhaitez !</string>
     <string name="browse">Explorer</string>
-    <string name="welcome_step1_title">Bienvenue dans OmniMusic !</string>
+    <string name="welcome_step1_title">Bienvenue dans Encore !</string>
     <string name="welcome_step1_body">Etes-vous prêt pour une nouvelle dimension musicale portable ?</string>
     <string name="welcome_step4_title">C\'est prêt !</string>
     <string name="welcome_finish">Let\'s rock!</string>
@@ -220,7 +220,7 @@
     <string name="bluetooth_action_drive_mode">Ouvrir le mode voiture</string>
     <string name="bluetooth_action_play_queue">Lancer la file d\'écoute</string>
     <string name="rename_playlist">Renommer la playlist</string>
-    <string name="listen_now_no_providers">Vous n\'avez pas de sources! Recherchez \'OmniMusic Provider\' sur le Play Store</string>
+    <string name="listen_now_no_providers">Vous n\'avez pas de sources! Recherchez \'Encore Provider\' sur le Play Store</string>
     <string name="settings_setup_wizard">Relancer l\'assistant de configuration</string>
     <string name="welcome_skip">Ignorer\nl\'assistant</string>
     <string name="welcome_skip_dialog_title">Ignorer la configuration ?</string>
