@@ -15,7 +15,6 @@
 
 package org.omnirom.music.api.echonest;
 
-import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -38,12 +37,6 @@ import org.omnirom.music.model.Playlist;
 import org.omnirom.music.model.Song;
 import org.omnirom.music.providers.ProviderAggregator;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -70,15 +63,9 @@ public class EchoNest {
      * Initializes an EchoNest API client with the EchoNest API key
      */
     public EchoNest() {
-        try {
-            mEchoNest = new EchoNestAPI(APIKeys.KEY_ECHONEST);
-            mEchoNest.setTraceRecvs(DEBUG);
-            mEchoNest.setTraceSends(DEBUG);
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "Cannot open API Key file", e);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading API key file", e);
-        }
+        mEchoNest = new EchoNestAPI(APIKeys.KEY_ECHONEST);
+        mEchoNest.setTraceRecvs(DEBUG);
+        mEchoNest.setTraceSends(DEBUG);
     }
 
     /**
