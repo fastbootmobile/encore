@@ -130,9 +130,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             // Then we query the providers
             for (ProviderConnection conn : providers) {
                 try {
-                    if (conn.getBinder() != null &&
-                            conn.getBinder().isSetup() && conn.getBinder().isAuthenticated()) {
-                        List<Playlist> playlist = conn.getBinder().getPlaylists();
+                    IMusicProvider binder = conn.getBinder();
+                    if (binder != null && binder.isSetup() && binder.isAuthenticated()) {
+                        List<Playlist> playlist = binder.getPlaylists();
                         ensurePlaylistsSongsCached(conn, playlist);
 
                         // Cache all songs in batch
@@ -161,16 +161,13 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                             }
                         }
 
-                        IMusicProvider binder = conn.getBinder();
-                        if (binder != null) {
-                            cacheAlbums(conn, binder.getAlbums());
-                            cacheArtists(conn, binder.getArtists());
-                        }
+                        cacheAlbums(conn, binder.getAlbums());
+                        cacheArtists(conn, binder.getArtists());
                     } else if (conn.getBinder() != null) {
                         Log.i(TAG, "Skipping a providers because it is not setup or authenticated" +
-                                " ==> binder=" + conn.getBinder() + " ; isSetup=" +
-                                conn.getBinder().isSetup() + " ; isAuthenticated=" +
-                                conn.getBinder().isAuthenticated());
+                                " ==> binder=" + binder + " ; isSetup=" +
+                                binder.isSetup() + " ; isAuthenticated=" +
+                                binder.isAuthenticated());
                     } else {
                         unregisterProvider(conn);
                     }
@@ -484,6 +481,11 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                IMusicProvider binder = provider.getBinder();
+                if (binder == null) {
+                    return;
+                }
+
                 for (Playlist p : playlist) {
                     if (p == null || p.getName() == null) {
                         continue;
@@ -507,7 +509,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         // Get the song from the provider
                         Song song = null;
                         try {
-                            song = provider.getBinder().getSong(songRef);
+                            song = binder.getSong(songRef);
                         } catch (RemoteException e) {
                             // ignore, provider likely died, we just skip its song
                         }
