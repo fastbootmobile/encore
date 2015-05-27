@@ -10,27 +10,29 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tvTrackDuration"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/tvTrackName"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="@dimen/artist_album_list_item_text_padding"
         android:layout_marginLeft="@dimen/artist_album_list_item_text_padding"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:textColor="@color/text_detail" />
+         />
+
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/tvTrackName"
-        android:layout_alignTop="@+id/tvTrackDuration"
-        android:layout_toEndOf="@+id/tvTrackDuration"
-        android:layout_toRightOf="@+id/tvTrackDuration"
+        android:id="@+id/tvTrackDuration"
+        android:layout_alignTop="@+id/tvTrackName"
+        android:layout_toEndOf="@+id/tvTrackName"
+        android:layout_toRightOf="@+id/tvTrackName"
         android:layout_marginStart="@dimen/artist_album_list_item_duration_padding"
         android:layout_marginLeft="@dimen/artist_album_list_item_duration_padding"
         android:layout_toStartOf="@+id/ivOffline"
-        android:layout_toLeftOf="@+id/ivOffline" />
+        android:layout_toLeftOf="@+id/ivOffline"
+        android:textColor="@color/text_detail" />
 
     <ImageView
         android:layout_width="wrap_content"
