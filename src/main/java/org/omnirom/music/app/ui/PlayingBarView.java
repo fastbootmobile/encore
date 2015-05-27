@@ -70,6 +70,8 @@ public class PlayingBarView extends RelativeLayout {
     // Delay after which the seek bar is updated (5Hz)
     private static final int SEEK_BAR_UPDATE_DELAY = 1000 / 5;
 
+    private boolean mIsHiding = false;
+
     private static class PlayingBarHandler extends Handler {
         private WeakReference<PlayingBarView> mParent;
 
@@ -184,30 +186,7 @@ public class PlayingBarView extends RelativeLayout {
     };
 
     private GestureDetector mGestureDetector;
-    private GestureDetector.SimpleOnGestureListener mGestureListener =
-            new GestureDetector.SimpleOnGestureListener() {
-                public boolean onSingleTapUp(MotionEvent ev) {
-                    return false;
-                }
-
-                public void onLongPress(MotionEvent ev) {
-                }
-
-                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
-                                        float distanceY) {
-                    return false;
-                }
-
-                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-                                       float velocityY) {
-                    if (velocityY > 0) {
-                        setWrapped(true);
-                    } else {
-                        setWrapped(false);
-                    }
-                    return true;
-                }
-            };
+    private BarGestureListener mGestureListener = new BarGestureListener();
 
     private static final int MAX_PEEK_QUEUE_SIZE = 3;
 
@@ -360,6 +339,9 @@ public class PlayingBarView extends RelativeLayout {
     @Override
     public boolean dispatchTouchEvent(@NonNull MotionEvent ev) {
         mGestureDetector.onTouchEvent(ev);
+        if (ev.getAction() == MotionEvent.ACTION_UP) {
+            mGestureListener.onTouchUp(ev);
+        }
         return super.dispatchTouchEvent(ev);
     }
 
@@ -643,6 +625,10 @@ public class PlayingBarView extends RelativeLayout {
     }
 
     public void setWrapped(boolean wrapped, boolean animation) {
+        if (mIsHiding) {
+            return;
+        }
+
         if (wrapped && mLastQueue != null) {
             final int itemHeight = getResources().getDimensionPixelSize(R.dimen.playing_bar_height);
             final int translationY = itemHeight * Math.min(mLastQueue.size(), MAX_PEEK_QUEUE_SIZE);
@@ -677,6 +663,102 @@ public class PlayingBarView extends RelativeLayout {
             return mTracksLayout.getVisibility() == View.VISIBLE;
         } else {
             return false;
+        }
+    }
+
+    private class BarGestureListener extends GestureDetector.SimpleOnGestureListener {
+        private int mTotalDistanceX = 0;
+        private int mTotalDistanceY = 0;
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                                float distanceY) {
+            mTotalDistanceX += Math.abs(distanceX);
+            mTotalDistanceY += Math.abs(distanceY);
+            if (mTotalDistanceX > mTotalDistanceY && mTotalDistanceX > 20) {
+                boolean isPlaying = PlaybackProxy.getState() == PlaybackService.STATE_PLAYING;
+
+                if (!isPlaying) {
+                    setTranslationX(getTranslationX() + (e2.getX() - e1.getX()));
+                    float alpha = 1.0f - Math.abs(getTranslationX() / getMeasuredWidth());
+                    setAlpha(alpha);
+                }
+            } else {
+                setTranslationX(0);
+                setAlpha(1);
+            }
+            return true;
+        }
+
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                               float velocityY) {
+            if (velocityY > 100) {
+                setWrapped(true);
+            } else if (velocityY < 100) {
+                setWrapped(false);
+            }
+            return true;
+        }
+
+        public void onTouchUp(MotionEvent ev) {
+            mTotalDistanceX = 0;
+            mTotalDistanceY = 0;
+
+            final int halfWidth = getMeasuredWidth() / 2;
+            if (getTranslationX() > halfWidth || getTranslationX() < -halfWidth) {
+                mIsHiding = true;
+                animate().translationX(getTranslationX() > 0 ? getMeasuredWidth() : -getMeasuredWidth())
+                        .setDuration(200).setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mWrapped = true;
+                        mTracksLayout.setVisibility(View.GONE);
+                        setFabVisible(false);
+                        setTranslationX(0);
+                        setAlpha(1.0f);
+
+                        animate().setListener(null);
+                        mIsHiding = false;
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        animate().setListener(null);
+                        mIsHiding = false;
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+                    }
+                }).start();
+            } else if (getTranslationX() != 0) {
+                mIsHiding = true;
+                animate().translationX(0).alpha(1).setDuration(200).setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        animate().setListener(null);
+                        mIsHiding = false;
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        animate().setListener(null);
+                        mIsHiding = false;
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                }).start();
+            }
         }
     }
 }
