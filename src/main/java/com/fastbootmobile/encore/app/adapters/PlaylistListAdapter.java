@@ -29,12 +29,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableItemViewHolder;
-
-import org.json.JSONException;
 import com.fastbootmobile.encore.app.PlaylistActivity;
 import com.fastbootmobile.encore.app.R;
 import com.fastbootmobile.encore.app.ui.AlbumArtImageView;
@@ -47,6 +41,12 @@ import com.fastbootmobile.encore.model.Playlist;
 import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.utils.Utils;
 import com.fastbootmobile.encore.utils.ViewUtils;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
+import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableItemViewHolder;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Collection;

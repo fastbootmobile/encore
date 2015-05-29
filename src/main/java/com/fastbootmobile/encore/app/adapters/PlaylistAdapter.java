@@ -128,7 +128,6 @@ public class PlaylistAdapter extends SongsListAdapter {
      */
     public void setVisibility(int position, int visibility) {
         if (position >= 0 && position < mVisible.size()) {
-            Log.d(TAG, position + " visibility " + visibility);
             mVisible.set(position, visibility);
         }
     }

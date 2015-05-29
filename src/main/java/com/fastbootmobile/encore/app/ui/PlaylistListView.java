@@ -131,7 +131,7 @@ public class PlaylistListView extends ParallaxScrollListView {
                     mHoverCell = getAndAddHoverView(selectedView);
 
                     ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter())
-                            .setVisibility(position, View.INVISIBLE);
+                            .setVisibility(position - 1, View.INVISIBLE);
                     selectedView.setVisibility(INVISIBLE);
 
                     mCellIsMobile = true;
@@ -475,7 +475,7 @@ public class PlaylistListView extends ParallaxScrollListView {
                     mAboveItemId = INVALID_ID;
                     mBelowItemId = INVALID_ID;
                     mobileView.setVisibility(VISIBLE);
-                    ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter()).setVisibility(getPositionForID(mMobileItemId), VISIBLE);
+                    ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter()).setVisibility(getPositionForID(mMobileItemId) - 1, VISIBLE);
                     mMobileItemId = INVALID_ID;
                     mHoverCell = null;
                     setEnabled(true);
@@ -495,7 +495,7 @@ public class PlaylistListView extends ParallaxScrollListView {
         if (mCellIsMobile) {
             mAboveItemId = INVALID_ID;
             mBelowItemId = INVALID_ID;
-            ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter()).setVisibility(getPositionForID(mMobileItemId), VISIBLE);
+            ((PlaylistAdapter) ((HeaderViewListAdapter) getAdapter()).getWrappedAdapter()).setVisibility(getPositionForID(mMobileItemId) - 1, VISIBLE);
             mMobileItemId = INVALID_ID;
             mHoverCell = null;
             invalidate();
