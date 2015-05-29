@@ -31,7 +31,7 @@
     <dimen name="welcome_button_font">16sp</dimen>
     <dimen name="welcome_button_margin">32dp</dimen>
     <dimen name="welcome_button_margin_small">16dp</dimen>
-    <dimen name="welcome_list_margin">4dp</dimen>
+    <dimen name="welcome_list_margin">12dp</dimen>
 
     <!-- General Entities Views -->
     <dimen name="entview_head_padding_left">24dp</dimen>

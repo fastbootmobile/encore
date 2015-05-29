@@ -17,15 +17,6 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="0dp"/>
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ivIllustration"
-        android:src="@drawable/welcome_illus_3"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,10 +38,9 @@
         android:id="@+id/tvExplanation"
         android:textColor="@color/white"
         android:textSize="@dimen/welcome_body_font"
-        android:layout_alignTop="@+id/ivIllustration"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="@dimen/welcome_body_margin"
-        android:layout_marginRight="@dimen/welcome_body_margin"/>
+        android:layout_below="@+id/tvTitle"
+        android:layout_alignLeft="@+id/tvTitle"
+        android:layout_alignStart="@+id/tvTitle"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -76,8 +66,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:divider="@color/white"
-        android:dividerHeight="@dimen/divider_height"
+        android:divider="@null"
         android:layout_marginTop="@dimen/welcome_list_margin"
         android:layout_marginBottom="@dimen/welcome_list_margin"/>
 </RelativeLayout>

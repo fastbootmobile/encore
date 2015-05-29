@@ -17,15 +17,6 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="0dp"/>
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ivIllustration"
-        android:src="@drawable/welcome_illus_3"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -71,12 +62,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/lvProviders"
-        android:divider="@color/white"
-        android:dividerHeight="@dimen/divider_height"
+        android:divider="@null"
         android:layout_alignParentBottom="true"
         android:layout_below="@+id/tvExplanation"
         android:layout_alignLeft="@+id/tvExplanation"
         android:layout_alignStart="@+id/tvExplanation"
         android:layout_alignRight="@+id/tvExplanation"
-        android:layout_alignEnd="@+id/tvExplanation"/>
+        android:layout_alignEnd="@+id/tvExplanation"
+        android:layout_margin="@dimen/welcome_list_margin"/>
 </RelativeLayout>

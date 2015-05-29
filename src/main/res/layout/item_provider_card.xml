@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_margin="4dp"
+        android:background="?android:attr/selectableItemBackground"
+        app:cardCornerRadius="@dimen/card_radius"
+        app:cardElevation="@dimen/card_elevation">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            >
+
+            <ImageView
+                android:id="@+id/ivProviderLogo"
+                android:layout_width="@dimen/dsp_item_provider_size"
+                android:layout_height="@dimen/dsp_item_provider_size"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="0dp"
+                android:contentDescription="@string/loading"
+                android:scaleType="centerInside"/>
+
+            <ImageView
+                android:id="@+id/ivChecked"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_margin="8dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/circle_green"
+                android:src="@drawable/ic_check_white_solid"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/ivProviderLogo"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="8dp"
+                android:layout_toEndOf="@+id/ivProviderLogo"
+                android:layout_toLeftOf="@+id/ivChecked"
+                android:layout_toRightOf="@+id/ivProviderLogo"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvProviderName"
+                    style="@style/FontSubhead"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    />
+
+                <TextView
+                    android:id="@+id/tvProviderAuthor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ivDelete"
+                style="@style/OmniMusic.Spec.BorderlessButton"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:clickable="true"
+                android:focusable="false"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_delete"
+                />
+
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+</FrameLayout>

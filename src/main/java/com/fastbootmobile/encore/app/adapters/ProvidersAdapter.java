@@ -112,7 +112,7 @@ public class ProvidersAdapter extends BaseAdapter {
 
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.item_provider, viewGroup, false);
+            view = inflater.inflate(mWhite ? R.layout.item_provider_card : R.layout.item_provider, viewGroup, false);
             tag = new ViewHolder();
             tag.vRoot = (ViewGroup) view;
             tag.tvProviderAuthor = (TextView) view.findViewById(R.id.tvProviderAuthor);
@@ -123,12 +123,6 @@ public class ProvidersAdapter extends BaseAdapter {
 
             tag.ivDelete.setTag(tag);
             view.setTag(tag);
-
-            if (mWhite) {
-                tag.tvProviderName.setTextColor(0xFFFFFFFF);
-                tag.tvProviderAuthor.setTextColor(0xFFFFFFFF);
-                tag.ivDelete.setVisibility(View.GONE);
-            }
 
             tag.ivDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
