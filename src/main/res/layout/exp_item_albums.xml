@@ -1,62 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="@dimen/list_item_height"
-    android:clickable="true"
-    android:background="?android:attr/selectableItemBackground">
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/list_item_height"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:orientation="horizontal">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/tvTrackName"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/artist_album_list_item_text_padding"
-        android:layout_marginLeft="@dimen/artist_album_list_item_text_padding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="@dimen/artist_album_list_item_text_padding"
+        android:layout_marginStart="@dimen/artist_album_list_item_text_padding"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_toLeftOf="@+id/tvTrackDuration"
         android:layout_alignParentLeft="true"
-         />
+        android:layout_alignParentStart="true"/>
 
 
     <TextView
+        android:id="@+id/tvTrackDuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tvTrackDuration"
-        android:layout_alignTop="@+id/tvTrackName"
-        android:layout_toEndOf="@+id/tvTrackName"
-        android:layout_toRightOf="@+id/tvTrackName"
-        android:layout_marginStart="@dimen/artist_album_list_item_duration_padding"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/artist_album_list_item_duration_padding"
-        android:layout_toStartOf="@+id/ivOffline"
+        android:layout_marginRight="@dimen/artist_album_list_item_duration_padding"
         android:layout_toLeftOf="@+id/ivOffline"
-        android:textColor="@color/text_detail" />
+        android:textColor="@color/text_detail"/>
 
     <ImageView
+        android:id="@+id/ivOffline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/ivOffline"
         android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@+id/ivOverflow"
-        android:layout_toLeftOf="@+id/ivOverflow"
-        android:src="@drawable/ic_track_downloaded"
         android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/ivOverflow"
+        android:layout_toStartOf="@+id/ivOverflow"
         android:contentDescription="@string/downloading"
-        android:scaleType="center" />
+        android:scaleType="center"
+        android:src="@drawable/ic_track_downloaded"/>
 
     <com.fastbootmobile.encore.app.ui.SquareImageView
+        android:id="@+id/ivOverflow"
         android:layout_width="@dimen/artist_album_list_item_play_size"
         android:layout_height="wrap_content"
-        android:id="@+id/ivOverflow"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:src="@drawable/ic_more_vert_dark"
         android:layout_alignParentTop="true"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
-        android:scaleType="center" />
+        android:scaleType="center"
+        android:src="@drawable/ic_more_vert_dark"/>
 
 </RelativeLayout>
