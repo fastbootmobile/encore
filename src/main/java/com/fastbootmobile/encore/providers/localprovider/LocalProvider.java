@@ -546,7 +546,7 @@ public class LocalProvider {
      */
     public List<Song> getSongs(int offset, int range) {
         final ArrayList<Song> songs = new ArrayList<Song>();
-        final Collection<LocalSong> localSongs = mSongs.values();
+        final Collection<LocalSong> localSongs = new ArrayList<>(mSongs.values());
 
         int index = 0;
         for (LocalSong song : localSongs) {
