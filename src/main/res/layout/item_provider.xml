@@ -37,7 +37,8 @@
         android:gravity="center_vertical"
         android:layout_toLeftOf="@+id/ivChecked"
         android:layout_toRightOf="@+id/ivProviderLogo"
-        android:layout_toEndOf="@+id/ivProviderLogo">
+        android:layout_toEndOf="@+id/ivProviderLogo"
+        android:layout_marginLeft="8dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -45,13 +46,13 @@
             android:id="@+id/tvProviderName"
             style="@style/FontSubhead"
             android:layout_marginBottom="4dp"
-            android:text="name"/>
+            />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tvProviderAuthor"
-            android:text="author"/>
+            />
     </LinearLayout>
 
     <ImageView
