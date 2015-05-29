@@ -15,7 +15,8 @@ android {
         targetSdkVersion 22
         versionCode 9
         versionName "0.3.0"
-        renderscriptTargetApi = 18
+        renderscriptTargetApi 18
+        multiDexEnabled false
     }
 
     buildTypes {
@@ -60,13 +61,12 @@ android {
 
 dependencies {
     compile project(':providerlib')
-    compile project(':google_play_services')
     compile files('src/main/libs/jEN.jar')
     compile files('src/main/libs/json_simple-1.1.jar')
-    compile files('src/main/libs/google-play-services.jar')
     compile files('src/main/libs/java_websocket.jar')
     compile files('src/main/libs/calligraphy-1.1.0.jar')
     compile files('src/main/libs/sentry-1.1.4.jar')
+    compile 'com.google.android.gms:play-services-cast:7.5.0'
     compile 'com.android.support:support-v13:22.1.1'
     compile 'com.android.support:mediarouter-v7:22.1.1'
     compile 'com.android.support:cardview-v7:22.1.1'
