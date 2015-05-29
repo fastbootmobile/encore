@@ -705,6 +705,7 @@ public class PlayingBarView extends RelativeLayout {
             final int halfWidth = getMeasuredWidth() / 2;
             if (getTranslationX() > halfWidth || getTranslationX() < -halfWidth) {
                 mIsHiding = true;
+                PlaybackProxy.stop();
                 animate().translationX(getTranslationX() > 0 ? getMeasuredWidth() : -getMeasuredWidth())
                         .setDuration(200).setListener(new Animator.AnimatorListener() {
                     @Override
