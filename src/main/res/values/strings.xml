@@ -251,4 +251,6 @@
     <string name="automix_create_dialog_title">Type of generation</string>
     <string name="automix_type_static">Static playlist of 100 tracks</string>
     <string name="automix_type_dynamic">Dynamic bucket with infinite tracks</string>
+    <string name="multiprovider_name">Multi-providers</string>
+    <string name="local_provider_name">Local music</string>
 </resources>

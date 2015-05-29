@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.fastbootmobile.encore.app.R;
 import com.fastbootmobile.encore.art.ImageCache;
 import com.fastbootmobile.encore.art.RecyclingBitmapDrawable;
 import com.fastbootmobile.encore.model.BoundEntity;
@@ -139,7 +140,7 @@ public class PluginsLookup {
         mMultiProviderPlaylistProvider = new MultiProviderPlaylistProvider(mContext);
         mMultiProviderConnection = injectProvider(mMultiProviderPlaylistProvider,
                 "com.fastbootmobile.encore.providers", "com.fastbootmobile.encore.providers.MultiProviderPlaylistProvider",
-                "Multi-Provider Playlists Provider", "The OmniROM Project", null);
+                mContext.getString(R.string.multiprovider_name), "The OmniROM Project", null);
     }
 
     private InjectedProviderConnection injectProvider(IMusicProvider provider, String pkg,

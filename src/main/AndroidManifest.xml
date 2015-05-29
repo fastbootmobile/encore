@@ -103,7 +103,7 @@
 
             <meta-data
                 android:name="com.fastbootmobile.encore.metadata.PROVIDER_NAME"
-                android:value="Local music"/>
+                android:value="@string/local_provider_name"/>
 
             <meta-data
                 android:name="com.fastbootmobile.encore.metadata.PROVIDER_AUTHOR"
