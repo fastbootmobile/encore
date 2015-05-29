@@ -559,12 +559,22 @@ public class MainActivity extends AppActivity
     }
 
     private void showSleepTimerPicker() {
-        TimePickerDialog dlg = new TimePickerDialog(this, this, 0, 0, true);
+        TimePickerDialog dlg;
+        if (Utils.hasLollipop()) {
+            dlg = new TimePickerDialog(this, R.style.TimePickerAppDialog, this, 0, 0, true);
+        } else {
+            dlg = new TimePickerDialog(this, this, 0, 0, true);
+        }
         dlg.show();
     }
 
     private void showSleepTimerPicker(int hour, int minute) {
-        TimePickerDialog dlg = new TimePickerDialog(this, this, hour, minute, true);
+        TimePickerDialog dlg;
+        if (Utils.hasLollipop()) {
+            dlg = new TimePickerDialog(this, R.style.TimePickerAppDialog, this, hour, minute, true);
+        } else {
+            dlg = new TimePickerDialog(this, this, hour, minute, true);
+        }
         dlg.show();
     }
 

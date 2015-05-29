@@ -47,4 +47,10 @@
         <item name="android:windowSharedElementEnterTransition">@transition/album_grid_to_view</item>
         <item name="android:windowSharedElementReturnTransition">@transition/album_view_to_grid</item>
     </style>
+
+    <style name="TimePickerAppDialog" parent="android:Theme.Material.Light.Dialog">
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorAccent">@color/accent</item>
+    </style>
 </resources>
