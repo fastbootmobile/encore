@@ -6,7 +6,7 @@
     <dimen name="button_elevation">4dp</dimen>
     <dimen name="button_press_elevation">8dp</dimen>
 
-    <dimen name="card_elevation">6dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
     <dimen name="card_radius">2dp</dimen>
     <dimen name="shadow_height">2dp</dimen>
 
@@ -155,4 +155,5 @@
     <dimen name="leanback_track_row_title_width">502dp</dimen>
     <dimen name="leanback_track_row_info_width_with_padding">88dp</dimen>
     <dimen name="leanback_track_row_icon_size">24dp</dimen>
+    <dimen name="recognition_card_height">112dp</dimen>
 </resources>

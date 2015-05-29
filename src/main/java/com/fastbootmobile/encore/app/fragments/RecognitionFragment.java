@@ -24,13 +24,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -59,16 +61,24 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
     private static final int MSG_RESULT = 2;
     private static final int MSG_NO_RESULT = 3;
 
+    private static final int FADE_DURATION = 500;
+
     private EchoPrint mActivePrint;
     private EchoPrint.PrintResult mLastResult;
-    private TextView mTvOops;
+
+    private LinearLayout mButtonLayout;
+    private AnimatedMicButton mRecognitionButton;
+    private TextView mTvStatus;
+    private TextView mTvDetails;
+
+    private CardView mCardResult;
     private TextView mTvTitle;
     private TextView mTvArtist;
     private TextView mTvAlbum;
     private ImageView mIvArt;
-    private AnimatedMicButton mRecognitionButton;
     private Button mSearchButton;
-    private ProgressBar mProgressRecognizing;
+
+
     private TextView mTvOfflineError;
 
     private static class RecognitionHandler extends Handler {
@@ -88,7 +98,7 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
             } else if (msg.what == MSG_RESULT) {
                 mParent.get().showLastResult();
             } else if (msg.what == MSG_NO_RESULT) {
-                mParent.get().showNoResult();
+                mParent.get().onNoResults();
             }
         }
     }
@@ -131,14 +141,21 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         RelativeLayout root = (RelativeLayout) inflater.inflate(R.layout.fragment_recognition, container, false);
+
+        // Recognition layout
+        mButtonLayout = (LinearLayout) root.findViewById(R.id.llRecognitionButton);
         mRecognitionButton = (AnimatedMicButton) root.findViewById(R.id.btnStartRec);
+        mTvStatus = (TextView) root.findViewById(R.id.tvStatus);
+        mTvDetails = (TextView) root.findViewById(R.id.tvDetailsText);
+
+        // Result layout
+        mCardResult = (CardView) root.findViewById(R.id.cardResult);
         mTvAlbum = (TextView) root.findViewById(R.id.tvAlbumName);
         mTvArtist = (TextView) root.findViewById(R.id.tvArtistName);
         mTvTitle = (TextView) root.findViewById(R.id.tvTrackName);
-        mTvOops = (TextView) root.findViewById(R.id.tvCannotRecognize);
         mIvArt = (ImageView) root.findViewById(R.id.ivRecognitionArt);
-        mProgressRecognizing = (ProgressBar) root.findViewById(R.id.pbRecognizing);
         mSearchButton = (Button) root.findViewById(R.id.btnSearch);
+
         mTvOfflineError = (TextView) root.findViewById(R.id.tvErrorMessage);
         mTvOfflineError.setText(R.string.error_recognition_unavailable_offline);
 
@@ -148,16 +165,10 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
         mRecognitionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mTvAlbum.setText(null);
-                mTvArtist.setText(null);
-                mTvTitle.setText(null);
-                mIvArt.setVisibility(View.INVISIBLE);
-                mSearchButton.setVisibility(View.GONE);
-                mRecognitionButton.setActive(true);
-
                 if (mActivePrint == null) {
                     mActivePrint = new EchoPrint(RecognitionFragment.this);
                     mActivePrint.startRecording();
+                    onRecognitionStartUI();
 
                     // The buffer has a max size of 20 seconds, so we force stop at around 19 seconds
                     mHandler.postDelayed(mStopRecognition, 19000);
@@ -207,10 +218,7 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
     }
 
     private void onStoppedAndRecognizing() {
-        mRecognitionButton.setEnabled(false);
-        mProgressRecognizing.setVisibility(View.VISIBLE);
-        mTvOops.setVisibility(View.GONE);
-        mSearchButton.setVisibility(View.GONE);
+        onRecognitionStopUI();
     }
 
     private void loadAlbumArt(final String urlString, final ImageView iv) {
@@ -272,28 +280,71 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
         mRecognitionButton.setLevel(level);
     }
 
+    public void onRecognitionStartUI() {
+        mRecognitionButton.setActive(true);
+        if (mTvDetails.getAlpha() > 0) {
+            // Hide the details text
+            mTvDetails.animate()
+                    .alpha(0)
+                    .translationY(mTvDetails.getMeasuredHeight())
+                    .setDuration(FADE_DURATION)
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .start();
+        }
+        mTvStatus.setText(R.string.recognition_status_listening);
+        hideResultCard();
+    }
+
+    public void onRecognitionStopUI() {
+        // Disable the button and prevent clicking it while we're processing
+        mRecognitionButton.setActive(false);
+        mRecognitionButton.setEnabled(false);
+
+        mTvStatus.setText(R.string.recognition_status_recognizing);
+    }
+
+    public void onNoResults() {
+        mActivePrint = null;
+        showNoResult();
+    }
+
     public void showLastResult() {
-        mTvOops.setVisibility(View.GONE);
+        mActivePrint = null;
+
+        showResultCard();
         mTvAlbum.setText(mLastResult.AlbumName);
         mTvTitle.setText(mLastResult.TrackName);
         mTvArtist.setText(mLastResult.ArtistName);
-        mSearchButton.setVisibility(View.VISIBLE);
-        mProgressRecognizing.setVisibility(View.GONE);
+
         mRecognitionButton.setActive(false);
+        mRecognitionButton.setEnabled(true);
+        mTvStatus.setText(R.string.recognition_status_idle);
 
         // Load the album art in a thread
         loadAlbumArt(mLastResult.AlbumImageUrl, mIvArt);
     }
 
-    public void showNoResult() {
-        mTvOops.setVisibility(View.VISIBLE);
-        mSearchButton.setVisibility(View.GONE);
-        mTvAlbum.setText(null);
-        mTvArtist.setText(null);
-        mTvTitle.setText(null);
+    public void showResultCard() {
+        mCardResult.animate().alpha(1).translationY(-mCardResult.getMeasuredHeight())
+                .setDuration(FADE_DURATION).setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+        mButtonLayout.animate().translationY(-mCardResult.getMeasuredHeight())
+                .setDuration(FADE_DURATION).setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+    }
 
-        mActivePrint = null;
-        mProgressRecognizing.setVisibility(View.GONE);
+    public void hideResultCard() {
+        mCardResult.animate().alpha(0).translationY(mCardResult.getMeasuredHeight())
+                .setDuration(FADE_DURATION).setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+        mButtonLayout.animate().translationY(0)
+                .setDuration(FADE_DURATION).setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+    }
+
+    public void showNoResult() {
+        mRecognitionButton.setActive(false);
         mRecognitionButton.setEnabled(true);
+        mTvStatus.setText(R.string.recognition_status_no_result);
     }
 }
