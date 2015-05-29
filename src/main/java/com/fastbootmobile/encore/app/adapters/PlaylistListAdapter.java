@@ -171,7 +171,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
         if (position == 0) {
             return -1;
         } else {
-            return mPlaylists.get(position).getRef().hashCode();
+            return mPlaylists.get(position - 1).getRef().hashCode();
         }
     }
 
@@ -227,7 +227,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
                 }
             });
         } else if (itemViewType == VIEW_TYPE_REGULAR) {
-            final Playlist item = mPlaylists.get(position);
+            final Playlist item = mPlaylists.get(position - 1);
             holder.tvPlaylistName.setText(item.getName());
             holder.ivCover.loadArtForPlaylist(item);
 
@@ -319,8 +319,8 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
             return;
         }
 
-        Playlist p = mPlaylists.remove(fromPosition); // Offset the header items
-        mPlaylists.add(toPosition, p);
+        Playlist p = mPlaylists.remove(fromPosition - 1); // Offset the header items
+        mPlaylists.add(toPosition - 1, p);
         ensureOrderer(null);
         mOrderer.setOrder(mPlaylists);
 

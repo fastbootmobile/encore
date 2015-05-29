@@ -475,6 +475,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                                             final List<Playlist> playlist) {
         if (provider == null || playlist == null) {
             // playlist may be null if there are no playlists
+            Log.w(TAG, "Bailing playlist song caching because provider or playlist is null");
             return;
         }
 
@@ -489,6 +490,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 for (Playlist p : playlist) {
                     if (p == null || p.getName() == null) {
                         continue;
+                    }
+
+                    if (p.getProvider() == null) {
+                        Log.w(TAG, "Playlist '" + p.getRef() + "' cached without identifier!");
                     }
 
                     mCache.putPlaylist(provider.getIdentifier(), p);
@@ -687,7 +692,8 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @return A list of playlists
      */
     public List<Playlist> getAllPlaylists() {
-        new Thread(mUpdatePlaylistsRunnable).start();
+        mBackHandler.removeCallbacks(mUpdatePlaylistsRunnable);
+        mBackHandler.post(mUpdatePlaylistsRunnable);
         return mCache.getAllPlaylists();
     }
 
@@ -760,7 +766,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         // Request playlists if we logged in
         Log.d(TAG, "onLoggedIn(" + success + ")");
         if (success) {
-            new Thread(mUpdatePlaylistsRunnable).start();
+            // Cache data
+            mBackHandler.removeCallbacks(mUpdatePlaylistsRunnable);
+            mBackHandler.post(mUpdatePlaylistsRunnable);
         } else {
             mMainHandler.post(new Runnable() {
                 @Override

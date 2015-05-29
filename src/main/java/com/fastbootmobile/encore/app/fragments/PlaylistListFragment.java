@@ -35,12 +35,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-
-import org.json.JSONException;
 import com.fastbootmobile.encore.app.MainActivity;
 import com.fastbootmobile.encore.app.PlaylistActivity;
 import com.fastbootmobile.encore.app.R;
@@ -55,6 +49,12 @@ import com.fastbootmobile.encore.model.Song;
 import com.fastbootmobile.encore.providers.ILocalCallback;
 import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
+import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
+import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
+import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
