@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Image cache in the cache directory on internal storage
@@ -43,6 +44,7 @@ import java.util.Set;
 public class ImageCache {
     private static final String TAG = "ImageCache";
     private static final ImageCache INSTANCE = new ImageCache();
+    private static final long EXPIRATION_TIME = TimeUnit.DAYS.toMillis(1);
 
     private static final boolean USE_MEMORY_CACHE = true;
 
@@ -119,7 +121,16 @@ public class ImageCache {
         File[] entries = mCacheDir.listFiles();
         if (entries != null) {
             for (File entry : entries) {
-                mEntries.add(entry.getName());
+                if (System.currentTimeMillis() - entry.lastModified() > EXPIRATION_TIME
+                        && entry.getName().contains("playlist")) {
+                    // Expire playlist art regularly
+                    if (!entry.delete()) {
+                        // Couldn't delete the art... Let's load it anyway then
+                        mEntries.add(entry.getName());
+                    }
+                } else {
+                    mEntries.add(entry.getName());
+                }
             }
         }
 
