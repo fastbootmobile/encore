@@ -499,9 +499,16 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         } else if (item.getItemId() == R.id.menu_rename_playlist) {
             renamePlaylistDialog();
             return true;
+        } else if (item.getItemId() == R.id.menu_add_to_playlist) {
+            addToPlaylist();
         }
 
         return false;
+    }
+
+    private void addToPlaylist() {
+        PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(mPlaylist);
+        fragment.show(getActivity().getSupportFragmentManager(), mPlaylist.getRef());
     }
 
     private void renamePlaylistDialog() {

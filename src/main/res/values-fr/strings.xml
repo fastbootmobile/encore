@@ -252,4 +252,5 @@
     <string name="automix_type_dynamic">Pot dynamique avec un nombre de pistes infini</string>
     <string name="multiprovider_name">Multi-sources</string>
     <string name="local_provider_name">Local</string>
+    <string name="add_to_another_playlist">Ajouter à une autre playlist</string>
 </resources>

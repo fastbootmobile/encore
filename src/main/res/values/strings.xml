@@ -253,4 +253,5 @@
     <string name="automix_type_dynamic">Dynamic bucket with infinite tracks</string>
     <string name="multiprovider_name">Multi-providers</string>
     <string name="local_provider_name">Local music</string>
+    <string name="add_to_another_playlist">Add to another playlist</string>
 </resources>
