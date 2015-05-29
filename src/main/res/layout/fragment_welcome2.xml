@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/ivIllustration"
         android:src="@drawable/welcome_illus_2"
-        android:layout_centerVertical="true"
+        android:layout_below="@+id/tvTitle"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"/>
 
