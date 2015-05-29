@@ -285,7 +285,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                 final int toolbarAlphaInteger = (((int) (toolbarBgAlpha * 255)) << 24) | 0xFFFFFF;
                 mColorDrawable.setColor(toolbarAlphaInteger & getResources().getColor(R.color.primary));
 
-                SpannableString spannableTitle = new SpannableString(mPlaylist.getName());
+                SpannableString spannableTitle = new SpannableString(mPlaylist.getName() != null ? mPlaylist.getName() : "");
                 mAlphaSpan.setAlpha(toolbarBgAlpha);
 
                 ActionBar actionbar = ((AppActivity) getActivity()).getSupportActionBar();
