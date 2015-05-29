@@ -58,7 +58,7 @@ public class PlaylistArtBuilder {
     private Runnable mTimeoutWatchdog = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.w(TAG, "Watchdog kicking " + mNumComposite + " images");
+            if (DEBUG) Log.w(TAG, "Watchdog kicking " + mPlaylistSource.size() + " images");
 
             if (mPlaylistComposite != null) {
                 try {
@@ -211,7 +211,7 @@ public class PlaylistArtBuilder {
             mDone = true;
             try {
                 callback.onArtLoaded(null);
-            } catch (RemoteException e) {
+            } catch (RemoteException ignore) {
             }
             return;
         }
