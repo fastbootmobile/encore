@@ -612,7 +612,7 @@ public class LocalProvider {
      * @return returns a list of the Playlists
      */
     public List<Playlist> getPlaylists() {
-        return new ArrayList<Playlist>(mPlaylists.values());
+        return new ArrayList<>(mPlaylists.values());
     }
 
     /**
@@ -755,10 +755,16 @@ public class LocalProvider {
      * @return true if the playlist has been deleted
      */
     public boolean deletePlaylist(String playlistRef) {
+        Log.d(TAG, "Deleting playlist " + playlistRef);
+
         long id = getPlaylistId(playlistRef);
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", id);
-        mContentResolver.delete(uri, null, null);
+        String where = MediaStore.Audio.Playlists._ID + "=?";
+        String[] whereVal = {String.valueOf(id)};
+
+        mContentResolver.delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, where, whereVal);
+
         mPlaylists.remove(playlistRef);
+        mCallback.playlistRemoved(playlistRef);
 
         // Errors aren't supported for now
         return true;
@@ -779,7 +785,10 @@ public class LocalProvider {
         values.put(MediaStore.Audio.Playlists.NAME, title);
         mContentResolver.update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, values, where, whereVal);
 
-        mPlaylists.get(playlistRef).setName(title);
+        Playlist playlist = mPlaylists.get(playlistRef);
+        playlist.setName(title);
+
+        mCallback.playlistUpdated(playlist);
 
         // Errors aren't supported for now
         return true;
@@ -1236,15 +1245,16 @@ public class LocalProvider {
      * Callback interface to communicate with the service
      */
     public interface LocalCallback {
-        public int musicDelivery(byte[] data, int frames, int channels, int sampleRate);
-        public void artistUpdated(final Artist artist);
-        public void albumUpdated(final Album album);
-        public void songUpdated(final Song song);
-        public void playlistUpdated(final Playlist playlist);
-        public void genreUpdated(final Genre genre);
-        public void searchFinished(final SearchResult searchResult);
-        public void songFinished();
-        public void songPaused();
-        public void songPlaying();
+        int musicDelivery(byte[] data, int frames, int channels, int sampleRate);
+        void artistUpdated(final Artist artist);
+        void albumUpdated(final Album album);
+        void songUpdated(final Song song);
+        void playlistUpdated(final Playlist playlist);
+        void playlistRemoved(final String playlistRef);
+        void genreUpdated(final Genre genre);
+        void searchFinished(final SearchResult searchResult);
+        void songFinished();
+        void songPaused();
+        void songPlaying();
     }
 }

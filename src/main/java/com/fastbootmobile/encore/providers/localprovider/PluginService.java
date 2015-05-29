@@ -242,6 +242,26 @@ public class PluginService extends Service implements AudioSocket.ISocketCallbac
         }
 
         @Override
+        public void playlistRemoved(final String playlistRef) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mCallbacks) {
+                        for (IProviderCallback cb : mCallbacks) {
+                            try {
+                                cb.onPlaylistRemoved(mIdentifier, playlistRef);
+                            } catch (DeadObjectException e) {
+                                removeCallback(cb);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "RemoteException when notifying a callback", e);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        @Override
         public void albumUpdated(final Album album) {
             if (mIdentifier == null) {
                 return;
@@ -789,7 +809,6 @@ public class PluginService extends Service implements AudioSocket.ISocketCallbac
 
         @Override
         public boolean onUserSwapPlaylistItem(int oldPosition, int newPosition, String playlistRef) {
-            Log.d("LocalProvider", "we swap thoses");
             return mLocalProvider.onUserSwapPlaylistItem(oldPosition, newPosition, playlistRef);
         }
 
