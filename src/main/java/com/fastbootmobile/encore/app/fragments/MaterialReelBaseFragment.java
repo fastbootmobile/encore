@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.fastbootmobile.encore.service.PlaybackService;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import com.fastbootmobile.encore.app.R;
@@ -199,4 +200,15 @@ public class MaterialReelBaseFragment extends Fragment {
         mBarTitle.setText(title);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Update playback status, if needed
+        if (mMaterialBarVisible) {
+            if (PlaybackProxy.getState() == PlaybackService.STATE_PAUSED) {
+                mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+            }
+        }
+    }
 }
