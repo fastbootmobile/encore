@@ -67,7 +67,9 @@
             android:textColor="@color/white"
             android:textSize="16sp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:textAlignment="center"/>
     </RelativeLayout>
 
 
