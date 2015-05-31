@@ -28,6 +28,7 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -54,6 +55,7 @@ import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.service.BasePlaybackCallback;
 import com.fastbootmobile.encore.service.PlaybackService;
+import com.fastbootmobile.encore.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -381,14 +383,15 @@ public class PlayingBarView extends RelativeLayout {
 
             // Inflate views and make the list out of the first 4 items (or less)
             int shownCount = 0;
-            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final LayoutInflater inflater =
+                    (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             for (int i = 0; i < currentIndex; ++i) {
-                if (queue.size() > currentIndex) {
+                if (queue.size() > 0) {
                     queue.remove(0);
                 }
-                if (mLastQueue.size() > currentIndex) {
+                if (mLastQueue.size() > 0) {
                     mLastQueue.remove(0);
                 }
             }
@@ -468,7 +471,7 @@ public class PlayingBarView extends RelativeLayout {
 
                         Bitmap hero = ((MaterialTransitionDrawable) ((ImageView) view).getDrawable()).getFinalDrawable().getBitmap();
                         if (mPalette == null) {
-                            mPalette = Palette.generate(hero);
+                            mPalette = Palette.from(hero).generate();
                         }
                         Palette.Swatch darkVibrantColor = mPalette.getDarkVibrantSwatch();
                         Palette.Swatch darkMutedColor = mPalette.getDarkMutedSwatch();
@@ -486,7 +489,7 @@ public class PlayingBarView extends RelativeLayout {
                         Intent intent = AlbumActivity.craftIntent(getContext(), hero, song.getAlbum(),
                                 song.getProvider(), color);
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        if (Utils.hasLollipop()) {
                             ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) getContext(),
                                 view, "itemImage");
 
