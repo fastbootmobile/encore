@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 
 public class LocalProvider {
@@ -1025,8 +1026,8 @@ public class LocalProvider {
                             // Input decoding
                             int inIndex = -2;
                             try {
-                                // Try to dequeue an output buffer (timeout 1ms)
-                                inIndex = mDecoder.dequeueInputBuffer(10000);
+                                // Try to dequeue an output buffer (timeout 30ms)
+                                inIndex = mDecoder.dequeueInputBuffer(TimeUnit.MILLISECONDS.toMicros(30));
                             } catch (IllegalStateException ignored) {
                             }
 
@@ -1062,8 +1063,8 @@ public class LocalProvider {
                                 outIndex = MediaCodec.INFO_TRY_AGAIN_LATER;
                             } else {
                                 try {
-                                    // Try to dequeue an output buffer (timeout 1ms)
-                                    outIndex = mDecoder.dequeueOutputBuffer(mInfo, 10000);
+                                    // Try to dequeue an output buffer (timeout 30ms)
+                                    outIndex = mDecoder.dequeueOutputBuffer(mInfo, TimeUnit.MILLISECONDS.toMicros(30));
                                 } catch (IllegalStateException ignored) {
                                 }
                             }

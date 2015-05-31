@@ -496,8 +496,6 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
             AudioBuffer* buffer = p->m_ActiveBuffers.front();
             p->m_ActiveBuffers.pop_front();
 
-            // ALOGE("Dequeued buffer %p", buffer);
-
             // Release the previously playing buffer
             if (p->m_pPlayingBuffer != nullptr) {
                 p->m_iActiveBuffersTotalSize -= p->m_pPlayingBuffer->iLength;

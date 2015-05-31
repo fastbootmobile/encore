@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.DeadObjectException;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.RemoteException;
+import android.os.*;
+import android.os.Process;
 import android.util.Log;
 
 import com.fastbootmobile.encore.app.R;
@@ -54,6 +52,7 @@ public class PluginService extends Service implements AudioSocket.ISocketCallbac
     private final Thread mWriteAudioThread = new Thread() {
         @Override
         public void run() {
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
             while (!isInterrupted()) {
                 synchronized (mWriteAudioThread) {
                     try {
@@ -61,9 +60,12 @@ public class PluginService extends Service implements AudioSocket.ISocketCallbac
                     } catch (InterruptedException e) {
                         continue;
                     }
-
                     try {
-                        mAudioSocket.writeAudioData(mAudioBuffer, 0, mAudioBufferIndex);
+                        try {
+                            mAudioSocket.writeAudioData(mAudioBuffer, 0, mAudioBufferIndex);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     } catch (Exception e) {
                         Log.e(TAG, "Error while writing audio data", e);
                         mAudioSocket = null;
@@ -159,13 +161,13 @@ public class PluginService extends Service implements AudioSocket.ISocketCallbac
             mAudioBufferIndex = frames;
 
             // There's enough data in the buffer, try to send it over to the app
+            mAudioWritten = -1;
+
+            synchronized (mWriteAudioThread) {
+                mWriteAudioThread.notifyAll();
+            }
+
             synchronized (mAudioWrittenLock) {
-                mAudioWritten = -1;
-
-                synchronized (mWriteAudioThread) {
-                    mWriteAudioThread.notifyAll();
-                }
-
                 if (mAudioWritten == -1) {
                     // Wait 100ms for a reply
                     try {
@@ -174,11 +176,11 @@ public class PluginService extends Service implements AudioSocket.ISocketCallbac
                         Log.e(TAG, "Interrupted while waiting for audio written response");
                     }
                 }
+            }
 
-                // No response in time, assume the audio wasn't written
-                if (mAudioWritten == -1) {
-                    mAudioWritten = 0;
-                }
+            // No response in time, assume the audio wasn't written
+            if (mAudioWritten == -1) {
+                mAudioWritten = 0;
             }
 
             if (mAudioWritten > 0) {
