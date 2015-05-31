@@ -31,10 +31,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
-
-import org.lucasr.twowayview.TwoWayView;
-import org.lucasr.twowayview.widget.DividerItemDecoration;
 import com.fastbootmobile.encore.api.common.Pair;
 import com.fastbootmobile.encore.app.MainActivity;
 import com.fastbootmobile.encore.app.R;
@@ -53,6 +49,10 @@ import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
+import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
+
+import org.lucasr.twowayview.TwoWayView;
+import org.lucasr.twowayview.widget.DividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -486,6 +486,17 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         twvRoot.setItemAnimator(new RefactoredDefaultItemAnimator());
 
         return root;
+    }
+
+    @Override
+    public void onDestroyView() {
+        View root = getView();
+        if (root != null) {
+            TwoWayView twvRoot = (TwoWayView) root.findViewById(R.id.twvRoot);
+            twvRoot.setAdapter(null);
+        }
+        super.onDestroyView();
+
     }
 
     /**

@@ -20,14 +20,15 @@ import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.util.Log;
 
-import com.joshdholtz.sentry.Sentry;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.fastbootmobile.encore.api.echonest.AutoMixManager;
 import com.fastbootmobile.encore.art.ImageCache;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
+import com.joshdholtz.sentry.Sentry;
+import com.squareup.leakcanary.LeakCanary;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,6 +69,8 @@ public class OmniMusic extends Application {
         Sentry.init(this, "https://sentry.fastboot.mobi/",
                 "https://4dc1acbdb1cb423282e2a59f553e1153:9415087b9e1348c3ba4bed44be599f6a@sentry.fastboot.mobi/2");
 
+        // Setup LeakCanary
+        LeakCanary.install(this);
 
         // Setup the plugins system
         ProviderAggregator.getDefault().setContext(getApplicationContext());
@@ -97,5 +100,6 @@ public class OmniMusic extends Application {
 
         // Setup custom fonts
         CalligraphyConfig.initDefault("fonts/Roboto-Regular.ttf", R.attr.fontPath);
+
     }
 }

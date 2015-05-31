@@ -52,11 +52,6 @@ import android.widget.TextView;
 
 import com.echonest.api.v4.Biography;
 import com.echonest.api.v4.EchoNestException;
-import com.getbase.floatingactionbutton.FloatingActionButton;
-
-import org.lucasr.twowayview.ItemClickSupport;
-import org.lucasr.twowayview.TwoWayView;
-import org.lucasr.twowayview.widget.DividerItemDecoration;
 import com.fastbootmobile.encore.api.echonest.EchoNest;
 import com.fastbootmobile.encore.app.AppActivity;
 import com.fastbootmobile.encore.app.ArtistActivity;
@@ -87,6 +82,11 @@ import com.fastbootmobile.encore.providers.ProviderIdentifier;
 import com.fastbootmobile.encore.service.BasePlaybackCallback;
 import com.fastbootmobile.encore.service.PlaybackService;
 import com.fastbootmobile.encore.utils.Utils;
+import com.getbase.floatingactionbutton.FloatingActionButton;
+
+import org.lucasr.twowayview.ItemClickSupport;
+import org.lucasr.twowayview.TwoWayView;
+import org.lucasr.twowayview.widget.DividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.Collections;

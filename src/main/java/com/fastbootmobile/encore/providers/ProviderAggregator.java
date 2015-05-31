@@ -142,7 +142,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
                         while (goForIt) {
                             try {
-                                List<Song> songs = conn.getBinder().getSongs(offset, limit);
+                                List<Song> songs = binder.getSongs(offset, limit);
 
                                 if (songs == null || songs.size() == 0) {
                                     goForIt = false;
@@ -549,24 +549,28 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 }
 
                 try {
-                    // Register this class as callback
-                    provider.getBinder().registerCallback(ProviderAggregator.this);
+                    IMusicProvider binder = provider.getBinder();
 
-                    // Add all rosetta prefixes and map it to this provider
-                    List<String> rosettaPrefixes = provider.getBinder().getSupportedRosettaPrefix();
+                    if (binder != null) {
+                        // Register this class as callback
+                        binder.registerCallback(ProviderAggregator.this);
 
-                    if (rosettaPrefixes != null) {
-                        for (String prefix : rosettaPrefixes) {
-                            mRosettaStoneMap.put(prefix, provider.getIdentifier());
-                            if (!mRosettaStonePrefix.contains(prefix)) {
-                                mRosettaStonePrefix.add(prefix);
+                        // Add all rosetta prefixes and map it to this provider
+                        List<String> rosettaPrefixes = binder.getSupportedRosettaPrefix();
+
+                        if (rosettaPrefixes != null) {
+                            for (String prefix : rosettaPrefixes) {
+                                mRosettaStoneMap.put(prefix, provider.getIdentifier());
+                                if (!mRosettaStonePrefix.contains(prefix)) {
+                                    mRosettaStonePrefix.add(prefix);
+                                }
                             }
                         }
-                    }
 
-                    // Notify subclasses of the new provider
-                    for (ILocalCallback cb : mUpdateCallbacks) {
-                        cb.onProviderConnected(provider.getBinder());
+                        // Notify subclasses of the new provider
+                        for (ILocalCallback cb : mUpdateCallbacks) {
+                            cb.onProviderConnected(binder);
+                        }
                     }
                 } catch (RemoteException e) {
                     // Maybe the service died already?

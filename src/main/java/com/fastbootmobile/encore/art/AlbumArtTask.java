@@ -125,6 +125,7 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
     @Override
     protected void onCancelled() {
         super.onCancelled();
+        mListener = null;
         final AlbumArtCache artCache = AlbumArtCache.getDefault();
         artCache.notifyQueryStopped(mEntity);
     }
@@ -133,7 +134,7 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
     protected void onPostExecute(final AlbumArtHelper.BackgroundResult result) {
         super.onPostExecute(result);
 
-        if (!isCancelled()) {
+        if (!isCancelled() && mListener != null) {
             if (result != null && result.retry) {
                 final AlbumArtTask task = new AlbumArtTask(mResources, mListener, mRequestedSize);
                 mHandler.postDelayed(new Runnable() {
