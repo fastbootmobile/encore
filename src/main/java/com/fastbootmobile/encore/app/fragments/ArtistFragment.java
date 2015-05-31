@@ -1718,6 +1718,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_artist_similar, container, false);
+            return rootView;
+        }
+
+        @Override
+        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            View rootView = getView();
             mArtistsSpinner = (ProgressBar) rootView.findViewById(R.id.pbSimilarArtists);
             mArtistsGrid = (TwoWayView) rootView.findViewById(R.id.twvSimilarArtists);
             final Drawable divider = getResources().getDrawable(R.drawable.divider);
@@ -1726,7 +1733,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             itemClick.setOnItemClickListener(mItemClickListener);
             mOfflineView = (TextView) rootView.findViewById(R.id.tvErrorMessage);
             mOfflineView.setText(R.string.error_similar_unavailable_offline);
-            return rootView;
         }
     }
 }
