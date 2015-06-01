@@ -38,62 +38,68 @@ public class ProviderCache {
      * Purges the cache in case the provider may change for the specified provider
      */
     public void purgeCacheForProvider(ProviderIdentifier id) {
+        List<String> keysToRemove;
+
         // Playlists
-        Set<Map.Entry<String, Playlist>> playlists = mPlaylists.entrySet();
-        List<String> keysToRemove = new ArrayList<>();
-
-        for (Map.Entry<String, Playlist> item : playlists) {
-            if (item.getValue().getProvider().equals(id)) {
-                keysToRemove.add(item.getKey());
-            }
-        }
-
         synchronized (mPlaylists) {
+            Set<Map.Entry<String, Playlist>> playlists = mPlaylists.entrySet();
+            keysToRemove = new ArrayList<>();
+
+            for (Map.Entry<String, Playlist> item : playlists) {
+                if (item.getValue().getProvider().equals(id)) {
+                    keysToRemove.add(item.getKey());
+                }
+            }
+
+
             for (String key : keysToRemove) {
                 mPlaylists.remove(key);
             }
         }
 
         // Songs
-        Set<Map.Entry<String, Song>> songs = mSongs.entrySet();
-        keysToRemove.clear();
-
-        for (Map.Entry<String, Song> item : songs) {
-            if (item.getValue().getProvider().equals(id)) {
-                keysToRemove.add(item.getKey());
-            }
-        }
-
         synchronized (mSongs) {
+            Set<Map.Entry<String, Song>> songs = mSongs.entrySet();
+            keysToRemove.clear();
+
+            for (Map.Entry<String, Song> item : songs) {
+                if (item.getValue().getProvider().equals(id)) {
+                    keysToRemove.add(item.getKey());
+                }
+            }
+
+
             for (String key : keysToRemove) {
                 mSongs.remove(key);
             }
         }
 
         // Albums
-        Set<Map.Entry<String, Album>> albums = mAlbums.entrySet();
-        keysToRemove.clear();
+        synchronized (mAlbums) {
+            Set<Map.Entry<String, Album>> albums = mAlbums.entrySet();
+            keysToRemove.clear();
 
-        for (Map.Entry<String, Album> item : albums) {
-            if (item.getValue().getProvider().equals(id)) {
-                keysToRemove.add(item.getKey());
+            for (Map.Entry<String, Album> item : albums) {
+                if (item.getValue().getProvider().equals(id)) {
+                    keysToRemove.add(item.getKey());
+                }
             }
-        }
-        for (String key : keysToRemove) {
-            mAlbums.remove(key);
+            for (String key : keysToRemove) {
+                mAlbums.remove(key);
+            }
         }
 
         // Artists
-        Set<Map.Entry<String, Artist>> artists = mArtists.entrySet();
-        keysToRemove.clear();
-
-        for (Map.Entry<String, Artist> item : artists) {
-            if (item.getValue().getProvider().equals(id)) {
-                keysToRemove.add(item.getKey());
-            }
-        }
-
         synchronized (mArtists) {
+            Set<Map.Entry<String, Artist>> artists = mArtists.entrySet();
+            keysToRemove.clear();
+
+            for (Map.Entry<String, Artist> item : artists) {
+                if (item.getValue().getProvider().equals(id)) {
+                    keysToRemove.add(item.getKey());
+                }
+            }
+
             for (String key : keysToRemove) {
                 mArtists.remove(key);
             }

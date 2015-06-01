@@ -15,12 +15,10 @@
 
 package com.fastbootmobile.encore.app.fragments;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -39,8 +37,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import com.fastbootmobile.encore.app.AlbumActivity;
 import com.fastbootmobile.encore.app.AppActivity;
@@ -66,6 +62,7 @@ import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
 import com.fastbootmobile.encore.service.BasePlaybackCallback;
 import com.fastbootmobile.encore.utils.Utils;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import java.util.Iterator;
 import java.util.List;
@@ -365,18 +362,8 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
             mTvAlbumName.setText(mAlbum.getName());
         }
 
-        if (Utils.hasLollipop()) {
-            mTvAlbumName.setVisibility(View.INVISIBLE);
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                public void run() {
-                    if (mTvAlbumName.isAttachedToWindow()) {
-                        Utils.animateHeadingReveal(mTvAlbumName);
-                    }
-                }
-            }, 500);
-        } else {
+        if (!Utils.hasLollipop()) {
+            // Since we don't have the transition animation, make sure everything is visible
             mTvAlbumName.setVisibility(View.VISIBLE);
             mTvAlbumName.setAlpha(0.0f);
             mTvAlbumName.animate().alpha(1.0f).setDuration(AlbumActivity.BACK_DELAY).start();
@@ -537,9 +524,6 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
 
     public void notifyReturnTransition() {
         showFab(true, false);
-        if (Utils.hasLollipop()) {
-            Utils.animateHeadingHiding(mTvAlbumName);
-        }
     }
 
     /**

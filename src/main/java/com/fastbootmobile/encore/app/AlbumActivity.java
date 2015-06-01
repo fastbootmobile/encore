@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,14 +56,14 @@ public class AlbumActivity extends AppActivity {
     public static final String BITMAP_ALBUM_HERO = "album_hero";
     private static final String EXTRA_RESTORE_INTENT = "restore_intent";
 
-    public static final int BACK_DELAY = ArtistActivity.BACK_DELAY;
+    public static final int BACK_DELAY = 300;
 
     private AlbumViewFragment mActiveFragment;
     private Bundle mInitialIntent;
     private Bitmap mHero;
     private Handler mHandler;
     private Toolbar mToolbar;
-    private boolean mBackPending = false;
+    private boolean mIsEntering;
 
     /**
      * Creates a proper intent to open this activity
@@ -123,6 +124,8 @@ public class AlbumActivity extends AppActivity {
             actionBar.setTitle("");
         }
 
+        mIsEntering = true;
+
         if (Utils.hasLollipop()) {
             setEnterSharedElementCallback(new SharedElementCallback() {
                 @Override
@@ -130,6 +133,24 @@ public class AlbumActivity extends AppActivity {
                     View imageHeader = mActiveFragment.getHeroImageView();
                     if (imageHeader != null) {
                         sharedElements.put("itemImage", imageHeader);
+                    }
+
+                    View albumName = mActiveFragment.findViewById(R.id.tvAlbumName);
+                    if (albumName != null) {
+                        final int cx = albumName.getMeasuredWidth() / 4;
+                        final int cy = albumName.getMeasuredHeight() / 2;
+                        final int duration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+                        final int radius = Utils.getEnclosingCircleRadius(albumName, cx, cy);
+
+                        if (mIsEntering) {
+                            albumName.setVisibility(View.INVISIBLE);
+                            Utils.animateCircleReveal(albumName, cx, cy, 0, radius,
+                                    duration, 300);
+                        } else {
+                            albumName.setVisibility(View.VISIBLE);
+                            Utils.animateCircleReveal(albumName, cx, cy, radius, 0,
+                                    duration, 0);
+                        }
                     }
                 }
             });
@@ -216,23 +237,13 @@ public class AlbumActivity extends AppActivity {
 
     @Override
     public void onBackPressed() {
+        mIsEntering = false;
+
         if (Utils.hasLollipop()) {
-            if (!mBackPending) {
-                mBackPending = true;
-                mActiveFragment.notifyReturnTransition();
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            AlbumActivity.super.onBackPressed();
-                        } catch (IllegalStateException ignored) {
-                        }
-                    }
-                }, BACK_DELAY);
-            }
-        } else {
-            super.onBackPressed();
+            mActiveFragment.notifyReturnTransition();
         }
+
+        super.onBackPressed();
     }
 
 }

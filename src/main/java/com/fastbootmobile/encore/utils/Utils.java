@@ -677,44 +677,54 @@ public class Utils {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void animateHeadingReveal(final View view) {
+    public static void animateHeadingReveal(final View view, final long duration) {
         final int cx = view.getMeasuredWidth() / 5;
         final int cy = view.getMeasuredHeight() / 2;
         final int radius = Utils.getEnclosingCircleRadius(view, cx, cy);
         if (cx == 0 && cy == 0) {
             Log.w(TAG, "animateHidingReveal: Measured dimensions are zero");
         }
-        animateCircleReveal(view, cx, cy, 0, radius);
+        animateCircleReveal(view, cx, cy, 0, radius, duration);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void animateHeadingReveal(final View view, final int cx, final int cy) {
+    public static void animateHeadingReveal(final View view, final int cx, final int cy,
+                                            final long duration) {
         final int radius = Utils.getEnclosingCircleRadius(view, cx, cy);
         if (cx == 0 && cy == 0) {
             Log.w(TAG, "animateHidingReveal: Measured dimensions are zero");
         }
-        animateCircleReveal(view, cx, cy, 0, radius);
+        animateCircleReveal(view, cx, cy, 0, radius, duration);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void animateHeadingHiding(final View view) {
+    public static void animateHeadingHiding(final View view, final long duration) {
         final int cx = view.getMeasuredWidth() / 5;
         final int cy = view.getMeasuredHeight() / 2;
-        animateHeadingHiding(view, cx, cy);
+        animateHeadingHiding(view, cx, cy, duration);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void animateHeadingHiding(final View view, final int cx, final int cy) {
+    public static void animateHeadingHiding(final View view, final int cx, final int cy,
+                                            final long duration) {
         final int radius = Utils.getEnclosingCircleRadius(view, cx, cy);
-        animateCircleReveal(view, cx, cy, radius, 0);
+        animateCircleReveal(view, cx, cy, radius, 0, duration);
+    }
+
+    public static Animator animateCircleReveal(final View view, final int cx, final int cy,
+                                               final int startRadius, final int endRadius,
+                                               final long duration) {
+        return animateCircleReveal(view, cx, cy, startRadius, endRadius, duration, 0);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private static void animateCircleReveal(final View view, final int cx, final int cy,
-                                            final int startRadius, final int endRadius) {
+    public static Animator animateCircleReveal(final View view, final int cx, final int cy,
+                                            final int startRadius, final int endRadius,
+                                            final long duration, final long startDelay) {
         Animator animator = ViewAnimationUtils.createCircularReveal(view, cx, cy, startRadius,
                 endRadius)
-                .setDuration(ArtistActivity.BACK_DELAY);
+                .setDuration(duration);
+        animator.setStartDelay(startDelay);
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -740,6 +750,8 @@ public class Utils {
             }
         });
         animator.start();
+
+        return animator;
     }
 
     public static int getRandom(int maxExcluded) {

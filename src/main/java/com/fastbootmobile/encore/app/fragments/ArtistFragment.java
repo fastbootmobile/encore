@@ -410,7 +410,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         final PagerTabStrip strip = (PagerTabStrip) mRootView.findViewById(R.id.pagerArtistStrip);
 
         if (Utils.hasLollipop()) {
-            Utils.animateHeadingHiding(tvArtist);
+            Utils.animateHeadingHiding(tvArtist, ArtistActivity.BACK_DELAY);
         } else {
             tvArtist.animate().alpha(0.0f).setStartDelay(0).setDuration(ArtistActivity.BACK_DELAY).start();
         }
@@ -543,7 +543,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 @Override
                 public void run() {
                     if (tvArtist.isAttachedToWindow() && tvArtist.getMeasuredWidth() > 0) {
-                        Utils.animateHeadingReveal(tvArtist);
+                        Utils.animateHeadingReveal(tvArtist, ArtistActivity.BACK_DELAY);
                     } else {
                         mHandler.postDelayed(this, 500);
                     }

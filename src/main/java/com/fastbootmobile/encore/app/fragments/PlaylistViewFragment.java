@@ -47,10 +47,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dd.CircularProgressButton;
-import com.getbase.floatingactionbutton.FloatingActionButton;
-
 import com.fastbootmobile.encore.app.AlbumActivity;
 import com.fastbootmobile.encore.app.AppActivity;
+import com.fastbootmobile.encore.app.ArtistActivity;
 import com.fastbootmobile.encore.app.PlaylistActivity;
 import com.fastbootmobile.encore.app.R;
 import com.fastbootmobile.encore.app.adapters.PlaylistAdapter;
@@ -76,6 +75,7 @@ import com.fastbootmobile.encore.providers.ProviderIdentifier;
 import com.fastbootmobile.encore.service.BasePlaybackCallback;
 import com.fastbootmobile.encore.service.PlaybackService;
 import com.fastbootmobile.encore.utils.Utils;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -424,7 +424,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                 public void run() {
                     if (mTvPlaylistName.isAttachedToWindow()) {
-                        Utils.animateHeadingReveal(mTvPlaylistName);
+                        Utils.animateHeadingReveal(mTvPlaylistName, ArtistActivity.BACK_DELAY);
                     }
                 }
             }, 500);
@@ -598,7 +598,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
     public void notifyReturnTransition() {
         if (Utils.hasLollipop()) {
-            Utils.animateHeadingHiding(mTvPlaylistName);
+            Utils.animateHeadingHiding(mTvPlaylistName, ArtistActivity.BACK_DELAY);
             Utils.animateScale(mPlayFab, true, false);
 
             mIvSource.setAlpha(1.0f);

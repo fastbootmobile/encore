@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.fastbootmobile.encore.app.ArtistActivity;
 import com.fastbootmobile.encore.service.PlaybackService;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
@@ -106,7 +107,7 @@ public class MaterialReelBaseFragment extends Fragment {
                         mBarLayout.setBackgroundColor(playFab.getNormalColor());
 
                         Utils.animateHeadingReveal(mBarLayout, mBarLayout.getMeasuredWidth() / 2,
-                                (int) (mBarLayout.getMeasuredHeight() / 1.25f));
+                                (int) (mBarLayout.getMeasuredHeight() / 1.25f), ArtistActivity.BACK_DELAY);
 
                         playFab.animate().setStartDelay(80)
                                 .alpha(0).scaleX(0.5f).scaleY(0.5f).setDuration(150).start();
@@ -148,7 +149,7 @@ public class MaterialReelBaseFragment extends Fragment {
                 final int DP = getResources().getDimensionPixelSize(R.dimen.one_dp);
 
                 Utils.animateHeadingHiding(mBarLayout, mBarLayout.getMeasuredWidth() / 2,
-                        (int) (mBarLayout.getMeasuredHeight() / 1.25f));
+                        (int) (mBarLayout.getMeasuredHeight() / 1.25f), ArtistActivity.BACK_DELAY);
                 mBarLayout.setAlpha(1.0f);
 
                 mBarPlay.setAlpha(1f);
