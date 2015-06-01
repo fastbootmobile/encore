@@ -53,6 +53,7 @@ public class PlaylistActivity extends AppActivity {
     private Handler mHandler = new Handler();
     private Toolbar mToolbar;
     private boolean mBackPending = false;
+    private boolean mIsEntering;
 
     /**
      * Creates an intent starting this activity with the provided parameters
@@ -112,6 +113,7 @@ public class PlaylistActivity extends AppActivity {
             actionBar.setTitle("");
         }
 
+        mIsEntering = true;
 
         if (Utils.hasLollipop()) {
             setEnterSharedElementCallback(new SharedElementCallback() {
@@ -121,10 +123,27 @@ public class PlaylistActivity extends AppActivity {
                     if (imageHeader != null) {
                         sharedElements.put("itemImage", imageHeader);
                     }
+
+                    View albumName = mActiveFragment.findViewById(R.id.tvAlbumName);
+                    if (albumName != null) {
+                        final int cx = albumName.getMeasuredWidth() / 4;
+                        final int cy = albumName.getMeasuredHeight() / 2;
+                        final int duration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+                        final int radius = Utils.getEnclosingCircleRadius(albumName, cx, cy);
+
+                        if (mIsEntering) {
+                            albumName.setVisibility(View.INVISIBLE);
+                            Utils.animateCircleReveal(albumName, cx, cy, 0, radius,
+                                    duration, 300);
+                        } else {
+                            albumName.setVisibility(View.VISIBLE);
+                            Utils.animateCircleReveal(albumName, cx, cy, radius, 0,
+                                    duration, 0);
+                        }
+                    }
                 }
             });
         }
-
 
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -141,7 +160,7 @@ public class PlaylistActivity extends AppActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (!mActiveFragment.onOptionsItemSelected(item)) {
             if (item.getItemId() == android.R.id.home) {
-                finish();
+                onBackPressed();
                 return true;
             } else {
                 return super.onOptionsItemSelected(item);
@@ -154,21 +173,9 @@ public class PlaylistActivity extends AppActivity {
     @Override
     public void onBackPressed() {
         if (Utils.hasLollipop()) {
-            if (!mBackPending) {
-                mBackPending = true;
-                mActiveFragment.notifyReturnTransition();
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            PlaylistActivity.super.onBackPressed();
-                        } catch (IllegalStateException ignored) {
-                        }
-                    }
-                }, BACK_DELAY);
-            }
-        } else {
-            super.onBackPressed();
+            mIsEntering = false;
+            mActiveFragment.notifyReturnTransition();
         }
+        super.onBackPressed();
     }
 }

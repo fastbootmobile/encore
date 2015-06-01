@@ -416,19 +416,8 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
         setupMaterialReelBar(root, mReelFabClickListener);
 
-        // Setup the opening animations
-        if (Utils.hasLollipop()) {
-            mTvPlaylistName.setVisibility(View.INVISIBLE);
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                public void run() {
-                    if (mTvPlaylistName.isAttachedToWindow()) {
-                        Utils.animateHeadingReveal(mTvPlaylistName, ArtistActivity.BACK_DELAY);
-                    }
-                }
-            }, 500);
-        } else {
+        // Setup the opening animations for non-Lollipop devices
+        if (!Utils.hasLollipop()) {
             mTvPlaylistName.setVisibility(View.VISIBLE);
             mTvPlaylistName.setAlpha(0.0f);
             mTvPlaylistName.animate().alpha(1.0f).setDuration(AlbumActivity.BACK_DELAY).start();
@@ -504,6 +493,16 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         }
 
         return false;
+    }
+
+    public View findViewById(int id) {
+        View root = getView();
+
+        if (root != null) {
+            return root.findViewById(id);
+        } else {
+            return null;
+        }
     }
 
     private void addToPlaylist() {
@@ -598,7 +597,6 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
     public void notifyReturnTransition() {
         if (Utils.hasLollipop()) {
-            Utils.animateHeadingHiding(mTvPlaylistName, ArtistActivity.BACK_DELAY);
             Utils.animateScale(mPlayFab, true, false);
 
             mIvSource.setAlpha(1.0f);

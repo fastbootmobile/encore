@@ -17,6 +17,7 @@ package com.fastbootmobile.encore.app;
 
 import android.animation.Animator;
 import android.annotation.TargetApi;
+import android.app.SharedElementCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -36,6 +37,9 @@ import android.view.animation.DecelerateInterpolator;
 import com.fastbootmobile.encore.app.fragments.ArtistFragment;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
 import com.fastbootmobile.encore.utils.Utils;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Activity to view an Artist tracks, similar, etc. through
@@ -58,15 +62,16 @@ public class ArtistActivity extends AppActivity {
     private ArtistFragment mActiveFragment;
     private Handler mHandler;
     private Toolbar mToolbar;
-    private boolean mBackPending = false;
+    private boolean mIsEntering;
 
     /**
      * Creates a proper intent to open this activity
-     * @param ctx The current context
-     * @param hero The hero (artist image) bitmap
+     *
+     * @param ctx       The current context
+     * @param hero      The hero (artist image) bitmap
      * @param artistRef The reference of the artist
-     * @param provider The provider of the artist
-     * @param color The back color of the header bar
+     * @param provider  The provider of the artist
+     * @param color     The back color of the header bar
      * @return An intent that will open this activity
      */
     public static Intent craftIntent(Context ctx, Bitmap hero, String artistRef,
@@ -108,9 +113,6 @@ public class ArtistActivity extends AppActivity {
                     .commit();
         }
 
-        if (Utils.hasLollipop()) {
-            mActiveFragment.notifySizeLimit();
-        }
         mActiveFragment.setArguments(mHero, mInitialIntent);
 
         // Remove the activity title as we don't want it here
@@ -123,24 +125,12 @@ public class ArtistActivity extends AppActivity {
             actionBar.setTitle("");
         }
 
+        mIsEntering = true;
+
         if (Utils.hasLollipop()) {
-            // Safeguard in case of no animation
-            mHandler.postDelayed(new Runnable() {
+            setEnterSharedElementCallback(new SharedElementCallback() {
                 @Override
-                public void run() {
-                    mActiveFragment.notifySizeUnlimited();
-                }
-            }, 500);
-
-            getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
-                @Override
-                public void onTransitionStart(Transition transition) {
-                    View fab = mActiveFragment.findViewById(R.id.fabPlay);
-                    fab.setVisibility(View.INVISIBLE);
-                }
-
-                @Override
-                public void onTransitionEnd(Transition transition) {
+                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
                     View fab = mActiveFragment.findViewById(R.id.fabPlay);
                     fab.setVisibility(View.VISIBLE);
 
@@ -153,8 +143,12 @@ public class ArtistActivity extends AppActivity {
 
                     // create and start the animator for this view
                     // (the start radius is zero)
-                    Animator anim =
-                            ViewAnimationUtils.createCircularReveal(fab, cx, cy, 0, finalRadius);
+                    Animator anim;
+                    if (mIsEntering) {
+                        anim = ViewAnimationUtils.createCircularReveal(fab, cx, cy, 0, finalRadius);
+                    } else {
+                        anim = ViewAnimationUtils.createCircularReveal(fab, cx, cy, finalRadius, 0);
+                    }
                     anim.setInterpolator(new DecelerateInterpolator());
                     anim.start();
 
@@ -165,37 +159,26 @@ public class ArtistActivity extends AppActivity {
                             .setInterpolator(new DecelerateInterpolator())
                             .start();
 
+                    final View artistName = mActiveFragment.findViewById(R.id.tvArtist);
+                    if (artistName != null) {
+                        cx = artistName.getMeasuredWidth() / 4;
+                        cy = artistName.getMeasuredHeight() / 2;
+                        final int duration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+                        final int radius = Utils.getEnclosingCircleRadius(artistName, cx, cy);
 
-                    mActiveFragment.notifySizeUnlimited();
-                    getWindow().getEnterTransition().removeListener(this);
-                }
-
-                @Override
-                public void onTransitionCancel(Transition transition) {
-
-                }
-
-                @Override
-                public void onTransitionPause(Transition transition) {
-
-                }
-
-                @Override
-                public void onTransitionResume(Transition transition) {
-
-                }
-            });
-        }/* else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    View fab = mActiveFragment.findViewById(R.id.fabPlay);
-                    fab.setVisibility(View.VISIBLE);
-                    mActiveFragment.notifySizeUnlimited();
+                        if (mIsEntering) {
+                            artistName.setVisibility(View.INVISIBLE);
+                            Utils.animateCircleReveal(artistName, cx, cy, 0, radius,
+                                    duration, 300);
+                        } else {
+                            artistName.setVisibility(View.VISIBLE);
+                            Utils.animateCircleReveal(artistName, cx, cy, radius, 0,
+                                    duration, 0);
+                        }
+                    }
                 }
             });
-        }*/
-
+        }
 
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -233,32 +216,10 @@ public class ArtistActivity extends AppActivity {
     @Override
     public void onBackPressed() {
         if (Utils.hasLollipop()) {
-            if (!mBackPending) {
-                mBackPending = true;
-
-                /*
-                 * Lollipop workaround: Transitions use hardware GPU layers, which means they are
-                 * GPU textures with a max size (for 99% devices) of 4096x4096. To avoid crashes,
-                 * we temporarily limit the size of the fragment (by either setting a max height
-                 * or by setting the visibility to Gone)
-                 * TODO: This has been fixed in final 5.0 release using transitionGroup parameter
-                 *       Need to check if this is still needed
-                 */
-                mActiveFragment.notifySizeLimit();
-                mActiveFragment.scrollToTop();
-                mActiveFragment.notifyClosing();
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ArtistActivity.super.onBackPressed();
-                        } catch (IllegalStateException ignored) {
-                        }
-                    }
-                }, BACK_DELAY);
-            }
-        } else {
-            super.onBackPressed();
+            mIsEntering = false;
+            mActiveFragment.scrollToTop();
+            mActiveFragment.notifyClosing();
         }
+        super.onBackPressed();
     }
 }

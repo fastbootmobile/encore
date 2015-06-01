@@ -22,4 +22,9 @@
         </targets>
     </changeImageTransform>
 
+    <arcMotion>
+        <targets>
+            <target android:targetName="itemImage" />
+        </targets>
+    </arcMotion>
 </transitionSet>

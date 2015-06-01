@@ -121,7 +121,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
     private ArtistSimilarFragment mArtistSimilarFragment;
     private FloatingActionButton mFabPlay;
     private RecyclingBitmapDrawable mLogoBitmap;
-    private boolean mSizeIsLimited;
     private ImageView mHeroImageView;
 
     private Runnable mUpdateAlbumsRunnable = new Runnable() {
@@ -389,29 +388,13 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         mFabShouldResume = false;
     }
 
-    public void notifySizeLimit() {
-        mSizeIsLimited = true;
-        if (mArtistTracksFragment != null) {
-            mArtistTracksFragment.notifySizeLimit();
-        }
-    }
-
-    public void notifySizeUnlimited() {
-        mSizeIsLimited = false;
-        if (mArtistTracksFragment != null) {
-            mArtistTracksFragment.notifySizeUnlimited();
-        }
-    }
-
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void notifyClosing() {
         Utils.animateScale(mFabPlay, true, false);
         final TextView tvArtist = (TextView) mRootView.findViewById(R.id.tvArtist);
         final PagerTabStrip strip = (PagerTabStrip) mRootView.findViewById(R.id.pagerArtistStrip);
 
-        if (Utils.hasLollipop()) {
-            Utils.animateHeadingHiding(tvArtist, ArtistActivity.BACK_DELAY);
-        } else {
+        if (!Utils.hasLollipop()) {
             tvArtist.animate().alpha(0.0f).setStartDelay(0).setDuration(ArtistActivity.BACK_DELAY).start();
         }
         strip.animate().alpha(0.0f).setStartDelay(0).translationY(-20).setDuration(ArtistActivity.BACK_DELAY).start();
@@ -499,9 +482,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         // Setup the inside fragments
         mArtistTracksFragment = new ArtistTracksFragment();
         mArtistTracksFragment.setParentFragment(this);
-        if (mSizeIsLimited) {
-            mArtistTracksFragment.notifySizeLimit();
-        }
 
         mArtistInfoFragment = new ArtistInfoFragment();
         mArtistInfoFragment.setArguments(mArtist);
@@ -537,19 +517,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         strip.setTranslationY(-20);
         strip.animate().alpha(1.0f).setDuration(ANIMATION_DURATION).setStartDelay(500).translationY(0).start();
 
-        if (Utils.hasLollipop()) {
-            tvArtist.setVisibility(View.INVISIBLE);
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (tvArtist.isAttachedToWindow() && tvArtist.getMeasuredWidth() > 0) {
-                        Utils.animateHeadingReveal(tvArtist, ArtistActivity.BACK_DELAY);
-                    } else {
-                        mHandler.postDelayed(this, 500);
-                    }
-                }
-            }, 500);
-        } else {
+        if (!Utils.hasLollipop()) {
             tvArtist.setAlpha(0);
             tvArtist.animate().alpha(1).setDuration(ANIMATION_DURATION).setStartDelay(500).start();
         }
@@ -992,30 +960,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     loadAlbums(true);
                 }
             });
-        }
-
-        public void notifySizeLimit() {
-            mSizeLimited = true;
-            if (mRootView != null) {
-                ViewGroup.LayoutParams params = mRootView.getLayoutParams();
-                if (params != null) {
-                    params.height = 1000;
-                    mRootView.setLayoutParams(params);
-                }
-            }
-        }
-
-        public void notifySizeUnlimited() {
-            if (mHandler != null) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mRootView.setVisibility(View.VISIBLE);
-                        mRootView.setAlpha(0.0f);
-                        mRootView.animate().alpha(1).setDuration(500).start();
-                    }
-                });
-            }
         }
 
         /**
