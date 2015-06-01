@@ -100,7 +100,9 @@ public class ImageCache {
 
                     oldBitmap.setIsCached(false);
 
-                    mReusableBitmaps.add(new SoftReference<>(oldBitmap.getBitmap()));
+                    synchronized (mReusableBitmaps) {
+                        mReusableBitmaps.add(new SoftReference<>(oldBitmap.getBitmap()));
+                    }
                 }
             };
         } else {
@@ -267,24 +269,26 @@ public class ImageCache {
         Bitmap bitmap = null;
 
         if (mReusableBitmaps != null && !mReusableBitmaps.isEmpty()) {
-            final Iterator<SoftReference<Bitmap>> iterator = mReusableBitmaps.iterator();
-            Bitmap item;
+            synchronized (mReusableBitmaps) {
+                final Iterator<SoftReference<Bitmap>> iterator = mReusableBitmaps.iterator();
+                Bitmap item;
 
-            while (iterator.hasNext()) {
-                item = iterator.next().get();
+                while (iterator.hasNext()) {
+                    item = iterator.next().get();
 
-                if (null != item && item.isMutable()) {
-                    // Check to see it the item can be used for inBitmap
-                    if (ImageUtils.canUseForInBitmap(item, options)) {
-                        bitmap = item;
+                    if (null != item && item.isMutable()) {
+                        // Check to see it the item can be used for inBitmap
+                        if (ImageUtils.canUseForInBitmap(item, options)) {
+                            bitmap = item;
 
-                        // Remove from reusable set so it can't be used again
+                            // Remove from reusable set so it can't be used again
+                            iterator.remove();
+                            break;
+                        }
+                    } else {
+                        // Remove from the set if the reference has been cleared.
                         iterator.remove();
-                        break;
                     }
-                } else {
-                    // Remove from the set if the reference has been cleared.
-                    iterator.remove();
                 }
             }
         }
