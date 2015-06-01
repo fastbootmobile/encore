@@ -24,6 +24,7 @@ import com.fastbootmobile.encore.api.common.JsonGet;
 import com.fastbootmobile.encore.api.common.RateLimitException;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 /**
@@ -45,7 +46,7 @@ public class GoogleImagesClient {
         JSONArray results = obj.getJSONObject("responseData").getJSONArray("results");
 
         if (results.length() > 0) {
-            return results.getJSONObject(0).getString("url");
+            return URLDecoder.decode(results.getJSONObject(0).getString("url"), "UTF-8");
         } else {
             return null;
         }
