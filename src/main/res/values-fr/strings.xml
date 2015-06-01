@@ -18,9 +18,9 @@
     <string name="cast">Caster</string>
     <string name="placeholder_search">Rechercher…</string>
     <plurals name="nb_tracks">
-        <item quantity="one">%d track</item>
-        <item quantity="other">%d tracks</item>
-        <item quantity="zero">No tracks</item>
+        <item quantity="one">%d piste</item>
+        <item quantity="other">%d pistes</item>
+        <item quantity="zero">Aucune piste</item>
     </plurals>
     <string name="no_settings_provider">Cette source n\'a pas de paramètres</string>
     <string name="no_settings_dsp">Cet effet n\'a pas de paramètres</string>
@@ -253,4 +253,9 @@
     <string name="multiprovider_name">Multi-sources</string>
     <string name="local_provider_name">Local</string>
     <string name="add_to_another_playlist">Ajouter à une autre playlist</string>
+    <string name="recognition_details_text">You can recognize music from radio, videos, concerts, or even humming it.</string>
+    <string name="recognition_status_idle">Tapez pour commencer à reconnaître</string>
+    <string name="recognition_status_listening">Ecoute en cours…</string>
+    <string name="recognition_status_recognizing">Identification…</string>
+    <string name="recognition_status_no_result">Aucun résultat :(</string>
 </resources>
