@@ -59,7 +59,9 @@ public class PacManReceiver extends BroadcastReceiver {
             int uid = intent.getIntExtra(Intent.EXTRA_UID, 0);
             if (uid > 0) {
                 String[] packages = pm.getPackagesForUid(uid);
-                stopPlayingTrack(packages);
+                if (packages != null) {
+                    stopPlayingTrack(packages);
+                }
             }
 
             // TODO: If EXTRA_REPLACE is set, maybe just pause and try to resume playback after
