@@ -832,11 +832,36 @@ public class PlaybackService extends Service
         if (currentSong != null) {
             Log.d(TAG, "onSongPaused: Pausing...");
 
+            boolean wasBuffering = (mState == STATE_BUFFERING);
+
             mState = STATE_PAUSING;
+
             final ProviderIdentifier identifier = currentSong.getProvider();
             mCommandsHandler.obtainMessage(CommandHandler.MSG_PAUSE_PROVIDER, identifier.serialize()).sendToTarget();
 
             mNativeSink.setPaused(true);
+
+            if (wasBuffering) {
+                // We were buffering, which means the provider might not be playing the song,
+                // and might not send the playback paused callback. We assume we're paused.
+                mState = STATE_PAUSED;
+
+                for (IPlaybackCallback cb : mCallbacks) {
+                    try {
+                        cb.onPlaybackPause();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                    } catch (Exception e) {
+                        Log.e(TAG, "BIG EXCEPTION DURING REMOTE PLAYBACK PAUSE: ", e);
+                        Log.e(TAG, "Callback: " + cb);
+                    }
+                }
+
+                Log.d(TAG, "onSongPaused: Paused (was buffering)...");
+
+                mNotification.setPlayPauseAction(true);
+                mRemoteMetadata.notifyPaused(getCurrentTrackPositionImpl());
+            }
         }
     }
 
@@ -1200,19 +1225,20 @@ public class PlaybackService extends Service
     public void onSongUpdate(List<Song> s) {
         final Song currentSong = getCurrentSong();
 
-        if (currentSong != null && s.contains(currentSong) && currentSong.isLoaded()
-                && mCurrentTrackLoaded) {
+        if (currentSong != null && s.contains(currentSong) && currentSong.isLoaded()) {
             if (mCurrentTrackWaitLoading) {
                 requestStartPlayback();
             }
 
-            mRemoteMetadata.setCurrentSong(currentSong, getNextTrack() != null);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mNotification.setCurrentSong(getCurrentSong());
-                }
-            });
+            if (mCurrentTrackLoaded) {
+                mRemoteMetadata.setCurrentSong(currentSong, getNextTrack() != null);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mNotification.setCurrentSong(getCurrentSong());
+                    }
+                });
+            }
         }
     }
 
