@@ -16,7 +16,9 @@
 package com.fastbootmobile.encore.art;
 
 import android.content.res.Resources;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.util.Log;
 
@@ -92,14 +94,15 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
             // Get from the cache
             synchronized (this) {
                 if (AlbumArtCache.getDefault().getArt(mResources, mEntity,
-                        mRequestedSize,mCacheListener)) {
+                        mRequestedSize, mCacheListener)) {
                     // Wait for the result
                     if (mArtBitmap == null) {
                         try {
                             wait(6000);
                         } catch (InterruptedException e) {
                             // Interrupted, cancel
-                            artCache.notifyQueryStopped(mEntity);
+                            cancel(true);
+                            mListener = null;
                             return null;
                         }
                     }
@@ -123,8 +126,7 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
     }
 
     @Override
-    protected void onCancelled() {
-        super.onCancelled();
+    protected void onCancelled(AlbumArtHelper.BackgroundResult backgroundResult) {
         mListener = null;
         final AlbumArtCache artCache = AlbumArtCache.getDefault();
         artCache.notifyQueryStopped(mEntity);

@@ -206,6 +206,7 @@ public class PlayingBarView extends RelativeLayout {
     private boolean mWrapped;
     private boolean mPlayInSeekMode;
     private boolean mSkipFabAction;
+    private boolean mCallbackRegistered = false;
 
     public PlayingBarView(Context context) {
         super(context);
@@ -235,6 +236,7 @@ public class PlayingBarView extends RelativeLayout {
 
         PlaybackProxy.removeCallback(mPlaybackCallback);
         ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
+        mCallbackRegistered = false;
     }
 
     public void onResume() {
@@ -243,7 +245,10 @@ public class PlayingBarView extends RelativeLayout {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PlaybackProxy.addCallback(mPlaybackCallback);
+                if (!mCallbackRegistered) {
+                    mCallbackRegistered = true;
+                    PlaybackProxy.addCallback(mPlaybackCallback);
+                }
 
                 // We delay check if we have a queue and/or are playing to leave time to the
                 // playback service to get up
@@ -254,7 +259,6 @@ public class PlayingBarView extends RelativeLayout {
                 }
             }
         }, 1000);
-
     }
 
     @Override

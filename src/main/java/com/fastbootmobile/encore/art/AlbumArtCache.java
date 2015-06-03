@@ -21,7 +21,6 @@ import android.graphics.BitmapFactory;
 import android.os.RemoteException;
 import android.util.Log;
 
-import org.json.JSONException;
 import com.fastbootmobile.encore.api.common.HttpGet;
 import com.fastbootmobile.encore.api.common.RateLimitException;
 import com.fastbootmobile.encore.api.freebase.FreeBaseClient;
@@ -40,6 +39,8 @@ import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
 import com.fastbootmobile.encore.utils.Utils;
+
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -510,6 +511,6 @@ public class AlbumArtCache {
     }
 
     public interface IAlbumArtCacheListener {
-        public void onArtLoaded(BoundEntity ent, RecyclingBitmapDrawable result);
+        void onArtLoaded(BoundEntity ent, RecyclingBitmapDrawable result);
     }
 }
