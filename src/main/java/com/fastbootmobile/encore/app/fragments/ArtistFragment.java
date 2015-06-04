@@ -1569,8 +1569,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     if (mOfflineView != null) mOfflineView.setVisibility(View.VISIBLE);
                     if (mArtistsSpinner != null) mArtistsSpinner.setVisibility(View.GONE);
                 } else {
-                    mOfflineView.setVisibility(View.GONE);
-                    mArtistsSpinner.setVisibility(View.VISIBLE);
+                    if (mOfflineView != null) mOfflineView.setVisibility(View.GONE);
+                    if (mArtistsSpinner != null) mArtistsSpinner.setVisibility(View.VISIBLE);
                     mSimilarLoaded = true;
                     new Thread() {
                         public void run() {
