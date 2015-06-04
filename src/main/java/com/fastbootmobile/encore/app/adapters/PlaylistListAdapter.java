@@ -146,7 +146,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
     public void remove(String ref) {
         for (Playlist playlist : mPlaylists) {
             if (playlist.getRef().equals(ref)) {
-                mPlaylists.remove(ref);
+                mPlaylists.remove(playlist);
                 break;
             }
         }

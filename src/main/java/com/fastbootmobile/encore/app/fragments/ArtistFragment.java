@@ -1334,7 +1334,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     ivOverflow.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Utils.showSongOverflow(getActivity(), ivOverflow, song);
+                            Utils.showSongOverflow(getActivity(), ivOverflow, song, true);
                         }
                     });
 

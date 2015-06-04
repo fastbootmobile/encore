@@ -94,7 +94,7 @@ public class HistoryAdapter extends BaseAdapter {
         @Override
         public void onClick(View v) {
             ViewHolder tag = (ViewHolder) v.getTag();
-            Utils.showSongOverflow((FragmentActivity) v.getContext(), tag.btnOverflow, tag.song);
+            Utils.showSongOverflow((FragmentActivity) v.getContext(), tag.btnOverflow, tag.song, false);
         }
     };
 

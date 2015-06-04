@@ -370,11 +370,11 @@ public class Utils {
     }
 
     public static void showSongOverflow(final FragmentActivity context, final View parent,
-                                        final Song song) {
+                                        final Song song, final boolean hideArtist) {
         PopupMenu popupMenu = new PopupMenu(context, parent);
         popupMenu.inflate(R.menu.track_overflow);
 
-        if (song.getArtist() == null) {
+        if (song.getArtist() == null || hideArtist) {
             // This song has no artist information, hide the entry
             Menu menu = popupMenu.getMenu();
             menu.removeItem(R.id.menu_open_artist);
@@ -433,6 +433,11 @@ public class Utils {
 
     public static void showCurrentSongOverflow(final Context context, final View parent,
                                                final Song song) {
+        showCurrentSongOverflow(context, parent, song, false);
+    }
+
+    public static void showCurrentSongOverflow(final Context context, final View parent,
+                                               final Song song, final boolean showArtist) {
         PopupMenu popupMenu = new PopupMenu(context, parent);
         popupMenu.inflate(R.menu.queue_overflow);
         if (song.getAlbum() == null) {
@@ -442,6 +447,11 @@ public class Utils {
             Menu menu = popupMenu.getMenu();
             menu.removeItem(R.id.menu_add_album_to_queue);
             menu.removeItem(R.id.menu_open_album);
+        }
+
+        if (!showArtist) {
+            Menu menu = popupMenu.getMenu();
+            menu.removeItem(R.id.menu_open_artist);
         }
 
         popupMenu.show();
@@ -459,6 +469,13 @@ public class Utils {
                                 song.getAlbum(),
                                 song.getProvider(),
                                 res.getColor(R.color.default_album_art_background));
+                        context.startActivity(intent);
+                        break;
+
+                    case R.id.menu_open_artist:
+                        intent = ArtistActivity.craftIntent(context, null, song.getArtist(),
+                                song.getProvider(),
+                                context.getResources().getColor(R.color.default_album_art_background));
                         context.startActivity(intent);
                         break;
 

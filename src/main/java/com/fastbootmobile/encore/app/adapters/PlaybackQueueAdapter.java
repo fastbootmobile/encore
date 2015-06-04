@@ -79,7 +79,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 ViewHolder tag = (ViewHolder) v.getTag();
-                Utils.showCurrentSongOverflow(tag.vRoot.getContext(), v, tag.song);
+                Utils.showCurrentSongOverflow(tag.vRoot.getContext(), v, tag.song, true);
             }
         };
     }

@@ -71,7 +71,7 @@ public class SongsListAdapter extends BaseAdapter {
         public void onClick(View v) {
             final ViewHolder tag = (ViewHolder) v.getTag();
             final Context context = tag.vRoot.getContext();
-            Utils.showSongOverflow((FragmentActivity) context, tag.ivOverflow, tag.song);
+            Utils.showSongOverflow((FragmentActivity) context, tag.ivOverflow, tag.song, false);
         }
     };
 
