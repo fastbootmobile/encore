@@ -80,30 +80,27 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
     private Runnable mUpdateListRunnable = new Runnable() {
         @Override
         public void run() {
-            boolean didChange = false;
             synchronized (mPlaylistsUpdated) {
                 if (mAdapter != null) {
-                    didChange = mAdapter.addAllUnique(mPlaylistsUpdated);
+                    mAdapter.addAllUnique(mPlaylistsUpdated);
                 }
                 if (mGridAdapter != null) {
-                    didChange = mGridAdapter.addAllUnique(mPlaylistsUpdated) || didChange;
+                    mGridAdapter.addAllUnique(mPlaylistsUpdated);
                 }
 
                 mPlaylistsUpdated.clear();
             }
 
-            if (didChange) {
-                if (mAdapter != null && getActivity() != null) {
-                    try {
-                        mAdapter.sortList(getActivity().getApplicationContext());
-                    } catch (JSONException e) {
-                        Log.e(TAG, "Unable to sort playlists list");
-                    }
-                    mAdapter.notifyDataSetChanged();
+            if (mAdapter != null && getActivity() != null) {
+                try {
+                    mAdapter.sortList(getActivity().getApplicationContext());
+                } catch (JSONException e) {
+                    Log.e(TAG, "Unable to sort playlists list");
                 }
-                if (mGridAdapter != null) {
-                    mGridAdapter.notifyDataSetChanged();
-                }
+                mAdapter.notifyDataSetChanged();
+            }
+            if (mGridAdapter != null) {
+                mGridAdapter.notifyDataSetChanged();
             }
         }
     };
@@ -273,10 +270,20 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onPlaylistRemoved(String ref) {
+        Log.d(TAG, "Playlist removed: " + ref);
         if (ref != null) {
+            synchronized (mPlaylistsUpdated) {
+                for (Playlist playlist : mPlaylistsUpdated) {
+                    if (playlist.getRef().equals(ref)) {
+                        mPlaylistsUpdated.remove(playlist);
+                        break;
+                    }
+                }
+            }
+
             mAdapter.remove(ref);
-            mHandler.removeCallbacks(mUpdateListRunnable);
-            mHandler.post(mUpdateListRunnable);
+            mHandler.removeCallbacks(mDataChangedRunnable);
+            mHandler.post(mDataChangedRunnable);
         }
     }
 
