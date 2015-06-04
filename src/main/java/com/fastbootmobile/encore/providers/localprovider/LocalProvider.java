@@ -207,7 +207,7 @@ public class LocalProvider {
         final Cursor cur = mContentResolver.query(mUri, null,
                 MediaStore.Audio.Media.IS_MUSIC + " = 1", null, null);
 
-        if (!cur.moveToFirst()) {
+        if (cur == null || !cur.moveToFirst()) {
             // there is no song to iterate over
             return;
         }
@@ -264,25 +264,28 @@ public class LocalProvider {
 
         // we poll the artists
         final Cursor cur = mContentResolver.query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, proj, null, null, null);
-        final int artistName = cur.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST);
-        final int artistKey = cur.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST_KEY);
-        final int artistId = cur.getColumnIndex(MediaStore.Audio.Artists._ID);
-        if (cur.moveToFirst()) {
-            do {
-                Artist artist = new Artist(PREFIX_ARTIST + getArtistUniqueName(cur.getString(artistKey)));
-                artist.setName(cur.getString(artistName));
-                artist.setIsLoaded(true);
+        if (cur != null) {
+            final int artistName = cur.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST);
+            final int artistKey = cur.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST_KEY);
+            final int artistId = cur.getColumnIndex(MediaStore.Audio.Artists._ID);
+            if ( cur.moveToFirst()) {
+                do {
+                    Artist artist = new Artist(PREFIX_ARTIST + getArtistUniqueName(cur.getString(artistKey)));
+                    artist.setName(cur.getString(artistName));
+                    artist.setIsLoaded(true);
 
-                // we get the albums from this artist
-                artist = getAlbumsArtists(artist, MediaStore.Audio.Artists.Albums.getContentUri("external", cur.getLong(artistId)));
-                if (artist != null) {
-                    artist.setSourceLogo(PluginService.LOGO_REF);
-                    mArtists.put(artist.getRef(), artist);
-                    mCallback.artistUpdated(artist);
-                }
-            } while (cur.moveToNext());
+                    // we get the albums from this artist
+                    artist = getAlbumsArtists(artist, MediaStore.Audio.Artists.Albums.getContentUri("external", cur.getLong(artistId)));
+                    if (artist != null) {
+                        artist.setSourceLogo(PluginService.LOGO_REF);
+                        mArtists.put(artist.getRef(), artist);
+                        mCallback.artistUpdated(artist);
+                    }
+                } while (cur.moveToNext());
+            }
+
+            cur.close();
         }
-        cur.close();
     }
 
     public void fetchPlaylists(String idPlaylist) {
@@ -300,7 +303,7 @@ public class LocalProvider {
         cur = mContentResolver.query(uri, proj,
                 request, null, null);
 
-        if (cur.moveToFirst()) {
+        if (cur != null && cur.moveToFirst()) {
             final int idKey = cur.getColumnIndex(MediaStore.Audio.Playlists._ID);
             final int nameKey = cur.getColumnIndex(MediaStore.Audio.Playlists.NAME);
 
@@ -321,7 +324,10 @@ public class LocalProvider {
                 }
             } while (cur.moveToNext());
         }
-        cur.close();
+
+        if (cur != null) {
+            cur.close();
+        }
     }
 
     public void fetchGenres(Uri uri) {

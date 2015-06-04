@@ -137,6 +137,10 @@ public class DspProvidersFragment extends ListFragment {
                 showAddEffect();
                 return true;
 
+            case R.id.menu_download_effect:
+                ProviderDownloadDialog.newInstance(true).show(getFragmentManager(), "DSPDownload");
+                return true;
+
             default:
                 return false;
         }

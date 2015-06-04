@@ -259,4 +259,6 @@
     <string name="recognition_status_listening">Listening…</string>
     <string name="recognition_status_recognizing">Recognizing…</string>
     <string name="recognition_status_no_result">No results :(</string>
+
+    <string name="download_from_dlg_title">Download from…</string>
 </resources>

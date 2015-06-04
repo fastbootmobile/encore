@@ -147,6 +147,13 @@ public class WelcomeFragment extends Fragment {
                         dialog.show();
                     }
                 });
+
+                root.findViewById(R.id.btnBrowse).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ProviderDownloadDialog.newInstance(false).show(getFragmentManager(), "Download");
+                    }
+                });
             }
         } else if (mStep == 3) {
             // Step 3: Configure plugins

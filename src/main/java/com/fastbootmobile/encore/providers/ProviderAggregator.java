@@ -932,7 +932,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
 
                 if (artist != null) {
                     Album album = mCache.getAlbum(s.getAlbum());
-                    if (album == null) {
+                    if (album == null && s.getAlbum() != null) {
                         album = retrieveAlbum(s.getAlbum(), provider);
                     }
 

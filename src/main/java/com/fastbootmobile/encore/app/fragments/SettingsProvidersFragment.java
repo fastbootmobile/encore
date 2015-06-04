@@ -136,6 +136,7 @@ public class SettingsProvidersFragment extends ListFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_download_provider:
+                ProviderDownloadDialog.newInstance(false).show(getFragmentManager(), "Download");
                 return true;
 
             default:

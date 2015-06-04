@@ -258,4 +258,5 @@
     <string name="recognition_status_listening">Ecoute en cours…</string>
     <string name="recognition_status_recognizing">Identification…</string>
     <string name="recognition_status_no_result">Aucun résultat :(</string>
+    <string name="download_from_dlg_title">Télécharger depuis…</string>
 </resources>
