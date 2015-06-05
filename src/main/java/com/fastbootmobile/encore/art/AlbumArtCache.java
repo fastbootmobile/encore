@@ -53,6 +53,7 @@ import java.util.List;
 public class AlbumArtCache {
     private static final String TAG = "AlbumArtCachev2";
     private static final AlbumArtCache INSTANCE = new AlbumArtCache();
+    private static final boolean CREATIVE_COMMONS = true;
 
     private final List<BoundEntity> mRunningQueries = new ArrayList<>();
 
@@ -133,24 +134,62 @@ public class AlbumArtCache {
             listener.onArtLoaded(ent, cache.get(res, key, requestedSize));
             result = true;
         } else {
-            try {
-                if (ent instanceof Song) {
-                    result = getSongArt(res, (Song) ent, listener);
-                } else if (ent instanceof Artist) {
-                    result = getArtistArt(res, (Artist) ent, listener);
-                } else if (ent instanceof Album) {
-                    result = getAlbumArt(res, (Album) ent, listener);
-                } else if (ent instanceof Playlist) {
-                    result = getPlaylistArt(res, (Playlist) ent, listener);
-                } else {
-                    throw new IllegalArgumentException("Entity is of an unknown class!");
+            if (CREATIVE_COMMONS) {
+                /*
+                 * "Copyrighted images to demonstrate functionality, but do not intend to imply
+                 * an association with the IP holder".
+                 * Yes Google, it's going to ruin content holders to display actual album
+                 * art in an app screenshot. Workaround: CC images in special build dedicated
+                 * to screenshots.
+                 */
+                getFreeArt(res, ent, listener);
+            } else {
+                try {
+                    if (ent instanceof Song) {
+                        result = getSongArt(res, (Song) ent, listener);
+                    } else if (ent instanceof Artist) {
+                        result = getArtistArt(res, (Artist) ent, listener);
+                    } else if (ent instanceof Album) {
+                        result = getAlbumArt(res, (Album) ent, listener);
+                    } else if (ent instanceof Playlist) {
+                        result = getPlaylistArt(res, (Playlist) ent, listener);
+                    } else {
+                        throw new IllegalArgumentException("Entity is of an unknown class!");
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Remote Exception while trying to get album art", e);
                 }
-            } catch (RemoteException e) {
-                Log.e(TAG, "Remote Exception while trying to get album art", e);
             }
         }
 
         return result;
+    }
+
+    private boolean getFreeArt(final Resources res, final BoundEntity ent,
+                               final IAlbumArtCacheListener listener) {
+        new Thread() {
+            public void run() {
+                try {
+                    byte[] bytes = HttpGet.getBytes("http://lorempixel.com/600/600/abstract/", "", false);
+                    if (bytes != null) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        if (bitmap != null) {
+                            RecyclingBitmapDrawable rbd = ImageCache.getDefault()
+                                    .put(res, getEntityArtKey(ent), bitmap);
+                            listener.onArtLoaded(ent, rbd);
+                        } else {
+                            listener.onArtLoaded(ent, null);
+                        }
+                    } else {
+                        listener.onArtLoaded(ent, null);
+                    }
+                } catch (IOException | RateLimitException ignore) {
+                    listener.onArtLoaded(ent, null);
+                }
+            }
+        }.start();
+
+        return true;
     }
 
     private boolean getSongArt(final Resources res, final Song song, final IAlbumArtCacheListener listener) throws RemoteException {
