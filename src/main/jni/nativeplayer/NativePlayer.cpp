@@ -25,7 +25,7 @@
 #include "Glue.h"
 #include "../libresample/resample.h"
 
-#define MAX_BUFFER_SIZE 44100
+#define MAX_BUFFER_SIZE 102400
 #define LOG_TAG "OM-NativePlayer"
 
 // -------------------------------------------------------------------------------------
