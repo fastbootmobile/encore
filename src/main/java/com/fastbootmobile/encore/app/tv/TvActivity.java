@@ -260,7 +260,7 @@ public class TvActivity extends Activity {
 
         // First row: Recently played (10 items, randomly artist or album)
         ListenLogger logger = new ListenLogger(this);
-        List<ListenLogger.LogEntry> logEntries = HistoryAdapter.sortByTime(logger.getEntries());
+        List<ListenLogger.LogEntry> logEntries = HistoryAdapter.sortByTime(logger.getEntries(25));
         ArrayObjectAdapter logEntriesRowAdapter = new ArrayObjectAdapter(new CardPresenter());
         int entriesCount = 0;
 

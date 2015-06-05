@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:orientation="vertical"
+             android:padding="@dimen/listen_now_card_padding"
+             android:clipToPadding="false">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/card_radius"
+        app:cardElevation="@dimen/card_elevation">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/listen_now_card_padding"
+            android:paddingTop="@dimen/listen_now_card_padding"
+            android:paddingLeft="@dimen/listen_now_card_padding">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                fontPath="fonts/Roboto-Medium.ttf"
+                android:fontFamily="sans-serif-medium"
+                android:text="Hey there, welcome!"
+                android:textColor="@color/text_regular"
+                android:id="@+id/tvTitle"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="It looks like you don&apos;t have any music on your device, and no cloud service installed or configured."
+                android:id="@+id/tvBody"
+                android:layout_below="@+id/tvTitle"
+                android:layout_marginTop="@dimen/listen_now_card_padding"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Browse plug-ins"
+                android:id="@+id/btnPrimary"
+                fontPath="fonts/Roboto-Medium.ttf"
+                style="@style/OmniMusic.Spec.BorderlessButton"
+                android:layout_below="@+id/tvBody"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="@dimen/listen_now_card_padding"
+                />
+
+            <Button
+                style="@style/OmniMusic.Spec.BorderlessButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Configure"
+                fontPath="fonts/Roboto-Medium.ttf"
+                android:id="@+id/btnSecondary"
+                android:layout_alignTop="@+id/btnPrimary"
+                android:layout_toLeftOf="@+id/btnPrimary"
+                android:layout_toStartOf="@+id/btnPrimary"
+                android:layout_marginRight="@dimen/listen_now_card_padding"
+                android:textColor="@color/text_regular"/>
+        </RelativeLayout>
+        </android.support.v7.widget.CardView>
+
+</FrameLayout>

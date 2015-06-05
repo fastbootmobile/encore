@@ -1,7 +1,8 @@
 <ListView xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context="com.fastbootmobile.encore.app.HistoryActivity.HistoryFragment"
-                android:clipToPadding="false"
-                android:paddingBottom="@dimen/playing_bar_height"/>
+          xmlns:tools="http://schemas.android.com/tools"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:clipToPadding="false"
+          android:paddingBottom="@dimen/playing_bar_height"
+          android:paddingTop="@dimen/translucent_toolbarstatus_top_margin"
+          tools:context="com.fastbootmobile.encore.app.HistoryActivity.HistoryFragment"/>

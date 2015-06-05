@@ -261,4 +261,17 @@
     <string name="recognition_status_no_result">No results :(</string>
 
     <string name="download_from_dlg_title">Download from…</string>
+    <string name="ln_landcard_nocustomprovider_title">Need new sources?</string>
+    <string name="ln_landcard_nocustomprovider_body">Encore can handle multiple cloud providers, which you can install from various stores. You can then make multi-providers playlists and listen all of your tracks at once!</string>
+    <string name="ln_section_recents">Recently played</string>
+    <string name="ln_landcard_dismiss">Got it</string>
+    <string name="lb_section_automixes">My automixes</string>
+    <string name="ln_automix_getstarted_body">Create automated mixes adjusting to your liking!</string>
+    <string name="ln_action_getstarted">Get started</string>
+    <string name="ln_section_playlists">My playlists</string>
+    <string name="ln_card_nothing_title">Hey there, welcome!</string>
+    <string name="ln_card_nothing_body">It looks like you don\'t have any music on your device, and no cloud music service installed or configured.</string>
+    <string name="ln_card_nothinghint_title">Are we missing something?</string>
+    <string name="ln_card_nothinghint_body">Should you already have music on your device, make sure it is MP3, WAV, or FLAC, and in a folder accessible by Encore (such as the Music folder on your storage).</string>
+    <string name="ln_header_search_placeholder">Search for a song, artist, album…</string>
 </resources>

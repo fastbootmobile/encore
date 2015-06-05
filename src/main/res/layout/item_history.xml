@@ -35,6 +35,8 @@
             android:layout_height="wrap_content"
             fontPath="fonts/Roboto-Medium.ttf"
             android:fontFamily="sans-serif-medium"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/text_regular"/>
 

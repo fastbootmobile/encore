@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.fastbootmobile.encore.app.fragments.SearchFragment;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
@@ -97,19 +98,23 @@ public class SearchActivity extends AppActivity {
 
     private void handleIntent(final Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            final String query = intent.getStringExtra(SearchManager.QUERY).trim();
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mActiveFragment.resetResults();
-                    mActiveFragment.setArguments(query);
-                    ProviderAggregator.getDefault().startSearch(query);
-                }
-            }, 200);
+            if (!intent.hasExtra(SearchManager.QUERY)) {
+                Toast.makeText(this, "Invalid search query: missing query", Toast.LENGTH_SHORT).show();
+            } else {
+                final String query = intent.getStringExtra(SearchManager.QUERY).trim();
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mActiveFragment.resetResults();
+                        mActiveFragment.setArguments(query);
+                        ProviderAggregator.getDefault().startSearch(query);
+                    }
+                }, 200);
 
-            SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
-                    SearchSuggestionProvider.AUTHORITY, SearchSuggestionProvider.MODE);
-            suggestions.saveRecentQuery(query, null);
+                SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+                        SearchSuggestionProvider.AUTHORITY, SearchSuggestionProvider.MODE);
+                suggestions.saveRecentQuery(query, null);
+            }
         }
     }
 }

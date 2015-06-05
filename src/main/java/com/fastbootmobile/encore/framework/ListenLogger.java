@@ -19,10 +19,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.fastbootmobile.encore.model.Song;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -104,11 +105,10 @@ public class ListenLogger {
      * Fetches and builds a list of all the history entries
      * @return A list of entries
      */
-    public List<LogEntry> getEntries() {
+    public List<LogEntry> getEntries(int limit) {
         Set<String> entries = mPrefs.getStringSet(PREF_HISTORY_ENTRIES, null);
         List<LogEntry> output = new ArrayList<>();
         if (entries != null) {
-            if (DEBUG) Log.d(TAG, "Log entries: " + entries.size());
             for (String entry : entries) {
                 try {
                     JSONObject jsonObj = new JSONObject(entry);
@@ -119,6 +119,10 @@ public class ListenLogger {
                     output.add(new LogEntry(songRef, providerSerialized, timestamp));
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON Exception while trying to get log entry", e);
+                }
+
+                if (limit > 0 && output.size() == limit) {
+                    break;
                 }
             }
         }

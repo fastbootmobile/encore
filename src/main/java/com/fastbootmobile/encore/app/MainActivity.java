@@ -28,8 +28,6 @@ import android.view.View;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.williammora.snackbar.Snackbar;
-
 import com.fastbootmobile.encore.app.fragments.AutomixFragment;
 import com.fastbootmobile.encore.app.fragments.HistoryFragment;
 import com.fastbootmobile.encore.app.fragments.ListenNowFragment;
@@ -48,6 +46,7 @@ import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.utils.Utils;
+import com.williammora.snackbar.Snackbar;
 
 import java.util.List;
 
@@ -141,10 +140,18 @@ public class MainActivity extends AppActivity
                 }
             }, 1000);
         }
+
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
     public Toolbar getToolbar() {
         return mToolbar;
+    }
+
+    public CharSequence getFragmentTitle() {
+        return mTitle;
     }
 
     private void lookForUnconfiguredProviders() {
@@ -220,6 +227,12 @@ public class MainActivity extends AppActivity
             }
             restoreActionBar();
         }
+    }
+
+    public void openSection(int section) {
+        mNavigationDrawerFragment.selectItem(section - 1);
+        onSectionAttached(section);
+        restoreActionBar();
     }
 
     @Override
@@ -309,7 +322,9 @@ public class MainActivity extends AppActivity
 
             final String fragmentTag = "" + position + "_" + mOrientation;
 
-            mPlayingBarLayout.animate().alpha(1).setDuration(400).start();
+            if (mPlayingBarLayout != null) {
+                mPlayingBarLayout.animate().alpha(1).setDuration(400).start();
+            }
 
             Fragment newFrag = null;
             switch (position + 1) {
@@ -405,21 +420,12 @@ public class MainActivity extends AppActivity
             default:
                 mTitle = getString(R.string.title_section_listen_now);
                 break;
-
         }
-    }
 
-    public void setContentShadowTop(final float pxTop) {
-        View actionBarShadow = findViewById(R.id.action_bar_shadow);
-        if (actionBarShadow != null) {
-            actionBarShadow.setTranslationY(pxTop + mToolbar.getMeasuredHeight());
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setContentShadowTop(pxTop);
-                }
-            });
+        if (mToolbar != null) {
+            if (number != SECTION_LISTEN_NOW) {
+                mToolbar.setBackgroundColor(getResources().getColor(R.color.primary));
+            }
         }
     }
 
@@ -427,6 +433,10 @@ public class MainActivity extends AppActivity
         if (mToolbar != null) {
             mToolbar.setTitle(mTitle);
         }
+    }
+
+    public void openSearchView() {
+        mSearchView.callOnClick();
     }
 
     public void toggleOfflineMode() {
@@ -457,6 +467,7 @@ public class MainActivity extends AppActivity
                         mNavigationDrawerFragment.setDrawerIndicatorEnabled(false);
                         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                         mSearchView.requestFocus();
+                        mToolbar.setBackgroundColor(getResources().getColor(R.color.primary));
                     }
                 });
                 mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {

@@ -16,31 +16,39 @@
 package com.fastbootmobile.encore.app.fragments;
 
 import android.app.Activity;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.app.SearchManager;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.RemoteException;
-import android.os.SystemClock;
+import android.os.TransactionTooLargeException;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.CardView;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AbsListView;
+import android.widget.EditText;
 import android.widget.TextView;
 
-import com.fastbootmobile.encore.api.common.Pair;
+import com.fastbootmobile.encore.api.echonest.AutoMixBucket;
+import com.fastbootmobile.encore.api.echonest.AutoMixManager;
+import com.fastbootmobile.encore.app.AppActivity;
 import com.fastbootmobile.encore.app.MainActivity;
 import com.fastbootmobile.encore.app.R;
-import com.fastbootmobile.encore.app.adapters.HistoryAdapter;
+import com.fastbootmobile.encore.app.SearchActivity;
 import com.fastbootmobile.encore.app.adapters.ListenNowAdapter;
+import com.fastbootmobile.encore.app.ui.ParallaxScrollListView;
+import com.fastbootmobile.encore.app.ui.ScrollStatusBarColorListener;
 import com.fastbootmobile.encore.framework.ListenLogger;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.model.Album;
 import com.fastbootmobile.encore.model.Artist;
-import com.fastbootmobile.encore.model.BoundEntity;
 import com.fastbootmobile.encore.model.Playlist;
 import com.fastbootmobile.encore.model.SearchResult;
 import com.fastbootmobile.encore.model.Song;
@@ -48,380 +56,33 @@ import com.fastbootmobile.encore.providers.ILocalCallback;
 import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderConnection;
-import com.fastbootmobile.encore.providers.ProviderIdentifier;
-import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
-
-import org.lucasr.twowayview.TwoWayView;
-import org.lucasr.twowayview.widget.DividerItemDecoration;
+import com.fastbootmobile.encore.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 /**
  * A simple {@link Fragment} subclass showing ideas of tracks and albums to listen to.
  * Use the {@link ListenNowFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
  */
 public class ListenNowFragment extends Fragment implements ILocalCallback {
-
     private static final String TAG = "ListenNowFragment";
 
-    private static final ListenNowAdapter sAdapter = new ListenNowAdapter();
-    private static boolean sWarmUp = false;
+    private static final String PREFS = "listen_now";
+    private static final String LANDCARD_NO_CUSTOM_PROVIDERS = "card_no_custom";
 
-    private static final int MSG_GENERATE_ENTRIES = 1;
-
-    private static final int TYPE_ARTIST = 0;
-    private static final int TYPE_ALBUM = 1;
-    private static final int TYPE_SONG = 2;
-
-    private static final int MAX_SUGGESTIONS = 21;
-    private static final int MAX_RECENTS = 4;
-
-    private Handler mHandler;
-    private TextView mTxtNoMusic;
-    private int mWarmUpCount = 0;
-    private boolean mFoundAnything;
-    private List<Integer> mUpdateItems;
-    private boolean mIsGenerating = false;
-
-    private final Runnable mUpdateItemsRunnable = new Runnable() {
-        @Override
-        public void run() {
-            for (int item : mUpdateItems) {
-                sAdapter.notifyItemChanged(item);
-            }
-        }
-    };
-
-    /**
-     * Runnable responsible of generating the entries to put in the grid
-     */
-    private final Runnable mGenerateEntries = new Runnable() {
-        @Override
-        public void run() {
-            if (mIsGenerating) return;
-
-            mIsGenerating = true;
-
-            final List<ListenNowAdapter.ListenNowEntry> addEntries = new ArrayList<>();
-            final List<ListenNowAdapter.ListenNowEntry> recentAddEntries = new ArrayList<>();
-
-            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-
-            final List<Playlist> playlists = aggregator.getAllPlaylists();
-            final List<String> chosenSongs = new ArrayList<>();
-            final List<String> usedReferences = new ArrayList<>();
-            final List<Pair<String, ProviderIdentifier>> availableReferences = new ArrayList<>();
-
-            sWarmUp = true;
-
-            for (Playlist p : playlists) {
-                Iterator<String> it = p.songs();
-                while (it.hasNext()) {
-                    String ref = it.next();
-                    Pair<String, ProviderIdentifier> pair = Pair.create(ref, p.getProvider());
-                    if (!availableReferences.contains(pair)) {
-                        availableReferences.add(pair);
-                    }
-                }
-            }
-
-            if (availableReferences.size() < 10) {
-                // We don't have much in playlists! Use all the library
-                List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
-
-                for (ProviderConnection provider : providers) {
-                    IMusicProvider binder = provider.getBinder();
-                    if (binder != null) {
-                        int limit = 50;
-                        int offset = 0;
-                        boolean goAhead = true;
-                        try {
-                            while (goAhead) {
-                                List<Song> songs = binder.getSongs(offset, limit);
-                                if (songs == null) {
-                                    goAhead = false;
-                                    continue;
-                                }
-
-                                if (songs.size() < limit) {
-                                    goAhead = false;
-                                }
-
-                                offset += songs.size();
-
-                                for (Song song : songs) {
-                                    Pair<String, ProviderIdentifier> pair = Pair.create(song.getRef(), song.getProvider());
-                                    if (!availableReferences.contains(pair)) {
-                                        availableReferences.add(pair);
-                                    }
-                                }
-                            }
-                        } catch (RemoteException ignore) {
-                        }
-                    }
-                }
-            }
-
-            // TODO: What if we have only Spotify and no playlists?
-
-            // If we don't have any playlists, retry in a short time and display either No Music
-            // or Loading... depending on the number of tries, waiting for providers to start
-            if (availableReferences.size() <= 0) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mTxtNoMusic != null) {
-                            mTxtNoMusic.animate().setDuration(400).translationX(0).alpha(1.0f).start();
-                        }
-
-                        if (mWarmUpCount < 2) {
-                            if (mTxtNoMusic != null) {
-                                mTxtNoMusic.setText(R.string.loading);
-                            }
-                        } else if (PluginsLookup.getDefault().getAvailableProviders().size() == 0) {
-                            if (mTxtNoMusic != null) {
-                                mTxtNoMusic.setText(R.string.listen_now_no_providers);
-                            }
-                            mFoundAnything = false;
-                        } else {
-                            if (mTxtNoMusic != null) {
-                                mTxtNoMusic.setText(R.string.no_music_hint);
-                            }
-                            mFoundAnything = false;
-                        }
-
-                        mWarmUpCount++;
-                    }
-                });
-
-                mHandler.removeMessages(MSG_GENERATE_ENTRIES);
-                mHandler.sendEmptyMessageDelayed(MSG_GENERATE_ENTRIES, 1000);
-
-                mIsGenerating = false;
-                return;
-            } else {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mTxtNoMusic != null) {
-                            mTxtNoMusic.animate().setDuration(400).translationX(100).alpha(0.0f).start();
-                        }
-                    }
-                });
-                mFoundAnything = true;
-            }
-
-            // We use a random algorithm (picking random tracks and albums and artists with
-            // a fixed layout:
-            // - One big entry
-            // - Six small entries
-            // A total of MAX_SUGGESTIONS entries
-
-            final Random random = new Random(SystemClock.uptimeMillis());
-            final long startTime = SystemClock.uptimeMillis();
-            for (int i = 0; i < MAX_SUGGESTIONS; i++) {
-                // Watchdog timer
-                if (SystemClock.uptimeMillis() - startTime > 1000) {
-                    break;
-                }
-
-                // Make sure we haven't reached all our accessible data
-                if (availableReferences.size() <= 0) {
-                    break;
-                }
-
-                // First, we determine the entity we want to show
-                int type = random.nextInt(2);
-                int trackId = random.nextInt(availableReferences.size());
-                Pair<String, ProviderIdentifier> trackPair = availableReferences.get(trackId);
-
-                final ProviderIdentifier provider = trackPair.second;
-                if (provider == null) {
-                    Log.e(TAG, "Track has no identifier!");
-                    continue;
-                }
-
-                String trackRef = trackPair.first;
-                if (chosenSongs.contains(trackRef)) {
-                    // We already picked that song
-                    i--;
-                    continue;
-                } else {
-                    chosenSongs.add(trackRef);
-                }
-
-                Song track = aggregator.retrieveSong(trackRef, provider);
-                if (track == null || !track.isLoaded()) {
-                    // Some error while loading this track, or it's not loaded yet! Try another
-                    i--;
-                    continue;
-                }
-
-                // Let's see if this song has the type of entity we're looking for
-                if ((type == TYPE_ARTIST && track.getArtist() == null)
-                        || (type == TYPE_ALBUM && track.getAlbum() == null)) {
-                    i--;
-                    continue;
-                }
-
-                // Now that we have the entity, let's figure if it's a big or small entry
-                boolean isLarge = ((i % 7) == 0);
-
-                // And we make the entry!
-                final BoundEntity entity;
-                switch (type) {
-                    case TYPE_ARTIST:
-                        String artistRef = track.getArtist();
-                        entity = aggregator.retrieveArtist(artistRef, track.getProvider());
-                        break;
-
-                    case TYPE_ALBUM:
-                        String albumRef = track.getAlbum();
-                        entity = aggregator.retrieveAlbum(albumRef, track.getProvider());
-                        ProviderConnection pc = PluginsLookup.getDefault()
-                                .getProvider(provider);
-                        if (pc != null) {
-                            IMusicProvider binder = pc.getBinder();
-                            try {
-                                if (binder != null) {
-                                    binder.fetchAlbumTracks(albumRef);
-                                }
-                            } catch (RemoteException e) {
-                                // ignore
-                            }
-                        }
-                        break;
-
-                    case TYPE_SONG: // UNUSED
-                        entity = track;
-                        break;
-
-                    default:
-                        Log.e(TAG, "Unexpected entry type " + type);
-                        entity = null;
-                        break;
-                }
-
-                if (entity == null) {
-                    i--;
-                } else if (type == TYPE_ARTIST && ((Artist) entity).getName() == null) {
-                    i--;
-                    continue;
-                } else if (type == TYPE_ALBUM && ((Album) entity).getName() == null) {
-                    i--;
-                    continue;
-                }
-
-                if (entity != null && usedReferences.contains(entity.getRef())) {
-                    // Already shown that
-                    i--;
-                } else if (entity != null) {
-                    final ListenNowAdapter.ListenNowEntry entry = new ListenNowAdapter.ListenNowEntry(
-                            isLarge ? ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_LARGE
-                                    : ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_MEDIUM,
-                            entity);
-                    addEntries.add(entry);
-
-                    usedReferences.add(entity.getRef());
-                } else {
-                    // Something bad happened while getting this entity, try something else
-                    i--;
-                }
-            }
-
-            // Generate 4 recent entries
-            Context context = getActivity();
-            if (context != null) {
-                ListenLogger logger = new ListenLogger(context);
-                List<ListenLogger.LogEntry> entries = HistoryAdapter.sortByTime(logger.getEntries());
-                List<String> knownReferences = new ArrayList<>();
-
-                int countRecent = 0;
-                for (ListenLogger.LogEntry entry : entries) {
-                    // Skip known elements
-                    if (knownReferences.contains(entry.getReference())) {
-                        continue;
-                    }
-
-                    final Song song = aggregator.retrieveSong(entry.getReference(), entry.getIdentifier());
-
-                    // Keep only fully-featured elements
-                    if (song == null || song.getArtist() == null || song.getAlbum() == null) {
-                        continue;
-                    }
-
-                    // Skip known elements (again)
-                    if (knownReferences.contains(song.getAlbum()) ||
-                            knownReferences.contains(song.getArtist())) {
-                        continue;
-                    }
-
-                    int type = random.nextInt(2);
-                    BoundEntity entity;
-                    switch (type) {
-                        case TYPE_ARTIST:
-                            entity = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
-                            break;
-
-                        case TYPE_ALBUM:
-                            entity = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
-                            break;
-
-                        default:
-                            throw new RuntimeException("Should not happen");
-                    }
-
-                    if (entity == null) {
-                        // Entity cannot be null, something went wrong, try again with something else
-                        continue;
-                    }
-
-
-                    // Store the references
-                    knownReferences.add(song.getRef());
-                    knownReferences.add(song.getAlbum());
-                    knownReferences.add(song.getArtist());
-
-                    // Create the item
-                    final ListenNowAdapter.ListenNowEntry card =
-                            new ListenNowAdapter.ListenNowEntry(ListenNowAdapter.ListenNowEntry.ENTRY_SIZE_SMALL,
-                                    entity);
-                    recentAddEntries.add(card);
-                    countRecent++;
-
-                    if (countRecent == 4) {
-                        break;
-                    }
-                }
-            }
-
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    sAdapter.clearEntries();
-                    for (ListenNowAdapter.ListenNowEntry addEntry : addEntries) {
-                        sAdapter.addEntry(addEntry);
-                    }
-                    for (ListenNowAdapter.ListenNowEntry addRecentEntry : recentAddEntries) {
-                        sAdapter.addRecentEntry(addRecentEntry);
-                    }
-                    sAdapter.notifyDataSetChanged();
-                }
-            });
-            mHandler.removeMessages(MSG_GENERATE_ENTRIES);
-
-            mIsGenerating = false;
-        }
-    };
+    private View mHeaderView;
+    private int mBackgroundColor;
+    private EditText mSearchBox;
+    private CardView mCardSearchBox;
+    private AbsListView.OnScrollListener mScrollListener;
+    private ListenNowAdapter mAdapter;
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
+     *
      * @return A new instance of fragment ListenNowFragment.
      */
     public static ListenNowFragment newInstance() {
@@ -432,8 +93,32 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      * Default empty constructor
      */
     public ListenNowFragment() {
-        // Required empty public constructor
-        mUpdateItems = new ArrayList<>();
+        mScrollListener = new ScrollStatusBarColorListener() {
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (view.getChildCount() == 0 || getActivity() == null) {
+                    return;
+                }
+
+                final float heroHeight = mHeaderView.getMeasuredHeight();
+                final float scrollY = getScroll(view);
+                final float toolbarBgAlpha = Math.min(1, scrollY / heroHeight);
+                final int toolbarAlphaInteger = (((int) (toolbarBgAlpha * 255)) << 24) | 0xFFFFFF;
+                mColorDrawable.setColor(toolbarAlphaInteger & mBackgroundColor);
+
+                SpannableString spannableTitle = new SpannableString(((MainActivity) getActivity()).getFragmentTitle());
+                mAlphaSpan.setAlpha(toolbarBgAlpha);
+
+                ActionBar actionbar = ((AppActivity) getActivity()).getSupportActionBar();
+                if (actionbar != null) {
+                    actionbar.setBackgroundDrawable(mColorDrawable);
+                    spannableTitle.setSpan(mAlphaSpan, 0, spannableTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    actionbar.setTitle(spannableTitle);
+                }
+
+                mCardSearchBox.setAlpha(1.0f - toolbarBgAlpha);
+            }
+        };
     }
 
     /**
@@ -442,24 +127,16 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                if (msg.what == MSG_GENERATE_ENTRIES) {
-                    new Thread(mGenerateEntries).start();
-                }
-            }
-        };
-
-        // Generate entries
-        mHandler.removeMessages(MSG_GENERATE_ENTRIES);
-        mHandler.sendEmptyMessage(MSG_GENERATE_ENTRIES);
+        mBackgroundColor = getResources().getColor(R.color.primary);
     }
 
     @Override
     public void onDestroy() {
-        mHandler.removeMessages(MSG_GENERATE_ENTRIES);
         super.onDestroy();
+    }
+
+    public float getToolbarAlpha() {
+        return 1.0f - mCardSearchBox.getAlpha();
     }
 
     /**
@@ -469,34 +146,266 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        final FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listen_now, container, false);
-        TwoWayView twvRoot = (TwoWayView) root.findViewById(R.id.twvRoot);
-        mTxtNoMusic = (TextView) root.findViewById(R.id.txtNoMusic);
-
-        if (sAdapter.getItemCount() > 2) {
-            mTxtNoMusic.setVisibility(View.GONE);
-        } else {
-            mTxtNoMusic.setTranslationX(-100);
-            mTxtNoMusic.setAlpha(0.0f);
-        }
-
-        twvRoot.setAdapter(sAdapter);
-        final Drawable divider = getResources().getDrawable(R.drawable.divider);
-        twvRoot.addItemDecoration(new DividerItemDecoration(divider));
-        twvRoot.setItemAnimator(new RefactoredDefaultItemAnimator());
-
-        return root;
+        return inflater.inflate(R.layout.fragment_listen_now, container, false);
     }
 
     @Override
-    public void onDestroyView() {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         View root = getView();
-        if (root != null) {
-            TwoWayView twvRoot = (TwoWayView) root.findViewById(R.id.twvRoot);
-            twvRoot.setAdapter(null);
-        }
-        super.onDestroyView();
 
+        if (root != null) {
+            ParallaxScrollListView listView = (ParallaxScrollListView) root;
+            listView.setOnScrollListener(mScrollListener);
+            setupHeader(listView);
+
+            mAdapter = new ListenNowAdapter();
+            listView.setAdapter(mAdapter);
+            setupItems();
+        }
+    }
+
+    private void setupHeader(ParallaxScrollListView listView) {
+        LayoutInflater inflater = LayoutInflater.from(listView.getContext());
+        mHeaderView = inflater.inflate(R.layout.header_listen_now, listView, false);
+        mCardSearchBox = (CardView) mHeaderView.findViewById(R.id.cardSearchBox);
+        mSearchBox = (EditText) mHeaderView.findViewById(R.id.ebSearch);
+        mSearchBox.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    final String query = v.getText().toString();
+
+                    Intent intent = new Intent(getActivity(), SearchActivity.class);
+                    intent.setAction(Intent.ACTION_SEARCH);
+                    intent.putExtra(SearchManager.QUERY, query);
+                    v.getContext().startActivity(intent);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        listView.addParallaxedHeaderView(mHeaderView);
+    }
+
+    private void setupItems() {
+        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+        final PluginsLookup plugins = PluginsLookup.getDefault();
+        final List<Playlist> playlists = aggregator.getAllPlaylists();
+        final List<Song> songs = new ArrayList<>();
+
+        // Get the list of songs first
+        final List<ProviderConnection> providers = plugins.getAvailableProviders();
+        for (ProviderConnection provider : providers) {
+            int limit = 50;
+            int offset = 0;
+
+            while (true) {
+                try {
+                    List<Song> providerSongs = provider.getBinder().getSongs(offset, limit);
+
+                    songs.addAll(providerSongs);
+                    offset += providerSongs.size();
+
+                    if (providerSongs.size() < limit) {
+                        Log.d(TAG, "Got " + providerSongs.size() + " instead of " + limit + ", assuming end of list");
+                        break;
+                    }
+                } catch (TransactionTooLargeException e) {
+                    limit -= 5;
+                    if (limit <= 0) {
+                        Log.e(TAG, "Error getting songs from " + provider.getProviderName()
+                                + ": transaction too large even with limit = 5");
+                        break;
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error getting songs from " + provider.getProviderName() + ": " + e.getMessage());
+                    break;
+                }
+            }
+        }
+
+
+        // Add a card if we have local music, but no cloud providers
+        if (providers.size() <= PluginsLookup.BUNDLED_PROVIDERS_COUNT && songs.size() > 0) {
+            final SharedPreferences prefs = getActivity().getSharedPreferences(PREFS, 0);
+            if (!prefs.getBoolean(LANDCARD_NO_CUSTOM_PROVIDERS, false)) {
+                // Show the "You have no custom providers" card
+                mAdapter.addItem(new ListenNowAdapter.CardItem(getString(R.string.ln_landcard_nocustomprovider_title),
+                        getString(R.string.ln_landcard_nocustomprovider_body),
+                        getString(R.string.browse), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ProviderDownloadDialog.newInstance(false).show(getFragmentManager(), "DOWN");
+                    }
+                },
+                        getString(R.string.ln_landcard_dismiss), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        prefs.edit().putBoolean(LANDCARD_NO_CUSTOM_PROVIDERS, true).apply();
+                        // This item must always be the first of the list
+                        mAdapter.removeItem(0);
+                    }
+                }));
+            }
+        }
+
+        // Add a card if there's no music at all (no songs and no playlists)
+        if (providers.size() <= PluginsLookup.BUNDLED_PROVIDERS_COUNT && songs.size() == 0 && playlists.size() == 0) {
+            mAdapter.addItem(new ListenNowAdapter.CardItem(getString(R.string.ln_card_nothing_title),
+                    getString(R.string.ln_card_nothing_body),
+                    getString(R.string.browse),
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ProviderDownloadDialog.newInstance(false).show(getFragmentManager(), "DOWN");
+                        }
+                    },
+                    getString(R.string.configure),
+                    new View.OnClickListener() {
+                        public void onClick(View v) {
+                            ((MainActivity) getActivity()).openSection(MainActivity.SECTION_SETTINGS);
+                        }
+                    }));
+
+            mAdapter.addItem(new ListenNowAdapter.CardItem(getString(R.string.ln_card_nothinghint_title),
+                    getString(R.string.ln_card_nothinghint_body), null, null));
+        }
+
+
+        // Add the "Recently played" section if we have recent tracks
+        final ListenLogger logger = new ListenLogger(getActivity());
+        List<ListenLogger.LogEntry> logEntries = logger.getEntries(50);
+
+        if (logEntries.size() > 0) {
+            mAdapter.addItem(new ListenNowAdapter.SectionHeaderItem(getString(R.string.ln_section_recents),
+                    R.drawable.ic_nav_history_active, getString(R.string.more), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ((MainActivity) getActivity()).openSection(MainActivity.SECTION_HISTORY);
+                }
+            }));
+
+            int i = 0;
+            List<ListenNowAdapter.ItemCardItem> itemsCouple = new ArrayList<>();
+
+            for (ListenLogger.LogEntry entry : logEntries) {
+                if (i == 4) {
+                    // Stop here, add remaining item
+                    if (itemsCouple.size() > 0) {
+                        for (ListenNowAdapter.ItemCardItem item : itemsCouple) {
+                            mAdapter.addItem(item);
+                        }
+                    }
+                    break;
+                }
+
+                Song song = aggregator.retrieveSong(entry.getReference(), entry.getIdentifier());
+                if (song != null) {
+                    int type = Utils.getRandom(2);
+                    if (song.getAlbum() != null && (type == 0 || type == 1 && song.getArtist() == null)) {
+                        Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
+
+                        if (album != null) {
+                            itemsCouple.add(new ListenNowAdapter.ItemCardItem(album));
+                            ++i;
+                        }
+                    } else if (song.getArtist() != null) {
+                        Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
+
+                        if (artist != null) {
+                            itemsCouple.add(new ListenNowAdapter.ItemCardItem(artist));
+                            ++i;
+                        }
+                    }
+                }
+
+                if (itemsCouple.size() == 2) {
+                    ListenNowAdapter.CardRowItem row = new ListenNowAdapter.CardRowItem(
+                            itemsCouple.get(0),
+                            itemsCouple.get(1)
+                    );
+                    mAdapter.addItem(row);
+                    itemsCouple.clear();
+                }
+            }
+        }
+
+        // Add playlists section
+        mAdapter.addItem(new ListenNowAdapter.SectionHeaderItem(getString(R.string.ln_section_playlists),
+                R.drawable.ic_nav_playlist_active, getString(R.string.browse), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity) getActivity()).openSection(MainActivity.SECTION_PLAYLISTS);
+            }
+        }));
+
+        if (playlists != null && playlists.size() > 0) {
+            int i = 0;
+            List<ListenNowAdapter.ItemCardItem> itemsCouple = new ArrayList<>();
+
+            for (Playlist playlist : playlists) {
+                if (i == 4) {
+                    // Stop here, add remaining item
+                    if (itemsCouple.size() > 0) {
+                        for (ListenNowAdapter.ItemCardItem item : itemsCouple) {
+                            mAdapter.addItem(item);
+                        }
+                    }
+                    break;
+                }
+
+                if (playlist != null) {
+                    ListenNowAdapter.ItemCardItem item = new ListenNowAdapter.ItemCardItem(playlist);
+                    itemsCouple.add(item);
+                    ++i;
+                }
+
+                if (itemsCouple.size() == 2) {
+                    ListenNowAdapter.CardRowItem row = new ListenNowAdapter.CardRowItem(
+                            itemsCouple.get(0),
+                            itemsCouple.get(1)
+                    );
+                    mAdapter.addItem(row);
+                    itemsCouple.clear();
+                }
+            }
+        }
+
+
+        // Add automix section
+        mAdapter.addItem(new ListenNowAdapter.SectionHeaderItem(getString(R.string.lb_section_automixes),
+                R.drawable.ic_nav_automix_active, getString(R.string.create), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity) getActivity()).openSection(MainActivity.SECTION_AUTOMIX);
+            }
+        }));
+
+        List<AutoMixBucket> buckets = AutoMixManager.getDefault().getBuckets();
+        if (buckets == null || buckets.size() == 0) {
+            mAdapter.addItem(new ListenNowAdapter.GetStartedItem(getString(R.string.ln_automix_getstarted_body),
+                    getString(R.string.ln_action_getstarted), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ((MainActivity) getActivity()).onNavigationDrawerItemSelected(MainActivity.SECTION_AUTOMIX);
+                }
+            }));
+        } else {
+            for (final AutoMixBucket bucket : buckets) {
+                mAdapter.addItem(new ListenNowAdapter.SimpleItem(bucket.getName(),
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                new Thread() {
+                                    public void run() {
+                                        AutoMixManager.getDefault().startPlay(bucket);
+                                    }
+                                }.start();
+                            }
+                        }));
+            }
+        }
     }
 
     /**
@@ -507,7 +416,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         super.onAttach(activity);
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_LISTEN_NOW);
-        mainActivity.setContentShadowTop(0);
     }
 
     /**
@@ -517,11 +425,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     public void onResume() {
         super.onResume();
         ProviderAggregator.getDefault().addUpdateCallback(this);
-
-        if (!mFoundAnything || sAdapter.getItemCount() < 3) {
-            mHandler.removeMessages(MSG_GENERATE_ENTRIES);
-            mHandler.sendEmptyMessage(MSG_GENERATE_ENTRIES);
-        }
     }
 
     /**
@@ -538,13 +441,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onSongUpdate(final List<Song> s) {
-        int hasThisSong;
-        for (Song song : s) {
-            hasThisSong = sAdapter.contains(song);
-            if (hasThisSong >= 0) {
-                requestNotifyItemChanged(hasThisSong);
-            }
-        }
     }
 
     /**
@@ -552,13 +448,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onAlbumUpdate(final List<Album> a) {
-        int hasThisAlbum;
-        for (Album album : a) {
-            hasThisAlbum = sAdapter.contains(album);
-            if (hasThisAlbum >= 0) {
-                requestNotifyItemChanged(hasThisAlbum);
-            }
-        }
+
     }
 
     /**
@@ -566,10 +456,6 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onPlaylistUpdate(List<Playlist> p) {
-        if (!mFoundAnything || sAdapter.getItemCount() < 3) {
-            mHandler.removeMessages(MSG_GENERATE_ENTRIES);
-            mHandler.sendEmptyMessage(MSG_GENERATE_ENTRIES);
-        }
     }
 
     @Override
@@ -581,13 +467,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onArtistUpdate(final List<Artist> a) {
-        int hasThisArtist;
-        for (Artist artist : a) {
-            hasThisArtist = sAdapter.contains(artist);
-            if (hasThisArtist >= 0) {
-                requestNotifyItemChanged(hasThisArtist);
-            }
-        }
+
     }
 
     /**
@@ -595,9 +475,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onProviderConnected(IMusicProvider provider) {
-        if (sWarmUp && sAdapter.getItemCount() < 2) {
-            requestGenerateEntries();
-        }
+
     }
 
     /**
@@ -605,19 +483,5 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
      */
     @Override
     public void onSearchResult(List<SearchResult> searchResult) {
-    }
-
-    private void requestGenerateEntries() {
-        mHandler.removeMessages(MSG_GENERATE_ENTRIES);
-        mHandler.sendEmptyMessageDelayed(MSG_GENERATE_ENTRIES, 200);
-    }
-
-    private void requestNotifyItemChanged(int item) {
-        if (!mUpdateItems.contains(item)) {
-            mUpdateItems.add(item);
-
-            mHandler.removeCallbacks(mUpdateItemsRunnable);
-            mHandler.postDelayed(mUpdateItemsRunnable, 500);
-        }
     }
 }

@@ -12,6 +12,7 @@
         android:layout_height="@dimen/my_songs_strip_height"
         android:background="@color/primary"
         android:clipToPadding="false"
+        android:paddingTop="@dimen/translucent_toolbarstatus_top_margin"
         app:stl_indicatorAlwaysInCenter="false"
         app:stl_indicatorInFront="false"
         app:stl_indicatorInterpolation="smart"

@@ -16,9 +16,7 @@
 package com.fastbootmobile.encore.app.fragments;
 
 import android.annotation.TargetApi;
-import android.app.ActivityOptions;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
@@ -38,6 +36,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -83,10 +82,6 @@ import com.fastbootmobile.encore.service.BasePlaybackCallback;
 import com.fastbootmobile.encore.service.PlaybackService;
 import com.fastbootmobile.encore.utils.Utils;
 import com.getbase.floatingactionbutton.FloatingActionButton;
-
-import org.lucasr.twowayview.ItemClickSupport;
-import org.lucasr.twowayview.TwoWayView;
-import org.lucasr.twowayview.widget.DividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1047,7 +1042,9 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
                 AlbumArtImageView ivCov = (AlbumArtImageView) mRootView.findViewById(R.id.ivArtistSuggestionCover);
                 ivCov.setOnArtLoadedListener(new AlbumArtLoadListener(cvRec));
-                ivCov.loadArtForAlbum(aggregator.retrieveAlbum(recommended.getAlbum(), recommended.getProvider()));
+                if (recommended.getAlbum() != null) {
+                    ivCov.loadArtForAlbum(aggregator.retrieveAlbum(recommended.getAlbum(), recommended.getProvider()));
+                }
 
                 // If we were gone, animate in
                 if (cvRec.getVisibility() == View.GONE) {
@@ -1514,7 +1511,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
      * Fragment showing similar artists
      */
     public static class ArtistSimilarFragment extends Fragment {
-        private TwoWayView mArtistsGrid;
+        private RecyclerView mArtistsGrid;
         private Artist mArtist;
         private boolean mSimilarLoaded;
         private ArtistsAdapter mAdapter;
@@ -1522,25 +1519,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private List<Artist> mSimilarArtists;
         private ProgressBar mArtistsSpinner;
         private TextView mOfflineView;
-        private final ItemClickSupport.OnItemClickListener mItemClickListener = new ItemClickSupport.OnItemClickListener() {
-            @Override
-            public void onItemClick(RecyclerView parent, View view, int position, long id) {
-                final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
-                final Context ctx = getActivity();
-                Artist artist = mAdapter.getItem(tag.position);
-                Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artist.getRef(),
-                        artist.getProvider(), tag.itemColor);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    AlbumArtImageView ivCover = tag.ivCover;
-                    ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                            ivCover, "itemImage");
-                    ctx.startActivity(intent, opt.toBundle());
-                } else {
-                    ctx.startActivity(intent);
-                }
-            }
-        };
 
         /**
          * Default constructor
@@ -1630,7 +1608,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                                 } else {
                                     Log.e(TAG, "Null artist for similar");
                                 }
-                            }                        }
+                            }
+                        }
                     }
 
                     mHandler.post(new Runnable() {
@@ -1661,22 +1640,22 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_artist_similar, container, false);
-            return rootView;
+            return inflater.inflate(R.layout.fragment_artist_similar, container, false);
         }
 
         @Override
         public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             View rootView = getView();
-            mArtistsSpinner = (ProgressBar) rootView.findViewById(R.id.pbSimilarArtists);
-            mArtistsGrid = (TwoWayView) rootView.findViewById(R.id.twvSimilarArtists);
-            final Drawable divider = getResources().getDrawable(R.drawable.divider);
-            mArtistsGrid.addItemDecoration(new DividerItemDecoration(divider));
-            final ItemClickSupport itemClick = ItemClickSupport.addTo(mArtistsGrid);
-            itemClick.setOnItemClickListener(mItemClickListener);
-            mOfflineView = (TextView) rootView.findViewById(R.id.tvErrorMessage);
-            mOfflineView.setText(R.string.error_similar_unavailable_offline);
+            if (rootView != null) {
+                mArtistsSpinner = (ProgressBar) rootView.findViewById(R.id.pbSimilarArtists);
+
+                mArtistsGrid = (RecyclerView) rootView.findViewById(R.id.gridSimilarArtists);
+                mArtistsGrid.setHasFixedSize(true);
+                mArtistsGrid.setLayoutManager(new GridLayoutManager(view.getContext(), 2));
+                mOfflineView = (TextView) rootView.findViewById(R.id.tvErrorMessage);
+                mOfflineView.setText(R.string.error_similar_unavailable_offline);
+            }
         }
     }
 }

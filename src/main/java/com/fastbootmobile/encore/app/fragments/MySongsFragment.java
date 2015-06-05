@@ -56,25 +56,13 @@ public class MySongsFragment extends Fragment {
 
         mSongsAdapter = new MySongsAdapter(getResources(), getChildFragmentManager());
         mViewPager = (ViewPager) root.findViewById(R.id.pager);
-        mViewPager.setOffscreenPageLimit(5);
+        mViewPager.setOffscreenPageLimit(1);
         mViewPager.setAdapter(mSongsAdapter);
 
         mTabStrip = (SmartTabLayout) root.findViewById(R.id.pager_title_strip);
         mTabStrip.setViewPager(mViewPager);
 
         return root;
-    }
-
-    private void updateShadowTop() {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                final MainActivity act = (MainActivity) getActivity();
-                if (act != null && mTabStrip != null) {
-                    act.setContentShadowTop(mTabStrip.getMeasuredHeight());
-                }
-            }
-        });
     }
 
     @Override
@@ -85,11 +73,5 @@ public class MySongsFragment extends Fragment {
         if (mainActivity != null) {
             mainActivity.onSectionAttached(MainActivity.SECTION_MY_SONGS);
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateShadowTop();
     }
 }

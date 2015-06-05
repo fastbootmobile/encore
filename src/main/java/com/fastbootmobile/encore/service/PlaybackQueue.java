@@ -18,12 +18,13 @@ package com.fastbootmobile.encore.service;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.fastbootmobile.encore.model.Song;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -61,7 +62,7 @@ public class PlaybackQueue extends ArrayList<Song> {
             try {
                 object.put("r", song.getRef());
                 object.put("p", song.getProvider().serialize());
-            } catch (JSONException e) {
+            } catch (NullPointerException | JSONException e) {
                 Log.e(TAG, "Cannot save playback queue entry", e);
             }
 

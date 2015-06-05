@@ -80,7 +80,6 @@ public class HistoryFragment extends Fragment implements ILocalCallback {
         super.onAttach(activity);
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_HISTORY);
-        mainActivity.setContentShadowTop(0);
     }
 
     @Override

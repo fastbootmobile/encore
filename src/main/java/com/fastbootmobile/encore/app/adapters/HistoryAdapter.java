@@ -100,7 +100,7 @@ public class HistoryAdapter extends BaseAdapter {
 
     public HistoryAdapter(Context ctx) {
         mLogger = new ListenLogger(ctx);
-        mEntries = mLogger.getEntries();
+        mEntries = mLogger.getEntries(250);
         sortByTime(mEntries);
     }
 

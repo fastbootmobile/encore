@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:layout_marginTop="@dimen/translucent_toolbar_top_margin"
+        android:paddingTop="@dimen/translucent_toolbar_top_margin"
         android:background="@android:color/transparent"
         android:minHeight="?attr/actionBarSize"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"

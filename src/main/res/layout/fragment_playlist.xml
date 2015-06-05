@@ -1,9 +1,10 @@
 <android.support.v7.widget.RecyclerView
+    android:id="@+id/rvPlaylists"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rvPlaylists"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="false"
     android:paddingBottom="@dimen/list_item_height"
+    android:paddingTop="@dimen/translucent_toolbarstatus_top_margin"
     tools:ignore="InconsistentLayout"/>

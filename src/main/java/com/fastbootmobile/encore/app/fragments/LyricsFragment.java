@@ -90,7 +90,6 @@ public class LyricsFragment extends Fragment {
         super.onAttach(activity);
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_LYRICS);
-        mainActivity.setContentShadowTop(0);
     }
 
     @Override

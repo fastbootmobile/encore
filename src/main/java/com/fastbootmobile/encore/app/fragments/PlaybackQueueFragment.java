@@ -459,7 +459,6 @@ public class PlaybackQueueFragment extends Fragment {
         if (activity instanceof MainActivity) {
             MainActivity mainActivity = (MainActivity) activity;
             mainActivity.onSectionAttached(MainActivity.SECTION_NOW_PLAYING);
-            mainActivity.setContentShadowTop(0);
         }
     }
 

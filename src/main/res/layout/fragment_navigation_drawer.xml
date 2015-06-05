@@ -1,8 +1,9 @@
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/nav_drawer_list"
-    android:layout_width="match_parent"
-    android:layout_height="fill_parent"
-    android:choiceMode="singleChoice"
-    android:background="@color/white"
-    android:divider="@null"
-    android:dividerHeight="0dp" />
+<ListView android:id="@+id/nav_drawer_list"
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          android:layout_width="match_parent"
+          android:layout_height="fill_parent"
+          android:background="@color/white"
+          android:choiceMode="singleChoice"
+          android:divider="@null"
+          android:dividerHeight="0dp"
+          android:paddingTop="@dimen/translucent_toolbar_top_margin"/>

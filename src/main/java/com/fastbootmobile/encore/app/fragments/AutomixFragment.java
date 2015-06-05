@@ -154,7 +154,6 @@ public class AutomixFragment extends Fragment {
         super.onAttach(activity);
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_AUTOMIX);
-        mainActivity.setContentShadowTop(0);
 
         // Register for playback events
         PlaybackProxy.addCallback(mPlaybackCallback);

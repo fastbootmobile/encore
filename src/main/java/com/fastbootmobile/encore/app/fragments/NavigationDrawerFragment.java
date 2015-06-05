@@ -266,7 +266,7 @@ public class NavigationDrawerFragment extends Fragment {
             if (mDrawerLayout != null) {
                 mDrawerLayout.closeDrawer(mFragmentContainerView);
             }
-            mHandler.postDelayed(new Runnable() {
+            mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (mCallbacks != null
@@ -283,7 +283,7 @@ public class NavigationDrawerFragment extends Fragment {
                         }
                     }
                 }
-            }, 200);
+            });
         }
     }
 

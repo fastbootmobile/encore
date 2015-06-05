@@ -40,6 +40,7 @@ import com.fastbootmobile.encore.providers.ProviderAggregator;
 public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper.AlbumArtListener {
     private final String TAG = "AlbumArtImageView";
     private static final boolean DEBUG = false;
+    private static final boolean STUB = false;
 
     private Handler mHandler;
     private OnArtLoadedListener mOnArtLoadedListener;
@@ -72,7 +73,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
         mHandler = new Handler();
         setScaleType(ScaleType.CENTER_CROP);
 
-        if (isInEditMode()) {
+        if (isInEditMode() || STUB) {
             setImageDrawable(getResources().getDrawable(R.drawable.album_placeholder));
         } else {
             mDrawable = new MaterialTransitionDrawable(
@@ -183,13 +184,15 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     public void loadArtForAlbum(final Album album) {
         loadArtImpl(album);
 
-        // If it's an album and we're offline and album is unavailable,
-        // overlay the offline status thing
-        if (ProviderAggregator.getDefault().isOfflineMode()
-                && !Utils.isAlbumAvailableOffline(album)) {
-            mDrawable.setShowOfflineOverdraw(true);
-        } else {
-            mDrawable.setShowOfflineOverdraw(false);
+        if (!STUB) {
+            // If it's an album and we're offline and album is unavailable,
+            // overlay the offline status thing
+            if (ProviderAggregator.getDefault().isOfflineMode()
+                    && !Utils.isAlbumAvailableOffline(album)) {
+                mDrawable.setShowOfflineOverdraw(true);
+            } else {
+                mDrawable.setShowOfflineOverdraw(false);
+            }
         }
     }
 
@@ -202,7 +205,7 @@ public class AlbumArtImageView extends SquareImageView implements AlbumArtHelper
     }
 
     private void loadArtImpl(final BoundEntity ent) {
-        if (ent == null ||
+        if (STUB || ent == null ||
                 (mRequestedEntity != null
                         && !mCurrentIsDefault
                         && ent.getRef().equals(mRequestedEntity.getRef()))) {

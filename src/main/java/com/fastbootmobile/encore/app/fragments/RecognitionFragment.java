@@ -197,7 +197,6 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
         super.onAttach(activity);
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_RECOGNITION);
-        mainActivity.setContentShadowTop(0);
     }
 
     @Override

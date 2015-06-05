@@ -15,6 +15,10 @@
 
 package com.fastbootmobile.encore.app.adapters;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -31,10 +35,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.fastbootmobile.encore.app.ArtistActivity;
 import com.fastbootmobile.encore.app.R;
-import com.fastbootmobile.encore.utils.Utils;
 import com.fastbootmobile.encore.app.ui.AlbumArtImageView;
 import com.fastbootmobile.encore.model.Artist;
+import com.fastbootmobile.encore.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +49,7 @@ import java.util.List;
 
 
 /**
- * Adapter for TwoWayView to display artists in a grid
+ * Adapter for RecyclerView to display artists in a grid
  */
 public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHolder> {
 
@@ -71,6 +76,30 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
             llRoot.setTag(this);
         }
     }
+
+    private final View.OnClickListener mItemClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) v.getTag();
+            final Context ctx = v.getContext();
+            Artist artist = getItem(tag.position);
+            Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artist.getRef(),
+                    artist.getProvider(), tag.itemColor);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                AlbumArtImageView ivCover = tag.ivCover;
+                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation((Activity) v.getContext(),
+                        ivCover, "itemImage");
+
+                ctx.startActivity(intent, opt.toBundle());
+            } else {
+                ctx.startActivity(intent);
+            }
+        }
+    };
+
+
+
 
     private final AlbumArtImageView.OnArtLoadedListener mAlbumArtListener
             = new AlbumArtImageView.OnArtLoadedListener() {
@@ -264,6 +293,9 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ViewHold
         } else {
             tag.tvTitle.setText(null);
         }
+
+        // Set the event listener
+        tag.llRoot.setOnClickListener(mItemClickListener);
 
         // Load the artist art
         final Resources res = tag.llRoot.getResources();

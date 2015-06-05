@@ -51,8 +51,10 @@ public class SquareImageView extends ImageView {
         if (!mDisableSquared) {
             // Only set a square size if we're not defining an exact size
             ViewGroup.LayoutParams layoutParams = getLayoutParams();
-            if (layoutParams.width == ViewGroup.LayoutParams.MATCH_PARENT
-                    || layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT) {
+            if ((layoutParams.width == ViewGroup.LayoutParams.MATCH_PARENT
+                    || layoutParams.width == ViewGroup.LayoutParams.WRAP_CONTENT)
+                    && (layoutParams.height == ViewGroup.LayoutParams.MATCH_PARENT
+                    || layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT)) {
                 int width = getMeasuredWidth();
                 setMeasuredDimension(width, width);
             }

@@ -57,15 +57,17 @@ public class PluginsLookup {
     private static final boolean DEBUG = false;
     private static final String TAG = "PluginsLookup";
 
+    public static final int BUNDLED_PROVIDERS_COUNT = 2; // Local and Multi-provider
+
     public static final String DATA_PACKAGE = "package";
     public static final String DATA_SERVICE = "service";
     public static final String DATA_NAME = "name";
     public static final String DATA_AUTHOR = "author";
     public static final String DATA_CONFIGCLASS = "configclass";
 
-    public static interface ConnectionListener {
-        public void onServiceConnected(AbstractProviderConnection connection);
-        public void onServiceDisconnected(AbstractProviderConnection connection);
+    public interface ConnectionListener {
+        void onServiceConnected(AbstractProviderConnection connection);
+        void onServiceDisconnected(AbstractProviderConnection connection);
     }
 
     private Context mContext;

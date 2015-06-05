@@ -72,7 +72,7 @@ public class AutoPlaylistHelper {
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
         final ListenLogger logger = new ListenLogger(ctx);
 
-        List<ListenLogger.LogEntry> likes = logger.getEntries();
+        List<ListenLogger.LogEntry> likes = logger.getEntries(0);
 
         Playlist playlist = new Playlist(REF_SPECIAL_MOST_PLAYED);
         playlist.setName(ctx.getString(R.string.most_played));

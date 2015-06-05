@@ -219,6 +219,10 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
                 }
             });
         }
+
+        if (!mIsStandalone) {
+            mRecyclerView.setPadding(0, 0, 0, 0);
+        }
     }
 
     @Override
@@ -227,7 +231,6 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
         if (mIsStandalone) {
             MainActivity mainActivity = (MainActivity) activity;
             mainActivity.onSectionAttached(MainActivity.SECTION_PLAYLISTS);
-            mainActivity.setContentShadowTop(0);
         }
     }
 

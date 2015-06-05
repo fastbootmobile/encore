@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/default_fragment_background"
@@ -21,14 +20,10 @@
 
     <include layout="@layout/part_offline" />
 
-    <org.lucasr.twowayview.TwoWayView
-        android:id="@+id/twvSimilarArtists"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/gridSimilarArtists"
         android:layout_margin="@dimen/grid_padding"
         android:layout_width="match_parent"
         android:layout_height="@dimen/artist_similar_height"
-        app:layoutManager="GridLayoutManager"
-        app:numColumns="@integer/main_grids_column_count"
-        app:numRows="4"
-        android:orientation="vertical"
         android:scrollbars="vertical" />
 </LinearLayout>

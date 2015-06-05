@@ -19,6 +19,7 @@
     <dimen name="grid_padding">4dp</dimen>
 
     <dimen name="translucent_toolbar_top_margin">24dp</dimen>
+    <dimen name="translucent_toolbarstatus_top_margin">80dp</dimen>
 
     <dimen name="detail_source_logo_size">32dp</dimen>
     <dimen name="detail_source_logo_margin">8dp</dimen>
@@ -66,7 +67,7 @@
     <dimen name="artist_tracks_header_margin_top">16dp</dimen>
 
     <!-- My songs -->
-    <dimen name="my_songs_strip_height">48dp</dimen>
+    <dimen name="my_songs_strip_height">128dp</dimen>
     <dimen name="my_songs_strip_indicator_height">4dp</dimen>
     <dimen name="my_songs_strip_indicator_radius">2dp</dimen>
 
@@ -120,9 +121,15 @@
     <dimen name="history_date_padding">4dp</dimen>
 
     <!-- Listen now -->
+    <dimen name="listen_now_hero_height">172dp</dimen>
+    <dimen name="listen_now_card_padding">16dp</dimen>
     <dimen name="card_text_secondline_padding_top">4dp</dimen>
-    <dimen name="listen_now_header_text_size">22sp</dimen>
+    <dimen name="listen_now_section_header_vert_padding">8dp</dimen>
+    <dimen name="listen_now_section_header_horz_padding">16dp</dimen>
     <dimen name="listen_now_header_padding">8dp</dimen>
+    <dimen name="listen_now_item_card_vert_padding">8dp</dimen>
+    <dimen name="listen_now_item_card_horz_padding">8dp</dimen>
+    <dimen name="listen_now_item_card_hero_height">96dp</dimen>
 
     <!-- nav drawer -->
     <dimen name="nav_drawer_item_padding">16dp</dimen>

@@ -258,5 +258,19 @@
     <string name="recognition_status_listening">Ecoute en cours…</string>
     <string name="recognition_status_recognizing">Identification…</string>
     <string name="recognition_status_no_result">Aucun résultat :(</string>
+
     <string name="download_from_dlg_title">Télécharger depuis…</string>
+    <string name="ln_landcard_nocustomprovider_title">Besoin de nouvelles sources?</string>
+    <string name="ln_landcard_nocustomprovider_body">Encore peut gérer plusieurs services cloud de musique que vous pouvez installer. Vous pourrez alors faire des playlistes multi-sources et écouter toutes vos chansons en même temps!</string>
+    <string name="ln_section_recents">Ecouté récemment</string>
+    <string name="ln_landcard_dismiss">Okay</string>
+    <string name="lb_section_automixes">Mes automix</string>
+    <string name="ln_automix_getstarted_body">Créez des mix automatiques qui s\'ajustent à votre goût!</string>
+    <string name="ln_action_getstarted">Démarrer</string>
+    <string name="ln_section_playlists">Mes playlists</string>
+    <string name="ln_card_nothing_title">Hey, bienvenue!</string>
+    <string name="ln_card_nothing_body">Il semblerait que vous n\'ayez pas de musique sur votre appareil, et aucun service de musique cloud installé ou configuré.</string>
+    <string name="ln_card_nothinghint_title">On a loupé quelque chose?</string>
+    <string name="ln_card_nothinghint_body">Dans le cas où vous auriez déjà de la musique sur votre appareil, assuez-vous qu\'elle soit au format MP3, WAV, ou FLAC, et dans un dossier accessible à Encore (tel que le dossier Music dans le stockage interne).</string>
+    <string name="ln_header_search_placeholder">Rechercher un titre, artiste, album…</string>
 </resources>

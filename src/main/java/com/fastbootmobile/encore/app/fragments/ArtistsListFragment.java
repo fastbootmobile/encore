@@ -15,30 +15,22 @@
 
 package com.fastbootmobile.encore.app.fragments;
 
-import android.app.ActivityOptions;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.lucasr.twowayview.ItemClickSupport;
-import org.lucasr.twowayview.TwoWayView;
-import org.lucasr.twowayview.widget.DividerItemDecoration;
-import com.fastbootmobile.encore.app.ArtistActivity;
 import com.fastbootmobile.encore.app.R;
 import com.fastbootmobile.encore.app.adapters.ArtistsAdapter;
-import com.fastbootmobile.encore.app.ui.AlbumArtImageView;
+import com.fastbootmobile.encore.app.ui.SpaceItemDecorator;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.model.Album;
 import com.fastbootmobile.encore.model.Artist;
@@ -62,28 +54,7 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
     private ArtistsAdapter mAdapter;
     private Handler mHandler;
     private boolean mAdapterSet;
-    private TwoWayView mArtistLayout;
-
-    private final ItemClickSupport.OnItemClickListener mItemClickListener = new ItemClickSupport.OnItemClickListener() {
-        @Override
-        public void onItemClick(RecyclerView parent, View view, int position, long id) {
-            final ArtistsAdapter.ViewHolder tag = (ArtistsAdapter.ViewHolder) view.getTag();
-            final Context ctx = view.getContext();
-            Artist artist = mAdapter.getItem(tag.position);
-            Intent intent = ArtistActivity.craftIntent(ctx, tag.srcBitmap, artist.getRef(),
-                    artist.getProvider(), tag.itemColor);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                AlbumArtImageView ivCover = tag.ivCover;
-                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                    ivCover, "itemImage");
-
-                ctx.startActivity(intent, opt.toBundle());
-            } else {
-                ctx.startActivity(intent);
-            }
-        }
-    };
+    private RecyclerView mArtistLayout;
 
     /**
      * Use this factory method to create a new instance of
@@ -111,13 +82,10 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_artists, container, false);
-        mArtistLayout = (TwoWayView) root.findViewById(R.id.twvArtists);
-
-        final Drawable divider = getResources().getDrawable(R.drawable.divider);
-        mArtistLayout.addItemDecoration(new DividerItemDecoration(divider));
-
-        final ItemClickSupport itemClick = ItemClickSupport.addTo(mArtistLayout);
-        itemClick.setOnItemClickListener(mItemClickListener);
+        mArtistLayout = (RecyclerView) root.findViewById(R.id.rvArtists);
+        mArtistLayout.setHasFixedSize(true);
+        mArtistLayout.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        mArtistLayout.addItemDecoration(new SpaceItemDecorator(getResources().getDimensionPixelSize(R.dimen.one_dp)));
 
         // Get artists
         new GetArtistsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -231,7 +199,6 @@ public class ArtistsListFragment extends Fragment implements ILocalCallback {
 
         @Override
         protected void onPostExecute(List<Artist> artists) {
-
             if (mAdapterSet) {
                 mAdapter.notifyDataSetChanged();
             } else {

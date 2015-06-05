@@ -23,7 +23,7 @@ import com.fastbootmobile.encore.art.RecyclingBitmapDrawable;
  * </p>
  */
 public class MaterialTransitionDrawable extends Drawable {
-    private static final String TAG = "MaterialTransitionDrawable";
+    private static final String TAG = "MaterialTransDrawable";
 
     public static final long DEFAULT_DURATION = 1000;
     public static final long SHORT_DURATION = 300;
@@ -39,12 +39,12 @@ public class MaterialTransitionDrawable extends Drawable {
     private Paint mPaint;
     private boolean mShowOfflineOverdraw;
     private long mOfflineStartTime;
+    private ColorFilter mExtColorFilter;
     private final Object mDrawLock = new Object();
 
     public MaterialTransitionDrawable(BitmapDrawable offlineDrawable, BitmapDrawable base) {
         this(offlineDrawable);
         mBaseDrawable = base;
-        //invalidateSelf();
     }
 
     public MaterialTransitionDrawable(BitmapDrawable offlineDrawable) {
@@ -155,10 +155,14 @@ public class MaterialTransitionDrawable extends Drawable {
                     drawTranslatedBase(canvas);
                 }
 
-                mColorMatSaturation.setSaturation(progressSaturation);
-                ColorMatrixColorFilter colorMatFilter = new ColorMatrixColorFilter(mColorMatSaturation);
-                mPaint.setAlpha((int) (progressOpacity * 255.0f));
-                mPaint.setColorFilter(colorMatFilter);
+                if (mExtColorFilter == null) {
+                    mColorMatSaturation.setSaturation(progressSaturation);
+                    ColorMatrixColorFilter colorMatFilter = new ColorMatrixColorFilter(mColorMatSaturation);
+                    mPaint.setAlpha((int) (progressOpacity * 255.0f));
+                    mPaint.setColorFilter(colorMatFilter);
+                } else {
+                    mPaint.setColorFilter(mExtColorFilter);
+                }
 
                 if (!mTargetDrawable.getBitmap().isRecycled()) {
                     try {
@@ -264,7 +268,8 @@ public class MaterialTransitionDrawable extends Drawable {
 
     @Override
     public void setColorFilter(ColorFilter colorFilter) {
-
+        mExtColorFilter = colorFilter;
+        invalidateSelf();
     }
 
     @Override

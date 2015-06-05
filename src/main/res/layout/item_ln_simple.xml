@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/list_item_height"
+        android:id="@+id/tvCaption"
+        android:background="?android:attr/selectableItemBackground"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:paddingLeft="@dimen/listen_now_card_padding"
+        android:paddingRight="@dimen/listen_now_card_padding"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:textAlignment="gravity"
+        android:layout_marginLeft="@dimen/listen_now_card_padding"
+        android:layout_marginRight="@dimen/listen_now_card_padding"/>
+
+
+</FrameLayout>

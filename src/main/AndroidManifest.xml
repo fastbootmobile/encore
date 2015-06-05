@@ -156,6 +156,7 @@
         <!-- Main Activity -->
         <activity
             android:name="com.fastbootmobile.encore.app.MainActivity"
+            android:theme="@style/AppTheme.TransparentNavBar.ArtistDetails"
             android:configChanges="orientation"
             android:label="@string/app_name"
             android:launchMode="singleTask">
