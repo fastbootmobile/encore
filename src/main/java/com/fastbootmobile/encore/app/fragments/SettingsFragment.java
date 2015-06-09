@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
@@ -137,6 +138,10 @@ public class SettingsFragment extends PreferenceFragment {
             }
             case KEY_LICENSES: {
                 openLicenses();
+                return true;
+            }
+            case SettingsKeys.KEY_FREE_ART: {
+                AlbumArtCache.CREATIVE_COMMONS = ((CheckBoxPreference) preference).isChecked();
                 return true;
             }
         }

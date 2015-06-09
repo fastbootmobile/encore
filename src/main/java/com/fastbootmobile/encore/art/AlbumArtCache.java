@@ -53,7 +53,7 @@ import java.util.List;
 public class AlbumArtCache {
     private static final String TAG = "AlbumArtCachev2";
     private static final AlbumArtCache INSTANCE = new AlbumArtCache();
-    private static final boolean CREATIVE_COMMONS = true;
+    public static boolean CREATIVE_COMMONS = true;
 
     private final List<BoundEntity> mRunningQueries = new ArrayList<>();
 

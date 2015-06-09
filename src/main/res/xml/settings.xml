@@ -6,35 +6,36 @@
         <Preference
             android:key="list_providers_config"
             android:summary="@string/settings_provider_config_summary"
-            android:title="@string/settings_provider_config_title" />
+            android:title="@string/settings_provider_config_title"/>
 
         <Preference
             android:key="list_dsp_config"
             android:summary="@string/settings_dsp_config_summary"
-            android:title="@string/settings_dsp_config_title" />
+            android:title="@string/settings_dsp_config_title"/>
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/settings_bluetooth"
-        android:key="category_bluetooth">
+    <PreferenceCategory
+        android:key="category_bluetooth"
+        android:title="@string/settings_bluetooth">
         <CheckBoxPreference
             android:key="bluetooth_autoconnect_enable"
-            android:title="@string/bt_autoconnect_enable_title"
-            android:summary="@string/bt_autoconnect_enable_summary" />
+            android:summary="@string/bt_autoconnect_enable_summary"
+            android:title="@string/bt_autoconnect_enable_title"/>
 
         <ListPreference
+            android:dependency="bluetooth_autoconnect_enable"
             android:key="bluetooth_autoconnect_name"
-            android:title="@string/bt_autoconnect_device_name_title"
             android:summary="%1$s"
-            android:dependency="bluetooth_autoconnect_enable" />
+            android:title="@string/bt_autoconnect_device_name_title"/>
 
         <MultiSelectListPreference
-            android:key="bluetooth_autoconnect_action"
-            android:title="@string/bt_autoconnect_action_title"
-            android:summary="@string/bt_autoconnect_action_summary"
+            android:dependency="bluetooth_autoconnect_enable"
             android:entries="@array/bluetooth_autoconnect_actions_entries"
             android:entryValues="@array/bluetooth_autoconnect_actions_values"
-            android:dependency="bluetooth_autoconnect_enable" />
+            android:key="bluetooth_autoconnect_action"
+            android:summary="@string/bt_autoconnect_action_summary"
+            android:title="@string/bt_autoconnect_action_title"/>
     </PreferenceCategory>
     <!--
         <PreferenceCategory android:title="@string/automix">
@@ -61,19 +62,25 @@
         </PreferenceCategory>
     -->
     <PreferenceCategory android:title="@string/other">
+        <CheckBoxPreference
+            android:checked="false"
+            android:key="cb_free_art"
+            android:summary="@string/pref_free_art_summary"
+            android:title="@string/pref_free_art_title"/>
+
         <Preference
             android:key="pref_clear_caches"
-            android:title="@string/pref_clear_caches_title"
-            android:summary="@string/pref_clear_caches_summary" />
+            android:summary="@string/pref_clear_caches_summary"
+            android:title="@string/pref_clear_caches_title"/>
 
         <Preference
             android:key="pref_open_setup_wizard"
-            android:title="@string/settings_setup_wizard" />
+            android:title="@string/settings_setup_wizard"/>
 
         <Preference
             android:key="pref_licenses"
             android:summary="@string/settings_licenses_summary"
-            android:title="@string/settings_licenses_title" />
+            android:title="@string/settings_licenses_title"/>
 
     </PreferenceCategory>
 

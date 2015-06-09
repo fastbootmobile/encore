@@ -16,6 +16,7 @@
 package com.fastbootmobile.encore.art;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,6 +26,7 @@ import android.util.LruCache;
 
 import com.fastbootmobile.encore.app.R;
 import com.fastbootmobile.encore.utils.ImageUtils;
+import com.fastbootmobile.encore.utils.SettingsKeys;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -138,6 +140,9 @@ public class ImageCache {
 
         mDefaultArt = ((BitmapDrawable) ctx.getResources()
                 .getDrawable(R.drawable.album_placeholder)).getBitmap();
+
+        SharedPreferences prefs = ctx.getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0);
+        AlbumArtCache.CREATIVE_COMMONS = prefs.getBoolean(SettingsKeys.KEY_FREE_ART, false);
     }
 
     /**

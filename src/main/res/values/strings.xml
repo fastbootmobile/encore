@@ -274,4 +274,6 @@
     <string name="ln_card_nothinghint_title">Are we missing something?</string>
     <string name="ln_card_nothinghint_body">Should you already have music on your device, make sure it is MP3, WAV, or FLAC, and in a folder accessible by Encore (such as the Music folder on your storage).</string>
     <string name="ln_header_search_placeholder">Search for a song, artist, album…</string>
+    <string name="pref_free_art_summary">Forces copyright-free album art to be used. Cache clear is needed when switching.</string>
+    <string name="pref_free_art_title">Use free art</string>
 </resources>
