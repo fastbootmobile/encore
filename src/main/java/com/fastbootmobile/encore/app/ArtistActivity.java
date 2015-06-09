@@ -90,7 +90,6 @@ public class ArtistActivity extends AppActivity {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setBackgroundDrawable(null);
         setContentView(R.layout.activity_artist);
 
         mHandler = new Handler();

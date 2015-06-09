@@ -4,6 +4,7 @@
               android:layout_height="match_parent"
               android:orientation="horizontal"
               android:baselineAligned="false"
+              android:background="@color/default_fragment_background"
               android:paddingRight="@dimen/listen_now_item_card_horz_padding">
 
     <include

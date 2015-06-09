@@ -333,7 +333,6 @@ public class MainActivity extends AppActivity
             switch (position + 1) {
                 case SECTION_LISTEN_NOW:
                     newFrag = ListenNowFragment.newInstance();
-                    needsBackground = false;
                     break;
                 case SECTION_PLAYLISTS:
                     newFrag = PlaylistListFragment.newInstance(true);
@@ -441,7 +440,7 @@ public class MainActivity extends AppActivity
     }
 
     public void restoreActionBar() {
-        if (mToolbar != null) {
+        if (mToolbar != null && mCurrentFragmentIndex + 1 != SECTION_LISTEN_NOW) {
             mToolbar.setTitle(mTitle);
         }
     }

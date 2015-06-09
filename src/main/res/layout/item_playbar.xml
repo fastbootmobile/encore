@@ -23,6 +23,7 @@
         android:layout_toRightOf="@+id/ivAlbumArt"
         android:gravity="center_vertical"
         android:orientation="vertical"
+        android:baselineAligned="false"
         android:layout_alignTop="@+id/ivAlbumArt"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
