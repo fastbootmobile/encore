@@ -2,6 +2,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
+            android:paddingTop="@dimen/translucent_toolbarstatus_top_margin"
             android:paddingBottom="@dimen/playing_bar_height">
 
     <FrameLayout

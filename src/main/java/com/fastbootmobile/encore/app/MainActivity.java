@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.ColorDrawable;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.Handler;
@@ -108,6 +109,7 @@ public class MainActivity extends AppActivity
             startActivity(intent);
             finish();
         } else {
+            // Load UI
             setContentView(R.layout.activity_main);
 
             mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -327,15 +329,18 @@ public class MainActivity extends AppActivity
             }
 
             Fragment newFrag = null;
+            boolean needsBackground = true;
             switch (position + 1) {
                 case SECTION_LISTEN_NOW:
                     newFrag = ListenNowFragment.newInstance();
+                    needsBackground = false;
                     break;
                 case SECTION_PLAYLISTS:
                     newFrag = PlaylistListFragment.newInstance(true);
                     break;
                 case SECTION_MY_SONGS:
                     newFrag = MySongsFragment.newInstance();
+                    needsBackground = false;
                     break;
                 case SECTION_AUTOMIX:
                     newFrag = AutomixFragment.newInstance();
@@ -359,6 +364,12 @@ public class MainActivity extends AppActivity
                 case SECTION_SETTINGS+1: // offset the divider
                     startActivity(new Intent(this, SettingsActivity.class));
                     break;
+            }
+
+            if (needsBackground) {
+                getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.default_fragment_background)));
+            } else {
+                getWindow().setBackgroundDrawable(null);
             }
 
             if (newFrag != null) {

@@ -2,8 +2,7 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
-                android:layout_height="@dimen/playing_bar_height"
-                android:background="@drawable/playing_bar_item_background">
+                android:layout_height="@dimen/playing_bar_height">
 
     <com.fastbootmobile.encore.app.ui.AlbumArtImageView
         android:id="@+id/ivAlbumArt"
@@ -12,7 +11,6 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/playing_bar_item_background"
         android:adjustViewBounds="true"
         android:clickable="true" />
 
