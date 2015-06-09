@@ -33,12 +33,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.fastbootmobile.encore.app.AlbumActivity;
 import com.fastbootmobile.encore.app.ArtistActivity;
 import com.fastbootmobile.encore.app.PlaylistActivity;
 import com.fastbootmobile.encore.app.R;
-import com.fastbootmobile.encore.utils.Utils;
 import com.fastbootmobile.encore.app.adapters.SearchAdapter;
 import com.fastbootmobile.encore.app.ui.MaterialTransitionDrawable;
 import com.fastbootmobile.encore.framework.PlaybackProxy;
@@ -50,6 +50,7 @@ import com.fastbootmobile.encore.model.Song;
 import com.fastbootmobile.encore.providers.ILocalCallback;
 import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
+import com.fastbootmobile.encore.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -67,6 +68,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     private Handler mHandler;
     private List<SearchResult> mSearchResults;
     private String mQuery;
+    private ProgressBar mLoadingBar;
+    private int mNumProvidersResponse;
 
     private static class SearchHandler extends Handler {
         private WeakReference<SearchFragment> mParent;
@@ -104,8 +107,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         final View root = inflater.inflate(R.layout.fragment_search, container, false);
         assert root != null;
 
-        getActivity().setProgressBarIndeterminate(true);
-        getActivity().setProgressBarIndeterminateVisibility(true);
+        mLoadingBar = (ProgressBar) root.findViewById(R.id.pbLoading);
 
         mAdapter = new SearchAdapter();
 
@@ -341,6 +343,7 @@ public class SearchFragment extends Fragment implements ILocalCallback {
             if (searchResult.getQuery().equals(mQuery)) {
                 mSearchResults = searchResults;
                 mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
+                mNumProvidersResponse++;
                 break;
             }
         }
@@ -352,6 +355,10 @@ public class SearchFragment extends Fragment implements ILocalCallback {
         if (act != null) {
             getActivity().setTitle("'" + mSearchResults.get(0).getQuery() + "'");
             getActivity().setProgressBarIndeterminateVisibility(false);
+
+            if (mNumProvidersResponse >= 2) {
+                mLoadingBar.setVisibility(View.GONE);
+            }
         } else {
             mHandler.sendEmptyMessage(MSG_UPDATE_RESULTS);
         }
