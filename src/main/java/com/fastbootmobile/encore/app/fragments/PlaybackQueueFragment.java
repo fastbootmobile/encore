@@ -470,7 +470,7 @@ public class PlaybackQueueFragment extends Fragment {
 
         // Attach this fragment as Playback Listener
         PlaybackProxy.addCallback(mPlaybackListener);
-        mHandler.sendEmptyMessage(MSG_UPDATE_SEEKBAR);
+        mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, 1000);
 
         ProviderAggregator.getDefault().addUpdateCallback(mProviderCallback);
 
