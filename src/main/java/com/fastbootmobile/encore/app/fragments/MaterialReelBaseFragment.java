@@ -103,6 +103,9 @@ public class MaterialReelBaseFragment extends Fragment {
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        if (isDetached() || getActivity() == null) {
+                            return;
+                        }
                         mBarLayout.setAlpha(1.0f);
                         mBarLayout.setBackgroundColor(playFab.getNormalColor());
 
