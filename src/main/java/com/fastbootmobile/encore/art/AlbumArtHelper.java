@@ -36,10 +36,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AlbumArtHelper {
     private static final String TAG = "AlbumArtHelper";
 
-    private static final int CORE_POOL_SIZE = 1;
-    private static final int PRI_CORE_POOL_SIZE = 1;
-    private static final int MAXIMUM_POOL_SIZE = 2;
-    private static final int PRI_MAXIMUM_POOL_SIZE = 2;
+    private static final int CORE_POOL_SIZE = 2;
+    private static final int PRI_CORE_POOL_SIZE = 2;
+    private static final int MAXIMUM_POOL_SIZE = 6;
+    private static final int PRI_MAXIMUM_POOL_SIZE = 3;
     private static final int KEEP_ALIVE = 10;
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
@@ -49,9 +49,9 @@ public class AlbumArtHelper {
         }
     };
     private static final BlockingQueue<Runnable> sPoolWorkQueue =
-            new LinkedBlockingQueue<>(32);
+            new LinkedBlockingQueue<>(64);
     private static final BlockingQueue<Runnable> sPriorityPoolWorkQueue =
-            new LinkedBlockingQueue<>(16);
+            new LinkedBlockingQueue<>(32);
 
     static final Executor ART_POOL_EXECUTOR
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,

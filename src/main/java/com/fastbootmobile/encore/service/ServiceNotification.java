@@ -306,6 +306,6 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
     }
 
     public interface NotificationChangedListener {
-        public void onNotificationChanged(ServiceNotification notification);
+        void onNotificationChanged(ServiceNotification notification);
     }
 }
