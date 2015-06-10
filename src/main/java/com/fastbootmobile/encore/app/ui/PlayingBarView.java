@@ -55,6 +55,7 @@ import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.service.BasePlaybackCallback;
 import com.fastbootmobile.encore.service.PlaybackService;
+import com.fastbootmobile.encore.utils.SettingsKeys;
 import com.fastbootmobile.encore.utils.Utils;
 
 import java.lang.ref.WeakReference;
@@ -258,7 +259,7 @@ public class PlayingBarView extends RelativeLayout {
                     mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
                 }
             }
-        }, 1000);
+        }, 500);
     }
 
     @Override
@@ -376,11 +377,14 @@ public class PlayingBarView extends RelativeLayout {
         List<Song> queue;
         int currentIndex;
 
+        boolean hidden = getContext().getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
+                .getBoolean(SettingsKeys.KEY_PLAYBAR_HIDDEN, false);
+
         // Do a copy
         queue = new ArrayList<>(PlaybackProxy.getCurrentPlaybackQueue());
         currentIndex = PlaybackProxy.getCurrentTrackIndex();
 
-        if (queue.size() > 0) {
+        if (queue.size() > 0 && !hidden) {
             mLastQueue = new ArrayList<>(queue);
             mTracksLayout.removeAllViews();
             mTracksLayout.setVisibility(View.VISIBLE);
@@ -713,6 +717,10 @@ public class PlayingBarView extends RelativeLayout {
             if (getTranslationX() > halfWidth || getTranslationX() < -halfWidth) {
                 mIsHiding = true;
                 PlaybackProxy.stop();
+
+                getContext().getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
+                        .edit().putBoolean(SettingsKeys.KEY_PLAYBAR_HIDDEN, true).apply();
+
                 animate().translationX(getTranslationX() > 0 ? getMeasuredWidth() : -getMeasuredWidth())
                         .setDuration(200).setListener(new Animator.AnimatorListener() {
                     @Override

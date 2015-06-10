@@ -14,4 +14,8 @@ public class SettingsKeys {
 
     // Album art
     public static final String KEY_FREE_ART = "cb_free_art";
+
+
+    // Playing bar behavior cache
+    public static final String KEY_PLAYBAR_HIDDEN = "cache_playbar_hidden";
 }

@@ -54,6 +54,7 @@ import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
 import com.fastbootmobile.encore.receivers.RemoteControlReceiver;
+import com.fastbootmobile.encore.utils.SettingsKeys;
 import com.fastbootmobile.encore.utils.Utils;
 
 import java.lang.ref.WeakReference;
@@ -664,6 +665,11 @@ public class PlaybackService extends Service
             if (providerId != null) {
                 ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerId);
                 if (connection != null) {
+                    // Reset playbar status
+                    getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
+                            .edit().putBoolean(SettingsKeys.KEY_PLAYBAR_HIDDEN, false).apply();
+
+                    // Start playback
                     IMusicProvider provider = connection.getBinder();
                     if (provider != null) {
                         mState = STATE_BUFFERING;

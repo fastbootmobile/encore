@@ -44,7 +44,7 @@ public class PlaylistArtBuilder {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private Bitmap mPlaylistComposite;
-    private List<RecyclingBitmapDrawable> mPlaylistSource;
+    private final List<RecyclingBitmapDrawable> mPlaylistSource = new ArrayList<>();
     private Paint mPlaylistPaint;
     private List<AlbumArtTask> mCompositeTasks;
     private List<BoundEntity> mCompositeRequests;
@@ -83,18 +83,20 @@ public class PlaylistArtBuilder {
     private AlbumArtHelper.AlbumArtListener mCompositeListener = new AlbumArtHelper.AlbumArtListener() {
         @Override
         public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
-            if (!mCompositeRequests.contains(request) || mPlaylistSource == null || mDone) {
+            if (!mCompositeRequests.contains(request) || mDone) {
                 return;
             }
 
             if (output != null) {
-                mPlaylistSource.add(output);
-                if (mPlaylistSource.size() < 4) {
-                    mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
-                    mHandler.postDelayed(mUpdatePlaylistCompositeRunnable, 200);
-                } else {
-                    mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
-                    mHandler.post(mUpdatePlaylistCompositeRunnable);
+                synchronized (mPlaylistSource) {
+                    mPlaylistSource.add(output);
+                    if (mPlaylistSource.size() < 4) {
+                        mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
+                        mHandler.postDelayed(mUpdatePlaylistCompositeRunnable, 200);
+                    } else {
+                        mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
+                        mHandler.post(mUpdatePlaylistCompositeRunnable);
+                    }
                 }
             }
         }
@@ -113,9 +115,8 @@ public class PlaylistArtBuilder {
             mPlaylistComposite.recycle();
             mPlaylistComposite = null;
         }
-        if (mPlaylistSource != null) {
+        synchronized (mPlaylistSource) {
             mPlaylistSource.clear();
-            mPlaylistSource = null;
         }
         if (mCompositeTasks != null) {
             for (AlbumArtTask task : mCompositeTasks) {
@@ -137,8 +138,8 @@ public class PlaylistArtBuilder {
             mPlaylistPaint = new Paint();
         }
 
-        if (mPlaylistSource == null) {
-            mPlaylistSource = new ArrayList<>();
+        synchronized (mPlaylistSource) {
+            mPlaylistSource.clear();
         }
 
         Canvas canvas = new Canvas(mPlaylistComposite);
@@ -159,17 +160,19 @@ public class PlaylistArtBuilder {
             }
         } else if (numImages == 2 || numImages == 3) {
             int i = 0;
-            for (RecyclingBitmapDrawable item : mPlaylistSource) {
-                Bitmap itemBmp = item.getBitmap();
+            synchronized (mPlaylistSource) {
+                for (RecyclingBitmapDrawable item : mPlaylistSource) {
+                    Bitmap itemBmp = item.getBitmap();
 
-                Rect src = new Rect(0, 0, itemBmp.getWidth(), itemBmp.getHeight());
-                Rect dst = new Rect(i * compositeWidth / numImages,
-                        0,
-                        i * compositeWidth / numImages + compositeWidth,
-                        compositeHeight);
+                    Rect src = new Rect(0, 0, itemBmp.getWidth(), itemBmp.getHeight());
+                    Rect dst = new Rect(i * compositeWidth / numImages,
+                            0,
+                            i * compositeWidth / numImages + compositeWidth,
+                            compositeHeight);
 
-                canvas.drawBitmap(itemBmp, src, dst, mPlaylistPaint);
-                ++i;
+                    canvas.drawBitmap(itemBmp, src, dst, mPlaylistPaint);
+                    ++i;
+                }
             }
         } else {
             for (int i = 0; i < 4; ++i) {
@@ -230,7 +233,7 @@ public class PlaylistArtBuilder {
         }
 
         // Load 4 songs if possible and compose them into one picture
-        mPlaylistSource = new ArrayList<>();
+        mPlaylistSource.clear();
         mCompositeRequests = new ArrayList<>();
         mNumComposite = Math.min(4, playlist.getSongsCount());
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
