@@ -150,6 +150,11 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
         public void run() {
             final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
+            if (mAlbum == null) {
+                Log.e(TAG, "Album is null!");
+                return;
+            }
+
             ProviderIdentifier pi = mAlbum.getProvider();
             if (pi == null) {
                 Log.e(TAG, "Album provider for " + mAlbum.getRef() + " is null!");
