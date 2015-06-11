@@ -465,6 +465,12 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -519,7 +525,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
 
         // Setup the subfragments pager
         final WrapContentHeightViewPager pager = (WrapContentHeightViewPager) mRootView.findViewById(R.id.pagerArtist);
-        pager.setAdapter(new ViewPagerAdapter(getActivity().getSupportFragmentManager()));
+        pager.setAdapter(new ViewPagerAdapter(getChildFragmentManager()));
         pager.setOffscreenPageLimit(FRAGMENT_COUNT);
 
 
@@ -533,7 +539,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 if (mRootView.getScrollY() > tvArtist.getTop()) {
                     mRootView.smoothScrollTo(0, tvArtist.getTop());
                 }
-                pager.requestLayout();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        pager.setMinimumHeight(1500);
+                        //pager.requestLayout();
+                    }
+                });
+
 
                 boolean hasRosetta = ProviderAggregator.getDefault().getRosettaStonePrefix().size() > 0;
 
@@ -811,7 +824,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private Song mRecommendedSong;
         private boolean mRecommendationLoaded = false;
         private View mRootView;
-        private static ArtistFragment mParent;
+        private ArtistFragment mParent;
         private HashMap<Song, View> mSongToViewMap = new HashMap<>();
         private HashMap<String, View> mAlbumToViewMap = new HashMap<>();
         private View mPreviousSongGroup;
@@ -918,8 +931,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     boldPlayingTrack(song);
                     updatePlayingAlbum(song.getAlbum());
                 }
-
-
             }
         };
 
@@ -1542,6 +1553,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
          * Notify that the fragment is active and that data should be populated
          */
         public void notifyActive() {
+            Log.e(TAG, "Notify Active Similar, similarLoaded=" + mSimilarLoaded);
             if (!mSimilarLoaded) {
                 if (ProviderAggregator.getDefault().isOfflineMode()) {
                     if (mOfflineView != null) mOfflineView.setVisibility(View.VISIBLE);
@@ -1556,6 +1568,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                         }
                     }.start();
                 }
+            } else {
+                ensureSimilar();
             }
         }
 
@@ -1602,9 +1616,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                             if (ref != null) {
                                 Artist artist = ProviderAggregator.getDefault().retrieveArtist(ref, rosettaProvider);
                                 if (artist != null) {
-                                    mAdapter.addItemUnique(artist);
                                     mSimilarArtists.add(artist);
-                                    mAdapter.notifyItemInserted(mSimilarArtists.size() - 1);
                                 } else {
                                     Log.e(TAG, "Null artist for similar");
                                 }
@@ -1615,10 +1627,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (mArtistsGrid != null && mArtistsSpinner != null) {
-                                mArtistsGrid.setAdapter(mAdapter);
-                                mArtistsSpinner.setVisibility(View.GONE);
-                            }
+                            ensureSimilar();
                         }
                     });
                 }
@@ -1631,6 +1640,18 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     }
                 });
 
+            }
+        }
+
+        private void ensureSimilar() {
+            mAdapter.addAllUnique(mSimilarArtists);
+            mAdapter.notifyDataSetChanged();
+
+            if (mArtistsGrid != null && mArtistsSpinner != null) {
+                mArtistsGrid.setAdapter(mAdapter);
+                mArtistsSpinner.setVisibility(View.GONE);
+                mArtistsGrid.setVisibility(View.VISIBLE);
+                mOfflineView.setVisibility(View.GONE);
             }
         }
 
