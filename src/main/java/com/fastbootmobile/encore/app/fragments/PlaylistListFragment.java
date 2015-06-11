@@ -195,10 +195,18 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
             mRecyclerView.addItemDecoration(new SimpleListDividerDecorator(getResources().getDrawable(R.drawable.list_divider), true));
 
             mRecyclerViewDragDropManager.attachRecyclerView(mRecyclerView);
+
+            if (!mIsStandalone) {
+                mRecyclerView.setPadding(0, 0, 0, 0);
+            }
         } else {
             // We're in landscape with the grid view
             GridView root = (GridView) view.findViewById(R.id.gvPlaylists);
             root.setAdapter(mGridAdapter);
+
+            if (!mIsStandalone) {
+                root.setPadding(0, 0, 0, 0);
+            }
 
             // Setup the click listener
             root.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -218,10 +226,6 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
                     }
                 }
             });
-        }
-
-        if (!mIsStandalone) {
-            mRecyclerView.setPadding(0, 0, 0, 0);
         }
     }
 
