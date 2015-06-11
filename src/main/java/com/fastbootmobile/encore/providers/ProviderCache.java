@@ -7,7 +7,6 @@ import com.fastbootmobile.encore.model.Song;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +59,7 @@ public class ProviderCache {
 
         // Songs
         synchronized (mSongs) {
-            Set<Map.Entry<String, Song>> songs = new HashSet<>(mSongs.entrySet());
+            Set<Map.Entry<String, Song>> songs = mSongs.entrySet();
             keysToRemove.clear();
 
             for (Map.Entry<String, Song> item : songs) {
@@ -161,12 +160,16 @@ public class ProviderCache {
     }
 
     public void putSong(final ProviderIdentifier provider, final Song song) {
-        mSongs.put(song.getRef(), song);
+        synchronized (mSongs) {
+            mSongs.put(song.getRef(), song);
+        }
         mRefProvider.put(song.getRef(), provider);
     }
 
     Song getSong(final String ref) {
-        return mSongs.get(ref);
+        synchronized (mSongs) {
+            return mSongs.get(ref);
+        }
     }
 
     public void putAlbum(final ProviderIdentifier provider, final Album album) {
