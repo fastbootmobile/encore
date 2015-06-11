@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 public class ImageCache {
     private static final String TAG = "ImageCache";
     private static final ImageCache INSTANCE = new ImageCache();
-    private static final long EXPIRATION_TIME = TimeUnit.DAYS.toMillis(1);
+    private static final long EXPIRATION_TIME = TimeUnit.DAYS.toMillis(7);
 
     private static final boolean USE_MEMORY_CACHE = true;
 
