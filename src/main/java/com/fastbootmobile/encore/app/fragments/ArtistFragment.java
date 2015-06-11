@@ -542,8 +542,8 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        pager.setMinimumHeight(1500);
-                        //pager.requestLayout();
+                        pager.setMinimumHeight(500);
+                        pager.requestLayout();
                     }
                 });
 
