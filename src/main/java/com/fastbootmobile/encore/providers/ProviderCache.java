@@ -7,10 +7,10 @@ import com.fastbootmobile.encore.model.Song;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Caches information gotten by providers
@@ -60,7 +60,7 @@ public class ProviderCache {
 
         // Songs
         synchronized (mSongs) {
-            Set<Map.Entry<String, Song>> songs = new TreeSet<>(mSongs.entrySet());
+            Set<Map.Entry<String, Song>> songs = new HashSet<>(mSongs.entrySet());
             keysToRemove.clear();
 
             for (Map.Entry<String, Song> item : songs) {
