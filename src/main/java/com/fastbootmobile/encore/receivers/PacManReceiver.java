@@ -72,10 +72,12 @@ public class PacManReceiver extends BroadcastReceiver {
             int uid = intent.getIntExtra(Intent.EXTRA_UID, 0);
             if (uid > 0) {
                 String[] packages = pm.getPackagesForUid(uid);
-                ProviderIdentifier id = stopPlayingTrack(packages);
+                if (packages != null) {
+                    ProviderIdentifier id = stopPlayingTrack(packages);
 
-                if (id != null) {
-                    ProviderAggregator.getDefault().getCache().purgeCacheForProvider(id);
+                    if (id != null) {
+                        ProviderAggregator.getDefault().getCache().purgeCacheForProvider(id);
+                    }
                 }
             }
 
@@ -85,6 +87,10 @@ public class PacManReceiver extends BroadcastReceiver {
     }
 
     private ProviderIdentifier stopPlayingTrack(String[] packages) {
+        if (packages == null) {
+            return null;
+        }
+
         if (PlaybackProxy.getState() == PlaybackService.STATE_PLAYING
                 || PlaybackProxy.getState() == PlaybackService.STATE_BUFFERING) {
             Song currentTrack = PlaybackProxy.getCurrentTrack();
