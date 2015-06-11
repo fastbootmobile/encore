@@ -17,6 +17,7 @@ package com.fastbootmobile.encore.app.fragments;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -194,6 +195,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     private void setupItems() {
         new Thread() {
             public void run() {
+                final Context context = getActivity();
+
+                if (context == null) {
+                    Log.e(TAG, "Invalid context when generating Listen Now items!");
+                    return;
+                }
+
                 final List<ListenNowAdapter.ListenNowItem> items = new ArrayList<>();
                 final ProviderAggregator aggregator = ProviderAggregator.getDefault();
                 final PluginsLookup plugins = PluginsLookup.getDefault();
@@ -234,7 +242,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
                 // Add a card if we have local music, but no cloud providers
                 if (providers.size() <= PluginsLookup.BUNDLED_PROVIDERS_COUNT && songs.size() > 0) {
-                    final SharedPreferences prefs = getActivity().getSharedPreferences(PREFS, 0);
+                    final SharedPreferences prefs = context.getSharedPreferences(PREFS, 0);
                     if (!prefs.getBoolean(LANDCARD_NO_CUSTOM_PROVIDERS, false)) {
                         // Show the "You have no custom providers" card
                         items.add(new ListenNowAdapter.CardItem(getString(R.string.ln_landcard_nocustomprovider_title),
@@ -270,7 +278,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                             getString(R.string.configure),
                             new View.OnClickListener() {
                                 public void onClick(View v) {
-                                    ((MainActivity) getActivity()).openSection(MainActivity.SECTION_SETTINGS);
+                                    ((MainActivity) context).openSection(MainActivity.SECTION_SETTINGS);
                                 }
                             }));
 
@@ -280,7 +288,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
 
                 // Add the "Recently played" section if we have recent tracks
-                final ListenLogger logger = new ListenLogger(getActivity());
+                final ListenLogger logger = new ListenLogger(context);
                 List<ListenLogger.LogEntry> logEntries = logger.getEntries(50);
 
                 if (logEntries.size() > 0) {
@@ -288,7 +296,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                             R.drawable.ic_nav_history_active, getString(R.string.more), new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ((MainActivity) getActivity()).openSection(MainActivity.SECTION_HISTORY);
+                            ((MainActivity) context).openSection(MainActivity.SECTION_HISTORY);
                         }
                     }));
 
@@ -342,7 +350,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         R.drawable.ic_nav_playlist_active, getString(R.string.browse), new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ((MainActivity) getActivity()).openSection(MainActivity.SECTION_PLAYLISTS);
+                        ((MainActivity) context).openSection(MainActivity.SECTION_PLAYLISTS);
                     }
                 }));
 
@@ -384,7 +392,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         R.drawable.ic_nav_automix_active, getString(R.string.create), new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ((MainActivity) getActivity()).openSection(MainActivity.SECTION_AUTOMIX);
+                        ((MainActivity) context).openSection(MainActivity.SECTION_AUTOMIX);
                     }
                 }));
 
@@ -394,7 +402,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                             getString(R.string.ln_action_getstarted), new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ((MainActivity) getActivity()).onNavigationDrawerItemSelected(MainActivity.SECTION_AUTOMIX);
+                            ((MainActivity) context).onNavigationDrawerItemSelected(MainActivity.SECTION_AUTOMIX);
                         }
                     }));
                 } else {
