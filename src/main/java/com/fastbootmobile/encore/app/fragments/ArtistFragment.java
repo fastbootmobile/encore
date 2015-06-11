@@ -1146,7 +1146,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 fetchAlbums();
             }
 
-            if (mRootView == null) {
+            if (mRootView == null && mHandler != null) {
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
