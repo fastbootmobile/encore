@@ -34,6 +34,7 @@ import java.util.TreeSet;
  */
 public class DSPProcessor {
     private static final String TAG = "DSPProcessor";
+    private static final boolean DEBUG = false;
 
     private static final String PREFS_DSP_CHAIN = "DSP_Chain";
     private static final String PREF_KEY_CHAIN = "chain";
@@ -154,8 +155,8 @@ public class DSPProcessor {
 
                 if (socketName == null) {
                     Log.e(TAG, "======== SOCKET NAME STILL NULL AFTER ASSIGNPROVIDERAUDIOSOCKET");
-                } else {
-                    Log.e(TAG, "SOCKET " + index + ": " + socketName);
+                } else if (DEBUG) {
+                    Log.d(TAG, "SOCKET " + index + ": " + socketName);
                 }
                 sockets[index] = socketName;
             } else {

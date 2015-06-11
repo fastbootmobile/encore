@@ -111,7 +111,7 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
 
             // Automatically try to login the providers once bound
             if (mBinder.isSetup()) {
-                Log.d(TAG, "Provider " + getProviderName() + " is setup! Trying to see if auth");
+                if (DEBUG) Log.d(TAG, "Provider " + getProviderName() + " is setup! Trying to see if auth");
                 if (!mBinder.isAuthenticated()) {
                     if (!mBinder.login()) {
                         Log.e(TAG, "Error while requesting login!");

@@ -83,7 +83,6 @@ public class PluginsLookup {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mPlaybackService = IPlaybackService.Stub.asInterface(service);
-            Log.i(TAG, "Connected to Playback Service");
             PlaybackProxy.notifyPlaybackConnected();
         }
 

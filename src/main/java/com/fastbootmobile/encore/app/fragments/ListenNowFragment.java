@@ -70,6 +70,7 @@ import java.util.List;
  */
 public class ListenNowFragment extends Fragment implements ILocalCallback {
     private static final String TAG = "ListenNowFragment";
+    private static final boolean DEBUG = false;
 
     private static final String PREFS = "listen_now";
     private static final String LANDCARD_NO_CUSTOM_PROVIDERS = "card_no_custom";
@@ -218,11 +219,15 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         try {
                             List<Song> providerSongs = provider.getBinder().getSongs(offset, limit);
 
-                            songs.addAll(providerSongs);
-                            offset += providerSongs.size();
+                            if (providerSongs != null) {
+                                songs.addAll(providerSongs);
+                                offset += providerSongs.size();
 
-                            if (providerSongs.size() < limit) {
-                                Log.d(TAG, "Got " + providerSongs.size() + " instead of " + limit + ", assuming end of list");
+                                if (providerSongs.size() < limit) {
+                                    if (DEBUG) Log.d(TAG, "Got " + providerSongs.size() + " instead of " + limit + ", assuming end of list");
+                                    break;
+                                }
+                            } else {
                                 break;
                             }
                         } catch (TransactionTooLargeException e) {

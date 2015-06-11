@@ -456,8 +456,6 @@ public class PlaybackService extends Service
 
         if (connection instanceof ProviderConnection) {
             try {
-                Log.e(TAG, "RegisterCallback: service "
-                        + connection.getIdentifier().mName + " connected");
                 final IMusicProvider binder = ((ProviderConnection) connection).getBinder(false);
 
                 if (binder != null) {

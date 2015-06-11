@@ -30,7 +30,7 @@ import com.fastbootmobile.encore.service.NativeHub;
  * Abstract host class for providers and DSP service connections
  */
 public abstract class AbstractProviderConnection implements ServiceConnection {
-    protected static final boolean DEBUG = BuildConfig.DEBUG;
+    protected static final boolean DEBUG = false;
     private static final String TAG = "AbstractProviderConnection";
 
     private String mProviderName;
