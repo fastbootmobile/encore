@@ -131,14 +131,16 @@ public class PlaylistActivity extends AppActivity {
                         final int duration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
                         final int radius = Utils.getEnclosingCircleRadius(albumName, cx, cy);
 
-                        if (mIsEntering) {
-                            albumName.setVisibility(View.INVISIBLE);
-                            Utils.animateCircleReveal(albumName, cx, cy, 0, radius,
-                                    duration, 300);
-                        } else {
-                            albumName.setVisibility(View.VISIBLE);
-                            Utils.animateCircleReveal(albumName, cx, cy, radius, 0,
-                                    duration, 0);
+                        if (albumName.isAttachedToWindow()) {
+                            if (mIsEntering) {
+                                albumName.setVisibility(View.INVISIBLE);
+                                Utils.animateCircleReveal(albumName, cx, cy, 0, radius,
+                                        duration, 300);
+                            } else {
+                                albumName.setVisibility(View.VISIBLE);
+                                Utils.animateCircleReveal(albumName, cx, cy, radius, 0,
+                                        duration, 0);
+                            }
                         }
                     }
                 }
