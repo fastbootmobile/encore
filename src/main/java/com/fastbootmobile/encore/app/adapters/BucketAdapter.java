@@ -116,7 +116,11 @@ public class BucketAdapter extends BaseAdapter {
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         switch (menuItem.getItemId()) {
                             case R.id.menu_play_now:
-                                AutoMixManager.getDefault().startPlay(bucket);
+                                new Thread() {
+                                    public void run() {
+                                        AutoMixManager.getDefault().startPlay(bucket);
+                                    }
+                                }.start();
                                 break;
 
                             case R.id.menu_delete:
