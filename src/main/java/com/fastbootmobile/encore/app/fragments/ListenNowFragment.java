@@ -82,6 +82,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     private AbsListView.OnScrollListener mScrollListener;
     private ListenNowAdapter mAdapter;
     private Handler mHandler;
+    private Thread mItemsSetupThread;
 
     /**
      * Use this factory method to create a new instance of
@@ -169,6 +170,12 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         }
     }
 
+    @Override
+    public void onDetach() {
+        mItemsSetupThread.interrupt();
+        super.onDetach();
+    }
+
     private void setupHeader(ParallaxScrollListView listView) {
         LayoutInflater inflater = LayoutInflater.from(listView.getContext());
         mHeaderView = inflater.inflate(R.layout.header_listen_now, listView, false);
@@ -194,7 +201,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
     }
 
     private void setupItems() {
-        new Thread() {
+        mItemsSetupThread = new Thread() {
             public void run() {
                 final Context context = getActivity();
 
@@ -215,7 +222,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     int limit = 50;
                     int offset = 0;
 
-                    while (true) {
+                    while (!isInterrupted()) {
                         try {
                             List<Song> providerSongs = provider.getBinder().getSongs(offset, limit);
 
@@ -244,6 +251,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     }
                 }
 
+                if (isInterrupted() || isDetached()) return;
 
                 // Add a card if we have local music, but no cloud providers
                 if (providers.size() <= PluginsLookup.BUNDLED_PROVIDERS_COUNT && songs.size() > 0) {
@@ -269,6 +277,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     }
                 }
 
+                if (isInterrupted() || isDetached()) return;
+
                 // Add a card if there's no music at all (no songs and no playlists)
                 if (providers.size() <= PluginsLookup.BUNDLED_PROVIDERS_COUNT && songs.size() == 0 && playlists.size() == 0) {
                     items.add(new ListenNowAdapter.CardItem(getString(R.string.ln_card_nothing_title),
@@ -291,12 +301,13 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                             getString(R.string.ln_card_nothinghint_body), null, null));
                 }
 
+                if (isInterrupted() || isDetached()) return;
 
                 // Add the "Recently played" section if we have recent tracks
                 final ListenLogger logger = new ListenLogger(context);
                 List<ListenLogger.LogEntry> logEntries = logger.getEntries(50);
 
-                if (logEntries.size() > 0) {
+                if (logEntries.size() > 0 && !isDetached()) {
                     items.add(new ListenNowAdapter.SectionHeaderItem(getString(R.string.ln_section_recents),
                             R.drawable.ic_nav_history_active, getString(R.string.more), new View.OnClickListener() {
                         @Override
@@ -350,6 +361,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     }
                 }
 
+                if (isInterrupted() || isDetached()) return;
+
                 // Add playlists section
                 items.add(new ListenNowAdapter.SectionHeaderItem(getString(R.string.ln_section_playlists),
                         R.drawable.ic_nav_playlist_active, getString(R.string.browse), new View.OnClickListener() {
@@ -391,6 +404,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     }
                 }
 
+                if (isInterrupted() || isDetached()) return;
 
                 // Add automix section
                 items.add(new ListenNowAdapter.SectionHeaderItem(getString(R.string.lb_section_automixes),
@@ -426,6 +440,8 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     }
                 }
 
+                if (isInterrupted() || isDetached()) return;
+
                 mHandler.post(new Runnable() {
                     public void run() {
                         for (ListenNowAdapter.ListenNowItem item : items) {
@@ -435,7 +451,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                     }
                 });
             }
-        }.start();
+        };
+
+        mItemsSetupThread.start();
     }
 
     /*

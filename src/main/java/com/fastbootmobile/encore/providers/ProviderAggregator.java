@@ -52,7 +52,7 @@ public class ProviderAggregator extends IProviderCallback.Stub {
     private static final boolean DEBUG = false;
 
     private final Map<String, List<SearchResult>> mCachedSearches;
-    private List<ILocalCallback> mUpdateCallbacks;
+    private final List<ILocalCallback> mUpdateCallbacks;
     private final List<ProviderConnection> mProviders;
     private ProviderCache mCache;
     private Handler mMainHandler;
@@ -73,8 +73,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         @Override
         public void run() {
             synchronized (mPostedUpdateSongs) {
-                for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onSongUpdate(new ArrayList<>(mPostedUpdateSongs));
+                synchronized (mUpdateCallbacks) {
+                    for (ILocalCallback cb : mUpdateCallbacks) {
+                        cb.onSongUpdate(new ArrayList<>(mPostedUpdateSongs));
+                    }
                 }
                 mPostedUpdateSongs.clear();
             }
@@ -85,8 +87,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         @Override
         public void run() {
             synchronized (mPostedUpdateAlbums) {
-                for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onAlbumUpdate(new ArrayList<>(mPostedUpdateAlbums));
+                synchronized (mUpdateCallbacks) {
+                    for (ILocalCallback cb : mUpdateCallbacks) {
+                        cb.onAlbumUpdate(new ArrayList<>(mPostedUpdateAlbums));
+                    }
                 }
                 mPostedUpdateAlbums.clear();
             }
@@ -97,8 +101,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         @Override
         public void run() {
             synchronized (mPostedUpdateArtists) {
-                for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onArtistUpdate(new ArrayList<>(mPostedUpdateArtists));
+                synchronized (mUpdateCallbacks) {
+                    for (ILocalCallback cb : mUpdateCallbacks) {
+                        cb.onArtistUpdate(new ArrayList<>(mPostedUpdateArtists));
+                    }
                 }
                 mPostedUpdateArtists.clear();
             }
@@ -109,8 +115,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
         @Override
         public void run() {
             synchronized (mPostedUpdatePlaylists) {
-                for (ILocalCallback cb : mUpdateCallbacks) {
-                    cb.onPlaylistUpdate(new ArrayList<>(mPostedUpdatePlaylists));
+                synchronized (mUpdateCallbacks) {
+                    for (ILocalCallback cb : mUpdateCallbacks) {
+                        cb.onPlaylistUpdate(new ArrayList<>(mPostedUpdatePlaylists));
+                    }
                 }
                 mPostedUpdatePlaylists.clear();
             }
@@ -224,7 +232,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @param cb The callback to add
      */
     public void addUpdateCallback(ILocalCallback cb) {
-        mUpdateCallbacks.add(cb);
+        synchronized (mUpdateCallbacks) {
+            mUpdateCallbacks.add(cb);
+        }
     }
 
     /**
@@ -233,7 +243,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
      * @param cb The callback to remove
      */
     public void removeUpdateCallback(ILocalCallback cb) {
-        mUpdateCallbacks.remove(cb);
+        synchronized (mUpdateCallbacks) {
+            mUpdateCallbacks.remove(cb);
+        }
     }
 
     public void cacheSongs(final ProviderConnection provider, final List<Song> songs) {
@@ -568,8 +580,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                         }
 
                         // Notify subclasses of the new provider
-                        for (ILocalCallback cb : mUpdateCallbacks) {
-                            cb.onProviderConnected(binder);
+                        synchronized (mUpdateCallbacks) {
+                            for (ILocalCallback cb : mUpdateCallbacks) {
+                                cb.onProviderConnected(binder);
+                            }
                         }
                     }
                 } catch (RemoteException e) {
@@ -883,8 +897,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             mCache.removePlaylist(ref);
         }
 
-        for (ILocalCallback cb : mUpdateCallbacks) {
-            cb.onPlaylistRemoved(ref);
+        synchronized (mUpdateCallbacks) {
+            for (ILocalCallback cb : mUpdateCallbacks) {
+                cb.onPlaylistRemoved(ref);
+            }
         }
     }
 
@@ -1087,8 +1103,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             mCachedSearches.put(query, results);
 
             // Feed results to the callback
-            for (ILocalCallback cb : mUpdateCallbacks) {
-                cb.onSearchResult(results);
+            synchronized (mUpdateCallbacks) {
+                for (ILocalCallback cb : mUpdateCallbacks) {
+                    cb.onSearchResult(results);
+                }
             }
         } else {
             // We already have cached results for this query, add new results
@@ -1129,8 +1147,10 @@ public class ProviderAggregator extends IProviderCallback.Stub {
             }
 
             // Feed updated results to the callbacks
-            for (ILocalCallback cb : mUpdateCallbacks) {
-                cb.onSearchResult(cachedResults);
+            synchronized (mUpdateCallbacks) {
+                for (ILocalCallback cb : mUpdateCallbacks) {
+                    cb.onSearchResult(cachedResults);
+                }
             }
         }
 
