@@ -402,7 +402,7 @@ public class MainActivity extends AppActivity
         ft.commit();
     }
 
-    public void onSectionAttached(int number) {
+    public void onSectionAttached(final int number) {
         switch (number) {
             case SECTION_MY_SONGS:
                 mTitle = getString(R.string.title_section_my_songs);
@@ -469,6 +469,10 @@ public class MainActivity extends AppActivity
                 mSearchView.setIconifiedByDefault(true);
                 mSearchView.setQueryRefinementEnabled(true);
                 mSearchView.setSubmitButtonEnabled(true);
+
+                if (mCurrentFragmentIndex + 1 == SECTION_LISTEN_NOW) {
+                    menu.removeItem(R.id.action_search);
+                }
 
                 mSearchView.setOnSearchClickListener(new View.OnClickListener() {
                     @Override
