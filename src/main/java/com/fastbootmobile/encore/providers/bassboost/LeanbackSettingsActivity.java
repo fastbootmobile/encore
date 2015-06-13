@@ -20,12 +20,6 @@ public class LeanbackSettingsActivity extends Activity {
     private static final int ACTION_FREQUENCY = 0;
     private static final int ACTION_STRENGTH = 1;
     private static final int OPTION_CHECK_SET_ID = 10;
-    private static final String[] OPTION_NAMES = { "Option A", "Option B", "Option C" };
-    private static final String[] OPTION_DESCRIPTIONS = { "Here's one thing you can do",
-            "Here's another thing you can do", "Here's one more thing you can do" };
-    private static final int[] OPTION_DRAWABLES = { R.drawable.ic_ab_cloud_download,
-            R.drawable.ic_ab_add, R.drawable.abc_ic_ab_back_mtrl_am_alpha};
-    private static final boolean[] OPTION_CHECKED = { true, false, false };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
