@@ -59,7 +59,7 @@ public class MaterialReelBaseFragment extends Fragment {
 
         mBarDrawable = new PlayPauseDrawable(getResources(), 1);
         mBarDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-        mBarDrawable.setYOffset(-6);
+        mBarDrawable.setYOffset(-3);
         mBarDrawable.setColor(0xFFFFFFFF);
 
         mBarPlay.setImageDrawable(mBarDrawable);
