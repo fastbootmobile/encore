@@ -796,17 +796,6 @@ public class PluginService extends Service implements AudioSocket.ISocketCallbac
         @Override
         public void resume() throws RemoteException {
             mLocalProvider.resume();
-            synchronized (mCallbacks) {
-                for (IProviderCallback cb : mCallbacks) {
-                    try {
-                        cb.onSongPlaying(mIdentifier);
-                    } catch (DeadObjectException e) {
-                        removeCallback(cb);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "RemoteException when notifying a callback", e);
-                    }
-                }
-            }
         }
 
         @Override
