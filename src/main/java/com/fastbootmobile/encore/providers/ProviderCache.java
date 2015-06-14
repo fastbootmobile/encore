@@ -63,7 +63,8 @@ public class ProviderCache {
             keysToRemove.clear();
 
             for (Map.Entry<String, Song> item : songs) {
-                if (item.getValue().getProvider().equals(id)) {
+                if (item.getValue().getProvider() != null
+                        && item.getValue().getProvider().equals(id)) {
                     keysToRemove.add(item.getKey());
                 }
             }
