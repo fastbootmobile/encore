@@ -245,7 +245,7 @@ public class PlaybackService extends Service
         ProviderAggregator.getDefault().addUpdateCallback(this);
 
         // Native playback initialization
-        mNativeHub = new NativeHub();
+        mNativeHub = new NativeHub(getApplicationContext());
         mNativeSink = new NativeAudioSink();
         mNativeHub.setSinkPointer(mNativeSink.getPlayer().getHandle());
         mNativeHub.setOnAudioWrittenListener(this);

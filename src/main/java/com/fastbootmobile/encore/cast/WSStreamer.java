@@ -18,11 +18,18 @@ package com.fastbootmobile.encore.cast;
 import android.util.Log;
 
 import org.java_websocket.WebSocket;
+import org.java_websocket.drafts.Draft;
+import org.java_websocket.drafts.Draft_10;
+import org.java_websocket.drafts.Draft_17;
+import org.java_websocket.drafts.Draft_75;
+import org.java_websocket.drafts.Draft_76;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * WebSocket Streaming server class to stream audio to Chromecast and webcast
@@ -30,8 +37,17 @@ import java.util.Collection;
 public class WSStreamer extends WebSocketServer {
     private static final String TAG = "WSStreamer";
 
+    private static final List<Draft> sWSSDrafts = new ArrayList<>();
+
+    static {
+        sWSSDrafts.add(new Draft_10());
+        sWSSDrafts.add(new Draft_17());
+        sWSSDrafts.add(new Draft_75());
+        sWSSDrafts.add(new Draft_76());
+    }
+
     public WSStreamer(int port) {
-        super(new InetSocketAddress(port));
+        super(new InetSocketAddress(port), sWSSDrafts);
     }
 
     public WSStreamer(InetSocketAddress addr) {

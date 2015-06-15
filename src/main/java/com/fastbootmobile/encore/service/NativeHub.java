@@ -15,11 +15,26 @@
 
 package com.fastbootmobile.encore.service;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.fastbootmobile.encore.cast.WSStreamer;
 
+import org.java_websocket.WebSocketImpl;
+import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Native Hub for audio sockets
@@ -43,12 +58,51 @@ public class NativeHub {
     /**
      * Default constructor
      */
-    public NativeHub() {
+    public NativeHub(Context context) {
         Log.i(TAG, "Initializing native hub");
+        WebSocketImpl.DEBUG = true;
 
         // Create the audio mirror buffer to stream audio to WebSocket, and the WS itself
         mAudioMirrorBuffer = new byte[262144];
         mStreamer = new WSStreamer(8887);
+
+        try {
+            String STORETYPE = "BKS";
+            // Yeah, that's plain text... We just need an SSL cert,
+            // we don't really care if people can decrypt the audio
+            // stream, that's not the expected behavior here :)
+            String KEYSTORE = "key.bks";
+            String STOREPASSWORD = "encore";
+            String KEYPASSWORD = "encore";
+
+            String[] list = context.getResources().getAssets().list("/");
+            for (String s : list) {
+                Log.e(TAG, "ASSET: " + s);
+            }
+
+            KeyStore ks = KeyStore.getInstance(STORETYPE);
+            InputStream is = context.getResources().getAssets().open(KEYSTORE);
+            ks.load(is, STOREPASSWORD.toCharArray());
+
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(ks, KEYPASSWORD.toCharArray());
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            tmf.init(ks);
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+            mStreamer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(sslContext));
+            Log.d(TAG, "Web Socket Certificate Loaded");
+        } catch (NoSuchAlgorithmException e) {
+            Log.e(TAG, "Unable to initialize WebSocket TLS security layer", e);
+        } catch (KeyManagementException | KeyStoreException | IOException e) {
+            Log.e(TAG, "Security error", e);
+        } catch (CertificateException e) {
+            Log.e(TAG, "Invalid SSL certificate", e);
+        } catch (UnrecoverableKeyException e) {
+            Log.e(TAG, "Key couldn't be read from keystore", e);
+        }
 
         nativeInitialize();
     }
@@ -57,6 +111,7 @@ public class NativeHub {
      * Called when the playback service starts
      */
     public void onStart() {
+        Log.e(TAG, "Starting Streamer");
         mStreamer.start();
     }
 
@@ -65,6 +120,7 @@ public class NativeHub {
      */
     public void onStop() {
         try {
+            Log.e(TAG, "Stopping Streamer");
             mStreamer.stop();
         } catch (IOException e) {
             Log.e(TAG, "IOException while stopping WS Streamer", e);

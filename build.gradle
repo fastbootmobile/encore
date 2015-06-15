@@ -13,8 +13,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 13
-        versionName "0.4.1"
+        versionCode 14
+        versionName "0.4.2"
         renderscriptTargetApi 18
         multiDexEnabled false
     }
@@ -63,7 +63,6 @@ dependencies {
     compile project(':providerlib')
     compile files('src/main/libs/jEN.jar')
     compile files('src/main/libs/json_simple-1.1.jar')
-    compile files('src/main/libs/java_websocket.jar')
     compile files('src/main/libs/calligraphy-1.1.0.jar')
     compile files('src/main/libs/sentry-1.1.4.jar')
     compile 'com.google.android.gms:play-services-cast:7.5.0'
