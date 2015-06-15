@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handles the playback of a list of songs
@@ -54,8 +55,12 @@ public class PlaybackQueue extends ArrayList<Song> {
      * @param editor The editor in which write the data
      */
     public void save(SharedPreferences.Editor editor) {
+        // Avoid concurrent modification errors
+        List<Song> copy = new ArrayList<>(this);
+
+        // Save it!
         JSONArray array = new JSONArray();
-        for (Song song : this) {
+        for (Song song : copy) {
             if (song == null) continue;
 
             JSONObject object = new JSONObject();

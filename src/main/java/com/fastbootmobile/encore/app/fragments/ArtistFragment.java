@@ -831,7 +831,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         private View mPreviousAlbumGroup;
         private TextView mOfflineView;
         private Handler mHandler;
-        private boolean mSizeLimited;
+
 
         private Comparator<Album> mComparator = new Comparator<Album>() {
             @Override
@@ -853,6 +853,14 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 final AlbumViewHolder tag = (AlbumViewHolder) view.getTag();
                 final Album album = tag.album;
                 final PlayPauseDrawable drawable = (PlayPauseDrawable) tag.ivPlayAlbum.getDrawable();
+
+                if (mPreviousAlbumGroup != null) {
+                    ImageView ivPlayAlbum = (ImageView) mPreviousAlbumGroup.findViewById(R.id.ivPlayAlbum);
+                    PlayPauseDrawable existingDrawable = (PlayPauseDrawable) ivPlayAlbum.getDrawable();
+                    existingDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                }
+
+                mPreviousAlbumGroup = tag.vRoot;
 
                 if (drawable.getRequestedShape() == PlayPauseDrawable.SHAPE_STOP) {
                     drawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
@@ -883,8 +891,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             AlbumArtImageView ivCover;
             ImageView ivPlayAlbum;
             Album album;
+            View vRoot;
 
             AlbumViewHolder(View viewRoot) {
+                vRoot = viewRoot;
                 tvAlbumName = (TextView) viewRoot.findViewById(R.id.tvAlbumName);
                 tvAlbumYear = (TextView) viewRoot.findViewById(R.id.tvAlbumYear);
                 ivCover = (AlbumArtImageView) viewRoot.findViewById(R.id.ivCover);
@@ -945,11 +955,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             mOfflineView = (TextView) mRootView.findViewById(R.id.tvErrorMessage);
             mOfflineView.setText(R.string.error_artist_unavailable_offline);
             mOfflineView.setVisibility(View.GONE);
-
-            if (mSizeLimited) {
-                mRootView.setVisibility(View.GONE);
-            }
-
 
             return mRootView;
         }
