@@ -26,6 +26,12 @@ import android.support.v7.media.MediaRouter;
 import android.text.format.Formatter;
 import android.util.Log;
 
+import com.fastbootmobile.encore.framework.PlaybackProxy;
+import com.fastbootmobile.encore.model.Artist;
+import com.fastbootmobile.encore.model.Song;
+import com.fastbootmobile.encore.providers.ProviderAggregator;
+import com.fastbootmobile.encore.service.BasePlaybackCallback;
+import com.fastbootmobile.encore.service.IPlaybackCallback;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastMediaControlIntent;
@@ -36,12 +42,6 @@ import com.google.android.gms.common.api.Status;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.fastbootmobile.encore.framework.PlaybackProxy;
-import com.fastbootmobile.encore.model.Artist;
-import com.fastbootmobile.encore.model.Song;
-import com.fastbootmobile.encore.providers.ProviderAggregator;
-import com.fastbootmobile.encore.service.BasePlaybackCallback;
-import com.fastbootmobile.encore.service.IPlaybackCallback;
 
 import java.io.IOException;
 

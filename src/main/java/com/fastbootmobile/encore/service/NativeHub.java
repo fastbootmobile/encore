@@ -49,6 +49,7 @@ public class NativeHub {
     }
 
     private WSStreamer mStreamer;
+    private WSStreamer mInsecureStreamer;
     private OnSampleWrittenListener mWrittenListener;
 
     // Used in native code
@@ -60,7 +61,7 @@ public class NativeHub {
      */
     public NativeHub(Context context) {
         Log.i(TAG, "Initializing native hub");
-        WebSocketImpl.DEBUG = true;
+        WebSocketImpl.DEBUG = false;
 
         // Create the audio mirror buffer to stream audio to WebSocket, and the WS itself
         mAudioMirrorBuffer = new byte[262144];
@@ -104,6 +105,8 @@ public class NativeHub {
             Log.e(TAG, "Key couldn't be read from keystore", e);
         }
 
+        mInsecureStreamer = new WSStreamer(8886);
+
         nativeInitialize();
     }
 
@@ -113,6 +116,7 @@ public class NativeHub {
     public void onStart() {
         Log.e(TAG, "Starting Streamer");
         mStreamer.start();
+        mInsecureStreamer.start();
     }
 
     /**
@@ -122,6 +126,7 @@ public class NativeHub {
         try {
             Log.e(TAG, "Stopping Streamer");
             mStreamer.stop();
+            mInsecureStreamer.stop();
         } catch (IOException e) {
             Log.e(TAG, "IOException while stopping WS Streamer", e);
         } catch (InterruptedException e) {
@@ -181,6 +186,7 @@ public class NativeHub {
     // Called from native code
     public void onAudioMirrorWritten(int len, int sampleRate, int channels) {
         mStreamer.write(mAudioMirrorBuffer, len);
+        mInsecureStreamer.write(mAudioMirrorBuffer, len);
 
         // We use audio mirroring writing for tracking track elapsed time
         if (mWrittenListener != null) {
