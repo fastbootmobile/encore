@@ -1027,7 +1027,7 @@ public class LocalProvider {
 
                     synchronized (LocalProvider.this) {
                         // if we did not finish the file
-                        if (!mIsEOS && !mPaused) {
+                        if (!mIsEOS && !mPaused && mDecoder != null) {
 
                             // Input decoding
                             int inIndex = -2;
