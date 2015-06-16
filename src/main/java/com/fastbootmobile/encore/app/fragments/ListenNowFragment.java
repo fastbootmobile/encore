@@ -44,6 +44,7 @@ import com.fastbootmobile.encore.app.AppActivity;
 import com.fastbootmobile.encore.app.MainActivity;
 import com.fastbootmobile.encore.app.R;
 import com.fastbootmobile.encore.app.SearchActivity;
+import com.fastbootmobile.encore.app.SettingsActivity;
 import com.fastbootmobile.encore.app.adapters.ListenNowAdapter;
 import com.fastbootmobile.encore.app.ui.ParallaxScrollListView;
 import com.fastbootmobile.encore.app.ui.ScrollStatusBarColorListener;
@@ -74,6 +75,7 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
     private static final String PREFS = "listen_now";
     private static final String LANDCARD_NO_CUSTOM_PROVIDERS = "card_no_custom";
+    private static final String LANDCARD_SOUND_EFFECTS = "card_sound_effects";
 
     private View mHeaderView;
     private int mBackgroundColor;
@@ -216,6 +218,31 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                 final List<Playlist> playlists = aggregator.getAllPlaylists();
                 final List<Song> songs = new ArrayList<>();
 
+                // Put a card to notify of sound effects
+                final SharedPreferences prefs = context.getSharedPreferences(PREFS, 0);
+                if (!prefs.getBoolean(LANDCARD_SOUND_EFFECTS, false)) {
+                    // Show the "You have no custom providers" card
+                    final ListenNowAdapter.CardItem item = new ListenNowAdapter.CardItem(getString(R.string.ln_landcard_sfx_title),
+                            getString(R.string.ln_landcard_sfx_body),
+                            getString(R.string.browse), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            prefs.edit().putBoolean(LANDCARD_SOUND_EFFECTS, true).apply();
+                            v.getContext().startActivity(new Intent(v.getContext(), SettingsActivity.class));
+                        }
+                    },
+                            getString(R.string.ln_landcard_dismiss), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            prefs.edit().putBoolean(LANDCARD_SOUND_EFFECTS, true).apply();
+                            // This item must always be the first of the list
+                            mAdapter.removeItem((ListenNowAdapter.ListenNowItem) v.getTag());
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
+                    mAdapter.addItem(item);
+                }
+
                 // Get the list of songs first
                 final List<ProviderConnection> providers = plugins.getAvailableProviders();
                 for (ProviderConnection provider : providers) {
@@ -255,10 +282,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
                 // Add a card if we have local music, but no cloud providers
                 if (providers.size() <= PluginsLookup.BUNDLED_PROVIDERS_COUNT && songs.size() > 0) {
-                    final SharedPreferences prefs = context.getSharedPreferences(PREFS, 0);
                     if (!prefs.getBoolean(LANDCARD_NO_CUSTOM_PROVIDERS, false)) {
                         // Show the "You have no custom providers" card
-                        items.add(new ListenNowAdapter.CardItem(getString(R.string.ln_landcard_nocustomprovider_title),
+                        final ListenNowAdapter.CardItem item = new ListenNowAdapter.CardItem(getString(R.string.ln_landcard_nocustomprovider_title),
                                 getString(R.string.ln_landcard_nocustomprovider_body),
                                 getString(R.string.browse), new View.OnClickListener() {
                             @Override
@@ -271,9 +297,12 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                             public void onClick(View v) {
                                 prefs.edit().putBoolean(LANDCARD_NO_CUSTOM_PROVIDERS, true).apply();
                                 // This item must always be the first of the list
-                                mAdapter.removeItem(0);
+                                mAdapter.removeItem((ListenNowAdapter.ListenNowItem) v.getTag());
+                                mAdapter.notifyDataSetChanged();
                             }
-                        }));
+                        });
+
+                        items.add(item);
                     }
                 }
 

@@ -27,6 +27,7 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ListenNowAdapter extends BaseAdapter {
+    private static final String TAG = "ListenNowAdapter";
+
     private static final int VIEW_TYPE_SECTION_HEADER       = 0;
     private static final int VIEW_TYPE_SIMPLE               = 1;
     private static final int VIEW_TYPE_CARD                 = 2;
@@ -72,6 +75,11 @@ public class ListenNowAdapter extends BaseAdapter {
 
     public void removeItem(int index) {
         mItems.remove(index);
+    }
+
+    public void removeItem(ListenNowItem item) {
+        Log.e(TAG, "Item " + item);
+        mItems.remove(item);
     }
 
     public void clearItems() {
@@ -424,6 +432,7 @@ public class ListenNowAdapter extends BaseAdapter {
                 itemVh.btnPrimary.setText(mPrimaryAction);
                 itemVh.btnPrimary.setVisibility(View.VISIBLE);
                 itemVh.btnPrimary.setOnClickListener(mPrimaryListener);
+                itemVh.btnPrimary.setTag(this);
             } else {
                 itemVh.btnPrimary.setVisibility(View.GONE);
             }
@@ -432,6 +441,7 @@ public class ListenNowAdapter extends BaseAdapter {
                 itemVh.btnSecondary.setText(mSecondaryAction);
                 itemVh.btnSecondary.setVisibility(View.VISIBLE);
                 itemVh.btnSecondary.setOnClickListener(mSecondaryListener);
+                itemVh.btnSecondary.setTag(this);
             } else {
                 itemVh.btnSecondary.setVisibility(View.GONE);
             }

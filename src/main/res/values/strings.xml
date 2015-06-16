@@ -276,4 +276,6 @@
     <string name="ln_header_search_placeholder">Search for a song, artist, album…</string>
     <string name="pref_free_art_summary">Forces copyright-free album art to be used. Cache clear is needed when switching.</string>
     <string name="pref_free_art_title">Use free art</string>
+    <string name="ln_landcard_sfx_body">Encore supports plug-ins for sound effects such as bass booster, equalizer, and more. Get started in the Sound Effects settings section.</string>
+    <string name="ln_landcard_sfx_title">Pimp your sound with effects</string>
 </resources>
