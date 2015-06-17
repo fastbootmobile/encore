@@ -148,6 +148,7 @@ public class PlaybackService extends Service
     private HandlerThread mCommandsHandlerThread;
     private CommandHandler mCommandsHandler;
     private long mSleepTimerUptime = -1;
+    private boolean mPausedByFocusLoss = false;
 
     private static class CommandHandler extends Handler {
         private WeakReference<PlaybackService> mService;
@@ -1393,10 +1394,10 @@ public class PlaybackService extends Service
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 // You have gained the audio focus.
-                if (mState == STATE_PLAYING) {
-                    mNativeHub.setDucking(false);
-                } else {
+                mNativeHub.setDucking(false);
+                if (mState != STATE_PLAYING && mPausedByFocusLoss) {
                     playImpl();
+                    mPausedByFocusLoss = false;
                 }
                 break;
 
@@ -1404,6 +1405,7 @@ public class PlaybackService extends Service
                 // You have lost the audio focus for a presumably long time. You must stop all audio
                 // playback.
                 pauseImpl();
+                mPausedByFocusLoss = true;
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
@@ -1411,6 +1413,7 @@ public class PlaybackService extends Service
                 // must stop all audio playback, but you can keep your resources because you will
                 // probably get focus back shortly.
                 pauseImpl();
+                mPausedByFocusLoss = true;
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
