@@ -275,4 +275,6 @@
     <string name="ln_header_search_placeholder">Rechercher un titre, artiste, album…</string>
     <string name="pref_free_art_summary">Utilise des images libres de droits au lieu des vraies pochettes. Il est nécessaire d\'effacer le cache.</string>
     <string name="pref_free_art_title">Utiliser des images libres</string>
+    <string name="ln_landcard_sfx_body">Encore offre la possibilité d\'utiliser des plug-ins bass booster, equalizer, et plus encore. Explorez et installez-en dans la section Effets audio des paramètres.</string>
+    <string name="ln_landcard_sfx_title">Pimpez votre musique avec des effets !</string>
 </resources>

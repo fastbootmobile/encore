@@ -23,7 +23,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
-import android.media.audiofx.AudioEffect;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -35,7 +34,6 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.echonest.api.v4.EchoNestException;
-
 import com.fastbootmobile.encore.api.echonest.AutoMixManager;
 import com.fastbootmobile.encore.framework.ListenLogger;
 import com.fastbootmobile.encore.framework.PluginsLookup;
@@ -49,10 +47,10 @@ import com.fastbootmobile.encore.providers.BaseProviderCallback;
 import com.fastbootmobile.encore.providers.ILocalCallback;
 import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.IProviderCallback;
-import com.fastbootmobile.encore.receivers.PacManReceiver;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
+import com.fastbootmobile.encore.receivers.PacManReceiver;
 import com.fastbootmobile.encore.receivers.RemoteControlReceiver;
 import com.fastbootmobile.encore.utils.SettingsKeys;
 import com.fastbootmobile.encore.utils.Utils;
@@ -575,12 +573,6 @@ public class PlaybackService extends Service
                 // Add a WakeLock to avoid CPU going to sleep while music is playing
                 mWakeLock.acquire();
 
-                // Request a global effects session ID
-                final Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
-                intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
-                intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
-                sendBroadcast(intent);
-
                 mHasAudioFocus = true;
             } else {
                 Log.e(TAG, "Audio focus request denied: " + result);
@@ -603,13 +595,6 @@ public class PlaybackService extends Service
 
             // Notify the remote metadata that we're getting down
             mRemoteMetadata.setActive(false);
-
-            // Release the Audio effects session for system audio FX
-            final Intent audioEffectsIntent = new Intent(
-                    AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
-            audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
-            audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
-            sendBroadcast(audioEffectsIntent);
 
             mHasAudioFocus = false;
         }
@@ -657,9 +642,6 @@ public class PlaybackService extends Service
             if (mState == STATE_PAUSED || mState == STATE_PAUSING || mState == STATE_STOPPED) {
                 mCommandsHandler.sendEmptyMessage(CommandHandler.MSG_FLUSH_BUFFERS);
             }
-
-            // Unpause the sink as well in any case
-            mNativeSink.setPaused(false);
 
             if (providerId != null) {
                 ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerId);
@@ -1283,6 +1265,10 @@ public class PlaybackService extends Service
                 mIsResuming = false;
             } else {
                 mCurrentTrackElapsedMs = 0;
+
+                // Flush and unpause the sink to clear previous track data
+                mNativeSink.flushSamples();
+                mNativeSink.setPaused(false);
             }
 
             mState = STATE_PLAYING;

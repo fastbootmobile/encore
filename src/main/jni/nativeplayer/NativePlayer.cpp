@@ -459,6 +459,8 @@ int64_t NativePlayer::getTotalWrittenSamples() const {
 // -------------------------------------------------------------------------------------
 void NativePlayer::flush() {
     std::lock_guard<std::mutex> lock(m_QueueMutex);
+
+    setPlayState(SL_PLAYSTATE_STOPPED);
     (*m_pBufferQueue)->Clear(m_pBufferQueue);
     m_iWrittenSamples = 0;
     m_iUnderflowCount = 0;
@@ -473,7 +475,6 @@ void NativePlayer::flush() {
     }
     m_ActiveBuffers.clear();
 
-    setPlayState(SL_PLAYSTATE_STOPPED);
     ALOGI("Flushed - Idle buffers: %u", (unsigned int) m_IdleBuffers.size());
 }
 // -------------------------------------------------------------------------------------
