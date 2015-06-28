@@ -60,14 +60,12 @@ public class PlaylistArtBuilder {
         public void run() {
             if (DEBUG) Log.w(TAG, "Watchdog kicking " + mPlaylistSource.size() + " images");
 
-            if (mPlaylistComposite != null) {
+            if (mPlaylistComposite != null && mPlaylistSource.size() > 0) {
                 try {
                     mCallback.onArtLoaded(mPlaylistComposite.copy(Bitmap.Config.ARGB_8888, false));
                 } catch (RemoteException ignored) {
                 }
             }
-
-            mDone = true;
         }
     };
 
@@ -90,7 +88,7 @@ public class PlaylistArtBuilder {
             if (output != null) {
                 synchronized (mPlaylistSource) {
                     mPlaylistSource.add(output);
-                    if (mPlaylistSource.size() < 4) {
+                    if (mPlaylistSource.size() < mNumComposite) {
                         mHandler.removeCallbacks(mUpdatePlaylistCompositeRunnable);
                         mHandler.postDelayed(mUpdatePlaylistCompositeRunnable, 200);
                     } else {
@@ -136,10 +134,6 @@ public class PlaylistArtBuilder {
 
         if (mPlaylistPaint == null) {
             mPlaylistPaint = new Paint();
-        }
-
-        synchronized (mPlaylistSource) {
-            mPlaylistSource.clear();
         }
 
         Canvas canvas = new Canvas(mPlaylistComposite);
@@ -241,10 +235,11 @@ public class PlaylistArtBuilder {
         for (int i = 0; i < mNumComposite; ++i) {
             String entry = playlist.songsList().get(i);
             Song song = aggregator.retrieveSong(entry, playlist.getProvider());
-            mCompositeTasks.add(AlbumArtHelper.retrieveAlbumArt(res, mCompositeListener, song, 600, false));
+
             mCompositeRequests.add(song);
+            mCompositeTasks.add(AlbumArtHelper.retrieveAlbumArt(res, mCompositeListener, song, 600, false));
         }
 
-        mHandler.postDelayed(mTimeoutWatchdog, 5000);
+        mHandler.postDelayed(mTimeoutWatchdog, 8000);
     }
 }
