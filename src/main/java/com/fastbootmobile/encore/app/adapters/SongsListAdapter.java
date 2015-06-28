@@ -102,6 +102,10 @@ public class SongsListAdapter extends BaseAdapter {
         mSongs.clear();
     }
 
+    public List<Song> getItems() {
+        return mSongs;
+    }
+
     /**
      * Adds a song to the adapter
      * @param song The song to add

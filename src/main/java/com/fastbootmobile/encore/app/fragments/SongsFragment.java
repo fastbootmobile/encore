@@ -16,8 +16,13 @@
 package com.fastbootmobile.encore.app.fragments;
 
 import android.app.Activity;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.DeadObjectException;
+import android.os.Handler;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.TransactionTooLargeException;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -65,10 +70,19 @@ public class SongsFragment extends Fragment {
     private AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            // Play the song
+            // Play the song along with every other
             Song song = mSongsListAdapter.getItem(i);
             if (Utils.canPlaySong(song)) {
-                PlaybackProxy.playSong(song);
+                PlaybackProxy.clearQueue();
+
+                // Queue all songs
+                List<Song> songs = mSongsListAdapter.getItems();
+                for (Song s : songs) {
+                    PlaybackProxy.queueSong(s, false);
+                }
+
+                // Play the requested one
+                PlaybackProxy.playAtIndex(i);
             } else if (song == null) {
                 Log.e(TAG, "Trying to play null song!");
             } else {
