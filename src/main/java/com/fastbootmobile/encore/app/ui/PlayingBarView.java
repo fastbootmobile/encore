@@ -28,7 +28,6 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -699,14 +698,61 @@ public class PlayingBarView extends RelativeLayout {
             return true;
         }
 
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-                               float velocityY) {
-            if (velocityY > 100) {
-                setWrapped(true);
-            } else if (velocityY < 100) {
-                setWrapped(false);
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float vX, float vY) {
+            final float avX = Math.abs(vX);
+            final float avY = Math.abs(vY);
+
+            if (avX > avY) {
+                if (avX > 400) {
+                    swipeAway();
+                    return true;
+                }
+            } else if (avY > avX) {
+                if (avY > 500) {
+                    setWrapped(vY > 0);
+                    return true;
+                }
             }
-            return true;
+
+            return false;
+        }
+
+        private void swipeAway() {
+            setWrapped(true);
+            mIsHiding = true;
+            PlaybackProxy.stop();
+
+            getContext().getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
+                    .edit().putBoolean(SettingsKeys.KEY_PLAYBAR_HIDDEN, true).apply();
+
+            animate().translationX(getTranslationX() > 0 ? getMeasuredWidth() : -getMeasuredWidth())
+                    .setDuration(200).setListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mWrapped = true;
+                    mTracksLayout.setVisibility(View.GONE);
+                    setFabVisible(false);
+                    setTranslationX(0);
+                    setAlpha(1.0f);
+
+                    animate().setListener(null);
+                    mIsHiding = false;
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    animate().setListener(null);
+                    mIsHiding = false;
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+                }
+            }).start();
         }
 
         public void onTouchUp(MotionEvent ev) {
@@ -715,40 +761,7 @@ public class PlayingBarView extends RelativeLayout {
 
             final int halfWidth = getMeasuredWidth() / 2;
             if (getTranslationX() > halfWidth || getTranslationX() < -halfWidth) {
-                mIsHiding = true;
-                PlaybackProxy.stop();
-
-                getContext().getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
-                        .edit().putBoolean(SettingsKeys.KEY_PLAYBAR_HIDDEN, true).apply();
-
-                animate().translationX(getTranslationX() > 0 ? getMeasuredWidth() : -getMeasuredWidth())
-                        .setDuration(200).setListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mWrapped = true;
-                        mTracksLayout.setVisibility(View.GONE);
-                        setFabVisible(false);
-                        setTranslationX(0);
-                        setAlpha(1.0f);
-
-                        animate().setListener(null);
-                        mIsHiding = false;
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-                        animate().setListener(null);
-                        mIsHiding = false;
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-                    }
-                }).start();
+                swipeAway();
             } else if (getTranslationX() != 0) {
                 mIsHiding = true;
                 animate().translationX(0).alpha(1).setDuration(200).setListener(new Animator.AnimatorListener() {
