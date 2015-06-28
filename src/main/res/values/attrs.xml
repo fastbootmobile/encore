@@ -127,4 +127,10 @@
         <attr name="fbb_showEndBitmap" format="boolean" />
         <attr name="fbb_hideProgressOnComplete" format="boolean" />
     </declare-styleable>
+
+    <!-- Filtered MultiSelectListPreference -->
+    <declare-styleable name="FilteredMultiSelectListPreference">
+        <attr name="android:entries" />
+        <attr name="android:entryValues" />
+    </declare-styleable>
 </resources>

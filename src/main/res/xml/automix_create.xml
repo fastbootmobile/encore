@@ -9,7 +9,7 @@
 
     <PreferenceCategory android:title="@string/automix_category_genre">
 
-        <MultiSelectListPreference
+        <com.fastbootmobile.encore.app.ui.FilteredMultiSelectListPreference
             android:persistent="false"
             android:key="automix_styles"
             android:summary="@string/automix_styles_summary"

@@ -25,6 +25,7 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
@@ -35,6 +36,7 @@ import android.widget.Toast;
 
 import com.fastbootmobile.encore.api.echonest.AutoMixBucket;
 import com.fastbootmobile.encore.api.echonest.AutoMixManager;
+import com.fastbootmobile.encore.app.ui.FilteredMultiSelectListPreference;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
@@ -252,7 +254,17 @@ public class AutomixCreateActivity extends PreferenceActivity {
 
     private String[] getPrefStringArray(String key) {
         PreferenceManager p = getPreferenceManager();
-        Set<String> stringSet = ((MultiSelectListPreference) p.findPreference(key)).getValues();
+        Preference pref = p.findPreference(key);
+        Set<String> stringSet;
+
+        if (pref instanceof MultiSelectListPreference) {
+            stringSet = ((MultiSelectListPreference) p.findPreference(key)).getValues();
+        } else if (pref instanceof FilteredMultiSelectListPreference) {
+            stringSet = ((FilteredMultiSelectListPreference) p.findPreference(key)).getValues();
+        } else {
+            throw new RuntimeException("Invalid type of preference for a string array");
+        }
+
         return stringSet.toArray(new String[stringSet.size()]);
     }
 
