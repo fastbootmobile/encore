@@ -411,11 +411,13 @@ public class Utils {
 
                     case R.id.menu_add_to_queue:
                         PlaybackProxy.queueSong(song, false);
+                        Toast.makeText(context, R.string.toast_song_added_to_queue, Toast.LENGTH_SHORT).show();
                         break;
 
                     case R.id.menu_add_album_to_queue:
                         PlaybackProxy.queueAlbum(aggregator.retrieveAlbum(song.getAlbum(),
                                 song.getProvider()), false);
+                        Toast.makeText(context, R.string.toast_album_added_to_queue, Toast.LENGTH_SHORT).show();
                         break;
 
                     case R.id.menu_add_to_playlist:
@@ -482,6 +484,7 @@ public class Utils {
                     case R.id.menu_add_album_to_queue:
                         PlaybackProxy.queueAlbum(aggregator.retrieveAlbum(song.getAlbum(),
                                 song.getProvider()), false);
+                        Toast.makeText(context, R.string.toast_album_added_to_queue, Toast.LENGTH_SHORT).show();
                         break;
 
                     case R.id.menu_add_to_playlist:

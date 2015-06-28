@@ -278,4 +278,6 @@
     <string name="pref_free_art_title">Use free art</string>
     <string name="ln_landcard_sfx_body">Encore supports plug-ins for sound effects such as bass booster, equalizer, and more. Get started in the Sound Effects settings section.</string>
     <string name="ln_landcard_sfx_title">Pimp your sound with effects</string>
+    <string name="toast_song_added_to_queue">Song added to queue.</string>
+    <string name="toast_album_added_to_queue">Album added to queue.</string>
 </resources>
