@@ -64,7 +64,6 @@ public class NativeHub {
         WebSocketImpl.DEBUG = false;
 
         // Create the audio mirror buffer to stream audio to WebSocket, and the WS itself
-        mAudioMirrorBuffer = new byte[262144];
         mStreamer = new WSStreamer(8887);
 
         try {
@@ -109,15 +108,22 @@ public class NativeHub {
      * Called when the playback service starts
      */
     public void onStart() {
-        Log.e(TAG, "Starting Streamer");
-        mStreamer.start();
-        mInsecureStreamer.start();
+        if (mAudioMirrorBuffer == null) {
+            mAudioMirrorBuffer = new byte[262144];
+        }
+        if (mStreamer != null) {
+            mStreamer.start();
+        }
+        if (mInsecureStreamer != null) {
+            mInsecureStreamer.start();
+        }
     }
 
     /**
      * Called when the playback service stops
      */
     public void onStop() {
+        mAudioMirrorBuffer = null;
         try {
             mStreamer.stop();
             mInsecureStreamer.stop();
@@ -126,6 +132,10 @@ public class NativeHub {
         } catch (InterruptedException e) {
             Log.e(TAG, "InterruptedException while stopping WS Streamer", e);
         }
+
+        mStreamer = null;
+        mInsecureStreamer = null;
+
         nativeShutdown();
     }
 
@@ -179,12 +189,14 @@ public class NativeHub {
 
     // Called from native code
     public void onAudioMirrorWritten(int len, int sampleRate, int channels) {
-        mStreamer.write(mAudioMirrorBuffer, len);
-        mInsecureStreamer.write(mAudioMirrorBuffer, len);
+        if (mAudioMirrorBuffer != null) {
+            mStreamer.write(mAudioMirrorBuffer, len);
+            mInsecureStreamer.write(mAudioMirrorBuffer, len);
 
-        // We use audio mirroring writing for tracking track elapsed time
-        if (mWrittenListener != null) {
-            mWrittenListener.onSampleWritten(mAudioMirrorBuffer, len, sampleRate, channels);
+            // We use audio mirroring writing for tracking track elapsed time
+            if (mWrittenListener != null) {
+                mWrittenListener.onSampleWritten(mAudioMirrorBuffer, len, sampleRate, channels);
+            }
         }
     }
 
