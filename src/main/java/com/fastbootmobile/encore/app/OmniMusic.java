@@ -63,8 +63,6 @@ public class OmniMusic extends Application {
         String appName = Utils.getAppNameByPID(this, android.os.Process.myPid());
         final String process = appName.substring(appName.indexOf(':') + 1);
 
-        Log.e(TAG, "--- INITIALIZING (" + process + ") ---");
-
         Sentry.setCaptureListener(new Sentry.SentryEventCaptureListener() {
             @Override
             public Sentry.SentryEventBuilder beforeCapture(Sentry.SentryEventBuilder sentryEventBuilder) {
