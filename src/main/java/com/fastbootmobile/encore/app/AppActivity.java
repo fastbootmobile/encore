@@ -35,7 +35,6 @@ public abstract class AppActivity  extends AppCompatActivity {
     protected void onPause() {
         PluginsLookup.getDefault().decPlaybackUsage();
         ImageCache.getDefault().evictAll();
-        System.gc();
 
         super.onPause();
     }
