@@ -26,15 +26,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fastbootmobile.encore.app.R;
-import com.fastbootmobile.encore.model.Playlist;
-import com.fastbootmobile.encore.utils.Utils;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.model.Album;
+import com.fastbootmobile.encore.model.Playlist;
 import com.fastbootmobile.encore.model.Song;
 import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderConnection;
+import com.fastbootmobile.encore.providers.ProviderIdentifier;
+import com.fastbootmobile.encore.utils.Utils;
 
 import java.util.Iterator;
 
@@ -136,7 +138,18 @@ public class NewPlaylistFragment extends DialogFragment {
                                 if (multiProviderPlaylist.isChecked()) {
                                     connection = PluginsLookup.getDefault().getMultiProviderPlaylistProvider();
                                 } else {
-                                    connection = PluginsLookup.getDefault().getProvider(mSong.getProvider());
+                                    ProviderIdentifier identifier;
+                                    if (mSong != null) {
+                                        identifier = mSong.getProvider();
+                                    } else if (mAlbum != null) {
+                                        identifier = mAlbum.getProvider();
+                                    } else if (mPlaylist != null) {
+                                        identifier = mPlaylist.getProvider();
+                                    } else {
+                                        throw new IllegalStateException("Song, Album and Playlist are all null, cannot determine provider!");
+                                    }
+
+                                    connection = PluginsLookup.getDefault().getProvider(identifier);
                                 }
 
                                 IMusicProvider binder = connection.getBinder();
@@ -158,9 +171,12 @@ public class NewPlaylistFragment extends DialogFragment {
                                             binder.addSongToPlaylist(songs.next(), playlistRef, mPlaylist.getProvider());
                                         }
                                     }
+                                } else {
+                                    throw new IllegalStateException("Playlist reference returned by the provider is null!");
                                 }
                             } catch (Exception e) {
                                 Log.e(TAG, "Unable to add playlist", e);
+                                Toast.makeText(getActivity(), getString(R.string.toast_playlist_track_add_error, playlistNameStr), Toast.LENGTH_SHORT).show();
                             }
 
                         } else {
