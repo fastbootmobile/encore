@@ -936,7 +936,7 @@ public class PlaybackService extends Service
      * @param index The index to play, 0-based
      */
     private void playAtIndexImpl(int index) {
-        Log.d(TAG, "Playing track " + (index + 1) + "/" + mPlaybackQueue.size() + " (this=" + this + ")");
+        Log.d(TAG, "Playing track " + (index + 1) + "/" + mPlaybackQueue.size());
         mCurrentTrack = index;
         requestStartPlayback();
     }
@@ -1003,6 +1003,14 @@ public class PlaybackService extends Service
     IPlaybackService.Stub mBinder = new IPlaybackService.Stub() {
         @Override
         public void addCallback(IPlaybackCallback cb) throws RemoteException {
+            // Check if we don't have it already
+            for (IPlaybackCallback callback  : mCallbacks) {
+                if (cb.getIdentifier() == callback.getIdentifier()) {
+                    return;
+                }
+            }
+
+            // Then we add it
             mCallbacks.add(cb);
         }
 
