@@ -16,6 +16,7 @@
 package com.fastbootmobile.encore.app;
 
 import android.app.Application;
+import android.content.Context;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.util.Log;
@@ -26,6 +27,7 @@ import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.joshdholtz.sentry.Sentry;
 import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +42,13 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
  */
 public class OmniMusic extends Application {
     private static final String TAG = "OmniMusic";
+
+    private RefWatcher mRefWatcher;
+
+    public static RefWatcher getRefWatcher(Context context) {
+        OmniMusic app = (OmniMusic) context.getApplicationContext();
+        return app.mRefWatcher;
+    }
 
     @Override
     public void onCreate() {
@@ -70,7 +79,7 @@ public class OmniMusic extends Application {
                 "https://4dc1acbdb1cb423282e2a59f553e1153:9415087b9e1348c3ba4bed44be599f6a@sentry.fastboot.mobi/2");
 
         // Setup LeakCanary
-        LeakCanary.install(this);
+        mRefWatcher = LeakCanary.install(this);
 
         // Setup the plugins system
         ProviderAggregator.getDefault().setContext(getApplicationContext());

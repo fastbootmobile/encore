@@ -417,7 +417,6 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
 
     @Override
     protected void onPause() {
-        super.onPause();
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         PlaybackProxy.removeCallback(mPlaybackCallback);
 
@@ -427,14 +426,19 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
             // Start NavHead for easy going back into Drive mode
             startService(new Intent(this, NavHeadService.class));
         }
+
+        super.onPause();
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        PlaybackProxy.removeCallback(mPlaybackCallback);
+
         // Hide NavHead as we're getting back into the app
         stopService(new Intent(this, NavHeadService.class));
         unregisterReceiver(mBroadcastRcv);
+
+        super.onDestroy();
     }
 
     @Override

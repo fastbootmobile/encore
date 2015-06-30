@@ -119,7 +119,6 @@ public class NativeHub {
      */
     public void onStop() {
         try {
-            Log.e(TAG, "Stopping Streamer");
             mStreamer.stop();
             mInsecureStreamer.stop();
         } catch (IOException e) {

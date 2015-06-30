@@ -35,6 +35,7 @@ import android.util.Log;
 
 import com.echonest.api.v4.EchoNestException;
 import com.fastbootmobile.encore.api.echonest.AutoMixManager;
+import com.fastbootmobile.encore.app.OmniMusic;
 import com.fastbootmobile.encore.framework.ListenLogger;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.model.Album;
@@ -46,7 +47,6 @@ import com.fastbootmobile.encore.providers.AbstractProviderConnection;
 import com.fastbootmobile.encore.providers.BaseProviderCallback;
 import com.fastbootmobile.encore.providers.ILocalCallback;
 import com.fastbootmobile.encore.providers.IMusicProvider;
-import com.fastbootmobile.encore.providers.IProviderCallback;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
@@ -54,6 +54,7 @@ import com.fastbootmobile.encore.receivers.PacManReceiver;
 import com.fastbootmobile.encore.receivers.RemoteControlReceiver;
 import com.fastbootmobile.encore.utils.SettingsKeys;
 import com.fastbootmobile.encore.utils.Utils;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -119,7 +120,6 @@ public class PlaybackService extends Service
     };
 
     private Handler mHandler;
-    private boolean mIsBound = false;
     private NativeAudioSink mNativeSink;
     private NativeHub mNativeHub;
     private DSPProcessor mDSPProcessor;
@@ -147,6 +147,8 @@ public class PlaybackService extends Service
     private CommandHandler mCommandsHandler;
     private long mSleepTimerUptime = -1;
     private boolean mPausedByFocusLoss = false;
+    private PlaybackServiceBinder mBinder = new PlaybackServiceBinder(new WeakReference<>(this));
+    private PlaybackProviderCallback mProviderCallback = new PlaybackProviderCallback(new WeakReference<>(this));
 
     private static class CommandHandler extends Handler {
         private WeakReference<PlaybackService> mService;
@@ -372,9 +374,13 @@ public class PlaybackService extends Service
 
         // Shutdown DSP chain
         mNativeHub.onStop();
+        mNativeHub.setOnAudioWrittenListener(null);
         mNativeSink.release();
 
         mCommandsHandlerThread.interrupt();
+
+        RefWatcher watcher = OmniMusic.getRefWatcher(this);
+        watcher.watch(this);
 
         super.onDestroy();
     }
@@ -425,14 +431,12 @@ public class PlaybackService extends Service
      */
     @Override
     public IBinder onBind(Intent intent) {
-        mIsBound = true;
         Log.i(TAG, "Client bound");
         return mBinder;
     }
 
     @Override
     public void onRebind(Intent intent) {
-        mIsBound = true;
         Log.i(TAG, "Client rebound");
     }
 
@@ -444,7 +448,6 @@ public class PlaybackService extends Service
      */
     @Override
     public boolean onUnbind(Intent intent) {
-        mIsBound = false;
         Log.i(TAG, "Clients unbound");
         return true;
     }
@@ -1000,225 +1003,384 @@ public class PlaybackService extends Service
     }
 
 
-    IPlaybackService.Stub mBinder = new IPlaybackService.Stub() {
+    private static class PlaybackServiceBinder extends IPlaybackService.Stub {
+        private WeakReference<PlaybackService> mParent;
+
+        PlaybackServiceBinder(WeakReference<PlaybackService> parent) {
+            mParent = parent;
+        }
+
         @Override
         public void addCallback(IPlaybackCallback cb) throws RemoteException {
-            // Check if we don't have it already
-            for (IPlaybackCallback callback  : mCallbacks) {
-                if (cb.getIdentifier() == callback.getIdentifier()) {
-                    return;
-                }
-            }
+            PlaybackService service = mParent.get();
 
-            // Then we add it
-            mCallbacks.add(cb);
+            if (service != null) {
+                // Check if we don't have it already
+                for (IPlaybackCallback callback : service.mCallbacks) {
+                    if (cb.getIdentifier() == callback.getIdentifier()) {
+                        return;
+                    }
+                }
+
+                // Then we add it
+                service.mCallbacks.add(cb);
+            }
         }
 
         @Override
         public void removeCallback(IPlaybackCallback cb) throws RemoteException {
-            for (IPlaybackCallback callback : mCallbacks) {
-                if (cb.getIdentifier() == callback.getIdentifier()) {
-                    mCallbacks.remove(cb);
-                    break;
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                for (IPlaybackCallback callback : service.mCallbacks) {
+                    if (cb.getIdentifier() == callback.getIdentifier()) {
+                        service.mCallbacks.remove(cb);
+                        break;
+                    }
                 }
             }
         }
 
         @Override
         public void playPlaylist(Playlist p) throws RemoteException {
-            Log.i(TAG, "Play playlist: " + p.getRef());
-            mCurrentTrack = 0;
-            mPlaybackQueue.clear();
-            queuePlaylist(p, false);
-            requestStartPlayback();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                Log.i(TAG, "Play playlist: " + p.getRef());
+                service.mCurrentTrack = 0;
+                service.mPlaybackQueue.clear();
+                queuePlaylist(p, false);
+                service. requestStartPlayback();
+            }
         }
 
         @Override
         public void playSong(Song s) throws RemoteException {
-            Log.i(TAG, "Play song: " + s.getRef());
-            mCurrentTrack = 0;
-            mPlaybackQueue.clear();
-            queueSong(s, true);
-            requestStartPlayback();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                Log.i(TAG, "Play song: " + s.getRef());
+                service.mCurrentTrack = 0;
+                service. mPlaybackQueue.clear();
+                queueSong(s, true);
+                service.requestStartPlayback();
+            }
         }
 
         @Override
         public void playAlbum(Album a) throws RemoteException {
-            Log.i(TAG, "Play album: " + a.getRef() + " (this=" + this + ")");
-            mCurrentTrack = 0;
-            mPlaybackQueue.clear();
-            queueAlbum(a, false);
-            requestStartPlayback();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                Log.i(TAG, "Play album: " + a.getRef() + " (this=" + this + ")");
+                service.mCurrentTrack = 0;
+                service.mPlaybackQueue.clear();
+                queueAlbum(a, false);
+                service.requestStartPlayback();
+            }
         }
 
         @Override
         public void queuePlaylist(Playlist p, boolean top) throws RemoteException {
-            Iterator<String> songsIt = p.songs();
+            PlaybackService service = mParent.get();
 
-            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-            while (songsIt.hasNext()) {
-                String ref = songsIt.next();
-                mPlaybackQueue.addSong(aggregator.retrieveSong(ref, p.getProvider()), top);
+            if (service != null) {
+                Iterator<String> songsIt = p.songs();
+
+                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+                while (songsIt.hasNext()) {
+                    String ref = songsIt.next();
+                    service.mPlaybackQueue.addSong(aggregator.retrieveSong(ref, p.getProvider()), top);
+                }
+
+                service.notifyQueueChanged();
             }
-
-            notifyQueueChanged();
         }
 
         @Override
         public void queueSong(Song s, boolean top) throws RemoteException {
-            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-            mPlaybackQueue.addSong(aggregator.retrieveSong(s.getRef(), null), top);
-            notifyQueueChanged();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+                service.mPlaybackQueue.addSong(aggregator.retrieveSong(s.getRef(), null), top);
+                service.notifyQueueChanged();
+            }
         }
 
         @Override
         public void queueAlbum(Album p, boolean top) throws RemoteException {
-            Iterator<String> songsIt = p.songs();
+            PlaybackService service = mParent.get();
 
-            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-            while (songsIt.hasNext()) {
-                String ref = songsIt.next();
-                mPlaybackQueue.addSong(aggregator.retrieveSong(ref, p.getProvider()), top);
+            if (service != null) {
+                Iterator<String> songsIt = p.songs();
+
+                final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+                while (songsIt.hasNext()) {
+                    String ref = songsIt.next();
+                    service.mPlaybackQueue.addSong(aggregator.retrieveSong(ref, p.getProvider()), top);
+                }
+
+                service.notifyQueueChanged();
             }
-
-            notifyQueueChanged();
         }
 
         @Override
         public void playNext(Song s) throws RemoteException {
-            if (mCurrentTrack >= 0) {
-                mPlaybackQueue.add(mCurrentTrack + 1, s);
-            } else {
-                mPlaybackQueue.add(0, s);
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                if (service.mCurrentTrack >= 0) {
+                    service.mPlaybackQueue.add(service.mCurrentTrack + 1, s);
+                } else {
+                    service.mPlaybackQueue.add(0, s);
+                }
             }
         }
 
         @Override
         public void pause() throws RemoteException {
-            // User-requested pause, so abandon audio focus to avoid resume if something else
-            // grabs and release playback while we were just paused.
-            pauseImpl();
-            abandonAudioFocus();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                // User-requested pause, so abandon audio focus to avoid resume if something else
+                // grabs and release playback while we were just paused.
+                service.pauseImpl();
+                service.abandonAudioFocus();
+            }
         }
 
         @Override
         public boolean play() throws RemoteException {
-            playImpl();
-            return true;
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.playImpl();
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
-        public int getState() { return mState; }
+        public int getState() {
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.mState;
+            } else {
+                return STATE_STOPPED;
+            }
+        }
 
         @Override
         public int getCurrentTrackLength() throws RemoteException {
-            final Song currentSong = getCurrentSong();
-            if (currentSong != null) {
-                return currentSong.getDuration();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                final Song currentSong = service.getCurrentSong();
+                if (currentSong != null) {
+                    return currentSong.getDuration();
+                }
+            }
+            return -1;
+        }
+
+        @Override
+        public int getCurrentTrackPosition() throws RemoteException {
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.getCurrentTrackPositionImpl();
             } else {
                 return -1;
             }
         }
 
         @Override
-        public int getCurrentTrackPosition() throws RemoteException {
-            return getCurrentTrackPositionImpl();
-        }
-
-        @Override
         public Song getCurrentTrack() throws RemoteException {
-            return getCurrentSong();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.getCurrentSong();
+            } else {
+                return null;
+            }
         }
 
         @Override
-        public int getCurrentTrackIndex() { return mCurrentTrack; }
+        public int getCurrentTrackIndex() {
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.mCurrentTrack;
+            } else {
+                return -1;
+            }
+        }
 
         @Override
         public List<Song> getCurrentPlaybackQueue() {
-            return mPlaybackQueue;
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.mPlaybackQueue;
+            } else {
+                return new ArrayList<Song>();
+            }
         }
 
         @Override
         public int getCurrentRms() throws RemoteException {
-            return mDSPProcessor.getRms();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.mDSPProcessor.getRms();
+            } else {
+                return 0;
+            }
         }
 
         @Override
         public List<ProviderIdentifier> getDSPChain() throws RemoteException {
-            return mDSPProcessor.getActiveChain();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.mDSPProcessor.getActiveChain();
+            } else {
+                return new ArrayList<>();
+            }
         }
 
         @Override
         public void setDSPChain(List<ProviderIdentifier> chain) throws RemoteException {
-            mDSPProcessor.setActiveChain(PlaybackService.this, chain, mNativeHub);
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.mDSPProcessor.setActiveChain(service, chain, service.mNativeHub);
+            }
         }
 
         @Override
         public void seek(final long timeMs) throws RemoteException {
-            seekImpl(timeMs);
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.seekImpl(timeMs);
+            }
         }
 
         @Override
         public void next() throws RemoteException {
-            nextImpl();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.nextImpl();
+            }
         }
 
         @Override
         public void previous() throws RemoteException {
-            previousImpl();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.previousImpl();
+            }
         }
 
         @Override
         public void playAtQueueIndex(int index) {
-            playAtIndexImpl(index);
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.playAtIndexImpl(index);
+            }
         }
 
         @Override
         public void stop() throws RemoteException {
-            stopImpl();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.stopImpl();
+            }
         }
 
         @Override
         public void setRepeatMode(boolean repeat) throws RemoteException {
-            mRepeatMode = repeat;
-            SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putBoolean(PREF_KEY_REPEAT, repeat);
-            editor.apply();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.mRepeatMode = repeat;
+                SharedPreferences prefs = service.getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(PREF_KEY_REPEAT, repeat);
+                editor.apply();
+            }
         }
 
         @Override
         public boolean isRepeatMode() throws RemoteException {
-            return mRepeatMode;
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.mRepeatMode;
+            } else {
+                return false;
+            }
         }
 
         @Override
         public void setShuffleMode(boolean shuffle) throws RemoteException {
-            mShuffleMode = shuffle;
-            SharedPreferences prefs = getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putBoolean(PREF_KEY_SHUFFLE, shuffle);
-            editor.apply();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.mShuffleMode = shuffle;
+                SharedPreferences prefs = service.getSharedPreferences(SERVICE_SHARED_PREFS, MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(PREF_KEY_SHUFFLE, shuffle);
+                editor.apply();
+            }
         }
 
         @Override
         public boolean isShuffleMode() throws RemoteException {
-            return mShuffleMode;
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.mShuffleMode;
+            } else {
+                return false;
+            }
         }
 
         @Override
         public void clearPlaybackQueue() throws RemoteException {
-            mPlaybackQueue.clear();
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.mPlaybackQueue.clear();
+            }
         }
 
         @Override
         public void setSleepTimer(long uptime) throws RemoteException {
-            mSleepTimerUptime = uptime;
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.mSleepTimerUptime = uptime;
+            }
         }
 
         @Override
         public long getSleepTimerEndTime() throws RemoteException {
-            return mSleepTimerUptime;
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                return service.mSleepTimerUptime;
+            } else {
+                return 0;
+            }
         }
     };
 
@@ -1271,119 +1433,137 @@ public class PlaybackService extends Service
 
     }
 
-    private IProviderCallback.Stub mProviderCallback = new BaseProviderCallback() {
+    private static class PlaybackProviderCallback extends BaseProviderCallback {
+        private WeakReference<PlaybackService> mParent;
+
+        PlaybackProviderCallback(WeakReference<PlaybackService> parent) {
+            mParent = parent;
+        }
+
         @Override
         public void onSongPlaying(ProviderIdentifier provider) {
-            boolean wasPaused = mIsResuming;
-            if (wasPaused) {
-                mIsResuming = false;
-            } else {
-                mCurrentTrackElapsedMs = 0;
+            PlaybackService service = mParent.get();
 
-                // Flush and unpause the sink to clear previous track data
-                mNativeSink.flushSamples();
-                mNativeSink.setPaused(false);
-            }
+            if (service != null) {
+                boolean wasPaused = service.mIsResuming;
+                if (wasPaused) {
+                    service.mIsResuming = false;
+                } else {
+                    service.mCurrentTrackElapsedMs = 0;
 
-            mState = STATE_PLAYING;
-            final Song currentSong = getCurrentSong();
-
-            if (currentSong == null) {
-                throw new IllegalStateException("Current song is null on callback! Queue size=" + mPlaybackQueue.size() +
-                        " and index=" + mCurrentTrack + " and this=" + this);
-            }
-
-            for (IPlaybackCallback cb : mCallbacks) {
-                try {
-                    if (!wasPaused) {
-                        cb.onSongStarted(false, currentSong);
-                    } else {
-                        cb.onPlaybackResume();
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Cannot call playback callback for song start event", e);
+                    // Flush and unpause the sink to clear previous track data
+                    service. mNativeSink.flushSamples();
+                    service.mNativeSink.setPaused(false);
                 }
-            }
 
-            Log.d(TAG, "onSongPlaying: Playing...");
+                service.mState = STATE_PLAYING;
+                final Song currentSong = service.getCurrentSong();
 
-            mNotification.setPlayPauseAction(false);
-            mRemoteMetadata.notifyPlaying(0);
+                if (currentSong == null) {
+                    throw new IllegalStateException("Current song is null on callback! Queue size=" + service.mPlaybackQueue.size() +
+                            " and index=" + service.mCurrentTrack + " and this=" + this);
+                }
 
-            // Prepare pre-fetching the next song
-            // Note: We don't take care of the delay being too early when it's paused, as long
-            // as it matches the next track.
-            ProviderConnection conn = PluginsLookup.getDefault().getProvider(provider);
-            if (conn != null) {
-                IMusicProvider binder = conn.getBinder();
-                if (binder != null) {
+                for (IPlaybackCallback cb : service.mCallbacks) {
                     try {
-                        mHandler.removeCallbacks(mPrefetcher);
-                        mHandler.postDelayed(mPrefetcher,
-                                currentSong.getDuration() - binder.getPrefetchDelay());
+                        if (!wasPaused) {
+                            cb.onSongStarted(false, currentSong);
+                        } else {
+                            cb.onPlaybackResume();
+                        }
                     } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot get prefetch delay from provider", e);
+                        Log.e(TAG, "Cannot call playback callback for song start event", e);
                     }
                 }
-            }
 
-            // Save the queue as we started playing a new song (maybe)
-            savePlaybackQueue();
+                Log.d(TAG, "onSongPlaying: Playing...");
+
+                service.mNotification.setPlayPauseAction(false);
+                service.mRemoteMetadata.notifyPlaying(0);
+
+                // Prepare pre-fetching the next song
+                // Note: We don't take care of the delay being too early when it's paused, as long
+                // as it matches the next track.
+                ProviderConnection conn = PluginsLookup.getDefault().getProvider(provider);
+                if (conn != null) {
+                    IMusicProvider binder = conn.getBinder();
+                    if (binder != null) {
+                        try {
+                            service. mHandler.removeCallbacks(service.mPrefetcher);
+                            service. mHandler.postDelayed(service.mPrefetcher,
+                                    currentSong.getDuration() - binder.getPrefetchDelay());
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot get prefetch delay from provider", e);
+                        }
+                    }
+                }
+
+                // Save the queue as we started playing a new song (maybe)
+                service.savePlaybackQueue();
+            }
         }
 
         @Override
         public void onSongPaused(ProviderIdentifier provider) throws RemoteException {
-            final Song currentSong = getCurrentSong();
-            if (currentSong != null && currentSong.getProvider().equals(provider) && !mIsStopping) {
-                mState = STATE_PAUSED;
+            PlaybackService service = mParent.get();
 
-                for (IPlaybackCallback cb : mCallbacks) {
-                    try {
-                        cb.onPlaybackPause();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot call playback callback for playback pause event", e);
-                    } catch (Exception e) {
-                        Log.e(TAG, "BIG EXCEPTION DURING REMOTE PLAYBACK PAUSE: ", e);
-                        Log.e(TAG, "Callback: " + cb);
+            if (service != null) {
+                final Song currentSong = service.getCurrentSong();
+                if (currentSong != null && currentSong.getProvider().equals(provider) && !service.mIsStopping) {
+                    service.mState = STATE_PAUSED;
+
+                    for (IPlaybackCallback cb : service.mCallbacks) {
+                        try {
+                            cb.onPlaybackPause();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot call playback callback for playback pause event", e);
+                        } catch (Exception e) {
+                            Log.e(TAG, "BIG EXCEPTION DURING REMOTE PLAYBACK PAUSE: ", e);
+                            Log.e(TAG, "Callback: " + cb);
+                        }
                     }
+
+                    Log.d(TAG, "onSongPaused: Paused...");
+
+                    service.mNotification.setPlayPauseAction(true);
+                    service.mRemoteMetadata.notifyPaused(service.getCurrentTrackPositionImpl());
                 }
-
-                Log.d(TAG, "onSongPaused: Paused...");
-
-                mNotification.setPlayPauseAction(true);
-                mRemoteMetadata.notifyPaused(getCurrentTrackPositionImpl());
             }
         }
 
         @Override
         public void onTrackEnded(ProviderIdentifier provider) throws RemoteException {
-            // We restart the queue in an handler. In the case of the Spotify provider, the
-            // endOfTrack callback locks the main API thread, leading to a dead lock if we
-            // try to play a track here while still being in the callstack of the endOfTrack
-            // callback.
+            PlaybackService service = mParent.get();
 
-            if (mPlaybackQueue.size() > 1 && mShuffleMode) {
-                // Shuffle mode is enabled, play any track but not the one we just played
-                int previousTrack = mCurrentTrack;
-                while (previousTrack == mCurrentTrack) {
-                    mCurrentTrack = Utils.getRandom(mPlaybackQueue.size());
-                }
+            if (service != null) {
+                // We restart the queue in an handler. In the case of the Spotify provider, the
+                // endOfTrack callback locks the main API thread, leading to a dead lock if we
+                // try to play a track here while still being in the callstack of the endOfTrack
+                // callback.
 
-                requestStartPlayback();
-            } else if (mPlaybackQueue.size() > 0 && mCurrentTrack < mPlaybackQueue.size() - 1) {
-                // Regular sequential mode, not at the end, move to the next track
-                mCurrentTrack++;
+                if (service.mPlaybackQueue.size() > 1 && service.mShuffleMode) {
+                    // Shuffle mode is enabled, play any track but not the one we just played
+                    int previousTrack = service.mCurrentTrack;
+                    while (previousTrack == service.mCurrentTrack) {
+                        service.mCurrentTrack = Utils.getRandom(service.mPlaybackQueue.size());
+                    }
 
-                requestStartPlayback();
-            } else if (mPlaybackQueue.size() > 0 && mCurrentTrack == mPlaybackQueue.size() - 1) {
-                // Regular sequential mode, at the end of the queue
-                if (mRepeatMode) {
-                    // We're repeating, go back to the first track and play it
-                    mCurrentTrack = 0;
-                    requestStartPlayback();
-                } else {
-                    // Not repeating and at the end of the playlist, stop
-                    mBinder.stop();
+                    service.requestStartPlayback();
+                } else if (service.mPlaybackQueue.size() > 0 && service.mCurrentTrack < service.mPlaybackQueue.size() - 1) {
+                    // Regular sequential mode, not at the end, move to the next track
+                    service.mCurrentTrack++;
+
+                    service.requestStartPlayback();
+                } else if (service.mPlaybackQueue.size() > 0 && service.mCurrentTrack == service.mPlaybackQueue.size() - 1) {
+                    // Regular sequential mode, at the end of the queue
+                    if (service.mRepeatMode) {
+                        // We're repeating, go back to the first track and play it
+                        service.mCurrentTrack = 0;
+                        service.requestStartPlayback();
+                    } else {
+                        // Not repeating and at the end of the playlist, stop
+                        service.mBinder.stop();
+                    }
                 }
             }
         }
