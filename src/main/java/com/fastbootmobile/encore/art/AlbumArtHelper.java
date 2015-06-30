@@ -68,11 +68,18 @@ public class AlbumArtHelper {
         public BoundEntity request;
         public RecyclingBitmapDrawable bitmap;
         public boolean retry;
+        public AlbumArtListener listener;
+        public int size;
     }
 
     public static AlbumArtTask retrieveAlbumArt(Resources res, AlbumArtListener listener,
                                                 BoundEntity request, int size, boolean immediate) {
-        AlbumArtTask task = new AlbumArtTask(res, listener, size);
+        AlbumArtRequest requestStructure = new AlbumArtRequest();
+        requestStructure.entity = request;
+        requestStructure.listener = listener;
+        requestStructure.requestedSize = size;
+        requestStructure.res = res;
+        AlbumArtTask task = new AlbumArtTask();
 
         // On Android 4.2+, we use our custom executor. Android 4.1 and below uses the predefined
         // pool, as the custom one causes the app to just crash without any kind of error message
@@ -83,19 +90,31 @@ public class AlbumArtHelper {
                     // Release a previous work to free up space in the queue
                     sPriorityPoolWorkQueue.remove(sPriorityPoolWorkQueue.iterator().next());
                 }
-                task.executeOnExecutor(PRIORITY_ART_POOL_EXECUTOR, request);
+                task.executeOnExecutor(PRIORITY_ART_POOL_EXECUTOR, requestStructure);
             } else {
                 if (sPoolWorkQueue.remainingCapacity() == 0) {
                     // Release a previous work to free up space in the queue
                     sPoolWorkQueue.remove(sPoolWorkQueue.iterator().next());
                 }
-                task.executeOnExecutor(ART_POOL_EXECUTOR, request);
+                task.executeOnExecutor(ART_POOL_EXECUTOR, requestStructure);
             }
         } else {
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requestStructure);
         }
 
         return task;
     }
 
+    public static void clearAlbumArtRequests() {
+        sPriorityPoolWorkQueue.clear();
+        sPoolWorkQueue.clear();
+    }
+
+
+    static class AlbumArtRequest {
+        Resources res;
+        AlbumArtHelper.AlbumArtListener listener;
+        int requestedSize;
+        BoundEntity entity;
+    }
 }

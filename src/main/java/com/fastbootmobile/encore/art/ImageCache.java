@@ -171,6 +171,7 @@ public class ImageCache {
      * Clears the memory cache
      */
     public void evictAll() {
+        AlbumArtHelper.clearAlbumArtRequests();
         if (USE_MEMORY_CACHE) {
             synchronized (mMemoryCache) {
                 mMemoryCache.evictAll();

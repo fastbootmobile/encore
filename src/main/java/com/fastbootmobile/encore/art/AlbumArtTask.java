@@ -17,8 +17,6 @@ package com.fastbootmobile.encore.art;
 
 import android.content.res.Resources;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Process;
 import android.util.Log;
 
@@ -29,23 +27,17 @@ import java.util.concurrent.RejectedExecutionException;
 /**
  * AsyncTask downloading the album art
  */
-public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.BackgroundResult> {
+public class AlbumArtTask extends AsyncTask<AlbumArtHelper.AlbumArtRequest, Void, AlbumArtHelper.BackgroundResult> {
     private static final String TAG = "AlbumArtTask";
 
     private static final int DELAY_BEFORE_RETRY = 500;
     private static final Object sPauseWorkLock = new Object();
     private static boolean sPauseWork = false;
 
-    private BoundEntity mEntity;
-    private AlbumArtHelper.AlbumArtListener mListener;
-    private Handler mHandler;
     private RecyclingBitmapDrawable mArtBitmap;
-    private Resources mResources;
-    private int mRequestedSize;
     private AlbumArtCache.IAlbumArtCacheListener mCacheListener = new AlbumArtCache.IAlbumArtCacheListener() {
         @Override
         public void onArtLoaded(BoundEntity ent, RecyclingBitmapDrawable result) {
-
             synchronized (AlbumArtTask.this) {
                 if (!isCancelled()) {
                     mArtBitmap = result;
@@ -55,17 +47,10 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
         }
     };
 
-    AlbumArtTask(Resources res, AlbumArtHelper.AlbumArtListener listener, int requestedSize) {
-        mListener = listener;
-        mHandler = new Handler(Looper.getMainLooper());
-        mResources = res;
-        mRequestedSize = requestedSize;
-    }
-
     @Override
-    protected AlbumArtHelper.BackgroundResult doInBackground(BoundEntity... params) {
+    protected AlbumArtHelper.BackgroundResult doInBackground(AlbumArtHelper.AlbumArtRequest... params) {
         android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
-        mEntity = params[0];
+        AlbumArtHelper.AlbumArtRequest request = params[0];
 
         // Wait here if work is paused and the task is not cancelled
         synchronized (sPauseWorkLock) {
@@ -76,25 +61,27 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
             }
         }
 
-        if (mEntity == null || isCancelled()) {
+        if (request.entity == null || isCancelled()) {
             return null;
         }
 
         AlbumArtHelper.BackgroundResult output = new AlbumArtHelper.BackgroundResult();
-        output.request = mEntity;
+        output.request = request.entity;
+        output.listener = request.listener;
+        output.size = request.requestedSize;
 
         final AlbumArtCache artCache = AlbumArtCache.getDefault();
 
-        if (artCache.isQueryRunning(mEntity)) {
+        if (artCache.isQueryRunning(request.entity)) {
             output.retry = true;
         } else {
             // Notify other potential tasks we're processing this entity
-            artCache.notifyQueryRunning(mEntity);
+            artCache.notifyQueryRunning(request.entity);
 
             // Get from the cache
             synchronized (this) {
-                if (AlbumArtCache.getDefault().getArt(mResources, mEntity,
-                        mRequestedSize, mCacheListener)) {
+                if (AlbumArtCache.getDefault().getArt(request.res, request.entity,
+                        request.requestedSize, mCacheListener)) {
                     // Wait for the result
                     if (mArtBitmap == null) {
                         try {
@@ -102,15 +89,14 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
                         } catch (InterruptedException e) {
                             // Interrupted, cancel
                             cancel(true);
-                            mListener = null;
-                            return null;
+                            return output;
                         }
                     }
                 }
             }
 
             // In all cases, we tell that this entity is loaded
-            artCache.notifyQueryStopped(mEntity);
+            artCache.notifyQueryStopped(request.entity);
 
             // We now have a bitmap to display, so let's put it!
             if (mArtBitmap != null) {
@@ -126,31 +112,38 @@ public class AlbumArtTask extends AsyncTask<BoundEntity, Void, AlbumArtHelper.Ba
     }
 
     @Override
-    protected void onCancelled(AlbumArtHelper.BackgroundResult backgroundResult) {
-        mListener = null;
+    protected void onCancelled(AlbumArtHelper.BackgroundResult result) {
         final AlbumArtCache artCache = AlbumArtCache.getDefault();
-        artCache.notifyQueryStopped(mEntity);
+        if (result != null) {
+            artCache.notifyQueryStopped(result.request);
+
+            if (result.listener != null) {
+                result.listener.onArtLoaded(null, result.request);
+            }
+        }
     }
 
     @Override
     protected void onPostExecute(final AlbumArtHelper.BackgroundResult result) {
         super.onPostExecute(result);
 
-        if (!isCancelled() && mListener != null) {
-            if (result != null && result.retry) {
-                final AlbumArtTask task = new AlbumArtTask(mResources, mListener, mRequestedSize);
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            task.executeOnExecutor(AlbumArtHelper.ART_POOL_EXECUTOR, result.request);
-                        } catch (RejectedExecutionException e) {
-                            Log.w(TAG, "Request restart has been denied", e);
-                        }
-                    }
-                }, DELAY_BEFORE_RETRY);
-            } else if (result != null) {
-                mListener.onArtLoaded(result.bitmap, result.request);
+        if (!isCancelled() && result != null && result.listener != null) {
+            if (result.retry) {
+                // We retry to get it in a bit
+                final AlbumArtTask task = new AlbumArtTask();
+                AlbumArtHelper.AlbumArtRequest request = new AlbumArtHelper.AlbumArtRequest();
+                request.listener = result.listener;
+                request.entity = result.request;
+                request.requestedSize = result.size;
+                request.res = Resources.getSystem();
+
+                try {
+                    task.executeOnExecutor(AlbumArtHelper.ART_POOL_EXECUTOR, request);
+                } catch (RejectedExecutionException e) {
+                    Log.w(TAG, "Request restart has been denied", e);
+                }
+            } else {
+                result.listener.onArtLoaded(result.bitmap, result.request);
             }
         }
     }
