@@ -17,6 +17,7 @@ package com.fastbootmobile.encore.utils;
 
 import android.animation.Animator;
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -776,5 +777,17 @@ public class Utils {
 
     public static int getRandom(int maxExcluded) {
         return new Random().nextInt(maxExcluded);
+    }
+
+    public static String getAppNameByPID(Context context, int pid) {
+        ActivityManager manager
+                = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+
+        for (ActivityManager.RunningAppProcessInfo processInfo : manager.getRunningAppProcesses()) {
+            if (processInfo.pid == pid) {
+                return processInfo.processName;
+            }
+        }
+        return "";
     }
 }

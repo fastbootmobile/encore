@@ -25,6 +25,7 @@ import com.fastbootmobile.encore.api.echonest.AutoMixManager;
 import com.fastbootmobile.encore.art.ImageCache;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
+import com.fastbootmobile.encore.utils.Utils;
 import com.joshdholtz.sentry.Sentry;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
@@ -43,6 +44,10 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 public class OmniMusic extends Application {
     private static final String TAG = "OmniMusic";
 
+    private static final String PROCESS_APP = "main";
+    private static final String PROCESS_LOCALPROVIDER = "localprovider";
+    private static final String PROCESS_BASSBOOST = "bassboost";
+
     private RefWatcher mRefWatcher;
 
     public static RefWatcher getRefWatcher(Context context) {
@@ -53,6 +58,12 @@ public class OmniMusic extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // We need to filter here whether we're initializing the main app or an aux attached plugin
+        String appName = Utils.getAppNameByPID(this, android.os.Process.myPid());
+        final String process = appName.substring(appName.indexOf(':') + 1);
+
+        Log.e(TAG, "--- INITIALIZING (" + process + ") ---");
 
         Sentry.setCaptureListener(new Sentry.SentryEventCaptureListener() {
             @Override
@@ -71,7 +82,7 @@ public class OmniMusic extends Application {
                     Log.e(TAG, "Failed to put a tag into Sentry", e);
                 }
 
-                sentryEventBuilder.addModule("app", BuildConfig.VERSION_NAME);
+                sentryEventBuilder.addModule(process, BuildConfig.VERSION_NAME);
                 return sentryEventBuilder;
             }
         });
@@ -81,34 +92,35 @@ public class OmniMusic extends Application {
         // Setup LeakCanary
         mRefWatcher = LeakCanary.install(this);
 
-        // Setup the plugins system
-        ProviderAggregator.getDefault().setContext(getApplicationContext());
-        PluginsLookup.getDefault().initialize(getApplicationContext());
+        if (PROCESS_APP.equals(process)) {
+            // Setup the plugins system
+            ProviderAggregator.getDefault().setContext(getApplicationContext());
+            PluginsLookup.getDefault().initialize(getApplicationContext());
 
-        /**
-         * Note about the cache and EchoNest: The HTTP cache would sometimes cache request
-         * we didn't want (such as status query for Taste Profile update). We're using
-         * a hacked jEN library that doesn't cache these requests.
-         */
-        // Setup network cache
-        try {
-            final File httpCacheDir = new File(getCacheDir(), "http");
-            final long httpCacheSize = 100 * 1024 * 1024; // 100 MiB
-            final HttpResponseCache cache = HttpResponseCache.install(httpCacheDir, httpCacheSize);
+            /**
+             * Note about the cache and EchoNest: The HTTP cache would sometimes cache request
+             * we didn't want (such as status query for Taste Profile update). We're using
+             * a hacked jEN library that doesn't cache these requests.
+             */
+            // Setup network cache
+            try {
+                final File httpCacheDir = new File(getCacheDir(), "http");
+                final long httpCacheSize = 100 * 1024 * 1024; // 100 MiB
+                final HttpResponseCache cache = HttpResponseCache.install(httpCacheDir, httpCacheSize);
 
-            Log.i(TAG, "HTTP Cache size: " + cache.size() / 1024 / 1024 + "MB");
-        } catch (IOException e) {
-            Log.w(TAG, "HTTP response cache installation failed", e);
+                Log.i(TAG, "HTTP Cache size: " + cache.size() / 1024 / 1024 + "MB");
+            } catch (IOException e) {
+                Log.w(TAG, "HTTP response cache installation failed", e);
+            }
+
+            // Setup image cache
+            ImageCache.getDefault().initialize(getApplicationContext());
+
+            // Setup Automix system
+            AutoMixManager.getDefault().initialize(getApplicationContext());
+
+            // Setup custom fonts
+            CalligraphyConfig.initDefault("fonts/Roboto-Regular.ttf", R.attr.fontPath);
         }
-
-        // Setup image cache
-        ImageCache.getDefault().initialize(getApplicationContext());
-
-        // Setup Automix system
-        AutoMixManager.getDefault().initialize(getApplicationContext());
-
-        // Setup custom fonts
-        CalligraphyConfig.initDefault("fonts/Roboto-Regular.ttf", R.attr.fontPath);
-
     }
 }
