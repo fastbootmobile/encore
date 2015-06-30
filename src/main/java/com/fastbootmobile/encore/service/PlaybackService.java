@@ -119,7 +119,7 @@ public class PlaybackService extends Service
     };
 
     private Handler mHandler;
-    private int mNumberBound = 0;
+    private boolean mIsBound = false;
     private NativeAudioSink mNativeSink;
     private NativeHub mNativeHub;
     private DSPProcessor mDSPProcessor;
@@ -425,22 +425,28 @@ public class PlaybackService extends Service
      */
     @Override
     public IBinder onBind(Intent intent) {
-        mNumberBound++;
-        Log.i(TAG, "Client bound service (" + mNumberBound + ")");
+        mIsBound = true;
+        Log.i(TAG, "Client bound");
         return mBinder;
     }
 
+    @Override
+    public void onRebind(Intent intent) {
+        mIsBound = true;
+        Log.i(TAG, "Client rebound");
+    }
+
     /**
-     * Called when an app unbind from this service
+     * Called when all clients unbound from this service
      *
      * @param intent The intent attached, not used
      * @return true
      */
     @Override
     public boolean onUnbind(Intent intent) {
-        mNumberBound--;
-        Log.i(TAG, "Client unbound service (" + mNumberBound + " left)");
-        return super.onUnbind(intent);
+        mIsBound = false;
+        Log.i(TAG, "Clients unbound");
+        return true;
     }
 
     /**

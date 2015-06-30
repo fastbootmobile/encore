@@ -76,11 +76,6 @@ public class NativeHub {
             String STOREPASSWORD = "encore";
             String KEYPASSWORD = "encore";
 
-            String[] list = context.getResources().getAssets().list("/");
-            for (String s : list) {
-                Log.e(TAG, "ASSET: " + s);
-            }
-
             KeyStore ks = KeyStore.getInstance(STORETYPE);
             InputStream is = context.getResources().getAssets().open(KEYSTORE);
             ks.load(is, STOREPASSWORD.toCharArray());

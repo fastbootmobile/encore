@@ -58,6 +58,8 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
      */
     @Override
     public void unbindService(NativeHub hub) {
+        Log.e(TAG, "unbindService(MP): mIsBound=" + mIsBound + ", name=" + getProviderName()
+                + ", socket=" + mAudioSocketName);
         if (mIsBound) {
             ProviderAggregator.getDefault().unregisterProvider(this);
             if (mAudioSocketName != null) {

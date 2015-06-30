@@ -111,6 +111,7 @@ public class PluginsLookup {
     private Runnable mShutdownPlaybackRunnable = new Runnable() {
         @Override
         public void run() {
+            mContext.stopService(new Intent(mContext, PlaybackService.class));
             mContext.unbindService(mPlaybackConnection);
             mPlaybackService = null;
         }
@@ -196,8 +197,8 @@ public class PluginsLookup {
 
         if (mPlaybackService == null) {
             Intent i = new Intent(mContext, PlaybackService.class);
-            mContext.bindService(i, mPlaybackConnection,
-                    Context.BIND_AUTO_CREATE | Context.BIND_ABOVE_CLIENT);
+            mContext.startService(i);
+            mContext.bindService(i, mPlaybackConnection, Context.BIND_ABOVE_CLIENT);
         }
     }
 
