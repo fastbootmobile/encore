@@ -1525,8 +1525,12 @@ public class PlaybackService extends Service
 
                     Log.d(TAG, "onSongPaused: Paused...");
 
-                    service.mNotification.setPlayPauseAction(true);
-                    service.mRemoteMetadata.notifyPaused(service.getCurrentTrackPositionImpl());
+                    // stopImpl() calls pauseImpl(), which may cause the notification to come back
+                    // after the current notification went away due to this callback
+                    if (!service.mIsStopping) {
+                        service.mNotification.setPlayPauseAction(true);
+                        service.mRemoteMetadata.notifyPaused(service.getCurrentTrackPositionImpl());
+                    }
                 }
             }
         }
