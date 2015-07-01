@@ -169,9 +169,9 @@ public class PluginService extends Service implements AudioSocket.ISocketCallbac
 
             synchronized (mAudioWrittenLock) {
                 if (mAudioWritten == -1) {
-                    // Wait 100ms for a reply
+                    // Wait 500ms for a reply
                     try {
-                        mAudioWrittenLock.wait(100);
+                        mAudioWrittenLock.wait(500);
                     } catch (InterruptedException e) {
                         Log.e(TAG, "Interrupted while waiting for audio written response");
                     }
