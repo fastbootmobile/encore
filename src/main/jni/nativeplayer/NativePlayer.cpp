@@ -273,8 +273,10 @@ bool NativePlayer::setAudioFormat(uint32_t sample_rate, uint32_t sample_format, 
                 m_pPlayingBuffer = nullptr;
             }
 
-            m_iBufferMinPlayback = sample_rate * channels / 8;
-            m_iBufferMaxSize = m_iBufferMinPlayback * 12;
+            // sample_rate * channels = 1 second of audio, in bytes
+            // min playback = 1 second, max size = 5 seconds
+            m_iBufferMinPlayback = sample_rate * channels;
+            m_iBufferMaxSize = m_iBufferMinPlayback * 5;
         }
 
         switch (sample_rate) {
@@ -538,9 +540,9 @@ void NativePlayer::bufferPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void* 
 
             if (p->m_iUnderflowCount - p->m_LastBuffersCheckUfCount > 3) {
                 if (len_ms < 10000) {
-                    // We raise the min buffer size, max 2 seconds
+                    // We raise the min buffer size, within the max boundary
                     p->m_iBufferMinPlayback = std::min(p->m_iBufferMinPlayback + 1024,
-                        p->m_iSampleRate * p->m_iChannels * 2);
+                        p->m_iBufferMaxSize);
 
                     ALOGD("Raising buffers: min=%d max=%d", p->m_iBufferMinPlayback, p->m_iBufferMaxSize);
                 }

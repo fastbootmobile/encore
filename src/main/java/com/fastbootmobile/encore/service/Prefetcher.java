@@ -31,12 +31,17 @@ public class Prefetcher implements Runnable {
 
     private PlaybackService mService;
 
+
     public Prefetcher(PlaybackService service) {
         mService = service;
     }
 
     @Override
     public void run() {
+        if (mService == null) {
+            return;
+        }
+        
         // If we're still expecting this song next, pre-fetch it
         final Song nextSong = mService.getNextTrack();
         if (nextSong != null) {
@@ -57,5 +62,9 @@ public class Prefetcher implements Runnable {
                 }
             }
         }
+    }
+
+    public void cancel() {
+        mService = null;
     }
 }

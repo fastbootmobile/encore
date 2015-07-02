@@ -149,6 +149,7 @@ public class PlaybackService extends Service
     private boolean mPausedByFocusLoss = false;
     private PlaybackServiceBinder mBinder = new PlaybackServiceBinder(new WeakReference<>(this));
     private PlaybackProviderCallback mProviderCallback = new PlaybackProviderCallback(new WeakReference<>(this));
+    private boolean mShouldFlushBuffers = false;
 
     private static class CommandHandler extends Handler {
         private WeakReference<PlaybackService> mService;
@@ -156,6 +157,7 @@ public class PlaybackService extends Service
         private static final int MSG_PAUSE_PROVIDER = 2;
         private static final int MSG_RESUME_PLAYBACK = 3;
         private static final int MSG_FLUSH_BUFFERS = 4;
+        private static final int MSG_STOP_SERVICE = 5;
 
         public CommandHandler(PlaybackService service, HandlerThread looper) {
             super(looper.getLooper());
@@ -199,6 +201,10 @@ public class PlaybackService extends Service
                 case MSG_FLUSH_BUFFERS:
                     service.mNativeSink.flushSamples();
                     break;
+
+                case MSG_STOP_SERVICE:
+                    service.stopImpl();
+                    break;
             }
         }
     }
@@ -206,7 +212,6 @@ public class PlaybackService extends Service
     public PlaybackService() {
         mPlaybackQueue = new PlaybackQueue();
         mCallbacks = new ArrayList<>();
-        mPrefetcher = new Prefetcher(this);
         mHandler = new Handler();
     }
 
@@ -217,6 +222,7 @@ public class PlaybackService extends Service
     public void onCreate() {
         super.onCreate();
         mListenLogger = new ListenLogger(this);
+        mPrefetcher = new Prefetcher(this);
 
         mCommandsHandlerThread = new HandlerThread("PlaybackServiceCommandsHandler");
         mCommandsHandlerThread.start();
@@ -339,12 +345,15 @@ public class PlaybackService extends Service
      */
     @Override
     public void onDestroy() {
-        Log.i(TAG, "onDestroy()");
-
         unregisterReceiver(mPacManReceiver);
         PluginsLookup.getDefault().removeProviderListener(this);
         ProviderAggregator.getDefault().removeUpdateCallback(this);
         mRemoteMetadata.release();
+
+        // Cancel prefetching
+        mHandler.removeCallbacks(mPrefetcher);
+        mPrefetcher.cancel();
+        mPrefetcher = null;
 
         if (mHasAudioFocus) {
             abandonAudioFocus();
@@ -499,7 +508,6 @@ public class PlaybackService extends Service
                                 }
                             }
                         }, 2000);
-
                     }
                 }
             } catch (RemoteException e) {
@@ -766,7 +774,9 @@ public class PlaybackService extends Service
                 mCurrentTrack = Utils.getRandom(mPlaybackQueue.size());
             }
 
-            mNativeSink.flushSamples();
+            mNativeSink.setPaused(true);
+            mShouldFlushBuffers = true;
+
             requestStartPlayback();
             mNotification.setHasNext(true);
         } else if (mPlaybackQueue.size() > 0 && hasNext) {
@@ -779,7 +789,10 @@ public class PlaybackService extends Service
             mNotification.setHasNext(hasNext);
         } else if (mRepeatMode && mPlaybackQueue.size() > 0) {
             mCurrentTrack = 0;
-            mNativeSink.flushSamples();
+
+            mNativeSink.setPaused(true);
+            mShouldFlushBuffers = true;
+
             requestStartPlayback();
             mNotification.setHasNext(true);
         }
@@ -802,7 +815,9 @@ public class PlaybackService extends Service
                 && mCurrentTrackLoaded;
         if (shouldRestart) {
             // Restart playback
-            mNativeSink.flushSamples();
+            mNativeSink.setPaused(true);
+            mShouldFlushBuffers = true;
+
             seekImpl(0);
         } else {
             // Go to the previous track
@@ -815,7 +830,9 @@ public class PlaybackService extends Service
                 }
             }
 
-            mNativeSink.flushSamples();
+            mNativeSink.setPaused(true);
+            mShouldFlushBuffers = true;
+
             requestStartPlayback();
         }
     }
@@ -941,6 +958,10 @@ public class PlaybackService extends Service
     private void playAtIndexImpl(int index) {
         Log.d(TAG, "Playing track " + (index + 1) + "/" + mPlaybackQueue.size());
         mCurrentTrack = index;
+
+        mNativeSink.setPaused(true);
+        mShouldFlushBuffers = true;
+
         requestStartPlayback();
     }
 
@@ -1451,8 +1472,10 @@ public class PlaybackService extends Service
                 } else {
                     service.mCurrentTrackElapsedMs = 0;
 
-                    // Flush and unpause the sink to clear previous track data
-                    service. mNativeSink.flushSamples();
+                    // Flush and unpause the sink to clear previous track data (if from user action)
+                    if (service.mShouldFlushBuffers) {
+                        service.mNativeSink.flushSamples();
+                    }
                     service.mNativeSink.setPaused(false);
                 }
 
@@ -1489,8 +1512,8 @@ public class PlaybackService extends Service
                     IMusicProvider binder = conn.getBinder();
                     if (binder != null) {
                         try {
-                            service. mHandler.removeCallbacks(service.mPrefetcher);
-                            service. mHandler.postDelayed(service.mPrefetcher,
+                            service.mHandler.removeCallbacks(service.mPrefetcher);
+                            service.mHandler.postDelayed(service.mPrefetcher,
                                     currentSong.getDuration() - binder.getPrefetchDelay());
                         } catch (RemoteException e) {
                             Log.e(TAG, "Cannot get prefetch delay from provider", e);
@@ -1552,21 +1575,26 @@ public class PlaybackService extends Service
                         service.mCurrentTrack = Utils.getRandom(service.mPlaybackQueue.size());
                     }
 
+                    service.mShouldFlushBuffers = false;
                     service.requestStartPlayback();
                 } else if (service.mPlaybackQueue.size() > 0 && service.mCurrentTrack < service.mPlaybackQueue.size() - 1) {
                     // Regular sequential mode, not at the end, move to the next track
                     service.mCurrentTrack++;
 
+                    service.mShouldFlushBuffers = false;
                     service.requestStartPlayback();
                 } else if (service.mPlaybackQueue.size() > 0 && service.mCurrentTrack == service.mPlaybackQueue.size() - 1) {
                     // Regular sequential mode, at the end of the queue
                     if (service.mRepeatMode) {
                         // We're repeating, go back to the first track and play it
                         service.mCurrentTrack = 0;
+                        service.mShouldFlushBuffers = false;
                         service.requestStartPlayback();
                     } else {
-                        // Not repeating and at the end of the playlist, stop
-                        service.mBinder.stop();
+                        // Not repeating and at the end of the playlist, stop after a little while
+                        // to allow the buffers to empty
+                        service.mHandler.sendEmptyMessageDelayed(CommandHandler.MSG_STOP_SERVICE,
+                                2000);
                     }
                 }
             }
