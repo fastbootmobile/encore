@@ -41,7 +41,7 @@ public class Prefetcher implements Runnable {
         if (mService == null) {
             return;
         }
-        
+
         // If we're still expecting this song next, pre-fetch it
         final Song nextSong = mService.getNextTrack();
         if (nextSong != null) {
