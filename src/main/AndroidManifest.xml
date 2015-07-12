@@ -107,7 +107,7 @@
 
             <meta-data
                 android:name="com.fastbootmobile.encore.metadata.PROVIDER_AUTHOR"
-                android:value="The OmniROM Project"/>
+                android:value="Fastboot Mobile, LLC"/>
         </service>
 
         <!-- Bass Boost Plugin -->
@@ -125,7 +125,7 @@
                 android:value="Bass Boost"/>
             <meta-data
                 android:name="com.fastbootmobile.encore.metadata.PROVIDER_AUTHOR"
-                android:value="The OmniROM Project"/>
+                android:value="Fastboot Mobile, LLC"/>
 
             <meta-data
                 android:name="com.fastbootmobile.encore.metadata.CONFIG_CLASS"
