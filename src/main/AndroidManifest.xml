@@ -50,6 +50,9 @@
     <!-- Bluetooth Automated Actions -->
     <uses-permission android:name="android.permission.BLUETOOTH"/>
 
+    <!-- Plugins permissions -->
+    <permission android:name="com.fastbootmobile.encore.PROVIDER" android:protectionLevel="normal" />
+
     <!-- Main application declaration -->
     <application
         android:name="com.fastbootmobile.encore.app.OmniMusic"
@@ -97,6 +100,7 @@
         <service
             android:name="com.fastbootmobile.encore.providers.localprovider.PluginService"
             android:exported="true"
+            android:permission="com.fastbootmobile.encore.PROVIDER"
             android:process=":localprovider">
             <intent-filter>
                 <action android:name="com.fastbootmobile.encore.action.PICK_PROVIDER"/>
@@ -116,6 +120,7 @@
             android:name="com.fastbootmobile.encore.providers.bassboost.PluginService"
             android:enabled="true"
             android:exported="true"
+            android:permission="com.fastbootmobile.encore.PROVIDER"
             android:process=":bassboost">
             <intent-filter>
                 <action android:name="com.fastbootmobile.encore.action.PICK_DSP_PROVIDER"/>
