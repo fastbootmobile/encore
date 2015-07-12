@@ -22,7 +22,6 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.fastbootmobile.encore.app.BuildConfig;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.service.NativeHub;
 
@@ -160,8 +159,8 @@ public abstract class AbstractProviderConnection implements ServiceConnection {
         if (DEBUG) Log.d(TAG, "Binding service " + mPackage + "/" + mServiceName + "...");
         Intent i = new Intent();
         i.setClassName(mPackage, mServiceName);
-        mContext.bindService(i, this, Context.BIND_AUTO_CREATE
-                | Context.BIND_WAIVE_PRIORITY | Context.BIND_IMPORTANT);
+        mContext.startService(i);
+        mContext.bindService(i, this, Context.BIND_WAIVE_PRIORITY | Context.BIND_IMPORTANT);
     }
 
     /**
