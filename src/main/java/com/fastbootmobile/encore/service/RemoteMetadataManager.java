@@ -27,6 +27,7 @@ import android.media.MediaMetadataEditor;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
 import android.os.Build;
+import android.util.Log;
 
 import com.fastbootmobile.encore.model.Album;
 import com.fastbootmobile.encore.model.Artist;
@@ -41,6 +42,7 @@ import com.fastbootmobile.encore.utils.Utils;
  */
 @TargetApi(Build.VERSION_CODES.KITKAT)
 public class RemoteMetadataManager implements IRemoteMetadataManager {
+    private static final String TAG = "RemoteMetadataManager";
 
     private RemoteControlClient mClient;
     private final ComponentName mEventReceiver;
@@ -136,7 +138,18 @@ public class RemoteMetadataManager implements IRemoteMetadataManager {
             }
         }
 
-        metadata.apply();
+        try {
+            metadata.apply();
+        } catch (IllegalStateException e) {
+            // Can happen in a race condition where the bitmap gets released during the
+            // memory allocation of the notification. Remove the bitmap.
+            metadata.putBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK, null);
+            try {
+                metadata.apply();
+            } catch (IllegalStateException e1) {
+                Log.e(TAG, "Cannot apply Remote Metadata values", e);
+            }
+        }
         mClient.setTransportControlFlags(getActionsFlags(hasNext));
 
         AvrcpUtils.notifyMetaChanged(mContext, song.getRef().hashCode(),
