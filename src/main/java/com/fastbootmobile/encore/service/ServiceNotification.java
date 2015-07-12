@@ -284,14 +284,13 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
     private void updateAlbumArt() {
         if (mCurrentSong != null) {
-            mCurrentArt = null;
             if (mArtTask != null) {
                 mArtTask.cancel(true);
             }
 
             final int artSize = mContext.getResources().getDimensionPixelSize(R.dimen.notification_expanded_art_size);
             mArtTask = AlbumArtHelper.retrieveAlbumArt(mContext.getApplicationContext().getResources(),
-                    this, mCurrentSong, artSize, false);
+                    this, mCurrentSong, artSize, true);
         }
     }
 
