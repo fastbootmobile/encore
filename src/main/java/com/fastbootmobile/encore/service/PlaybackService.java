@@ -636,6 +636,12 @@ public class PlaybackService extends Service
             }
 
             final Song next = mPlaybackQueue.get(mCurrentTrack);
+            if (next == null) {
+                // Song got unavailable, retry the next one
+                nextImpl();
+                return;
+            }
+
             final ProviderIdentifier providerId = next.getProvider();
 
             if (mCurrentPlayingProvider != null && !next.getProvider().equals(mCurrentPlayingProvider)) {
