@@ -33,7 +33,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -186,16 +185,17 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
         mSearchBox.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    final String query = v.getText().toString();
+                final String query = v.getText().toString();
 
-                    Intent intent = new Intent(getActivity(), SearchActivity.class);
-                    intent.setAction(Intent.ACTION_SEARCH);
-                    intent.putExtra(SearchManager.QUERY, query);
-                    v.getContext().startActivity(intent);
-                    return true;
-                }
-                return false;
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                intent.setAction(Intent.ACTION_SEARCH);
+                intent.putExtra(SearchManager.QUERY, query);
+                v.getContext().startActivity(intent);
+
+                // Clear the box once searched
+                v.setText(null);
+
+                return true;
             }
         });
 
