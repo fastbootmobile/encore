@@ -357,13 +357,17 @@ public class PlaybackQueueFragment extends Fragment {
                 } else {
                     logger.addLike(tag.song);
 
-                    AutoMixBucket bucket = AutoMixManager.getDefault().getCurrentPlayingBucket();
+                    final AutoMixBucket bucket = AutoMixManager.getDefault().getCurrentPlayingBucket();
                     if (bucket != null) {
-                        try {
-                            bucket.notifyLike();
-                        } catch (EchoNestException e) {
-                            Log.e(TAG, "Unable to notify like event to EchoNest");
-                        }
+                        new Thread() {
+                            public void run() {
+                                try {
+                                    bucket.notifyLike();
+                                } catch (EchoNestException e) {
+                                    Log.e(TAG, "Unable to notify like event to EchoNest");
+                                }
+                            }
+                        }.start();
                     }
 
                     ((ImageView) v).setImageResource(R.drawable.ic_thumbs_up);
@@ -384,13 +388,17 @@ public class PlaybackQueueFragment extends Fragment {
                 } else {
                     logger.addDislike(tag.song);
 
-                    AutoMixBucket bucket = AutoMixManager.getDefault().getCurrentPlayingBucket();
+                    final AutoMixBucket bucket = AutoMixManager.getDefault().getCurrentPlayingBucket();
                     if (bucket != null) {
-                        try {
-                            bucket.notifyDislike();
-                        } catch (EchoNestException e) {
-                            Log.e(TAG, "Unable to notify dislike event to EchoNest");
-                        }
+                        new Thread() {
+                            public void run() {
+                                try {
+                                    bucket.notifyDislike();
+                                } catch (EchoNestException e) {
+                                    Log.e(TAG, "Unable to notify dislike event to EchoNest");
+                                }
+                            }
+                        }.start();
                     }
 
                     ((ImageView) v).setImageResource(R.drawable.ic_thumb_down);
