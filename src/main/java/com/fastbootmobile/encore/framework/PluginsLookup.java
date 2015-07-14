@@ -151,7 +151,9 @@ public class PluginsLookup {
         InjectedProviderConnection pc = new InjectedProviderConnection(provider, mContext, name,
                 author, pkg, service, configClass);
         pc.setListener(mProviderListener);
-        mConnections.add(pc);
+        synchronized (mConnections) {
+            mConnections.add(pc);
+        }
 
         return pc;
     }
