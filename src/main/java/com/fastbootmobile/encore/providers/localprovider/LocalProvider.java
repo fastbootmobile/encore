@@ -166,36 +166,43 @@ public class LocalProvider {
         mContentResolver.registerContentObserver(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, true, mArtistContentObserver);
         mSetup = true;
 
-        fetchAlbums();
-        fetchArtists();
-        fetchSongs();
-        fetchPlaylists(null);
-        fetchGenres(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI);
+        try {
+            fetchAlbums();
+            fetchArtists();
+            fetchSongs();
+            fetchPlaylists(null);
+            fetchGenres(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI);
+        } catch (SecurityException e) {
+            // This happened once on a Nexus Player.
+            Log.e(TAG, "Security exception when fetching local provider data! " + e.getMessage());
+        }
     }
 
     private void fetchAlbums() {
         final String[] proj = {"*"};
         final Cursor cur = mContentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, proj, null, null, null);
-        final int albumName = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM);
-        final int artistName = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ARTIST);
-        final int albumKey = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM_KEY);
-        final int yearKey = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.LAST_YEAR);
-        final int idKey = cur.getColumnIndex(MediaStore.Audio.Albums._ID);
+        if (cur != null) {
+            final int albumName = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM);
+            final int artistName = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ARTIST);
+            final int albumKey = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM_KEY);
+            final int yearKey = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.LAST_YEAR);
+            final int idKey = cur.getColumnIndex(MediaStore.Audio.Albums._ID);
 
-        if (cur.moveToFirst()) {
-            do {
-                Album album = new Album(PREFIX_ALBUM + getAlbumUniqueName(cur.getString(albumKey), cur.getString(artistName)));
-                album.setName(cur.getString(albumName));
-                album.setIsLoaded(true);
-                album.setSourceLogo(PluginService.LOGO_REF);
-                album.setYear(cur.getInt(yearKey));
+            if (cur.moveToFirst()) {
+                do {
+                    Album album = new Album(PREFIX_ALBUM + getAlbumUniqueName(cur.getString(albumKey), cur.getString(artistName)));
+                    album.setName(cur.getString(albumName));
+                    album.setIsLoaded(true);
+                    album.setSourceLogo(PluginService.LOGO_REF);
+                    album.setYear(cur.getInt(yearKey));
 
-                // we get the contents of the album
-                mAlbums.put(album.getRef(), album);
-                mAlbumsId.put(album.getRef(), cur.getLong(idKey));
-            } while (cur.moveToNext());
+                    // we get the contents of the album
+                    mAlbums.put(album.getRef(), album);
+                    mAlbumsId.put(album.getRef(), cur.getLong(idKey));
+                } while (cur.moveToNext());
+            }
+            cur.close();
         }
-        cur.close();
 
         // first we poll all the musics
         mContentResolver.registerContentObserver(mUri, true, mSongContentObserver);
@@ -339,23 +346,25 @@ public class LocalProvider {
         // now we poll the genre
         cur = mContentResolver.query(uri, proj, null, null, null);
 
-        if (cur.moveToFirst()) {
-            final int idKey = cur.getColumnIndex(MediaStore.Audio.Genres._ID);
-            final int nameKey = cur.getColumnIndex(MediaStore.Audio.Genres.NAME);
-            do {
-                Long id = cur.getLong(idKey);
-                String name = cur.getString(nameKey);
-                Genre genre = new Genre("local:genre:" + MD5(name));
-                genre.setName(name);
-                genre.setIsLoaded(true);
-                getGenreSongs(MediaStore.Audio.Genres.Members.getContentUri("external", id), genre);
-                genre.setSourceLogo(PluginService.LOGO_REF);
-                mGenres.put(genre.getRef(), genre);
-                mCallback.genreUpdated(genre);
-            } while (cur.moveToNext());
-        }
+        if (cur != null) {
+            if (cur.moveToFirst()) {
+                final int idKey = cur.getColumnIndex(MediaStore.Audio.Genres._ID);
+                final int nameKey = cur.getColumnIndex(MediaStore.Audio.Genres.NAME);
+                do {
+                    Long id = cur.getLong(idKey);
+                    String name = cur.getString(nameKey);
+                    Genre genre = new Genre("local:genre:" + MD5(name));
+                    genre.setName(name);
+                    genre.setIsLoaded(true);
+                    getGenreSongs(MediaStore.Audio.Genres.Members.getContentUri("external", id), genre);
+                    genre.setSourceLogo(PluginService.LOGO_REF);
+                    mGenres.put(genre.getRef(), genre);
+                    mCallback.genreUpdated(genre);
+                } while (cur.moveToNext());
+            }
 
-        cur.close();
+            cur.close();
+        }
     }
 
     public boolean getSongArt(String songRef, IArtCallback callback) {
@@ -477,16 +486,18 @@ public class LocalProvider {
     public Artist getAlbumsArtists(Artist artist, Uri uri) {
         Cursor albums = mContentResolver.query(uri, null, null, null, null);
 
-        // we only need the name of the album to generate the album local id
-        final int albumKey = albums.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM_KEY);
+        if (albums != null) {
+            // we only need the name of the album to generate the album local id
+            final int albumKey = albums.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM_KEY);
 
-        if (albums.moveToFirst()) {
-            do {
-                artist.addAlbum(PREFIX_ALBUM + getAlbumUniqueName(albums.getString(albumKey), artist.getName()));
-            } while (albums.moveToNext());
+            if (albums.moveToFirst()) {
+                do {
+                    artist.addAlbum(PREFIX_ALBUM + getAlbumUniqueName(albums.getString(albumKey), artist.getName()));
+                } while (albums.moveToNext());
+            }
+
+            albums.close();
         }
-
-        albums.close();
         return artist;
     }
 
@@ -506,19 +517,21 @@ public class LocalProvider {
         };
         Cursor tracks = mContentResolver.query(uri, projection, MediaStore.Audio.Media.IS_MUSIC + " != 0 ", null, null);
 
-        int artistKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Playlists.Members.ARTIST_KEY);
-        int albumKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Playlists.Members.ALBUM_KEY);
-        int titleKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Playlists.Members.TITLE_KEY);
+        if (tracks != null) {
+            int artistKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Playlists.Members.ARTIST_KEY);
+            int albumKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Playlists.Members.ALBUM_KEY);
+            int titleKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Playlists.Members.TITLE_KEY);
 
-        if (tracks.moveToFirst()) {
-            do {
-                // for each song we get its unique name and we put it in the playlist
-                play.addSong(PREFIX_SONG + getSongUniqueName(tracks.getString(artistKeyColumn),
-                        tracks.getString(albumKeyColumn),
-                        tracks.getString(titleKeyColumn)));
-            } while (tracks.moveToNext());
+            if (tracks.moveToFirst()) {
+                do {
+                    // for each song we get its unique name and we put it in the playlist
+                    play.addSong(PREFIX_SONG + getSongUniqueName(tracks.getString(artistKeyColumn),
+                            tracks.getString(albumKeyColumn),
+                            tracks.getString(titleKeyColumn)));
+                } while (tracks.moveToNext());
+            }
+            tracks.close();
         }
-        tracks.close();
         return play;
     }
 
@@ -535,17 +548,19 @@ public class LocalProvider {
                 MediaStore.Audio.Genres.Members.ALBUM_KEY
         };
         Cursor tracks = mContentResolver.query(uri, projection, MediaStore.Audio.Media.IS_MUSIC + " != 0 ", null, null);
-        int titleKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Genres.Members.TITLE_KEY);
-        int artistKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Genres.Members.ARTIST_KEY);
-        int albumKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Genres.Members.ALBUM_KEY);
-        if (tracks.moveToNext()) {
-            do {
-                genre.addSong(PREFIX_SONG + getSongUniqueName(tracks.getString(artistKeyColumn),
-                        tracks.getString(albumKeyColumn),
-                        tracks.getString(titleKeyColumn)));
-            } while (tracks.moveToNext());
+        if (tracks != null) {
+            int titleKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Genres.Members.TITLE_KEY);
+            int artistKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Genres.Members.ARTIST_KEY);
+            int albumKeyColumn = tracks.getColumnIndex(MediaStore.Audio.Genres.Members.ALBUM_KEY);
+            if (tracks.moveToNext()) {
+                do {
+                    genre.addSong(PREFIX_SONG + getSongUniqueName(tracks.getString(artistKeyColumn),
+                            tracks.getString(albumKeyColumn),
+                            tracks.getString(titleKeyColumn)));
+                } while (tracks.moveToNext());
+            }
+            tracks.close();
         }
-        tracks.close();
     }
 
     /**
@@ -850,17 +865,19 @@ public class LocalProvider {
         };
         //we get the length of the playlist to set the PLAY_ORDER right
         Cursor cur = mContentResolver.query(uri, cols, null, null, null);
-        cur.moveToFirst();
-        final int base = cur.getInt(0);
-        cur.close();
-        contentValues.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, base);
-        contentValues.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, getLocalSong(songRef).getId());
-        uri = mContentResolver.insert(uri, contentValues);
-        if (uri != null) {
-            pl.addSong(songRef);
-            mPlaylists.put(playlistRef, pl);
-            //we update the app
-            mCallback.playlistUpdated(pl);
+        if (cur != null) {
+            cur.moveToFirst();
+            final int base = cur.getInt(0);
+            cur.close();
+            contentValues.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, base);
+            contentValues.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, getLocalSong(songRef).getId());
+            uri = mContentResolver.insert(uri, contentValues);
+            if (uri != null) {
+                pl.addSong(songRef);
+                mPlaylists.put(playlistRef, pl);
+                //we update the app
+                mCallback.playlistUpdated(pl);
+            }
         }
 
         return uri != null;
