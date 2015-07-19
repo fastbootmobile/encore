@@ -280,4 +280,11 @@
 
     <string name="toast_song_added_to_queue">Chanson ajoutée à la file.</string>
     <string name="toast_album_added_to_queue">Album ajouté à la file.</string>
+
+    <string name="welcome_featurette_title">Ne manquez pas :</string>
+    <string name="welcome_featurette_effects"><b>Effets audio :</b> Améliorez votre qualité audio à l\'aide d\'un égaliseur ou un bass boost.</string>
+    <string name="welcome_featurette_automix"><b>Automix :</b> Créez des playlistes automatiquement en fonction de vos goûts.</string>
+    <string name="welcome_featurette_recognition"><b>Reconnaissance :</b> Identifiez ce que vous entendez ou chantez, et ajoutez-le à vos playlistes.</string>
+    <string name="welcome_featurette_drivemode"><b>Mode voiture :</b> Découvrez une interface adaptée à l\'utilisation d\'Encore en voiture.</string>
+    <string name="welcome_featurette_more">Et bien d\'autres !</string>
 </resources>
