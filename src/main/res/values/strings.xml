@@ -280,4 +280,10 @@
     <string name="ln_landcard_sfx_title">Pimp your sound with effects</string>
     <string name="toast_song_added_to_queue">Song added to queue.</string>
     <string name="toast_album_added_to_queue">Album added to queue.</string>
+    <string name="welcome_featurette_title">Don\'t miss out:</string>
+    <string name="welcome_featurette_effects"><b>Audio effects:</b> Enhance your audio quality with equalizers, bass boosters, and more.</string>
+    <string name="welcome_featurette_automix"><b>Automix:</b> Create automated mixes based on your taste and a few parameters.</string>
+    <string name="welcome_featurette_recognition"><b>Recognition:</b> Recognize what you hear or sing, and add it directly in your playlists.</string>
+    <string name="welcome_featurette_drivemode"><b>Drive Mode:</b> Enhanced experience when using Encore in your car with gestures and voice control.</string>
+    <string name="welcome_featurette_more">And much more!</string>
 </resources>
