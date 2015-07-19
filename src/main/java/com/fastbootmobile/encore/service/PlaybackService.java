@@ -638,7 +638,11 @@ public class PlaybackService extends Service
             final Song next = mPlaybackQueue.get(mCurrentTrack);
             if (next == null) {
                 // Song got unavailable, retry the next one
+                boolean shouldFlush = mShouldFlushBuffers;
                 nextImpl();
+
+                // Keep the flush status
+                mShouldFlushBuffers = shouldFlush;
                 return;
             }
 
@@ -695,7 +699,11 @@ public class PlaybackService extends Service
                             Log.w(TAG, "Track not yet loaded: " + next.getRef() + ", delaying");
                         } else if (!next.isAvailable()) {
                             // Track is not available, skip to the next one
+                            boolean shouldFlush = mShouldFlushBuffers;
                             nextImpl();
+
+                            // Keep the flush status
+                            mShouldFlushBuffers = shouldFlush;
                         } else {
                             mCurrentTrackWaitLoading = false;
                             mCurrentPlayingProvider = providerId;
