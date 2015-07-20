@@ -286,4 +286,5 @@
     <string name="welcome_featurette_recognition"><b>Recognition:</b> Recognize what you hear or sing, and add it directly in your playlists.</string>
     <string name="welcome_featurette_drivemode"><b>Drive Mode:</b> Enhanced experience when using Encore in your car with gestures and voice control.</string>
     <string name="welcome_featurette_more">And much more!</string>
+    <string name="search_no_results">No results</string>
 </resources>
