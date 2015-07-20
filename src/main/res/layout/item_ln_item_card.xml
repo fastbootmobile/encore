@@ -21,7 +21,8 @@
         android:clickable="false"
         android:elevation="@dimen/card_elevation"
         android:focusable="false"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/llLnItemCard">
 
         <com.fastbootmobile.encore.app.ui.AlbumArtImageView
             android:id="@+id/ivAlbumArt"
@@ -38,10 +39,10 @@
             android:ellipsize="end"
             android:focusable="false"
             android:maxLines="2"
-            android:padding="@dimen/listen_now_card_padding"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/white"
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            android:layout_margin="@dimen/listen_now_card_padding" />
     </LinearLayout>
 
 </FrameLayout>
