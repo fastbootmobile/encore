@@ -25,6 +25,7 @@ import com.echonest.api.v4.Playlist;
 import com.echonest.api.v4.Song;
 import com.echonest.api.v4.Track;
 
+import com.fastbootmobile.encore.framework.PlaybackProxy;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
 
 import java.util.List;
@@ -327,10 +328,14 @@ public class AutoMixBucket {
      * Notifies the system that the user liked this song and want more
      */
     public void notifyLike() throws EchoNestException {
-        try {
-            mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.favorite_song, "last");
-        } catch (Exception e) {
-            Log.e(TAG, "Cannot feedback like", e);
+        com.fastbootmobile.encore.model.Song currentTrack = PlaybackProxy.getCurrentTrack();
+        if (currentTrack != null) {
+            String songRef = currentTrack.getRef();
+            try {
+                mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.favorite_song, songRef);
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot feedback like", e);
+            }
         }
     }
 
@@ -339,10 +344,14 @@ public class AutoMixBucket {
      * @throws EchoNestException
      */
     public void notifyDislike() throws EchoNestException {
-        try {
-            mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.ban_song, "last");
-        } catch (Exception e) {
-            Log.e(TAG, "Cannot feedback dislike", e);
+        com.fastbootmobile.encore.model.Song currentTrack = PlaybackProxy.getCurrentTrack();
+        if (currentTrack != null) {
+            String songRef = currentTrack.getRef();
+            try {
+                mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.ban_song, songRef);
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot feedback dislike", e);
+            }
         }
     }
 
@@ -350,10 +359,14 @@ public class AutoMixBucket {
      * Notifies the system that the user skipped the current song so he might not like it
      */
     public void notifySkip() throws EchoNestException {
-        try {
-            mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.skip_song, "last");
-        } catch (Exception e) {
-            Log.e(TAG, "Cannot feedback skip", e);
+        com.fastbootmobile.encore.model.Song currentTrack = PlaybackProxy.getCurrentTrack();
+        if (currentTrack != null) {
+            String songRef = currentTrack.getRef();
+            try {
+                mPlaylistSession.feedback(DynamicPlaylistSession.FeedbackType.skip_song, songRef);
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot feedback skip", e);
+            }
         }
     }
 }
