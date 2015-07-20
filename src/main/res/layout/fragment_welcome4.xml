@@ -53,4 +53,70 @@
         android:layout_marginBottom="@dimen/welcome_button_margin"
         android:textSize="@dimen/welcome_button_font"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_featurette_title"
+        android:id="@+id/tvFeaturetteTitle"
+        android:layout_alignBottom="@+id/ivBackground"
+        android:layout_alignLeft="@+id/tvTitle"
+        android:layout_alignStart="@+id/tvTitle"
+        android:textColor="@color/white"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_featurette_effects"
+        android:id="@+id/tvFeaturette1"
+        android:layout_below="@+id/ivBackground"
+        android:layout_alignLeft="@+id/tvFeaturetteTitle"
+        android:layout_alignStart="@+id/tvFeaturetteTitle"
+        android:textColor="@color/white"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_featurette_automix"
+        android:id="@+id/tvFeaturette2"
+        android:layout_below="@+id/tvFeaturette1"
+        android:layout_alignLeft="@+id/tvFeaturette1"
+        android:layout_alignStart="@+id/tvFeaturette1"
+        android:textColor="@color/white"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_featurette_recognition"
+        android:id="@+id/tvFeaturette3"
+        android:textColor="@color/white"
+        android:layout_below="@+id/tvFeaturette2"
+        android:layout_alignLeft="@+id/tvFeaturette2"
+        android:layout_alignStart="@+id/tvFeaturette2"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_featurette_drivemode"
+        android:id="@+id/tvFeaturette4"
+        android:textColor="@color/white"
+        android:layout_below="@+id/tvFeaturette3"
+        android:layout_alignLeft="@+id/tvFeaturette3"
+        android:layout_alignStart="@+id/tvFeaturette3"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_featurette_more"
+        android:id="@+id/tvFeaturetteMore"
+        android:textColor="@color/white"
+        android:layout_below="@+id/tvFeaturette4"
+        android:layout_alignLeft="@+id/tvFeaturette4"
+        android:layout_alignStart="@+id/tvFeaturette4"
+        android:layout_marginTop="4dp" />
+
 </RelativeLayout>

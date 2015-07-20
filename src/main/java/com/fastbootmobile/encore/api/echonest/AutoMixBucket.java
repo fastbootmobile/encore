@@ -152,9 +152,11 @@ public class AutoMixBucket {
             if (mAdventurousness >= 0) {
                 p.setAdventurousness(mAdventurousness);
             }
-            if (mSongTypes != null) {
+            if (mSongTypes != null && mSongTypes.length > 0) {
                 for (String songType : mSongTypes) {
-                    p.add("song_type", songType);
+                    if (!songType.isEmpty()) {
+                        p.add("song_type", songType);
+                    }
                 }
             }
 
