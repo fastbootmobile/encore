@@ -291,7 +291,8 @@ public class AutoMixBucket {
                 try {
                     nextTracks = mPlaylistSession.next();
                 } catch (EchoNestException e) {
-                    if (e.getCode() == -1 && e.getMessage().contains("timed out") && tries < 5) {
+                    if ((e.getCode() == -1 && e.getMessage().contains("timed out") || e.getMessage().contains("Parse Exception"))
+                            && tries < 5) {
                         tries++;
                     } else {
                         throw e;
