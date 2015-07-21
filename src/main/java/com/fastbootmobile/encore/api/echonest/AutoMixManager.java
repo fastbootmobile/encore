@@ -68,23 +68,25 @@ public class AutoMixManager extends BasePlaybackCallback {
         mGetNextTrackRunnable = new Runnable() {
             @Override
             public void run() {
-                try {
-                    // Fetch the next track
-                    String nextTrackRef = mCurrentPlayingBucket.getNextTrack();
+                for (int i = 0; i < 2; ++i) {
+                    try {
+                        // Fetch the next track
+                        String nextTrackRef = mCurrentPlayingBucket.getNextTrack();
 
-                    // Queue it
-                    Song nextTrack = getSongFromRef(nextTrackRef);
-                    if (nextTrack != null) {
-                        // TODO: Check if track is available, to avoid queuing tracks that
-                        // aren't available. The tricky part here is unloaded tracks (for Spotify
-                        // at least) shows as not available until they're loaded. We'd need to
-                        // add some callback handling too.
-                        PlaybackProxy.queueSong(nextTrack, false);
+                        // Queue it
+                        Song nextTrack = getSongFromRef(nextTrackRef);
+                        if (nextTrack != null) {
+                            // TODO: Check if track is available, to avoid queuing tracks that
+                            // aren't available. The tricky part here is unloaded tracks (for Spotify
+                            // at least) shows as not available until they're loaded. We'd need to
+                            // add some callback handling too.
+                            PlaybackProxy.queueSong(nextTrack, false);
+                        }
+
+                        mActiveBucketRefHistory.add(nextTrackRef);
+                    } catch (EchoNestException e) {
+                        Log.e(TAG, "Unable to get next track", e);
                     }
-
-                    mActiveBucketRefHistory.add(nextTrackRef);
-                } catch (EchoNestException e) {
-                    Log.e(TAG, "Unable to get next track", e);
                 }
             }
         };
@@ -344,14 +346,16 @@ public class AutoMixManager extends BasePlaybackCallback {
     @Override
     public void onSongStarted(boolean buffering, Song s) throws RemoteException {
         if (mCurrentPlayingBucket != null) {
-            if (!mActiveBucketRefHistory.contains(s.getRef())) {
-                // Song started is not the one we expected from the bucket, cancel automix playback
-                Log.d(TAG, "Cancelling automix playback: Playing " + s.getRef() + ", not in active history");
-                mCurrentPlayingBucket = null;
-            } else {
-                // We're playing the song we expected to be played from the bucket, fetch the next one.
-                Log.d(TAG, "Fetching next automix track");
-                new Thread(mGetNextTrackRunnable).start();
+            if (buffering) {
+                if (!mActiveBucketRefHistory.contains(s.getRef())) {
+                    // Song started is not the one we expected from the bucket, cancel automix playback
+                    Log.d(TAG, "Cancelling automix playback: Playing " + s.getRef() + ", not in active history");
+                    mCurrentPlayingBucket = null;
+                } else {
+                    // We're playing the song we expected to be played from the bucket, fetch the next one.
+                    Log.d(TAG, "Fetching next automix track");
+                    new Thread(mGetNextTrackRunnable).start();
+                }
             }
         }
     }
