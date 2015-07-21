@@ -310,7 +310,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
 
     @Override
     public int getItemCount() {
-        return mPlaylists.size();
+        return mPlaylists.size() + 1;
     }
 
     @Override

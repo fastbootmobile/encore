@@ -13,8 +13,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 18
-        versionName "0.4.6"
+        versionCode 19
+        versionName "0.5.0"
         renderscriptTargetApi 18
         multiDexEnabled false
     }

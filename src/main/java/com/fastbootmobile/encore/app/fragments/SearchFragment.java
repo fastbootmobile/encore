@@ -64,6 +64,8 @@ public class SearchFragment extends Fragment implements ILocalCallback {
     private static final int MSG_UPDATE_RESULTS = 1;
     private static final int MSG_DATASET_CHANGED = 2;
 
+    public static final String KEY_SPECIAL_MORE = "__encore_plus";
+
     private SearchAdapter mAdapter;
     private Handler mHandler;
     private List<SearchResult> mSearchResults;
@@ -180,92 +182,97 @@ public class SearchFragment extends Fragment implements ILocalCallback {
 
     private void onSongClick(int i) {
         SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.SONG, i);
-        final int numSongEntries = mAdapter.getChildrenCount(SearchAdapter.SONG);
-        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-
-        if (i == Math.max(10, numSongEntries + 1)) {
-            // More
+        if (entry.ref.equals(KEY_SPECIAL_MORE)) {
+            mAdapter.setGroupMaxCount(SearchAdapter.SONG,
+                    mAdapter.getGroupMaxCount(SearchAdapter.SONG) + 5);
         } else {
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+
             Song song = aggregator.retrieveSong(entry.ref, entry.identifier);
             if (song != null) {
                 PlaybackProxy.playSong(song);
             }
         }
-
     }
 
     private void onAlbumClick(int i, View v) {
-        SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
-        Bitmap hero = ((MaterialTransitionDrawable) holder.albumArtImageView.getDrawable()).getFinalDrawable().getBitmap();
-        int color = 0xffffff;
-        if (hero != null) {
-            Palette palette = Palette.generate(hero);
-            Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
-            Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();
+        if (mAdapter.getChildrenCount(SearchAdapter.ALBUM) > 1) {
+            SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
+            Bitmap hero = ((MaterialTransitionDrawable) holder.albumArtImageView.getDrawable()).getFinalDrawable().getBitmap();
+            int color = 0xffffff;
+            if (hero != null) {
+                Palette palette = Palette.generate(hero);
+                Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
+                Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();
 
-            if (darkVibrantColor != null) {
-                color = darkVibrantColor.getRgb();
-            } else if (darkMutedColor != null) {
-                color = darkMutedColor.getRgb();
-            } else {
-                color = getResources().getColor(R.color.default_album_art_background);
+                if (darkVibrantColor != null) {
+                    color = darkVibrantColor.getRgb();
+                } else if (darkMutedColor != null) {
+                    color = darkMutedColor.getRgb();
+                } else {
+                    color = getResources().getColor(R.color.default_album_art_background);
+                }
             }
-        }
-        SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.ALBUM, i);
-        Intent intent = AlbumActivity.craftIntent(getActivity(), hero, entry.ref,
-                entry.identifier, color);
+            SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.ALBUM, i);
+            Intent intent = AlbumActivity.craftIntent(getActivity(), hero, entry.ref,
+                    entry.identifier, color);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ImageView ivCover = holder.albumArtImageView;
-            ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                    new Pair<View, String>(ivCover, "itemImage"));
-            getActivity().startActivity(intent, opt.toBundle());
-        } else {
-            startActivity(intent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                ImageView ivCover = holder.albumArtImageView;
+                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                        new Pair<View, String>(ivCover, "itemImage"));
+                getActivity().startActivity(intent, opt.toBundle());
+            } else {
+                startActivity(intent);
+            }
         }
     }
 
     private void onArtistClick(int i, View v) {
-        SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
-        ImageView ivCover = holder.albumArtImageView;
-        Bitmap hero = ((MaterialTransitionDrawable) ivCover.getDrawable()).getFinalDrawable().getBitmap();
-        int color = 0xffffff;
-        if (hero != null) {
-            Palette palette = Palette.generate(hero);
-            Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
-            Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();
+        if (mAdapter.getChildrenCount(SearchAdapter.ARTIST) > 1) {
+            SearchAdapter.ViewHolder holder = (SearchAdapter.ViewHolder) v.getTag();
+            ImageView ivCover = holder.albumArtImageView;
+            Bitmap hero = ((MaterialTransitionDrawable) ivCover.getDrawable()).getFinalDrawable().getBitmap();
+            int color = 0xffffff;
+            if (hero != null) {
+                Palette palette = Palette.generate(hero);
+                Palette.Swatch darkVibrantColor = palette.getDarkVibrantSwatch();
+                Palette.Swatch darkMutedColor = palette.getDarkMutedSwatch();
 
-            if (darkVibrantColor != null) {
-                color = darkVibrantColor.getRgb();
-            } else if (darkMutedColor != null) {
-                color = darkMutedColor.getRgb();
-            } else {
-                color = getResources().getColor(R.color.default_album_art_background);
+                if (darkVibrantColor != null) {
+                    color = darkVibrantColor.getRgb();
+                } else if (darkMutedColor != null) {
+                    color = darkMutedColor.getRgb();
+                } else {
+                    color = getResources().getColor(R.color.default_album_art_background);
+                }
             }
-        }
-        Intent intent = new Intent(getActivity(), ArtistActivity.class);
-        intent.putExtra(ArtistActivity.EXTRA_ARTIST, mAdapter.getChild(SearchAdapter.ARTIST, i).ref);
-        intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
-                color);
-        Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, hero);
+            Intent intent = new Intent(getActivity(), ArtistActivity.class);
+            intent.putExtra(ArtistActivity.EXTRA_ARTIST, mAdapter.getChild(SearchAdapter.ARTIST, i).ref);
+            intent.putExtra(ArtistActivity.EXTRA_BACKGROUND_COLOR,
+                    color);
+            Utils.queueBitmap(ArtistActivity.BITMAP_ARTIST_HERO, hero);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                    ivCover, "itemImage");
-            getActivity().startActivity(intent, opt.toBundle());
-        } else {
-            startActivity(intent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                ActivityOptions opt = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                        ivCover, "itemImage");
+                getActivity().startActivity(intent, opt.toBundle());
+            } else {
+                startActivity(intent);
+            }
         }
     }
 
     private void onPlaylistClick(int i, View v) {
-        final ProviderAggregator aggregator = ProviderAggregator.getDefault();
-        final SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.PLAYLIST, i);
-        Playlist playlist = aggregator.retrievePlaylist(entry.ref, entry.identifier);
-        if (playlist != null) {
-            Intent intent = PlaylistActivity.craftIntent(getActivity(), playlist,
-                    ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap());
-            startActivity(intent);
+        if (mAdapter.getChildrenCount(SearchAdapter.PLAYLIST) > 1) {
+            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
+            final SearchAdapter.SearchEntry entry = mAdapter.getChild(SearchAdapter.PLAYLIST, i);
+            Playlist playlist = aggregator.retrievePlaylist(entry.ref, entry.identifier);
+            if (playlist != null) {
+                Intent intent = PlaylistActivity.craftIntent(getActivity(), playlist,
+                        ((BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder)).getBitmap());
+                startActivity(intent);
+            }
         }
     }
 

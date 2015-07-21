@@ -400,7 +400,7 @@ public class AlbumArtCache {
         if (!providerprovides) {
             // Hardcode warning: Image providers tend to return... funny images for empty
             // names and '<unknown>'. We just don't want images for them then.
-            if (artist.getName().isEmpty() || "<unknown>".equals(artist.getName())) {
+            if (artist.getName() == null || artist.getName().isEmpty() || "<unknown>".equals(artist.getName())) {
                 return false;
             }
 

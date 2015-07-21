@@ -34,6 +34,7 @@ import com.fastbootmobile.encore.app.AlbumActivity;
 import com.fastbootmobile.encore.app.ArtistActivity;
 import com.fastbootmobile.encore.app.R;
 import com.fastbootmobile.encore.app.fragments.PlaylistChooserFragment;
+import com.fastbootmobile.encore.app.fragments.SearchFragment;
 import com.fastbootmobile.encore.app.ui.AlbumArtImageView;
 import com.fastbootmobile.encore.framework.PlaybackProxy;
 import com.fastbootmobile.encore.framework.PluginsLookup;
@@ -67,6 +68,8 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     public final static int SONG = 2;
     public final static int PLAYLIST = 3;
     public final static int COUNT = 4;
+
+    private int mMaxCount[] = new int[COUNT];
 
     private List<SearchResult> mSearchResults;
     private List<SearchEntry> mAllSongs;
@@ -159,6 +162,10 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         mSortedArtists = new ArrayList<>();
         mSortedPlaylists = new ArrayList<>();
         mSortedAlbums = new ArrayList<>();
+
+        for (int i = 0; i < COUNT; ++i) {
+            mMaxCount[i] = 5;
+        }
     }
 
     /**
@@ -190,6 +197,19 @@ public class SearchAdapter extends BaseExpandableListAdapter {
                 return 0;
             }
         }
+    }
+
+    public void setGroupMaxCount(int group, int count) {
+        mMaxCount[group] = count;
+
+        synchronized (this) {
+            computeResultsList();
+        }
+        notifyDataSetChanged();
+    }
+
+    public int getGroupMaxCount(int group) {
+        return mMaxCount[group];
     }
 
     /**
@@ -253,14 +273,11 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         Map<ProviderIdentifier, Integer> playlistsPerProvider = new HashMap<>();
         Map<ProviderIdentifier, Integer> artistsPerProvider = new HashMap<>();
 
-        // Use 5 results from each provider for each category
-        final int maxResults = 5;
-
         for (SearchEntry song : mAllSongs) {
             Integer providerCountInteger = songsPerProvider.get(song.identifier);
             int providerCount = providerCountInteger == null ? 0 : providerCountInteger;
 
-            if (providerCount < maxResults) {
+            if (providerCount < mMaxCount[SONG]) {
                 mSortedSongs.add(song);
                 songsPerProvider.put(song.identifier, providerCount + 1);
             }
@@ -270,7 +287,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             Integer providerCountInteger = albumsPerProvider.get(album.identifier);
             int providerCount = providerCountInteger == null ? 0 : providerCountInteger;
 
-            if (providerCount < maxResults) {
+            if (providerCount < mMaxCount[ALBUM]) {
                 mSortedAlbums.add(album);
                 albumsPerProvider.put(album.identifier, providerCount + 1);
             }
@@ -280,7 +297,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             Integer providerCountInteger = artistsPerProvider.get(artist.identifier);
             int providerCount = providerCountInteger == null ? 0 : providerCountInteger;
 
-            if (providerCount < maxResults) {
+            if (providerCount < mMaxCount[ARTIST]) {
                 mSortedArtists.add(artist);
                 artistsPerProvider.put(artist.identifier, providerCount + 1);
             }
@@ -290,7 +307,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             Integer providerCountInteger = playlistsPerProvider.get(playlist.identifier);
             int providerCount = providerCountInteger == null ? 0 : providerCountInteger;
 
-            if (providerCount < maxResults) {
+            if (providerCount < mMaxCount[PLAYLIST]) {
                 mSortedPlaylists.add(playlist);
                 playlistsPerProvider.put(playlist.identifier, providerCount + 1);
             }
@@ -330,7 +347,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             List children = getGroup(i);
 
             if (children != null) {
-                return children.size();
+                return children.size() + 1;
             } else {
                 return 0;
             }
@@ -368,7 +385,13 @@ public class SearchAdapter extends BaseExpandableListAdapter {
     @Override
     public SearchEntry getChild(int i, int i2) {
         synchronized (this) {
-            return getGroup(i).get(i2);
+            try {
+                return getGroup(i).get(i2);
+            } catch (IndexOutOfBoundsException e) {
+                // TODO: Better heuristic
+                // This is the "More" item in search
+                return new SearchEntry(SearchFragment.KEY_SPECIAL_MORE, null);
+            }
         }
     }
 
@@ -486,15 +509,18 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             if (i2 == getChildrenCount(i) - 1) {
                 tag.albumArtImageView.setVisibility(View.INVISIBLE);
                 tag.ivSource.setVisibility(View.GONE);
-                tag.tvTitle.setText(R.string.more);
+                if (getChildrenCount(i) == 1) {
+                    tag.tvTitle.setText(R.string.search_no_results);
+                } else {
+                    tag.tvTitle.setText(R.string.more);
+                }
                 tag.tvSubtitle.setText(null);
-
-                // TODO: More is not working for now, we'll see that later, so hide it
-                tag.vRoot.setVisibility(View.GONE);
+                tag.ivOverflow.setVisibility(View.GONE);
+                tag.content = null;
             } else {
-                tag.vRoot.setVisibility(View.VISIBLE);
                 tag.albumArtImageView.setVisibility(View.VISIBLE);
                 tag.ivSource.setVisibility(View.VISIBLE);
+                tag.ivOverflow.setVisibility(View.VISIBLE);
 
                 switch (i) {
                     case ARTIST:
@@ -572,9 +598,9 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             return;
         }
 
-        if (artist != null && artist.isLoaded()) {
+        if (artist != null && (artist.isLoaded() || artist.getName() != null)) {
             tag.tvTitle.setText(artist.getName());
-            tag.tvSubtitle.setText("");
+            tag.tvSubtitle.setText(null);
             tag.albumArtImageView.loadArtForArtist(artist);
             tag.content = artist;
             tag.sourceLogo = PluginsLookup.getDefault().getCachedLogo(tag.vRoot.getResources(), artist);

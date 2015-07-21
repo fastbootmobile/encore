@@ -287,4 +287,6 @@
     <string name="welcome_featurette_recognition"><b>Reconnaissance :</b> Identifiez ce que vous entendez ou chantez, et ajoutez-le à vos playlistes.</string>
     <string name="welcome_featurette_drivemode"><b>Mode voiture :</b> Découvrez une interface adaptée à l\'utilisation d\'Encore en voiture.</string>
     <string name="welcome_featurette_more">Et bien d\'autres !</string>
+
+    <string name="search_no_results">Aucun résultat trouvé</string>
 </resources>

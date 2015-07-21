@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.fastbootmobile.encore.app.AlbumActivity;
@@ -266,7 +267,7 @@ public class ListenNowAdapter extends BaseAdapter {
         @Override
         protected final void bind() {
             ItemCardViewHolder itemVh = (ItemCardViewHolder) mViewHolder;
-            itemVh.tvCaption.setBackgroundColor(0xFF333333);
+            itemVh.llLnItemCard.setBackgroundColor(0xFF333333);
 
             if (mEntity instanceof Song) {
                 itemVh.ivAlbumArt.loadArtForSong((Song) mEntity);
@@ -496,6 +497,7 @@ public class ListenNowAdapter extends BaseAdapter {
     }
 
     private static class ItemCardViewHolder extends BaseViewHolder {
+        LinearLayout llLnItemCard;
         AlbumArtImageView ivAlbumArt;
         TextView tvCaption;
         int bgColor = 0xFF333333;
@@ -508,6 +510,9 @@ public class ListenNowAdapter extends BaseAdapter {
             tvCaption = (TextView) vRoot.findViewById(R.id.tvCaption);
             if (tvCaption == null) throw new IllegalStateException("Caption view is null");
 
+            llLnItemCard = (LinearLayout) vRoot.findViewById(R.id.llLnItemCard);
+            if (llLnItemCard == null) throw new IllegalStateException("Linear layout view is null");
+
             ivAlbumArt.setOnArtLoadedListener(new AlbumArtImageView.OnArtLoadedListener() {
                 @Override
                 public void onArtLoaded(AlbumArtImageView view, BitmapDrawable drawable) {
@@ -517,11 +522,11 @@ public class ListenNowAdapter extends BaseAdapter {
                             public void onGenerated(Palette palette) {
                                 int color = palette.getDarkMutedColor(0xFF333333);
                                 TransitionDrawable td = new TransitionDrawable(new Drawable[] {
-                                        tvCaption.getBackground(),
+                                        llLnItemCard.getBackground(),
                                         new ColorDrawable(color)
                                 });
                                 bgColor = color;
-                                tvCaption.setBackground(td);
+                                llLnItemCard.setBackground(td);
                                 td.startTransition(300);
                             }
                         });
