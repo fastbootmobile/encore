@@ -172,17 +172,15 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      * Clear all the results from the adapter
      */
     public void clear() {
-        synchronized (this) {
-            mSearchResults.clear();
-            mAllSongs.clear();
-            mAllArtists.clear();
-            mAllPlaylists.clear();
-            mAllAlbums.clear();
-            mSortedSongs.clear();
-            mSortedArtists.clear();
-            mSortedPlaylists.clear();
-            mSortedAlbums.clear();
-        }
+        mSearchResults.clear();
+        mAllSongs.clear();
+        mAllArtists.clear();
+        mAllPlaylists.clear();
+        mAllAlbums.clear();
+        mSortedSongs.clear();
+        mSortedArtists.clear();
+        mSortedPlaylists.clear();
+        mSortedAlbums.clear();
     }
 
     /**
@@ -190,21 +188,17 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public int getGroupCount() {
-        synchronized (this) {
-            if (mSearchResults.size() > 0) {
-                return COUNT;
-            } else {
-                return 0;
-            }
+        if (mSearchResults.size() > 0) {
+            return COUNT;
+        } else {
+            return 0;
         }
     }
 
     public void setGroupMaxCount(int group, int count) {
         mMaxCount[group] = count;
 
-        synchronized (this) {
-            computeResultsList();
-        }
+        computeResultsList();
         notifyDataSetChanged();
     }
 
@@ -257,9 +251,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
             }
         }
 
-        synchronized (this) {
-            computeResultsList();
-        }
+        computeResultsList();
     }
 
     private void computeResultsList() {
@@ -321,21 +313,19 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      * @return True if the search results contains the entity, false otherwise
      */
     public boolean contains(BoundEntity ent) {
-        synchronized (this) {
-            SearchEntry compare = new SearchEntry(ent.getRef(), ent.getProvider());
+        SearchEntry compare = new SearchEntry(ent.getRef(), ent.getProvider());
 
-            if (ent instanceof Song) {
-                return mAllSongs.contains(compare);
-            } else if (ent instanceof Artist) {
-                return mAllArtists.contains(compare);
-            } else if (ent instanceof Album) {
-                return mAllAlbums.contains(compare);
-            } else if (ent instanceof Playlist) {
-                return mAllPlaylists.contains(compare);
-            }
-
-            return false;
+        if (ent instanceof Song) {
+            return mAllSongs.contains(compare);
+        } else if (ent instanceof Artist) {
+            return mAllArtists.contains(compare);
+        } else if (ent instanceof Album) {
+            return mAllAlbums.contains(compare);
+        } else if (ent instanceof Playlist) {
+            return mAllPlaylists.contains(compare);
         }
+
+        return false;
     }
 
     /**
@@ -343,14 +333,12 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public int getChildrenCount(int i) {
-        synchronized (this) {
-            List children = getGroup(i);
+        List children = getGroup(i);
 
-            if (children != null) {
-                return children.size() + 1;
-            } else {
-                return 0;
-            }
+        if (children != null) {
+            return children.size() + 1;
+        } else {
+            return 0;
         }
     }
 
@@ -359,23 +347,21 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public List<SearchEntry> getGroup(int i) {
-        synchronized (this) {
-            switch (i) {
-                case ARTIST:
-                    return mSortedArtists;
+        switch (i) {
+            case ARTIST:
+                return mSortedArtists;
 
-                case ALBUM:
-                    return mSortedAlbums;
+            case ALBUM:
+                return mSortedAlbums;
 
-                case SONG:
-                    return mSortedSongs;
+            case SONG:
+                return mSortedSongs;
 
-                case PLAYLIST:
-                    return mSortedPlaylists;
+            case PLAYLIST:
+                return mSortedPlaylists;
 
-                default:
-                    return null;
-            }
+            default:
+                return null;
         }
     }
 
@@ -384,14 +370,12 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public SearchEntry getChild(int i, int i2) {
-        synchronized (this) {
-            try {
-                return getGroup(i).get(i2);
-            } catch (IndexOutOfBoundsException e) {
-                // TODO: Better heuristic
-                // This is the "More" item in search
-                return new SearchEntry(SearchFragment.KEY_SPECIAL_MORE, null);
-            }
+        try {
+            return getGroup(i).get(i2);
+        } catch (IndexOutOfBoundsException e) {
+            // TODO: Better heuristic
+            // This is the "More" item in search
+            return new SearchEntry(SearchFragment.KEY_SPECIAL_MORE, null);
         }
     }
 
@@ -408,18 +392,16 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public long getChildId(int i, int i2) {
-        synchronized (this) {
-            if (i < getGroupCount() && i2 < getChildrenCount(i)) {
-                try {
-                    return (long) getChild(i, i2).hashCode();
-                } catch (IndexOutOfBoundsException e) {
-                    // It's the 'more' item
-                    // TODO: Better heuristic for that
-                    return -2;
-                }
-            } else {
-                return -1;
+        if (i < getGroupCount() && i2 < getChildrenCount(i)) {
+            try {
+                return (long) getChild(i, i2).hashCode();
+            } catch (IndexOutOfBoundsException e) {
+                // It's the 'more' item
+                // TODO: Better heuristic for that
+                return -2;
             }
+        } else {
+            return -1;
         }
     }
 
@@ -436,48 +418,46 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public View getGroupView(int i, boolean b, View view, ViewGroup parent) {
-        synchronized (this) {
-            final Context ctx = parent.getContext();
-            assert ctx != null;
+        final Context ctx = parent.getContext();
+        assert ctx != null;
 
-            GroupViewHolder holder;
+        GroupViewHolder holder;
 
-            if (view == null) {
-                LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                view = inflater.inflate(R.layout.item_group_separator, parent, false);
-                holder = new GroupViewHolder();
-                holder.tvSearchSeparator = (TextView) view.findViewById(R.id.tv_search_separator);
-                view.setTag(holder);
-            } else {
-                holder = (GroupViewHolder) view.getTag();
-            }
-
-            int title;
-            switch (i) {
-                case ARTIST:
-                    title = R.string.tab_artists;
-                    break;
-                case ALBUM:
-                    title = R.string.albums;
-                    break;
-                case SONG:
-                    title = R.string.songs;
-                    break;
-                case PLAYLIST:
-                    title = R.string.tab_playlists;
-                    break;
-                default:
-                    throw new RuntimeException("Unknown group index: " + i);
-            }
-
-            holder.tvSearchSeparator.setText(title);
-            if (getChildrenCount(i) == 0) {
-                view.setVisibility(View.GONE);
-            } else {
-                view.setVisibility(View.VISIBLE);
-            }
-            return view;
+        if (view == null) {
+            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = inflater.inflate(R.layout.item_group_separator, parent, false);
+            holder = new GroupViewHolder();
+            holder.tvSearchSeparator = (TextView) view.findViewById(R.id.tv_search_separator);
+            view.setTag(holder);
+        } else {
+            holder = (GroupViewHolder) view.getTag();
         }
+
+        int title;
+        switch (i) {
+            case ARTIST:
+                title = R.string.tab_artists;
+                break;
+            case ALBUM:
+                title = R.string.albums;
+                break;
+            case SONG:
+                title = R.string.songs;
+                break;
+            case PLAYLIST:
+                title = R.string.tab_playlists;
+                break;
+            default:
+                throw new RuntimeException("Unknown group index: " + i);
+        }
+
+        holder.tvSearchSeparator.setText(title);
+        if (getChildrenCount(i) == 0) {
+            view.setVisibility(View.GONE);
+        } else {
+            view.setVisibility(View.VISIBLE);
+        }
+        return view;
     }
 
     /**
@@ -485,63 +465,61 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public View getChildView(int i, int i2, boolean b, View root, ViewGroup parent) {
-        synchronized (this) {
-            final Context ctx = parent.getContext();
-            assert ctx != null;
-            if (root == null) {
-                LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                root = inflater.inflate(R.layout.item_search_element, parent, false);
-                ViewHolder holder = new ViewHolder();
-                holder.albumArtImageView = (AlbumArtImageView) root.findViewById(R.id.ivCover);
-                holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
-                holder.tvSubtitle = (TextView) root.findViewById(R.id.tvSubTitle);
-                holder.divider = (TextView) root.findViewById(R.id.divider);
-                holder.ivSource = (ImageView) root.findViewById(R.id.ivSource);
-                holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
-                holder.vRoot = root;
+        final Context ctx = parent.getContext();
+        assert ctx != null;
+        if (root == null) {
+            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            root = inflater.inflate(R.layout.item_search_element, parent, false);
+            ViewHolder holder = new ViewHolder();
+            holder.albumArtImageView = (AlbumArtImageView) root.findViewById(R.id.ivCover);
+            holder.tvTitle = (TextView) root.findViewById(R.id.tvTitle);
+            holder.tvSubtitle = (TextView) root.findViewById(R.id.tvSubTitle);
+            holder.divider = (TextView) root.findViewById(R.id.divider);
+            holder.ivSource = (ImageView) root.findViewById(R.id.ivSource);
+            holder.ivOverflow = (ImageView) root.findViewById(R.id.ivOverflow);
+            holder.vRoot = root;
 
-                holder.ivOverflow.setTag(holder);
-                root.setTag(holder);
-            }
-
-            final ViewHolder tag = (ViewHolder) root.getTag();
-
-            if (i2 == getChildrenCount(i) - 1) {
-                tag.albumArtImageView.setVisibility(View.INVISIBLE);
-                tag.ivSource.setVisibility(View.GONE);
-                if (getChildrenCount(i) == 1) {
-                    tag.tvTitle.setText(R.string.search_no_results);
-                } else {
-                    tag.tvTitle.setText(R.string.more);
-                }
-                tag.tvSubtitle.setText(null);
-                tag.ivOverflow.setVisibility(View.GONE);
-                tag.content = null;
-            } else {
-                tag.albumArtImageView.setVisibility(View.VISIBLE);
-                tag.ivSource.setVisibility(View.VISIBLE);
-                tag.ivOverflow.setVisibility(View.VISIBLE);
-
-                switch (i) {
-                    case ARTIST:
-                        updateArtistTag(i2, tag);
-                        break;
-                    case ALBUM:
-                        updateAlbumTag(i2, tag);
-                        break;
-                    case SONG:
-                        updateSongTag(i2, tag);
-                        break;
-                    case PLAYLIST:
-                        updatePlaylistTag(i2, tag);
-                        break;
-                    default:
-                        Log.e(TAG, "Unknown group " + i);
-                        break;
-                }
-            }
-            return root;
+            holder.ivOverflow.setTag(holder);
+            root.setTag(holder);
         }
+
+        final ViewHolder tag = (ViewHolder) root.getTag();
+
+        if (i2 == getChildrenCount(i) - 1) {
+            tag.albumArtImageView.setVisibility(View.INVISIBLE);
+            tag.ivSource.setVisibility(View.GONE);
+            if (getChildrenCount(i) == 1) {
+                tag.tvTitle.setText(R.string.search_no_results);
+            } else {
+                tag.tvTitle.setText(R.string.more);
+            }
+            tag.tvSubtitle.setText(null);
+            tag.ivOverflow.setVisibility(View.GONE);
+            tag.content = null;
+        } else {
+            tag.albumArtImageView.setVisibility(View.VISIBLE);
+            tag.ivSource.setVisibility(View.VISIBLE);
+            tag.ivOverflow.setVisibility(View.VISIBLE);
+
+            switch (i) {
+                case ARTIST:
+                    updateArtistTag(i2, tag);
+                    break;
+                case ALBUM:
+                    updateAlbumTag(i2, tag);
+                    break;
+                case SONG:
+                    updateSongTag(i2, tag);
+                    break;
+                case PLAYLIST:
+                    updatePlaylistTag(i2, tag);
+                    break;
+                default:
+                    Log.e(TAG, "Unknown group " + i);
+                    break;
+            }
+        }
+        return root;
     }
 
     /**
@@ -702,9 +680,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public boolean isChildSelectable(int i, int i2) {
-        synchronized (this) {
-            return mSearchResults.size() > 0 && getGroup(i) != null;
-        }
+        return mSearchResults.size() > 0 && getGroup(i) != null;
     }
 
     private void showArtistOverflow(final Context context, View parent, final Artist artist) {
