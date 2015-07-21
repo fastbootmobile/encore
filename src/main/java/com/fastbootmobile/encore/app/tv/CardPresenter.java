@@ -3,6 +3,8 @@ package com.fastbootmobile.encore.app.tv;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v4.graphics.ColorUtils;
@@ -35,6 +37,11 @@ public class CardPresenter extends Presenter {
     private Context mContext;
     private Drawable mDefaultCardImage;
     private AlbumArtTask mArtTask;
+    private Handler mHandler;
+
+    public CardPresenter() {
+        mHandler = new Handler(Looper.getMainLooper());
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
@@ -158,19 +165,18 @@ public class CardPresenter extends Presenter {
 
         cardView.setMainImage(mDefaultCardImage);
         if (item instanceof BoundEntity) {
-            if (mArtTask != null) {
-                // Cancel the previous task if any
-                mArtTask.cancel(true);
-            }
-
             mArtTask = AlbumArtHelper.retrieveAlbumArt(mContext.getResources(), new AlbumArtHelper.AlbumArtListener() {
                 @Override
-                public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
+                public void onArtLoaded(final RecyclingBitmapDrawable output, BoundEntity request) {
                     if (output != null) {
-                        Palette palette = Palette.from(output.getBitmap()).generate();
-                        cardView.setMainImage(output, true);
-                        cardView.setTag(palette);
-                        updateCardBackgroundColor(cardView, cardView.isSelected());
+                        mHandler.post(new Runnable() {
+                            public void run() {
+                                Palette palette = Palette.from(output.getBitmap()).generate();
+                                cardView.setMainImage(output, true);
+                                cardView.setTag(palette);
+                                updateCardBackgroundColor(cardView, cardView.isSelected());
+                            }
+                        });
                     }
                 }
             }, (BoundEntity) item, CARD_WIDTH, false);
@@ -185,9 +191,5 @@ public class CardPresenter extends Presenter {
         cardView.setMainImage(null);
         cardView.setTag(null);
         updateCardBackgroundColor(cardView, false);
-
-        if (mArtTask != null) {
-            mArtTask.cancel(true);
-        }
     }
 }

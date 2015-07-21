@@ -357,6 +357,7 @@ public class TvActivity extends Activity {
         // Randomly generate recommendations
         ArrayObjectAdapter recommendedRowAdapter = new ArrayObjectAdapter(new CardPresenter());
         int entriesCount = 0;
+        List<String> knownRefs = new ArrayList<>();
 
         for (Pair<String, ProviderIdentifier> ref : availableReferences) {
             if (entriesCount == 20) break;
@@ -370,16 +371,18 @@ public class TvActivity extends Activity {
             }
 
             final int type = rand.nextInt(2);
-            if (type == TYPE_ALBUM && song.getAlbum() == null
-                    || type == TYPE_ARTIST && song.getArtist() == null) {
+            if (type == TYPE_ALBUM && (song.getAlbum() == null || knownRefs.contains(song.getAlbum()))
+                    || type == TYPE_ARTIST && (song.getArtist() == null || knownRefs.contains(song.getArtist()))) {
                 // We don't have the requested track info, so skip it
                 continue;
             }
 
             if (type == TYPE_ALBUM) {
+                knownRefs.add(song.getAlbum());
                 Album album = aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
                 recommendedRowAdapter.add(album);
             } else if (type == TYPE_ARTIST) {
+                knownRefs.add(song.getArtist());
                 Artist artist = aggregator.retrieveArtist(song.getArtist(), song.getProvider());
                 recommendedRowAdapter.add(artist);
             }
