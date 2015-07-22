@@ -136,8 +136,10 @@ public class PlayingBarView extends RelativeLayout {
             boolean contains = false;
             List<Song> playbackQueue = PlaybackProxy.getCurrentPlaybackQueue();
             for (Song song : playbackQueue) {
+                if (song == null) continue;
+                
                 for (Artist artist : a) {
-                    if (artist.getRef().equals(song.getArtist())) {
+                    if (artist != null && artist.getRef().equals(song.getArtist())) {
                         contains = true;
                         break;
                     }
