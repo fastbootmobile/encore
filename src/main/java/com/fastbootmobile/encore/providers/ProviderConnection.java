@@ -28,7 +28,9 @@ import com.fastbootmobile.encore.service.NativeHub;
 /**
  * Represents a connection to an audio provider (music source) service
  */
-public class ProviderConnection extends AbstractProviderConnection implements AudioHostSocket.AudioHostSocketListener {
+public class ProviderConnection extends AbstractProviderConnection
+        implements AudioHostSocket.AudioHostSocketListener,
+        Comparable<ProviderConnection> {
     private static final String TAG = "ProviderConnection";
 
     // Don't ship with this set to false
@@ -171,5 +173,10 @@ public class ProviderConnection extends AbstractProviderConnection implements Au
         // assign it.
         // TODO: Is this still needed?
         Log.e(TAG, "Socket error");
+    }
+
+    @Override
+    public int compareTo(ProviderConnection o) {
+        return getServiceName().compareTo(o.getServiceName());
     }
 }

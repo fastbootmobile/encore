@@ -79,7 +79,6 @@ public class ListenNowAdapter extends BaseAdapter {
     }
 
     public void removeItem(ListenNowItem item) {
-        Log.e(TAG, "Item " + item);
         mItems.remove(item);
     }
 

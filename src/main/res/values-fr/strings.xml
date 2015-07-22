@@ -289,4 +289,7 @@
     <string name="welcome_featurette_more">Et bien d\'autres !</string>
 
     <string name="search_no_results">Aucun résultat trouvé</string>
+    <string name="ln_landcard_plugin_installed_title">%s a été installé</string>
+    <string name="ln_landcard_plugin_installed_body_configure">Ce plug-in a été installé avec succès, mais peut nécessiter une configuration. Tapez ci-dessous pour le configurer.</string>
+    <string name="ln_landcard_plugin_installed_body">Ce plug-in a été installé avec succès, et peut dès maintenat être utilisé.</string>
 </resources>

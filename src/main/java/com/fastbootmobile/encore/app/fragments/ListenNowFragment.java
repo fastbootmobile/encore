@@ -62,6 +62,7 @@ import com.fastbootmobile.encore.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A simple {@link Fragment} subclass showing ideas of tracks and albums to listen to.
@@ -241,6 +242,53 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
                         }
                     });
                     mAdapter.addItem(item);
+                }
+
+                // Put cards for new providers
+                Set<ProviderConnection> newPlugins = PluginsLookup.getDefault().getNewPlugins();
+                if (newPlugins != null) {
+                    for (final ProviderConnection plugin : newPlugins) {
+                        final ListenNowAdapter.CardItem item;
+                        if (plugin.getConfigurationActivity() == null) {
+                            item = new ListenNowAdapter.CardItem(String.format(getString(R.string.ln_landcard_plugin_installed_title), plugin.getProviderName()),
+                                    getString(R.string.ln_landcard_plugin_installed_body),
+                                    getString(R.string.ln_landcard_dismiss), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    prefs.edit().putBoolean(LANDCARD_SOUND_EFFECTS, true).apply();
+                                    // This item must always be the first of the list
+                                    mAdapter.removeItem((ListenNowAdapter.ListenNowItem) v.getTag());
+                                    mAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        } else {
+                            item = new ListenNowAdapter.CardItem(String.format(getString(R.string.ln_landcard_plugin_installed_title), plugin.getProviderName()),
+                                    getString(R.string.ln_landcard_plugin_installed_body_configure),
+                                    getString(R.string.ln_landcard_dismiss),
+                                    new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            prefs.edit().putBoolean(LANDCARD_SOUND_EFFECTS, true).apply();
+                                            // This item must always be the first of the list
+                                            mAdapter.removeItem((ListenNowAdapter.ListenNowItem) v.getTag());
+                                            mAdapter.notifyDataSetChanged();
+                                        }
+                                    }, getString(R.string.configure),
+                                    new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            mAdapter.removeItem((ListenNowAdapter.ListenNowItem) v.getTag());
+                                            mAdapter.notifyDataSetChanged();
+
+                                            Intent intent = new Intent();
+                                            intent.setClassName(plugin.getPackage(), plugin.getConfigurationActivity());
+                                            startActivity(intent);
+                                        }
+                                    });
+                        }
+                        mAdapter.addItem(item);
+                    }
+                    PluginsLookup.getDefault().resetNewPlugins();
                 }
 
                 // Get the list of songs first
