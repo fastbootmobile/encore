@@ -53,6 +53,8 @@
     <!-- Plugins permissions -->
     <permission android:name="com.fastbootmobile.encore.PROVIDER" android:protectionLevel="normal" />
 
+    <uses-permission android:name="com.fastbootmobile.encore.PROVIDER"/>
+
     <!-- Main application declaration -->
     <application
         android:name="com.fastbootmobile.encore.app.OmniMusic"
