@@ -1211,6 +1211,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     holder = (AlbumViewHolder) viewRoot.getTag();
                     holder.album = album;
                     llAlbums.addView(viewRoot);
+
+                    AlbumGroupClickListener listener =
+                            new AlbumGroupClickListener(album, mParent.mRootView, llAlbums, viewRoot, this);
+                    viewRoot.setOnClickListener(listener);
                 } else {
                     viewRoot = inflater.inflate(R.layout.exp_group_albums, llAlbums, false);
                     llAlbums.addView(viewRoot);

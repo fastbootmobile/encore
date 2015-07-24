@@ -287,4 +287,7 @@
     <string name="welcome_featurette_drivemode"><b>Drive Mode:</b> Enhanced experience when using Encore in your car with gestures and voice control.</string>
     <string name="welcome_featurette_more">And much more!</string>
     <string name="search_no_results">No results</string>
+    <string name="ln_landcard_plugin_installed_title">%s has been installed</string>
+    <string name="ln_landcard_plugin_installed_body_configure">This plug-in has been successfully installed, but might require some setup. Tap the button below to configure this plugin.</string>
+    <string name="ln_landcard_plugin_installed_body">This plug-in has been successfully installed and may now be used.</string>
 </resources>

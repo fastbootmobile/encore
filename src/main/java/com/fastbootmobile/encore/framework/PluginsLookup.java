@@ -19,6 +19,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -48,6 +49,8 @@ import com.fastbootmobile.encore.service.PlaybackService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Plugins Manager class
@@ -65,6 +68,9 @@ public class PluginsLookup {
     public static final String DATA_AUTHOR = "author";
     public static final String DATA_CONFIGCLASS = "configclass";
 
+    private static final String PREFS_PLUGINS = "plugins";
+    private static final String PREF_KNOWN_PLUGINS = "known_plugins";
+
     public interface ConnectionListener {
         void onServiceConnected(AbstractProviderConnection connection);
         void onServiceDisconnected(AbstractProviderConnection connection);
@@ -79,6 +85,7 @@ public class PluginsLookup {
     private ProviderConnection mMultiProviderConnection;
     private Handler mHandler;
     private int mServiceUsage;
+    private Set<ProviderConnection> mNewServices;
     private ServiceConnection mPlaybackConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
@@ -127,6 +134,7 @@ public class PluginsLookup {
         mConnections = new ArrayList<>();
         mDSPConnections = new ArrayList<>();
         mConnectionListeners = new ArrayList<>();
+        mNewServices = new TreeSet<>();
         mHandler = new Handler();
     }
 
@@ -210,6 +218,36 @@ public class PluginsLookup {
     public void updatePlugins() {
         fetchProviders();
         fetchDSPs();
+
+        SharedPreferences prefs = mContext.getSharedPreferences(PREFS_PLUGINS, 0);
+        Set<String> knownPlugins = new TreeSet<>(prefs.getStringSet(PREF_KNOWN_PLUGINS, new TreeSet<String>()));
+
+        if (knownPlugins.size() == 0) {
+            // First start, fill in all plugins
+            for (ProviderConnection connection : mConnections) {
+                knownPlugins.add(connection.getServiceName());
+            }
+
+            prefs.edit().putStringSet(PREF_KNOWN_PLUGINS, knownPlugins).apply();
+        } else {
+            // Check if there's any new plugin
+            for (ProviderConnection connection : mConnections) {
+                if (!knownPlugins.contains(connection.getServiceName())) {
+                    knownPlugins.add(connection.getServiceName());
+                    mNewServices.add(connection);
+                }
+            }
+
+            prefs.edit().putStringSet(PREF_KNOWN_PLUGINS, knownPlugins).apply();
+        }
+    }
+
+    public Set<ProviderConnection> getNewPlugins() {
+        return mNewServices;
+    }
+
+    public void resetNewPlugins() {
+        mNewServices.clear();
     }
 
     public void releasePlaybackServiceIfPossible() {

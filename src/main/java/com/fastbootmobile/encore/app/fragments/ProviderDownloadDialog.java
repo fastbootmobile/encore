@@ -60,7 +60,7 @@ public class ProviderDownloadDialog extends DialogFragment {
                             if (mDSP) {
                                 intent.setData(Uri.parse("market://search?q=Encore+DSP"));
                             } else {
-                                intent.setData(Uri.parse("market://search?q=Encore+Provider"));
+                                intent.setData(Uri.parse("market://search?q=Encore+Plugin"));
                             }
                             getActivity().startActivity(intent);
                         }
