@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -251,23 +252,27 @@ public class PlayingBarView extends RelativeLayout implements SharedPreferences.
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (!mCallbackRegistered) {
-                    mCallbackRegistered = true;
-                    PlaybackProxy.addCallback(mPlaybackCallback);
-                }
-
-                // We delay check if we have a queue and/or are playing to leave time to the
-                // playback service to get up
-                if (mTracksLayout != null) {
-                    mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
-                    mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
-                    mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
-                }
+                ensurePlaybackCallback();
             }
         }, 500);
 
         getContext().getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
                 .registerOnSharedPreferenceChangeListener(this);
+    }
+
+    private void ensurePlaybackCallback() {
+        if (!mCallbackRegistered) {
+            mCallbackRegistered = true;
+            PlaybackProxy.addCallback(mPlaybackCallback);
+        }
+
+        // We delay check if we have a queue and/or are playing to leave time to the
+        // playback service to get up
+        if (mTracksLayout != null) {
+            mHandler.sendEmptyMessage(MSG_UPDATE_QUEUE);
+            mHandler.sendEmptyMessage(MSG_UPDATE_FAB);
+            mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEK, SEEK_BAR_UPDATE_DELAY);
+        }
     }
 
     @Override
@@ -364,6 +369,7 @@ public class PlayingBarView extends RelativeLayout implements SharedPreferences.
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (SettingsKeys.KEY_PLAYBAR_HIDDEN.equals(key)) {
+            ensurePlaybackCallback();
             updatePlayingQueue();
         }
     }
@@ -394,8 +400,11 @@ public class PlayingBarView extends RelativeLayout implements SharedPreferences.
         List<Song> queue;
         int currentIndex;
 
+        int playbackState = PlaybackProxy.getState();
+        boolean isPlaying = ((playbackState == PlaybackService.STATE_BUFFERING)
+                || (playbackState == PlaybackService.STATE_PLAYING));
         boolean hidden = getContext().getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
-                .getBoolean(SettingsKeys.KEY_PLAYBAR_HIDDEN, false);
+                .getBoolean(SettingsKeys.KEY_PLAYBAR_HIDDEN, false) && !isPlaying;
 
         // Do a copy
         queue = new ArrayList<>(PlaybackProxy.getCurrentPlaybackQueue());
@@ -743,6 +752,8 @@ public class PlayingBarView extends RelativeLayout implements SharedPreferences.
             getContext().getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
                     .edit().putBoolean(SettingsKeys.KEY_PLAYBAR_HIDDEN, true).apply();
 
+            mCallbackRegistered = false;
+
             animate().translationX(getTranslationX() > 0 ? getMeasuredWidth() : -getMeasuredWidth())
                     .setDuration(200).setListener(new Animator.AnimatorListener() {
                 @Override
@@ -764,6 +775,8 @@ public class PlayingBarView extends RelativeLayout implements SharedPreferences.
                 @Override
                 public void onAnimationCancel(Animator animation) {
                     animate().setListener(null);
+                    setTranslationX(0);
+                    setAlpha(1.0f);
                     mIsHiding = false;
                 }
 
