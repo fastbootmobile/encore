@@ -40,10 +40,14 @@ public class MaterialReelBaseFragment extends Fragment {
     private ImageView mBarPlay;
     private ImageView mBarNext;
     private ImageView mBarPrevious;
+    private ImageView mBarRepeat;
+    private ImageView mBarShuffle;
     private TextView mBarTitle;
     private float mSourceDeltaX;
     protected boolean mMaterialBarVisible = false;
     protected PlayPauseDrawable mBarDrawable;
+
+    private static final float DISABLED_OPACITY = 0.5f;
 
     public MaterialReelBaseFragment() {
         mHandler = new Handler();
@@ -55,6 +59,8 @@ public class MaterialReelBaseFragment extends Fragment {
         mBarPlay = (ImageView) rootView.findViewById(R.id.btnBarPlay);
         mBarNext = (ImageView) rootView.findViewById(R.id.btnBarNext);
         mBarPrevious = (ImageView) rootView.findViewById(R.id.btnBarPrevious);
+        mBarRepeat = (ImageView) rootView.findViewById(R.id.btnBarRepeat);
+        mBarShuffle = (ImageView) rootView.findViewById(R.id.btnBarShuffle);
         mBarTitle = (TextView) rootView.findViewById(R.id.tvBarTitle);
 
         mBarDrawable = new PlayPauseDrawable(getResources(), 1);
@@ -75,6 +81,22 @@ public class MaterialReelBaseFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 PlaybackProxy.previous();
+            }
+        });
+        mBarRepeat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isRepeat = !PlaybackProxy.isRepeatMode();
+                PlaybackProxy.setRepeatMode(isRepeat);
+                v.setAlpha(isRepeat ? 1 : DISABLED_OPACITY);
+            }
+        });
+        mBarShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isShuffle = !PlaybackProxy.isShuffleMode();
+                PlaybackProxy.setShuffleMode(isShuffle);
+                v.setAlpha(isShuffle ? 1 : DISABLED_OPACITY);
             }
         });
     }
@@ -125,11 +147,25 @@ public class MaterialReelBaseFragment extends Fragment {
                         mBarPrevious.setTranslationX(16 * DP);
                         mBarPrevious.setScaleX(0);
                         mBarPrevious.setScaleY(0);
+                        mBarRepeat.setAlpha(0f);
+                        mBarRepeat.setTranslationX(-16 * DP);
+                        mBarRepeat.setScaleX(0);
+                        mBarRepeat.setScaleY(0);
+                        mBarShuffle.setAlpha(0f);
+                        mBarShuffle.setTranslationX(16 * DP);
+                        mBarShuffle.setScaleX(0);
+                        mBarShuffle.setScaleY(0);
 
                         mBarPlay.animate().alpha(1).setDuration(100).start();
                         mBarNext.animate().alpha(1).scaleX(1).scaleY(1)
                                 .translationX(0).setDuration(250).start();
+                        mBarRepeat.animate().alpha(PlaybackProxy.isRepeatMode() ? 1 : DISABLED_OPACITY)
+                                .scaleX(1).scaleY(1)
+                                .translationX(0).setDuration(250).start();
                         mBarPrevious.animate().alpha(1).translationX(0).scaleX(1).scaleY(1)
+                                .setDuration(250).start();
+                        mBarShuffle.animate().alpha(PlaybackProxy.isShuffleMode() ? 1 : DISABLED_OPACITY)
+                                .translationX(0).scaleX(1).scaleY(1)
                                 .setDuration(250).start();
                     }
                 }, 300);
@@ -161,16 +197,26 @@ public class MaterialReelBaseFragment extends Fragment {
                 mBarNext.setTranslationX(0);
                 mBarNext.setScaleX(1);
                 mBarNext.setScaleY(1);
+                mBarShuffle.setTranslationX(0);
+                mBarShuffle.setScaleX(1);
+                mBarShuffle.setScaleY(1);
                 mBarPrevious.setAlpha(1f);
                 mBarPrevious.setTranslationX(0);
                 mBarPrevious.setScaleX(1);
                 mBarPrevious.setScaleY(1);
+                mBarRepeat.setTranslationX(0);
+                mBarRepeat.setScaleX(1);
+                mBarRepeat.setScaleY(1);
 
                 mBarPlay.animate().alpha(0).setDuration(100).start();
                 mBarNext.animate().alpha(0).scaleX(0).scaleY(0)
                         .translationX(16 * DP).setDuration(250).start();
+                mBarRepeat.animate().alpha(0).scaleX(0).scaleY(0)
+                        .translationX(16 * DP).setDuration(250).start();
                 mBarPrevious.animate().alpha(0).translationX(-16 * DP).scaleX(0).scaleY(0)
                         .setDuration(250).start();
+                mBarShuffle.animate().alpha(0).scaleX(0).scaleY(0)
+                        .translationX(16 * DP).setDuration(250).start();
 
 
                 playFab.animate().setStartDelay(150)

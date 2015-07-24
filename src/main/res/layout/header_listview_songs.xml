@@ -70,6 +70,28 @@
             android:layout_marginBottom="8dp"
             android:gravity="center_vertical|center_horizontal"
             android:textAlignment="center"/>
+
+        <ImageView
+            style="@style/OmniMusic.Spec.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnBarRepeat"
+            android:src="@drawable/ic_replay_white"
+            android:layout_alignTop="@+id/btnBarPrevious"
+            android:layout_toLeftOf="@+id/btnBarPrevious"
+            android:scaleType="center"
+            android:layout_marginTop="3dp"/>
+
+        <ImageView
+            style="@style/OmniMusic.Spec.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnBarShuffle"
+            android:src="@drawable/ic_shuffle_white"
+            android:scaleType="center"
+            android:layout_alignTop="@+id/btnBarRepeat"
+            android:layout_toRightOf="@+id/btnBarNext"
+            android:layout_toEndOf="@+id/btnBarNext"/>
     </RelativeLayout>
 
 
