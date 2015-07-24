@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
@@ -66,7 +67,7 @@ import mbanje.kurt.fabbutton.FabButton;
 /**
  * ViewGroup for the sticky bottom playing bar
  */
-public class PlayingBarView extends RelativeLayout {
+public class PlayingBarView extends RelativeLayout implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = "PlayingBarView";
 
     // Delay after which the seek bar is updated (5Hz)
@@ -237,6 +238,9 @@ public class PlayingBarView extends RelativeLayout {
         PlaybackProxy.removeCallback(mPlaybackCallback);
         ProviderAggregator.getDefault().removeUpdateCallback(mProviderCallback);
         mCallbackRegistered = false;
+
+        getContext().getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
+                .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     public void onResume() {
@@ -259,6 +263,9 @@ public class PlayingBarView extends RelativeLayout {
                 }
             }
         }, 500);
+
+        getContext().getSharedPreferences(SettingsKeys.PREF_SETTINGS, 0)
+                .registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -350,6 +357,15 @@ public class PlayingBarView extends RelativeLayout {
         }
         return super.dispatchTouchEvent(ev);
     }
+
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (SettingsKeys.KEY_PLAYBAR_HIDDEN.equals(key)) {
+            updatePlayingQueue();
+        }
+    }
+
 
     public void updateSeekBar() {
         int state = PlaybackProxy.getState();
