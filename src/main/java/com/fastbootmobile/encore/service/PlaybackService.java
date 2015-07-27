@@ -834,14 +834,22 @@ public class PlaybackService extends Service
 
             seekImpl(0);
         } else {
-            // Go to the previous track
-            mCurrentTrack--;
-            if (mCurrentTrack < 0) {
-                if (mRepeatMode) {
-                    mCurrentTrack = mPlaybackQueue.size() - 1;
-                } else {
-                    mCurrentTrack = 0;
+            boolean retry = true;
+
+            while (retry) {
+                // Go to the previous track
+                mCurrentTrack--;
+                if (mCurrentTrack < 0) {
+                    if (mRepeatMode) {
+                        mCurrentTrack = mPlaybackQueue.size() - 1;
+                    } else {
+                        mCurrentTrack = 0;
+                    }
                 }
+
+                Song songToPlay = mPlaybackQueue.get(mCurrentTrack);
+                // If song is unavailable, try the next one
+                retry = songToPlay.isLoaded() && !songToPlay.isAvailable();
             }
 
             mNativeSink.setPaused(true);
