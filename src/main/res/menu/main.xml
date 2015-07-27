@@ -24,11 +24,6 @@
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/action_feedback"
-        android:title="@string/feedback"
-        app:showAsAction="never"/>
-
-    <item
         android:id="@+id/action_sleep_timer"
         android:title="@string/sleep_timer"
         app:showAsAction="never"/>
