@@ -15,14 +15,12 @@
 
 package com.fastbootmobile.encore.app.fragments;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -49,7 +47,6 @@ import android.widget.Toast;
 import com.dd.CircularProgressButton;
 import com.fastbootmobile.encore.app.AlbumActivity;
 import com.fastbootmobile.encore.app.AppActivity;
-import com.fastbootmobile.encore.app.ArtistActivity;
 import com.fastbootmobile.encore.app.PlaylistActivity;
 import com.fastbootmobile.encore.app.R;
 import com.fastbootmobile.encore.app.adapters.PlaylistAdapter;
@@ -82,7 +79,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass.
