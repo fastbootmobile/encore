@@ -56,7 +56,6 @@ public class DSPConnection extends AbstractProviderConnection {
      */
     @Override
     public void unbindService(NativeHub hub) {
-        Log.e(TAG, "unbindService(DSP): mIsBound=" + mIsBound + ", name=" + getProviderName() + ", socket=" + mAudioSocketName);
         if (mIsBound) {
             mBinder = null;
         }
