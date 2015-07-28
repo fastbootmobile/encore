@@ -1420,10 +1420,6 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                 tvTrackDuration = (TextView) view.findViewById(R.id.tvTrackDuration);
                 tvTrackName.setTypeface(null, Typeface.BOLD);
                 tvTrackDuration.setTypeface(null, Typeface.BOLD);
-            } else {
-                // This is perfectly normal, if the user hasn't unwrapped an album, the views won't be
-                // created.
-                Log.d(TAG, "No view for track " + s.getRef());
             }
 
             mPreviousSongGroup = view;
