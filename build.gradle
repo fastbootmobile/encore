@@ -35,7 +35,7 @@ android {
 
     productFlavors {
         production {
-            versionName defaultConfig.versionName
+            versionName defaultConfig.versionName + "-" + getDate()
         }
         dogfood {
             versionName defaultConfig.versionName + "-dogfood-" + getDate()
