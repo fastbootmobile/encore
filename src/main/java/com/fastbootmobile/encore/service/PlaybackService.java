@@ -847,6 +847,11 @@ public class PlaybackService extends Service
                     }
                 }
 
+                if (mCurrentTrack < 0 || mCurrentTrack >= mPlaybackQueue.size()) {
+                    retry = true;
+                    continue;
+                }
+
                 Song songToPlay = mPlaybackQueue.get(mCurrentTrack);
                 // If song is unavailable, try the next one
                 retry = songToPlay.isLoaded() && !songToPlay.isAvailable();

@@ -291,7 +291,7 @@ public class VoiceActionHelper implements VoiceCommander.ResultListener {
                                 }
                             }
                         }
-                    } else {
+                    } else if (artist.getName() != null) {
                         float percent = Utils.distancePercentage(request, artist.getName());
                         if (percent > bestMatchPercentage) {
                             List<Song> radio = Suggestor.getInstance().buildArtistRadio(artist);

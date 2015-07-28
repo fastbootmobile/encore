@@ -174,7 +174,9 @@ public class ListenNowFragment extends Fragment implements ILocalCallback {
 
     @Override
     public void onDetach() {
-        mItemsSetupThread.interrupt();
+        if (mItemsSetupThread != null && mItemsSetupThread.isAlive()) {
+            mItemsSetupThread.interrupt();
+        }
         super.onDetach();
     }
 

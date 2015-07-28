@@ -1199,7 +1199,10 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             }
 
             // Sort it from album names
-            Collections.sort(albums, mComparator);
+            try {
+                Collections.sort(albums, mComparator);
+            } catch (IllegalArgumentException ignore) {
+            }
 
             // Then inflate views
             final LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -1488,7 +1491,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (mLoadingSpinner != null && mArtistInfo != null) {
+                            if (mLoadingSpinner != null && mArtistInfo != null && !isDetached()) {
                                 mLoadingSpinner.setVisibility(View.GONE);
 
                                 if (bio != null) {

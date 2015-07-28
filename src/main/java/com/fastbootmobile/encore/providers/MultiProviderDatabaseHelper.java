@@ -110,9 +110,13 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     public Song getSong(String ref) throws RemoteException {
         ProviderIdentifier providerId = mRefProviderId.get(ref);
         if (providerId != null) {
-            IMusicProvider binder = PluginsLookup.getDefault().getProvider(providerId).getBinder();
-            if (binder != null)
-                return binder.getSong(ref);
+            ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerId);
+            if (connection != null) {
+                IMusicProvider binder = connection.getBinder();
+                if (binder != null) {
+                    return binder.getSong(ref);
+                }
+            }
         }
         return null;
     }
