@@ -231,7 +231,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             tag.btnThumbsDown.setImageResource(R.drawable.ic_thumb_down_gray);
         }
 
-        if (item.isLoaded()) {
+        if (item != null && item.isLoaded()) {
             tag.tvTitle.setText(item.getTitle());
 
             Artist artist = aggregator.retrieveArtist(item.getArtist(), item.getProvider());
@@ -248,7 +248,7 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             tag.ivAlbumArt.setDefaultArt();
         }
 
-        if (!item.isAvailable()) {
+        if (item == null || !item.isAvailable()) {
             tag.vRoot.setAlpha(0.5f);
         } else {
             tag.vRoot.setAlpha(1.0f);
