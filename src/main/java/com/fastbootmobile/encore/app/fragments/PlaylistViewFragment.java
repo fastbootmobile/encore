@@ -764,7 +764,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         while (it.hasNext()) {
             final String songRef = it.next();
             Song song = aggregator.retrieveSong(songRef, mPlaylist.getProvider());
-            if (song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY) {
+            if (song != null && song.getOfflineStatus() == BoundEntity.OFFLINE_STATUS_READY) {
                 numSync++;
             }
         }
