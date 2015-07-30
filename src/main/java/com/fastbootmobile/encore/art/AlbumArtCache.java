@@ -293,12 +293,19 @@ public class AlbumArtCache {
                 }
             }
 
+            if (artistName == null && albumName == null) {
+                // No artist name neither album name, bail out
+                return false;
+            }
+
             // Try to get from Google Images
             try {
-                if (artistName != null) {
+                if (artistName != null && albumName != null) {
                     url = GoogleImagesClient.getImageUrl("album " + artistName + " " + albumName);
-                } else {
+                } else if (artistName == null) {
                     url = GoogleImagesClient.getImageUrl("album " + albumName);
+                } else {
+                    url = GoogleImagesClient.getImageUrl("album from " + artistName);
                 }
             } catch (RateLimitException e) {
                 Log.w(TAG, "Rate limit hit while getting image from Google Images");

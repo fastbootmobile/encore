@@ -283,6 +283,10 @@ public class Utils {
      * @return A reference to the main artist, or null if none
      */
     public static String getMainArtist(Album a) {
+        if (a == null) {
+            return null;
+        }
+
         HashMap<String, Integer> occurrences = new HashMap<>();
         Iterator<String> it = a.songs();
 
