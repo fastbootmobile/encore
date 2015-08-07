@@ -136,7 +136,7 @@ public class PlayingBarView extends RelativeLayout implements SharedPreferences.
         @Override
         public void onArtistUpdate(List<Artist> a) {
             boolean contains = false;
-            List<Song> playbackQueue = PlaybackProxy.getCurrentPlaybackQueue();
+            List<Song> playbackQueue = new ArrayList<>(PlaybackProxy.getCurrentPlaybackQueue());
             for (Song song : playbackQueue) {
                 if (song == null) continue;
 
