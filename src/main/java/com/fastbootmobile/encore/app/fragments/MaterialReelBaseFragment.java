@@ -128,45 +128,47 @@ public class MaterialReelBaseFragment extends Fragment {
                         if (isDetached() || getActivity() == null) {
                             return;
                         }
-                        mBarLayout.setAlpha(1.0f);
-                        mBarLayout.setBackgroundColor(playFab.getNormalColor());
+                        try {
+                            mBarLayout.setAlpha(1.0f);
+                            mBarLayout.setBackgroundColor(playFab.getNormalColor());
 
-                        Utils.animateHeadingReveal(mBarLayout, mBarLayout.getMeasuredWidth() / 2,
-                                (int) (mBarLayout.getMeasuredHeight() / 1.25f), ArtistActivity.BACK_DELAY);
+                            Utils.animateHeadingReveal(mBarLayout, mBarLayout.getMeasuredWidth() / 2,
+                                    (int) (mBarLayout.getMeasuredHeight() / 1.25f), ArtistActivity.BACK_DELAY);
 
-                        playFab.animate().setStartDelay(80)
-                                .alpha(0).scaleX(0.5f).scaleY(0.5f).setDuration(150).start();
+                            playFab.animate().setStartDelay(80)
+                                    .alpha(0).scaleX(0.5f).scaleY(0.5f).setDuration(150).start();
 
-                        mBarPlay.setAlpha(0f);
+                            mBarPlay.setAlpha(0f);
 
-                        mBarNext.setAlpha(0f);
-                        mBarNext.setTranslationX(-16 * DP);
-                        mBarNext.setScaleX(0);
-                        mBarNext.setScaleY(0);
-                        mBarPrevious.setAlpha(0f);
-                        mBarPrevious.setTranslationX(16 * DP);
-                        mBarPrevious.setScaleX(0);
-                        mBarPrevious.setScaleY(0);
-                        mBarRepeat.setAlpha(0f);
-                        mBarRepeat.setTranslationX(-16 * DP);
-                        mBarRepeat.setScaleX(0);
-                        mBarRepeat.setScaleY(0);
-                        mBarShuffle.setAlpha(0f);
-                        mBarShuffle.setTranslationX(16 * DP);
-                        mBarShuffle.setScaleX(0);
-                        mBarShuffle.setScaleY(0);
+                            mBarNext.setAlpha(0f);
+                            mBarNext.setTranslationX(-16 * DP);
+                            mBarNext.setScaleX(0);
+                            mBarNext.setScaleY(0);
+                            mBarPrevious.setAlpha(0f);
+                            mBarPrevious.setTranslationX(16 * DP);
+                            mBarPrevious.setScaleX(0);
+                            mBarPrevious.setScaleY(0);
+                            mBarRepeat.setAlpha(0f);
+                            mBarRepeat.setTranslationX(-16 * DP);
+                            mBarRepeat.setScaleX(0);
+                            mBarRepeat.setScaleY(0);
+                            mBarShuffle.setAlpha(0f);
+                            mBarShuffle.setTranslationX(16 * DP);
+                            mBarShuffle.setScaleX(0);
+                            mBarShuffle.setScaleY(0);
 
-                        mBarPlay.animate().alpha(1).setDuration(100).start();
-                        mBarNext.animate().alpha(1).scaleX(1).scaleY(1)
-                                .translationX(0).setDuration(250).start();
-                        mBarRepeat.animate().alpha(PlaybackProxy.isRepeatMode() ? 1 : DISABLED_OPACITY)
-                                .scaleX(1).scaleY(1)
-                                .translationX(0).setDuration(250).start();
-                        mBarPrevious.animate().alpha(1).translationX(0).scaleX(1).scaleY(1)
-                                .setDuration(250).start();
-                        mBarShuffle.animate().alpha(PlaybackProxy.isShuffleMode() ? 1 : DISABLED_OPACITY)
-                                .translationX(0).scaleX(1).scaleY(1)
-                                .setDuration(250).start();
+                            mBarPlay.animate().alpha(1).setDuration(100).start();
+                            mBarNext.animate().alpha(1).scaleX(1).scaleY(1)
+                                    .translationX(0).setDuration(250).start();
+                            mBarRepeat.animate().alpha(PlaybackProxy.isRepeatMode() ? 1 : DISABLED_OPACITY)
+                                    .scaleX(1).scaleY(1)
+                                    .translationX(0).setDuration(250).start();
+                            mBarPrevious.animate().alpha(1).translationX(0).scaleX(1).scaleY(1)
+                                    .setDuration(250).start();
+                            mBarShuffle.animate().alpha(PlaybackProxy.isShuffleMode() ? 1 : DISABLED_OPACITY)
+                                    .translationX(0).scaleX(1).scaleY(1)
+                                    .setDuration(250).start();
+                        } catch (IllegalStateException ignore) { }
                     }
                 }, 300);
 
