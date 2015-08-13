@@ -26,7 +26,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:textColor="@color/white"
+        android:textColor="@color/white_text"
         android:textSize="@dimen/welcome_title_font"
         android:fontFamily="sans-serif-medium"
         android:layout_margin="@dimen/welcome_title_margin"/>
@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:text="@string/welcome_step3_body"
         android:id="@+id/tvExplanation"
-        android:textColor="@color/white"
+        android:textColor="@color/white_text"
         android:textSize="@dimen/welcome_body_font"
         android:layout_below="@+id/tvTitle"
         android:layout_alignLeft="@+id/tvTitle"
@@ -51,7 +51,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         style="@style/OmniMusic.Spec.BorderlessButton"
-        android:textColor="@color/white"
+        android:textColor="@color/white_text"
         android:layout_marginRight="@dimen/welcome_button_margin"
         android:layout_marginBottom="@dimen/welcome_button_margin"
         android:textSize="@dimen/welcome_button_font"/>

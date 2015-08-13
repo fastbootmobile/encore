@@ -33,7 +33,7 @@
             android:paddingEnd="@dimen/entview_head_padding_right"
             android:paddingLeft="@dimen/entview_head_padding_left"
             android:paddingStart="@dimen/entview_head_padding_left"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             android:layout_below="@+id/ivHero"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
@@ -92,7 +92,7 @@
                 android:layout_gravity="top"
                 android:textAppearance="@style/OmniMusic.Spec.ViewPager"
                 android:gravity="center_vertical"
-                android:textColor="#fff" />
+                android:textColor="@color/white_text" />
 
         </com.fastbootmobile.encore.app.ui.WrapContentHeightViewPager>
 

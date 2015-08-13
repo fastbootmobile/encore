@@ -25,7 +25,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="#80000000"
+        android:background="@color/black80"
         android:visibility="visible"/>
 
     <TextView
@@ -38,7 +38,7 @@
         android:layout_alignParentEnd="true"
         android:fontFamily="sans-serif-medium"
         fontPath="fonts/Roboto-Medium.ttf"
-        android:textColor="@color/white"
+        android:textColor="@color/white_text"
         android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
         />
@@ -53,7 +53,7 @@
         fontPath="fonts/RobotoCondensed-Regular.ttf"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#ffffff"
+        android:textColor="@color/white_text"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
@@ -76,7 +76,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:fontFamily="sans-serif-condensed"
         fontPath="fonts/RobotoCondensed-Regular.ttf"
-        android:textColor="@color/white"
+        android:textColor="@color/white_text"
         android:layout_alignRight="@+id/tvTitle"
         android:layout_alignEnd="@+id/tvTitle"
         />
@@ -96,7 +96,7 @@
         fontPath="fonts/Roboto-Medium.ttf"
         android:singleLine="true"
         android:textAllCaps="true"
-        android:textColor="@color/white"
+        android:textColor="@color/white_text"
         />
 
     <LinearLayout
@@ -107,7 +107,7 @@
         android:longClickable="false"
         android:orientation="horizontal"
         android:padding="8dp"
-        android:background="#AA333333"
+        android:background="@color/llButtons_bg"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -206,7 +206,7 @@
         android:layout_alignParentStart="true"
         android:padding="12dp"
         android:textStyle="bold"
-        android:textColor="@color/white"
+        android:textColor="@color/white_text"
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground"
         android:onClick="onClickClose"/>

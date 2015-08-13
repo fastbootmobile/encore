@@ -40,7 +40,7 @@
             android:focusable="false"
             android:maxLines="2"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             android:textSize="14sp"
             android:layout_margin="@dimen/listen_now_card_padding" />
     </LinearLayout>

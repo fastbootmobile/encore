@@ -34,7 +34,7 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:text="@string/drive_tutorial_title"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             android:textSize="@dimen/welcome_title_font"/>
 
         <TextView
@@ -51,7 +51,7 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:text="@string/drive_tutorial_header_gestures"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white_text"/>
 
         <TextView
             android:id="@+id/tvDetailsGestures"
@@ -67,7 +67,7 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:text="@string/drive_tutorial_body_gestures"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white_text"/>
 
         <ImageView
             android:id="@+id/ivGestures"
@@ -92,7 +92,7 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:text="@string/drive_tutorial_header_voice"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white_text"/>
 
         <TextView
             android:id="@+id/tvDetailsVoice"
@@ -109,7 +109,7 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:text="@string/drive_tutorial_body_voice"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white_text"/>
 
         <TextView
             android:id="@+id/tvHeaderNavHead"
@@ -122,7 +122,7 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:text="@string/drive_tutorial_header_navhead"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             android:layout_alignParentBottom="false"
             android:layout_alignParentLeft="false"
             android:layout_alignParentStart="false"
@@ -138,7 +138,7 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:text="@string/drive_tutorial_body_navhead"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             android:layout_alignParentTop="false"
             android:layout_below="@+id/tvHeaderNavHead"
             android:layout_alignParentRight="true"
@@ -157,7 +157,7 @@
             android:layout_alignParentEnd="true"
             android:onClick="onClickFinish"
             style="@style/OmniMusic.Spec.BorderlessButton"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:background="@color/primary_dark"/>

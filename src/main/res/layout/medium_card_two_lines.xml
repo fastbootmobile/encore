@@ -33,7 +33,7 @@
             android:layout_marginRight="@dimen/tile_text_padding"
             android:singleLine="true"
             android:gravity="start|bottom"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             android:layout_weight="1"
             />
 

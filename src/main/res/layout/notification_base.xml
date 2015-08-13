@@ -7,7 +7,7 @@
     android:layout_height="64dp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:background="@color/material_blue_grey_900"
+    android:background="@color/notification_bg"
     tools:ignore="contentDescription">
 
     <ImageView
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
             android:singleLine="true"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             android:textSize="16sp"/>
 
         <TextView

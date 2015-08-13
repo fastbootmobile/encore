@@ -4,7 +4,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="128.0dip"
-                android:background="@color/material_blue_grey_900"
+                android:background="@color/notification_bg"
                 tools:ignore="ContentDescription" >
 
     <ImageView
@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
             android:singleLine="true"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             android:textSize="16sp"/>
 
         <TextView
@@ -112,13 +112,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent"/>
+            android:textAppearance="@style/FontStatusBar"/>
 
         <TextView
             android:id="@+id/tvNotifLineThree"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent" />
+            android:textAppearance="@style/FontStatusBar" />
     </LinearLayout>
 
 </RelativeLayout>
