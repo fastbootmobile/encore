@@ -270,14 +270,19 @@ public class CastModule extends MediaRouter.Callback {
 
         @Override
         public void onApplicationStatusChanged() {
-            String status = Cast.CastApi.getApplicationStatus(mApiClient);
-            Log.d(TAG, "onApplicationStatusChanged; status=" + status);
+            try {
+                String status = Cast.CastApi.getApplicationStatus(mApiClient);
+                Log.d(TAG, "onApplicationStatusChanged; status=" + status);
 
-            if (mShouldStart && mApiClient.isConnected()) {
-                Cast.CastApi.launchApplication(mApiClient, CAST_APP_ID, true)
-                        .setResultCallback(new ApplicationConnectionResultCallback("LaunchApp"));
-                mShouldStart = false;
-            } else {
+                if (mShouldStart && mApiClient.isConnected()) {
+                    Cast.CastApi.launchApplication(mApiClient, CAST_APP_ID, true)
+                            .setResultCallback(new ApplicationConnectionResultCallback("LaunchApp"));
+                    mShouldStart = false;
+                } else {
+                    mIsAppUp = false;
+                }
+            } catch (IllegalStateException e) {
+                // Not connected to a device
                 mIsAppUp = false;
             }
         }
