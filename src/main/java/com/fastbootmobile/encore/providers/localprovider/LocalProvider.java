@@ -77,37 +77,48 @@ public class LocalProvider {
     private final ContentObserver mAlbumContentObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean self) {
-            fetchAlbums();
+            try {
+                fetchAlbums();
+            } catch (SecurityException e) {
+                Log.e(TAG, "Cannot read albums because of a security exception", e);
+            }
         }
 
         @Override
         public void onChange(boolean self, Uri uri) {
-            fetchAlbums();
+            onChange(self);
         }
     };
 
     private final ContentObserver mArtistContentObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean self) {
-            fetchArtists();
+            try {
+                fetchArtists();
+            } catch (SecurityException e) {
+                Log.e(TAG, "Cannot read artists because of a security exception", e);
+            }
         }
 
         @Override
         public void onChange(boolean self, Uri uri) {
-            Log.d(TAG, uri.getPath());
+            onChange(self);
         }
     };
 
     private final ContentObserver mGenreContentObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean self) {
-            onChange(self, null);
+            try {
+                fetchGenres(null);
+            } catch (SecurityException e) {
+                Log.e(TAG, "Cannot read genres because of a security exception", e);
+            }
         }
 
         @Override
         public void onChange(boolean self, Uri uri) {
-            Log.d(TAG, uri.getPath());
-            fetchGenres(null);
+            onChange(self);
         }
     };
 
