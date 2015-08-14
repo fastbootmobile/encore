@@ -123,7 +123,7 @@ public class PlaybackService extends Service
     private NativeAudioSink mNativeSink;
     private NativeHub mNativeHub;
     private DSPProcessor mDSPProcessor;
-    private PlaybackQueue mPlaybackQueue;
+    private final PlaybackQueue mPlaybackQueue;
     private List<IPlaybackCallback> mCallbacks;
     private ServiceNotification mNotification;
     private int mCurrentTrack = -1;
@@ -760,10 +760,12 @@ public class PlaybackService extends Service
      * @return A Song if a song is playing, null otherwise
      */
     private Song getCurrentSong() {
-        if (mCurrentTrack >= 0 && mPlaybackQueue.size() > mCurrentTrack) {
-            return mPlaybackQueue.get(mCurrentTrack);
-        } else {
-            return null;
+        synchronized (mPlaybackQueue) {
+            if (mCurrentTrack >= 0 && mPlaybackQueue.size() > mCurrentTrack) {
+                return mPlaybackQueue.get(mCurrentTrack);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -1096,8 +1098,10 @@ public class PlaybackService extends Service
             if (service != null) {
                 Log.i(TAG, "Play playlist: " + p.getRef());
                 service.mCurrentTrack = 0;
-                service.mPlaybackQueue.clear();
-                queuePlaylist(p, false);
+                synchronized (service.mPlaybackQueue) {
+                    service.mPlaybackQueue.clear();
+                    queuePlaylist(p, false);
+                }
                 service. requestStartPlayback();
             }
         }
@@ -1109,8 +1113,10 @@ public class PlaybackService extends Service
             if (service != null) {
                 Log.i(TAG, "Play song: " + s.getRef());
                 service.mCurrentTrack = 0;
-                service. mPlaybackQueue.clear();
-                queueSong(s, true);
+                synchronized (service.mPlaybackQueue) {
+                    service.mPlaybackQueue.clear();
+                    queueSong(s, true);
+                }
                 service.requestStartPlayback();
             }
         }
@@ -1122,8 +1128,10 @@ public class PlaybackService extends Service
             if (service != null) {
                 Log.i(TAG, "Play album: " + a.getRef() + " (this=" + this + ")");
                 service.mCurrentTrack = 0;
-                service.mPlaybackQueue.clear();
-                queueAlbum(a, false);
+                synchronized (service.mPlaybackQueue) {
+                    service.mPlaybackQueue.clear();
+                    queueAlbum(a, false);
+                }
                 service.requestStartPlayback();
             }
         }
@@ -1407,7 +1415,9 @@ public class PlaybackService extends Service
             PlaybackService service = mParent.get();
 
             if (service != null) {
-                service.mPlaybackQueue.clear();
+                synchronized (service.mPlaybackQueue) {
+                    service.mPlaybackQueue.clear();
+                }
             }
         }
 
