@@ -663,7 +663,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
 
     private void removeDuplicates() throws RemoteException {
         // Process each track and look for the same track
-        Iterator<String> songsIt = mPlaylist.songs();
+        List<String> songsIt = new ArrayList<>(mPlaylist.songsList());
         List<String> knownTracks = new ArrayList<>();
 
         // Only process if the provider is up
@@ -672,9 +672,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
             IMusicProvider provider = conn.getBinder();
             if (provider != null) {
                 int position = 0;
-                while (songsIt.hasNext()) {
-                    String songRef = songsIt.next();
-
+                for (String songRef : songsIt) {
                     // If we know the track, remove it (it's the second occurrence of the track).
                     // Else, add it to the known list and move on.
                     if (knownTracks.contains(songRef)) {
