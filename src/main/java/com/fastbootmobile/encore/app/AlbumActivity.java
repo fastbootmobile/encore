@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -207,7 +206,7 @@ public class AlbumActivity extends AppActivity {
         int id = item.getItemId();
         if (id == R.id.menu_add_to_queue) {
             Album album = mActiveFragment.getAlbum();
-            if (album.isLoaded()) {
+            if (album != null && album.isLoaded()) {
                 PlaybackProxy.queueAlbum(album, false);
             } else {
                 Utils.shortToast(this, R.string.toast_album_not_loaded_yet);
@@ -215,7 +214,7 @@ public class AlbumActivity extends AppActivity {
             return true;
         } else if (id == R.id.menu_add_to_playlist) {
             Album album = mActiveFragment.getAlbum();
-            if (album.isLoaded()) {
+            if (album != null && album.isLoaded()) {
                 PlaylistChooserFragment fragment = PlaylistChooserFragment.newInstance(album);
                 fragment.show(getSupportFragmentManager(), album.getRef());
             } else {

@@ -292,4 +292,5 @@
     <string name="ln_landcard_plugin_installed_title">%s a été installé</string>
     <string name="ln_landcard_plugin_installed_body_configure">Ce plug-in a été installé avec succès, mais peut nécessiter une configuration. Tapez ci-dessous pour le configurer.</string>
     <string name="ln_landcard_plugin_installed_body">Ce plug-in a été installé avec succès, et peut dès maintenat être utilisé.</string>
+    <string name="toast_song_not_loaded">This song is not loaded yet</string>
 </resources>
