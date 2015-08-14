@@ -10,3 +10,8 @@
 *.iml
 *.apk
 APIKeys.java
+.idea/
+gradle/
+gradlew
+gradlew.bat
+local.properties
