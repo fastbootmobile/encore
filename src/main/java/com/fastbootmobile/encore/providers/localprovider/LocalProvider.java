@@ -237,7 +237,11 @@ public class LocalProvider {
             Song s = new Song(PREFIX_SONG + uniquename);
             s.setAvailable(true);
             s.setTitle(cur.getString(titleColumn));
-            s.setArtist(PREFIX_ARTIST + getArtistUniqueName(cur.getString(artistKey)));
+
+            String artistSrc = cur.getString(artistKey);
+            if (artistSrc != null) {
+                s.setArtist(PREFIX_ARTIST + getArtistUniqueName(artistSrc));
+            }
             s.setDuration((int) cur.getLong(durationColumn));
             s.setAlbum(PREFIX_ALBUM + getAlbumUniqueName(cur.getString(albumKey), cur.getString(artistColumn)));
 
