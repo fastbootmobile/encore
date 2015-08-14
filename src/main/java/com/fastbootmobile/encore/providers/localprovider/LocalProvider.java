@@ -182,13 +182,13 @@ public class LocalProvider {
         final String[] proj = {"*"};
         final Cursor cur = mContentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, proj, null, null, null);
         if (cur != null) {
-            final int albumName = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM);
-            final int artistName = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ARTIST);
-            final int albumKey = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM_KEY);
-            final int yearKey = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.LAST_YEAR);
-            final int idKey = cur.getColumnIndex(MediaStore.Audio.Albums._ID);
-
             if (cur.moveToFirst()) {
+                final int albumName = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM);
+                final int artistName = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ARTIST);
+                final int albumKey = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM_KEY);
+                final int yearKey = cur.getColumnIndex(MediaStore.Audio.AlbumColumns.LAST_YEAR);
+                final int idKey = cur.getColumnIndex(MediaStore.Audio.Albums._ID);
+
                 do {
                     Album album = new Album(PREFIX_ALBUM + getAlbumUniqueName(cur.getString(albumKey), cur.getString(artistName)));
                     album.setName(cur.getString(albumName));
@@ -214,56 +214,54 @@ public class LocalProvider {
         final Cursor cur = mContentResolver.query(mUri, null,
                 MediaStore.Audio.Media.IS_MUSIC + " = 1", null, null);
 
-        if (cur == null || !cur.moveToFirst()) {
-            // there is no song to iterate over
-            return;
+        if (cur != null) {
+            if (cur.moveToFirst()) {
+                // Fetch all the columns we are interested in
+                int artistKey = cur.getColumnIndex(MediaStore.Audio.Media.ARTIST_KEY);
+                int albumKey = cur.getColumnIndex(MediaStore.Audio.Media.ALBUM_KEY);
+                int titleKey = cur.getColumnIndex(MediaStore.Audio.Media.TITLE_KEY);
+                int artistColumn = cur.getColumnIndex(MediaStore.Audio.Media.ARTIST);
+                int titleColumn = cur.getColumnIndex(MediaStore.Audio.Media.TITLE);
+                int albumIdColumn = cur.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
+                int durationColumn = cur.getColumnIndex(MediaStore.Audio.Media.DURATION);
+                int idColumn = cur.getColumnIndex(MediaStore.Audio.Media._ID);
+                int yearColumn = cur.getColumnIndex(MediaStore.Audio.Media.YEAR);
+
+                do {
+                    // We create the unique ID the song have
+                    final String uniquename = getSongUniqueName(cur.getString(artistKey), cur.getString(albumKey), cur.getString(titleKey));
+
+                    Song s = new Song(PREFIX_SONG + uniquename);
+                    s.setAvailable(true);
+                    s.setTitle(cur.getString(titleColumn));
+
+                    String artistSrc = cur.getString(artistKey);
+                    if (artistSrc != null) {
+                        s.setArtist(PREFIX_ARTIST + getArtistUniqueName(artistSrc));
+                    }
+                    s.setDuration((int) cur.getLong(durationColumn));
+                    s.setAlbum(PREFIX_ALBUM + getAlbumUniqueName(cur.getString(albumKey), cur.getString(artistColumn)));
+
+                    Album album = mAlbums.get(s.getAlbum());
+                    if (album != null) {
+                        album.addSong(s.getRef());
+                    }
+
+                    s.setYear(cur.getInt(yearColumn));
+                    s.setIsLoaded(true); // Local songs are always fully loaded
+                    s.setOfflineStatus(BoundEntity.OFFLINE_STATUS_READY); // Local songs are always offline
+                    s.setSourceLogo(PluginService.LOGO_REF);
+
+                    //we keep LocalSongs so we still have the id informations
+                    final Long id = cur.getLong(idColumn);
+                    final Long albumId = cur.getLong(albumIdColumn);
+
+                    mSongs.put(s.getRef(), new LocalSong(s, id, albumId));
+                    mCallback.songUpdated(s);
+                } while (cur.moveToNext());
+            }
+            cur.close();
         }
-
-        // Fetch all the columns we are interested in
-        int artistKey = cur.getColumnIndex(MediaStore.Audio.Media.ARTIST_KEY);
-        int albumKey = cur.getColumnIndex(MediaStore.Audio.Media.ALBUM_KEY);
-        int titleKey = cur.getColumnIndex(MediaStore.Audio.Media.TITLE_KEY);
-        int artistColumn = cur.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-        int titleColumn = cur.getColumnIndex(MediaStore.Audio.Media.TITLE);
-        int albumIdColumn = cur.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
-        int durationColumn = cur.getColumnIndex(MediaStore.Audio.Media.DURATION);//I keep it for later use
-        int idColumn = cur.getColumnIndex(MediaStore.Audio.Media._ID);
-        int yearColumn = cur.getColumnIndex(MediaStore.Audio.Media.YEAR);
-
-        do {
-            // We create the unique ID the song have
-            final String uniquename = getSongUniqueName(cur.getString(artistKey), cur.getString(albumKey), cur.getString(titleKey));
-
-            Song s = new Song(PREFIX_SONG + uniquename);
-            s.setAvailable(true);
-            s.setTitle(cur.getString(titleColumn));
-
-            String artistSrc = cur.getString(artistKey);
-            if (artistSrc != null) {
-                s.setArtist(PREFIX_ARTIST + getArtistUniqueName(artistSrc));
-            }
-            s.setDuration((int) cur.getLong(durationColumn));
-            s.setAlbum(PREFIX_ALBUM + getAlbumUniqueName(cur.getString(albumKey), cur.getString(artistColumn)));
-
-            Album album = mAlbums.get(s.getAlbum());
-            if (album != null) {
-                album.addSong(s.getRef());
-            }
-
-            s.setYear(cur.getInt(yearColumn));
-            s.setIsLoaded(true); // Local songs are always fully loaded
-            s.setOfflineStatus(BoundEntity.OFFLINE_STATUS_READY); // Local songs are always offline
-            s.setSourceLogo(PluginService.LOGO_REF);
-
-            //we keep LocalSongs so we still have the id informations
-            final Long id = cur.getLong(idColumn);
-            final Long albumId = cur.getLong(albumIdColumn);
-
-            mSongs.put(s.getRef(), new LocalSong(s, id, albumId));
-            mCallback.songUpdated(s);
-        } while (cur.moveToNext());
-
-        cur.close();
 
         for (Album album : mAlbums.values()) {
             mCallback.albumUpdated(album);
@@ -276,10 +274,10 @@ public class LocalProvider {
         // we poll the artists
         final Cursor cur = mContentResolver.query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, proj, null, null, null);
         if (cur != null) {
-            final int artistName = cur.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST);
-            final int artistKey = cur.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST_KEY);
-            final int artistId = cur.getColumnIndex(MediaStore.Audio.Artists._ID);
-            if ( cur.moveToFirst()) {
+            if (cur.moveToFirst()) {
+                final int artistName = cur.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST);
+                final int artistKey = cur.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST_KEY);
+                final int artistId = cur.getColumnIndex(MediaStore.Audio.Artists._ID);
                 do {
                     Artist artist = new Artist(PREFIX_ARTIST + getArtistUniqueName(cur.getString(artistKey)));
                     artist.setName(cur.getString(artistName));
