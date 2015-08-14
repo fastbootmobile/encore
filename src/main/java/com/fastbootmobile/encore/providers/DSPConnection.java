@@ -121,6 +121,8 @@ public class DSPConnection extends AbstractProviderConnection {
                     mBinder.setAudioSocketName(socketName);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Cannot assign audio socket to " + getProviderName(), e);
+                } catch (Exception e) {
+                    Log.e(TAG, "Provider exception while assigning audio socket", e);
                 }
             }
             return true;
