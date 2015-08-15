@@ -55,8 +55,12 @@ public class DspProvidersFragment extends ListFragment {
         @Override
         public void onDeleteClicked(int position) {
             List<ProviderIdentifier> chain = PlaybackProxy.getDSPChain();
-            chain.remove(position);
-            PlaybackProxy.setDSPChain(chain);
+            if (position < chain.size()) {
+                chain.remove(position);
+                PlaybackProxy.setDSPChain(chain);
+            } else {
+                Log.w(TAG, "Invalid element position: " + position + " (size=" + chain.size() + ")");
+            }
 
             postUpdateDspChain();
         }
