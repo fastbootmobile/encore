@@ -774,7 +774,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
             while (songs.hasNext()) {
                 String songRef = songs.next();
                 Song song = aggregator.retrieveSong(songRef, album.getProvider());
-                if (song != null && mArtist.getRef().equals(song.getArtist())) {
+                if (song != null && mArtist != null && mArtist.getRef().equals(song.getArtist())) {
                     hasThisArtist = true;
                     break;
                 }
