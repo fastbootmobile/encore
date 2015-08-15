@@ -23,7 +23,9 @@ import android.view.ViewGroup;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.model.Playlist;
 import com.fastbootmobile.encore.model.Song;
+import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
+import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
 
 import java.util.ArrayList;
@@ -67,8 +69,13 @@ public class PlaylistAdapter extends SongsListAdapter {
     public void updatePlaylist(int oldPosition, int newPosition) {
         final ProviderIdentifier providerIdentifier = mPlaylist.getProvider();
         try {
-            PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().onUserSwapPlaylistItem(oldPosition, newPosition, mPlaylist.getRef());
-            //// resetIds();
+            ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerIdentifier);
+            if (connection != null) {
+                IMusicProvider binder = connection.getBinder();
+                if (binder != null) {
+                    binder.onUserSwapPlaylistItem(oldPosition, newPosition, mPlaylist.getRef());
+                }
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error: " + e.getMessage());
         }
@@ -81,7 +88,14 @@ public class PlaylistAdapter extends SongsListAdapter {
     public void delete(int id) {
         final ProviderIdentifier providerIdentifier = mPlaylist.getProvider();
         try {
-            PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().deleteSongFromPlaylist(id, mPlaylist.getRef());
+            ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerIdentifier);
+            if (connection != null) {
+                IMusicProvider binder = connection.getBinder();
+                if (binder != null) {
+                    binder.deleteSongFromPlaylist(id, mPlaylist.getRef());
+                }
+            }
+            
             mSongs.remove(id);
             mIds.remove(id);
             mVisible.remove(id);
