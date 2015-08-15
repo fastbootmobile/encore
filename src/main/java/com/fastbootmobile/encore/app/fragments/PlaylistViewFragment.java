@@ -474,7 +474,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
             return true;
         } else if (item.getItemId() == R.id.menu_remove_duplicates) {
             try {
-                removeDuplicates();
+                removeDuplicates(0);
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot remove duplicates", e);
             }
@@ -664,7 +664,12 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         }
     }
 
-    private void removeDuplicates() throws RemoteException {
+    private void removeDuplicates(int count) throws RemoteException {
+        if (count > 1000) {
+            // Watchdog
+            return;
+        }
+
         // Process each track and look for the same track
         List<String> songsIt = new ArrayList<>(mPlaylist.songsList());
         List<String> knownTracks = new ArrayList<>();
@@ -681,7 +686,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                     if (knownTracks.contains(songRef)) {
                         // Delete the song and restart the process
                         provider.deleteSongFromPlaylist(position, mPlaylist.getRef());
-                        removeDuplicates();
+                        removeDuplicates(count + 1);
                         return;
                     } else {
                         knownTracks.add(songRef);
