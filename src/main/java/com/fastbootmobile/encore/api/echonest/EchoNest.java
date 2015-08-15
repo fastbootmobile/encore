@@ -234,10 +234,12 @@ public class EchoNest {
                 }
 
                 for (String prefix : rosettaPrefixes) {
-                    String rosettaLink = similar.getForeignID(prefix);
-                    synchronized (sArtistForeignIDs) {
-                        linksMap.put(prefix, rosettaLink);
-                    }
+                    try {
+                        String rosettaLink = similar.getForeignID(prefix);
+                        synchronized (sArtistForeignIDs) {
+                            linksMap.put(prefix, rosettaLink);
+                        }
+                    } catch (Exception ignore) { }
                 }
             }
         }
