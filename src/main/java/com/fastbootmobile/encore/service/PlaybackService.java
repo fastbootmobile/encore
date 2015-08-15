@@ -761,9 +761,13 @@ public class PlaybackService extends Service
      */
     private Song getCurrentSong() {
         synchronized (mPlaybackQueue) {
-            if (mCurrentTrack >= 0 && mPlaybackQueue.size() > mCurrentTrack) {
-                return mPlaybackQueue.get(mCurrentTrack);
-            } else {
+            try {
+                if (mCurrentTrack >= 0 && mPlaybackQueue.size() > mCurrentTrack) {
+                    return mPlaybackQueue.get(mCurrentTrack);
+                } else {
+                    return null;
+                }
+            } catch (Exception e) {
                 return null;
             }
         }
