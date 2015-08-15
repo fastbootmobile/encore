@@ -141,7 +141,10 @@ public class LocalProvider {
     public void notifyIdentifier(final ProviderIdentifier id) {
         Set<String> keys = mSongs.keySet();
         for (String key : keys) {
-            mSongs.get(key).getSong().setProvider(id);
+            LocalSong lSong = mSongs.get(key);
+            if (lSong != null) {
+                lSong.getSong().setProvider(id);
+            }
         }
 
         keys = mAlbums.keySet();
