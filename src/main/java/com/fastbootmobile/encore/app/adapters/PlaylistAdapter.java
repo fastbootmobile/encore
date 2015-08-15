@@ -27,7 +27,6 @@ import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -143,14 +142,14 @@ public class PlaylistAdapter extends SongsListAdapter {
         mIds.clear();
         mVisible.clear();
 
-        final Iterator<String> it = mPlaylist.songs();
+        final List<String> it = new ArrayList<>(mPlaylist.songsList());
         final ProviderIdentifier id = mPlaylist.getProvider();
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
-        while (it.hasNext()) {
-            Song s = aggregator.retrieveSong(it.next(), id);
+        for (String songRef : it) {
+            Song s = aggregator.retrieveSong(songRef, id);
             if (s == null) {
-                Log.e(TAG, "Retreived a null song from the playlist!");
+                Log.e(TAG, "Retrieved a null song from the playlist!");
             } else {
                 put(s);
             }
