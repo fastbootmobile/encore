@@ -709,34 +709,38 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
         AlbumArtHelper.retrieveAlbumArt(getResources(), new AlbumArtHelper.AlbumArtListener() {
             @Override
             public void onArtLoaded(RecyclingBitmapDrawable output, BoundEntity request) {
-                if (output != null && !isDetached()) {
-                    mHeroImage = output.getBitmap();
+                try {
+                    if (output != null && !isDetached()) {
+                        mHeroImage = output.getBitmap();
 
-                    if (materialTransition) {
-                        MaterialTransitionDrawable mtd = new MaterialTransitionDrawable(
-                                (BitmapDrawable) getResources().getDrawable(R.drawable.ic_cloud_offline),
-                                (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
-                        mtd.transitionTo(output);
+                        if (materialTransition) {
+                            MaterialTransitionDrawable mtd = new MaterialTransitionDrawable(
+                                    (BitmapDrawable) getResources().getDrawable(R.drawable.ic_cloud_offline),
+                                    (BitmapDrawable) getResources().getDrawable(R.drawable.album_placeholder));
+                            mtd.transitionTo(output);
 
-                        mHeroImageView.setImageDrawable(mtd);
-                    } else {
-                        final TransitionDrawable transition = new TransitionDrawable(new Drawable[] {
-                                mHeroImageView.getDrawable(),
-                                output
-                        });
+                            mHeroImageView.setImageDrawable(mtd);
+                        } else {
+                            final TransitionDrawable transition = new TransitionDrawable(new Drawable[]{
+                                    mHeroImageView.getDrawable(),
+                                    output
+                            });
 
-                        // Make sure the transition happens after the activity animation is done,
-                        // otherwise weird sliding occurs.
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mHeroImageView.setImageDrawable(transition);
-                                transition.startTransition(500);
-                            }
-                        }, 600);
+                            // Make sure the transition happens after the activity animation is done,
+                            // otherwise weird sliding occurs.
+                            mHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mHeroImageView.setImageDrawable(transition);
+                                    transition.startTransition(500);
+                                }
+                            }, 600);
+                        }
+
+                        generateHeroPalette();
                     }
-
-                    generateHeroPalette();
+                } catch (IllegalStateException ignore) {
+                    // We might have left the activity, so go on
                 }
             }
         }, mArtist, -1, false);

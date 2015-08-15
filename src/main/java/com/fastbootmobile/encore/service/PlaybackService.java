@@ -1129,14 +1129,18 @@ public class PlaybackService extends Service
         public void playAlbum(Album a) throws RemoteException {
             PlaybackService service = mParent.get();
 
-            if (service != null) {
-                Log.i(TAG, "Play album: " + a.getRef() + " (this=" + this + ")");
-                service.mCurrentTrack = 0;
-                synchronized (service.mPlaybackQueue) {
-                    service.mPlaybackQueue.clear();
-                    queueAlbum(a, false);
+            if (a != null) {
+                if (service != null) {
+                    Log.i(TAG, "Play album: " + a.getRef() + " (this=" + this + ")");
+                    service.mCurrentTrack = 0;
+                    synchronized (service.mPlaybackQueue) {
+                        service.mPlaybackQueue.clear();
+                        queueAlbum(a, false);
+                    }
+                    service.requestStartPlayback();
                 }
-                service.requestStartPlayback();
+            } else {
+                Log.e(TAG, "Cannot play album: Null");
             }
         }
 
