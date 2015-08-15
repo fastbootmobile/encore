@@ -1501,7 +1501,7 @@ public class ArtistFragment extends Fragment implements ILocalCallback {
                         }
                     });
                 }
-            } catch (EchoNestException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Unable to get artist information", e);
                 mHandler.post(new Runnable() {
                     @Override

@@ -95,7 +95,7 @@ public class PlaylistAdapter extends SongsListAdapter {
                     binder.deleteSongFromPlaylist(id, mPlaylist.getRef());
                 }
             }
-            
+
             mSongs.remove(id);
             mIds.remove(id);
             mVisible.remove(id);
