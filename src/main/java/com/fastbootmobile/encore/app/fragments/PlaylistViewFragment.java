@@ -73,6 +73,7 @@ import com.fastbootmobile.encore.service.BasePlaybackCallback;
 import com.fastbootmobile.encore.service.PlaybackService;
 import com.fastbootmobile.encore.utils.Utils;
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.joshdholtz.sentry.Sentry;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -525,6 +526,8 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                             provider.renamePlaylist(mPlaylist.getRef(), value);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Cannot rename playlist", e);
+                        } catch (Exception e) {
+                            Sentry.captureException(new Exception("Rename playlist: Plugin error", e));
                         }
                     }
                 }
