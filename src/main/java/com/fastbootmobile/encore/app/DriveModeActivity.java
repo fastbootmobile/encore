@@ -16,6 +16,7 @@
 package com.fastbootmobile.encore.app;
 
 import android.annotation.TargetApi;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fastbootmobile.encore.app.ui.AlbumArtImageView;
 import com.fastbootmobile.encore.app.ui.PlayPauseDrawable;
@@ -458,7 +460,12 @@ public class DriveModeActivity extends AppActivity implements ILocalCallback,
     private void startMaps() {
         Intent mapIntent = new Intent(Intent.ACTION_VIEW);
         mapIntent.setPackage("com.google.android.apps.maps");
-        startActivity(mapIntent);
+        try {
+            startActivity(mapIntent);
+        } catch (ActivityNotFoundException e) {
+            // User doesn't have Google Maps
+            Toast.makeText(this, R.string.toast_no_gmaps, Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void onClickClose(View v) {
