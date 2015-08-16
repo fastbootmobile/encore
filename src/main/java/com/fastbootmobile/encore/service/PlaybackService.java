@@ -860,7 +860,7 @@ public class PlaybackService extends Service
 
                 Song songToPlay = mPlaybackQueue.get(mCurrentTrack);
                 // If song is unavailable, try the next one
-                retry = songToPlay.isLoaded() && !songToPlay.isAvailable();
+                retry = songToPlay == null || (songToPlay.isLoaded() && !songToPlay.isAvailable());
             }
 
             mNativeSink.setPaused(true);

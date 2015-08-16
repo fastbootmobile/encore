@@ -16,6 +16,7 @@
 package com.fastbootmobile.encore.app.fragments;
 
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.fastbootmobile.encore.app.MainActivity;
 import com.fastbootmobile.encore.app.R;
@@ -196,7 +198,11 @@ public class WelcomeFragment extends Fragment {
                     intent.setPackage(connection.getPackage());
                     intent.setClassName(connection.getPackage(), connection.getConfigurationActivity());
                     mConfiguringProvider = connection;
-                    startActivity(intent);
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(getActivity(), R.string.toast_retry_plugin_not_ready, Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
         }
