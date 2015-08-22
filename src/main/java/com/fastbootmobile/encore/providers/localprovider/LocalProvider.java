@@ -293,7 +293,15 @@ public class LocalProvider {
                 final int artistKey = cur.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST_KEY);
                 final int artistId = cur.getColumnIndex(MediaStore.Audio.Artists._ID);
                 do {
-                    Artist artist = new Artist(PREFIX_ARTIST + getArtistUniqueName(cur.getString(artistKey)));
+                    String artistKeyStr = cur.getString(artistKey);
+                    if (artistKeyStr == null || artistKeyStr.isEmpty()) {
+                        artistKeyStr = cur.getString(artistName);
+                    }
+                    if (artistKeyStr == null || artistKeyStr.isEmpty()) {
+                        artistKeyStr = String.valueOf(cur.getLong(artistId));
+                    }
+
+                    Artist artist = new Artist(PREFIX_ARTIST + getArtistUniqueName(artistKeyStr));
                     artist.setName(cur.getString(artistName));
                     artist.setIsLoaded(true);
 
