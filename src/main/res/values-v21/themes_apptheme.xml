@@ -23,7 +23,7 @@
     </style>
 
     <style name="AppActionBarText" parent="android:TextAppearance.Material.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/white</item>
+        <item name="android:textColor">@color/white_text</item>
     </style>
 
     <style name="TransparentNavBar" parent="@android:style/Widget.Material.Light.ActionBar.Solid">

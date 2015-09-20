@@ -4,6 +4,6 @@
     android:shape="oval">
 
     <stroke
-        android:color="#80FFFFFF"
+        android:color="@color/white80"
         android:width="2dp"/>
 </shape>

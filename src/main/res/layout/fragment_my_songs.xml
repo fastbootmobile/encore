@@ -23,7 +23,7 @@
         app:stl_underlineThickness="@dimen/divider_height"
         app:stl_dividerThickness="0dp"
         app:stl_defaultTabTextAllCaps="true"
-        app:stl_defaultTabTextColor="@color/white"
+        app:stl_defaultTabTextColor="@color/white_text"
         app:stl_defaultTabTextSize="12sp"
         app:stl_defaultTabTextHorizontalPadding="20dp"
         app:stl_defaultTabTextMinWidth="80dp"
