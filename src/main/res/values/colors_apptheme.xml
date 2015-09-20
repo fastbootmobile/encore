@@ -64,7 +64,7 @@
 	<color name="white80">#80ffffff</color>
 	<color name="white40">#40ffffff</color>
 	<color name="black80">#80000000</color>
-	<color name="white_text">ffffffff</color>
+	<color name="white_text">#ffffffff</color>
 	<color name="primary_text">#8A000000</color>
 	<color name="secondary_text">#DD000000</color>
 	<color name="llButtons_bg">#aa333333</color>
