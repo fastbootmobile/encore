@@ -7,12 +7,12 @@ def getDate() {
 }
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '22.0.1'
+    compileSdkVersion 23
+    buildToolsVersion '23.0.1'
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 22
+        targetSdkVersion 23
         versionCode 24
         versionName "1.0.1"
         renderscriptTargetApi 18
