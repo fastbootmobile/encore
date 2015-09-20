@@ -233,11 +233,13 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
 
             if (item.isLoaded() || item.getSongsCount() > 0) {
                 ProviderConnection provider = PluginsLookup.getDefault().getProvider(item.getProvider());
-                holder.tvPlaylistDesc.setText(
-                        String.format("%s / %s",
-                                holder.tvPlaylistDesc.getContext().getResources().getQuantityString(R.plurals.xx_songs,
-                                        item.getSongsCount(), item.getSongsCount()),
-                                provider.getProviderName()));
+                if (provider != null) {
+                    holder.tvPlaylistDesc.setText(
+                            String.format("%s / %s",
+                                    holder.tvPlaylistDesc.getContext().getResources().getQuantityString(R.plurals.xx_songs,
+                                            item.getSongsCount(), item.getSongsCount()),
+                                    provider.getProviderName()));
+                }
 
                 holder.ivOfflineStatus.setVisibility(View.VISIBLE);
 
