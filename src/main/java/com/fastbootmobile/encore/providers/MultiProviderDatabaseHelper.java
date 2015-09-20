@@ -308,7 +308,8 @@ public class MultiProviderDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void startSearch(final String query) {
-        if (mSearchResult != null && mSearchResult.getQuery().hashCode() != query.hashCode() || mSearchResult == null) {
+        if (mSearchResult != null && mSearchResult.getQuery() != null &&
+                mSearchResult.getQuery().hashCode() != query.hashCode() || mSearchResult == null) {
             mSearchResult = new SearchResult(query);
             final String regex = ".*" + query + ".*";
             Thread searchThread = new Thread() {
