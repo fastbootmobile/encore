@@ -29,7 +29,6 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -85,21 +84,27 @@ public class PlayingBarView extends RelativeLayout implements SharedPreferences.
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_UPDATE_QUEUE:
-                    final int trackLength = PlaybackProxy.getCurrentTrackLength();
-                    mParent.get().mPlayFab.setMaxProgress(trackLength);
-                    mParent.get().mPlayFab.setEnabled(true);
-                    mParent.get().updatePlayingQueue();
-                    break;
+            PlayingBarView parent = mParent.get();
 
-                case MSG_UPDATE_SEEK:
-                    mParent.get().updateSeekBar();
-                    break;
+            if (parent != null) {
+                switch (msg.what) {
+                    case MSG_UPDATE_QUEUE:
+                        final int trackLength = PlaybackProxy.getCurrentTrackLength();
+                        if (parent.mPlayFab != null) {
+                            parent.mPlayFab.setMaxProgress(trackLength);
+                            parent.mPlayFab.setEnabled(true);
+                        }
+                        parent.updatePlayingQueue();
+                        break;
 
-                case MSG_UPDATE_FAB:
-                    mParent.get().updatePlayFab();
-                    break;
+                    case MSG_UPDATE_SEEK:
+                        parent.updateSeekBar();
+                        break;
+
+                    case MSG_UPDATE_FAB:
+                        parent.updatePlayFab();
+                        break;
+                }
             }
         }
     }
@@ -136,7 +141,7 @@ public class PlayingBarView extends RelativeLayout implements SharedPreferences.
         @Override
         public void onArtistUpdate(List<Artist> a) {
             boolean contains = false;
-            List<Song> playbackQueue = PlaybackProxy.getCurrentPlaybackQueue();
+            List<Song> playbackQueue = new ArrayList<>(PlaybackProxy.getCurrentPlaybackQueue());
             for (Song song : playbackQueue) {
                 if (song == null) continue;
 

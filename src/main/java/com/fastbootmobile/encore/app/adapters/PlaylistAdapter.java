@@ -23,11 +23,12 @@ import android.view.ViewGroup;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.model.Playlist;
 import com.fastbootmobile.encore.model.Song;
+import com.fastbootmobile.encore.providers.IMusicProvider;
 import com.fastbootmobile.encore.providers.ProviderAggregator;
+import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.providers.ProviderIdentifier;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -68,8 +69,13 @@ public class PlaylistAdapter extends SongsListAdapter {
     public void updatePlaylist(int oldPosition, int newPosition) {
         final ProviderIdentifier providerIdentifier = mPlaylist.getProvider();
         try {
-            PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().onUserSwapPlaylistItem(oldPosition, newPosition, mPlaylist.getRef());
-            //// resetIds();
+            ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerIdentifier);
+            if (connection != null) {
+                IMusicProvider binder = connection.getBinder();
+                if (binder != null) {
+                    binder.onUserSwapPlaylistItem(oldPosition, newPosition, mPlaylist.getRef());
+                }
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error: " + e.getMessage());
         }
@@ -82,7 +88,14 @@ public class PlaylistAdapter extends SongsListAdapter {
     public void delete(int id) {
         final ProviderIdentifier providerIdentifier = mPlaylist.getProvider();
         try {
-            PluginsLookup.getDefault().getProvider(providerIdentifier).getBinder().deleteSongFromPlaylist(id, mPlaylist.getRef());
+            ProviderConnection connection = PluginsLookup.getDefault().getProvider(providerIdentifier);
+            if (connection != null) {
+                IMusicProvider binder = connection.getBinder();
+                if (binder != null) {
+                    binder.deleteSongFromPlaylist(id, mPlaylist.getRef());
+                }
+            }
+
             mSongs.remove(id);
             mIds.remove(id);
             mVisible.remove(id);
@@ -143,14 +156,14 @@ public class PlaylistAdapter extends SongsListAdapter {
         mIds.clear();
         mVisible.clear();
 
-        final Iterator<String> it = mPlaylist.songs();
+        final List<String> it = new ArrayList<>(mPlaylist.songsList());
         final ProviderIdentifier id = mPlaylist.getProvider();
         final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
-        while (it.hasNext()) {
-            Song s = aggregator.retrieveSong(it.next(), id);
+        for (String songRef : it) {
+            Song s = aggregator.retrieveSong(songRef, id);
             if (s == null) {
-                Log.e(TAG, "Retreived a null song from the playlist!");
+                Log.e(TAG, "Retrieved a null song from the playlist!");
             } else {
                 put(s);
             }

@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
@@ -37,7 +38,6 @@ import com.fastbootmobile.encore.framework.PlaybackProxy;
 import com.fastbootmobile.encore.framework.PluginsLookup;
 import com.fastbootmobile.encore.model.Song;
 import com.fastbootmobile.encore.providers.IMusicProvider;
-import com.fastbootmobile.encore.providers.ProviderAggregator;
 import com.fastbootmobile.encore.providers.ProviderConnection;
 import com.fastbootmobile.encore.service.BasePlaybackCallback;
 import com.fastbootmobile.encore.utils.Utils;
@@ -95,11 +95,13 @@ public class SongsFragment extends Fragment {
         return new SongsFragment();
     }
 
+    public SongsFragment() {
+        mHandler = new Handler(Looper.getMainLooper());
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mHandler = new Handler();
-
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_songs, container, false);
         assert root != null;
@@ -126,11 +128,10 @@ public class SongsFragment extends Fragment {
         PlaybackProxy.removeCallback(mPlaybackCallback);
     }
 
-    private class GetAllSongsTask extends AsyncTask<Void, Void, List<Song>> {
+    private class GetAllSongsTask extends AsyncTask<Void, List<Song>, List<Song>> {
         @Override
         protected List<Song> doInBackground(Void... params) {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            final ProviderAggregator aggregator = ProviderAggregator.getDefault();
 
             List<ProviderConnection> providers = PluginsLookup.getDefault().getAvailableProviders();
             final List<Song> songsToAdd = new ArrayList<>();
@@ -153,16 +154,11 @@ public class SongsFragment extends Fragment {
                                 for (Song song : songs) {
                                     if (song != null) {
                                         songsToAdd.add(song);
-
-                                        // Pre-fetch artist and album information
-                                        if (song.getArtist() != null) {
-                                            aggregator.retrieveArtist(song.getArtist(), song.getProvider());
-                                        }
-                                        if (song.getAlbum() != null) {
-                                            aggregator.retrieveAlbum(song.getAlbum(), song.getProvider());
-                                        }
                                     }
                                 }
+
+                                publishProgress(new ArrayList<>(songsToAdd));
+                                songsToAdd.clear();
 
                                 if (songs.size() < limit) {
                                     // Less songs than requested, assume we're at the end
@@ -194,6 +190,15 @@ public class SongsFragment extends Fragment {
             return songsToAdd;
         }
 
+        @SafeVarargs
+        @Override
+        protected final void onProgressUpdate(List<Song>... values) {
+            List<Song> songs = values[0];
+            if (songs.size() > 0) {
+                onPostExecute(songs);
+            }
+        }
+
         @Override
         protected void onPostExecute(List<Song> songs) {
             mSongsListAdapter.putAll(songs);
@@ -203,6 +208,13 @@ public class SongsFragment extends Fragment {
                 mSongsListAdapter.notifyDataSetChanged();
             } else {
                 mListView.setAdapter(mSongsListAdapter);
+
+                View root = getView();
+                if (root != null) {
+                    root.findViewById(R.id.songsProgress).setVisibility(View.GONE);
+                }
+
+                mAdapterSet = true;
             }
         }
     }

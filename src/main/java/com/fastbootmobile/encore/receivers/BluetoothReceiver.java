@@ -133,8 +133,10 @@ public class BluetoothReceiver extends BroadcastReceiver {
 
     private int buildActionFlags(Set<String> flags) {
         int actionFlags = 0;
-        for (String flag : flags) {
-            actionFlags += Integer.parseInt(flag);
+        if (flags != null) {
+            for (String flag : flags) {
+                actionFlags += Integer.parseInt(flag);
+            }
         }
 
         return actionFlags;

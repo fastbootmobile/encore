@@ -169,8 +169,17 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                             }
                         }
 
-                        cacheAlbums(conn, binder.getAlbums());
-                        cacheArtists(conn, binder.getArtists());
+                        try {
+                            cacheAlbums(conn, binder.getAlbums());
+                        } catch (Exception e) {
+                            Log.e(TAG, "Provider " + conn.getProviderName() + " threw an exception in getAlbums", e);
+                        }
+
+                        try {
+                            cacheArtists(conn, binder.getArtists());
+                        } catch (Exception e) {
+                            Log.e(TAG, "Provider " + conn.getProviderName() + " threw an exception in getArtists", e);
+                        }
                     } else if (conn.getBinder() != null) {
                         Log.i(TAG, "Skipping a providers because it is not setup or authenticated" +
                                 " ==> binder=" + binder + " ; isSetup=" +

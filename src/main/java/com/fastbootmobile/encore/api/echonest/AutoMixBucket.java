@@ -297,6 +297,13 @@ public class AutoMixBucket {
                     } else {
                         throw e;
                     }
+                } catch (Exception e) {
+                    if (tries < 5) {
+                        Log.e(TAG, "Error while parsing response from EchoNest");
+                        tries++;
+                    } else {
+                        return null;
+                    }
                 }
             }
 
