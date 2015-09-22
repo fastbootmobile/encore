@@ -525,8 +525,13 @@ public class PlaybackQueueFragment extends Fragment {
                     || state == PlaybackService.STATE_PAUSING
                     || state == PlaybackService.STATE_PAUSED) {
                 if (!mLockSeekBarUpdate) {
-                    tag.sbSeek.setMax(PlaybackProxy.getCurrentTrackLength());
-                    tag.sbSeek.setProgress(PlaybackProxy.getCurrentTrackPosition());
+                    final int length = PlaybackProxy.getCurrentTrackLength();
+                    final int position = PlaybackProxy.getCurrentTrackPosition();
+
+                    tag.sbSeek.setMax(length);
+                    tag.sbSeek.setProgress(position);
+                    tag.tvTotalTime.setText(Utils.formatTrackLength(length));
+                    tag.tvCurrentTime.setText(Utils.formatTrackLength(position));
                 }
 
                 mHandler.sendEmptyMessageDelayed(MSG_UPDATE_SEEKBAR, SEEK_UPDATE_DELAY);
