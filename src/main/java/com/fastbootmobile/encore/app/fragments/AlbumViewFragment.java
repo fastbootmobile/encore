@@ -497,7 +497,9 @@ public class AlbumViewFragment extends MaterialReelBaseFragment implements ILoca
                         }, 600);
                     }
 
-                    generateHeroPalette();
+                    try {
+                        generateHeroPalette();
+                    } catch (IllegalArgumentException ignore) { }
                 }
             }
         }, mAlbum, -1, false);

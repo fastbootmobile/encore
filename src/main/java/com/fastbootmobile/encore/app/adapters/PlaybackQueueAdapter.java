@@ -171,6 +171,8 @@ public class PlaybackQueueAdapter extends BaseAdapter {
                 tag.btnThumbsDown = (ImageView) convertView.findViewById(R.id.btnThumbsDown);
                 tag.btnOverflow = (ImageView) convertView.findViewById(R.id.btnOverflow);
                 tag.fabPlay = (FloatingActionButton) convertView.findViewById(R.id.fabPlay);
+                tag.tvCurrentTime = (TextView) convertView.findViewById(R.id.tvCurrentTime);
+                tag.tvTotalTime = (TextView) convertView.findViewById(R.id.tvTotalTime);
 
                 // Setup some initial states
                 if (PlaybackProxy.isRepeatMode()) {
@@ -237,8 +239,10 @@ public class PlaybackQueueAdapter extends BaseAdapter {
             Artist artist = aggregator.retrieveArtist(item.getArtist(), item.getProvider());
             if (artist != null && artist.getName() != null && !artist.getName().isEmpty()) {
                 tag.tvArtist.setText(artist.getName());
-            } else {
+            } else if (artist != null) {
                 tag.tvArtist.setText("...");
+            } else {
+                tag.tvArtist.setText(null);
             }
 
             tag.ivAlbumArt.loadArtForSong(item);
@@ -296,6 +300,8 @@ public class PlaybackQueueAdapter extends BaseAdapter {
         public ViewGroup vRoot;
         public TextView tvTitle;
         public TextView tvArtist;
+        public TextView tvCurrentTime;
+        public TextView tvTotalTime;
         public AlbumArtImageView ivAlbumArt;
         public SeekBar sbSeek;
         public FloatingActionButton fabPlay;

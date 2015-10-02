@@ -147,7 +147,7 @@ public class AlbumsAdapter extends BaseAdapter {
     /**
      * Sorts the list of albums alphabetically
      */
-    private void sortList() {
+    private void sortListLocked() {
         Collections.sort(mAlbums, mComparator);
     }
 
@@ -156,8 +156,10 @@ public class AlbumsAdapter extends BaseAdapter {
      * @param a The album to add
      */
     public void addItem(Album a) {
-        mAlbums.add(a);
-        sortList();
+        synchronized (mAlbums) {
+            mAlbums.add(a);
+            sortListLocked();
+        }
     }
 
     /**
@@ -166,12 +168,14 @@ public class AlbumsAdapter extends BaseAdapter {
      * @return True if the item has been added, false otherwise
      */
     public boolean addItemUnique(Album a) {
-        if (!mAlbums.contains(a)) {
-            mAlbums.add(a);
-            sortList();
-            return true;
-        } else {
-            return false;
+        synchronized (mAlbums) {
+            if (!mAlbums.contains(a)) {
+                mAlbums.add(a);
+                sortListLocked();
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
@@ -180,8 +184,10 @@ public class AlbumsAdapter extends BaseAdapter {
      * @param ps The elements to add
      */
     public void addAll(Collection<Album> ps) {
-        mAlbums.addAll(ps);
-        sortList();
+        synchronized (mAlbums) {
+            mAlbums.addAll(ps);
+            sortListLocked();
+        }
     }
 
     /**
@@ -191,15 +197,18 @@ public class AlbumsAdapter extends BaseAdapter {
      */
     public boolean addAllUnique(List<Album> ps) {
         boolean didChange = false;
-        for (Album p : ps) {
-            if (!mAlbums.contains(p) && p.isLoaded()) {
-                mAlbums.add(p);
-                didChange = true;
-            }
-        }
 
-        if (didChange) {
-            sortList();
+        synchronized (mAlbums) {
+            for (Album p : ps) {
+                if (!mAlbums.contains(p) && p.isLoaded()) {
+                    mAlbums.add(p);
+                    didChange = true;
+                }
+            }
+
+            if (didChange) {
+                sortListLocked();
+            }
         }
 
         return didChange;
@@ -211,7 +220,9 @@ public class AlbumsAdapter extends BaseAdapter {
      * @return true if the adapter contains the provided album
      */
     public boolean contains(Album p) {
-        return mAlbums.contains(p);
+        synchronized (mAlbums) {
+            return mAlbums.contains(p);
+        }
     }
 
     /**
@@ -219,7 +230,9 @@ public class AlbumsAdapter extends BaseAdapter {
      */
     @Override
     public int getCount() {
-        return mAlbums.size();
+        synchronized (mAlbums) {
+            return mAlbums.size();
+        }
     }
 
     /**
@@ -227,7 +240,9 @@ public class AlbumsAdapter extends BaseAdapter {
      */
     @Override
     public Album getItem(int position) {
-        return mAlbums.get(position);
+        synchronized (mAlbums) {
+            return mAlbums.get(position);
+        }
     }
 
     /**
@@ -235,7 +250,9 @@ public class AlbumsAdapter extends BaseAdapter {
      */
     @Override
     public long getItemId(int position) {
-        return mAlbums.get(position).getRef().hashCode();
+        synchronized (mAlbums) {
+            return mAlbums.get(position).getRef().hashCode();
+        }
     }
 
     /**

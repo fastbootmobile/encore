@@ -503,7 +503,10 @@ public class MainActivity extends AppActivity
                     @Override
                     public boolean onClose() {
                         if (Utils.hasJellyBeanMR1()) {
-                            menu.findItem(R.id.action_cast).setVisible(true);
+                            MenuItem item = menu.findItem(R.id.action_cast);
+                            if (item != null) {
+                                item.setVisible(true);
+                            }
                         }
 
                         getSupportActionBar().setDisplayHomeAsUpEnabled(false);

@@ -69,7 +69,10 @@ public class ImageCache {
      */
     public ImageCache() {
         mEntries = new ArrayList<>();
-        final int memoryCacheSize = (int) (Runtime.getRuntime().maxMemory() / 1024 / 3);
+
+        // A third of the max heap memory, or 39MB, whichever is lowest
+        final int memoryCacheSize = Math.min(30000,
+                (int) (Runtime.getRuntime().maxMemory() / 1024 / 3));
         Log.d(TAG, "Maximum image cache memory: " + memoryCacheSize + " KB (maxMemory=" + (Runtime.getRuntime().maxMemory() / 1024) + "KB)");
 
         // We create a set of reusable bitmaps that can be

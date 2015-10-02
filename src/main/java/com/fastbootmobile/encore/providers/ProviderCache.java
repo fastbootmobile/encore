@@ -46,7 +46,7 @@ public class ProviderCache {
             keysToRemove = new ArrayList<>();
 
             for (Map.Entry<String, Playlist> item : playlists) {
-                if (item.getValue().getProvider().equals(id)) {
+                if (item.getValue() == null || item.getValue().getProvider().equals(id)) {
                     keysToRemove.add(item.getKey());
                 }
             }

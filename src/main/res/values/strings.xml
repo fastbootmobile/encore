@@ -290,4 +290,8 @@
     <string name="ln_landcard_plugin_installed_title">%s has been installed</string>
     <string name="ln_landcard_plugin_installed_body_configure">This plug-in has been successfully installed, but might require some setup. Tap the button below to configure this plugin.</string>
     <string name="ln_landcard_plugin_installed_body">This plug-in has been successfully installed and may now be used.</string>
+    <string name="toast_song_not_loaded">This song is not loaded yet.</string>
+    <string name="toast_no_gmaps">You must have Google Maps installed.</string>
+    <string name="toast_recognition_error">Unable to start audio recorder.</string>
+    <string name="toast_retry_plugin_not_ready">Please try again, plug-in not ready.</string>
 </resources>

@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
@@ -94,11 +95,13 @@ public class SongsFragment extends Fragment {
         return new SongsFragment();
     }
 
+    public SongsFragment() {
+        mHandler = new Handler(Looper.getMainLooper());
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mHandler = new Handler();
-
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_songs, container, false);
         assert root != null;
@@ -187,8 +190,9 @@ public class SongsFragment extends Fragment {
             return songsToAdd;
         }
 
+        @SafeVarargs
         @Override
-        protected void onProgressUpdate(List<Song>... values) {
+        protected final void onProgressUpdate(List<Song>... values) {
             List<Song> songs = values[0];
             if (songs.size() > 0) {
                 onPostExecute(songs);

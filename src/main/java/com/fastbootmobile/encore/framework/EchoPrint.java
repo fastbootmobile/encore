@@ -245,19 +245,24 @@ public class EchoPrint {
          *
          * @param result The matched track
          */
-        public void onResult(PrintResult result);
+        void onResult(PrintResult result);
 
         /**
          * Called when the API returned no match
          */
-        public void onNoMatch();
+        void onNoMatch();
 
         /**
          * Called frequently with the audio level
          *
          * @param level The microphone audio level, between 0 and 1
          */
-        public void onAudioLevel(float level);
+        void onAudioLevel(float level);
+
+        /**
+         * Called when an error occurred
+         */
+        void onError();
     }
 
 
@@ -293,9 +298,14 @@ public class EchoPrint {
                 minBufSize);
 
         mBufferIndex = 0;
-        mRecorder.startRecording();
-        mRecThread = new RecorderThread();
-        mRecThread.start();
+        try {
+            mRecorder.startRecording();
+            mRecThread = new RecorderThread();
+            mRecThread.start();
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Cannot start recording for recognition", e);
+            mCallback.onError();
+        }
     }
 
     /**

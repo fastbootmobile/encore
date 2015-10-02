@@ -35,6 +35,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fastbootmobile.encore.app.MainActivity;
 import com.fastbootmobile.encore.app.R;
@@ -60,6 +61,7 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
     private static final int MSG_AUDIO_LEVEL = 1;
     private static final int MSG_RESULT = 2;
     private static final int MSG_NO_RESULT = 3;
+    private static final int MSG_ERROR = 4;
 
     private static final int FADE_DURATION = 500;
 
@@ -90,15 +92,22 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == MSG_AUDIO_LEVEL) {
-                float value = (Float) msg.obj;
-                if (value >= 0.0f) {
-                    mParent.get().setVoiceLevel(value);
+            RecognitionFragment parent = mParent.get();
+
+            if (parent != null) {
+                if (msg.what == MSG_AUDIO_LEVEL) {
+                    float value = (Float) msg.obj;
+                    if (value >= 0.0f) {
+                        parent.setVoiceLevel(value);
+                    }
+                } else if (msg.what == MSG_RESULT) {
+                    parent.showLastResult();
+                } else if (msg.what == MSG_NO_RESULT) {
+                    parent.onNoResults();
+                } else if (msg.what == MSG_ERROR) {
+                    parent.showErrorToast();
+                    parent.onNoResults();
                 }
-            } else if (msg.what == MSG_RESULT) {
-                mParent.get().showLastResult();
-            } else if (msg.what == MSG_NO_RESULT) {
-                mParent.get().onNoResults();
             }
         }
     }
@@ -214,6 +223,11 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
     @Override
     public void onAudioLevel(final float level) {
         mHandler.obtainMessage(MSG_AUDIO_LEVEL, level).sendToTarget();
+    }
+
+    @Override
+    public void onError() {
+        mHandler.obtainMessage(MSG_ERROR).sendToTarget();
     }
 
     private void onStoppedAndRecognizing() {
@@ -345,5 +359,9 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
         mRecognitionButton.setActive(false);
         mRecognitionButton.setEnabled(true);
         mTvStatus.setText(R.string.recognition_status_no_result);
+    }
+
+    public void showErrorToast() {
+        Toast.makeText(getActivity(), R.string.toast_recognition_error, Toast.LENGTH_SHORT).show();
     }
 }

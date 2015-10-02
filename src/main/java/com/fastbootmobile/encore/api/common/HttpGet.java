@@ -17,9 +17,8 @@ package com.fastbootmobile.encore.api.common;
 
 import android.util.Log;
 
-import org.apache.http.util.ByteArrayBuffer;
-
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -74,14 +73,15 @@ public class HttpGet {
                     // No length? Let's allocate 100KB.
                     contentLength = 100 * 1024;
                 }
-                ByteArrayBuffer bab = new ByteArrayBuffer(contentLength);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(contentLength);
+                byte[] buffer = new byte[2048];
                 BufferedInputStream bis = new BufferedInputStream(in);
-                int character;
+                int read;
 
-                while ((character = bis.read()) != -1) {
-                    bab.append(character);
+                while ((read = bis.read(buffer, 0, buffer.length)) > 0) {
+                    baos.write(buffer, 0, read);
                 }
-                return bab.toByteArray();
+                return baos.toByteArray();
             } else if (status == HttpURLConnection.HTTP_NOT_FOUND) {
                 // 404
                 return new byte[]{};

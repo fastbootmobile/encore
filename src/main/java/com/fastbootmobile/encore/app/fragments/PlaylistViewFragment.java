@@ -73,6 +73,7 @@ import com.fastbootmobile.encore.service.BasePlaybackCallback;
 import com.fastbootmobile.encore.service.PlaybackService;
 import com.fastbootmobile.encore.utils.Utils;
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.joshdholtz.sentry.Sentry;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -473,7 +474,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
             return true;
         } else if (item.getItemId() == R.id.menu_remove_duplicates) {
             try {
-                removeDuplicates();
+                removeDuplicates(0);
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot remove duplicates", e);
             }
@@ -525,6 +526,8 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                             provider.renamePlaylist(mPlaylist.getRef(), value);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Cannot rename playlist", e);
+                        } catch (Exception e) {
+                            Sentry.captureException(new Exception("Rename playlist: Plugin error", e));
                         }
                     }
                 }
@@ -661,9 +664,14 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
         }
     }
 
-    private void removeDuplicates() throws RemoteException {
+    private void removeDuplicates(int count) throws RemoteException {
+        if (count > 1000) {
+            // Watchdog
+            return;
+        }
+
         // Process each track and look for the same track
-        Iterator<String> songsIt = mPlaylist.songs();
+        List<String> songsIt = new ArrayList<>(mPlaylist.songsList());
         List<String> knownTracks = new ArrayList<>();
 
         // Only process if the provider is up
@@ -672,15 +680,13 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
             IMusicProvider provider = conn.getBinder();
             if (provider != null) {
                 int position = 0;
-                while (songsIt.hasNext()) {
-                    String songRef = songsIt.next();
-
+                for (String songRef : songsIt) {
                     // If we know the track, remove it (it's the second occurrence of the track).
                     // Else, add it to the known list and move on.
                     if (knownTracks.contains(songRef)) {
                         // Delete the song and restart the process
                         provider.deleteSongFromPlaylist(position, mPlaylist.getRef());
-                        removeDuplicates();
+                        removeDuplicates(count + 1);
                         return;
                     } else {
                         knownTracks.add(songRef);

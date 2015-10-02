@@ -68,7 +68,7 @@ public class HistoryAdapter extends BaseAdapter {
         public void onClick(View v) {
             ViewHolder tag = (ViewHolder) v.getTag();
 
-            if (tag.song.getAlbum() != null) {
+            if (tag.song != null && tag.song.getAlbum() != null) {
                 FragmentActivity activity = (FragmentActivity) v.getContext();
 
                 MaterialTransitionDrawable mtd = (MaterialTransitionDrawable) tag.ivAlbumArt.getDrawable();
@@ -85,6 +85,8 @@ public class HistoryAdapter extends BaseAdapter {
                 } else {
                     v.getContext().startActivity(intent);
                 }
+            } else if (tag.song == null) {
+                Toast.makeText(v.getContext(), R.string.toast_song_not_loaded, Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(v.getContext(), R.string.toast_song_no_album, Toast.LENGTH_SHORT).show();
             }
