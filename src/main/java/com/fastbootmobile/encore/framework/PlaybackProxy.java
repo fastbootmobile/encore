@@ -63,6 +63,7 @@ public class PlaybackProxy {
     private static final int MSG_SET_SHUFFLE_MODE   = 19;
     private static final int MSG_PLAY_NEXT          = 20;
     private static final int MSG_SLEEP_TIMER        = 21;
+    private static final int MSG_SET_PLAYER_MUTED   = 22;
 
     private static class PlaybackProxyHandler extends Handler {
         public PlaybackProxyHandler(Looper looper) {
@@ -166,6 +167,10 @@ public class PlaybackProxy {
 
                     case MSG_SLEEP_TIMER:
                         getPlayback().setSleepTimer((Long) msg.obj);
+                        break;
+
+                    case MSG_SET_PLAYER_MUTED:
+                        getPlayback().setPlayerMuted((Boolean) msg.obj);
                         break;
                 }
             } catch (RemoteException e) {
@@ -372,5 +377,9 @@ public class PlaybackProxy {
         } catch (RemoteException e) {
             return -1;
         }
+    }
+
+    public static void setPhonePlayerMuted(boolean muted) {
+        Message.obtain(sHandler, MSG_SET_PLAYER_MUTED, muted).sendToTarget();
     }
 }

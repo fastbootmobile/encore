@@ -35,7 +35,7 @@ NativePlayer::NativePlayer() : m_pEngineObj(nullptr), m_pEngine(nullptr),
         m_iWrittenSamples(0), m_iUnderflowCount(0),
         m_pPlayingBuffer(nullptr), m_iActiveBuffersTotalSize(0), m_fVolume(1.0f),
         m_pNativeHub(nullptr), m_bUseResampler(false), m_LastBuffersCheckUfCount(0),
-        m_bPaused(false) {
+        m_bPaused(false), m_bMuted(false) {
 }
 // -------------------------------------------------------------------------------------
 NativePlayer::~NativePlayer() {
@@ -576,7 +576,12 @@ void NativePlayer::setVolume(float volume) {
     SLresult result;
     m_fVolume = volume;
 
-    float attenuation = volume < 0.01f ? -96.0f : 20 * log10(volume);
+    float attenuation;
+    if (m_bMuted) {
+        attenuation = -96.0f;
+    } else {
+        attenuation = volume < 0.01f ? -96.0f : 20 * log10(volume);
+    }
 
     (*m_pPlayerVol)->SetVolumeLevel(m_pPlayerVol, (SLmillibel) (attenuation * 100));
 }
@@ -588,6 +593,16 @@ void NativePlayer::setPaused(bool pause) {
         setPlayState(SL_PLAYSTATE_PAUSED);
     } else {
         setPlayState(SL_PLAYSTATE_PLAYING);
+    }
+}
+// -------------------------------------------------------------------------------------
+void NativePlayer::setMuted(bool muted) {
+    m_bMuted = muted;
+
+    if (muted) {
+        (*m_pPlayerVol)->SetVolumeLevel(m_pPlayerVol, (SLmillibel) (-96.0f * 100.0f));
+    } else {
+        setVolume(m_fVolume);
     }
 }
 // -------------------------------------------------------------------------------------

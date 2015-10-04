@@ -175,6 +175,7 @@ public class CastModule extends MediaRouter.Callback {
         // secondary output device
         mSelectedDevice = null;
         updateCast();
+        PlaybackProxy.setPhonePlayerMuted(false);
     }
 
     private void updateCast() {
@@ -278,12 +279,15 @@ public class CastModule extends MediaRouter.Callback {
                     Cast.CastApi.launchApplication(mApiClient, CAST_APP_ID, true)
                             .setResultCallback(new ApplicationConnectionResultCallback("LaunchApp"));
                     mShouldStart = false;
+                    PlaybackProxy.setPhonePlayerMuted(true);
                 } else {
                     mIsAppUp = false;
+                    PlaybackProxy.setPhonePlayerMuted(false);
                 }
             } catch (IllegalStateException e) {
                 // Not connected to a device
                 mIsAppUp = false;
+                PlaybackProxy.setPhonePlayerMuted(false);
             }
         }
 
@@ -291,6 +295,7 @@ public class CastModule extends MediaRouter.Callback {
         public void onApplicationDisconnected(int statusCode) {
             Log.d(TAG, "onApplicationDisconnected: statusCode=" + statusCode);
             mIsAppUp = false;
+            PlaybackProxy.setPhonePlayerMuted(false);
         }
     }
 
@@ -319,6 +324,9 @@ public class CastModule extends MediaRouter.Callback {
 
                 // Ask the device to connect to this sender's websocket
                 attachMediaPlayer();
+
+                // Mute phone audio
+                PlaybackProxy.setPhonePlayerMuted(true);
             } else {
                 Log.e(TAG, "App launch error");
             }

@@ -91,6 +91,15 @@ public class NativePlayer {
     public void setPaused(boolean pause) { nativeSetPaused(pause); }
 
     /**
+     * Sets the audio player mute state to prevent output to the phone's regular output (speaker,
+     * earbuds, bluetooth, etc).
+     * @param muted True to mute, false to restore
+     */
+    public void setMuted(boolean muted) {
+        nativeSetMuted(muted);
+    }
+
+    /**
      * Releases resources and cleans up the player
      */
     public void shutdown() {
@@ -107,4 +116,5 @@ public class NativePlayer {
     private native void nativeFlush();
     private native void nativeSetPaused(boolean pause);
     private native void nativeShutdown();
+    private native void nativeSetMuted(boolean muted);
 }

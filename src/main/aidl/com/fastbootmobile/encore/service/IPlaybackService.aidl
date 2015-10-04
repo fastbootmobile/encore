@@ -179,4 +179,9 @@ interface IPlaybackService {
      * Returns the time (in SystemClock.uptimeMillis() spacetime) at which the playback should stop
      */
     long getSleepTimerEndTime();
+
+    /**
+     * Sets whether or not to mute the phone's speaker output
+     */
+    void setPlayerMuted(boolean muted);
 }
