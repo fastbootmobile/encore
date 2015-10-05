@@ -42,6 +42,8 @@ static JNINativeMethod gMethodsNativePlayer[] = {
             reinterpret_cast<void*>(om_NativePlayer_flush)},
     {"nativeSetPaused", "(Z)V",
             reinterpret_cast<void*>(om_NativePlayer_setPaused)},
+    {"nativeSetMuted", "(Z)V",
+            reinterpret_cast<void*>(om_NativePlayer_setMuted)},
     {"nativeShutdown", "()V",
             reinterpret_cast<void*>(om_NativePlayer_shutdown)},
 };

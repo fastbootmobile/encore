@@ -127,3 +127,8 @@ void om_NativePlayer_setPaused(JNIEnv* env, jobject thiz, jboolean pause) {
     player->setPaused(pause);
 }
 // -------------------------------------------------------------------------------------
+void om_NativePlayer_setMuted(JNIEnv* env, jobject thiz, jboolean muted) {
+    NativePlayer* player = get_layer_from_object(env, thiz);
+    player->setMuted(muted);
+}
+// -------------------------------------------------------------------------------------

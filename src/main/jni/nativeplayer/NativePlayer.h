@@ -86,8 +86,11 @@ class NativePlayer : public INativeSink {
     // Sets the active volume
     void setVolume(float volume);
 
-   // Pauses or resume the playback
+    // Pauses or resume the playback
     void setPaused(bool pause);
+
+    // Mutes or unmutes the playback
+    void setMuted(bool muted);
 
  private:
     bool createAudioPlayer();
@@ -111,6 +114,7 @@ class NativePlayer : public INativeSink {
     std::atomic<int64_t> m_iWrittenSamples;
     std::atomic<int32_t> m_iUnderflowCount;
     std::atomic<float> m_fVolume;
+    std::atomic<bool> m_bMuted;
 
     std::list<AudioBuffer*> m_ActiveBuffers;
     std::list<AudioBuffer*> m_IdleBuffers;

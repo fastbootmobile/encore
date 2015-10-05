@@ -70,4 +70,8 @@ public class NativeAudioSink implements AudioSink {
     public void setPaused(boolean pause) {
         mPlayer.setPaused(pause);
     }
+
+    public void setMuted(boolean muted) {
+        mPlayer.setMuted(muted);
+    }
 }

@@ -56,4 +56,7 @@ void om_NativePlayer_flush(JNIEnv* env, jobject thiz);
 // NativePlayer.nativeSetPaused ==> NativePlayer::setPaused
 void om_NativePlayer_setPaused(JNIEnv* env, jobject thiz, jboolean pause);
 
+// NativePlayer.nativeSetMuted ==> NativePlayer::setMuted
+void om_NativePlayer_setMuted(JNIEnv* env, jobject thiz, jboolean muted);
+
 #endif  // SRC_MAIN_JNI_NATIVEPLAYER_JNI_NATIVEPLAYER_H_

@@ -1448,7 +1448,16 @@ public class PlaybackService extends Service
                 return 0;
             }
         }
-    };
+
+        @Override
+        public  void setPlayerMuted(boolean muted) {
+            PlaybackService service = mParent.get();
+
+            if (service != null) {
+                service.mNativeSink.setMuted(muted);
+            }
+        }
+    }
 
     @Override
     public void onSongUpdate(List<Song> s) {
