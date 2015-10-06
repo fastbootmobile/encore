@@ -25,7 +25,7 @@
             android:transitionName="artistName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/text_regular"
+            android:background="@color/artist_bg"
             android:gravity="top|start"
             android:paddingTop="@dimen/entview_head_padding_top"
             android:paddingBottom="@dimen/artist_head_padding_bottom"

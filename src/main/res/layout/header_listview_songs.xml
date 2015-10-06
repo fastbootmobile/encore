@@ -19,7 +19,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary"
+        android:background="@color/red_bg"
         android:layout_below="@+id/tvAlbumName"
         android:id="@+id/layoutBar"
         android:visibility="gone"
@@ -101,7 +101,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/ivHero"
         android:layout_alignStart="@+id/ivHero"
-        android:background="@color/text_regular"
+        android:background="@color/artist_bg"
         android:transitionName="albumName"
         android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
         fontPath="fonts/Roboto-Medium.ttf"
