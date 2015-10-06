@@ -14,7 +14,7 @@
         android:id="@+id/currentSongIndicator"
         android:layout_width="4dp"
         android:layout_height="match_parent"
-        android:background="@color/primary"
+        android:background="@color/red_bg"
         android:visibility="invisible" />
 
     <com.fastbootmobile.encore.app.ui.AlbumArtImageView
