@@ -581,27 +581,29 @@ public class PlayingBarView extends RelativeLayout implements SharedPreferences.
     public void updatePlayFab() {
         int state = PlaybackProxy.getState();
 
-        switch (state) {
-            case PlaybackService.STATE_PAUSED:
-            case PlaybackService.STATE_STOPPED:
-                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
-                mPlayFab.showProgress(false);
-                mIsPlaying = false;
-                break;
+        if (mPlayFab != null && mPlayFabDrawable != null) {
+            switch (state) {
+                case PlaybackService.STATE_PAUSED:
+                case PlaybackService.STATE_STOPPED:
+                    mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PLAY);
+                    mPlayFab.showProgress(false);
+                    mIsPlaying = false;
+                    break;
 
-            case PlaybackService.STATE_BUFFERING:
-            case PlaybackService.STATE_PAUSING:
-                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                mPlayFab.showProgress(true);
-                mPlayFab.setIndeterminate(true);
-                mIsPlaying = true;
-                break;
+                case PlaybackService.STATE_BUFFERING:
+                case PlaybackService.STATE_PAUSING:
+                    mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mPlayFab.showProgress(true);
+                    mPlayFab.setIndeterminate(true);
+                    mIsPlaying = true;
+                    break;
 
-            case PlaybackService.STATE_PLAYING:
-                mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
-                mPlayFab.setIndeterminate(false);
-                mIsPlaying = true;
-                break;
+                case PlaybackService.STATE_PLAYING:
+                    mPlayFabDrawable.setShape(PlayPauseDrawable.SHAPE_PAUSE);
+                    mPlayFab.setIndeterminate(false);
+                    mIsPlaying = true;
+                    break;
+            }
         }
     }
 
