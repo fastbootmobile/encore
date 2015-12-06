@@ -145,7 +145,7 @@ public class MainActivity extends AppActivity
                 .checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) !=
                 PermissionChecker.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO},
-                    REQUEST_WRITE_STORAGE_PERMISSION);
+                    REQUEST_RECORD_AUDIO_PERMISSION);
         } else {
             // Do absolutely NOTHING
         }
