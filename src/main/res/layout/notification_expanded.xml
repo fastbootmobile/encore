@@ -112,12 +112,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
+            android:textColor="@color/white_text"
             android:textAppearance="@style/FontStatusBar"/>
 
         <TextView
             android:id="@+id/tvNotifLineThree"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white_text"
             android:textAppearance="@style/FontStatusBar" />
     </LinearLayout>
 
