@@ -135,9 +135,9 @@
     <dimen name="nav_drawer_item_padding">16dp</dimen>
 
     <!-- Playback queue -->
-    <dimen name="playbackqueue_current_height">220dp</dimen>
+    <dimen name="playbackqueue_current_height">480dp</dimen>
     <dimen name="playbackqueue_current_margin">4dp</dimen>
-    <dimen name="playbackqueue_current_art_height">140dp</dimen>
+    <dimen name="playbackqueue_current_art_height">400dp</dimen>
     <dimen name="playbackqueue_current_metadata_padleft">8dp</dimen>
     <dimen name="playbackqueue_current_metadata_padtop">12dp</dimen>
     <dimen name="playbackqueue_current_overflow_padding">4dp</dimen>
