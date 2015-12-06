@@ -15,6 +15,7 @@
 
 package com.fastbootmobile.encore.app;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.app.TimePickerDialog;
@@ -25,6 +26,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.net.http.HttpResponseCache;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -32,6 +34,7 @@ import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.PermissionChecker;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.MediaRouteActionProvider;
@@ -82,6 +85,9 @@ public class MainActivity extends AppActivity
 
     public static final int SECTION_DRIVE_MODE = 9;
     public static final int SECTION_SETTINGS = 10;
+	
+	private final static int REQUEST_RECORD_AUDIO_PERMISSION = 0;
+	private final static int REQUEST_WRITE_STORAGE_PERMISSION = 1;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -126,6 +132,23 @@ public class MainActivity extends AppActivity
         } else {
             // Load UI
             setContentView(R.layout.activity_main);
+			
+			if (Build.VERSION.SDK_INT >= 23 && PermissionChecker
+                .checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                PermissionChecker.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_WRITE_STORAGE_PERMISSION);
+        } else {
+            // Do absolutely NOTHING
+        }
+		if (Build.VERSION.SDK_INT >= 23 && PermissionChecker
+                .checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) !=
+                PermissionChecker.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO},
+                    REQUEST_RECORD_AUDIO_PERMISSION);
+        } else {
+            // Do absolutely NOTHING
+        }
 
             mToolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(mToolbar);

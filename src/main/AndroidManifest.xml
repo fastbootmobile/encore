@@ -28,9 +28,11 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 
     <!-- Permission needed to cache data -->
+	<!-- Considered "dangerous" and requires permission request for API 23+ -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <!-- Permission needed for recognition -->
+	<!-- Considered "dangerous" and requires permission request for API 23+ -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <!-- Permission for Media Session notification and remote control -->
