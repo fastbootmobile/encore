@@ -189,7 +189,7 @@ public class PlaybackService extends Service
                         } else {
                             Log.e(TAG, "Provider is null! Has it crashed?");
                         }
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
                         Log.e(TAG, "Cannot pause the track!", e);
                     }
                     break;
