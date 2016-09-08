@@ -89,13 +89,13 @@ public class AnimatedMicButton extends ImageButton {
         public void draw(Canvas canvas) {
             Rect bounds = getBounds();
 
-            mPaint.setColor(0xFFDDDDDD);
+            mPaint.setColor(getResources().getColor.(R.color.voice_pulse));
 
             canvas.drawCircle(bounds.centerX(), bounds.centerY(),
                     bounds.height() / 1.5f + mCurrentLevel * bounds.height() / 3.0f,
                     mPaint);
 
-            mPaint.setColor(0xFFFFFFFF);
+            mPaint.setColor(getResources().getColor.(R.color.white_background));
 
             canvas.drawCircle(bounds.centerX(), bounds.centerY(),
                     bounds.height() / 1.5f,

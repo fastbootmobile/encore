@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/playing_bar_margin_top"
         android:elevation="@dimen/playing_bar_elevation"
-        android:background="@color/white"
+        android:background="@color/white_background"
         android:orientation="vertical">
 
     </LinearLayout>

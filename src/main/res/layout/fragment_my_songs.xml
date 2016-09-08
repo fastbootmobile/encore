@@ -10,7 +10,7 @@
         android:id="@+id/pager_title_strip"
         android:layout_width="match_parent"
         android:layout_height="@dimen/my_songs_strip_height"
-        android:background="@color/primary"
+        android:background="@color/red_bg"
         android:clipToPadding="false"
         android:paddingTop="@dimen/translucent_toolbarstatus_top_margin"
         app:stl_indicatorAlwaysInCenter="false"
