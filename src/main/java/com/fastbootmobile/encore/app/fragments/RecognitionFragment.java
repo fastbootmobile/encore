@@ -107,6 +107,7 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
                 } else if (msg.what == MSG_ERROR) {
                     parent.showErrorToast();
                     parent.onNoResults();
+                    parent.mHandler.removeCallbacks(parent.mStopRecognition);
                 }
             }
         }
