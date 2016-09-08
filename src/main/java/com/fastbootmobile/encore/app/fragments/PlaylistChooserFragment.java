@@ -156,7 +156,9 @@ public class PlaylistChooserFragment extends DialogFragment {
         } else if (mPlaylist != null) {
             ent = mPlaylist;
         } else {
-            throw new RuntimeException("No entity attached for source checking");
+            Log.e(TAG, "No entity attached for source checking!");
+            builder.setTitle(getString(R.string.add_to));
+            return builder.create();
         }
 
         for (Playlist playlist : playlistList) {
