@@ -294,4 +294,5 @@
     <string name="toast_no_gmaps">You must have Google Maps installed.</string>
     <string name="toast_recognition_error">Unable to start audio recorder.</string>
     <string name="toast_retry_plugin_not_ready">Please try again, plug-in not ready.</string>
+    <string name="toast_storage_permission_warning">You must allow this permission in order to access your local music library.</string>
 </resources>
