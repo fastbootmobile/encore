@@ -173,7 +173,7 @@ public class PlaybackProxy {
                         getPlayback().setPlayerMuted((Boolean) msg.obj);
                         break;
                 }
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Cannot run remote method", e);
             }
         }
