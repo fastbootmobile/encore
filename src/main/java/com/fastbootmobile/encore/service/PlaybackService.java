@@ -633,6 +633,8 @@ public class PlaybackService extends Service
             // mCurrentTrack in this context is the track that is going to be played
             if (mCurrentTrack < 0) {
                 mCurrentTrack = 0;
+            } else if (mCurrentTrack >= mPlaybackQueue.size()) {
+                mCurrentTrack = mPlaybackQueue.size() - 1;
             }
 
             final Song next = mPlaybackQueue.get(mCurrentTrack);
@@ -963,7 +965,7 @@ public class PlaybackService extends Service
                     } catch (IllegalStateException e) {
                         Log.e(TAG, "Illegal state while resuming", e);
                     }
-                    
+
                     mIsResuming = true;
                     mState = STATE_BUFFERING;
 
