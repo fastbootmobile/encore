@@ -230,6 +230,7 @@
         <activity
             android:name="com.fastbootmobile.encore.app.AutomixCreateActivity"
             android:label="@string/title_activity_automix_create_static"
+            android:screenOrientation="locked"
             android:launchMode="singleTask">
         </activity>
 
