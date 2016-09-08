@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -112,7 +113,11 @@ public class ArtistActivity extends AppActivity {
                     .commit();
         }
 
-        mActiveFragment.setArguments(mHero, mInitialIntent);
+        try {
+            mActiveFragment.setArguments(mHero, mInitialIntent);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Invalid artist!", e);
+        }
 
         // Remove the activity title as we don't want it here
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
