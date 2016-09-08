@@ -556,7 +556,7 @@ public class PlaylistViewFragment extends MaterialReelBaseFragment implements IL
                             if (provider != null) {
                                 try {
                                     provider.deletePlaylist(mPlaylist.getRef());
-                                } catch (RemoteException e) {
+                                } catch (Exception e) {
                                     Log.e(TAG, "Cannot remove playlist", e);
                                 }
                             }
