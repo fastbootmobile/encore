@@ -45,7 +45,7 @@
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
                         android:visibility="gone"
-                        android:src="@drawable/ic_play_dark"
+                        android:src="@drawable/lb_ic_play"
                         android:scaleType="centerInside"/>
 
                     <TextView
