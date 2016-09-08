@@ -60,6 +60,9 @@ dependencies {
     compile files('src/main/libs/jEN.jar')
     compile files('src/main/libs/json_simple-1.1.jar')
     compile files('src/main/libs/calligraphy-1.1.0.jar')
+    compile ('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.9.3@aar'){
+        transitive=true
+    }
     compile 'com.joshdholtz.sentry:sentry-android:1.4.4'
     compile 'com.google.android.gms:play-services-cast:9.4.0'
     compile 'com.android.support:support-v13:24.2.0'

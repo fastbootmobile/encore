@@ -316,6 +316,26 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
     }
 
     @Override
+    public boolean onCheckCanStartDrag(ViewHolder holder, int position, int x, int y) {
+        // x, y --- relative from the itemView's top-left
+        final View containerView = holder.container;
+        final View dragHandleView = holder.ivDragHandle;
+
+        final int offsetX = containerView.getLeft() + (int) (ViewCompat.getTranslationX(containerView) + 0.5f);
+        final int offsetY = containerView.getTop() + (int) (ViewCompat.getTranslationY(containerView) + 0.5f);
+
+        return ViewUtils.hitTest(dragHandleView, x - offsetX, y - offsetY);
+    }
+
+    @Override
+    public ItemDraggableRange onGetItemDraggableRange(ViewHolder holder, int position) {
+        if (mDragRange == null) {
+            mDragRange = new ItemDraggableRange(1, getItemCount() + 1);
+        }
+        return mDragRange;
+    }
+
+    @Override
     public void onMoveItem(int fromPosition, int toPosition) {
         if (fromPosition == toPosition) {
             return;
@@ -330,25 +350,9 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
     }
 
     @Override
-    public boolean onCheckCanStartDrag(ViewHolder holder, int x, int y) {
-        // x, y --- relative from the itemView's top-left
-        final View containerView = holder.container;
-        final View dragHandleView = holder.ivDragHandle;
-
-        final int offsetX = containerView.getLeft() + (int) (ViewCompat.getTranslationX(containerView) + 0.5f);
-        final int offsetY = containerView.getTop() + (int) (ViewCompat.getTranslationY(containerView) + 0.5f);
-
-        return ViewUtils.hitTest(dragHandleView, x - offsetX, y - offsetY);
+    public boolean onCheckCanDrop(int draggingPosition, int dropPosition) {
+        return false;
     }
-
-    @Override
-    public ItemDraggableRange onGetItemDraggableRange(ViewHolder holder) {
-        if (mDragRange == null) {
-            mDragRange = new ItemDraggableRange(1, getItemCount() + 1);
-        }
-        return mDragRange;
-    }
-
 
     /**
      * ViewHolder for items
