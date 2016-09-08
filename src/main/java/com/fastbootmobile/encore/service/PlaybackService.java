@@ -960,7 +960,10 @@ public class PlaybackService extends Service
                         provider.resume();
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot resume", e);
+                    } catch (IllegalStateException e) {
+                        Log.e(TAG, "Illegal state while resuming", e);
                     }
+                    
                     mIsResuming = true;
                     mState = STATE_BUFFERING;
 
