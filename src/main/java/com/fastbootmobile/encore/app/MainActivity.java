@@ -16,6 +16,7 @@
 package com.fastbootmobile.encore.app;
 
 import android.*;
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.app.TimePickerDialog;
@@ -87,7 +88,7 @@ public class MainActivity extends AppActivity
     public static final int SECTION_DRIVE_MODE = 9;
     public static final int SECTION_SETTINGS = 10;
 
-    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 129;
+    private static final int PERM_REQUEST_APP_CORE_PERMISSIONS = 129;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -134,11 +135,12 @@ public class MainActivity extends AppActivity
             setContentView(R.layout.activity_main);
 
             // Ensure we have READ_EXTERNAL_STORAGE for Music database in LocalProvider
+            // Ensure we have WRITE_EXTERNAL_STORAGE for Album arts storage
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
-                        new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                        MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERM_REQUEST_APP_CORE_PERMISSIONS);
             }
 
             mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -181,7 +183,7 @@ public class MainActivity extends AppActivity
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
+            case PERM_REQUEST_APP_CORE_PERMISSIONS: {
                 // If request is cancelled, the result arrays are empty.
                 if (!(grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
@@ -190,9 +192,6 @@ public class MainActivity extends AppActivity
                 }
                 return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
