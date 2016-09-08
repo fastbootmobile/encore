@@ -146,7 +146,7 @@ public class NavDrawerAdapter extends BaseAdapter {
 
         if (isActiveEntry(i) && tag.tvText != null) {
             tag.tvText.setTextColor(tag.tvText.getResources().getColor(R.color.primary));
-            view.setBackgroundColor(getResources().getColor(R.color.navdrawer_selected));
+            view.setBackgroundColor(tag.tvText.getResources().getColor(R.color.navdrawer_selected));
         } else if (tag.tvText != null) {
             tag.tvText.setTextColor(tag.tvText.getResources().getColor(R.color.text_regular));
             int[] attrs = new int[] { android.R.attr.selectableItemBackground };
