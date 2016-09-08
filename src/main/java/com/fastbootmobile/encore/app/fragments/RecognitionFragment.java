@@ -15,15 +15,20 @@
 
 package com.fastbootmobile.encore.app.fragments;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,6 +62,8 @@ import java.net.URL;
  */
 public class RecognitionFragment extends Fragment implements EchoPrint.PrintCallback {
     private static final String TAG = "RecognitionFragment";
+
+    private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 128;
 
     private static final int MSG_AUDIO_LEVEL = 1;
     private static final int MSG_RESULT = 2;
@@ -176,12 +183,17 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
             @Override
             public void onClick(View view) {
                 if (mActivePrint == null) {
-                    mActivePrint = new EchoPrint(RecognitionFragment.this);
-                    mActivePrint.startRecording();
-                    onRecognitionStartUI();
+                    // Ensure we have the permissions to record audio
+                    if (ContextCompat.checkSelfPermission(getActivity(),
+                        Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                        // No explanation needed, we can request the permission.
 
-                    // The buffer has a max size of 20 seconds, so we force stop at around 19 seconds
-                    mHandler.postDelayed(mStopRecognition, 19000);
+                        ActivityCompat.requestPermissions(getActivity(),
+                                new String[]{Manifest.permission.RECORD_AUDIO},
+                                MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+                    } else {
+                        startRecording();
+                    }
                 } else {
                     mHandler.removeCallbacks(mStopRecognition);
                     mStopRecognition.run();
@@ -207,6 +219,30 @@ public class RecognitionFragment extends Fragment implements EchoPrint.PrintCall
         super.onAttach(activity);
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.onSectionAttached(MainActivity.SECTION_RECOGNITION);
+    }
+
+    private void startRecording() {
+        mActivePrint = new EchoPrint(RecognitionFragment.this);
+        mActivePrint.startRecording();
+        onRecognitionStartUI();
+
+        // The buffer has a max size of 20 seconds, so we force stop at around 19 seconds
+        mHandler.postDelayed(mStopRecognition, 19000);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_RECORD_AUDIO: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startRecording();
+                }
+                break;
+            }
+        }
     }
 
     @Override
