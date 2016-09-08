@@ -53,7 +53,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:gravity="start|top"
-                android:textColor="@color/white"
+                android:textColor="@color/white_text"
                 android:paddingTop="4dp"
                 android:layout_weight="1"
                 android:layout_gravity="top"
