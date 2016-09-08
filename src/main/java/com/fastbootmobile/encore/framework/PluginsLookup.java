@@ -224,17 +224,21 @@ public class PluginsLookup {
 
         if (knownPlugins.size() == 0) {
             // First start, fill in all plugins
-            for (ProviderConnection connection : mConnections) {
-                knownPlugins.add(connection.getServiceName());
+            synchronized (mConnections) {
+                for (ProviderConnection connection : mConnections) {
+                    knownPlugins.add(connection.getServiceName());
+                }
             }
 
             prefs.edit().putStringSet(PREF_KNOWN_PLUGINS, knownPlugins).apply();
         } else {
             // Check if there's any new plugin
-            for (ProviderConnection connection : mConnections) {
-                if (!knownPlugins.contains(connection.getServiceName())) {
-                    knownPlugins.add(connection.getServiceName());
-                    mNewServices.add(connection);
+            synchronized (mConnections) {
+                for (ProviderConnection connection : mConnections) {
+                    if (!knownPlugins.contains(connection.getServiceName())) {
+                        knownPlugins.add(connection.getServiceName());
+                        mNewServices.add(connection);
+                    }
                 }
             }
 
