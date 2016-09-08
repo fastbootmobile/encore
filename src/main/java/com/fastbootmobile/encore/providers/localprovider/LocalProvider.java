@@ -1196,40 +1196,56 @@ public class LocalProvider {
             public void run() {
                 mSearchResult = new SearchResult(query);
 
-                final List<String> songsList = new ArrayList<String>();
-                final List<String> albumList = new ArrayList<String>();
-                final List<String> playlistList = new ArrayList<String>();
-                final List<String> artistList = new ArrayList<String>();
+                final List<String> songsList = new ArrayList<>();
+                final List<String> albumList = new ArrayList<>();
+                final List<String> playlistList = new ArrayList<>();
+                final List<String> artistList = new ArrayList<>();
 
                 final String queryUpper = query.toUpperCase();
 
                 for (LocalSong song : mSongs.values()) {
-                    if (song.getSong().getTitle().equalsIgnoreCase(query)) {
-                        songsList.add(0, song.getSong().getRef());
-                    } else if (song.getSong().getTitle().toUpperCase().contains(queryUpper)) {
-                        songsList.add(song.getSong().getRef());
+                    String title = song.getSong().getTitle();
+
+                    if (title != null) {
+                        if (title.equalsIgnoreCase(query)) {
+                            songsList.add(0, song.getSong().getRef());
+                        } else if (title.toUpperCase().contains(queryUpper)) {
+                            songsList.add(song.getSong().getRef());
+                        }
                     }
                 }
 
                 for (Album album : mAlbums.values()) {
-                    if (album.getName().equalsIgnoreCase(query)) {
-                        albumList.add(0, album.getRef());
-                    } else if (album.getName().toUpperCase().contains(queryUpper)) {
-                        albumList.add(album.getRef());
+                    String name = album.getName();
+
+                    if (name != null) {
+                        if (name.equalsIgnoreCase(query)) {
+                            albumList.add(0, album.getRef());
+                        } else if (name.toUpperCase().contains(queryUpper)) {
+                            albumList.add(album.getRef());
+                        }
                     }
                 }
                 for (Playlist playlist : mPlaylists.values()) {
-                    if (playlist.getName().equalsIgnoreCase(query)) {
-                        playlistList.add(0, playlist.getRef());
-                    } else if (playlist.getName().toUpperCase().contains(queryUpper)) {
-                        playlistList.add(playlist.getRef());
+                    String name = playlist.getName();
+
+                    if (name != null) {
+                        if (name.equalsIgnoreCase(query)) {
+                            playlistList.add(0, playlist.getRef());
+                        } else if (name.toUpperCase().contains(queryUpper)) {
+                            playlistList.add(playlist.getRef());
+                        }
                     }
                 }
                 for (Artist artist : mArtists.values()) {
-                    if (artist.getName().equalsIgnoreCase(query)) {
-                        artistList.add(0, artist.getRef());
-                    } else if (artist.getName().toUpperCase().contains(queryUpper)) {
-                        artistList.add(artist.getRef());
+                    String name = artist.getName();
+
+                    if (name != null) {
+                        if (name.equalsIgnoreCase(query)) {
+                            artistList.add(0, artist.getRef());
+                        } else if (name.toUpperCase().contains(queryUpper)) {
+                            artistList.add(artist.getRef());
+                        }
                     }
                 }
 
