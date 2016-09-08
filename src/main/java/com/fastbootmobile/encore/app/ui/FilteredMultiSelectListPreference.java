@@ -370,7 +370,7 @@ public class FilteredMultiSelectListPreference extends DialogPreference {
      *
      * @hide Pending API approval
      */
-    protected boolean persistStringSet(Set<String> values) {
+    public boolean persistStringSet(Set<String> values) {
         if (shouldPersist()) {
             // Shouldn't store null
             if (values.equals(getPersistedStringSet(null))) {
@@ -402,7 +402,7 @@ public class FilteredMultiSelectListPreference extends DialogPreference {
      *
      * @hide Pending API approval
      */
-    protected Set<String> getPersistedStringSet(Set<String> defaultReturnValue) {
+    public Set<String> getPersistedStringSet(Set<String> defaultReturnValue) {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
