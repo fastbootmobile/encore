@@ -448,12 +448,16 @@ public class LocalProvider {
     ContentObserver mSongContentObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean self) {
-            fetchSongs();
+            try {
+                fetchSongs();
+            } catch (SecurityException e) {
+                Log.e(TAG, "Cannot read songs because of a security exception", e);
+            }
         }
 
         @Override
         public void onChange(boolean self, Uri uri) {
-            fetchSongs();
+            onChange(self);
         }
     };
 
@@ -465,8 +469,11 @@ public class LocalProvider {
 
         @Override
         public void onChange(boolean self, Uri uri) {
-            Log.d(TAG, uri.getPath());
-            fetchPlaylists(null);
+            try {
+                fetchPlaylists(null);
+            } catch (SecurityException e) {
+                Log.e(TAG, "Cannot read playlists because of a security exception", e);
+            }
         }
     };
 
