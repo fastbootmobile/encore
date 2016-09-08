@@ -617,8 +617,9 @@ public class ProviderAggregator extends IProviderCallback.Stub {
                 synchronized (mProviders) {
                     mProviders.remove(provider);
                     try {
-                        if (provider.getBinder() != null) {
-                            provider.getBinder().unregisterCallback(ProviderAggregator.this);
+                        IMusicProvider binder = provider.getBinder();
+                        if (binder != null) {
+                            binder.unregisterCallback(ProviderAggregator.this);
                         }
                     } catch (RemoteException e) {
                         // This may perfectly happen if the provider died.
