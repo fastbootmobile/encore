@@ -144,7 +144,7 @@ public class NavDrawerAdapter extends BaseAdapter {
             tag = (ViewHolder) view.getTag();
         }
 
-        if (isActiveEntry(i)) {
+        if (isActiveEntry(i) && tag.tvText != null) {
             tag.tvText.setTextColor(tag.tvText.getResources().getColor(R.color.primary));
             view.setBackgroundColor(0xFFEAEAEA);
         } else if (tag.tvText != null) {
