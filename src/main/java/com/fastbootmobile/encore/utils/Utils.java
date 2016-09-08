@@ -376,6 +376,10 @@ public class Utils {
 
     public static void showSongOverflow(final FragmentActivity context, final View parent,
                                         final Song song, final boolean hideArtist) {
+        if (song == null) {
+            return;
+        }
+
         PopupMenu popupMenu = new PopupMenu(context, parent);
         popupMenu.inflate(R.menu.track_overflow);
 
