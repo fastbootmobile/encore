@@ -188,21 +188,23 @@ public class AutoMixManager extends BasePlaybackCallback {
             SharedPreferences.Editor editor = prefs.edit();
             final String id = bucket.getSessionId();
 
-            editor.putString(PREF_PREFIX_NAME + id, bucket.mName);
-            editor.putFloat(PREF_PREFIX_ADVENTUROUS + id, bucket.mAdventurousness);
-            editor.putFloat(PREF_PREFIX_ENERGY + id, bucket.mEnergy);
-            editor.putFloat(PREF_PREFIX_FAMILIAR + id, bucket.mFamiliar);
-            editor.putString(PREF_PREFIX_MOODS + id, Utils.implode(bucket.mMoods, ","));
-            editor.putString(PREF_PREFIX_SONG_TYPES + id, Utils.implode(bucket.mSongTypes, ","));
-            editor.putFloat(PREF_PREFIX_SPEECHINESS + id, bucket.mSpeechiness);
-            editor.putString(PREF_PREFIX_STYLES + id, Utils.implode(bucket.mStyles, ","));
-            editor.putBoolean(PREF_PREFIX_TASTE + id, bucket.mUseTaste);
+            if (id != null) {
+                editor.putString(PREF_PREFIX_NAME + id, bucket.mName);
+                editor.putFloat(PREF_PREFIX_ADVENTUROUS + id, bucket.mAdventurousness);
+                editor.putFloat(PREF_PREFIX_ENERGY + id, bucket.mEnergy);
+                editor.putFloat(PREF_PREFIX_FAMILIAR + id, bucket.mFamiliar);
+                editor.putString(PREF_PREFIX_MOODS + id, Utils.implode(bucket.mMoods, ","));
+                editor.putString(PREF_PREFIX_SONG_TYPES + id, Utils.implode(bucket.mSongTypes, ","));
+                editor.putFloat(PREF_PREFIX_SPEECHINESS + id, bucket.mSpeechiness);
+                editor.putString(PREF_PREFIX_STYLES + id, Utils.implode(bucket.mStyles, ","));
+                editor.putBoolean(PREF_PREFIX_TASTE + id, bucket.mUseTaste);
 
-            Set<String> set = new TreeSet<>(prefs.getStringSet(PREF_BUCKETS_IDS, new TreeSet<String>()));
-            set.add(id);
-            editor.putStringSet(PREF_BUCKETS_IDS, set);
+                Set<String> set = new TreeSet<>(prefs.getStringSet(PREF_BUCKETS_IDS, new TreeSet<String>()));
+                set.add(id);
+                editor.putStringSet(PREF_BUCKETS_IDS, set);
 
-            editor.apply();
+                editor.apply();
+            }
         } else {
             Log.e(TAG, "Cannot save bucket: playlist session is in error state");
         }

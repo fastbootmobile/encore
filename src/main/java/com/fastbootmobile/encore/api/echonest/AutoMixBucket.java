@@ -261,10 +261,14 @@ public class AutoMixBucket {
     /**
      * Returns the ID of the current playlist session. The session must be ready for this call
      * to be valid.
-     * @return The ID of the current session.
+     * @return The ID of the current session, or null if none.
      */
     public String getSessionId() {
-        return mPlaylistSession.getSessionID();
+        if (mPlaylistSession != null) {
+            return mPlaylistSession.getSessionID();
+        } else {
+            return null;
+        }
     }
 
     /**
