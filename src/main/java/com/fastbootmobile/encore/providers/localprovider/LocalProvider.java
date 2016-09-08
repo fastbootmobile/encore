@@ -1091,13 +1091,20 @@ public class LocalProvider {
                                 ByteBuffer buffer = mInputBuffers[inIndex];
 
                                 // we retrieve the current encoded sample size
-                                int sampleSize = mExtractor.readSampleData(buffer, 0);
+                                int sampleSize;
+                                try {
+                                    sampleSize = mExtractor.readSampleData(buffer, 0);
+                                } catch (IllegalArgumentException e) {
+                                    Log.w(TAG, "Got illegal argument while reading sample data from buffer", e);
+                                    sampleSize = 0;
+                                }
+
                                 if (sampleSize < 0) {
                                     // we are at the end of the file
                                     mDecoder.queueInputBuffer(inIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                                     mIsEOS = true;
                                     mCallback.songFinished();
-                                } else {
+                                } else if (sampleSize > 0) {
                                     //we queue the encoded sample in the decoder
                                     try {
                                         mDecoder.queueInputBuffer(inIndex, 0, sampleSize, 0, 0);
@@ -1105,6 +1112,15 @@ public class LocalProvider {
                                     } catch (Exception e) {
                                         Log.d(TAG, e.toString());
                                         continue;
+                                    }
+                                } else {
+                                    // We already error'd out when reading, so if we can't advance,
+                                    // assume song is EOS
+                                    try {
+                                        mExtractor.advance();
+                                    } catch(Exception e) {
+                                        mIsEOS = true;
+                                        mCallback.songFinished();
                                     }
                                 }
                             }
