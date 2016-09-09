@@ -252,7 +252,6 @@
     <string name="automix_type_static">Static playlist of 100 tracks</string>
     <string name="automix_type_dynamic">Dynamic bucket with infinite tracks</string>
     <string name="multiprovider_name">Multi-providers</string>
-    <string name="local_provider_name">Local music</string>
     <string name="add_to_another_playlist">Add to another playlist</string>
     <string name="recognition_details_text">You can recognize music from radio, videos, concerts, or even humming it.</string>
     <string name="recognition_status_idle">Tap to start recognizing music</string>

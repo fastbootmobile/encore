@@ -251,7 +251,6 @@
     <string name="automix_type_static">Playlist statique de 100 pistes</string>
     <string name="automix_type_dynamic">Pot dynamique avec un nombre de pistes infini</string>
     <string name="multiprovider_name">Multi-sources</string>
-    <string name="local_provider_name">Local</string>
     <string name="add_to_another_playlist">Ajouter à une autre playlist</string>
     <string name="recognition_details_text">Nous identifions les musiques de radios, vidéos, concerts, et même fredonnées.</string>
     <string name="recognition_status_idle">Tapez pour commencer à reconnaître</string>
