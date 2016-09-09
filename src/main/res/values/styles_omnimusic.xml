@@ -12,6 +12,11 @@
         <item name="android:textAllCaps">true</item>
     </style>
 
+    <style name="ToolbarDarkTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:textColorPrimary">@color/white_text</item>
+        <item name="android:textColorPrimaryInverse">@color/white_text</item>
+    </style>
+
     <style name="OmniMusic">
     </style>
 

@@ -30,7 +30,7 @@
                 android:minHeight="?attr/actionBarSize"
                 android:paddingTop="@dimen/translucent_toolbar_top_margin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
+                android:theme="@style/ToolbarDarkTheme"/>
 
             <include
                 layout="@layout/fragment_playing_bar"
