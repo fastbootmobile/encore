@@ -14,7 +14,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 24
         versionCode 28
-        versionName "1.0.5"
+        versionName "1.0.6"
         renderscriptTargetApi 18
         multiDexEnabled false
     }
