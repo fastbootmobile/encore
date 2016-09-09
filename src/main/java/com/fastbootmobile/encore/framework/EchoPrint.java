@@ -76,7 +76,9 @@ public class EchoPrint {
                 }
 
                 if (read >= 0) {
-                    mCallback.onAudioLevel((float) computeAverageAmplitude(mBuffer, mBufferIndex - 10, 4));
+                    if (mBufferIndex > 10) {
+                        mCallback.onAudioLevel((float) computeAverageAmplitude(mBuffer, mBufferIndex - 10, 4));
+                    }
 
                     long currentTime = SystemClock.uptimeMillis();
                     if (currentTime - mLastMatchTryTime >= TRY_MATCH_INTERVAL) {
