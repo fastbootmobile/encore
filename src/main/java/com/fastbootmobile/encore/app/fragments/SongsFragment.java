@@ -61,7 +61,9 @@ public class SongsFragment extends Fragment {
         public void onSongStarted(boolean buffering, Song s) throws RemoteException {
             mHandler.post(new Runnable() {
                 public void run() {
-                    mSongsListAdapter.notifyDataSetChanged();
+                    if (mSongsListAdapter != null) {
+                        mSongsListAdapter.notifyDataSetChanged();
+                    }
                 }
             });
         }
