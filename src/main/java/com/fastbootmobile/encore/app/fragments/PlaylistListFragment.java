@@ -332,11 +332,17 @@ public class PlaylistListFragment extends Fragment implements ILocalCallback {
             if (mAdapter != null) {
                 mAdapter.clear();
                 mAdapter.addAllUnique(playlists);
-                try {
-                    mAdapter.sortList(getActivity().getApplicationContext());
-                } catch (JSONException e) {
-                    Log.e(TAG, "Unable to sort playlists list");
+
+                Activity activity = getActivity();
+
+                if (activity != null) {
+                    try {
+                        mAdapter.sortList(activity.getApplicationContext());
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Unable to sort playlists list");
+                    }
                 }
+
                 mAdapter.notifyDataSetChanged();
             }
 
