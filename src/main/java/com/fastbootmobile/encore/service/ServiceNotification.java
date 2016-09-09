@@ -138,6 +138,7 @@ public class ServiceNotification implements AlbumArtHelper.AlbumArtListener {
 
         if (Utils.hasLollipop()) {
             mNotification.category = Notification.CATEGORY_SERVICE;
+            mNotification.visibility = Notification.VISIBILITY_PUBLIC;
         }
 
         // Update fields
