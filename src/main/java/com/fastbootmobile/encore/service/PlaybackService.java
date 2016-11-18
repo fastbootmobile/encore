@@ -1036,6 +1036,7 @@ public class PlaybackService extends Service
                         provider.seek(timeMs);
                         success = true;
                         mCurrentTrackElapsedMs = timeMs;
+                        mNativeSink.flushSamples();
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot seek to time", e);
                     } catch (Exception e) {
